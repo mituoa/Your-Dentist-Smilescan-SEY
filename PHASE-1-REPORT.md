@@ -6,7 +6,7 @@
 
 - [x] Next.js (create-next-app **16.2.4** — App Router, TypeScript, Tailwind v4; der Plan spricht von „Next.js 14“, installiert ist die aktuelle `latest`-Kette)
 - [x] Supabase-Clients (Browser `lib/supabase/client.ts`, Server `lib/supabase/server.ts`, Admin `lib/supabase/admin.ts`)
-- [x] Middleware für Session-Refresh (`middleware.ts` — Next 16 meldet Deprecation zugunsten „proxy“, siehe unten)
+- [x] Proxy für Session-Refresh (`proxy.ts`, export `proxy` — Next.js 16 Konvention)
 - [x] Design-Tokens (Light `:root` + Dark `.dark`) und `tailwind.config.ts` mit Theme-Erweiterung; `app/globals.css` nutzt `@import "tailwindcss"` + `@config` (Tailwind v4)
 - [x] Fonts (DM Sans, Fraunces, JetBrains Mono) in `app/layout.tsx`
 - [x] Dev-Server verifiziert: `http://localhost:3000` liefert **HTTP 200**; Prozess läuft weiter im Hintergrund (gemäß Plan Schritt 10)
@@ -26,10 +26,7 @@ Phase 2 — Datenmodell in Supabase anlegen (submissions, tasks, profile_data, j
 
 ## Bekannte offene Punkte / Hinweise:
 
-1. **Next.js 16 / Turbopack:** Build und Dev laufen; Warnung wegen **mehrerer `package-lock.json`** (z. B. unter `C:\Users\mituo\` und im Projekt). Optional: überzählige Lockfile entfernen oder `turbopack.root` in `next.config.ts` setzen.
-2. **Middleware:** Next meldet: Dateikonvention `middleware` ist deprecated zugunsten **„proxy“** — für Phase 1 wurde der Plan wortgetreu umgesetzt; Migration kann später erfolgen.
-3. **Node-Warnung** zu `tailwind.config.ts` („Module type not specified“): harmlos; optional `"type": "module"` in `package.json` oder Config-Format anpassen.
-4. **Schritt 12 (GitHub):** Kein Push — bitte bei Bedarf Repo anlegen und `origin` setzen (z. B. mit `gh repo create`).
+1. **Schritt 12 (GitHub):** Kein Push — bitte bei Bedarf Repo anlegen und `origin` setzen (z. B. mit `gh repo create`).
 
 ---
 
