@@ -1,51 +1,57 @@
 import { getCurrentUser, getCurrentWorkspace } from "@/lib/auth-helpers";
+import { Greeting } from "@/components/dashboard/greeting";
+import { NewSubmissionsBlock } from "@/components/dashboard/new-submissions-block";
+import { OpenTasksBlock } from "@/components/dashboard/open-tasks-block";
+import { RecentActivityBlock } from "@/components/dashboard/recent-activity-block";
+import { createClient } from "@/lib/supabase/server";
+import {
+  getNewSubmissionsCount,
+  getTotalUnseenSubmissions,
+  getOpenTasks,
+  getRecentActivity,
+} from "@/lib/queries/dashboard";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   const workspace = await getCurrentWorkspace();
 
+  if (!user || !workspace) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <p className="text-text-secondary">Workspace wird geladen…</p>
+      </div>
+    );
+  }
+
+  const workspaceId = workspace.workspace_id;
+  const role = workspace.role;
+  const isDoctor = role === "doctor";
+
+  const supabase = await createClient();
+  const { data: profileData } = await supabase
+    .from("profile_data")
+    .select("display_name")
+    .eq("workspace_id", workspaceId)
+    .single();
+
+  const displayName =
+    profileData?.display_name || user.email?.split("@")[0] || "";
+
+  const [newCount, totalUnseen, tasks, activity] = await Promise.all([
+    getNewSubmissionsCount(workspaceId),
+    getTotalUnseenSubmissions(workspaceId),
+    getOpenTasks(workspaceId, user.id),
+    getRecentActivity(workspaceId),
+  ]);
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="mb-12">
-        <p className="text-xs font-mono uppercase tracking-wider text-text-tertiary mb-3">
-          Dashboard · Phase 5
-        </p>
-        <h1 className="font-serif text-5xl font-light tracking-tight text-text-primary mb-4">
-          Willkommen
-        </h1>
-        <p className="text-text-secondary max-w-xl">
-          Hier entstehen drei ruhige Info-Blöcke: neue Einsendungen, offene
-          Aufgaben, letzte Aktivität. Kommt in der nächsten Phase.
-        </p>
-      </div>
+      <Greeting name={displayName} />
 
-      <div className="bg-surface-card border border-border rounded-lg p-6 space-y-3">
-        <h2 className="text-sm font-medium text-text-primary mb-4">
-          Session aktiv
-        </h2>
-        <div className="text-sm space-y-2">
-          <div>
-            <span className="text-text-tertiary">Email: </span>
-            <span className="text-text-primary">{user?.email}</span>
-          </div>
-          {workspace && (
-            <>
-              <div>
-                <span className="text-text-tertiary">Workspace: </span>
-                <span className="text-text-primary">
-                  {/* @ts-expect-error - workspaces is joined */}
-                  {workspace.workspaces?.name}
-                </span>
-              </div>
-              <div>
-                <span className="text-text-tertiary">Rolle: </span>
-                <span className="text-text-primary">
-                  {workspace.role === "doctor" ? "Arzt" : "Team-Mitglied"}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <NewSubmissionsBlock newCount={newCount} totalUnseen={totalUnseen} />
+        <OpenTasksBlock tasks={tasks} canCheckOff={isDoctor} />
+        <RecentActivityBlock events={activity} />
       </div>
     </div>
   );
