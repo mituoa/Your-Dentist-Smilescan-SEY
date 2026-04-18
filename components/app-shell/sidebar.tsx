@@ -1,11 +1,3 @@
-import {
-  LayoutDashboard,
-  Inbox,
-  UserCircle,
-  BookOpen,
-  Settings,
-  ListChecks,
-} from "lucide-react";
 import { BrandMark } from "./brand-mark";
 import { NavItem } from "./nav-item";
 
@@ -19,21 +11,16 @@ export function Sidebar({ role }: SidebarProps) {
       <BrandMark />
 
       <nav className="flex-1 py-4 space-y-0.5">
-        <NavItem
-          href="/dashboard"
-          icon={LayoutDashboard}
-          label="Dashboard"
-        />
-        <NavItem href="/inbox" icon={Inbox} label="Inbox" />
+        <NavItem href="/dashboard" iconName="dashboard" label="Dashboard" />
+        <NavItem href="/inbox" iconName="inbox" label="Inbox" />
 
-        {/* Team-Mitglieder sehen "My Tasks" statt der Profile/Journal */}
         {role === "team" && (
-          <NavItem href="/my-tasks" icon={ListChecks} label="Meine Aufgaben" />
+          <NavItem href="/my-tasks" iconName="tasks" label="Meine Aufgaben" />
         )}
 
-        <NavItem href="/profile" icon={UserCircle} label="Profil" />
-        <NavItem href="/journal" icon={BookOpen} label="Journal" />
-        <NavItem href="/settings" icon={Settings} label="Einstellungen" />
+        <NavItem href="/profile" iconName="profile" label="Profil" />
+        <NavItem href="/journal" iconName="journal" label="Journal" />
+        <NavItem href="/settings" iconName="settings" label="Einstellungen" />
       </nav>
 
       <div className="p-4 border-t border-border">

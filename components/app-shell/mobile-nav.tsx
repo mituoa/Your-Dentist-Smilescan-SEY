@@ -1,16 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  LayoutDashboard,
-  Inbox,
-  UserCircle,
-  BookOpen,
-  Settings,
-  ListChecks,
-  Menu,
-  X,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { NavItem } from "./nav-item";
 import { BrandMark } from "./brand-mark";
 
@@ -37,14 +28,14 @@ export function MobileNav({ role }: MobileNavProps) {
       {open && (
         <div className="md:hidden fixed inset-0 top-14 bg-surface-page z-40">
           <nav className="py-4 space-y-0.5" onClick={() => setOpen(false)}>
-            <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" />
-            <NavItem href="/inbox" icon={Inbox} label="Inbox" />
+            <NavItem href="/dashboard" iconName="dashboard" label="Dashboard" />
+            <NavItem href="/inbox" iconName="inbox" label="Inbox" />
             {role === "team" && (
-              <NavItem href="/my-tasks" icon={ListChecks} label="Meine Aufgaben" />
+              <NavItem href="/my-tasks" iconName="tasks" label="Meine Aufgaben" />
             )}
-            <NavItem href="/profile" icon={UserCircle} label="Profil" />
-            <NavItem href="/journal" icon={BookOpen} label="Journal" />
-            <NavItem href="/settings" icon={Settings} label="Einstellungen" />
+            <NavItem href="/profile" iconName="profile" label="Profil" />
+            <NavItem href="/journal" iconName="journal" label="Journal" />
+            <NavItem href="/settings" iconName="settings" label="Einstellungen" />
           </nav>
         </div>
       )}

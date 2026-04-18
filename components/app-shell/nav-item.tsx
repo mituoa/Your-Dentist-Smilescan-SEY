@@ -2,19 +2,37 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LucideIcon } from "lucide-react";
+import {
+  LayoutDashboard,
+  Inbox,
+  UserCircle,
+  BookOpen,
+  Settings,
+  ListChecks,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  inbox: Inbox,
+  profile: UserCircle,
+  journal: BookOpen,
+  settings: Settings,
+  tasks: ListChecks,
+};
 
 interface NavItemProps {
   href: string;
-  icon: LucideIcon;
+  iconName: keyof typeof ICON_MAP;
   label: string;
   badge?: number;
 }
 
-export function NavItem({ href, icon: Icon, label, badge }: NavItemProps) {
+export function NavItem({ href, iconName, label, badge }: NavItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href || pathname.startsWith(href + "/");
+  const Icon = ICON_MAP[iconName];
 
   return (
     <Link
