@@ -4,7 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{ error?: string; invite?: string; email?: string }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const queryError = params.error;
+  const inviteToken = params.invite?.trim() || "";
+  const prefilledEmail = params.email?.trim() || "";
+
   return (
     <div className="bg-surface-card border border-border rounded-lg p-8">
       <h2 className="font-serif text-2xl font-light mb-2 text-text-primary">
@@ -14,7 +23,15 @@ export default function LoginPage() {
         Willkommen zurück.
       </p>
 
+      {queryError && (
+        <p className="text-sm text-danger mb-4">{decodeURIComponent(queryError)}</p>
+      )}
+
       <form action={signIn} className="space-y-4">
+        {inviteToken ? (
+          <input type="hidden" name="invite_token" value={inviteToken} />
+        ) : null}
+
         <div>
           <Label htmlFor="email">E-Mail</Label>
           <Input
@@ -24,6 +41,7 @@ export default function LoginPage() {
             required
             autoComplete="email"
             placeholder="doc@praxis.de"
+            defaultValue={prefilledEmail}
           />
         </div>
 
@@ -45,7 +63,14 @@ export default function LoginPage() {
 
       <p className="mt-6 text-sm text-text-secondary text-center">
         Noch kein Konto?{" "}
-        <Link href="/register" className="text-brand hover:underline">
+        <Link
+          href={
+            inviteToken
+              ? `/register?invite=${encodeURIComponent(inviteToken)}`
+              : "/register"
+          }
+          className="text-brand hover:underline"
+        >
           Registrieren
         </Link>
       </p>

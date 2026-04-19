@@ -89,7 +89,14 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
 
       <p className="mt-6 text-sm text-text-secondary text-center">
         Schon ein Konto?{" "}
-        <Link href="/login" className="text-brand hover:underline">
+        <Link
+          href={
+            inviteToken
+              ? `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
+              : "/login"
+          }
+          className="text-brand hover:underline"
+        >
           Anmelden
         </Link>
       </p>

@@ -10,6 +10,7 @@ import { isSlugAvailable } from "@/lib/queries/settings";
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
 import { buildTeamInvitationEmail } from "@/lib/mail/team-invitation-email";
 import { getAppBaseUrl } from "@/lib/env";
+import { findAuthUserIdByEmail } from "@/lib/team-invitations/get-invitation-by-token";
 
 export async function saveAppointmentLink(
   url: string
@@ -130,7 +131,7 @@ export async function requestPasswordReset(): Promise<{
   if (!user?.email) return { error: "Nicht angemeldet." };
 
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-    redirectTo: `${getAppBaseUrl()}/login`,
+    redirectTo: `${getAppBaseUrl()}/reset-password`,
   });
 
   if (error) {
@@ -346,49 +347,136 @@ export async function removeLogo(): Promise<{ error?: string; success?: boolean 
   return { success: true };
 }
 
+export type AcceptInvitationMode = "accept_page" | "post_signup";
+
+export type AcceptInvitationOptions = {
+  mode?: AcceptInvitationMode;
+  registeredEmail?: string;
+  registeredUserId?: string | null;
+};
+
+export type AcceptInvitationResult =
+  | { ok: true; success: true; alreadyMember?: boolean }
+  | { ok: false; error: string; code?: string };
+
 export async function acceptInvitation(
-  token: string
-): Promise<{
-  error?: string;
-  success?: boolean;
-  needsSignup?: boolean;
-  email?: string;
-}> {
+  token: string,
+  options?: AcceptInvitationOptions
+): Promise<AcceptInvitationResult> {
+  const mode = options?.mode ?? "accept_page";
   const admin = createAdminClient();
 
-  const { data: invite } = await admin
+  const { data: invite, error: loadErr } = await admin
     .from("team_invitations")
-    .select("*")
+    .select("id, workspace_id, email, role, status, expires_at, token")
     .eq("token", token)
-    .eq("status", "pending")
     .maybeSingle();
 
+  if (loadErr) {
+    console.error("[acceptInvitation]", loadErr);
+    return { ok: false, error: "Einladung konnte nicht geladen werden." };
+  }
+
   if (!invite) {
-    return { error: "Einladung nicht gefunden oder bereits angenommen." };
+    return {
+      ok: false,
+      error: "Einladung nicht gefunden oder bereits angenommen.",
+      code: "NOT_FOUND",
+    };
+  }
+
+  if (invite.status !== "pending") {
+    return { ok: false, error: "Einladung ist nicht mehr gültig.", code: "INVALID_STATUS" };
   }
 
   if (new Date(invite.expires_at) < new Date()) {
-    return { error: "Einladung ist abgelaufen." };
+    return { ok: false, error: "Einladung ist abgelaufen.", code: "EXPIRED" };
   }
 
-  const { data: allUsers } = await admin.auth.admin.listUsers();
-  const existingUser = allUsers.users.find(
-    (u) => u.email?.toLowerCase() === invite.email.toLowerCase()
-  );
+  let userId: string;
+  const inviteEmail = invite.email as string;
 
-  if (!existingUser) {
-    return { needsSignup: true, email: invite.email };
+  if (mode === "post_signup") {
+    const reg = options?.registeredEmail?.trim().toLowerCase();
+    if (!reg || reg !== inviteEmail.toLowerCase()) {
+      return {
+        ok: false,
+        error: "E-Mail passt nicht zur Einladung.",
+        code: "EMAIL_MISMATCH",
+      };
+    }
+    const fromSignup = options?.registeredUserId?.trim();
+    if (fromSignup) {
+      userId = fromSignup;
+    } else {
+      const found = await findAuthUserIdByEmail(inviteEmail);
+      if (!found) {
+        return {
+          ok: false,
+          error:
+            "Bitte bestätigen Sie zuerst Ihre E-Mail; danach können Sie die Einladung über den Link erneut annehmen.",
+          code: "USER_NOT_FOUND",
+        };
+      }
+      userId = found;
+    }
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user?.id || !user.email) {
+      return { ok: false, error: "Nicht angemeldet.", code: "NOT_AUTHENTICATED" };
+    }
+    if (user.email.toLowerCase() !== inviteEmail.toLowerCase()) {
+      return {
+        ok: false,
+        error: "E-Mail stimmt nicht mit der Einladung überein.",
+        code: "EMAIL_MISMATCH",
+      };
+    }
+    userId = user.id;
+  }
+
+  const { data: thisMember } = await admin
+    .from("workspace_members")
+    .select("user_id")
+    .eq("workspace_id", invite.workspace_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (thisMember) {
+    await admin
+      .from("team_invitations")
+      .update({ status: "accepted", accepted_at: new Date().toISOString() })
+      .eq("id", invite.id);
+    return { ok: true, success: true, alreadyMember: true };
+  }
+
+  const { data: otherMembers } = await admin
+    .from("workspace_members")
+    .select("workspace_id")
+    .eq("user_id", userId)
+    .neq("workspace_id", invite.workspace_id)
+    .limit(1);
+
+  if (otherMembers && otherMembers.length > 0) {
+    return {
+      ok: false,
+      error: "Sie sind bereits einem anderen Workspace zugeordnet.",
+      code: "OTHER_WORKSPACE",
+    };
   }
 
   const { error: memberError } = await admin.from("workspace_members").insert({
     workspace_id: invite.workspace_id,
-    user_id: existingUser.id,
+    user_id: userId,
     role: invite.role,
   });
 
   if (memberError && memberError.code !== "23505") {
     console.error("[acceptInvitation]", memberError);
-    return { error: "Beitritt fehlgeschlagen." };
+    return { ok: false, error: "Beitritt fehlgeschlagen." };
   }
 
   await admin
@@ -396,5 +484,5 @@ export async function acceptInvitation(
     .update({ status: "accepted", accepted_at: new Date().toISOString() })
     .eq("id", invite.id);
 
-  return { success: true };
+  return { ok: true, success: true };
 }
