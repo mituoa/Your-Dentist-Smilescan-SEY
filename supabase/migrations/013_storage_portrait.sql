@@ -1,0 +1,3 @@
+-- Dokumentation: Portrait-Bucket wird manuell im Dashboard angelegt.
+-- Details siehe STEP 15 in PHASE-8-PLAN.md.
+-- Dieses SQL-File ist nur Dokumentation.

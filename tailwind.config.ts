@@ -28,6 +28,13 @@ const config: Config = {
           glow: "rgb(var(--brand-glow) / <alpha-value>)",
         },
         danger: "rgb(var(--signal-danger) / <alpha-value>)",
+        cream: "#FAFAF8",
+        paper: "#F5F2EC",
+        ink: "#1A1A1A",
+        "ink-soft": "#5F5E5A",
+        "ink-faint": "#97958C",
+        teal: "#0F6E56",
+        warning: "#B45309",
       },
       fontFamily: {
         sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],

@@ -1,4 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  parseServicesStructured,
+  parseSpecializations,
+} from "@/lib/profile/parse-profile-fields";
+import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
 
 export interface PublicProfile {
   workspace_id: string;
@@ -9,17 +14,104 @@ export interface PublicProfile {
   photo_url: string | null;
   vita_markdown: string | null;
   services: string[];
+  first_name: string | null;
+  last_name: string | null;
+  founding_year: number | null;
+  specializations: string[];
+  services_structured: ProfileEditorData["services_structured"];
   practice_name: string | null;
   practice_address: string | null;
   practice_employment_status: string | null;
   practice_phone: string | null;
   practice_email: string | null;
   practice_website: string | null;
+  practice_hours: string | null;
 }
 
 function normalizeServices(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter((item): item is string => typeof item === "string");
+}
+
+export function publicProfileToEditorData(
+  profile: PublicProfile
+): ProfileEditorData {
+  return {
+    workspace_id: profile.workspace_id,
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    title: profile.title,
+    display_name: profile.display_name,
+    founding_year: profile.founding_year,
+    photo_url: profile.photo_url,
+    vita_markdown: profile.vita_markdown,
+    specializations: profile.specializations,
+    services_structured: profile.services_structured,
+    practice_name: profile.practice_name,
+    practice_address: profile.practice_address,
+    practice_employment_status: profile.practice_employment_status,
+    practice_phone: profile.practice_phone,
+    practice_email: profile.practice_email,
+    practice_website: profile.practice_website,
+    practice_hours: profile.practice_hours,
+  };
+}
+
+function mapProfileRow(
+  workspace: { id: string; name: string; slug: string },
+  profile: Record<string, unknown> | null
+): PublicProfile {
+  if (!profile) {
+    return {
+      workspace_id: workspace.id,
+      workspace_name: workspace.name,
+      slug: workspace.slug,
+      display_name: null,
+      title: null,
+      photo_url: null,
+      vita_markdown: null,
+      services: [],
+      first_name: null,
+      last_name: null,
+      founding_year: null,
+      specializations: [],
+      services_structured: [],
+      practice_name: null,
+      practice_address: null,
+      practice_employment_status: null,
+      practice_phone: null,
+      practice_email: null,
+      practice_website: null,
+      practice_hours: null,
+    };
+  }
+
+  return {
+    workspace_id: workspace.id,
+    workspace_name: workspace.name,
+    slug: workspace.slug,
+    display_name: (profile.display_name as string | null) ?? null,
+    title: (profile.title as string | null) ?? null,
+    photo_url: (profile.photo_url as string | null) ?? null,
+    vita_markdown: (profile.vita_markdown as string | null) ?? null,
+    services: normalizeServices(profile.services),
+    first_name: (profile.first_name as string | null) ?? null,
+    last_name: (profile.last_name as string | null) ?? null,
+    founding_year:
+      typeof profile.founding_year === "number"
+        ? profile.founding_year
+        : null,
+    specializations: parseSpecializations(profile.specializations),
+    services_structured: parseServicesStructured(profile.services_structured),
+    practice_name: (profile.practice_name as string | null) ?? null,
+    practice_address: (profile.practice_address as string | null) ?? null,
+    practice_employment_status:
+      (profile.practice_employment_status as string | null) ?? null,
+    practice_phone: (profile.practice_phone as string | null) ?? null,
+    practice_email: (profile.practice_email as string | null) ?? null,
+    practice_website: (profile.practice_website as string | null) ?? null,
+    practice_hours: (profile.practice_hours as string | null) ?? null,
+  };
 }
 
 export async function getPublicProfileBySlug(
@@ -43,41 +135,7 @@ export async function getPublicProfileBySlug(
     .eq("workspace_id", workspace.id)
     .single();
 
-  if (!profile) {
-    return {
-      workspace_id: workspace.id,
-      workspace_name: workspace.name,
-      slug: workspace.slug,
-      display_name: null,
-      title: null,
-      photo_url: null,
-      vita_markdown: null,
-      services: [],
-      practice_name: null,
-      practice_address: null,
-      practice_employment_status: null,
-      practice_phone: null,
-      practice_email: null,
-      practice_website: null,
-    };
-  }
-
-  return {
-    workspace_id: workspace.id,
-    workspace_name: workspace.name,
-    slug: workspace.slug,
-    display_name: profile.display_name,
-    title: profile.title,
-    photo_url: profile.photo_url,
-    vita_markdown: profile.vita_markdown,
-    services: normalizeServices(profile.services),
-    practice_name: profile.practice_name,
-    practice_address: profile.practice_address,
-    practice_employment_status: profile.practice_employment_status,
-    practice_phone: profile.practice_phone,
-    practice_email: profile.practice_email,
-    practice_website: profile.practice_website,
-  };
+  return mapProfileRow(workspace, profile as Record<string, unknown> | null);
 }
 
 export async function getRecentJournalEntries(workspaceId: string, limit = 3) {

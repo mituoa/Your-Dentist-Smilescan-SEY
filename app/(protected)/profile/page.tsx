@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Edit3 } from "lucide-react";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,45 +21,46 @@ export default async function ProfilePage() {
     .eq("id", workspace.workspace_id)
     .single();
 
-  const publicUrl = ws ? `/doc/${ws.slug}` : null;
+  const publicUrl = ws?.slug ? `/doc/${ws.slug}` : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <p className="text-xs font-mono uppercase tracking-wider text-text-tertiary mb-3">
-        Profil · Phase 8 (Editor kommt)
-      </p>
-      <h1 className="font-serif text-5xl font-light tracking-tight text-text-primary mb-4">
-        Öffentliches Profil
-      </h1>
-      <p className="text-text-secondary max-w-xl mb-8">
-        Der Editor für Vita, Dienstleistungen und Praxis-Informationen wird in
-        Phase 8 hinzugefügt. Aktuell kannst du deine öffentliche Seite bereits
-        sehen.
-      </p>
+    <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
+      <div>
+        <p className="text-xs font-mono uppercase tracking-wider text-text-tertiary mb-3">
+          Profil
+        </p>
+        <h1 className="font-serif text-5xl font-light tracking-tight mb-4">
+          Öffentliches Profil
+        </h1>
+        <p className="text-text-secondary max-w-xl">
+          Verwalten Sie Ihre öffentliche Präsenz. Änderungen sind sofort live.
+        </p>
+      </div>
 
-      {publicUrl && (
-        <div className="bg-surface-card border border-border rounded-lg p-6">
-          <h2 className="text-sm font-medium text-text-primary mb-3">
-            Deine öffentliche Profil-URL
-          </h2>
-          <div className="flex items-center gap-3">
-            <code className="text-sm text-text-secondary font-mono flex-1 truncate">
-              smilescan.io{publicUrl}
-            </code>
-            <Link
-              href={publicUrl}
-              target="_blank"
-              className="inline-flex items-center gap-1.5 text-sm text-brand hover:text-brand-glow transition-colors"
-            >
-              Ansehen
-              <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.75} />
-            </Link>
-          </div>
-          <p className="text-xs text-text-tertiary mt-3">
-            Diese URL teilst du mit Patienten, um Unterlagen einzureichen.
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Link
+          href="/profile/editor"
+          className="block bg-surface-card border border-border rounded-lg p-6 hover:border-brand/50 transition-colors"
+        >
+          <Edit3 className="w-5 h-5 text-brand mb-3" strokeWidth={1.75} />
+          <h2 className="font-serif text-xl mb-1">Profil bearbeiten</h2>
+          <p className="text-xs text-text-tertiary">
+            Name, Vita, Leistungen, Praxis-Info
           </p>
-        </div>
-      )}
+        </Link>
+
+        {publicUrl && (
+          <Link
+            href={publicUrl}
+            target="_blank"
+            className="block bg-surface-card border border-border rounded-lg p-6 hover:border-brand/50 transition-colors"
+          >
+            <ExternalLink className="w-5 h-5 text-brand mb-3" strokeWidth={1.75} />
+            <h2 className="font-serif text-xl mb-1">Ansehen</h2>
+            <p className="text-xs text-text-tertiary">smilescan.io{publicUrl}</p>
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

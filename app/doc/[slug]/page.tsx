@@ -2,13 +2,9 @@ import { notFound } from "next/navigation";
 import {
   getPublicProfileBySlug,
   getRecentJournalEntries,
+  publicProfileToEditorData,
 } from "@/lib/queries/public-profile";
-import { ProfileHero } from "@/components/public/profile-hero";
-import { ProfileVita } from "@/components/public/profile-vita";
-import { ProfileServices } from "@/components/public/profile-services";
-import { ProfileWorkspace } from "@/components/public/profile-workspace";
-import { ProfileJournalPreviews } from "@/components/public/profile-journal-previews";
-import { ProfileCTA } from "@/components/public/profile-cta";
+import { EditorialProfile } from "@/components/profile-preview/editorial-profile";
 
 interface PublicProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -25,32 +21,14 @@ export default async function PublicProfilePage({
   }
 
   const journalEntries = await getRecentJournalEntries(profile.workspace_id);
+  const data = publicProfileToEditorData(profile);
 
   return (
-    <>
-      <ProfileHero
-        displayName={profile.display_name}
-        title={profile.title}
-        photoUrl={profile.photo_url}
-        practiceName={profile.practice_name}
-      />
-
-      <ProfileVita vitaMarkdown={profile.vita_markdown} />
-
-      <ProfileServices services={profile.services} />
-
-      <ProfileWorkspace
-        practiceName={profile.practice_name}
-        practiceAddress={profile.practice_address}
-        practiceEmploymentStatus={profile.practice_employment_status}
-        practicePhone={profile.practice_phone}
-        practiceEmail={profile.practice_email}
-        practiceWebsite={profile.practice_website}
-      />
-
-      <ProfileJournalPreviews entries={journalEntries} />
-
-      <ProfileCTA slug={profile.slug} />
-    </>
+    <EditorialProfile
+      data={data}
+      workspaceName={profile.workspace_name}
+      slug={profile.slug}
+      journalEntries={journalEntries}
+    />
   );
 }
