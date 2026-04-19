@@ -1,4 +1,7 @@
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+
+const SIGNED_PHOTO_URL_TTL_SEC = 3600;
 
 export interface SubmissionDetail {
   id: string;
@@ -14,6 +17,7 @@ export interface SubmissionDetail {
     id: string;
     storage_path: string;
     sort_order: number;
+    signed_url: string | null;
   }>;
 }
 
@@ -39,6 +43,32 @@ export async function getSubmissionById(
     return null;
   }
 
+  const sortedPhotos = (data.submission_photos || []).sort(
+    (a: { sort_order: number }, b: { sort_order: number }) =>
+      a.sort_order - b.sort_order
+  );
+
+  const admin = createAdminClient();
+  const photos = await Promise.all(
+    sortedPhotos.map(
+      async (photo: {
+        id: string;
+        storage_path: string;
+        sort_order: number;
+      }) => {
+        const { data: signed } = await admin.storage
+          .from("submission-photos")
+          .createSignedUrl(photo.storage_path, SIGNED_PHOTO_URL_TTL_SEC);
+        return {
+          id: photo.id,
+          storage_path: photo.storage_path,
+          sort_order: photo.sort_order,
+          signed_url: signed?.signedUrl ?? null,
+        };
+      }
+    )
+  );
+
   return {
     id: data.id,
     workspace_id: data.workspace_id,
@@ -49,10 +79,7 @@ export async function getSubmissionById(
     created_at: data.created_at,
     seen_at: data.seen_at,
     seen_by: data.seen_by,
-    photos: (data.submission_photos || []).sort(
-      (a: { sort_order: number }, b: { sort_order: number }) =>
-        a.sort_order - b.sort_order
-    ),
+    photos,
   };
 }
 

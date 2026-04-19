@@ -7,6 +7,7 @@ interface Photo {
   id: string;
   storage_path: string;
   sort_order: number;
+  signed_url: string | null;
 }
 
 interface PhotoViewerProps {
@@ -30,35 +31,57 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
           />
           <p className="text-sm text-text-tertiary">Keine Fotos vorhanden</p>
           <p className="text-xs text-text-tertiary/70 max-w-xs text-center px-6">
-            Fotos werden in Phase 7 aus Supabase Storage geladen, sobald der
-            Upload-Flow implementiert ist.
+            Sobald Patienten Fotos hochladen, erscheinen sie hier.
           </p>
         </div>
       </div>
     );
   }
 
+  const selected = photos[selectedIndex];
+  const selectedUrl = selected?.signed_url;
+
   return (
     <div className="space-y-4" aria-label={`Fotos: ${patientName}`}>
       <div className="bg-surface-card border border-border rounded-lg overflow-hidden">
         <div className="aspect-[4/3] bg-surface-sunken flex items-center justify-center relative">
-          <ImageIcon
-            className="w-24 h-24 text-text-tertiary/40"
-            strokeWidth={1}
-          />
+          {selectedUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
+            <img
+              src={selectedUrl}
+              alt={`Foto ${selectedIndex + 1}`}
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+          ) : (
+            <ImageIcon
+              className="w-24 h-24 text-text-tertiary/40"
+              strokeWidth={1}
+            />
+          )}
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-surface-page/90 backdrop-blur rounded px-3 py-2">
             <span className="text-xs font-mono text-text-secondary">
               Foto {selectedIndex + 1} von {photos.length}
             </span>
-            <button
-              type="button"
-              disabled
-              className="text-xs text-text-tertiary flex items-center gap-1.5"
-              title="Download verfügbar ab Phase 7"
-            >
-              <Download className="w-3 h-3" strokeWidth={1.75} />
-              Download
-            </button>
+            {selectedUrl ? (
+              <a
+                href={selectedUrl}
+                download
+                className="text-xs text-brand flex items-center gap-1.5 hover:underline"
+              >
+                <Download className="w-3 h-3" strokeWidth={1.75} />
+                Download
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="text-xs text-text-tertiary flex items-center gap-1.5"
+                title="Vorschau nicht verfügbar"
+              >
+                <Download className="w-3 h-3" strokeWidth={1.75} />
+                Download
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -70,16 +93,25 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
               key={photo.id}
               type="button"
               onClick={() => setSelectedIndex(i)}
-              className={`aspect-square bg-surface-sunken rounded border-2 transition-colors flex items-center justify-center ${
+              className={`relative aspect-square bg-surface-sunken rounded border-2 transition-colors overflow-hidden flex items-center justify-center ${
                 i === selectedIndex
                   ? "border-brand"
                   : "border-transparent hover:border-border"
               }`}
             >
-              <ImageIcon
-                className="w-6 h-6 text-text-tertiary/50"
-                strokeWidth={1}
-              />
+              {photo.signed_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={photo.signed_url}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <ImageIcon
+                  className="w-6 h-6 text-text-tertiary/50"
+                  strokeWidth={1}
+                />
+              )}
             </button>
           ))}
         </div>
