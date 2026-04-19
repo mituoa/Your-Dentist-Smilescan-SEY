@@ -243,6 +243,10 @@ export async function revokeInvitation(
   return { success: true };
 }
 
+// Nur Mitgliedschaft entfernen — User bleibt in auth.users erhalten, da er sich
+// später selbst löschen kann.
+// Falls Doctor denselben User NOCHMAL einladen will und dieser nicht mehr
+// existieren soll, muss er via Supabase Dashboard gelöscht werden.
 export async function removeTeamMember(
   userId: string
 ): Promise<{ error?: string; success?: boolean }> {

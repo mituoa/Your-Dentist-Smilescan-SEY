@@ -38,7 +38,13 @@ export function buildTeamInvitationEmail(
     `<p>Guten Tag,</p>` +
     `<p>${safeInviter} hat Sie zu einem Team-Account bei SmileScan eingeladen.</p>` +
     `<p>Die Einladung ist persönlich für die E-Mail-Adresse <strong>${safeEmail}</strong> ausgestellt und gilt für 7 Tage.</p>` +
-    `<p><a href="${safeUrl}" style="display: inline-block; padding: 14px 28px; background: #1A1A1A; color: #FAFAF8; text-decoration: none; font-weight: 500; border-radius: 2px;">Einladung annehmen</a></p>` +
+    `<table cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">` +
+    `<tr>` +
+    `<td style="background-color: #1A1A1A; border-radius: 2px;">` +
+    `<a href="${safeUrl}" style="display: inline-block; padding: 14px 28px; color: #FAFAF8; text-decoration: none; font-weight: 500; font-family: sans-serif;">Einladung annehmen</a>` +
+    `</td>` +
+    `</tr>` +
+    `</table>` +
     `<p style="color: #5F5E5A; font-size: 12px;">Oder öffnen Sie: ${safeUrl}</p>` +
     `<p style="color: #97958C; font-size: 12px;">Falls Sie diese E-Mail unerwartet erhalten haben, können Sie sie ignorieren.</p>` +
     `<p>Mit freundlichen Grüßen<br>SmileScan</p>`;

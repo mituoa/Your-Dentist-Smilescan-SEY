@@ -3,6 +3,7 @@ import { signUp } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getInvitationByToken } from "@/lib/team-invitations/get-invitation-by-token";
 
 interface RegisterPageProps {
   searchParams: Promise<{ invite?: string; email?: string; error?: string }>;
@@ -13,6 +14,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   const inviteToken = params.invite?.trim() || "";
   const prefilledEmail = params.email?.trim() || "";
   const queryError = params.error;
+  const invitation = inviteToken
+    ? await getInvitationByToken(inviteToken)
+    : null;
 
   return (
     <div className="bg-surface-card border border-border rounded-lg p-8">
@@ -32,6 +36,20 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           <input type="hidden" name="invite_token" value={inviteToken} />
         ) : null}
 
+        {inviteToken ? (
+          <p className="text-sm text-text-secondary rounded-md border border-border bg-surface-sunken px-3 py-2">
+            Sie treten einem bestehenden Workspace bei.
+            {invitation ? (
+              <>
+                {" "}
+                <span className="font-medium text-text-primary">
+                  {invitation.workspaceName}
+                </span>
+              </>
+            ) : null}
+          </p>
+        ) : null}
+
         <div>
           <Label htmlFor="display_name">Vollständiger Name</Label>
           <Input
@@ -43,16 +61,18 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           />
         </div>
 
-        <div>
-          <Label htmlFor="workspace_name">Praxis-Name</Label>
-          <Input
-            id="workspace_name"
-            name="workspace_name"
-            type="text"
-            required
-            placeholder="Zahnarztpraxis am Rathausplatz"
-          />
-        </div>
+        {!inviteToken ? (
+          <div>
+            <Label htmlFor="workspace_name">Praxis-Name</Label>
+            <Input
+              id="workspace_name"
+              name="workspace_name"
+              type="text"
+              required
+              placeholder="Zahnarztpraxis am Rathausplatz"
+            />
+          </div>
+        ) : null}
 
         <div>
           <Label htmlFor="email">E-Mail</Label>

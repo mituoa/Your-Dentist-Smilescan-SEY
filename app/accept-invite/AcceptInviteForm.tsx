@@ -87,8 +87,9 @@ export function AcceptInviteForm({
           <>
             <h1 className="font-serif text-3xl font-light">Team-Einladung</h1>
             <p className="text-text-secondary text-sm text-left">
-              <strong>{practiceName}</strong> hat Sie eingeladen. Melden Sie sich an,
-              um die Einladung zu bestätigen.
+              <strong>{practiceName}</strong> hat Sie eingeladen. Ein Konto mit
+              dieser E-Mail-Adresse existiert bereits bei SmileScan. Melden Sie
+              sich an, um die Einladung anzunehmen.
             </p>
             <Link
               href={loginHref}

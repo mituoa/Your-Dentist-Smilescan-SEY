@@ -67,15 +67,19 @@ export async function signUp(formData: FormData) {
   }
 
   const supabase = await createClient();
+  const userMetadata: Record<string, string | null> = {
+    display_name: displayName || email,
+    invite_token: inviteToken || null,
+  };
+  if (!inviteToken) {
+    userMetadata.workspace_name = workspaceName || "Meine Praxis";
+  }
+
   const { data: signData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: {
-        workspace_name: workspaceName || "Meine Praxis",
-        display_name: displayName || email,
-        invite_token: inviteToken || null,
-      },
+      data: userMetadata,
     },
   });
 

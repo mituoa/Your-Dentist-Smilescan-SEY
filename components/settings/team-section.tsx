@@ -31,7 +31,12 @@ export function TeamSection({
   };
 
   const handleRemove = (userId: string) => {
-    if (!confirm("Mitglied wirklich entfernen?")) return;
+    if (
+      !confirm(
+        "Mitglied wirklich entfernen? Der Account bleibt bestehen, die Person hat nur keinen Zugriff mehr auf diesen Workspace."
+      )
+    )
+      return;
     startTransition(async () => {
       await removeTeamMember(userId);
       router.refresh();
