@@ -1,0 +1,257 @@
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { generateSlug } from "@/lib/slug";
+import { revalidatePath } from "next/cache";
+import {
+  calculateReadingTime,
+  countWords,
+  JOURNAL_LIMITS,
+} from "@/lib/validation/journal-limits";
+
+export async function createDraftArticle(): Promise<{ id?: string; error?: string }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Nicht angemeldet." };
+
+  const { data, error } = await supabase
+    .from("journal_entries")
+    .insert({
+      workspace_id: workspace.workspace_id,
+      author_id: user.id,
+      title: null,
+      slug: null,
+      excerpt: null,
+      content_markdown: null,
+      topic: null,
+      status: "draft",
+      word_count: 0,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    console.error("[createDraft]", error);
+    return { error: "Entwurf konnte nicht erstellt werden." };
+  }
+
+  return { id: data.id };
+}
+
+export interface SaveArticlePayload {
+  id: string;
+  title: string;
+  excerpt: string;
+  content_markdown: string;
+  topic: string | null;
+  cover_photo_url: string | null;
+}
+
+export async function saveArticle(
+  payload: SaveArticlePayload
+): Promise<{ error?: string; success?: boolean }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." };
+
+  const supabase = await createClient();
+
+  const wordCount = countWords(payload.content_markdown);
+  const readingTime = calculateReadingTime(wordCount);
+
+  let slug: string | null = null;
+  if (payload.title.trim()) {
+    slug = generateSlug(payload.title);
+    if (slug.length > JOURNAL_LIMITS.slug) {
+      slug = slug.substring(0, JOURNAL_LIMITS.slug);
+    }
+    const { data: existing } = await supabase
+      .from("journal_entries")
+      .select("id")
+      .eq("workspace_id", workspace.workspace_id)
+      .eq("slug", slug)
+      .neq("id", payload.id);
+    if (existing && existing.length > 0) {
+      slug = `${slug}-${payload.id.slice(0, 6)}`;
+    }
+  }
+
+  const { error } = await supabase
+    .from("journal_entries")
+    .update({
+      title: payload.title || null,
+      slug,
+      excerpt: payload.excerpt || null,
+      content_markdown: payload.content_markdown || null,
+      topic: payload.topic,
+      cover_photo_url: payload.cover_photo_url,
+      word_count: wordCount,
+      reading_time_minutes: readingTime,
+    })
+    .eq("id", payload.id)
+    .eq("workspace_id", workspace.workspace_id);
+
+  if (error) {
+    console.error("[saveArticle]", error);
+    return { error: "Speichern fehlgeschlagen." };
+  }
+
+  revalidatePath("/journal");
+  revalidatePath(`/journal/${payload.id}/edit`);
+  return { success: true };
+}
+
+async function revalidatePublicJournalPaths(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  workspaceId: string,
+  articleSlug: string | null
+) {
+  const { data: ws } = await supabase
+    .from("workspaces")
+    .select("slug")
+    .eq("id", workspaceId)
+    .single();
+  if (ws?.slug) {
+    revalidatePath(`/doc/${ws.slug}`);
+    revalidatePath(`/doc/${ws.slug}/journal`);
+    if (articleSlug) {
+      revalidatePath(`/doc/${ws.slug}/journal/${articleSlug}`);
+    }
+  }
+}
+
+export async function publishArticle(
+  id: string
+): Promise<{ error?: string; success?: boolean }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." };
+
+  const supabase = await createClient();
+  const { data: article } = await supabase
+    .from("journal_entries")
+    .select("*")
+    .eq("id", id)
+    .eq("workspace_id", workspace.workspace_id)
+    .single();
+
+  if (!article) return { error: "Artikel nicht gefunden." };
+  if (!article.title) return { error: "Titel erforderlich zum Veröffentlichen." };
+  if (!article.content_markdown)
+    return { error: "Inhalt erforderlich zum Veröffentlichen." };
+  if (!article.topic) return { error: "Thema erforderlich zum Veröffentlichen." };
+  if (!article.slug) return { error: "Slug fehlt. Bitte Titel speichern." };
+
+  const { error } = await supabase
+    .from("journal_entries")
+    .update({
+      status: "published",
+      published_at: article.published_at || new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[publishArticle]", error);
+    return { error: "Veröffentlichung fehlgeschlagen." };
+  }
+
+  revalidatePath("/journal");
+  revalidatePath(`/journal/${id}/edit`);
+  await revalidatePublicJournalPaths(
+    supabase,
+    workspace.workspace_id,
+    article.slug as string
+  );
+
+  return { success: true };
+}
+
+export async function unpublishArticle(
+  id: string
+): Promise<{ error?: string; success?: boolean }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." };
+
+  const supabase = await createClient();
+  const { data: article } = await supabase
+    .from("journal_entries")
+    .select("slug")
+    .eq("id", id)
+    .eq("workspace_id", workspace.workspace_id)
+    .single();
+
+  const { error } = await supabase
+    .from("journal_entries")
+    .update({ status: "draft" })
+    .eq("id", id)
+    .eq("workspace_id", workspace.workspace_id);
+
+  if (error) return { error: "Zurücksetzen fehlgeschlagen." };
+
+  revalidatePath("/journal");
+  revalidatePath(`/journal/${id}/edit`);
+  await revalidatePublicJournalPaths(
+    supabase,
+    workspace.workspace_id,
+    article?.slug as string | null
+  );
+
+  return { success: true };
+}
+
+export async function deleteArticle(
+  id: string
+): Promise<{ error?: string; success?: boolean }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("journal_entries")
+    .delete()
+    .eq("id", id)
+    .eq("workspace_id", workspace.workspace_id);
+
+  if (error) return { error: "Löschen fehlgeschlagen." };
+
+  revalidatePath("/journal");
+  return { success: true };
+}
+
+export async function uploadCoverPhoto(
+  formData: FormData
+): Promise<{ error?: string; url?: string }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." };
+
+  const file = formData.get("file") as File;
+  if (!file || file.size === 0) return { error: "Keine Datei ausgewählt." };
+
+  if (file.size > 10 * 1024 * 1024)
+    return { error: "Datei zu groß. Maximum 10 MB." };
+
+  const allowed = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowed.includes(file.type)) return { error: "Format nicht unterstützt." };
+
+  const admin = createAdminClient();
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${workspace.workspace_id}/cover-${Date.now()}.${ext}`;
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const { error: upErr } = await admin.storage
+    .from("journal-covers")
+    .upload(path, buffer, { contentType: file.type, upsert: false });
+
+  if (upErr) {
+    console.error("[uploadCover]", upErr);
+    return { error: "Upload fehlgeschlagen." };
+  }
+
+  const { data } = admin.storage.from("journal-covers").getPublicUrl(path);
+  return { url: data.publicUrl };
+}

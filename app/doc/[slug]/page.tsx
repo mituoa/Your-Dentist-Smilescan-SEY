@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
-import {
-  getPublicProfileBySlug,
-  getRecentJournalEntries,
-  publicProfileToEditorData,
-} from "@/lib/queries/public-profile";
+import { getPublicProfileBySlug, publicProfileToEditorData } from "@/lib/queries/public-profile";
+import { listPublishedForWorkspace } from "@/lib/queries/journal";
 import { EditorialProfile } from "@/components/profile-preview/editorial-profile";
 
 interface PublicProfilePageProps {
@@ -20,7 +17,7 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const journalEntries = await getRecentJournalEntries(profile.workspace_id);
+  const journalEntries = await listPublishedForWorkspace(profile.workspace_id);
   const data = publicProfileToEditorData(profile);
 
   return (

@@ -2,18 +2,15 @@ import Link from "next/link";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { getSpecializationLabel } from "@/lib/masterdata/specializations";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
+import { JournalPreviewList } from "@/components/public/journal-preview-list";
+import type { JournalEntry } from "@/lib/queries/journal";
 
 interface EditorialProfileProps {
   data: ProfileEditorData;
   workspaceName: string;
   slug: string;
   cityTagline?: string | null;
-  journalEntries?: Array<{
-    id: string;
-    title: string;
-    slug: string;
-    published_at: string | null;
-  }>;
+  journalEntries?: JournalEntry[];
   previewMode?: boolean;
 }
 
@@ -22,7 +19,7 @@ export function EditorialProfile({
   workspaceName,
   slug,
   cityTagline,
-  journalEntries: _journalEntries,
+  journalEntries,
   previewMode = false,
 }: EditorialProfileProps) {
   const fullName =
@@ -218,6 +215,10 @@ export function EditorialProfile({
           </section>
         )}
 
+        {journalEntries && journalEntries.length > 0 && (
+          <JournalPreviewList entries={journalEntries} slug={slug} />
+        )}
+
         {(data.practice_address ||
           data.practice_phone ||
           data.practice_email ||
@@ -225,7 +226,7 @@ export function EditorialProfile({
           <section className="py-20 md:py-32 border-t border-border">
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 md:gap-16 mb-10">
               <div className="text-[10px] tracking-[0.3em] uppercase text-ink-faint">
-                IV · Praxis
+                V · Praxis
               </div>
               <h2 className="font-serif font-light text-[clamp(2.25rem,5vw,4rem)] leading-none">
                 {data.practice_name ? (
