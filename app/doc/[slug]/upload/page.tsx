@@ -42,7 +42,11 @@ export default async function UploadPage({ params }: UploadPageProps) {
         </p>
       </div>
 
-      <UploadForm slug={slug} practiceName={practiceName} />
+      <UploadForm
+        slug={slug}
+        practiceName={practiceName}
+        workspaceId={profile.workspace_id}
+      />
     </div>
   );
 }

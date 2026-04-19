@@ -1,7 +1,6 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { validatePhotoCollection } from "@/lib/upload/validation";
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
 import { buildUploadConfirmationEmail } from "@/lib/mail/upload-confirmation-patient-email";
 import { buildNewSubmissionPractitionerEmail } from "@/lib/mail/new-submission-practitioner-email";
@@ -17,27 +16,25 @@ export async function submitUpload(
     (formData.get("patient_phone") as string)?.trim() || null;
   const patientNotes =
     (formData.get("patient_notes") as string)?.trim() || null;
-  const photoCount = parseInt(formData.get("photo_count") as string, 10);
+  const storagePathsJson = formData.get("storage_paths") as string | null;
 
   if (!slug || !patientName || !patientEmail) {
     return { error: "Bitte alle Pflichtfelder ausfüllen." };
   }
 
-  if (isNaN(photoCount) || photoCount < 1) {
+  if (!storagePathsJson?.trim()) {
     return { error: "Mindestens ein Foto erforderlich." };
   }
 
-  const photos: File[] = [];
-  for (let i = 0; i < photoCount; i++) {
-    const photo = formData.get(`photo_${i}`) as File;
-    if (photo && photo.size > 0) {
-      photos.push(photo);
-    }
+  let storagePaths: string[] = [];
+  try {
+    storagePaths = JSON.parse(storagePathsJson);
+  } catch {
+    return { error: "Fehler beim Verarbeiten der Fotos." };
   }
 
-  const validation = validatePhotoCollection(photos);
-  if (!validation.valid) {
-    return { error: validation.error };
+  if (!Array.isArray(storagePaths) || storagePaths.length === 0) {
+    return { error: "Mindestens ein Foto erforderlich." };
   }
 
   const admin = createAdminClient();
@@ -80,48 +77,33 @@ export async function submitUpload(
 
   const submissionId = submission.id;
 
-  const uploadedPaths: string[] = [];
+  const finalPaths: string[] = [];
+  for (let i = 0; i < storagePaths.length; i++) {
+    const tempPath = storagePaths[i];
+    const fileName = tempPath.split("/").pop() || `photo-${i}.jpg`;
+    const finalPath = `${workspace.id}/${submissionId}/${fileName}`;
 
-  for (let i = 0; i < photos.length; i++) {
-    const photo = photos[i];
-    const ext = photo.name.split(".").pop()?.toLowerCase() || "jpg";
-    const storagePath = `${workspace.id}/${submissionId}/${Date.now()}-${i}.${ext}`;
-
-    const arrayBuffer = await photo.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const { error: uploadError } = await admin.storage
+    const { error: moveError } = await admin.storage
       .from("submission-photos")
-      .upload(storagePath, buffer, {
-        contentType: photo.type,
-        upsert: false,
-      });
+      .move(tempPath, finalPath);
 
-    if (uploadError) {
-      console.error(`[upload] photo ${i} upload failed:`, uploadError);
-      await admin.from("submissions").delete().eq("id", submissionId);
-      for (const path of uploadedPaths) {
-        await admin.storage.from("submission-photos").remove([path]);
-      }
-      return { error: "Foto-Upload fehlgeschlagen. Bitte erneut versuchen." };
+    if (moveError) {
+      console.error(`[upload] move failed for ${tempPath}:`, moveError);
+      continue;
     }
+    const sortOrder = finalPaths.length;
+    finalPaths.push(finalPath);
 
-    uploadedPaths.push(storagePath);
-
-    const { error: rowError } = await admin.from("submission_photos").insert({
+    await admin.from("submission_photos").insert({
       submission_id: submissionId,
-      storage_path: storagePath,
-      sort_order: i,
+      storage_path: finalPath,
+      sort_order: sortOrder,
     });
+  }
 
-    if (rowError) {
-      console.error(`[upload] submission_photos row failed:`, rowError);
-      await admin.from("submissions").delete().eq("id", submissionId);
-      for (const path of uploadedPaths) {
-        await admin.storage.from("submission-photos").remove([path]);
-      }
-      return { error: "Einsendung konnte nicht gespeichert werden." };
-    }
+  if (finalPaths.length === 0) {
+    await admin.from("submissions").delete().eq("id", submissionId);
+    return { error: "Fotos konnten nicht gespeichert werden." };
   }
 
   const fullName = patientName;
@@ -157,14 +139,12 @@ export async function submitUpload(
     const { data: authData } = await admin.auth.admin.getUserById(
       members[0].user_id
     );
-
     if (authData?.user?.email) {
       const doctorMail = buildNewSubmissionPractitionerEmail({
         appBase: getAppBaseUrl(),
         patientDisplayLabel: fullName || patientEmail,
         submissionTimestamp: new Date(),
       });
-
       await sendTransactionalMailBestEffort(
         {
           to: authData.user.email,
