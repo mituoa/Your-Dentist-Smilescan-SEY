@@ -7,6 +7,7 @@ import { buildAppointmentLinkEmail } from "@/lib/mail/appointment-link-email";
 import { buildAppointmentLinkPractitionerNoticeEmail } from "@/lib/mail/appointment-link-notice-email";
 import { isSmtpConfigured } from "@/lib/env";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { submitTaskForReview } from "@/app/(protected)/my-tasks/actions";
 
 export async function markSubmissionSeen(submissionId: string) {
   const supabase = await createClient();
@@ -56,57 +57,103 @@ export async function createTask(formData: FormData) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Kein Workspace" };
 
-  const { error } = await supabase.from("tasks").insert({
-    workspace_id: workspace.workspace_id,
-    submission_id: submissionId,
-    content: content.trim(),
-    recipient_type: recipientType,
-    created_by: user.id,
-  });
+  const { data: inserted, error } = await supabase
+    .from("tasks")
+    .insert({
+      workspace_id: workspace.workspace_id,
+      submission_id: submissionId,
+      content: content.trim(),
+      recipient_type: recipientType,
+      created_by: user.id,
+      status: "open",
+    })
+    .select("id")
+    .single();
 
   if (error) {
     console.error("[createTask]", error);
     return { error: error.message };
   }
 
+  const newTaskId = inserted?.id as string;
+
+  try {
+    const { buildTaskAssigned } = await import("@/lib/mail/task-notifications");
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const { getAppBaseUrl } = await import("@/lib/env");
+
+    const admin = createAdminClient();
+    const recipientEmails: string[] = [];
+
+    if (recipientType === "all_team") {
+      const { data: members } = await admin
+        .from("workspace_members")
+        .select("user_id")
+        .eq("workspace_id", workspace.workspace_id)
+        .neq("user_id", user.id);
+      for (const m of members || []) {
+        const { data } = await admin.auth.admin.getUserById(m.user_id);
+        if (data?.user?.email) recipientEmails.push(data.user.email);
+      }
+    } else if (recipientType === "doctor_only") {
+      const { data: doctors } = await admin
+        .from("workspace_members")
+        .select("user_id")
+        .eq("workspace_id", workspace.workspace_id)
+        .eq("role", "doctor")
+        .neq("user_id", user.id);
+      for (const m of doctors || []) {
+        const { data } = await admin.auth.admin.getUserById(m.user_id);
+        if (data?.user?.email) recipientEmails.push(data.user.email);
+      }
+    }
+
+    if (recipientEmails.length > 0) {
+      const taskUrl = `${getAppBaseUrl()}/my-tasks/${newTaskId}`;
+      const mail = buildTaskAssigned({
+        taskTitle: content.trim(),
+        taskUrl,
+        actorName: user.email || "Arzt",
+        recipientEmail: recipientEmails[0] || "",
+      });
+      for (const to of recipientEmails) {
+        await sendTransactionalMailBestEffort(
+          { to, subject: mail.subject, text: mail.text, html: mail.html },
+          "task_assigned"
+        );
+      }
+    }
+  } catch (err) {
+    console.error("[createTask mail]", err);
+  }
+
   revalidatePath(`/inbox/${submissionId}`);
   revalidatePath("/dashboard");
+  revalidatePath("/my-tasks");
   return { success: true };
 }
 
-export async function toggleTaskDone(taskId: string, submissionId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return { error: "Nicht angemeldet" };
-
-  const { data: task } = await supabase
-    .from("tasks")
-    .select("done_at")
-    .eq("id", taskId)
-    .single();
-
-  if (!task) return { error: "Task nicht gefunden" };
-
-  const newValue = task.done_at
-    ? { done_at: null, done_by: null }
-    : { done_at: new Date().toISOString(), done_by: user.id };
-
-  const { error } = await supabase
-    .from("tasks")
-    .update(newValue)
-    .eq("id", taskId);
-
-  if (error) return { error: error.message };
-
-  revalidatePath(`/inbox/${submissionId}`);
-  revalidatePath("/dashboard");
-  return { success: true };
+/** Inbox: meldet Erledigung (ersetzt früheres direktes Abhaken). */
+export async function submitInboxTaskForReview(
+  taskId: string,
+  submissionId: string
+) {
+  const result = await submitTaskForReview(taskId);
+  if (result.success) {
+    revalidatePath(`/inbox/${submissionId}`);
+  }
+  return result;
 }
 
 export async function sendAppointmentLink(submissionId: string) {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { error: "Kein Workspace" };
+  }
+  if (workspace.role !== "doctor") {
+    return { error: "Nur Ärzte können Terminlinks versenden." };
+  }
+
   if (!isSmtpConfigured()) {
     return {
       error:

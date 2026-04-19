@@ -92,6 +92,7 @@ export interface TaskItem {
   created_at: string;
   done_at: string | null;
   done_by: string | null;
+  status: "open" | "pending_review" | "done";
 }
 
 export async function getTasksForSubmission(
@@ -101,7 +102,9 @@ export async function getTasksForSubmission(
 
   const { data, error } = await supabase
     .from("tasks")
-    .select("*")
+    .select(
+      "id, content, recipient_type, specific_recipient_id, created_by, created_at, done_at, done_by, status"
+    )
     .eq("submission_id", submissionId)
     .order("created_at", { ascending: false });
 
@@ -110,7 +113,20 @@ export async function getTasksForSubmission(
     return [];
   }
 
-  return (data || []) as TaskItem[];
+  return (data || []).map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      content: row.content as string,
+      recipient_type: row.recipient_type as TaskItem["recipient_type"],
+      specific_recipient_id: (row.specific_recipient_id as string | null) ?? null,
+      created_by: row.created_by as string,
+      created_at: row.created_at as string,
+      done_at: (row.done_at as string | null) ?? null,
+      done_by: (row.done_by as string | null) ?? null,
+      status: (row.status as TaskItem["status"]) ?? "open",
+    };
+  });
 }
 
 export async function getProfileData(workspaceId: string) {

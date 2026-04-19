@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getCurrentUser, getCurrentWorkspace } from "@/lib/auth-helpers";
 import { Greeting } from "@/components/dashboard/greeting";
 import { NewSubmissionsBlock } from "@/components/dashboard/new-submissions-block";
@@ -23,9 +24,11 @@ export default async function DashboardPage() {
     );
   }
 
+  if (workspace.role === "team") {
+    redirect("/my-tasks");
+  }
+
   const workspaceId = workspace.workspace_id;
-  const role = workspace.role;
-  const isDoctor = role === "doctor";
 
   const supabase = await createClient();
   const { data: profileData } = await supabase
@@ -50,7 +53,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <NewSubmissionsBlock newCount={newCount} totalUnseen={totalUnseen} />
-        <OpenTasksBlock tasks={tasks} canCheckOff={isDoctor} />
+        <OpenTasksBlock tasks={tasks} />
         <RecentActivityBlock events={activity} />
       </div>
     </div>

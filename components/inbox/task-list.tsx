@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { toggleTaskDone } from "@/app/(protected)/inbox/[id]/actions";
+
+import { submitInboxTaskForReview } from "@/app/(protected)/inbox/[id]/actions";
 import { cn } from "@/lib/utils";
 
 interface Task {
@@ -9,6 +11,7 @@ interface Task {
   content: string;
   recipient_type: "doctor_only" | "all_team" | "specific_person";
   done_at: string | null;
+  status: "open" | "pending_review" | "done";
 }
 
 interface TaskListProps {
@@ -24,19 +27,20 @@ const RECIPIENT_LABEL = {
 };
 
 export function TaskList({ tasks, canCheckOff, submissionId }: TaskListProps) {
-  const [isPending, startTransition] = useTransition();
-  const [optimisticDone, setOptimisticDone] = useState<Record<string, boolean>>(
+  const [isMutating, startTransition] = useTransition();
+  const router = useRouter();
+  const [errorById, setErrorById] = useState<Record<string, string | undefined>>(
     {}
   );
 
-  const handleToggle = (taskId: string, currentDone: boolean) => {
-    if (!canCheckOff) return;
-    const newDone = !currentDone;
-    setOptimisticDone((prev) => ({ ...prev, [taskId]: newDone }));
+  const handleSubmitForReview = (taskId: string) => {
+    setErrorById((prev) => ({ ...prev, [taskId]: undefined }));
     startTransition(async () => {
-      const result = await toggleTaskDone(taskId, submissionId);
+      const result = await submitInboxTaskForReview(taskId, submissionId);
       if (result.error) {
-        setOptimisticDone((prev) => ({ ...prev, [taskId]: currentDone }));
+        setErrorById((prev) => ({ ...prev, [taskId]: result.error }));
+      } else {
+        router.refresh();
       }
     });
   };
@@ -50,23 +54,31 @@ export function TaskList({ tasks, canCheckOff, submissionId }: TaskListProps) {
   return (
     <ul className="space-y-2">
       {tasks.map((task) => {
-        const isDone =
-          optimisticDone[task.id] !== undefined
-            ? optimisticDone[task.id]
-            : !!task.done_at;
+        const status = task.status ?? "open";
+        const isDone = status === "done";
+        const isPendingReview = status === "pending_review";
+        const canSubmitHere =
+          canCheckOff && status === "open" && !isMutating && !isDone;
 
         return (
           <li key={task.id} className="flex items-start gap-2.5">
             <button
               type="button"
-              onClick={() => handleToggle(task.id, isDone)}
-              disabled={!canCheckOff || isPending}
+              onClick={() => handleSubmitForReview(task.id)}
+              disabled={!canSubmitHere || isMutating}
               className={cn(
                 "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
-                canCheckOff
+                canSubmitHere
                   ? "border-border hover:border-brand cursor-pointer"
                   : "border-border/50 cursor-not-allowed"
               )}
+              title={
+                isDone
+                  ? "Erledigt"
+                  : isPendingReview
+                    ? "Wartet auf Bestätigung"
+                    : "Als erledigt melden"
+              }
             >
               {isDone && (
                 <svg
@@ -84,7 +96,7 @@ export function TaskList({ tasks, canCheckOff, submissionId }: TaskListProps) {
                 </svg>
               )}
             </button>
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <p
                 className={cn(
                   "text-sm leading-snug",
@@ -97,7 +109,13 @@ export function TaskList({ tasks, canCheckOff, submissionId }: TaskListProps) {
               </p>
               <p className="text-xs text-text-tertiary mt-0.5">
                 → {RECIPIENT_LABEL[task.recipient_type]}
+                {isPendingReview && (
+                  <span className="ml-2 text-amber-800">· Auf Bestätigung</span>
+                )}
               </p>
+              {errorById[task.id] && (
+                <p className="text-xs text-danger mt-1">{errorById[task.id]}</p>
+              )}
             </div>
           </li>
         );

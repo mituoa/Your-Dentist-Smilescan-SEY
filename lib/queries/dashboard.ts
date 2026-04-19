@@ -42,10 +42,10 @@ export async function getOpenTasks(workspaceId: string) {
   const { data, error } = await supabase
     .from("tasks")
     .select(
-      "id, content, submission_id, created_at, created_by, recipient_type, specific_recipient_id"
+      "id, content, submission_id, created_at, created_by, recipient_type, specific_recipient_id, status"
     )
     .eq("workspace_id", workspaceId)
-    .is("done_at", null)
+    .in("status", ["open", "pending_review"])
     .order("created_at", { ascending: false })
     .limit(10);
 
@@ -75,9 +75,9 @@ export async function getRecentActivity(workspaceId: string) {
       .limit(3),
     supabase
       .from("tasks")
-      .select("id, content, done_at, submission_id")
+      .select("id, content, done_at, submission_id, status")
       .eq("workspace_id", workspaceId)
-      .not("done_at", "is", null)
+      .eq("status", "done")
       .order("done_at", { ascending: false })
       .limit(3),
   ]);
