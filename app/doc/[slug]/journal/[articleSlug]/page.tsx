@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { marked } from "marked";
-import { getPublicProfileBySlug } from "@/lib/queries/public-profile";
+import { getPublicDocProfileOrRedirect } from "@/lib/doc/resolve-public-doc-profile";
 import { getPublicJournalBySlug, getRelatedEntries } from "@/lib/queries/journal";
 import { getTopicLabel } from "@/lib/masterdata/journal-topics";
 import { ShareButtons } from "@/components/journal/share-buttons";
@@ -13,8 +13,10 @@ interface ArticlePageProps {
 
 export async function generateMetadata({ params }: ArticlePageProps) {
   const { slug, articleSlug } = await params;
-  const profile = await getPublicProfileBySlug(slug);
-  if (!profile) return {};
+  const profile = await getPublicDocProfileOrRedirect(
+    slug,
+    `/journal/${articleSlug}`
+  );
   const article = await getPublicJournalBySlug(profile.workspace_id, articleSlug);
   if (!article) return {};
 
@@ -34,8 +36,10 @@ export async function generateMetadata({ params }: ArticlePageProps) {
 
 export default async function PublicArticlePage({ params }: ArticlePageProps) {
   const { slug, articleSlug } = await params;
-  const profile = await getPublicProfileBySlug(slug);
-  if (!profile) notFound();
+  const profile = await getPublicDocProfileOrRedirect(
+    slug,
+    `/journal/${articleSlug}`
+  );
 
   const article = await getPublicJournalBySlug(profile.workspace_id, articleSlug);
   if (!article || !article.content_markdown) notFound();
@@ -46,13 +50,14 @@ export default async function PublicArticlePage({ params }: ArticlePageProps) {
   const contentHtml = marked.parse(article.content_markdown, {
     async: false,
   }) as string;
-  const url = `${getAppBaseUrl()}/doc/${slug}/journal/${articleSlug}`;
+  const canonicalSlug = profile.slug;
+  const url = `${getAppBaseUrl()}/doc/${canonicalSlug}/journal/${articleSlug}`;
 
   return (
     <div className="min-h-screen bg-cream">
       <div className="max-w-[680px] mx-auto px-6 py-12 md:py-20">
         <Link
-          href={`/doc/${slug}`}
+          href={`/doc/${canonicalSlug}`}
           className="text-xs uppercase tracking-wider text-ink-faint hover:text-ink"
         >
           ← Zurück zu {name}
@@ -129,7 +134,7 @@ export default async function PublicArticlePage({ params }: ArticlePageProps) {
                 return (
                   <Link
                     key={r.id}
-                    href={`/doc/${slug}/journal/${r.slug}`}
+                    href={`/doc/${canonicalSlug}/journal/${r.slug}`}
                     className="block group"
                   >
                     {relTopic && (

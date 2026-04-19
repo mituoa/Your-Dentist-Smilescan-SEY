@@ -1,9 +1,14 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { getSpecializationLabel } from "@/lib/masterdata/specializations";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
 import { JournalPreviewList } from "@/components/public/journal-preview-list";
 import type { JournalEntry } from "@/lib/queries/journal";
+import {
+  hexToRgbSpaceSeparated,
+  lightenRgbSpaceSeparated,
+} from "@/lib/color/hex-to-rgb-css";
 
 interface EditorialProfileProps {
   data: ProfileEditorData;
@@ -41,16 +46,35 @@ export function EditorialProfile({
   const tagline =
     cityTagline || data.practice_address?.split("\n").pop()?.trim() || null;
 
+  const accentHex = data.accent_color?.trim() || "#0F6E56";
+  const primaryRgb = hexToRgbSpaceSeparated(accentHex);
+  const glowRgb = lightenRgbSpaceSeparated(primaryRgb, 0.35);
+  const brandCssVars = {
+    "--brand-primary": primaryRgb,
+    "--brand-glow": glowRgb,
+  } as CSSProperties;
+
   const vitaParagraphs =
     data.vita_markdown?.split(/\n\n+/).filter((p) => p.trim()) || [];
 
   return (
-    <div className="bg-cream text-ink font-sans">
+    <div className="bg-cream text-ink font-sans" style={brandCssVars}>
       <div className="max-w-[1280px] mx-auto px-6 md:px-10">
         <nav className="flex items-center justify-between py-10 border-b border-border">
-          <div className="text-sm tracking-[0.14em] uppercase">
-            {data.practice_name || workspaceName}
-          </div>
+          {data.logo_url ? (
+            <div className="flex items-center max-w-[220px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={data.logo_url}
+                alt={data.practice_name || workspaceName}
+                className="max-h-12 w-auto object-contain object-left"
+              />
+            </div>
+          ) : (
+            <div className="text-sm tracking-[0.14em] uppercase">
+              {data.practice_name || workspaceName}
+            </div>
+          )}
           {tagline && (
             <div className="text-xs tracking-wider text-ink-soft">{tagline}</div>
           )}
@@ -321,7 +345,7 @@ export function EditorialProfile({
             </p>
             <Link
               href={`/doc/${slug}/upload`}
-              className="inline-flex items-center gap-4 px-10 py-5 bg-ink text-cream no-underline text-sm tracking-[0.12em] uppercase font-medium hover:bg-teal transition-colors rounded-sm"
+              className="inline-flex items-center gap-4 px-10 py-5 bg-ink text-cream no-underline text-sm tracking-[0.12em] uppercase font-medium hover:bg-brand-glow transition-colors rounded-sm"
             >
               Jetzt einsenden
               <span>→</span>

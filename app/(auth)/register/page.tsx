@@ -4,7 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function RegisterPage() {
+interface RegisterPageProps {
+  searchParams: Promise<{ invite?: string; email?: string; error?: string }>;
+}
+
+export default async function RegisterPage({ searchParams }: RegisterPageProps) {
+  const params = await searchParams;
+  const inviteToken = params.invite?.trim() || "";
+  const prefilledEmail = params.email?.trim() || "";
+  const queryError = params.error;
+
   return (
     <div className="bg-surface-card border border-border rounded-lg p-8">
       <h2 className="font-serif text-2xl font-light mb-2 text-text-primary">
@@ -14,7 +23,15 @@ export default function RegisterPage() {
         Für Zahnärzte in geschlossener Beta.
       </p>
 
+      {queryError && (
+        <p className="text-sm text-danger mb-4">{decodeURIComponent(queryError)}</p>
+      )}
+
       <form action={signUp} className="space-y-4">
+        {inviteToken ? (
+          <input type="hidden" name="invite_token" value={inviteToken} />
+        ) : null}
+
         <div>
           <Label htmlFor="display_name">Vollständiger Name</Label>
           <Input
@@ -46,6 +63,7 @@ export default function RegisterPage() {
             required
             autoComplete="email"
             placeholder="doc@praxis.de"
+            defaultValue={prefilledEmail}
           />
         </div>
 

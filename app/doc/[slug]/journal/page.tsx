@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getPublicProfileBySlug } from "@/lib/queries/public-profile";
+import { getPublicDocProfileOrRedirect } from "@/lib/doc/resolve-public-doc-profile";
 import { listPublishedForWorkspace } from "@/lib/queries/journal";
 import { getTopicLabel } from "@/lib/masterdata/journal-topics";
 
@@ -9,18 +8,18 @@ interface JournalIndexProps {
 }
 
 export default async function PublicJournalIndex({ params }: JournalIndexProps) {
-  const { slug } = await params;
-  const profile = await getPublicProfileBySlug(slug);
-  if (!profile) notFound();
+  const { slug: urlSlug } = await params;
+  const profile = await getPublicDocProfileOrRedirect(urlSlug, "/journal");
 
   const articles = await listPublishedForWorkspace(profile.workspace_id);
   const name = profile.display_name || profile.workspace_name;
+  const canonicalSlug = profile.slug;
 
   return (
     <div className="min-h-screen bg-cream">
       <div className="max-w-3xl mx-auto px-6 py-20">
         <Link
-          href={`/doc/${slug}`}
+          href={`/doc/${canonicalSlug}`}
           className="text-xs uppercase tracking-wider text-ink-faint hover:text-ink"
         >
           ← Zurück zu {name}
@@ -40,7 +39,10 @@ export default async function PublicJournalIndex({ params }: JournalIndexProps) 
               const topic = getTopicLabel(a.topic);
               return (
                 <article key={a.id}>
-                  <Link href={`/doc/${slug}/journal/${a.slug}`} className="block group">
+                  <Link
+                    href={`/doc/${canonicalSlug}/journal/${a.slug}`}
+                    className="block group"
+                  >
                     {topic && (
                       <div className="text-[10px] uppercase tracking-[0.3em] text-ink-faint mb-4">
                         {topic}

@@ -23,4 +23,6 @@ export interface ProfileEditorData {
   practice_email: string | null;
   practice_website: string | null;
   practice_hours: string | null;
+  logo_url: string | null;
+  accent_color: string | null;
 }

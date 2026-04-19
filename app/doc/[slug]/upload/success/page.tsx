@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { getPublicProfileBySlug } from "@/lib/queries/public-profile";
+import { getPublicDocProfileOrRedirect } from "@/lib/doc/resolve-public-doc-profile";
 
 interface SuccessPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export default async function UploadSuccessPage({ params }: SuccessPageProps) {
-  const { slug } = await params;
-  const profile = await getPublicProfileBySlug(slug);
+  const { slug: urlSlug } = await params;
+  const profile = await getPublicDocProfileOrRedirect(urlSlug, "/upload/success");
 
   const practiceName =
     profile?.practice_name || profile?.display_name || "der Praxis";
@@ -31,9 +31,9 @@ export default async function UploadSuccessPage({ params }: SuccessPageProps) {
           Eine Bestätigung haben wir an Ihre E-Mail-Adresse gesendet.
         </p>
 
-        {slug && (
+        {profile.slug && (
           <Link
-            href={`/doc/${slug}`}
+            href={`/doc/${profile.slug}`}
             className="text-sm text-brand hover:underline"
           >
             Zurück zum Profil

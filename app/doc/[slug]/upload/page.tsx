@@ -1,7 +1,6 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getPublicProfileBySlug } from "@/lib/queries/public-profile";
+import { getPublicDocProfileOrRedirect } from "@/lib/doc/resolve-public-doc-profile";
 import { UploadForm } from "@/components/public/upload-form";
 
 interface UploadPageProps {
@@ -9,12 +8,8 @@ interface UploadPageProps {
 }
 
 export default async function UploadPage({ params }: UploadPageProps) {
-  const { slug } = await params;
-  const profile = await getPublicProfileBySlug(slug);
-
-  if (!profile) {
-    notFound();
-  }
+  const { slug: urlSlug } = await params;
+  const profile = await getPublicDocProfileOrRedirect(urlSlug, "/upload");
 
   const practiceName =
     profile.practice_name || profile.display_name || "Zahnarztpraxis";
@@ -22,7 +17,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
   return (
     <div className="max-w-xl mx-auto px-6 py-12">
       <Link
-        href={`/doc/${slug}`}
+        href={`/doc/${profile.slug}`}
         className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-8"
       >
         <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
@@ -43,7 +38,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
       </div>
 
       <UploadForm
-        slug={slug}
+        slug={profile.slug}
         practiceName={practiceName}
         workspaceId={profile.workspace_id}
       />

@@ -56,5 +56,7 @@ function mapToEditor(data: Record<string, unknown>): ProfileEditorData {
     practice_email: (data.practice_email as string | null) ?? null,
     practice_website: (data.practice_website as string | null) ?? null,
     practice_hours: (data.practice_hours as string | null) ?? null,
+    logo_url: (data.logo_url as string | null) ?? null,
+    accent_color: (data.accent_color as string | null) ?? null,
   };
 }

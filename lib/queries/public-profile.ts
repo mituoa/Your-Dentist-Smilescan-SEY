@@ -26,6 +26,8 @@ export interface PublicProfile {
   practice_email: string | null;
   practice_website: string | null;
   practice_hours: string | null;
+  logo_url: string | null;
+  accent_color: string | null;
 }
 
 function normalizeServices(raw: unknown): string[] {
@@ -54,6 +56,8 @@ export function publicProfileToEditorData(
     practice_email: profile.practice_email,
     practice_website: profile.practice_website,
     practice_hours: profile.practice_hours,
+    logo_url: profile.logo_url,
+    accent_color: profile.accent_color,
   };
 }
 
@@ -83,6 +87,8 @@ function mapProfileRow(
       practice_email: null,
       practice_website: null,
       practice_hours: null,
+      logo_url: null,
+      accent_color: null,
     };
   }
 
@@ -111,6 +117,8 @@ function mapProfileRow(
     practice_email: (profile.practice_email as string | null) ?? null,
     practice_website: (profile.practice_website as string | null) ?? null,
     practice_hours: (profile.practice_hours as string | null) ?? null,
+    logo_url: (profile.logo_url as string | null) ?? null,
+    accent_color: (profile.accent_color as string | null) ?? null,
   };
 }
 

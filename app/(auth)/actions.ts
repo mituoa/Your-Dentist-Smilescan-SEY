@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { acceptInvitation } from "@/app/(protected)/settings/actions";
 
 export async function signIn(formData: FormData) {
   const email = formData.get("email") as string;
@@ -33,6 +34,7 @@ export async function signUp(formData: FormData) {
   const password = formData.get("password") as string;
   const workspaceName = formData.get("workspace_name") as string;
   const displayName = formData.get("display_name") as string;
+  const inviteToken = (formData.get("invite_token") as string | null)?.trim();
 
   if (!email || !password) {
     redirect(
@@ -59,11 +61,23 @@ export async function signUp(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/register?error=${encodeURIComponent(error.message)}`);
+    const inviteQ = inviteToken
+      ? `&invite=${encodeURIComponent(inviteToken)}`
+      : "";
+    redirect(
+      `/register?error=${encodeURIComponent(error.message)}${inviteQ}`
+    );
   }
 
-  // Falls Email Confirmation eingeschaltet ist, landet User jetzt auf
-  // einer "Check your email"-Seite. Sonst direkt ins Dashboard.
+  if (inviteToken) {
+    const inviteResult = await acceptInvitation(inviteToken);
+    if (inviteResult.error) {
+      redirect(
+        `/dashboard?invite_notice=${encodeURIComponent(inviteResult.error)}`
+      );
+    }
+  }
+
   revalidatePath("/", "layout");
   redirect("/dashboard");
 }

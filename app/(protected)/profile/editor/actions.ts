@@ -36,6 +36,12 @@ export async function saveProfileData(
 
   const supabase = await createClient();
 
+  const { data: existingBranding } = await supabase
+    .from("profile_data")
+    .select("logo_url, accent_color")
+    .eq("workspace_id", workspace.workspace_id)
+    .maybeSingle();
+
   const display_name =
     [payload.first_name, payload.last_name].filter(Boolean).join(" ").trim() ||
     null;
@@ -57,6 +63,8 @@ export async function saveProfileData(
     practice_email: payload.practice_email || null,
     practice_website: payload.practice_website || null,
     practice_hours: payload.practice_hours || null,
+    logo_url: existingBranding?.logo_url ?? null,
+    accent_color: existingBranding?.accent_color ?? null,
   };
 
   const { error } = await supabase
