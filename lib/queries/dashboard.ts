@@ -36,7 +36,7 @@ export async function getTotalUnseenSubmissions(workspaceId: string) {
   return count || 0;
 }
 
-export async function getOpenTasks(workspaceId: string, _userId: string) {
+export async function getOpenTasks(workspaceId: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase

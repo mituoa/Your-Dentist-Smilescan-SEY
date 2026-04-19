@@ -18,7 +18,7 @@ export default async function MyTasksPage() {
         Meine Aufgaben
       </h1>
       <p className="text-text-secondary max-w-xl">
-        Hier sieht ein Team-Mitglied alle Aufgaben, die an "alle" oder
+        Hier sieht ein Team-Mitglied alle Aufgaben, die an „alle“ oder
         speziell an diese Person verteilt wurden.
       </p>
     </div>

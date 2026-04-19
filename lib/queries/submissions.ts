@@ -1,0 +1,97 @@
+import { createClient } from "@/lib/supabase/server";
+
+export interface SubmissionDetail {
+  id: string;
+  workspace_id: string;
+  patient_name: string | null;
+  patient_email: string | null;
+  patient_phone: string | null;
+  patient_notes: string | null;
+  created_at: string;
+  seen_at: string | null;
+  seen_by: string | null;
+  photos: Array<{
+    id: string;
+    storage_path: string;
+    sort_order: number;
+  }>;
+}
+
+export async function getSubmissionById(
+  submissionId: string
+): Promise<SubmissionDetail | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("submissions")
+    .select(
+      `
+      id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
+      created_at, seen_at, seen_by,
+      submission_photos (id, storage_path, sort_order)
+    `
+    )
+    .eq("id", submissionId)
+    .single();
+
+  if (error) {
+    console.error("[submissions] getSubmissionById failed:", error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    workspace_id: data.workspace_id,
+    patient_name: data.patient_name,
+    patient_email: data.patient_email,
+    patient_phone: data.patient_phone,
+    patient_notes: data.patient_notes,
+    created_at: data.created_at,
+    seen_at: data.seen_at,
+    seen_by: data.seen_by,
+    photos: (data.submission_photos || []).sort(
+      (a: { sort_order: number }, b: { sort_order: number }) =>
+        a.sort_order - b.sort_order
+    ),
+  };
+}
+
+export interface TaskItem {
+  id: string;
+  content: string;
+  recipient_type: "doctor_only" | "all_team" | "specific_person";
+  specific_recipient_id: string | null;
+  created_by: string;
+  created_at: string;
+  done_at: string | null;
+  done_by: string | null;
+}
+
+export async function getTasksForSubmission(
+  submissionId: string
+): Promise<TaskItem[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("submission_id", submissionId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[submissions] getTasksForSubmission failed:", error);
+    return [];
+  }
+
+  return (data || []) as TaskItem[];
+}
+
+export async function getProfileData(workspaceId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profile_data")
+    .select("display_name, practice_name, appointment_link")
+    .eq("workspace_id", workspaceId)
+    .single();
+  return data;
+}

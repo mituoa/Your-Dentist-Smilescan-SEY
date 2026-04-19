@@ -40,7 +40,7 @@ export default async function DashboardPage() {
   const [newCount, totalUnseen, tasks, activity] = await Promise.all([
     getNewSubmissionsCount(workspaceId),
     getTotalUnseenSubmissions(workspaceId),
-    getOpenTasks(workspaceId, user.id),
+    getOpenTasks(workspaceId),
     getRecentActivity(workspaceId),
   ]);
 
