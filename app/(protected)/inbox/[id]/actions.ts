@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
 import { buildAppointmentLinkEmail } from "@/lib/mail/appointment-link-email";
@@ -8,6 +9,58 @@ import { buildAppointmentLinkPractitionerNoticeEmail } from "@/lib/mail/appointm
 import { isSmtpConfigured } from "@/lib/env";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { submitTaskForReview } from "@/app/(protected)/my-tasks/actions";
+import JSZip from "jszip";
+
+const MAX_ZIP_BYTES = 50 * 1024 * 1024;
+
+function formatSubmissionDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "unknown-date";
+  }
+  return date.toISOString().slice(0, 10);
+}
+
+function transliterateGerman(input: string): string {
+  return input
+    .replace(/Ä/g, "Ae")
+    .replace(/Ö/g, "Oe")
+    .replace(/Ü/g, "Ue")
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss");
+}
+
+function sanitizeNamePart(input: string): string {
+  return transliterateGerman(input)
+    .replace(/[^a-zA-Z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function toPatientSlug(patientName: string | null): string {
+  const safe = sanitizeNamePart(patientName || "");
+  if (!safe) return "Unbekannt-Patient";
+  const parts = safe.split("-").filter(Boolean);
+  if (parts.length === 1) return parts[0];
+  const firstName = parts[0];
+  const lastName = parts.slice(1).join("-");
+  return `${lastName}-${firstName}`;
+}
+
+function fileExtensionFromPath(path: string): string {
+  const segment = path.split("/").pop() || "";
+  const dotIndex = segment.lastIndexOf(".");
+  if (dotIndex <= 0 || dotIndex === segment.length - 1) return "jpg";
+  return segment.slice(dotIndex + 1).toLowerCase();
+}
+
+function toBase64(buffer: Buffer): string {
+  return buffer.toString("base64");
+}
 
 export async function markSubmissionSeen(submissionId: string) {
   const supabase = await createClient();
@@ -241,4 +294,95 @@ export async function sendAppointmentLink(submissionId: string) {
 
   revalidatePath(`/inbox/${submissionId}`);
   return { success: true, message: "Terminlink-E-Mail versendet." };
+}
+
+export async function downloadSubmissionPhotos(
+  submissionId: string
+): Promise<{ error?: string; zipBase64?: string; filename?: string }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { error: "Kein Workspace" };
+  }
+  if (!["doctor", "team"].includes(workspace.role)) {
+    return { error: "Keine Berechtigung für den Download." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Nicht angemeldet" };
+  }
+
+  const { data: submission, error: submissionError } = await supabase
+    .from("submissions")
+    .select("id, workspace_id, patient_name, created_at")
+    .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id)
+    .single();
+
+  if (submissionError || !submission) {
+    console.error("[downloadSubmissionPhotos] submission lookup failed", submissionError);
+    return { error: "Submission nicht gefunden." };
+  }
+
+  const { data: photos, error: photosError } = await supabase
+    .from("submission_photos")
+    .select("id, storage_path, sort_order")
+    .eq("submission_id", submissionId)
+    .order("sort_order", { ascending: true });
+
+  if (photosError) {
+    console.error("[downloadSubmissionPhotos] photo lookup failed", photosError);
+    return { error: "Download nicht möglich, bitte erneut versuchen" };
+  }
+
+  if (!photos || photos.length === 0) {
+    return { error: "Keine Fotos vorhanden." };
+  }
+
+  const datePart = formatSubmissionDate(submission.created_at);
+  const patientPart = toPatientSlug(submission.patient_name);
+  const zipFilename = `${datePart}_${patientPart}.zip`;
+  const zip = new JSZip();
+  const admin = createAdminClient();
+
+  let cumulativeBytes = 0;
+
+  for (const [index, photo] of photos.entries()) {
+    const { data, error } = await admin.storage
+      .from("submission-photos")
+      .download(photo.storage_path);
+
+    if (error || !data) {
+      console.error("[downloadSubmissionPhotos] storage download failed", {
+        storagePath: photo.storage_path,
+        error,
+      });
+      return { error: "Download nicht möglich, bitte erneut versuchen" };
+    }
+
+    const arrayBuffer = await data.arrayBuffer();
+    const uint8 = new Uint8Array(arrayBuffer);
+    cumulativeBytes += uint8.byteLength;
+    if (cumulativeBytes > MAX_ZIP_BYTES) {
+      return { error: "Zu groß, bitte Admin kontaktieren" };
+    }
+
+    const fileIndex = String(index + 1).padStart(2, "0");
+    const ext = fileExtensionFromPath(photo.storage_path);
+    const zipEntryName = `${datePart}_${patientPart}_${fileIndex}.${ext}`;
+    zip.file(zipEntryName, uint8);
+  }
+
+  const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
+  if (zipBuffer.byteLength > MAX_ZIP_BYTES) {
+    return { error: "Zu groß, bitte Admin kontaktieren" };
+  }
+
+  return {
+    filename: zipFilename,
+    zipBase64: toBase64(zipBuffer),
+  };
 }
