@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Loader2, AlertCircle } from "lucide-react";
 
 interface ComposerTopBarProps {
   status: "draft" | "published";
@@ -29,14 +29,19 @@ export function ComposerTopBar({
   const renderSaveStatus = () => {
     if (saveStatus === "saving") {
       return (
-        <span className="text-xs text-white/40 flex items-center gap-1.5">
+        <span className="text-xs text-slate-400 flex items-center gap-1.5">
           <Loader2 className="w-3 h-3 animate-spin" strokeWidth={2} />
           Speichern…
         </span>
       );
     }
     if (saveStatus === "error") {
-      return <span className="text-xs text-red-400">Fehler: {saveError}</span>;
+      return (
+        <span className="text-xs text-red-400 flex items-center gap-1.5">
+          <AlertCircle className="w-3 h-3" strokeWidth={2} />
+          Fehler: {saveError}
+        </span>
+      );
     }
     if (saveStatus === "saved" && lastSavedAt) {
       // Relative label; time-based read for display only.
@@ -49,7 +54,7 @@ export function ComposerTopBar({
             ? `vor ${seconds}s`
             : `vor ${Math.floor(seconds / 60)}min`;
       return (
-        <span className="text-xs text-white/40 flex items-center gap-1.5">
+        <span className="text-xs text-green-400 flex items-center gap-1.5">
           <Check className="w-3 h-3" strokeWidth={2} />
           Gespeichert {label}
         </span>
@@ -59,19 +64,25 @@ export function ComposerTopBar({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 bg-black/90 backdrop-blur border-b border-white/5">
-      <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 md:px-6">
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => router.push("/journal")}
-            className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
+            className="flex items-center gap-2 rounded-lg p-2 -m-2 text-sm text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
             Journal
           </button>
-          <span className="text-white/20">·</span>
-          <span className="text-xs uppercase tracking-wider text-white/40">
+          <span className="text-slate-600">·</span>
+          <span
+            className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium ${
+              status === "published"
+                ? "border-green-500/20 bg-green-500/10 text-green-400"
+                : "border-slate-600 bg-slate-700 text-slate-300"
+            }`}
+          >
             {status === "published" ? "Veröffentlicht" : "Entwurf"}
           </span>
           {renderSaveStatus()}
@@ -83,7 +94,7 @@ export function ComposerTopBar({
               type="button"
               onClick={onUnpublish}
               disabled={isPending}
-              className="px-4 py-2 text-xs uppercase tracking-wider text-white/60 hover:text-white transition-colors disabled:opacity-50"
+              className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600"
             >
               Zurück in Entwurf
             </button>
@@ -92,7 +103,7 @@ export function ComposerTopBar({
               type="button"
               onClick={onPublish}
               disabled={isPending || !canPublish}
-              className="px-5 py-2 bg-white text-black text-xs uppercase tracking-wider font-medium rounded hover:bg-white/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500"
               title={!canPublish ? "Titel, Inhalt und Thema erforderlich" : ""}
             >
               Veröffentlichen

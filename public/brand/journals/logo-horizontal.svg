@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="240" viewBox="0 0 920 240" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Journals logo</title>
+  <desc id="desc">A warm editorial wordmark paired with an open-book icon inside a copper-tinted badge.</desc>
+  <defs>
+    <linearGradient id="panel" x1="46" y1="52" x2="176" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F7EEE7"/>
+    </linearGradient>
+  </defs>
+  <rect x="36" y="52" width="136" height="136" rx="38" fill="url(#panel)"/>
+  <rect x="36.75" y="52.75" width="134.5" height="134.5" rx="37.25" stroke="#8C5C33" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M76 90C86 84.667 95.333 84.667 104 90V146C95.333 140.667 86 140.667 76 146V90Z" stroke="#8C5C33" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M132 90C122 84.667 112.667 84.667 104 90V146C112.667 140.667 122 140.667 132 146V90Z" stroke="#8C5C33" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M85 105H96" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M85 118H98" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M112 105H123" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M110 118H123" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M75 82C84.333 75.333 94 72 104 72C114 72 123.667 75.333 133 82" stroke="#8C5C33" stroke-opacity="0.24" stroke-width="6.5" stroke-linecap="round"/>
+  <text x="214" y="118" fill="#121212" font-family="'Iowan Old Style', 'Palatino Linotype', Georgia, serif" font-size="66" letter-spacing="-1.8">Journals</text>
+  <text x="218" y="155" fill="#8C5C33" font-family="'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="4.2">EDITORIAL PROFILE PUBLISHING</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Portrait mark</title>
+  <desc id="desc">A cameo-inspired portrait symbol inside a merlot badge.</desc>
+  <defs>
+    <linearGradient id="panel" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F6ECEF"/>
+    </linearGradient>
+  </defs>
+  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#panel)"/>
+  <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#7A495B" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M92 91C103.333 83.667 115.333 80 128 80C140.667 80 152.667 83.667 164 91" stroke="#7A495B" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="128" cy="129" rx="38" ry="50" stroke="#7A495B" stroke-opacity="0.34" stroke-width="8.5"/>
+  <circle cx="126" cy="112" r="13" fill="#7A495B" fill-opacity="0.18"/>
+  <path d="M108 155C114 141 120 134 126 134C132 134 138 141 144 155" stroke="#7A495B" stroke-width="9.5" stroke-linecap="round"/>
+  <path d="M95 173C106 180.333 116.333 184 126 184C135.667 184 146 180.333 157 173" stroke="#7A495B" stroke-width="9.5" stroke-linecap="round"/>
+</svg>

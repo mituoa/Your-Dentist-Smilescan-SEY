@@ -17,11 +17,7 @@ export default async function DashboardPage() {
   const workspace = await getCurrentWorkspace();
 
   if (!user || !workspace) {
-    return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <p className="text-text-secondary">Workspace wird geladen…</p>
-      </div>
-    );
+    redirect("/login?error=workspace_missing");
   }
 
   if (workspace.role === "team") {

@@ -1,0 +1,242 @@
+===========================================
+PRICING SECTION - OPTIMIERTER CODE
+===========================================
+
+ANLEITUNG:
+1. Öffne die Datei: /src/app/components/PricingSection.tsx
+2. Suche nach dem "return (" Teil (ca. Zeile 45)
+3. Ersetze alles ab "return (" bis zum Ende der Datei mit dem Code unten
+4. Speichern mit Cmd+S / Strg+S
+
+===========================================
+CODE BEGINNT HIER:
+===========================================
+
+  return (
+    <div className="w-full bg-white py-16 px-8 lg:px-16">
+      <div className="max-w-5xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-4">
+          <h2 className="text-[36px] font-semibold text-gray-900 mb-3 tracking-tight">
+            Einfache, transparente Preise
+          </h2>
+          <p className="text-[16px] text-gray-600 max-w-xl mx-auto">
+            Alle Pläne beinhalten den vollen Funktionsumfang. Wählen Sie einfach Ihren Abrechnungszeitraum.
+          </p>
+        </div>
+
+        {/* Risk Reversal */}
+        <div className="flex items-center justify-center gap-6 mb-12 text-[13px] text-gray-600">
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>14 Tage kostenlos testen</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Jederzeit kündbar</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>30 Tage Geld-zurück-Garantie</span>
+          </div>
+        </div>
+
+        {/* Pricing Cards - Minimal Design */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16" style={{ animation: 'fadeIn 0.6s ease-out' }}>
+
+          {/* Monthly */}
+          <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 hover:border-[#0284C7] hover:shadow-lg transition-all duration-200 flex flex-col" style={{ animation: 'fadeIn 0.5s ease-out 0.1s both' }}>
+            <div className="h-[20px]"></div>
+
+            <h3 className="text-[20px] font-semibold text-gray-900 mb-1">Monatlich</h3>
+            <p className="text-[13px] text-gray-500 mb-6">{plans.monthly.billing}</p>
+
+            <div className="mb-2">
+              <span className="text-[40px] font-semibold text-gray-900">€{plans.monthly.price}</span>
+              <span className="text-[16px] text-gray-500 ml-1">/Monat</span>
+            </div>
+            <div className="h-[20px] mb-8"></div>
+
+            <button
+              type="button"
+              onClick={() => handlePlanSelect('monthly')}
+              className="w-full h-[48px] bg-white text-gray-900 border-2 border-gray-900 rounded-xl hover:bg-gray-900 hover:text-white hover:-translate-y-0.5 transition-all duration-200 text-[15px] font-semibold active:scale-[0.98] mt-auto"
+            >
+              Jetzt starten
+            </button>
+          </div>
+
+          {/* Half-Yearly */}
+          <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 hover:border-[#0284C7] hover:shadow-lg transition-all duration-200 relative flex flex-col" style={{ animation: 'fadeIn 0.5s ease-out 0.2s both' }}>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="bg-[#F59E0B] text-white px-3 py-1 rounded-full text-[11px] font-semibold">
+                SPARE 10%
+              </span>
+            </div>
+
+            <div className="h-[20px]"></div>
+
+            <h3 className="text-[20px] font-semibold text-gray-900 mb-1">Halbjährlich</h3>
+            <p className="text-[13px] text-gray-500 mb-6">{plans.halfyearly.billing}</p>
+
+            <div className="mb-2">
+              <span className="text-[40px] font-semibold text-gray-900">€{plans.halfyearly.price}</span>
+              <span className="text-[16px] text-gray-500 ml-1">/Monat</span>
+            </div>
+            <div className="h-[20px] mb-8 flex items-center justify-start">
+              <span className="text-[12px] text-gray-500">€{plans.halfyearly.total} alle 6 Monate</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handlePlanSelect('halfyearly')}
+              className="w-full h-[48px] bg-white text-gray-900 border-2 border-gray-900 rounded-xl hover:bg-gray-900 hover:text-white hover:-translate-y-0.5 transition-all duration-200 text-[15px] font-semibold active:scale-[0.98] mt-auto"
+            >
+              Jetzt starten
+            </button>
+          </div>
+
+          {/* Yearly - Popular */}
+          <div className="bg-white rounded-2xl border-2 border-[#0284C7] p-6 shadow-lg relative flex flex-col" style={{ animation: 'fadeIn 0.5s ease-out 0.3s both' }}>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span
+                className="bg-gradient-to-r from-[#0284C7] to-[#0369A1] text-white px-3 py-1 rounded-full text-[11px] font-semibold"
+                style={{
+                  boxShadow: '0 4px 12px rgba(2, 132, 199, 0.4)',
+                  animation: 'pulse 3s ease-in-out infinite'
+                }}
+              >
+                BELIEBTESTE WAHL
+              </span>
+            </div>
+
+            <div className="h-[20px]"></div>
+
+            <h3 className="text-[20px] font-semibold text-gray-900 mb-1">Jährlich</h3>
+            <p className="text-[13px] text-gray-500 mb-6">{plans.yearly.billing}</p>
+
+            <div className="mb-2">
+              <span className="text-[40px] font-semibold text-[#0284C7]">€{plans.yearly.price}</span>
+              <span className="text-[16px] text-gray-500 ml-1">/Monat</span>
+            </div>
+            <div className="h-[20px] mb-8 flex items-center justify-start">
+              <span className="text-[12px] text-gray-500">€{plans.yearly.total} pro Jahr</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handlePlanSelect('yearly')}
+              className="w-full h-[48px] text-white rounded-xl transition-all duration-200 shadow-sm hover:shadow-lg text-[15px] font-semibold active:scale-[0.98] hover:scale-[1.02] mt-auto"
+              style={{
+                background: 'linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(to bottom, #0369A1 0%, #075985 100%)';
+                e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)';
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              }}
+            >
+              Jetzt starten
+            </button>
+          </div>
+        </div>
+
+        {/* All Features - ONCE for all plans */}
+        <div className="bg-[#FAFAFA] rounded-2xl p-6 border border-gray-200">
+          <h3 className="text-[20px] font-semibold text-gray-900 mb-6 text-center">
+            Alle Pläne beinhalten
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 max-w-3xl mx-auto">
+            {[
+              'Unbegrenzte Fallaufnahmen',
+              'DSGVO-konforme Datenspeicherung',
+              'Automatische Backups',
+              'Mobile App (iOS & Android)',
+              'Exportfunktion (PDF, CSV)',
+              'Team-Verwaltung',
+              'Kostenlose Updates',
+              'Sicheres Cloud-Hosting'
+            ].map((feature, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-[14px] text-gray-700">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Social Proof - Subtle */}
+        <div className="mt-16 text-center">
+          <p className="text-[13px] text-gray-500 mb-6">Vertrauen Sie der Nr. 1 Plattform für Zahnärzte</p>
+          <div className="flex items-center justify-center gap-12 flex-wrap">
+            <div>
+              <div className="text-[24px] font-semibold text-gray-900">2.500+</div>
+              <div className="text-[12px] text-gray-500">Zahnarztpraxen</div>
+            </div>
+            <div>
+              <div className="text-[24px] font-semibold text-gray-900">99,9%</div>
+              <div className="text-[12px] text-gray-500">Uptime</div>
+            </div>
+            <div>
+              <div className="text-[24px] font-semibold text-gray-900">4,9/5</div>
+              <div className="text-[12px] text-gray-500">★★★★★ Bewertung</div>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ - Simple */}
+        <div className="mt-20 max-w-2xl mx-auto">
+          <h3 className="text-[24px] font-semibold text-gray-900 mb-8 text-center">
+            Häufig gestellte Fragen
+          </h3>
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-[15px] font-semibold text-gray-900 mb-2">
+                Kann ich meinen Plan später ändern?
+              </h4>
+              <p className="text-[14px] text-gray-600">
+                Ja, Sie können jederzeit zu einem anderen Plan wechseln. Die Änderung wird zum nächsten Abrechnungszeitraum wirksam.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-[15px] font-semibold text-gray-900 mb-2">
+                Wie funktioniert die 14-tägige Testphase?
+              </h4>
+              <p className="text-[14px] text-gray-600">
+                Nach der Registrierung haben Sie 14 Tage vollen Zugriff auf alle Funktionen. Ihre Kreditkarte wird erst nach Ablauf der Testphase belastet.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-[15px] font-semibold text-gray-900 mb-2">
+                Welche Zahlungsmethoden akzeptieren Sie?
+              </h4>
+              <p className="text-[14px] text-gray-600">
+                Wir akzeptieren alle gängigen Kreditkarten (Visa, Mastercard, Amex), SEPA-Lastschrift und PayPal.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+===========================================
+CODE ENDET HIER
+===========================================
+
+WICHTIG: Die Datei wurde bereits automatisch aktualisiert!
+Diese Datei ist nur als BACKUP falls du manuell was ändern willst.

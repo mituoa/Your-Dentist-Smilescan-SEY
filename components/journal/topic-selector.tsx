@@ -11,7 +11,7 @@ interface TopicSelectorProps {
 export function TopicSelector({ value, onChange, required }: TopicSelectorProps) {
   return (
     <div className="space-y-2">
-      <label className="text-[10px] uppercase tracking-[0.2em] text-white/50">
+      <label className="block text-sm font-medium text-slate-900 dark:text-white">
         Thema {required && <span className="text-red-400">*</span>}
       </label>
       <div className="flex flex-wrap gap-2">
@@ -22,10 +22,10 @@ export function TopicSelector({ value, onChange, required }: TopicSelectorProps)
               key={topic.id}
               type="button"
               onClick={() => onChange(selected ? null : topic.id)}
-              className={`px-3 py-1.5 text-xs rounded-full border transition-all ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
                 selected
-                  ? "bg-white text-black border-white"
-                  : "bg-transparent border-white/20 text-white/70 hover:border-white/50 hover:text-white"
+                  ? "bg-slate-900 text-white dark:bg-slate-700"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               }`}
             >
               {topic.label}

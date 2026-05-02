@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Relay mark</title>
+  <desc id="desc">A handoff path with connected nodes inside a cobalt badge.</desc>
+  <defs>
+    <linearGradient id="panel" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E9F0FB"/>
+    </linearGradient>
+  </defs>
+  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#panel)"/>
+  <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#466BB0" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M92 91C103.333 84.333 115.333 81 128 81C140.667 81 152.667 84.333 164 91" stroke="#466BB0" stroke-opacity="0.26" stroke-width="8" stroke-linecap="round"/>
+  <path d="M104 115L120 130" stroke="#466BB0" stroke-width="10.5" stroke-linecap="round"/>
+  <path d="M136 129L149 116" stroke="#466BB0" stroke-width="10.5" stroke-linecap="round"/>
+  <path d="M137 129H149" stroke="#466BB0" stroke-width="10.5" stroke-linecap="round"/>
+  <circle cx="98" cy="110" r="10" fill="#FFFFFF" stroke="#466BB0" stroke-width="7"/>
+  <circle cx="128" cy="136" r="10" fill="#466BB0" fill-opacity="0.42"/>
+  <circle cx="158" cy="112" r="10" fill="#466BB0"/>
+  <path d="M96 175C106 183.667 116.667 188 128 188C139.333 188 150 183.667 160 175" stroke="#466BB0" stroke-opacity="0.36" stroke-width="8.5" stroke-linecap="round"/>
+</svg>

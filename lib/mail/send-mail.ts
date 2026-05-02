@@ -70,7 +70,7 @@ type SendMailResult = {
 
 export async function sendTransactionalMail(
   input: SendTransactionalMailInput
-): Promise<void> {
+): Promise<SendMailResult> {
   const context = input.mailContext ?? "transactional";
 
   if (!isSmtpConfigured()) {
@@ -108,6 +108,7 @@ export async function sendTransactionalMail(
     if (rejectedCount > 0) {
       throw new MailSendError();
     }
+    return info;
   } catch (error) {
     if (error instanceof SmtpNotConfiguredError) throw error;
     if (error instanceof MailSendError) throw error;

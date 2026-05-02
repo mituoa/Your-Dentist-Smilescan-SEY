@@ -54,7 +54,7 @@ export function TaskActions({
 
   const handleReject = () => {
     if (!rejectReason.trim()) {
-      setError("Begründung ist erforderlich.");
+      setError("Bitte geben Sie eine Begründung ein.");
       return;
     }
     setError(null);
@@ -70,30 +70,30 @@ export function TaskActions({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 sm:space-y-4">
       {canSubmit && (
         <button
           type="button"
           onClick={handleSubmit}
           disabled={isPending}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-cream rounded text-sm hover:bg-ink/90 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm text-cream transition-colors hover:bg-ink/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <Check className="w-4 h-4" />
           )}
-          Erledigt melden
+          Als erledigt einreichen
         </button>
       )}
 
       {canReview && !showReject && (
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
             onClick={handleApprove}
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand text-white rounded text-sm hover:bg-brand/90 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-brand px-5 py-2.5 text-sm text-white transition-colors hover:bg-brand/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50"
           >
             {isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -106,7 +106,7 @@ export function TaskActions({
             type="button"
             onClick={() => setShowReject(true)}
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-border text-text-secondary rounded text-sm hover:text-danger hover:border-danger disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-border px-5 py-2.5 text-sm text-text-secondary transition-colors hover:border-danger hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50"
           >
             <X className="w-4 h-4" />
             Zurückweisen
@@ -115,24 +115,26 @@ export function TaskActions({
       )}
 
       {canReview && showReject && (
-        <div className="p-4 bg-surface-sunken border border-border rounded space-y-3">
-          <div className="text-sm font-medium">Aufgabe zurückweisen</div>
+        <div className="space-y-3 rounded-lg border border-border bg-surface-sunken p-4">
+          <div className="text-sm font-semibold leading-6 text-text-primary">
+            Aufgabe zurückweisen
+          </div>
           <textarea
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Begründung: warum ist die Aufgabe nicht erledigt?"
+            placeholder="Begründung: Warum ist die Aufgabe noch nicht erledigt?"
             rows={3}
             maxLength={500}
-            className="w-full px-3 py-2 bg-paper border border-border rounded text-sm resize-none focus:outline-none focus:ring-2 focus:ring-danger/30"
+            className="w-full rounded-md border border-border bg-paper px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-danger/30"
           />
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
               onClick={handleReject}
               disabled={isPending || !rejectReason.trim()}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-danger text-white rounded text-sm hover:bg-danger/90 disabled:opacity-50"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-danger px-4 py-2 text-sm text-white transition-colors hover:bg-danger/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50"
             >
-              Zurückweisen bestätigen
+              Zurückweisung senden
             </button>
             <button
               type="button"
@@ -140,7 +142,7 @@ export function TaskActions({
                 setShowReject(false);
                 setRejectReason("");
               }}
-              className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary"
+              className="min-h-10 rounded-md px-4 py-2 text-sm text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
             >
               Abbrechen
             </button>
@@ -148,7 +150,7 @@ export function TaskActions({
         </div>
       )}
 
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <p className="text-sm leading-5 text-danger">{error}</p>}
     </div>
   );
 }

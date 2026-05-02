@@ -20,27 +20,41 @@ export function SubmissionMeta({
   });
 
   return (
-    <div className="space-y-2 text-sm">
+    <div className="space-y-3 text-sm">
       <div>
-        <div className="text-xs text-text-tertiary">Eingereicht</div>
-        <div className="text-text-primary">{formattedDate}</div>
+        <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+          Eingereicht
+        </div>
+        <div className="text-sm font-medium leading-6 text-text-primary">
+          {formattedDate}
+        </div>
       </div>
       {patientName && (
         <div>
-          <div className="text-xs text-text-tertiary">Name</div>
-          <div className="text-text-primary">{patientName}</div>
+          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+            Name
+          </div>
+          <div className="text-sm font-medium leading-6 text-text-primary">
+            {patientName}
+          </div>
         </div>
       )}
       {patientEmail && (
         <div>
-          <div className="text-xs text-text-tertiary">E-Mail</div>
-          <div className="text-text-primary break-all">{patientEmail}</div>
+          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+            E-Mail
+          </div>
+          <div className="break-all text-sm leading-6 text-text-primary">
+            {patientEmail}
+          </div>
         </div>
       )}
       {patientPhone && (
         <div>
-          <div className="text-xs text-text-tertiary">Telefon</div>
-          <div className="text-text-primary">{patientPhone}</div>
+          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+            Telefon
+          </div>
+          <div className="text-sm leading-6 text-text-primary">{patientPhone}</div>
         </div>
       )}
     </div>

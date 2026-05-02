@@ -7,7 +7,7 @@ interface TaskStatusBadgeProps {
 
 export function TaskStatusBadge({ status, size = "sm" }: TaskStatusBadgeProps) {
   const cls =
-    size === "sm" ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1";
+    size === "sm" ? "text-[11px] px-1.5 py-0.5" : "text-sm px-2 py-1";
   const iconCls = size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5";
 
   if (status === "pending_review") {

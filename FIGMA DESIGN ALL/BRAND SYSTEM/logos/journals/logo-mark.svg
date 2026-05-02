@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Journals mark</title>
+  <desc id="desc">An open-book icon inside a warm editorial badge.</desc>
+  <defs>
+    <linearGradient id="panel" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F7EEE7"/>
+    </linearGradient>
+  </defs>
+  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#panel)"/>
+  <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#8C5C33" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M92 101C104 94.333 116 94.333 128 101V170C116 162.667 104 162.667 92 170V101Z" stroke="#8C5C33" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M164 101C152 94.333 140 94.333 128 101V170C140 162.667 152 162.667 164 170V101Z" stroke="#8C5C33" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M104 119H118" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round"/>
+  <path d="M104 134H120" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round"/>
+  <path d="M138 119H152" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round"/>
+  <path d="M136 134H152" stroke="#8C5C33" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round"/>
+  <path d="M92 91C103.333 83.667 115.333 80 128 80C140.667 80 152.667 83.667 164 91" stroke="#8C5C33" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round"/>
+</svg>

@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
+
+import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
+
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -27,15 +31,20 @@ export const metadata: Metadata = {
     "SmileScan ist die diskrete Brücke zwischen Beobachtung und klinischer Versorgung.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE_NAME)?.value);
+  const themeClass = theme === "dark" ? "dark" : "";
+
   return (
     <html
       lang="de"
-      className={`${dmSans.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+      className={`${dmSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} ${themeClass}`.trim()}
     >
       <body>{children}</body>
     </html>

@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // This repo contains design/reference code that should not block linting.
+    "FIGMA DESIGN ALL/**",
+    ".agents/**",
+    "**/*.canvas.tsx",
   ]),
 ]);
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ExternalLink, Edit3 } from "lucide-react";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
@@ -7,11 +8,11 @@ export default async function ProfilePage() {
   const workspace = await getCurrentWorkspace();
 
   if (!workspace) {
-    return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <p className="text-text-secondary">Workspace wird geladen…</p>
-      </div>
-    );
+    redirect("/login?error=workspace_missing");
+  }
+
+  if (workspace.role !== "doctor") {
+    redirect("/my-tasks");
   }
 
   const supabase = await createClient();

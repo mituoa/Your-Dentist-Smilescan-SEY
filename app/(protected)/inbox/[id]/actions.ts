@@ -9,6 +9,8 @@ import { buildAppointmentLinkPractitionerNoticeEmail } from "@/lib/mail/appointm
 import { isSmtpConfigured } from "@/lib/env";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { submitTaskForReview } from "@/app/(protected)/my-tasks/actions";
+import { upsertTaskReceipts } from "@/lib/tasks/receipts";
+import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
 import JSZip from "jszip";
 
 const MAX_ZIP_BYTES = 50 * 1024 * 1024;
@@ -91,13 +93,24 @@ export async function markSubmissionSeen(submissionId: string) {
 
 export async function createTask(formData: FormData) {
   const submissionId = formData.get("submission_id") as string;
+  const title = ((formData.get("title") as string) || "").trim();
   const content = formData.get("content") as string;
-  const recipientType = formData.get("recipient_type") as
-    | "doctor_only"
-    | "all_team";
+  const priority = formData.get("is_important") === "true" ? "important" : "normal";
+  const assignAllTeam = formData.get("assign_all_team") === "true";
+  const assignToMe = formData.get("assign_to_me") === "true";
+  const specificRecipientId =
+    (formData.get("specific_recipient_id") as string | null) || null;
+  const specificRecipientIds = Array.from(
+    new Set(
+      formData
+        .getAll("specific_recipient_ids[]")
+        .map((value) => String(value).trim())
+        .filter(Boolean)
+    )
+  );
 
   if (!submissionId || !content?.trim()) {
-    return { error: "Bitte Aufgabentext eingeben." };
+    return { error: "Bitte geben Sie eine Aufgabe ein." };
   }
 
   const supabase = await createClient();
@@ -108,17 +121,61 @@ export async function createTask(formData: FormData) {
   if (!user) return { error: "Nicht angemeldet" };
 
   const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Kein Workspace" };
+  if (!workspace) return { error: "Workspace nicht gefunden." };
+  const sortOrder = Date.now();
+  if (assignAllTeam && specificRecipientIds.length > 0) {
+    return { error: "Bitte wählen Sie entweder alle Mitarbeitenden oder konkrete Personen." };
+  }
+
+  const recipientType = assignAllTeam ? "all_team" : "specific_person";
+
+  if (
+    !assignAllTeam &&
+    specificRecipientIds.length === 0 &&
+    (!specificRecipientId || specificRecipientId.trim().length === 0)
+  ) {
+    return { error: "Bitte wählen Sie einen Mitarbeitenden aus." };
+  }
+
+  const normalizedSpecificRecipientIds =
+    !assignAllTeam
+      ? specificRecipientIds.length > 0
+        ? specificRecipientIds
+        : specificRecipientId
+          ? [specificRecipientId]
+          : []
+      : [];
+  const finalSpecificRecipientIds = assignToMe
+    ? Array.from(new Set([...normalizedSpecificRecipientIds, user.id]))
+    : normalizedSpecificRecipientIds;
+
+  if (recipientType === "specific_person" && finalSpecificRecipientIds.length > 0) {
+    const { data: members, error: memberError } = await supabase
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspace.workspace_id)
+      .in("user_id", finalSpecificRecipientIds);
+    if (memberError || !members || members.length !== finalSpecificRecipientIds.length) {
+      return { error: "Ausgewählter Mitarbeitender ist im Workspace nicht verfügbar." };
+    }
+  }
 
   const { data: inserted, error } = await supabase
     .from("tasks")
     .insert({
       workspace_id: workspace.workspace_id,
       submission_id: submissionId,
+      title: title.length > 0 ? title : null,
       content: content.trim(),
+      priority,
       recipient_type: recipientType,
+      specific_recipient_id:
+        !assignAllTeam
+          ? finalSpecificRecipientIds[0] || specificRecipientId || null
+          : null,
       created_by: user.id,
       status: "open",
+      sort_order: sortOrder,
     })
     .select("id")
     .single();
@@ -130,15 +187,30 @@ export async function createTask(formData: FormData) {
 
   const newTaskId = inserted?.id as string;
 
+  if (!assignAllTeam && finalSpecificRecipientIds.length > 0) {
+    const assigneeRows = finalSpecificRecipientIds.map((id) => ({
+      task_id: newTaskId,
+      user_id: id,
+    }));
+    const { error: assigneeError } = await supabase
+      .from("task_assignees")
+      .insert(assigneeRows);
+    if (assigneeError) {
+      console.error("[createTask assignees]", assigneeError);
+      await supabase.from("tasks").delete().eq("id", newTaskId);
+      return { error: "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen." };
+    }
+  }
+
   try {
     const { buildTaskAssigned } = await import("@/lib/mail/task-notifications");
     const { createAdminClient } = await import("@/lib/supabase/admin");
     const { getAppBaseUrl } = await import("@/lib/env");
 
     const admin = createAdminClient();
-    const recipientEmails: string[] = [];
+    const recipients: Array<{ userId: string; email: string }> = [];
 
-    if (recipientType === "all_team") {
+    if (assignAllTeam) {
       const { data: members } = await admin
         .from("workspace_members")
         .select("user_id")
@@ -146,35 +218,51 @@ export async function createTask(formData: FormData) {
         .neq("user_id", user.id);
       for (const m of members || []) {
         const { data } = await admin.auth.admin.getUserById(m.user_id);
-        if (data?.user?.email) recipientEmails.push(data.user.email);
+        if (data?.user?.email) recipients.push({ userId: m.user_id, email: data.user.email });
       }
-    } else if (recipientType === "doctor_only") {
-      const { data: doctors } = await admin
-        .from("workspace_members")
-        .select("user_id")
-        .eq("workspace_id", workspace.workspace_id)
-        .eq("role", "doctor")
-        .neq("user_id", user.id);
-      for (const m of doctors || []) {
-        const { data } = await admin.auth.admin.getUserById(m.user_id);
-        if (data?.user?.email) recipientEmails.push(data.user.email);
+    } else if (finalSpecificRecipientIds.length > 0) {
+      for (const recipientId of finalSpecificRecipientIds) {
+        const { data } = await admin.auth.admin.getUserById(recipientId);
+        if (data?.user?.email && data.user.id !== user.id) {
+          recipients.push({ userId: recipientId, email: data.user.email });
+        }
       }
     }
 
-    if (recipientEmails.length > 0) {
+    const dedupedRecipients = Array.from(
+      new Map(recipients.map((recipient) => [recipient.userId, recipient])).values()
+    );
+    const receiptRows: Array<{ userId: string; email?: string | null; messageId?: string | null }> = [];
+    if (dedupedRecipients.length > 0) {
       const taskUrl = `${getAppBaseUrl()}/my-tasks/${newTaskId}`;
       const mail = buildTaskAssigned({
-        taskTitle: content.trim(),
+        taskTitle: resolveTaskDisplayTitle(title, content.trim()),
         taskUrl,
         actorName: user.email || "Arzt",
-        recipientEmail: recipientEmails[0] || "",
+        recipientEmail: dedupedRecipients[0]?.email || "",
       });
-      for (const to of recipientEmails) {
-        await sendTransactionalMailBestEffort(
-          { to, subject: mail.subject, text: mail.text, html: mail.html },
+      for (const recipient of dedupedRecipients) {
+        const result = await sendTransactionalMailBestEffort(
+          { to: recipient.email, subject: mail.subject, text: mail.text, html: mail.html },
           "task_assigned"
         );
+        receiptRows.push({
+          userId: recipient.userId,
+          email: recipient.email,
+          messageId: result.messageId ?? null,
+        });
       }
+    }
+    if (!assignAllTeam) {
+      const knownRecipientIds = new Set(receiptRows.map((row) => row.userId));
+      for (const recipientId of finalSpecificRecipientIds) {
+        if (!knownRecipientIds.has(recipientId)) {
+          receiptRows.push({ userId: recipientId, email: null, messageId: null });
+        }
+      }
+    }
+    if (receiptRows.length > 0) {
+      await upsertTaskReceipts(newTaskId, receiptRows);
     }
   } catch (err) {
     console.error("[createTask mail]", err);
@@ -201,16 +289,16 @@ export async function submitInboxTaskForReview(
 export async function sendAppointmentLink(submissionId: string) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
-    return { error: "Kein Workspace" };
+    return { error: "Workspace nicht gefunden." };
   }
   if (workspace.role !== "doctor") {
-    return { error: "Nur Ärzte können Terminlinks versenden." };
+    return { error: "Nur Ärzte dürfen Terminlinks versenden." };
   }
 
   if (!isSmtpConfigured()) {
     return {
       error:
-        "E-Mail-Versand ist nicht konfiguriert. Bitte SMTP-Zugangsdaten in .env.local eintragen.",
+        "E-Mail-Versand ist derzeit nicht eingerichtet. Bitte kontaktieren Sie den Admin.",
       code: "SMTP_NOT_CONFIGURED",
     };
   }
@@ -229,7 +317,7 @@ export async function sendAppointmentLink(submissionId: string) {
     .single();
 
   if (!submission || !submission.patient_email) {
-    return { error: "Patient hat keine E-Mail-Adresse." };
+    return { error: "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt." };
   }
 
   const { data: profile } = await supabase
@@ -240,8 +328,7 @@ export async function sendAppointmentLink(submissionId: string) {
 
   if (!profile?.appointment_link) {
     return {
-      error:
-        "Kein Terminlink hinterlegt. Bitte in Supabase appointment_link setzen (siehe Anleitung).",
+      error: "Kein Terminlink hinterlegt. Bitte in den Einstellungen ergänzen.",
     };
   }
 
@@ -273,7 +360,7 @@ export async function sendAppointmentLink(submissionId: string) {
 
   if (!result.sent) {
     return {
-      error: "E-Mail konnte nicht versendet werden. Details im Server-Log.",
+      error: "Terminlink konnte nicht gesendet werden. Bitte erneut versuchen.",
     };
   }
 
@@ -293,7 +380,7 @@ export async function sendAppointmentLink(submissionId: string) {
   }
 
   revalidatePath(`/inbox/${submissionId}`);
-  return { success: true, message: "Terminlink-E-Mail versendet." };
+  return { success: true, message: "Terminlink wurde per E-Mail versendet." };
 }
 
 export async function downloadSubmissionPhotos(
@@ -301,7 +388,7 @@ export async function downloadSubmissionPhotos(
 ): Promise<{ error?: string; zipBase64?: string; filename?: string }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
-    return { error: "Kein Workspace" };
+    return { error: "Workspace nicht gefunden." };
   }
   if (!["doctor", "team"].includes(workspace.role)) {
     return { error: "Keine Berechtigung für den Download." };
@@ -324,7 +411,7 @@ export async function downloadSubmissionPhotos(
 
   if (submissionError || !submission) {
     console.error("[downloadSubmissionPhotos] submission lookup failed", submissionError);
-    return { error: "Submission nicht gefunden." };
+    return { error: "Fall nicht gefunden." };
   }
 
   const { data: photos, error: photosError } = await supabase
@@ -335,7 +422,7 @@ export async function downloadSubmissionPhotos(
 
   if (photosError) {
     console.error("[downloadSubmissionPhotos] photo lookup failed", photosError);
-    return { error: "Download nicht möglich, bitte erneut versuchen" };
+    return { error: "Download nicht möglich. Bitte erneut versuchen." };
   }
 
   if (!photos || photos.length === 0) {
@@ -360,14 +447,14 @@ export async function downloadSubmissionPhotos(
         storagePath: photo.storage_path,
         error,
       });
-      return { error: "Download nicht möglich, bitte erneut versuchen" };
+      return { error: "Download nicht möglich. Bitte erneut versuchen." };
     }
 
     const arrayBuffer = await data.arrayBuffer();
     const uint8 = new Uint8Array(arrayBuffer);
     cumulativeBytes += uint8.byteLength;
     if (cumulativeBytes > MAX_ZIP_BYTES) {
-      return { error: "Zu groß, bitte Admin kontaktieren" };
+      return { error: "Download zu groß. Bitte Admin kontaktieren." };
     }
 
     const fileIndex = String(index + 1).padStart(2, "0");
@@ -378,7 +465,7 @@ export async function downloadSubmissionPhotos(
 
   const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
   if (zipBuffer.byteLength > MAX_ZIP_BYTES) {
-    return { error: "Zu groß, bitte Admin kontaktieren" };
+    return { error: "Download zu groß. Bitte Admin kontaktieren." };
   }
 
   return {

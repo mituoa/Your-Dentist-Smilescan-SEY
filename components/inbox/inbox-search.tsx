@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { Search } from "lucide-react";
 
+import { pilotGlassPanel } from "@/lib/pilot-surface";
+
 export function InboxSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,9 +35,9 @@ export function InboxSearch() {
   };
 
   return (
-    <div className="relative mb-6">
+    <div className={`relative mb-6 p-1.5 ${pilotGlassPanel}`}>
       <Search
-        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary"
+        className="absolute left-4 top-1/2 z-10 -translate-y-1/2 w-4 h-4 text-text-tertiary"
         strokeWidth={1.75}
       />
       <input
@@ -43,7 +45,7 @@ export function InboxSearch() {
         value={value}
         onChange={handleChange}
         placeholder="Suchen…"
-        className="w-full h-10 pl-10 pr-4 text-sm bg-surface-card border border-border rounded focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
+        className="h-10 w-full rounded-lg border border-transparent bg-surface-page/70 py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-tertiary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/40 dark:bg-surface-sunken/40"
       />
     </div>
   );

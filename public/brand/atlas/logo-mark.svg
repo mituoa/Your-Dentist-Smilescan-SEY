@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Atlas mark</title>
+  <desc id="desc">An atlas-style globe symbol inside a verdigris badge.</desc>
+  <defs>
+    <linearGradient id="panel" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF3F1"/>
+    </linearGradient>
+  </defs>
+  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#panel)"/>
+  <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#3F5F5A" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M92 91C103.333 83.667 115.333 80 128 80C140.667 80 152.667 83.667 164 91" stroke="#3F5F5A" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="128" cy="131" r="40" stroke="#3F5F5A" stroke-width="8.5"/>
+  <path d="M128 91V171" stroke="#3F5F5A" stroke-opacity="0.48" stroke-width="8.5" stroke-linecap="round"/>
+  <path d="M97 131H159" stroke="#3F5F5A" stroke-opacity="0.48" stroke-width="8.5" stroke-linecap="round"/>
+  <path d="M103 110C111 116 119.333 119 128 119C136.667 119 145 116 153 110" stroke="#3F5F5A" stroke-opacity="0.48" stroke-width="7" stroke-linecap="round"/>
+  <path d="M103 151C111 144.333 119.333 141 128 141C136.667 141 145 144.333 153 151" stroke="#3F5F5A" stroke-opacity="0.48" stroke-width="7" stroke-linecap="round"/>
+  <path d="M96 179C106 184.667 116.667 188 128 188C139.333 188 150 184.667 160 179" stroke="#3F5F5A" stroke-width="9.5" stroke-linecap="round"/>
+</svg>

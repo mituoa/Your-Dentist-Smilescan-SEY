@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">SmileScan mark</title>
+  <desc id="desc">Three scan bars above a smile arc inside a soft teal badge.</desc>
+  <defs>
+    <linearGradient id="panel" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E2F8F2"/>
+    </linearGradient>
+  </defs>
+  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#panel)"/>
+  <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#127A67" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M91 88C102.333 80.667 114.667 77 128 77C141.333 77 153.667 80.667 165 88" stroke="#127A67" stroke-opacity="0.34" stroke-width="9" stroke-linecap="round"/>
+  <path d="M102 99V138" stroke="#127A67" stroke-width="11" stroke-linecap="round"/>
+  <path d="M128 88V145" stroke="#127A67" stroke-width="11" stroke-linecap="round"/>
+  <path d="M154 99V138" stroke="#127A67" stroke-width="11" stroke-linecap="round"/>
+  <path d="M92 149C104 145 116 143 128 143C140 143 152 145 164 149" stroke="#127A67" stroke-opacity="0.34" stroke-width="8" stroke-linecap="round"/>
+  <path d="M95 168C106 174.667 117 178 128 178C139 178 150 174.667 161 168" stroke="#127A67" stroke-width="10" stroke-linecap="round"/>
+</svg>

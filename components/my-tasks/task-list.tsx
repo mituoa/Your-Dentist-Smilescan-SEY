@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import Link from "next/link";
 
+import { pilotGlassPanel } from "@/lib/pilot-surface";
 import { groupTasksByUrgency } from "@/lib/task-grouping";
 import type { MyTask } from "@/lib/queries/my-tasks";
 
@@ -14,22 +15,27 @@ interface TaskListProps {
 export function TaskList({ tasks, status }: TaskListProps) {
   if (tasks.length === 0) {
     const messages = {
-      open: { title: "Keine offenen Aufgaben", text: "Alles erledigt für jetzt." },
+      open: {
+        title: "Keine offenen Aufgaben",
+        text: "Aktuell gibt es keine offenen Aufgaben.",
+      },
       pending: {
-        title: "Keine zu bestätigenden Aufgaben",
-        text: "Keine Aufgaben warten auf Bestätigung.",
+        title: "Keine Aufgaben zur Bestätigung",
+        text: "Aktuell wartet keine Aufgabe auf ärztliche Bestätigung.",
       },
       done: {
         title: "Keine erledigten Aufgaben",
-        text: "In den letzten 90 Tagen wurde noch nichts abgeschlossen.",
+        text: "In den letzten 90 Tagen wurde noch keine Aufgabe abgeschlossen.",
       },
     };
     const m = messages[status];
     return (
-      <div className="border border-border rounded-lg p-12 text-center bg-surface-card">
+      <div className={`p-8 text-center sm:p-12 ${pilotGlassPanel}`}>
         <Check className="w-10 h-10 text-brand mx-auto mb-4" strokeWidth={1.5} />
-        <h2 className="font-serif text-2xl font-light mb-2">{m.title}</h2>
-        <p className="text-text-secondary text-sm">{m.text}</p>
+        <h2 className="mb-2 font-serif text-2xl font-light tracking-tight text-text-primary">
+          {m.title}
+        </h2>
+        <p className="text-sm leading-6 text-text-secondary">{m.text}</p>
       </div>
     );
   }
@@ -37,11 +43,11 @@ export function TaskList({ tasks, status }: TaskListProps) {
   if (status === "open") {
     const groups = groupTasksByUrgency(tasks);
     return (
-      <div className="space-y-10">
+      <div className="space-y-7 sm:space-y-9">
         {groups.map((group) => (
-          <section key={group.urgency}>
+          <section key={group.urgency} className="space-y-2.5">
             <h2
-              className={`text-[10px] font-mono uppercase tracking-[0.2em] mb-3 ${
+              className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${
                 group.urgency === "overdue"
                   ? "text-danger"
                   : "text-text-tertiary"
@@ -49,7 +55,7 @@ export function TaskList({ tasks, status }: TaskListProps) {
             >
               {group.label} · {group.tasks.length}
             </h2>
-            <div className="border-t border-border">
+            <div className={`overflow-hidden ${pilotGlassPanel}`}>
               {group.tasks.map((task) => (
                 <TaskRow key={task.id} task={task} urgency={group.urgency} />
               ))}
@@ -61,7 +67,7 @@ export function TaskList({ tasks, status }: TaskListProps) {
   }
 
   return (
-    <div className="border-t border-border">
+    <div className={`overflow-hidden ${pilotGlassPanel}`}>
       {tasks.map((task) => (
         <TaskRow key={task.id} task={task} />
       ))}
@@ -79,20 +85,36 @@ function TaskRow({
   return (
     <Link
       href={`/my-tasks/${task.id}`}
-      className={`flex items-center justify-between gap-4 py-4 border-b border-border hover:bg-surface-card transition-colors -mx-2 px-2 rounded ${
+      className={`grid grid-cols-1 gap-2 border-b border-border px-3 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand/40 last:border-b-0 hover:bg-surface-sunken/40 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:px-4 sm:py-3.5 ${
         urgency === "overdue" ? "bg-danger/5" : ""
       }`}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-3 mb-1">
-          <h3 className="font-medium text-sm truncate">{task.title}</h3>
+        <div className="mb-1 flex items-center gap-2.5">
+          <h3 className="truncate break-words text-sm font-semibold leading-6 text-text-primary sm:text-[0.98rem]">
+            {task.title}
+          </h3>
+          {task.priority === "important" && (
+            <span className="rounded bg-danger/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-danger">
+              Wichtig
+            </span>
+          )}
           {task.status !== "open" && <TaskStatusBadge status={task.status} />}
         </div>
-        <div className="text-xs text-text-tertiary">
-          Patient: {task.submission_patient_name || "—"}
+        <div className="break-words text-sm leading-5 text-text-secondary">
+          {task.submission_id
+            ? `Patient: ${task.submission_patient_name || "Unbekannt"}`
+            : "Interne Aufgabe"}
           {task.due_date &&
             ` · Fällig ${new Date(task.due_date).toLocaleDateString("de-DE")}`}
         </div>
+      </div>
+      <div className="text-xs font-medium tabular-nums text-text-tertiary sm:text-right">
+        {new Date(task.created_at).toLocaleDateString("de-DE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })}
       </div>
     </Link>
   );

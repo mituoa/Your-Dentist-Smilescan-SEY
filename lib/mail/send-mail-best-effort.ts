@@ -6,13 +6,13 @@ import type { SendTransactionalMailInput } from "@/lib/mail/send-mail";
 export async function sendTransactionalMailBestEffort(
   input: SendTransactionalMailInput,
   logContext: string
-): Promise<{ sent: boolean; reason?: string }> {
+): Promise<{ sent: boolean; reason?: string; messageId?: string }> {
   try {
-    await sendTransactionalMail({
+    const info = await sendTransactionalMail({
       ...input,
       mailContext: input.mailContext ?? logContext,
     });
-    return { sent: true };
+    return { sent: true, messageId: info.messageId };
   } catch (error) {
     console.error(`[mail] ${logContext}: Versand fehlgeschlagen`);
     return {

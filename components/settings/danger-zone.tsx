@@ -21,7 +21,7 @@ export function DangerZone() {
 
   return (
     <section className="space-y-6 pb-24">
-      <SectionHeader number="VI" title="Abmelden" />
+      <SectionHeader number="VII" title="Abmelden" />
       <button
         type="button"
         onClick={handleLogout}

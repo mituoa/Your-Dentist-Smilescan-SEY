@@ -360,7 +360,13 @@ export type AcceptInvitationOptions = {
 };
 
 export type AcceptInvitationResult =
-  | { ok: true; success: true; alreadyMember?: boolean }
+  | {
+      ok: true;
+      success: true;
+      alreadyMember?: boolean;
+      workspaceId: string;
+      role: "doctor" | "team";
+    }
   | { ok: false; error: string; code?: string };
 
 export async function acceptInvitation(
@@ -454,7 +460,13 @@ export async function acceptInvitation(
       .from("team_invitations")
       .update({ status: "accepted", accepted_at: new Date().toISOString() })
       .eq("id", invite.id);
-    return { ok: true, success: true, alreadyMember: true };
+    return {
+      ok: true,
+      success: true,
+      alreadyMember: true,
+      workspaceId: invite.workspace_id,
+      role: invite.role,
+    };
   }
 
   const { data: otherMembers } = await admin
@@ -488,5 +500,10 @@ export async function acceptInvitation(
     .update({ status: "accepted", accepted_at: new Date().toISOString() })
     .eq("id", invite.id);
 
-  return { ok: true, success: true };
+  return {
+    ok: true,
+    success: true,
+    workspaceId: invite.workspace_id,
+    role: invite.role,
+  };
 }

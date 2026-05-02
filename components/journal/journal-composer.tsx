@@ -142,7 +142,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-serif">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
       <ComposerTopBar
         status={article.status}
         saveStatus={saveStatus}
@@ -154,10 +154,12 @@ export function JournalComposer({ article }: JournalComposerProps) {
         onUnpublish={handleUnpublish}
       />
 
-      <div className="max-w-3xl mx-auto px-6 pt-32 pb-40">
-        <div className="space-y-8 mb-12">
+      <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-12">
+        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+          <div className="space-y-8">
           <TopicSelector value={topic} onChange={setTopic} required />
           <CoverPhotoUpload coverUrl={coverUrl} onChange={setCoverUrl} />
+          </div>
         </div>
 
         <div className="mb-6">
@@ -167,9 +169,9 @@ export function JournalComposer({ article }: JournalComposerProps) {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Titel"
             maxLength={JOURNAL_LIMITS.title}
-            className="w-full bg-transparent font-serif text-5xl md:text-6xl font-light leading-tight tracking-tight outline-none placeholder:text-white/20 border-none p-0"
+            className="w-full border-none bg-transparent p-0 font-serif text-4xl font-light leading-tight tracking-tight text-slate-900 outline-none placeholder:text-slate-300 md:text-5xl dark:text-white dark:placeholder:text-slate-700"
           />
-          <div className="text-[10px] text-white/30 uppercase tracking-wider mt-2">
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
             {title.length}/{JOURNAL_LIMITS.title}
           </div>
         </div>
@@ -181,14 +183,14 @@ export function JournalComposer({ article }: JournalComposerProps) {
             placeholder="Kurzbeschreibung (erscheint in Artikel-Vorschauen)"
             maxLength={JOURNAL_LIMITS.excerpt}
             rows={2}
-            className="w-full bg-transparent font-serif text-xl italic text-white/70 leading-relaxed outline-none placeholder:text-white/20 border-none p-0 resize-none"
+            className="w-full resize-none border-none bg-transparent p-0 text-base leading-relaxed text-slate-600 outline-none placeholder:text-slate-300 dark:text-slate-400 dark:placeholder:text-slate-700"
           />
-          <div className="text-[10px] text-white/30 uppercase tracking-wider mt-2">
+          <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
             {excerpt.length}/{JOURNAL_LIMITS.excerpt}
           </div>
         </div>
 
-        <hr className="border-white/10 mb-12" />
+        <hr className="mb-8 border-slate-200 dark:border-slate-800" />
 
         <div className="composer-content">
           <EditorContent editor={editor} />
@@ -197,14 +199,21 @@ export function JournalComposer({ article }: JournalComposerProps) {
 
       <style jsx global>{`
         .composer-content .ProseMirror {
-          color: #f5f2ec;
+          color: rgb(15 23 42);
+          min-height: 400px;
+        }
+        .dark .composer-content .ProseMirror {
+          color: rgb(241 245 249);
         }
         .composer-content .ProseMirror p.is-editor-empty:first-child::before {
-          color: rgba(255, 255, 255, 0.2);
+          color: rgb(148 163 184);
           content: attr(data-placeholder);
           float: left;
           height: 0;
           pointer-events: none;
+        }
+        .dark .composer-content .ProseMirror p.is-editor-empty:first-child::before {
+          color: rgb(71 85 105);
         }
         .composer-content .ProseMirror h2 {
           font-family: Fraunces, serif;
@@ -227,18 +236,29 @@ export function JournalComposer({ article }: JournalComposerProps) {
           margin-bottom: 1.5rem;
         }
         .composer-content .ProseMirror blockquote {
-          border-left: 2px solid rgba(255, 255, 255, 0.3);
+          border-left: 2px solid rgb(203 213 225);
           padding-left: 1.5rem;
           font-style: italic;
-          color: rgba(255, 255, 255, 0.8);
+          color: rgb(71 85 105);
           margin: 2rem 0;
         }
+        .dark .composer-content .ProseMirror blockquote {
+          border-left: 2px solid rgba(255, 255, 255, 0.3);
+          color: rgba(255, 255, 255, 0.8);
+        }
         .composer-content .ProseMirror a {
-          color: #f5f2ec;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+          color: rgb(15 23 42);
+          border-bottom: 1px solid rgb(148 163 184);
           text-decoration: none;
         }
+        .dark .composer-content .ProseMirror a {
+          color: #f5f2ec;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
         .composer-content .ProseMirror a:hover {
+          border-bottom-color: rgb(15 23 42);
+        }
+        .dark .composer-content .ProseMirror a:hover {
           border-bottom-color: #f5f2ec;
         }
         .composer-content .ProseMirror ul,

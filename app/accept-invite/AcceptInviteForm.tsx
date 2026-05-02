@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
+import { AlertCircle, ArrowRight, CheckCircle2, LogOut } from "lucide-react";
 import { acceptInvitation } from "@/app/(protected)/settings/actions";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
+import smileScanLogo from "@/FIGMA DESIGN ALL/SMILESCAN LOGO/SmileScan.svg";
 
 export type AcceptInviteScenario = "invalid" | "A" | "B" | "C" | "D" | "E" | "F";
 
@@ -18,6 +21,16 @@ export type AcceptInviteFormProps = {
   otherWorkspaceName?: string;
   invalidReason?: string;
 };
+
+const primaryCtaClass =
+  "inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-slate-700 px-4 py-3 text-[15px] font-medium text-white shadow-[0px_8px_22px_rgba(51,65,85,0.25)] transition-all duration-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700/30 focus-visible:ring-offset-2";
+
+const glassCardClass =
+  "relative flex flex-col gap-6 rounded-[18px] border border-white/30 bg-white/80 p-8 backdrop-blur-xl";
+
+const glassCardShadow = {
+  boxShadow: "0px 24px 64px rgba(15, 23, 42, 0.12)",
+} as const;
 
 export function AcceptInviteForm({
   token,
@@ -44,131 +57,229 @@ export function AcceptInviteForm({
         setActionError(result.error);
         return;
       }
-      router.push("/dashboard");
+      router.push(result.role === "doctor" ? "/dashboard" : "/my-tasks");
       router.refresh();
     });
   }
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-6">
-      <div className="max-w-md w-full bg-surface-card border border-border rounded-lg p-8 text-center space-y-4">
-        {scenario === "invalid" && (
-          <>
-            <h1 className="font-serif text-3xl font-light">Einladung ungültig</h1>
-            <p className="text-danger text-sm">
-              {invalidReason ?? "Diese Einladung ist nicht mehr gültig."}
-            </p>
-            <Link
-              href="/login"
-              className="inline-block text-sm text-brand hover:underline"
-            >
-              Zum Login
-            </Link>
-          </>
-        )}
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50 px-4 py-8 pt-24 md:pt-8">
+      <div
+        className="pointer-events-none absolute left-0 top-0 h-[600px] w-[600px] rounded-full opacity-30"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(148, 163, 184, 0.7) 0%, rgba(59, 130, 246, 0.55) 100%)",
+          filter: "blur(150px)",
+          transform: "translate(-25%, -25%)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 h-[600px] w-[600px] rounded-full opacity-30"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(99, 102, 241, 0.45) 100%)",
+          filter: "blur(150px)",
+          transform: "translate(25%, 25%)",
+        }}
+      />
 
-        {scenario === "A" && (
-          <>
-            <h1 className="font-serif text-3xl font-light">Team-Einladung</h1>
-            <p className="text-text-secondary text-sm text-left">
-              <strong>{practiceName}</strong> hat Sie eingeladen ({inviteEmail}). Es
-              existiert noch kein Konto mit dieser E-Mail.
-            </p>
-            <Link
-              href={registerHref}
-              className="inline-flex w-full items-center justify-center h-10 px-4 text-sm font-medium rounded bg-brand text-white hover:bg-brand-glow transition-colors"
-            >
-              Account erstellen
-            </Link>
-          </>
-        )}
+      <div className="pointer-events-none fixed left-3 top-3 z-50 md:left-4 md:top-4">
+        <Image
+          src={smileScanLogo}
+          alt="SmileScan Logo"
+          priority
+          className="smilescan-logo-pulse h-auto w-[156px] max-w-full object-contain md:w-[186px]"
+        />
+      </div>
 
-        {scenario === "B" && (
-          <>
-            <h1 className="font-serif text-3xl font-light">Team-Einladung</h1>
-            <p className="text-text-secondary text-sm text-left">
-              <strong>{practiceName}</strong> hat Sie eingeladen. Ein Konto mit
-              dieser E-Mail-Adresse existiert bereits bei SmileScan. Melden Sie
-              sich an, um die Einladung anzunehmen.
-            </p>
-            <Link
-              href={loginHref}
-              className="inline-flex w-full items-center justify-center h-10 px-4 text-sm font-medium rounded bg-brand text-white hover:bg-brand-glow transition-colors"
-            >
-              Anmelden und beitreten
-            </Link>
-          </>
-        )}
+      <div className="relative z-10 w-full max-w-[500px]">
+        <div className={glassCardClass} style={glassCardShadow}>
+          {scenario === "invalid" && (
+            <div className="space-y-6">
+              <div className="flex flex-col items-center space-y-4 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50">
+                  <AlertCircle className="h-8 w-8 text-red-600" aria-hidden />
+                </div>
+                <h1 className="font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl">
+                  Einladung ungültig
+                </h1>
+                <p className="max-w-sm text-base leading-relaxed text-danger">
+                  {invalidReason ?? "Diese Einladung ist nicht mehr gültig."}
+                </p>
+              </div>
+              <Link
+                href="/login"
+                className="flex h-[46px] w-full items-center justify-center rounded-[10px] bg-slate-100 text-[15px] font-medium text-slate-900 transition-all duration-200 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700/25 focus-visible:ring-offset-2"
+              >
+                Zum Login
+              </Link>
+            </div>
+          )}
 
-        {scenario === "C" && (
-          <>
-            <h1 className="font-serif text-3xl font-light">Einladung bestätigen</h1>
-            <p className="text-text-secondary text-sm text-left">
-              Sie wurden zu <strong>{practiceName}</strong> eingeladen (
-              {inviteEmail}).
-            </p>
-            {actionError && (
-              <p className="text-danger text-sm text-left">{actionError}</p>
-            )}
-            <Button
-              type="button"
-              className="w-full"
-              disabled={pending}
-              onClick={handleAccept}
-            >
-              {pending ? "Wird bearbeitet…" : "Einladung annehmen"}
-            </Button>
-          </>
-        )}
+          {scenario === "A" && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h1 className="font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl">
+                  Team-Einladung
+                </h1>
+                <p className="text-left text-sm leading-relaxed text-slate-600">
+                  <strong className="font-semibold text-slate-900">{practiceName}</strong> hat
+                  Sie eingeladen ({inviteEmail}). Es existiert noch kein Konto mit dieser E-Mail.
+                </p>
+              </div>
+              <Link href={registerHref} className={`group ${primaryCtaClass}`}>
+                Account erstellen
+                <ArrowRight
+                  className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+            </div>
+          )}
 
-        {scenario === "D" && (
-          <>
-            <h1 className="font-serif text-3xl font-light">Falsches Konto</h1>
-            <p className="text-text-secondary text-sm text-left">
-              Diese Einladung ist für <strong>{inviteEmail}</strong>. Sie sind als{" "}
-              <strong>{sessionEmail}</strong> angemeldet. Bitte melden Sie sich ab.
-            </p>
-            <form action={signOut} className="w-full">
-              <input type="hidden" name="return_to" value={returnToAccept} />
-              <Button type="submit" variant="secondary" className="w-full">
-                Abmelden
+          {scenario === "B" && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h1 className="font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl">
+                  Team-Einladung
+                </h1>
+                <p className="text-left text-sm leading-relaxed text-slate-600">
+                  <strong className="font-semibold text-slate-900">{practiceName}</strong> hat Sie
+                  eingeladen. Ein Konto mit dieser E-Mail-Adresse existiert bereits bei SmileScan.
+                  Melden Sie sich an, um die Einladung anzunehmen.
+                </p>
+              </div>
+              <Link href={loginHref} className={`group ${primaryCtaClass}`}>
+                Anmelden und beitreten
+                <ArrowRight
+                  className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+            </div>
+          )}
+
+          {scenario === "C" && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h1 className="font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl">
+                  Einladung bestätigen
+                </h1>
+                <p className="text-left text-sm leading-relaxed text-slate-600">
+                  Sie wurden zu <strong className="font-semibold text-slate-900">{practiceName}</strong>{" "}
+                  eingeladen ({inviteEmail}).
+                </p>
+              </div>
+              {actionError && (
+                <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3">
+                  <p className="text-left text-sm leading-relaxed text-danger">{actionError}</p>
+                </div>
+              )}
+              <Button
+                type="button"
+                disabled={pending}
+                onClick={handleAccept}
+                className="h-auto min-h-[46px] w-full rounded-[10px] bg-slate-700 py-3 text-[15px] font-medium text-white shadow-[0px_8px_22px_rgba(51,65,85,0.25)] transition-all duration-200 hover:bg-slate-800 disabled:opacity-50"
+              >
+                {pending ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <span
+                      className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                      aria-hidden
+                    />
+                    Wird bearbeitet…
+                  </span>
+                ) : (
+                  "Einladung annehmen"
+                )}
               </Button>
-            </form>
-          </>
-        )}
+            </div>
+          )}
 
-        {scenario === "E" && (
-          <>
-            <h1 className="font-serif text-3xl font-light">Bereits anderer Workspace</h1>
-            <p className="text-text-secondary text-sm text-left">
-              Sie gehören bereits zu Workspace{" "}
-              <strong>{otherWorkspaceName ?? "einer anderen Praxis"}</strong>. Sie
-              können nicht gleichzeitig Mitglied zweier Workspaces sein. Bitte
-              Workspace verlassen oder sich abmelden.
-            </p>
-            <form action={signOut} className="w-full">
-              <input type="hidden" name="return_to" value={returnToAccept} />
-              <Button type="submit" variant="secondary" className="w-full">
-                Abmelden
-              </Button>
-            </form>
-          </>
-        )}
+          {scenario === "D" && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-50">
+                  <AlertCircle className="h-8 w-8 text-orange-600" aria-hidden />
+                </div>
+                <h1 className="font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl">
+                  Falsches Konto
+                </h1>
+                <p className="text-left text-sm leading-relaxed text-slate-600">
+                  Diese Einladung ist für <strong className="font-semibold text-slate-900">{inviteEmail}</strong>. Sie
+                  sind als <strong className="font-semibold text-slate-900">{sessionEmail}</strong> angemeldet. Bitte
+                  melden Sie sich ab.
+                </p>
+              </div>
+              <form action={signOut} className="w-full">
+                <input type="hidden" name="return_to" value={returnToAccept} />
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  className="flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] border-2 border-slate-200 bg-white text-[15px] font-medium text-slate-900 shadow-none hover:bg-slate-50"
+                >
+                  <LogOut className="h-5 w-5 shrink-0" aria-hidden />
+                  Abmelden
+                </Button>
+              </form>
+            </div>
+          )}
 
-        {scenario === "F" && (
-          <>
-            <h1 className="font-serif text-3xl font-light">Bereits Mitglied</h1>
-            <p className="text-text-secondary text-sm">
-              Sie sind bereits Mitglied dieses Workspaces.
-            </p>
-            <Link
-              href="/dashboard"
-              className="inline-flex w-full items-center justify-center h-10 px-4 text-sm font-medium rounded bg-brand text-white hover:bg-brand-glow transition-colors"
-            >
-              Zum Dashboard
-            </Link>
-          </>
-        )}
+          {scenario === "E" && (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-50">
+                  <AlertCircle className="h-8 w-8 text-orange-600" aria-hidden />
+                </div>
+                <h1 className="font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl">
+                  Bereits anderer Workspace
+                </h1>
+                <p className="text-left text-sm leading-relaxed text-slate-600">
+                  Sie gehören bereits zu Workspace{" "}
+                  <strong className="font-semibold text-slate-900">
+                    {otherWorkspaceName ?? "einer anderen Praxis"}
+                  </strong>
+                  . Sie können nicht gleichzeitig Mitglied zweier Workspaces sein. Bitte Workspace verlassen oder sich
+                  abmelden.
+                </p>
+              </div>
+              <form action={signOut} className="w-full">
+                <input type="hidden" name="return_to" value={returnToAccept} />
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  className="flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] border-2 border-slate-200 bg-white text-[15px] font-medium text-slate-900 shadow-none hover:bg-slate-50"
+                >
+                  <LogOut className="h-5 w-5 shrink-0" aria-hidden />
+                  Abmelden
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {scenario === "F" && (
+            <div className="space-y-6 text-center">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600" aria-hidden />
+                </div>
+                <h1 className="font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl">
+                  Bereits Mitglied
+                </h1>
+                <p className="text-sm leading-relaxed text-slate-600">
+                  Sie sind bereits Mitglied dieses Workspaces.
+                </p>
+              </div>
+              <Link href="/dashboard" className={`group ${primaryCtaClass}`}>
+                Zum Dashboard
+                <ArrowRight
+                  className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

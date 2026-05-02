@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Dentist Brand System</title>
+    <style>
+      :root {
+        --page: #f3f0ea;
+        --card: rgba(255, 255, 255, 0.78);
+        --card-strong: rgba(255, 255, 255, 0.94);
+        --border: rgba(24, 24, 22, 0.08);
+        --ink: #181816;
+        --muted: #66625b;
+        --green: #0f6e56;
+        --teal: #127a67;
+        --copper: #8c5c33;
+        --blue: #466bb0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        font-family: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(15, 110, 86, 0.12), transparent 32%),
+          radial-gradient(circle at top right, rgba(70, 107, 176, 0.12), transparent 28%),
+          linear-gradient(180deg, #faf8f3 0%, var(--page) 100%);
+      }
+
+      .wrapper {
+        width: min(1200px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 56px 0 84px;
+      }
+
+      .hero,
+      .notes {
+        backdrop-filter: blur(18px);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 32px;
+        box-shadow: 0 24px 60px rgba(17, 17, 17, 0.08);
+      }
+
+      .hero {
+        padding: 34px 34px 30px;
+      }
+
+      .eyebrow {
+        margin-bottom: 14px;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0 0 14px;
+        font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        font-size: clamp(3rem, 6vw, 5.35rem);
+        font-weight: 400;
+        line-height: 0.96;
+        letter-spacing: -0.04em;
+      }
+
+      .hero p {
+        max-width: 760px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.65;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .chip {
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 22px;
+        margin-top: 22px;
+      }
+
+      .card {
+        background: var(--card-strong);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 22px;
+        box-shadow: 0 20px 42px rgba(17, 17, 17, 0.06);
+      }
+
+      .logo-panel,
+      .mark-panel {
+        display: grid;
+        place-items: center;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+      }
+
+      .logo-panel {
+        min-height: 220px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 244, 237, 0.96));
+      }
+
+      .mark-panel {
+        width: 176px;
+        height: 176px;
+        background:
+          radial-gradient(circle at top, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.25)),
+          linear-gradient(180deg, rgba(15, 18, 24, 0.94), rgba(21, 24, 31, 0.98));
+      }
+
+      .card-media {
+        display: flex;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .card-media .logo-panel {
+        flex: 1;
+      }
+
+      .card-media img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .mark-panel img {
+        width: 120px;
+        height: 120px;
+      }
+
+      h2 {
+        margin: 18px 0 8px;
+        font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        font-size: 34px;
+        font-weight: 400;
+        letter-spacing: -0.04em;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.65;
+      }
+
+      .tag {
+        display: inline-flex;
+        margin-top: 14px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(24, 24, 22, 0.04);
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .notes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+        margin-top: 22px;
+        padding: 26px 28px;
+      }
+
+      h3 {
+        margin: 0 0 12px;
+        font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        font-size: 28px;
+        font-weight: 400;
+        letter-spacing: -0.03em;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      strong {
+        color: var(--ink);
+      }
+
+      @media (max-width: 760px) {
+        .wrapper {
+          width: min(100% - 24px, 1200px);
+          padding-top: 26px;
+        }
+
+        .hero,
+        .notes,
+        .card {
+          border-radius: 22px;
+        }
+
+        .card-media {
+          flex-direction: column;
+        }
+
+        .mark-panel {
+          width: 100%;
+          height: 160px;
+        }
+
+        .mark-panel img {
+          width: 116px;
+          height: 116px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrapper">
+      <section class="hero">
+        <div class="eyebrow">SCH LTD / Customer-facing architecture</div>
+        <h1>Your Dentist becomes the neutral umbrella brand.</h1>
+        <p>
+          This keeps the public-facing domain calm and credible while still letting each
+          product area own its own visual identity. The system below is designed so
+          landing pages, doctor pages, and product surfaces can all feel related without
+          forcing everything to lead with SmileScan.
+        </p>
+        <div class="chips">
+          <div class="chip">Parent brand: Your Dentist</div>
+          <div class="chip">Scan product: SmileScan</div>
+          <div class="chip">Publishing product: Journals</div>
+          <div class="chip">Tasks rename: Relay</div>
+          <div class="chip">Public presence: Portrait</div>
+          <div class="chip">Settings label: Settings</div>
+          <div class="chip">Dashboard rename: Atlas</div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-media">
+            <div class="logo-panel">
+              <img
+                src="./logos/your-dentist/logo-horizontal.svg"
+                alt="Your Dentist horizontal logo"
+              />
+            </div>
+            <div class="mark-panel">
+              <img src="./logos/your-dentist/logo-mark.svg" alt="Your Dentist mark" />
+            </div>
+          </div>
+          <h2>Your Dentist</h2>
+          <p>
+            Neutral umbrella brand for landing pages, public practice pages, and shared
+            ecosystem navigation.
+          </p>
+          <div class="tag">Master Brand</div>
+        </article>
+
+        <article class="card">
+          <div class="card-media">
+            <div class="logo-panel">
+              <img
+                src="./logos/smilescan/logo-horizontal.svg"
+                alt="SmileScan horizontal logo"
+              />
+            </div>
+            <div class="mark-panel">
+              <img src="./logos/smilescan/logo-mark.svg" alt="SmileScan mark" />
+            </div>
+          </div>
+          <h2>SmileScan</h2>
+          <p>
+            Visual intake and scan-led triage. The icon keeps the smile arc but adds a
+            clearer scanning signal.
+          </p>
+          <div class="tag">Capture Product</div>
+        </article>
+
+        <article class="card">
+          <div class="card-media">
+            <div class="logo-panel">
+              <img
+                src="./logos/journals/logo-horizontal.svg"
+                alt="Journals horizontal logo"
+              />
+            </div>
+            <div class="mark-panel">
+              <img src="./logos/journals/logo-mark.svg" alt="Journals mark" />
+            </div>
+          </div>
+          <h2>Journals</h2>
+          <p>
+            Editorial publishing, trust-building, and doctor authority. The open-book
+            mark gives it its own voice without leaving the family.
+          </p>
+          <div class="tag">Publishing Product</div>
+        </article>
+
+        <article class="card">
+          <div class="card-media">
+            <div class="logo-panel">
+              <img src="./logos/relay/logo-horizontal.svg" alt="Relay horizontal logo" />
+            </div>
+            <div class="mark-panel">
+              <img src="./logos/relay/logo-mark.svg" alt="Relay mark" />
+            </div>
+          </div>
+          <h2>Relay</h2>
+          <p>
+            Proposed replacement for the Tasks label. It feels more product-like, more
+            premium, and more accurate to assignment, review, and handoff behavior.
+          </p>
+          <div class="tag">Workflow Product</div>
+        </article>
+
+        <article class="card">
+          <div class="card-media">
+            <div class="logo-panel">
+              <img
+                src="./logos/portrait/logo-horizontal.svg"
+                alt="Portrait horizontal logo"
+              />
+            </div>
+            <div class="mark-panel">
+              <img src="./logos/portrait/logo-mark.svg" alt="Portrait mark" />
+            </div>
+          </div>
+          <h2>Portrait</h2>
+          <p>
+            Public doctor and practice presence. This turns the current profile section
+            into a lasting label rather than a technical utility page.
+          </p>
+          <div class="tag">Presence Product</div>
+        </article>
+
+        <article class="card">
+          <div class="card-media">
+            <div class="logo-panel">
+              <img src="./logos/atlas/logo-horizontal.svg" alt="Atlas horizontal logo" />
+            </div>
+            <div class="mark-panel">
+              <img src="./logos/atlas/logo-mark.svg" alt="Atlas mark" />
+            </div>
+          </div>
+          <h2>Atlas</h2>
+          <p>
+            Dashboard and practice overview. It frames the home view as a map of
+            movement, signals, and current state.
+          </p>
+          <div class="tag">Overview Product</div>
+        </article>
+      </section>
+
+      <section class="notes">
+        <div>
+          <h3>Suggested naming ladder</h3>
+          <ul>
+            <li><strong>SCH LTD</strong> stays the legal entity, not the public brand.</li>
+            <li><strong>Your Dentist</strong> becomes the website and ecosystem header.</li>
+            <li><strong>SmileScan</strong>, <strong>Journals</strong>, <strong>Relay</strong>, <strong>Portrait</strong>, and <strong>Atlas</strong> stay readable as distinct products.</li>
+            <li>Practice pages can feel calmer under a neutral surface anchored by <strong>your.dentist</strong>.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Why Relay works</h3>
+          <ul>
+            <li>It implies movement between people, not a dead list of tickets.</li>
+            <li>It fits medical team handoff logic better than the generic word <strong>Tasks</strong>.</li>
+            <li>It is short, neutral, memorable, and visually strong beside the other names.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Why the new labels work</h3>
+          <ul>
+            <li><strong>Portrait</strong> feels curated and public, which matches the actual doctor page.</li>
+            <li><strong>Settings</strong> keeps navigation familiar and reduces user confusion.</li>
+            <li><strong>Atlas</strong> gives the dashboard a broader, more strategic sense of overview.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -6,6 +6,9 @@ import { JournalList } from "@/components/journal/journal-list";
 export default async function JournalPage() {
   const workspace = await getCurrentWorkspace();
   if (!workspace) redirect("/login");
+  if (workspace.role !== "doctor") {
+    redirect("/my-tasks");
+  }
 
   const entries = await listJournalForWorkspace(workspace.workspace_id);
 

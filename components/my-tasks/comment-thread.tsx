@@ -8,7 +8,9 @@ interface CommentThreadProps {
 export function CommentThread({ comments, currentUserId }: CommentThreadProps) {
   if (comments.length === 0) {
     return (
-      <p className="text-sm text-text-tertiary italic">Noch keine Kommentare.</p>
+      <p className="text-sm italic leading-6 text-text-tertiary">
+        Noch keine Kommentare.
+      </p>
     );
   }
 
@@ -22,11 +24,11 @@ export function CommentThread({ comments, currentUserId }: CommentThreadProps) {
           return (
             <div
               key={c.id}
-              className="flex items-start gap-3 py-2 px-3 bg-warning/10 border border-warning/20 rounded"
+              className="flex items-start gap-3 rounded-lg border border-warning/20 bg-warning/10 px-3 py-2"
             >
-              <div className="text-xs text-text-secondary italic">
+              <div className="text-sm italic leading-6 text-text-secondary">
                 {c.content}
-                <span className="ml-2 text-text-tertiary">
+                <span className="ml-2 text-xs not-italic tabular-nums text-text-tertiary">
                   ·{" "}
                   {new Date(c.created_at).toLocaleDateString("de-DE", {
                     day: "numeric",
@@ -42,15 +44,15 @@ export function CommentThread({ comments, currentUserId }: CommentThreadProps) {
 
         return (
           <div key={c.id} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-surface-sunken flex items-center justify-center text-xs font-medium flex-shrink-0">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-border/70 bg-surface-sunken text-xs font-medium text-text-secondary">
               {initial}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-sm font-medium">
+              <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="text-sm font-semibold leading-6 text-text-primary">
                   {c.author_email || "Unbekannt"} {isCurrent && "(Sie)"}
                 </span>
-                <span className="text-xs text-text-tertiary">
+                <span className="text-xs tabular-nums text-text-tertiary">
                   {new Date(c.created_at).toLocaleDateString("de-DE", {
                     day: "numeric",
                     month: "short",
@@ -59,7 +61,7 @@ export function CommentThread({ comments, currentUserId }: CommentThreadProps) {
                   })}
                 </span>
               </div>
-              <p className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+              <p className="whitespace-pre-wrap text-sm leading-6 text-text-primary">
                 {c.content}
               </p>
             </div>

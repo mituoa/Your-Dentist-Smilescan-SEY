@@ -2,6 +2,7 @@ import { ArrowLeft, Calendar, Clock, FileText, User } from "lucide-react";
 import Link from "next/link";
 
 import type { TaskComment, TaskDetail } from "@/lib/queries/task-detail";
+import { pilotGlassPanel } from "@/lib/pilot-surface";
 
 import { CommentForm } from "./comment-form";
 import { CommentThread } from "./comment-thread";
@@ -24,49 +25,71 @@ export function TaskDetailView({
   isMyTask,
 }: TaskDetailViewProps) {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <Link
         href="/my-tasks"
-        className="inline-flex items-center gap-1 text-xs text-text-tertiary hover:text-text-primary mb-8"
+        className="mb-6 inline-flex items-center gap-1 rounded-md text-xs text-text-tertiary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 sm:mb-8"
       >
         <ArrowLeft className="w-3 h-3" strokeWidth={1.75} />
-        Zu meinen Aufgaben
+        Zur Aufgabenübersicht
       </Link>
 
-      <div className="mb-8">
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <h1 className="font-serif text-3xl font-light tracking-tight leading-tight flex-1">
-            {task.content}
-          </h1>
+      <div className={`mb-8 p-4 sm:p-5 ${pilotGlassPanel}`}>
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex-1">
+            <h1 className="font-serif text-2xl font-light leading-tight tracking-tight text-text-primary sm:text-3xl">
+              {task.title}
+            </h1>
+            {task.priority === "important" && (
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-danger">
+                Wichtig
+              </p>
+            )}
+          </div>
           <TaskStatusBadge status={task.status} size="md" />
         </div>
 
         {task.description && (
-          <p className="text-text-secondary whitespace-pre-wrap leading-relaxed mb-4">
+          <p className="mb-4 whitespace-pre-wrap text-sm leading-6 text-text-secondary sm:text-base">
             {task.description}
           </p>
         )}
 
-        <div className="flex flex-wrap gap-4 text-xs text-text-tertiary border-t border-border pt-4">
+        <div className="grid grid-cols-1 gap-2 border-t border-border pt-4 text-sm leading-5 text-text-secondary sm:grid-cols-2 xl:grid-cols-3">
+          <div className="flex items-center gap-1.5">
+            Zustellung: {task.receipt_summary.read}/{task.receipt_summary.total} gelesen
+          </div>
           <div className="flex items-center gap-1.5">
             <User className="w-3 h-3" strokeWidth={1.75} />
-            Zugewiesen von {task.created_by_email || "Unbekannt"}
+            Erstellt von {task.created_by_email || "Unbekannt"}
           </div>
           {task.recipient_type === "specific_person" &&
-            task.specific_recipient_email && (
-              <div>An {task.specific_recipient_email}</div>
+            (task.assignee_emails.length > 0 || task.specific_recipient_email) && (
+              <div>
+                Zugewiesen an{" "}
+                {task.assignee_emails.length > 0
+                  ? task.assignee_emails.join(", ")
+                  : task.specific_recipient_email}
+              </div>
             )}
           {task.recipient_type === "all_team" && (
-            <div>An gesamtes Team</div>
+            <div>Zugewiesen an gesamtes Team</div>
           )}
-          {task.recipient_type === "doctor_only" && <div>Nur Arzt</div>}
-          <Link
-            href={`/inbox/${task.submission_id}`}
-            className="flex items-center gap-1.5 hover:text-text-primary"
-          >
-            <FileText className="w-3 h-3" strokeWidth={1.75} />
-            Patient: {task.submission_patient_name || "—"}
-          </Link>
+          {task.recipient_type === "doctor_only" && <div>Zugewiesen an Arzt</div>}
+          {task.submission_id ? (
+            <Link
+              href={`/inbox/${task.submission_id}`}
+              className="flex items-center gap-1.5 break-words rounded-sm transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+            >
+              <FileText className="w-3 h-3" strokeWidth={1.75} />
+              Patient: {task.submission_patient_name || "Unbekannt"}
+            </Link>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <FileText className="w-3 h-3" strokeWidth={1.75} />
+              Interne Aufgabe
+            </div>
+          )}
           {task.due_date && (
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3 h-3" strokeWidth={1.75} />
@@ -86,7 +109,7 @@ export function TaskDetailView({
       </div>
 
       {task.status !== "done" && (
-        <div className="mb-10 p-5 bg-surface-card border border-border rounded-lg">
+        <div className={`mb-10 p-4 sm:p-5 ${pilotGlassPanel}`}>
           <TaskActions
             taskId={task.id}
             status={task.status}
@@ -96,12 +119,12 @@ export function TaskDetailView({
         </div>
       )}
 
-      <section className="space-y-6">
-        <h2 className="text-xs uppercase tracking-[0.2em] text-text-tertiary font-mono">
+      <section className={`space-y-6 p-4 sm:p-5 ${pilotGlassPanel}`}>
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
           Kommentare · {comments.length}
         </h2>
         <CommentThread comments={comments} currentUserId={currentUserId} />
-        <div className="pt-4 border-t border-border">
+        <div className="border-t border-border pt-4">
           <CommentForm taskId={task.id} />
         </div>
       </section>

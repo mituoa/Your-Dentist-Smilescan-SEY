@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="240" viewBox="0 0 920 240" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">SmileScan logo</title>
+  <desc id="desc">A clinical teal wordmark paired with a badge that combines scan bars and a smile arc.</desc>
+  <defs>
+    <linearGradient id="panel" x1="46" y1="52" x2="176" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E2F8F2"/>
+    </linearGradient>
+  </defs>
+  <rect x="36" y="52" width="136" height="136" rx="38" fill="url(#panel)"/>
+  <rect x="36.75" y="52.75" width="134.5" height="134.5" rx="37.25" stroke="#127A67" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M72 83C82 75.667 92.667 72 104 72C115.333 72 126 75.667 136 83" stroke="#127A67" stroke-opacity="0.34" stroke-width="7.5" stroke-linecap="round"/>
+  <path d="M82 91V123" stroke="#127A67" stroke-width="9" stroke-linecap="round"/>
+  <path d="M104 82V128" stroke="#127A67" stroke-width="9" stroke-linecap="round"/>
+  <path d="M126 91V123" stroke="#127A67" stroke-width="9" stroke-linecap="round"/>
+  <path d="M74 137C83.333 133.667 93.333 132 104 132C114.667 132 124.667 133.667 134 137" stroke="#127A67" stroke-opacity="0.34" stroke-width="6.5" stroke-linecap="round"/>
+  <path d="M79 149C88 154.333 96.333 157 104 157C111.667 157 120 154.333 129 149" stroke="#127A67" stroke-width="8.5" stroke-linecap="round"/>
+  <text x="214" y="118" fill="#121212" font-family="'Iowan Old Style', 'Palatino Linotype', Georgia, serif" font-size="66" letter-spacing="-1.8">SmileScan</text>
+  <text x="218" y="155" fill="#127A67" font-family="'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="4.2">VISUAL TRIAGE AND INTAKE</text>
+</svg>

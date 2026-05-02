@@ -11,6 +11,7 @@ export default async function EditArticlePage({ params }: EditPageProps) {
   const { id } = await params;
   const workspace = await getCurrentWorkspace();
   if (!workspace) redirect("/login");
+  if (workspace.role !== "doctor") redirect("/my-tasks");
 
   const article = await getJournalEntry(id);
   if (!article || article.workspace_id !== workspace.workspace_id) notFound();

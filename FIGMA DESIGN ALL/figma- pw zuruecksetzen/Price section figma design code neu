@@ -1,0 +1,67 @@
+export default function PricingSection() {
+  const features = [
+    "Unbegrenzte Fallaufnahmen",
+    "DSGVO-konforme Datenspeicherung",
+    "Automatische Backups",
+    "Mobile App (iOS & Android)",
+    "Exportfunktion (PDF, CSV)",
+    "Team-Verwaltung",
+    "Kostenlose Updates",
+    "Sicheres Cloud-Hosting"
+  ];
+
+  return (
+    <div className="w-full bg-white py-16 px-8 lg:px-16">
+      <div className="max-w-5xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h2 className="text-[36px] font-semibold text-gray-900 mb-3">
+            Einfache, transparente Preise
+          </h2>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Alle Pläne beinhalten den vollen Funktionsumfang.
+            Wählen Sie einfach Ihren Abrechnungszeitraum.
+          </p>
+        </div>
+
+        {/* Features */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+          {features.map((feature, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-5 h-5 text-[#2D5B8C]">
+                ✓
+              </div>
+              <span className="text-gray-700">{feature}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Pricing Card */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition">
+          <h3 className="text-xl font-semibold mb-2">
+            Halbjährlich
+          </h3>
+
+          <p className="text-gray-500 mb-6">
+            Flexible Abrechnung alle 6 Monate
+          </p>
+
+          <div className="mb-6">
+            <span className="text-4xl font-semibold text-gray-900">
+              49€
+            </span>
+            <span className="text-gray-500 ml-1">
+              /Monat
+            </span>
+          </div>
+
+          <button className="w-full bg-[#2D5B8C] text-white py-3 rounded-xl hover:bg-[#3F6FA3] transition">
+            Jetzt starten
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}

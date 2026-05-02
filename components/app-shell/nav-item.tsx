@@ -2,54 +2,60 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Inbox,
-  UserCircle,
-  BookOpen,
-  Settings,
-  ListChecks,
-  type LucideIcon,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NavBadge } from "./nav-badge";
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  inbox: Inbox,
-  profile: UserCircle,
-  journal: BookOpen,
-  settings: Settings,
-  tasks: ListChecks,
+const BRAND_MARK_BY_ROUTE: Record<string, { src: string; alt: string }> = {
+  "/dashboard": { src: "/brand/atlas/logo-mark.svg", alt: "Atlas mark" },
+  "/inbox": { src: "/brand/smilescan/logo-mark.svg", alt: "SmileScan mark" },
+  "/my-tasks": { src: "/brand/relay/logo-mark.svg", alt: "Relay mark" },
+  "/profile/editor": { src: "/brand/portrait/logo-mark.svg", alt: "Portrait mark" },
+  "/journal": { src: "/brand/journals/logo-mark.svg", alt: "Journals mark" },
+  "/settings": { src: "/brand/your-dentist/logo-mark.svg", alt: "Settings mark" },
 };
 
 interface NavItemProps {
   href: string;
-  iconName: keyof typeof ICON_MAP;
+  iconName: string;
   label: string;
   badge?: number;
+  badgeUrgent?: boolean;
 }
 
-export function NavItem({ href, iconName, label, badge }: NavItemProps) {
+export function NavItem({
+  href,
+  label,
+  badge,
+  badgeUrgent,
+}: NavItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href || pathname.startsWith(href + "/");
-  const Icon = ICON_MAP[iconName];
+  const brandMark = BRAND_MARK_BY_ROUTE[href] || {
+    src: "/brand/your-dentist/logo-mark.svg",
+    alt: `${label} mark`,
+  };
 
   return (
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors rounded mx-2",
+        "mx-2 flex items-center gap-3 rounded-[10px] px-4 py-2.5 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
         isActive
-          ? "bg-surface-sunken text-text-primary font-medium"
-          : "text-text-secondary hover:text-text-primary hover:bg-surface-sunken/50"
+          ? "bg-slate-700 text-white shadow-[0px_8px_22px_rgba(51,65,85,0.22)]"
+          : "text-text-primary/80 hover:bg-white/75 hover:text-text-primary"
       )}
     >
-      <Icon className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+      <img
+        src={brandMark.src}
+        alt={brandMark.alt}
+        className="h-5 w-5 shrink-0 object-contain"
+      />
       <span className="flex-1">{label}</span>
       {badge !== undefined && badge > 0 && (
-        <span className="text-xs bg-brand text-white px-1.5 py-0.5 rounded">
-          {badge}
-        </span>
+        <NavBadge
+          count={badge}
+          variant={badgeUrgent ? "urgent" : "default"}
+        />
       )}
     </Link>
   );

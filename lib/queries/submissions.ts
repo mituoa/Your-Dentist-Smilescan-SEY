@@ -88,6 +88,7 @@ export interface TaskItem {
   content: string;
   recipient_type: "doctor_only" | "all_team" | "specific_person";
   specific_recipient_id: string | null;
+  assignee_ids: string[];
   created_by: string;
   created_at: string;
   done_at: string | null;
@@ -103,7 +104,7 @@ export async function getTasksForSubmission(
   const { data, error } = await supabase
     .from("tasks")
     .select(
-      "id, content, recipient_type, specific_recipient_id, created_by, created_at, done_at, done_by, status"
+      "id, content, recipient_type, specific_recipient_id, created_by, created_at, done_at, done_by, status, task_assignees(user_id)"
     )
     .eq("submission_id", submissionId)
     .order("created_at", { ascending: false });
@@ -120,6 +121,11 @@ export async function getTasksForSubmission(
       content: row.content as string,
       recipient_type: row.recipient_type as TaskItem["recipient_type"],
       specific_recipient_id: (row.specific_recipient_id as string | null) ?? null,
+      assignee_ids: (
+        ((row.task_assignees as Array<{ user_id: string }> | null) || [])
+          .map((assignee) => assignee.user_id)
+          .filter((id): id is string => Boolean(id))
+      ),
       created_by: row.created_by as string,
       created_at: row.created_at as string,
       done_at: (row.done_at as string | null) ?? null,

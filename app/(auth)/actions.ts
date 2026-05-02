@@ -1,9 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAppBaseUrl } from "@/lib/env";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { acceptInvitation } from "@/app/(protected)/settings/actions";
+import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 
 function sanitizeReturnTo(value: string | null | undefined): string | null {
   if (!value || typeof value !== "string") return null;
@@ -44,7 +46,13 @@ export async function signIn(formData: FormData) {
   if (inviteToken) {
     redirect(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
   }
-  redirect("/dashboard");
+  const nextPath = await resolveAuthenticatedEntryPath();
+  redirect(nextPath);
+}
+
+/** After password reset (client): same routing as post-login when no explicit invite in URL. */
+export async function getAuthenticatedEntryPath(): Promise<string> {
+  return resolveAuthenticatedEntryPath();
 }
 
 export async function signUp(formData: FormData) {
@@ -116,4 +124,37 @@ export async function signOut(formData?: FormData) {
   const raw = formData?.get("return_to");
   const to = sanitizeReturnTo(typeof raw === "string" ? raw : null);
   redirect(to ?? "/login");
+}
+
+export async function requestPasswordResetFromLogin(formData: FormData) {
+  const email = (formData.get("email") as string | null)?.trim().toLowerCase() || "";
+  const inviteToken = (formData.get("invite_token") as string | null)?.trim();
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const params = new URLSearchParams();
+    params.set("error", "Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+    if (inviteToken) params.set("invite", inviteToken);
+    if (email) params.set("email", email);
+    redirect(
+      `/forgot-password?${params.toString()}`
+    );
+  }
+
+  const supabase = await createClient();
+  const resetUrl = inviteToken
+    ? `${getAppBaseUrl()}/reset-password?invite=${encodeURIComponent(inviteToken)}`
+    : `${getAppBaseUrl()}/reset-password`;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: resetUrl,
+  });
+
+  if (error) {
+    console.error("[requestPasswordResetFromLogin]", error);
+  }
+
+  const params = new URLSearchParams();
+  params.set("sent", "1");
+  if (inviteToken) params.set("invite", inviteToken);
+  params.set("email", email);
+  redirect(`/forgot-password?${params.toString()}`);
 }

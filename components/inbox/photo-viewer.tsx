@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ImageIcon, Download, Loader2, Check } from "lucide-react";
 import { saveAs } from "file-saver";
 import { downloadSubmissionPhotos } from "@/app/(protected)/inbox/[id]/actions";
+import { pilotGlassPanel } from "@/lib/pilot-surface";
 import { useParams } from "next/navigation";
 
 interface Photo {
@@ -42,7 +43,7 @@ export function PhotoViewer({
   if (photos.length === 0) {
     return (
       <div
-        className="bg-surface-card border border-border rounded-lg overflow-hidden"
+        className={`overflow-hidden ${pilotGlassPanel}`}
         aria-label={`Fotos: ${patientName}`}
       >
         <div className="aspect-[4/3] bg-surface-sunken flex flex-col items-center justify-center gap-3">
@@ -50,9 +51,11 @@ export function PhotoViewer({
             className="w-16 h-16 text-text-tertiary/40"
             strokeWidth={1}
           />
-          <p className="text-sm text-text-tertiary">Keine Fotos vorhanden</p>
-          <p className="text-xs text-text-tertiary/70 max-w-xs text-center px-6">
-            Sobald Patienten Fotos hochladen, erscheinen sie hier.
+          <p className="text-sm font-medium leading-6 text-text-tertiary">
+            Noch keine Fotos vorhanden
+          </p>
+          <p className="max-w-xs px-6 text-center text-sm leading-6 text-text-tertiary/80">
+            Sobald der Patient Fotos hochlädt, sehen Sie sie hier.
           </p>
         </div>
       </div>
@@ -73,7 +76,7 @@ export function PhotoViewer({
       if (result.error || !result.zipBase64 || !result.filename) {
         setDownloadStatus("error");
         setDownloadError(
-          result.error || "Download nicht möglich, bitte erneut versuchen"
+          result.error || "Download nicht möglich. Bitte erneut versuchen."
         );
         return;
       }
@@ -91,13 +94,13 @@ export function PhotoViewer({
     } catch (error) {
       console.error("[PhotoViewer] ZIP download failed", error);
       setDownloadStatus("error");
-      setDownloadError("Download nicht möglich, bitte erneut versuchen");
+      setDownloadError("Download nicht möglich. Bitte erneut versuchen.");
     }
   }
 
   return (
-    <div className="space-y-4" aria-label={`Fotos: ${patientName}`}>
-      <div className="bg-surface-card border border-border rounded-lg overflow-hidden">
+    <div className="space-y-4 sm:space-y-5" aria-label={`Fotos: ${patientName}`}>
+      <div className={`overflow-hidden ${pilotGlassPanel}`}>
         <div className="aspect-[4/3] bg-surface-sunken flex items-center justify-center relative">
           {selectedUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
@@ -112,15 +115,20 @@ export function PhotoViewer({
               strokeWidth={1}
             />
           )}
-          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-surface-page/90 backdrop-blur rounded px-3 py-2">
-            <span className="text-xs font-mono text-text-secondary">
-              Foto {selectedIndex + 1} von {photos.length}
-            </span>
+          <div className="absolute bottom-3 left-3 right-3 flex min-h-12 flex-col items-stretch gap-2.5 rounded-lg border border-border/70 bg-surface-page/90 px-3 py-2.5 backdrop-blur sm:bottom-4 sm:left-4 sm:right-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+                Fotoübersicht
+              </p>
+              <span className="text-sm font-medium tabular-nums text-text-secondary">
+                {selectedIndex + 1} / {photos.length}
+              </span>
+            </div>
             <button
               type="button"
               onClick={handleDownloadAllPhotos}
               disabled={isLoading}
-              className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded border border-border bg-surface-card text-text-secondary hover:text-text-primary hover:border-brand/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-md border border-border bg-surface-card px-2.5 py-2 text-xs font-medium text-text-secondary transition-colors hover:border-brand/40 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0 sm:w-auto sm:shrink-0 sm:py-1.5"
             >
               {isLoading ? (
                 <Loader2 className="w-3 h-3 animate-spin" strokeWidth={1.75} />
@@ -130,30 +138,30 @@ export function PhotoViewer({
                 <Download className="w-3 h-3" strokeWidth={1.75} />
               )}
               {isLoading
-                ? "Wird vorbereitet…"
+                ? "ZIP wird erstellt…"
                 : downloadStatus === "success"
-                  ? "Heruntergeladen"
+                  ? "Download gestartet"
                   : downloadStatus === "error"
-                    ? "Fehler"
+                    ? "Erneut versuchen"
                     : "Alle Fotos laden"}
             </button>
           </div>
         </div>
       </div>
       {downloadStatus === "error" && (
-        <p className="text-xs text-danger">
-          {downloadError || "Download nicht möglich, bitte erneut versuchen"}
+        <p className="text-sm leading-5 text-danger">
+          {downloadError || "Download nicht möglich. Bitte erneut versuchen."}
         </p>
       )}
 
       {photos.length > 1 && (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-4 lg:gap-3">
           {photos.map((photo, i) => (
             <button
               key={photo.id}
               type="button"
               onClick={() => setSelectedIndex(i)}
-              className={`relative aspect-square bg-surface-sunken rounded border-2 transition-colors overflow-hidden flex items-center justify-center ${
+              className={`relative aspect-square bg-surface-sunken rounded-md border-2 transition-colors overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 ${
                 i === selectedIndex
                   ? "border-brand"
                   : "border-transparent hover:border-border"

@@ -1,27 +1,36 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { summarizeTaskReceipts, type TaskDeliveryAggregate } from "@/lib/tasks/receipts";
+import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
 
 export interface MyTask {
   id: string;
   title: string;
+  raw_title: string | null;
   description: string | null;
   due_date: string | null;
+  priority: "normal" | "important";
+  recipient_type: "doctor_only" | "all_team" | "specific_person";
+  specific_recipient_id: string | null;
+  assignee_ids: string[];
+  created_by: string;
   status: "open" | "pending_review" | "done";
   done_at: string | null;
   submitted_for_review_at: string | null;
+  sort_order: number;
   completed: boolean;
   created_at: string;
-  submission_id: string;
+  submission_id: string | null;
   submission_patient_name: string | null;
-  submission_created_at: string;
-}
-
-function roleOrFilter(userId: string, isDoctor: boolean): string {
-  if (isDoctor) {
-    return `created_by.eq.${userId},specific_recipient_id.eq.${userId},recipient_type.eq.all_team,recipient_type.eq.doctor_only`;
-  }
-  return `specific_recipient_id.eq.${userId},recipient_type.eq.all_team`;
+  submission_created_at: string | null;
+  delivery_status: TaskDeliveryAggregate;
+  receipt_summary: {
+    total: number;
+    sent: number;
+    delivered: number;
+    read: number;
+  };
 }
 
 export async function getMyTasks(
@@ -36,14 +45,15 @@ export async function getMyTasks(
     .from("tasks")
     .select(
       `
-      id, content, description, due_date, status, done_at, created_at,
-      submitted_for_review_at, submission_id,
-      submissions(patient_name, created_at)
+      id, title, content, description, due_date, status, done_at, created_at, priority, sort_order,
+      submitted_for_review_at, submission_id, created_by, recipient_type, specific_recipient_id,
+      submissions(patient_name, created_at),
+      task_assignees(user_id),
+      task_delivery_receipts(sent_at, delivered_at, read_at)
     `
     )
     .eq("workspace_id", workspaceId)
-    .eq("status", status)
-    .or(roleOrFilter(userId, isDoctor));
+    .eq("status", status);
 
   if (status === "done") {
     const ninetyDaysAgo = new Date(
@@ -54,6 +64,8 @@ export async function getMyTasks(
       .order("done_at", { ascending: false });
   } else {
     query = query
+      .order("priority", { ascending: false })
+      .order("sort_order", { ascending: true })
       .order("due_date", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: true });
   }
@@ -65,28 +77,69 @@ export async function getMyTasks(
     return [];
   }
 
-  return (data || []).map((t: Record<string, unknown>) => {
+  const mapped = (data || []).map((t: Record<string, unknown>) => {
     const submissions = t.submissions as {
       patient_name?: string | null;
       created_at?: string;
     } | null;
+    const assignees = (t.task_assignees as Array<{ user_id: string }> | null) || [];
+    const receipts =
+      (t.task_delivery_receipts as Array<{
+        sent_at?: string | null;
+        delivered_at?: string | null;
+        read_at?: string | null;
+      }> | null) || [];
+    const receiptSummary = summarizeTaskReceipts(receipts);
+    const assigneeIds = assignees
+      .map((assignee) => assignee.user_id)
+      .filter((id): id is string => Boolean(id));
     const st = t.status as MyTask["status"];
     return {
       id: t.id as string,
-      title: (t.content as string) || "",
+      title: resolveTaskDisplayTitle((t.title as string | null) ?? null, (t.content as string) || ""),
+      raw_title: (t.title as string | null) ?? null,
       description: (t.description as string | null) ?? null,
       due_date: (t.due_date as string | null) ?? null,
+      priority: ((t.priority as "normal" | "important" | null) ?? "normal"),
+      recipient_type:
+        (t.recipient_type as "doctor_only" | "all_team" | "specific_person") ??
+        "doctor_only",
+      specific_recipient_id:
+        (t.specific_recipient_id as string | null) ?? null,
+      assignee_ids: assigneeIds,
+      created_by: t.created_by as string,
       status: st,
       done_at: (t.done_at as string | null) ?? null,
       submitted_for_review_at:
         (t.submitted_for_review_at as string | null) ?? null,
+      sort_order: Number((t.sort_order as number | string | null) ?? 0),
       completed: st === "done",
       created_at: t.created_at as string,
-      submission_id: t.submission_id as string,
+      submission_id: (t.submission_id as string | null) ?? null,
       submission_patient_name: submissions?.patient_name ?? null,
-      submission_created_at:
-        submissions?.created_at ?? (t.created_at as string),
+      submission_created_at: submissions?.created_at ?? null,
+      delivery_status: receiptSummary.aggregate,
+      receipt_summary: {
+        total: receiptSummary.total,
+        sent: receiptSummary.sent,
+        delivered: receiptSummary.delivered,
+        read: receiptSummary.read,
+      },
     };
+  });
+
+  return mapped.filter((task) => {
+    const isSpecificallyAssigned =
+      task.specific_recipient_id === userId || task.assignee_ids.includes(userId);
+    if (isDoctor) {
+      return (
+        task.created_by === userId ||
+        task.recipient_type === "all_team" ||
+        task.recipient_type === "doctor_only" ||
+        isSpecificallyAssigned
+      );
+    }
+    return task.recipient_type === "all_team" || isSpecificallyAssigned;
   });
 }
 
@@ -104,30 +157,14 @@ export async function countMyOpenTasks(
   workspaceId: string,
   role: "doctor" | "team"
 ): Promise<{ total: number; overdue: number }> {
-  const supabase = await createClient();
   const isDoctor = role === "doctor";
-  const orF = roleOrFilter(userId, isDoctor);
-
   const statuses = isDoctor ? (["open", "pending_review"] as const) : (["open"] as const);
-
-  const queries = statuses.map((s) =>
-    supabase
-      .from("tasks")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", workspaceId)
-      .or(orF)
-      .eq("status", s)
+  const tasksByStatus = await Promise.all(
+    statuses.map((currentStatus) =>
+      getMyTasks(userId, workspaceId, isDoctor, currentStatus)
+    )
   );
-
-  const results = await Promise.all(queries);
-  for (const r of results) {
-    if (r.error) {
-      console.error("[countMyOpenTasks]", r.error);
-      return { total: 0, overdue: 0 };
-    }
-  }
-
-  const total = results.reduce((sum, r) => sum + (r.count || 0), 0);
+  const total = tasksByStatus.reduce((sum, items) => sum + items.length, 0);
 
   return {
     total,

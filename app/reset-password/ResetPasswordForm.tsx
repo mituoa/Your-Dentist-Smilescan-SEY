@@ -7,28 +7,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { getAuthenticatedEntryPath } from "@/app/(auth)/actions";
 
 type Props = {
   tokenHashFromQuery: string | null;
   typeFromQuery: string | null;
+  inviteTokenFromQuery?: string | null;
 };
 
-function parseHashParams(): { token_hash: string | null; type: string | null } {
+function parseHashParams(): {
+  token_hash: string | null;
+  type: string | null;
+  invite: string | null;
+} {
   if (typeof window === "undefined") {
-    return { token_hash: null, type: null };
+    return { token_hash: null, type: null, invite: null };
   }
   const raw = window.location.hash?.replace(/^#/, "") ?? "";
-  if (!raw) return { token_hash: null, type: null };
+  if (!raw) return { token_hash: null, type: null, invite: null };
   const params = new URLSearchParams(raw);
   return {
     token_hash: params.get("token_hash"),
     type: params.get("type"),
+    invite: params.get("invite"),
   };
 }
 
 export function ResetPasswordForm({
   tokenHashFromQuery,
   typeFromQuery,
+  inviteTokenFromQuery,
 }: Props) {
   const router = useRouter();
   const [verifyError, setVerifyError] = useState<string | null>(null);
@@ -38,6 +46,9 @@ export function ResetPasswordForm({
   const [confirm, setConfirm] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [inviteToken, setInviteToken] = useState<string | null>(
+    inviteTokenFromQuery || null
+  );
 
   const runVerify = useCallback(async (token_hash: string, type: string) => {
     setVerifying(true);
@@ -67,12 +78,15 @@ export function ResetPasswordForm({
     async function init() {
       let token_hash = tokenHashFromQuery;
       let type = typeFromQuery;
+      let invite = inviteTokenFromQuery;
 
       if (!token_hash || !type) {
         const fromHash = parseHashParams();
         token_hash = token_hash || fromHash.token_hash;
         type = type || fromHash.type;
+        invite = invite || fromHash.invite;
       }
+      setInviteToken(invite || null);
 
       if (!token_hash || !type) {
         if (!cancelled) {
@@ -91,7 +105,7 @@ export function ResetPasswordForm({
     return () => {
       cancelled = true;
     };
-  }, [tokenHashFromQuery, typeFromQuery, runVerify]);
+  }, [tokenHashFromQuery, typeFromQuery, inviteTokenFromQuery, runVerify]);
 
   const canSubmit = useMemo(() => {
     if (!verified || submitting) return false;
@@ -118,7 +132,12 @@ export function ResetPasswordForm({
       setSubmitting(false);
       return;
     }
-    router.push("/dashboard");
+    if (inviteToken) {
+      router.push(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
+    } else {
+      const nextPath = await getAuthenticatedEntryPath();
+      router.push(nextPath);
+    }
     router.refresh();
   }
 

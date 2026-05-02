@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="240" viewBox="0 0 920 240" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Settings logo</title>
+  <desc id="desc">A slate-toned wordmark paired with a quiet control-panel icon that fits the broader brand family.</desc>
+  <defs>
+    <linearGradient id="panel" x1="46" y1="52" x2="176" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EEF1F5"/>
+    </linearGradient>
+  </defs>
+  <rect x="36" y="52" width="136" height="136" rx="38" fill="url(#panel)"/>
+  <rect x="36.75" y="52.75" width="134.5" height="134.5" rx="37.25" stroke="#58606B" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M72 83C81.5 75.667 92.167 72 104 72C115.833 72 126.5 75.667 136 83" stroke="#58606B" stroke-opacity="0.24" stroke-width="6.5" stroke-linecap="round"/>
+  <rect x="77" y="94" width="54" height="44" rx="14" stroke="#58606B" stroke-width="6.5"/>
+  <circle cx="104" cy="116" r="9" fill="#FFFFFF" stroke="#58606B" stroke-width="6.5"/>
+  <path d="M88 116H95" stroke="#58606B" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M113 116H120" stroke="#58606B" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M85 148C91.333 144.667 97.667 143 104 143C110.333 143 116.667 144.667 123 148" stroke="#58606B" stroke-opacity="0.42" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M79 156C88 161.333 96.333 164 104 164C111.667 164 120 161.333 129 156" stroke="#58606B" stroke-width="7.5" stroke-linecap="round"/>
+  <text x="214" y="118" fill="#121212" font-family="'Iowan Old Style', 'Palatino Linotype', Georgia, serif" font-size="66" letter-spacing="-1.8">Settings</text>
+  <text x="218" y="155" fill="#58606B" font-family="'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="4.2">PRACTICE CONTROLS AND ACCESS</text>
+</svg>

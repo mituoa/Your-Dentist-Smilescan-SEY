@@ -34,28 +34,30 @@ export function CommentForm({ taskId }: CommentFormProps) {
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Kommentar hinzufügen…"
+        placeholder="Kommentar für Team oder Arzt eingeben…"
         rows={3}
         maxLength={2000}
-        className="w-full px-3 py-2 bg-surface-card border border-border rounded text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand/40"
+        className="w-full resize-none rounded-md border border-border bg-surface-card px-3 py-2 text-sm leading-6 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-brand/40"
       />
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-text-tertiary">{content.length}/2000</span>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-xs font-medium tabular-nums text-text-tertiary">
+          {content.length}/2000
+        </span>
         <button
           type="button"
           onClick={handleSubmit}
           disabled={isPending || !content.trim()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-ink text-cream rounded text-sm hover:bg-ink/90 disabled:opacity-50"
+          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-ink px-4 py-2 text-sm text-cream transition-colors hover:bg-ink/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50 sm:w-auto"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <Send className="w-4 h-4" />
           )}
-          Senden
+          Kommentar senden
         </button>
       </div>
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <p className="text-sm leading-5 text-danger">{error}</p>}
     </div>
   );
 }

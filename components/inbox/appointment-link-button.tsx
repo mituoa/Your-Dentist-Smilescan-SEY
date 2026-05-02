@@ -8,11 +8,13 @@ import { Send, Check, AlertCircle } from "lucide-react";
 interface AppointmentLinkButtonProps {
   submissionId: string;
   hasPatientEmail: boolean;
+  canSend: boolean;
 }
 
 export function AppointmentLinkButton({
   submissionId,
   hasPatientEmail,
+  canSend,
 }: AppointmentLinkButtonProps) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<{
@@ -37,22 +39,32 @@ export function AppointmentLinkButton({
 
   if (!hasPatientEmail) {
     return (
-      <div className="p-3 bg-surface-sunken rounded text-xs text-text-tertiary">
-        Keine E-Mail-Adresse des Patienten hinterlegt.
+      <div className="rounded-lg bg-surface-sunken p-3 text-sm leading-5 text-text-tertiary">
+        Keine E-Mail-Adresse hinterlegt. Terminlink kann nicht gesendet werden.
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <Button onClick={handleClick} disabled={isPending} className="w-full">
+      <Button
+        type="button"
+        onClick={handleClick}
+        disabled={!canSend || isPending}
+        title={
+          !canSend
+            ? "Nur Ärzte dürfen Terminlinks versenden."
+            : undefined
+        }
+        className="min-h-11 w-full"
+      >
         <Send className="w-4 h-4 mr-2" strokeWidth={1.75} />
-        {isPending ? "Wird gesendet…" : "Terminlink senden"}
+        {isPending ? "Wird gesendet…" : "Terminlink per E-Mail senden"}
       </Button>
 
       {result && (
         <div
-          className={`flex items-start gap-2 p-2.5 rounded text-xs ${
+          className={`flex items-start gap-2 rounded-lg p-2.5 text-sm leading-5 ${
             result.type === "success"
               ? "bg-brand/10 text-brand"
               : "bg-danger/10 text-danger"
@@ -66,7 +78,7 @@ export function AppointmentLinkButton({
               strokeWidth={2}
             />
           )}
-          <span className="leading-snug">{result.message}</span>
+          <span>{result.message}</span>
         </div>
       )}
     </div>

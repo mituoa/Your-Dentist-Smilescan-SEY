@@ -7,6 +7,9 @@ import { ProfileEditorShell } from "@/components/profile-editor/profile-editor-s
 export default async function ProfileEditorPage() {
   const workspace = await getCurrentWorkspace();
   if (!workspace) redirect("/login");
+  if (workspace.role !== "doctor") {
+    redirect("/my-tasks");
+  }
 
   const supabase = await createClient();
   const { data: ws } = await supabase
