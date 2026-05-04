@@ -1,0 +1,637 @@
+import { useState, useEffect, useRef } from 'react';
+import { Send, RefreshCw } from 'lucide-react';
+
+interface AppointmentPanelProps {
+  patientName: string;
+  onClose: () => void;
+  onSend: (message: string, action: 'appointment') => void;
+  isClosing?: boolean;
+}
+
+interface InquiryPanelProps {
+  patientName: string;
+  onClose: () => void;
+  onSend: (message: string, action: 'inquiry') => void;
+  isClosing?: boolean;
+}
+
+// Global practice settings (would come from app settings)
+const PRACTICE_PHONE = '+49 30 12345678';
+const PRACTICE_BOOKING_LINK = 'https://yourpractice.de/termin';
+
+// Helper function to generate template text
+function generateTemplate(
+  timeframe: 'today' | 'week' | 'routine',
+  patientName: string
+): string {
+  const contactSection = `Bitte ${timeframe === 'today' ? 'setzen Sie sich noch heute telefonisch mit unserer Praxis in Verbindung' : timeframe === 'week' ? 'vereinbaren Sie hierzu einen Termin telefonisch' : 'können Sie hierfür telefonisch einen Termin vereinbaren'}:\n${PRACTICE_PHONE}\n\nAlternativ ${timeframe === 'today' ? 'können Sie einen Termin über unsere Online-Terminvergabe buchen' : 'steht Ihnen unsere Online-Terminvergabe zur Verfügung'}:\n${PRACTICE_BOOKING_LINK}`;
+
+  if (timeframe === 'today') {
+    return `Guten Tag ${patientName},
+
+vielen Dank für Ihre Mitteilung.
+
+Anhand Ihrer Angaben besteht der Verdacht auf einen akuten Behandlungsbedarf. Wir empfehlen daher eine zeitnahe zahnärztliche Abklärung.
+
+${contactSection}
+
+Sollten sich die Beschwerden kurzfristig verstärken, insbesondere bei zunehmenden Schmerzen, Schwellung oder Fieber, suchen Sie bitte umgehend zahnärztliche Hilfe auf.
+
+Mit freundlichen Grüßen  
+Ihr Praxisteam`;
+  }
+
+  if (timeframe === 'week') {
+    return `Guten Tag ${patientName},
+
+vielen Dank für Ihre Mitteilung.
+
+Auf Grundlage Ihrer Angaben empfehlen wir eine zahnärztliche Abklärung innerhalb der nächsten Tage.
+
+${contactSection}
+
+Sollten sich Ihre Beschwerden zwischenzeitlich verstärken, melden Sie sich bitte erneut bei uns.
+
+Mit freundlichen Grüßen  
+Ihr Praxisteam`;
+  }
+
+  return `Guten Tag ${patientName},
+
+vielen Dank für Ihre Mitteilung.
+
+Nach aktueller Einschätzung besteht kein akuter Behandlungsbedarf. Wir empfehlen eine reguläre zahnärztliche Kontrolle.
+
+${contactSection}
+
+Sollten sich Ihre Beschwerden verändern oder verschlimmern, kontaktieren Sie uns bitte erneut.
+
+Mit freundlichen Grüßen  
+Ihr Praxisteam`;
+}
+
+export function AppointmentPanel({ patientName, onClose, onSend, isClosing }: AppointmentPanelProps) {
+  const [selectedTimeframe, setSelectedTimeframe] = useState<'today' | 'week' | 'routine' | null>(null);
+  const [messageText, setMessageText] = useState('');
+  const [isManuallyEdited, setIsManuallyEdited] = useState(false);
+  const [generatedTemplate, setGeneratedTemplate] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Generate message when timeframe changes
+  useEffect(() => {
+    if (!selectedTimeframe) {
+      setMessageText('');
+      setGeneratedTemplate('');
+      return;
+    }
+
+    const newTemplate = generateTemplate(selectedTimeframe, patientName);
+    setGeneratedTemplate(newTemplate);
+
+    if (!isManuallyEdited) {
+      setMessageText(newTemplate);
+      setTimeout(() => textareaRef.current?.focus(), 100);
+    }
+  }, [selectedTimeframe, patientName, isManuallyEdited]);
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessageText(e.target.value);
+    if (e.target.value !== generatedTemplate) {
+      setIsManuallyEdited(true);
+    }
+  };
+
+  const handleResetToTemplate = () => {
+    setMessageText(generatedTemplate);
+    setIsManuallyEdited(false);
+    textareaRef.current?.focus();
+  };
+
+  const handleSend = () => {
+    if (messageText.trim()) {
+      onSend(messageText, 'appointment');
+    }
+  };
+
+  const showResetButton = isManuallyEdited && generatedTemplate && messageText !== generatedTemplate;
+
+  return (
+    <div
+      style={{
+        background: '#F8FAFB',
+        borderRadius: '16px',
+        padding: '32px',
+        marginTop: '16px',
+        animation: isClosing ? 'slideOut 200ms ease-in' : 'slideIn 180ms ease-out',
+        opacity: isClosing ? 0 : 1,
+      }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h3 className="text-[16px]" style={{
+          color: '#0F172A',
+          fontWeight: 600,
+          letterSpacing: '-0.015em',
+          marginBottom: '10px',
+        }}>
+          Termin vorschlagen
+        </h3>
+        <p className="text-[13px]" style={{
+          color: '#6B7A90',
+          lineHeight: '1.5',
+          letterSpacing: '-0.003em',
+        }}>
+          Treffen Sie eine Einschätzung. Die Nachricht wird automatisch vorbereitet.
+        </p>
+      </div>
+
+      {/* Zeitraum Chips */}
+      <div style={{ marginBottom: '32px' }}>
+        <p className="text-[11px]" style={{
+          color: '#6B7A90',
+          fontWeight: 600,
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          marginBottom: '12px',
+        }}>
+          Zeitraum
+        </p>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {[
+            { id: 'today' as const, label: 'Heute' },
+            { id: 'week' as const, label: 'Diese Woche' },
+            { id: 'routine' as const, label: 'Nicht dringend' },
+          ].map((option) => (
+            <button
+              key={option.id}
+              onClick={() => {
+                setSelectedTimeframe(option.id);
+                setIsManuallyEdited(false);
+              }}
+              style={{
+                padding: '11px 20px',
+                background: selectedTimeframe === option.id ? 'rgba(47,128,237,0.03)' : '#F7FAFD',
+                color: selectedTimeframe === option.id ? '#2F80ED' : '#64748B',
+                border: `1px solid ${selectedTimeframe === option.id ? 'rgba(47,128,237,0.15)' : '#E5EAF2'}`,
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: selectedTimeframe === option.id ? 600 : 500,
+                cursor: 'pointer',
+                transition: 'all 140ms ease',
+                letterSpacing: '-0.003em',
+              }}
+              onMouseEnter={(e) => {
+                if (selectedTimeframe !== option.id) {
+                  e.currentTarget.style.background = '#FAFBFD';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedTimeframe !== option.id) {
+                  e.currentTarget.style.background = '#F7FAFD';
+                }
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Nachricht Textarea */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          marginBottom: '12px'
+        }}>
+          <label className="text-[11px]" style={{
+            color: '#6B7A90',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+          }}>
+            Nachricht
+          </label>
+          
+          {showResetButton && (
+            <button
+              onClick={handleResetToTemplate}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '5px 11px',
+                background: 'transparent',
+                color: '#2F80ED',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 140ms ease',
+                letterSpacing: '-0.003em',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(47,128,237,0.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <RefreshCw className="w-3 h-3" />
+              Vorlage aktualisieren
+            </button>
+          )}
+        </div>
+        
+        <textarea
+          ref={textareaRef}
+          value={messageText}
+          onChange={handleTextChange}
+          placeholder="Wählen Sie einen Zeitraum aus..."
+          className="w-full text-[14px] focus:outline-none placeholder:text-gray-400 resize-none"
+          style={{
+            minHeight: '180px',
+            padding: '22px',
+            borderRadius: '10px',
+            border: '1px solid #E5EAF2',
+            background: '#FBFCFE',
+            color: '#0F172A',
+            lineHeight: '1.75',
+            transition: 'all 140ms ease',
+            fontFamily: 'inherit',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = '#2F80ED';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,128,237,0.04)';
+            e.currentTarget.style.background = '#FFFFFF';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = '#E5EAF2';
+            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.background = '#FBFCFE';
+          }}
+        />
+      </div>
+
+      {/* Action Buttons */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: '20px',
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            padding: '0',
+            height: 'auto',
+            background: 'transparent',
+            color: '#6B7A90',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'all 140ms ease',
+            letterSpacing: '-0.003em',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#0F172A';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#6B7A90';
+          }}
+        >
+          Abbrechen
+        </button>
+
+        <button
+          onClick={handleSend}
+          disabled={!messageText.trim()}
+          style={{
+            padding: '0 26px',
+            height: '42px',
+            background: messageText.trim() ? '#2F80ED' : '#E5EAF2',
+            color: messageText.trim() ? '#FFFFFF' : '#94A3B8',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: messageText.trim() ? 'pointer' : 'not-allowed',
+            transition: 'all 140ms ease',
+            letterSpacing: '-0.003em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '9px',
+            boxShadow: messageText.trim() ? '0 1px 3px rgba(47,128,237,0.12)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (messageText.trim()) {
+              e.currentTarget.style.background = '#1C6FD8';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(47,128,237,0.18)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (messageText.trim()) {
+              e.currentTarget.style.background = '#2F80ED';
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(47,128,237,0.12)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }
+          }}
+        >
+          <Send className="w-4 h-4" />
+          Nachricht senden
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideOut {
+          from {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export function InquiryPanel({ patientName, onClose, onSend, isClosing }: InquiryPanelProps) {
+  const [messageText, setMessageText] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const templates = [
+    { 
+      id: 'pain', 
+      label: 'Schmerzen?',
+      text: 'Haben Sie aktuell Schmerzen? Falls ja, wie stark sind diese auf einer Skala von 1 bis 10?'
+    },
+    { 
+      id: 'since', 
+      label: 'Seit wann?',
+      text: 'Seit wann bestehen die Beschwerden genau?'
+    },
+    { 
+      id: 'swelling', 
+      label: 'Schwellung/Fieber?',
+      text: 'Haben Sie eine Schwellung, Fieber oder zunehmende Beschwerden bemerkt?'
+    },
+    { 
+      id: 'image', 
+      label: 'Weiteres Bild',
+      text: 'Bitte senden Sie uns, wenn möglich, ein weiteres scharfes Foto der betroffenen Stelle.'
+    },
+    { 
+      id: 'medication', 
+      label: 'Medikamentenfrage',
+      text: 'Nehmen Sie aktuell Medikamente ein oder haben Sie bereits Schmerzmittel eingenommen?'
+    },
+  ];
+
+  const handleTemplateClick = (template: typeof templates[0]) => {
+    setSelectedTemplate(template.id);
+    setMessageText(template.text);
+    setTimeout(() => textareaRef.current?.focus(), 100);
+  };
+
+  const handleSend = () => {
+    if (messageText.trim()) {
+      onSend(messageText, 'inquiry');
+    }
+  };
+
+  return (
+    <div
+      style={{
+        background: '#F8FAFB',
+        borderRadius: '16px',
+        padding: '32px',
+        marginTop: '16px',
+        animation: isClosing ? 'slideOut 200ms ease-in' : 'slideIn 180ms ease-out',
+        opacity: isClosing ? 0 : 1,
+      }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h3 className="text-[16px]" style={{
+          color: '#0F172A',
+          fontWeight: 600,
+          letterSpacing: '-0.015em',
+          marginBottom: '10px',
+        }}>
+          Rückfrage an Patient
+        </h3>
+        <p className="text-[13px]" style={{
+          color: '#6B7A90',
+          lineHeight: '1.5',
+          letterSpacing: '-0.003em',
+        }}>
+          Wählen Sie eine Vorlage oder formulieren Sie eine eigene Rückfrage.
+        </p>
+      </div>
+
+      {/* Template Chips */}
+      <div style={{ marginBottom: '32px' }}>
+        <p className="text-[11px]" style={{
+          color: '#6B7A90',
+          fontWeight: 600,
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          marginBottom: '12px',
+        }}>
+          Vorlagen
+        </p>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {templates.map((template) => (
+            <button
+              key={template.id}
+              onClick={() => handleTemplateClick(template)}
+              style={{
+                padding: '11px 18px',
+                background: selectedTemplate === template.id ? 'rgba(47,128,237,0.03)' : '#F7FAFD',
+                color: selectedTemplate === template.id ? '#2F80ED' : '#64748B',
+                border: `1px solid ${selectedTemplate === template.id ? 'rgba(47,128,237,0.15)' : '#E5EAF2'}`,
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: selectedTemplate === template.id ? 600 : 500,
+                cursor: 'pointer',
+                transition: 'all 140ms ease',
+                letterSpacing: '-0.003em',
+              }}
+              onMouseEnter={(e) => {
+                if (selectedTemplate !== template.id) {
+                  e.currentTarget.style.background = '#FAFBFD';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedTemplate !== template.id) {
+                  e.currentTarget.style.background = '#F7FAFD';
+                }
+              }}
+            >
+              {template.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Nachricht Textarea */}
+      <div style={{ marginBottom: '32px' }}>
+        <label className="text-[11px]" style={{
+          color: '#6B7A90',
+          fontWeight: 600,
+          display: 'block',
+          marginBottom: '12px',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+        }}>
+          Nachricht
+        </label>
+        <textarea
+          ref={textareaRef}
+          value={messageText}
+          onChange={(e) => {
+            setMessageText(e.target.value);
+            setSelectedTemplate(null);
+          }}
+          placeholder="Formulieren Sie Ihre Rückfrage..."
+          className="w-full text-[14px] focus:outline-none placeholder:text-gray-400 resize-none"
+          style={{
+            minHeight: '160px',
+            padding: '22px',
+            borderRadius: '10px',
+            border: '1px solid #E5EAF2',
+            background: '#FBFCFE',
+            color: '#0F172A',
+            lineHeight: '1.75',
+            transition: 'all 140ms ease',
+            fontFamily: 'inherit',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = '#2F80ED';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,128,237,0.04)';
+            e.currentTarget.style.background = '#FFFFFF';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = '#E5EAF2';
+            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.background = '#FBFCFE';
+          }}
+        />
+      </div>
+
+      {/* Action Buttons */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: '20px',
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            padding: '0',
+            height: 'auto',
+            background: 'transparent',
+            color: '#6B7A90',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'all 140ms ease',
+            letterSpacing: '-0.003em',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#0F172A';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#6B7A90';
+          }}
+        >
+          Abbrechen
+        </button>
+
+        <button
+          onClick={handleSend}
+          disabled={!messageText.trim()}
+          style={{
+            padding: '0 26px',
+            height: '42px',
+            background: messageText.trim() ? '#2F80ED' : '#E5EAF2',
+            color: messageText.trim() ? '#FFFFFF' : '#94A3B8',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: messageText.trim() ? 'pointer' : 'not-allowed',
+            transition: 'all 140ms ease',
+            letterSpacing: '-0.003em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '9px',
+            boxShadow: messageText.trim() ? '0 1px 3px rgba(47,128,237,0.12)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (messageText.trim()) {
+              e.currentTarget.style.background = '#1C6FD8';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(47,128,237,0.18)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (messageText.trim()) {
+              e.currentTarget.style.background = '#2F80ED';
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(47,128,237,0.12)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }
+          }}
+        >
+          <Send className="w-4 h-4" />
+          Rückfrage senden
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideOut {
+          from {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}

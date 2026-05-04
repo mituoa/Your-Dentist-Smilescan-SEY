@@ -1,0 +1,802 @@
+import { useState } from 'react';
+import { Search, Bell, User, ChevronDown, LogOut, Plus, AlertCircle, Users } from 'lucide-react';
+import { useNavigate } from 'react-router';
+// Product Logos
+import logoAtlas from '../../imports/logo-mark-2.svg';
+import logoSmileScan from '../../imports/logo-mark.svg';
+import logoJournals from '../../imports/logo-mark-3.svg';
+import logoPortrait from '../../imports/logo-mark-4.svg';
+import logoRelay from '../../imports/logo-mark-5.svg';
+import logoSettings from '../../imports/logo-mark-6.svg';
+
+type Task = {
+  id: string;
+  title: string;
+  assignedTo: string[];
+  isImportant: boolean;
+  status: 'open' | 'in-progress' | 'done';
+  context?: string;
+};
+
+type TeamMember = {
+  id: string;
+  name: string;
+  initials: string;
+  color: string;
+};
+
+const teamMembers: TeamMember[] = [
+  { id: '1', name: 'Dr. Cyrus Alamouti', initials: 'CA', color: '#2F80ED' },
+  { id: '2', name: 'Sarah Weber', initials: 'SW', color: '#16A34A' },
+  { id: '3', name: 'Michael Klein', initials: 'MK', color: '#EA580C' },
+  { id: '4', name: 'Anna Schmidt', initials: 'AS', color: '#8B5CF6' },
+];
+
+// TaskCard Component
+function TaskCard({ task, teamMembers, currentUserId }: { task: Task; teamMembers: TeamMember[]; currentUserId: string }) {
+  const isDone = task.status === 'done';
+  const isMyTask = task.assignedTo.includes(currentUserId);
+
+  return (
+    <div
+      className="bg-white group cursor-pointer"
+      style={{
+        border: isMyTask ? '1px solid rgba(47,128,237,0.15)' : 'none',
+        borderRadius: '8px',
+        padding: '14px 16px',
+        transition: 'all 180ms ease',
+        background: isMyTask ? 'rgba(47,128,237,0.02)' : '#FFFFFF',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = isMyTask ? 'rgba(47,128,237,0.04)' : '#F8FAFC';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = isMyTask ? 'rgba(47,128,237,0.02)' : '#FFFFFF';
+      }}
+    >
+      {/* Task Title with Important Indicator */}
+      <div className="flex items-start gap-2 mb-3">
+        {task.isImportant && (
+          <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#DC2626' }} />
+        )}
+        <h3
+          className="text-[14px] font-medium flex-1"
+          style={{
+            color: isDone ? '#94A3B8' : '#1E293B',
+            textDecoration: isDone ? 'line-through' : 'none',
+            lineHeight: '1.45',
+          }}
+        >
+          {task.title}
+        </h3>
+      </div>
+
+      {/* Context */}
+      {task.context && (
+        <p className="text-[12px] mb-3" style={{ color: '#94A3B8', paddingLeft: task.isImportant ? '14px' : '0' }}>
+          {task.context}
+        </p>
+      )}
+
+      {/* Assignees */}
+      <div className="flex items-center gap-1.5" style={{ paddingLeft: task.isImportant ? '14px' : '0' }}>
+        {task.assignedTo.length > 1 && (
+          <Users className="w-3 h-3 mr-0.5" style={{ color: '#94A3B8' }} />
+        )}
+        {task.assignedTo.map(id => {
+          const member = teamMembers.find(m => m.id === id);
+          return member ? (
+            <div
+              key={id}
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white"
+              style={{
+                background: member.color,
+                boxShadow: id === currentUserId ? '0 0 0 2px rgba(47,128,237,0.2)' : 'none'
+              }}
+              title={member.name}
+            >
+              {member.initials}
+            </div>
+          ) : null;
+        })}
+      </div>
+    </div>
+  );
+}
+
+const mockTasks: Task[] = [
+  {
+    id: '1',
+    title: 'Nachsorge-Termin mit Anna Müller vereinbaren',
+    assignedTo: ['2'],
+    isImportant: true,
+    status: 'open',
+    context: 'Fall #12345'
+  },
+  {
+    id: '2',
+    title: 'Röntgenbilder für Thomas Schmidt überprüfen',
+    assignedTo: ['1'],
+    isImportant: true,
+    status: 'in-progress',
+    context: 'Fall #12344'
+  },
+  {
+    id: '3',
+    title: 'Behandlungsplan dokumentieren',
+    assignedTo: ['3'],
+    isImportant: false,
+    status: 'open',
+    context: 'Fall #12340'
+  },
+  {
+    id: '4',
+    title: 'Sterilisation Raum 2 überprüfen',
+    assignedTo: ['4'],
+    isImportant: false,
+    status: 'in-progress',
+  },
+  {
+    id: '5',
+    title: 'Laborergebnisse besprechen',
+    assignedTo: ['1', '2'],
+    isImportant: false,
+    status: 'done',
+    context: 'Fall #12338'
+  },
+  {
+    id: '6',
+    title: 'Materialbestellung aufgeben',
+    assignedTo: ['3'],
+    isImportant: false,
+    status: 'done',
+  }
+];
+
+export default function Relay() {
+  const [activeTab, setActiveTab] = useState('relay');
+  const [viewFilter, setViewFilter] = useState<'all' | 'mine'>('all');
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+  const [isImportant, setIsImportant] = useState(false);
+  const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/');
+  };
+
+  const currentUserId = '1'; // Dr. Cyrus Alamouti
+
+  const getTasksByStatus = (status: 'open' | 'in-progress' | 'done') => {
+    let filtered = mockTasks.filter(t => t.status === status);
+    if (viewFilter === 'mine') {
+      filtered = filtered.filter(t => t.assignedTo.includes(currentUserId));
+    }
+    return filtered;
+  };
+
+  const openTasks = getTasksByStatus('open');
+  const inProgressTasks = getTasksByStatus('in-progress');
+  const doneTasks = getTasksByStatus('done');
+
+  const getMemberById = (id: string) => teamMembers.find(m => m.id === id);
+
+  const handleCreateTask = () => {
+    if (!newTaskTitle.trim()) return;
+    // Task creation logic here
+    setNewTaskTitle('');
+    setSelectedAssignees([]);
+    setIsImportant(false);
+  };
+
+  return (
+    <div className="min-h-screen flex relative" style={{
+      background: '#F8FAFC'
+    }}>
+      {/* Sophisticated ambient gradient */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at top right, rgba(47,128,237,0.05), transparent 32%)',
+        }}
+      />
+      {/* SIDEBAR - OS-quality navigation */}
+      <aside className="w-[280px] bg-white/95 backdrop-blur-xl border-r flex flex-col relative z-10"
+        style={{
+          borderColor: '#EEF2F6',
+          boxShadow: 'none',
+        }}
+      >
+        {/* Logo Section - Matching Login exactly */}
+        <div className="px-6 border-b" style={{
+          borderColor: '#EEF2F6',
+          height: '80px',
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <div className="flex items-center gap-3">
+            {/* Medical Blue Logo from Login */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" className="w-11 h-11">
+              <defs>
+                <linearGradient id="logo-relay" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#FFFFFF"/>
+                  <stop offset="1" stopColor="#E3F2FD"/>
+                </linearGradient>
+              </defs>
+              <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#logo-relay)"/>
+              <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#2F80ED" strokeOpacity="0.18" strokeWidth="1.5"/>
+              <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#2F80ED" strokeOpacity="0.34" strokeWidth="9" strokeLinecap="round"/>
+              <path d="M99 103L128 131L157 103" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M128 130V157" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round"/>
+              <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#2F80ED" strokeWidth="10" strokeLinecap="round"/>
+            </svg>
+            <div>
+              <h1 className="text-[19px] font-medium text-gray-900 tracking-tight leading-none">
+                <span className="italic font-light">Your</span> Dentist
+              </h1>
+              <p className="text-[9px] font-semibold text-[#2F80ED] uppercase tracking-[0.15em] mt-0.5">
+                Neutral Practice Platform
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation - Premium Product Icons */}
+        <nav className="flex-1 px-4 pt-6 pb-4 space-y-2">
+          {/* Atlas - Dashboard */}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]"
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoAtlas} alt="Atlas" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>
+                Atlas
+              </span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Dashboard</span>
+            </div>
+          </button>
+
+          {/* Tracker - SmileScan */}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]"
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoSmileScan} alt="Tracker" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>
+                Tracker
+              </span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Intake & Triage</span>
+            </div>
+          </button>
+
+          {/* Relay - Tasks (ACTIVE) */}
+          <button
+            onClick={() => setActiveTab('relay')}
+            className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative bg-[#EEF6FF]"
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              left: '6px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '2px',
+              height: '20px',
+              background: '#2F80ED',
+              borderRadius: '2px',
+            }} />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoRelay} alt="Relay" className="w-8 h-8 opacity-100" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium text-[#1E293B]">
+                Relay
+              </span>
+              <span className="block text-[11px] font-medium text-[#64748B]">Aufgaben</span>
+            </div>
+          </button>
+
+          {/* Benutzer - Portrait */}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]"
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoPortrait} alt="Benutzer" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>
+                Benutzer
+              </span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Profilverwaltung</span>
+            </div>
+          </button>
+
+          {/* Dokumente - Journals */}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]"
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoJournals} alt="Dokumente" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>
+                Journals
+              </span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Fallakten</span>
+            </div>
+          </button>
+
+          {/* Admin - Settings */}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]"
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoSettings} alt="Admin" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>
+                Admin
+              </span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Einstellungen</span>
+            </div>
+          </button>
+        </nav>
+
+        {/* Bottom Section */}
+        <div className="px-4 py-4 border-t space-y-2" style={{ borderColor: '#EEF2F6' }}>
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="group w-full flex items-center gap-3 px-3 rounded-xl hover:bg-[#F8FAFC]"
+            style={{
+              height: '48px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: '#F8FAFC' }}
+            >
+              <LogOut className="w-4 h-4" style={{ color: '#64748B' }} />
+            </div>
+            <span className="text-[15px] font-medium" style={{ color: '#64748B' }}>Abmelden</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col relative">
+        {/* HEADER - Intelligent and refined */}
+        <header className="bg-white/80 backdrop-blur-xl relative z-10"
+          style={{
+            height: '80px',
+          }}
+        >
+          <div className="px-10 h-full flex items-center justify-between">
+            {/* Search */}
+            <div className="flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Aufgaben, Patienten oder Fälle suchen..."
+                  className="w-full bg-white text-[15px] text-gray-900 focus:outline-none placeholder:text-gray-400"
+                  style={{
+                    height: '48px',
+                    paddingLeft: '44px',
+                    paddingRight: '16px',
+                    borderRadius: '12px',
+                    border: '1px solid #E2E8F0',
+                    transition: 'all 200ms ease',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,128,237,0.12)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Right Section */}
+            <div className="flex items-center gap-3 ml-6">
+              {/* Quick Action */}
+              <button
+                className="hidden lg:flex items-center gap-2 px-5 text-white font-medium text-[14px]"
+                style={{
+                  height: '48px',
+                  borderRadius: '12px',
+                  background: '#2F80ED',
+                  boxShadow: '0 4px 12px rgba(47,128,237,0.28), 0 2px 4px rgba(47,128,237,0.18)',
+                  transition: 'all 180ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#1C6FD8';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(47,128,237,0.34), 0 3px 6px rgba(47,128,237,0.22)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#2F80ED';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(47,128,237,0.28), 0 2px 4px rgba(47,128,237,0.18)';
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                <span>Neue Aufgabe</span>
+              </button>
+
+              {/* Notifications */}
+              <button className="relative w-10 h-10 flex items-center justify-center hover:bg-[#F8FAFC] rounded-lg"
+                style={{
+                  transition: 'all 180ms ease',
+                }}
+              >
+                <Bell className="w-[18px] h-[18px]" style={{ color: '#64748B' }} />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ background: '#2F80ED' }}></span>
+              </button>
+
+              {/* User Menu */}
+              <button className="flex items-center gap-3 px-3 hover:bg-[#F8FAFC] rounded-xl"
+                style={{
+                  height: '44px',
+                  transition: 'all 180ms ease',
+                }}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{
+                  background: '#2F80ED',
+                }}>
+                  <User className="w-[16px] h-[16px] text-white" />
+                </div>
+                <div className="text-left hidden lg:block">
+                  <p className="text-[13px] font-medium" style={{
+                    color: '#1E293B',
+                    marginBottom: '2px',
+                  }}>Dr. Cyrus Alamouti</p>
+                  <p className="text-[11px]" style={{ color: '#64748B' }}>Administrator</p>
+                </div>
+                <ChevronDown className="w-4 h-4 hidden lg:block" style={{ color: '#94A3B8' }} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* CONTENT AREA */}
+        <div className="flex-1 overflow-auto">
+          <div className="max-w-[1600px] mx-auto px-10" style={{ paddingTop: '32px', paddingBottom: '32px' }}>
+            {/* HEADER */}
+            <div className="relative overflow-hidden"
+              style={{
+                marginBottom: '40px',
+              }}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-[28px] font-semibold"
+                    style={{
+                      color: '#1E293B',
+                      letterSpacing: '-0.01em',
+                      lineHeight: '1.2',
+                      fontWeight: 600,
+                      marginBottom: '8px',
+                    }}
+                  >
+                    Relay
+                  </h1>
+                  <p className="text-[13px]"
+                    style={{
+                      color: '#64748B',
+                    }}
+                  >
+                    Praxisorganisation & Aufgaben
+                  </p>
+                </div>
+
+                {/* View Filter */}
+                <div className="flex items-center gap-1"
+                  style={{
+                    background: '#F8FAFC',
+                    padding: '4px',
+                    borderRadius: '10px',
+                  }}
+                >
+                  <button
+                    onClick={() => setViewFilter('all')}
+                    className="px-4 py-2 rounded-lg text-[13px] font-medium"
+                    style={{
+                      background: viewFilter === 'all' ? '#FFFFFF' : 'transparent',
+                      color: viewFilter === 'all' ? '#1E293B' : '#64748B',
+                      transition: 'all 180ms ease',
+                      boxShadow: viewFilter === 'all' ? '0 1px 3px rgba(15,23,42,0.08)' : 'none',
+                    }}
+                  >
+                    Alle Aufgaben
+                  </button>
+                  <button
+                    onClick={() => setViewFilter('mine')}
+                    className="px-4 py-2 rounded-lg text-[13px] font-medium"
+                    style={{
+                      background: viewFilter === 'mine' ? '#FFFFFF' : 'transparent',
+                      color: viewFilter === 'mine' ? '#1E293B' : '#64748B',
+                      transition: 'all 180ms ease',
+                      boxShadow: viewFilter === 'mine' ? '0 1px 3px rgba(15,23,42,0.08)' : 'none',
+                    }}
+                  >
+                    Meine Aufgaben
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* QUICK ACTION - Task Creation */}
+            <div className="bg-white"
+              style={{
+                border: isInputFocused ? '1px solid #2F80ED' : '1px solid #E2E8F0',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                marginBottom: '32px',
+                transition: 'all 180ms ease',
+                boxShadow: isInputFocused ? '0 0 0 3px rgba(47,128,237,0.08)' : 'none',
+              }}
+            >
+              {/* Main Input */}
+              <input
+                type="text"
+                placeholder="Was steht als Nächstes an?"
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => {
+                  setTimeout(() => setIsInputFocused(false), 200);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateTask();
+                }}
+                className="w-full text-[15px] focus:outline-none"
+                style={{
+                  color: '#1E293B',
+                }}
+              />
+
+              {/* Options (visible on focus) */}
+              {isInputFocused && (
+                <div
+                  className="flex items-center gap-3 pt-3 mt-3"
+                  style={{
+                    borderTop: '1px solid #F1F5F9',
+                    animation: 'fadeIn 180ms ease',
+                  }}
+                >
+                  {/* Assignee Selector */}
+                  <div className="relative flex-1">
+                    <button
+                      onClick={() => setShowAssigneeDropdown(!showAssigneeDropdown)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#F8FAFC] w-full"
+                      style={{
+                        transition: 'all 180ms ease',
+                        border: '1px solid #F1F5F9',
+                      }}
+                    >
+                      {selectedAssignees.length === 0 ? (
+                        <>
+                          <User className="w-4 h-4" style={{ color: '#94A3B8' }} />
+                          <span className="text-[13px]" style={{ color: '#64748B' }}>Wer übernimmt das?</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1">
+                            {selectedAssignees.map(id => {
+                              const member = getMemberById(id);
+                              return member ? (
+                                <div
+                                  key={id}
+                                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white"
+                                  style={{ background: member.color }}
+                                >
+                                  {member.initials}
+                                </div>
+                              ) : null;
+                            })}
+                          </div>
+                          <span className="text-[13px] flex-1 text-left" style={{ color: '#1E293B' }}>
+                            {selectedAssignees.length === 1
+                              ? getMemberById(selectedAssignees[0])?.name
+                              : `${selectedAssignees.length} Personen`
+                            }
+                          </span>
+                        </>
+                      )}
+                      <ChevronDown className="w-3.5 h-3.5 ml-auto" style={{ color: '#94A3B8' }} />
+                    </button>
+
+                    {showAssigneeDropdown && (
+                      <div
+                        className="absolute left-0 mt-2 bg-white rounded-lg shadow-lg border"
+                        style={{
+                          width: '100%',
+                          minWidth: '240px',
+                          borderColor: '#E2E8F0',
+                          zIndex: 50,
+                        }}
+                      >
+                        <div style={{ padding: '8px' }}>
+                          {teamMembers.map(member => (
+                            <button
+                              key={member.id}
+                              onClick={() => {
+                                if (selectedAssignees.includes(member.id)) {
+                                  setSelectedAssignees(selectedAssignees.filter(id => id !== member.id));
+                                } else {
+                                  setSelectedAssignees([...selectedAssignees, member.id]);
+                                }
+                              }}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#F8FAFC]"
+                              style={{
+                                transition: 'all 180ms ease',
+                              }}
+                            >
+                              <div
+                                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white"
+                                style={{ background: member.color }}
+                              >
+                                {member.initials}
+                              </div>
+                              <span className="text-[14px]" style={{ color: '#1E293B' }}>{member.name}</span>
+                              {selectedAssignees.includes(member.id) && (
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: '#2F80ED' }} />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Important Toggle */}
+                  <button
+                    onClick={() => setIsImportant(!isImportant)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#F8FAFC]"
+                    style={{
+                      background: isImportant ? 'rgba(220,38,38,0.06)' : 'transparent',
+                      transition: 'all 180ms ease',
+                      border: '1px solid #F1F5F9',
+                    }}
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: isImportant ? '#DC2626' : '#CBD5E1' }} />
+                    <span className="text-[13px]" style={{ color: isImportant ? '#DC2626' : '#64748B' }}>
+                      Als wichtig markieren
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* BOARD - Kanban View */}
+            <div className="grid grid-cols-3" style={{ gap: '24px' }}>
+              {/* Column: Offen */}
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  padding: '20px',
+                }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[13px] font-semibold uppercase tracking-wider"
+                    style={{ color: '#64748B', letterSpacing: '0.05em' }}
+                  >
+                    Offen
+                  </h2>
+                  <span className="text-[12px] font-medium px-2 py-0.5 rounded-full"
+                    style={{
+                      background: '#F8FAFC',
+                      color: '#64748B',
+                    }}
+                  >
+                    {openTasks.length}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {openTasks.map(task => (
+                    <TaskCard key={task.id} task={task} teamMembers={teamMembers} currentUserId={currentUserId} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Column: In Bearbeitung */}
+              <div
+                style={{
+                  background: 'rgba(47,128,237,0.02)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[13px] font-semibold uppercase tracking-wider"
+                    style={{ color: '#64748B', letterSpacing: '0.05em' }}
+                  >
+                    In Bearbeitung
+                  </h2>
+                  <span className="text-[12px] font-medium px-2 py-0.5 rounded-full"
+                    style={{
+                      background: '#F8FAFC',
+                      color: '#64748B',
+                    }}
+                  >
+                    {inProgressTasks.length}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {inProgressTasks.map(task => (
+                    <TaskCard key={task.id} task={task} teamMembers={teamMembers} currentUserId={currentUserId} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Column: Erledigt */}
+              <div
+                style={{
+                  background: 'rgba(22,163,74,0.02)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[13px] font-semibold uppercase tracking-wider"
+                    style={{ color: '#64748B', letterSpacing: '0.05em' }}
+                  >
+                    Erledigt
+                  </h2>
+                  <span className="text-[12px] font-medium px-2 py-0.5 rounded-full"
+                    style={{
+                      background: '#F8FAFC',
+                      color: '#64748B',
+                    }}
+                  >
+                    {doneTasks.length}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {doneTasks.map(task => (
+                    <TaskCard key={task.id} task={task} teamMembers={teamMembers} currentUserId={currentUserId} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

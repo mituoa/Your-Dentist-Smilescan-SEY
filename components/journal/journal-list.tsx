@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FileText, Plus, Trash2 } from "lucide-react";
 import { createDraftArticle, deleteArticle } from "@/app/(protected)/journal/actions";
-import type { JournalEntry } from "@/lib/queries/journal";
+import type { JournalEntry } from "@/lib/types/journal-entry";
 import { getTopicLabel } from "@/lib/masterdata/journal-topics";
 
 interface JournalListProps {

@@ -272,6 +272,7 @@ export async function createMyTask(formData: FormData): Promise<{
   }
 
   revalidatePath("/my-tasks");
+  revalidatePath("/relay");
   revalidatePath("/dashboard");
   return { success: true };
 }
@@ -340,6 +341,7 @@ export async function submitTaskForReview(
   }
 
   revalidatePath("/my-tasks");
+  revalidatePath("/relay");
   revalidatePath(`/my-tasks/${taskId}`);
   revalidatePath("/inbox");
   revalidatePath("/dashboard");
@@ -430,6 +432,7 @@ export async function moveTaskStatusByDrag(
   }
 
   revalidatePath("/my-tasks");
+  revalidatePath("/relay");
   revalidatePath(`/my-tasks/${taskId}`);
   revalidatePath("/dashboard");
   return { success: true };
@@ -473,6 +476,7 @@ export async function reorderTasksInColumn(
   }
 
   revalidatePath("/my-tasks");
+  revalidatePath("/relay");
   return { success: true };
 }
 
@@ -533,6 +537,7 @@ export async function approveTask(
   }
 
   revalidatePath("/my-tasks");
+  revalidatePath("/relay");
   revalidatePath(`/my-tasks/${taskId}`);
   revalidatePath("/inbox");
   revalidatePath("/dashboard");
@@ -609,6 +614,7 @@ export async function rejectTask(
   }
 
   revalidatePath("/my-tasks");
+  revalidatePath("/relay");
   revalidatePath(`/my-tasks/${taskId}`);
   revalidatePath("/inbox");
   revalidatePath("/dashboard");

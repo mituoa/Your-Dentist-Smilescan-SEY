@@ -1,0 +1,444 @@
+import { useState } from 'react';
+import { Search, Calendar, MessageSquare, Clock, X } from 'lucide-react';
+
+interface Submission {
+  id: string;
+  patientName: string;
+  issue: string;
+  description: string;
+  timestamp: string;
+  status: 'new' | 'reviewed' | 'urgent';
+  images?: string[];
+}
+
+export default function Submissions() {
+  const [hoveredSubmission, setHoveredSubmission] = useState<string | null>(null);
+
+  // Mock data with richer content
+  const submissions: Submission[] = [
+    {
+      id: '1',
+      patientName: 'Thomas Schmidt',
+      issue: 'Zahn abgebrochen hinten rechts',
+      description: 'Guten Tag, mir ist heute Morgen beim Frühstück ein Stück vom Backenzahn abgebrochen. Ich habe starke Schmerzen und die Stelle ist sehr empfindlich. Es blutet leicht und ich kann auf der Seite nicht kauen.',
+      timestamp: 'Vor 5 Minuten',
+      status: 'urgent',
+      images: ['https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=800&q=80'],
+    },
+    {
+      id: '2',
+      patientName: 'Anna Müller',
+      issue: 'Schmerzen im oberen rechten Bereich',
+      description: 'Seit gestern Abend habe ich Schmerzen im oberen rechten Bereich. Die Schmerzen sind konstant und werden beim Kauen stärker. Ich bin mir nicht sicher, ob es sich um eine Entzündung handelt.',
+      timestamp: 'Vor 23 Minuten',
+      status: 'new',
+      images: ['https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&q=80'],
+    },
+    {
+      id: '3',
+      patientName: 'Lisa Weber',
+      issue: 'Zahnfleischbluten nach Zähneputzen',
+      description: 'Mir ist aufgefallen, dass mein Zahnfleisch beim Putzen blutet. Das passiert seit etwa einer Woche regelmäßig. Ich würde gerne wissen, ob ich mir Sorgen machen sollte.',
+      timestamp: 'Vor 1 Stunde',
+      status: 'new',
+    },
+    {
+      id: '4',
+      patientName: 'Michael Klein',
+      issue: 'Kontrolltermin nach Wurzelbehandlung',
+      description: 'Ich hatte vor zwei Wochen eine Wurzelbehandlung und möchte einen Kontrolltermin vereinbaren. Die Schmerzen sind weg, ich möchte nur sichergehen, dass alles in Ordnung ist.',
+      timestamp: 'Vor 2 Stunden',
+      status: 'reviewed',
+    },
+  ];
+
+  const [selectedSubmission, setSelectedSubmission] = useState<string>(submissions[0]?.id || '');
+
+  const selectedItem = submissions.find(s => s.id === selectedSubmission);
+  const unreadCount = submissions.filter(s => s.status === 'new' || s.status === 'urgent').length;
+
+  return (
+    <div className="h-screen flex flex-col" style={{ background: '#FAFBFC' }}>
+      {/* Split View Container */}
+      <div className="flex-1 flex overflow-hidden">
+
+        {/* LEFT SIDEBAR - Submission List */}
+        <div className="flex flex-col" style={{
+          width: '38%',
+          maxWidth: '480px',
+          minWidth: '380px',
+          borderRight: '1px solid #EEF2F6',
+          background: '#FFFFFF',
+        }}>
+
+          {/* Sidebar Header */}
+          <div style={{
+            padding: '24px 20px',
+            borderBottom: '1px solid #EEF2F6',
+          }}>
+            <div style={{ marginBottom: '20px' }}>
+              <h1 className="text-[18px]" style={{
+                color: '#0F172A',
+                fontWeight: 600,
+                letterSpacing: '-0.01em',
+                marginBottom: '4px',
+              }}>
+                Einsendungen
+              </h1>
+              <p className="text-[13px]" style={{ color: '#64748B' }}>
+                {unreadCount} offene {unreadCount === 1 ? 'Fall' : 'Fälle'}
+              </p>
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-[16px] h-[16px]" style={{ color: '#94A3B8' }} />
+              <input
+                type="text"
+                placeholder="Suchen..."
+                className="w-full bg-white text-[14px] focus:outline-none placeholder:text-gray-400"
+                style={{
+                  height: '40px',
+                  paddingLeft: '36px',
+                  paddingRight: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid #E2E8F0',
+                  color: '#1E293B',
+                  transition: 'all 200ms ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#2F80ED';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,128,237,0.08)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#E2E8F0';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Submission List */}
+          <div className="flex-1 overflow-y-auto" style={{ padding: '8px 12px' }}>
+            {submissions.map((submission) => (
+              <div
+                key={submission.id}
+                onMouseEnter={() => setHoveredSubmission(submission.id)}
+                onMouseLeave={() => setHoveredSubmission(null)}
+                onClick={() => setSelectedSubmission(submission.id)}
+                style={{
+                  padding: '16px 20px',
+                  marginBottom: '8px',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  transition: 'all 200ms ease',
+                  background: selectedSubmission === submission.id ? '#EFF6FF' :
+                             hoveredSubmission === submission.id ? '#F8FAFC' : 'transparent',
+                  borderLeft: selectedSubmission === submission.id ? '2px solid #2F80ED' : '2px solid transparent',
+                  opacity: submission.status === 'reviewed' ? 0.6 : 1,
+                }}
+              >
+                {/* Issue (Primary) */}
+                <p className="text-[16px]" style={{
+                  color: '#1E293B',
+                  fontWeight: 600,
+                  lineHeight: '1.4',
+                  marginBottom: '6px',
+                }}>
+                  {submission.issue}
+                </p>
+
+                {/* Patient Name (Secondary) */}
+                <p className="text-[14px]" style={{
+                  color: '#64748B',
+                  fontWeight: 500,
+                  marginBottom: '4px',
+                }}>
+                  {submission.patientName}
+                </p>
+
+                {/* Meta Info (Tertiary) */}
+                <p className="text-[13px]" style={{
+                  color: '#94A3B8',
+                  fontWeight: 400,
+                }}>
+                  {submission.timestamp}
+                  {' · '}
+                  {submission.description.split('.')[0].split(' ').slice(0, 5).join(' ')}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT PANEL - Detail View */}
+        <div className="flex-1 flex flex-col overflow-hidden" style={{ background: '#FAFBFC' }}>
+          {selectedItem ? (
+            <>
+              {/* Detail Header */}
+              <div style={{
+                padding: '32px 40px 24px',
+                borderBottom: '1px solid #EEF2F6',
+                background: '#FFFFFF',
+              }}>
+                <h2 className="text-[26px]" style={{
+                  color: '#0F172A',
+                  fontWeight: 600,
+                  letterSpacing: '-0.01em',
+                  marginBottom: '8px',
+                  lineHeight: '1.3',
+                }}>
+                  {selectedItem.issue}
+                </h2>
+                <p className="text-[14px]" style={{
+                  color: '#64748B',
+                }}>
+                  {selectedItem.patientName} · {selectedItem.timestamp}
+                </p>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto" style={{ padding: '32px 40px 40px' }}>
+
+                {/* Images Section */}
+                {selectedItem.images && selectedItem.images.length > 0 && (
+                  <div style={{ marginBottom: '32px' }}>
+                    <div style={{
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      border: '1px solid #EEF2F6',
+                      maxHeight: '300px',
+                    }}>
+                      <img
+                        src={selectedItem.images[0]}
+                        alt="Patientenbild"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          maxHeight: '300px',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Patient Description */}
+                <div style={{ marginBottom: '32px', maxWidth: '600px' }}>
+                  <p className="text-[11px] uppercase" style={{
+                    color: '#94A3B8',
+                    fontWeight: 600,
+                    letterSpacing: '0.05em',
+                    marginBottom: '12px',
+                  }}>
+                    Beschreibung
+                  </p>
+                  <p className="text-[15px]" style={{
+                    color: '#1E293B',
+                    lineHeight: '1.6',
+                  }}>
+                    {selectedItem.description}
+                  </p>
+                </div>
+
+                {/* Decision Section */}
+                {selectedItem.status !== 'reviewed' && (
+                  <div style={{ maxWidth: '600px' }}>
+                    <div style={{
+                      borderTop: '1px solid #EEF2F6',
+                      paddingTop: '32px',
+                    }}>
+                      <p className="text-[11px] uppercase" style={{
+                        color: '#94A3B8',
+                        fontWeight: 600,
+                        letterSpacing: '0.05em',
+                        marginBottom: '16px',
+                      }}>
+                        Aktion erforderlich
+                      </p>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                        {/* Primary Action */}
+                        <button
+                          onClick={() => console.log('Suggest appointment')}
+                          style={{
+                            padding: '14px 20px',
+                            background: '#2F80ED',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '10px',
+                            fontSize: '15px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 180ms ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#2370D1';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#2F80ED';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                          onMouseDown={(e) => {
+                            e.currentTarget.style.transform = 'scale(0.98)';
+                          }}
+                          onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <Calendar className="w-5 h-5" />
+                          Termin vorschlagen
+                        </button>
+
+                        {/* Secondary Action */}
+                        <button
+                          onClick={() => console.log('Send message')}
+                          style={{
+                            padding: '13px 20px',
+                            background: '#FFFFFF',
+                            color: '#2F80ED',
+                            border: '1px solid #2F80ED',
+                            borderRadius: '10px',
+                            fontSize: '15px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 180ms ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(47,128,237,0.04)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#FFFFFF';
+                          }}
+                          onMouseDown={(e) => {
+                            e.currentTarget.style.transform = 'scale(0.98)';
+                          }}
+                          onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <MessageSquare className="w-5 h-5" />
+                          Nachricht senden
+                        </button>
+
+                        {/* Tertiary Action */}
+                        <button
+                          onClick={() => console.log('Mark as observed')}
+                          style={{
+                            padding: '13px 20px',
+                            background: '#FFFFFF',
+                            color: '#64748B',
+                            border: '1px solid #E2E8F0',
+                            borderRadius: '10px',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 180ms ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#F8FAFC';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#FFFFFF';
+                          }}
+                          onMouseDown={(e) => {
+                            e.currentTarget.style.transform = 'scale(0.98)';
+                          }}
+                          onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <Clock className="w-5 h-5" />
+                          Beobachten
+                        </button>
+                      </div>
+
+                      {/* Quick Action Chips */}
+                      <div>
+                        <p className="text-[11px]" style={{
+                          color: '#94A3B8',
+                          marginBottom: '8px',
+                        }}>
+                          Schnellauswahl:
+                        </p>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {['Heute', 'Diese Woche', 'Nicht dringend'].map((chip) => (
+                            <button
+                              key={chip}
+                              onClick={() => console.log('Quick action:', chip)}
+                              style={{
+                                padding: '6px 12px',
+                                background: '#F8FAFC',
+                                color: '#64748B',
+                                border: '1px solid #E2E8F0',
+                                borderRadius: '6px',
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'all 180ms ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#EFF6FF';
+                                e.currentTarget.style.borderColor = '#2F80ED';
+                                e.currentTarget.style.color = '#2F80ED';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#F8FAFC';
+                                e.currentTarget.style.borderColor = '#E2E8F0';
+                                e.currentTarget.style.color = '#64748B';
+                              }}
+                            >
+                              {chip}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: '12px',
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: '#F8FAFC',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Calendar className="w-6 h-6" style={{ color: '#94A3B8' }} />
+              </div>
+              <p className="text-[14px]" style={{ color: '#64748B' }}>
+                Wählen Sie eine Einsendung aus
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

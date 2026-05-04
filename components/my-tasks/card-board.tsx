@@ -19,7 +19,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, CheckCheck, CircleDot } from "lucide-react";
+import { Check, CheckCheck, CircleDot, Users } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useRef, useState, useTransition } from "react";
 
@@ -45,9 +45,20 @@ interface CardBoardProps {
   columns: BoardColumns;
   currentUserId: string;
   isDoctor: boolean;
+  columnTitles?: Partial<Record<BoardColumnId, string>>;
+  columnSurfaceClass?: Partial<Record<BoardColumnId, string>>;
+  /** user_id → initials + color for assignee chips */
+  avatarByUserId?: Record<string, { initials: string; color: string }>;
 }
 
-export function CardBoard({ columns, currentUserId, isDoctor }: CardBoardProps) {
+export function CardBoard({
+  columns,
+  currentUserId,
+  isDoctor,
+  columnTitles,
+  columnSurfaceClass,
+  avatarByUserId,
+}: CardBoardProps) {
   const [board, setBoard] = useState(columns);
   const [activeTask, setActiveTask] = useState<MyTask | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -188,10 +199,11 @@ export function CardBoard({ columns, currentUserId, isDoctor }: CardBoardProps) 
       onDragEnd={onDragEnd}
     >
       <div className="overflow-x-auto pb-2">
-        <div className="grid min-w-[980px] grid-cols-3 gap-4">
+        <div className="grid min-w-[980px] grid-cols-3 gap-6">
           <BoardColumn
             id="open"
-            title="Offen"
+            title={columnTitles?.open ?? "Offen"}
+            surfaceClassName={columnSurfaceClass?.open}
             count={board.open.length}
             emptyTitle="Keine offenen Relay-Items"
             emptyText="Aktuell gibt es keine offenen Relay-Items."
@@ -200,22 +212,26 @@ export function CardBoard({ columns, currentUserId, isDoctor }: CardBoardProps) 
             activeTask={activeTask}
             currentUserId={currentUserId}
             isDoctor={isDoctor}
+            avatarByUserId={avatarByUserId}
           />
           <BoardColumn
             id="pending"
-            title="Zur Bestätigung"
+            title={columnTitles?.pending ?? "Zur Bestätigung"}
+            surfaceClassName={columnSurfaceClass?.pending}
             count={board.pending.length}
-            emptyTitle="Keine Relay-Items zur Bestätigung"
-            emptyText="Aktuell wartet kein Relay-Item auf Bestätigung."
+            emptyTitle="Keine Relay-Items in Bearbeitung"
+            emptyText="Aktuell gibt es keine Aufgaben in diesem Status."
             tasks={board.pending}
             disabled={isPending}
             activeTask={activeTask}
             currentUserId={currentUserId}
             isDoctor={isDoctor}
+            avatarByUserId={avatarByUserId}
           />
           <BoardColumn
             id="done"
-            title="Erledigt"
+            title={columnTitles?.done ?? "Erledigt"}
+            surfaceClassName={columnSurfaceClass?.done}
             count={board.done.length}
             emptyTitle="Keine erledigten Relay-Items"
             emptyText="In den letzten 90 Tagen wurde kein Relay-Item abgeschlossen."
@@ -224,6 +240,7 @@ export function CardBoard({ columns, currentUserId, isDoctor }: CardBoardProps) 
             activeTask={activeTask}
             currentUserId={currentUserId}
             isDoctor={isDoctor}
+            avatarByUserId={avatarByUserId}
           />
         </div>
       </div>
@@ -235,6 +252,7 @@ export function CardBoard({ columns, currentUserId, isDoctor }: CardBoardProps) 
 function BoardColumn({
   id,
   title,
+  surfaceClassName,
   count,
   emptyTitle,
   emptyText,
@@ -243,9 +261,11 @@ function BoardColumn({
   activeTask,
   currentUserId,
   isDoctor,
+  avatarByUserId,
 }: {
   id: BoardColumnId;
   title: string;
+  surfaceClassName?: string;
   count: number;
   emptyTitle: string;
   emptyText: string;
@@ -254,6 +274,7 @@ function BoardColumn({
   activeTask: MyTask | null;
   currentUserId: string;
   isDoctor: boolean;
+  avatarByUserId?: Record<string, { initials: string; color: string }>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const activeFromColumn = activeTask ? taskStatusToColumn(activeTask.status) : null;
@@ -268,29 +289,33 @@ function BoardColumn({
     <section
       id={id}
       ref={setNodeRef}
-      className={`max-h-[72vh] overflow-y-auto p-3 sm:p-4 ${pilotGlassPanel} ${
-        isOver && canDropActiveTask ? "ring-2 ring-brand/30" : ""
-      }`}
+      className={`max-h-[72vh] overflow-y-auto rounded-xl border border-[#E2E8F0] p-4 sm:p-5 ${surfaceClassName ?? ""} ${
+        pilotGlassPanel
+      } ${isOver && canDropActiveTask ? "ring-2 ring-brand/30" : ""}`}
     >
-      <header className="sticky top-0 z-10 mb-3 flex items-center justify-between border-b border-border bg-surface-page/80 pb-2 backdrop-blur">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
-          {title}
-        </h2>
-        <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-surface-sunken px-1.5 text-[11px] font-semibold tabular-nums text-text-secondary">
+      <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[#F1F5F9] bg-white/90 pb-3 backdrop-blur">
+        <h2 className="text-[13px] font-semibold uppercase tracking-[0.05em] text-[#64748B]">{title}</h2>
+        <span className="inline-flex min-w-[24px] items-center justify-center rounded-full bg-[#F8FAFC] px-2 py-0.5 text-[12px] font-medium tabular-nums text-[#64748B]">
           {count > 99 ? "99+" : count}
         </span>
       </header>
 
       {tasks.length === 0 ? (
-        <div className="rounded-md border border-dashed border-border px-3 py-6 text-center">
+        <div className="rounded-lg border border-dashed border-[#E2E8F0] px-3 py-8 text-center">
           <p className="text-sm font-medium text-text-primary">{emptyTitle}</p>
           <p className="mt-1 text-xs text-text-secondary">{emptyText}</p>
         </div>
       ) : (
         <SortableContext items={tasks.map((task) => `card-${task.id}`)} strategy={verticalListSortingStrategy}>
-        <div className={`space-y-2.5 ${disabled ? "pointer-events-none opacity-80" : ""}`}>
+        <div className={`space-y-3 ${disabled ? "pointer-events-none opacity-80" : ""}`}>
           {tasks.map((task) => (
-            <TaskMiniCard key={task.id} task={task} />
+            <TaskMiniCard
+              key={task.id}
+              task={task}
+              doneColumn={id === "done"}
+              currentUserId={currentUserId}
+              avatarByUserId={avatarByUserId}
+            />
           ))}
         </div>
         </SortableContext>
@@ -299,7 +324,17 @@ function BoardColumn({
   );
 }
 
-function TaskMiniCard({ task }: { task: MyTask }) {
+function TaskMiniCard({
+  task,
+  doneColumn,
+  currentUserId,
+  avatarByUserId,
+}: {
+  task: MyTask;
+  doneColumn?: boolean;
+  currentUserId: string;
+  avatarByUserId?: Record<string, { initials: string; color: string }>;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `card-${task.id}`,
   });
@@ -307,6 +342,24 @@ function TaskMiniCard({ task }: { task: MyTask }) {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const assigneeIds =
+    task.assignee_ids.length > 0
+      ? task.assignee_ids
+      : task.specific_recipient_id
+        ? [task.specific_recipient_id]
+        : [task.created_by];
+  const uniqueAssignees = Array.from(new Set(assigneeIds)).slice(0, 4);
+  const multi = uniqueAssignees.length > 1;
+
+  const contextLine =
+    task.submission_patient_name != null && String(task.submission_patient_name).trim().length > 0
+      ? task.submission_patient_name
+      : task.submission_id
+        ? "Patienten-Item"
+        : null;
+
+  const isMine = task.assignee_ids.includes(currentUserId) || task.specific_recipient_id === currentUserId;
 
   return (
     <div
@@ -321,20 +374,53 @@ function TaskMiniCard({ task }: { task: MyTask }) {
         onClick={(event) => {
           if (isDragging) event.preventDefault();
         }}
-        className="block rounded-md border border-border bg-surface-card px-3 py-2.5 transition-colors hover:bg-surface-sunken/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+        className={`block rounded-lg border px-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F80ED]/30 ${
+          isMine
+            ? "border-[rgba(47,128,237,0.15)] bg-[rgba(47,128,237,0.02)] hover:bg-[rgba(47,128,237,0.04)]"
+            : "border-[#EEF2F6] bg-white hover:bg-[#F8FAFC]"
+        }`}
       >
-        <div className="mb-1.5 flex items-start justify-between gap-2">
-          <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-text-primary">{task.title}</h3>
-          <ReceiptMark task={task} />
+        <div className="mb-2 flex items-start gap-2">
+          {task.priority === "important" ? (
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#DC2626]" aria-hidden />
+          ) : (
+            <span className="mt-1.5 w-1.5 shrink-0" aria-hidden />
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3
+                className={`line-clamp-2 text-[14px] font-medium leading-snug ${
+                  doneColumn ? "text-[#94A3B8] line-through decoration-[#94A3B8]" : "text-[#1E293B]"
+                }`}
+              >
+                {task.title}
+              </h3>
+              <ReceiptMark task={task} />
+            </div>
+            {contextLine ? (
+              <p className={`mt-1 text-[12px] ${doneColumn ? "text-[#CBD5E1]" : "text-[#94A3B8]"}`}>{contextLine}</p>
+            ) : null}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 text-[11px] text-text-tertiary">
-          {task.priority === "important" && (
-            <span className="rounded bg-danger/15 px-1.5 py-0.5 font-semibold uppercase tracking-[0.08em] text-danger">
-              Wichtig
-            </span>
-          )}
-          <span>{task.submission_id ? "Patienten-Item" : "Internes Item"}</span>
+        <div className="mt-1 flex items-center gap-1.5 pl-3.5">
+          {multi ? <Users className="h-3 w-3 shrink-0 text-[#94A3B8]" aria-hidden /> : null}
+          {uniqueAssignees.map((uid) => {
+            const chip = avatarByUserId?.[uid];
+            return (
+              <div
+                key={uid}
+                className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+                style={{
+                  background: chip?.color ?? "#64748B",
+                  boxShadow: uid === currentUserId ? "0 0 0 2px rgba(47,128,237,0.2)" : undefined,
+                }}
+                title={uid}
+              >
+                {chip?.initials ?? "?"}
+              </div>
+            );
+          })}
         </div>
       </Link>
     </div>

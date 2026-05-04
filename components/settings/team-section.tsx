@@ -6,7 +6,7 @@ import { revokeInvitation, removeTeamMember } from "@/app/(protected)/settings/a
 import { SectionHeader } from "./section-header";
 import { InviteForm } from "./invite-form";
 import { useRouter } from "next/navigation";
-import type { TeamMember, TeamInvitation } from "@/lib/queries/settings";
+import type { TeamMember, TeamInvitation } from "@/lib/types/settings-team";
 
 interface TeamSectionProps {
   members: TeamMember[];

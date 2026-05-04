@@ -19,7 +19,7 @@ import { ComposerTopBar } from "./composer-topbar";
 import { TopicSelector } from "./topic-selector";
 import { CoverPhotoUpload } from "./cover-photo-upload";
 import { JOURNAL_LIMITS } from "@/lib/validation/journal-limits";
-import type { JournalEntry } from "@/lib/queries/journal";
+import type { JournalEntry } from "@/lib/types/journal-entry";
 
 interface JournalComposerProps {
   article: JournalEntry;

@@ -27,7 +27,7 @@ export function TaskDetailView({
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <Link
-        href="/my-tasks"
+        href="/relay"
         className="mb-6 inline-flex items-center gap-1 rounded-md text-xs text-text-tertiary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 sm:mb-8"
       >
         <ArrowLeft className="w-3 h-3" strokeWidth={1.75} />

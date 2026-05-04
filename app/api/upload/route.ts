@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { validatePhoto } from "@/lib/upload/validation";
+import { resolveImageMimeForUpload, validatePhoto } from "@/lib/upload/validation";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +20,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
+    const contentType =
+      resolveImageMimeForUpload(file) || file.type || "application/octet-stream";
+
     const admin = createAdminClient();
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const tempId = crypto.randomUUID();
@@ -31,7 +34,7 @@ export async function POST(request: NextRequest) {
     const { error: uploadError } = await admin.storage
       .from("submission-photos")
       .upload(storagePath, buffer, {
-        contentType: file.type,
+        contentType,
         upsert: false,
       });
 

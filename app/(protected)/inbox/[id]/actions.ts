@@ -271,6 +271,7 @@ export async function createTask(formData: FormData) {
   revalidatePath(`/inbox/${submissionId}`);
   revalidatePath("/dashboard");
   revalidatePath("/my-tasks");
+  revalidatePath("/relay");
   return { success: true };
 }
 

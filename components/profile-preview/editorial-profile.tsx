@@ -2,9 +2,10 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { getSpecializationLabel } from "@/lib/masterdata/specializations";
+import { expandWorkingStyleVitaForDisplay } from "@/lib/profile/working-style-library";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
 import { JournalPreviewList } from "@/components/public/journal-preview-list";
-import type { JournalEntry } from "@/lib/queries/journal";
+import type { JournalEntry } from "@/lib/types/journal-entry";
 import {
   hexToRgbSpaceSeparated,
   lightenRgbSpaceSeparated,
@@ -55,7 +56,9 @@ export function EditorialProfile({
   } as CSSProperties;
 
   const vitaParagraphs =
-    data.vita_markdown?.split(/\n\n+/).filter((p) => p.trim()) || [];
+    expandWorkingStyleVitaForDisplay(data.vita_markdown ?? null)
+      .split(/\n\n+/)
+      .filter((p) => p.trim()) || [];
 
   return (
     <div className="bg-cream text-ink font-sans" style={brandCssVars}>

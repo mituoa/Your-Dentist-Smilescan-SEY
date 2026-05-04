@@ -1,0 +1,762 @@
+import { useState } from 'react';
+import { Search, Bell, User, ChevronDown, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router';
+// Product Logos
+import logoAtlas from '../../imports/logo-mark-2.svg';
+import logoSmileScan from '../../imports/logo-mark.svg';
+import logoJournals from '../../imports/logo-mark-3.svg';
+import logoPortrait from '../../imports/logo-mark-4.svg';
+import logoRelay from '../../imports/logo-mark-5.svg';
+import logoSettings from '../../imports/logo-mark-6.svg';
+
+type Explanation = {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  published: boolean;
+  publishedAt?: string;
+};
+
+const GUIDED_QUESTIONS = [
+  'Was tun bei Zahnschmerzen?',
+  'Was passiert bei einer Wurzelbehandlung?',
+  'Wann ist ein Implantat sinnvoll?',
+  'Wie läuft eine professionelle Zahnreinigung ab?',
+  'Was sollte ich nach dem Eingriff beachten?',
+  'Wie oft sollte ich zur Kontrolle kommen?',
+];
+
+export default function Journals() {
+  const [activeTab, setActiveTab] = useState('journals');
+  const [contentView, setContentView] = useState<'create' | 'published' | 'drafts'>('create');
+  const [isWriting, setIsWriting] = useState(false);
+  const [explanations, setExplanations] = useState<Explanation[]>([]);
+  const [newTitle, setNewTitle] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/');
+  };
+
+  // AI Draft Generator (simplified simulation)
+  const generateDraft = (title: string): string => {
+    const drafts: Record<string, string> = {
+      'Was tun bei Zahnschmerzen?': 'Bei plötzlichen Zahnschmerzen sollten Sie zunächst die betroffene Stelle vorsichtig reinigen. Spülen Sie Ihren Mund mit lauwarmem Wasser.\n\n\nKühlen Sie die Wange von außen – das lindert die Schwellung. Vermeiden Sie heiße oder sehr kalte Speisen.\n\n\nWenn der Schmerz stark ist oder länger als einen Tag anhält, vereinbaren Sie einen Termin. Wir finden gemeinsam heraus, was die Ursache ist.',
+      'Was passiert bei einer Wurzelbehandlung?': 'Eine Wurzelbehandlung klingt komplizierter, als sie ist. Wir entfernen das entzündete Gewebe aus dem Zahninneren und reinigen die Kanäle gründlich.\n\n\nDer Zahn wird dabei betäubt – Sie spüren nichts. Die Behandlung selbst dauert etwa 45 bis 60 Minuten.\n\n\nDanach verschließen wir den Zahn wieder. In den meisten Fällen bleibt der Zahn dadurch erhalten und funktioniert normal weiter.',
+      'Wann ist ein Implantat sinnvoll?': 'Ein Implantat macht Sinn, wenn ein Zahn fehlt und die Nachbarzähne gesund sind. Anders als bei einer Brücke müssen wir diese nicht beschleifen.\n\n\nDas Implantat sitzt fest im Kiefer – wie eine neue Zahnwurzel. Darauf setzen wir eine Krone, die aussieht und funktioniert wie Ihr eigener Zahn.\n\n\nWir besprechen vorher gemeinsam, ob ein Implantat in Ihrer Situation die beste Lösung ist.',
+      'Wie läuft eine professionelle Zahnreinigung ab?': 'Die professionelle Zahnreinigung entfernt Beläge, die Sie mit der Zahnbürste nicht erreichen. Wir reinigen zunächst alle Zahnflächen und Zwischenräume gründlich.\n\n\nDanach polieren wir die Zähne und versiegeln sie mit Fluorid. Das stärkt den Zahnschmelz.\n\n\nDie Behandlung dauert etwa 45 Minuten und ist in der Regel nicht schmerzhaft. Sie verlassen die Praxis mit einem spürbar sauberen Gefühl.',
+      'Was sollte ich nach dem Eingriff beachten?': 'In den ersten Stunden nach der Betäubung sollten Sie nichts essen – Sie könnten sich unbemerkt verletzen.\n\n\nTrinken Sie erst, wenn die Betäubung vollständig abgeklungen ist. Vermeiden Sie am ersten Tag heiße Getränke und körperliche Anstrengung.\n\n\nWenn Sie Schmerzen haben, nehmen Sie die empfohlenen Schmerzmittel. Bei ungewöhnlichen Beschwerden rufen Sie uns an – wir sind für Sie da.',
+      'Wie oft sollte ich zur Kontrolle kommen?': 'Die meisten Patienten kommen zweimal im Jahr zur Kontrolle. So können wir Probleme frühzeitig erkennen, bevor sie größer werden.\n\n\nBei erhöhtem Risiko – etwa bei Parodontitis – empfehlen wir kürzere Abstände. Das besprechen wir individuell.\n\n\nRegelmäßige Kontrollen sind der beste Schutz für Ihre Zähne. Die Termine sind kurz, und wir schauen nur, dass alles in Ordnung ist.',
+    };
+
+    return drafts[title] || 'Schreiben Sie hier Ihre Erklärung für Patienten.\n\n\nDenken Sie daran: kurz, klar und verständlich.';
+  };
+
+  const handleStartWriting = (prefilledTitle = '') => {
+    setNewTitle(prefilledTitle);
+    setNewContent(prefilledTitle ? generateDraft(prefilledTitle) : '');
+    setIsWriting(true);
+  };
+
+  const handleShorter = () => {
+    if (newContent.trim()) {
+      // Simulate "make shorter" - remove middle paragraph
+      const paragraphs = newContent.split('\n\n\n');
+      if (paragraphs.length > 2) {
+        setNewContent([paragraphs[0], paragraphs[paragraphs.length - 1]].join('\n\n\n'));
+      }
+    }
+  };
+
+  const handleSimpler = () => {
+    if (newContent.trim()) {
+      // Simulate "make simpler" - this would call AI in real implementation
+      setNewContent(newContent.replace(/zunächst/g, 'zuerst').replace(/etwa/g, 'ungefähr'));
+    }
+  };
+
+  const getRelativeTime = (timestamp: string): string => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Heute veröffentlicht';
+    if (diffDays === 1) return 'Gestern veröffentlicht';
+    if (diffDays < 7) return `Vor ${diffDays} Tagen veröffentlicht`;
+    if (diffDays < 30) return `Vor ${Math.floor(diffDays / 7)} Wochen veröffentlicht`;
+    return date.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+  };
+
+  const handleSave = (publish = true) => {
+    if (newTitle.trim() && newContent.trim()) {
+      if (editingId) {
+        // Update existing
+        setExplanations(explanations.map(exp =>
+          exp.id === editingId
+            ? { ...exp, title: newTitle, content: newContent, published: publish, publishedAt: publish ? new Date().toISOString() : exp.publishedAt }
+            : exp
+        ));
+        setEditingId(null);
+      } else {
+        // Create new
+        const newExplanation: Explanation = {
+          id: Date.now().toString(),
+          title: newTitle,
+          content: newContent,
+          date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }),
+          published: publish,
+          publishedAt: publish ? new Date().toISOString() : undefined,
+        };
+        setExplanations([newExplanation, ...explanations]);
+      }
+      setNewTitle('');
+      setNewContent('');
+      setIsWriting(false);
+    }
+  };
+
+  const handleEdit = (explanation: Explanation) => {
+    setNewTitle(explanation.title);
+    setNewContent(explanation.content);
+    setEditingId(explanation.id);
+    setIsWriting(true);
+  };
+
+  const handleCancel = () => {
+    setNewTitle('');
+    setNewContent('');
+    setEditingId(null);
+    setIsWriting(false);
+  };
+
+  const publishedExplanations = explanations.filter(e => e.published).slice(0, 7);
+  const draftExplanations = explanations.filter(e => !e.published).slice(0, 5);
+
+  // Dynamic page title
+  const getPageTitle = () => {
+    switch (contentView) {
+      case 'create':
+        return 'Erklärungen erstellen';
+      case 'published':
+        return 'Veröffentlichte Inhalte';
+      case 'drafts':
+        return 'Entwürfe';
+      default:
+        return 'Erklärungen für Patienten';
+    }
+  };
+
+  // Dynamic subtitle
+  const getPageSubtitle = () => {
+    switch (contentView) {
+      case 'create':
+        return 'Geben Sie Ihren Patienten Klarheit – bevor sie fragen müssen';
+      case 'published':
+        return 'Ihre veröffentlichten Erklärungen für Patienten';
+      case 'drafts':
+        return 'Unfertige Erklärungen, an denen Sie arbeiten';
+      default:
+        return '';
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex relative" style={{ background: '#F8FAFC' }}>
+      {/* Ambient gradient */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: 'radial-gradient(circle at top right, rgba(47,128,237,0.05), transparent 32%)' }}
+      />
+
+      {/* SIDEBAR */}
+      <aside className="w-[280px] bg-white/95 backdrop-blur-xl border-r flex flex-col relative z-10"
+        style={{ borderColor: '#EEF2F6' }}>
+
+        {/* Logo */}
+        <div className="px-6 border-b" style={{ borderColor: '#EEF2F6', height: '80px', display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" className="w-11 h-11">
+              <defs>
+                <linearGradient id="logo-journals" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#FFFFFF"/>
+                  <stop offset="1" stopColor="#E3F2FD"/>
+                </linearGradient>
+              </defs>
+              <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#logo-journals)"/>
+              <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#2F80ED" strokeOpacity="0.18" strokeWidth="1.5"/>
+              <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#2F80ED" strokeOpacity="0.34" strokeWidth="9" strokeLinecap="round"/>
+              <path d="M99 103L128 131L157 103" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M128 130V157" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round"/>
+              <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#2F80ED" strokeWidth="10" strokeLinecap="round"/>
+            </svg>
+            <div>
+              <h1 className="text-[19px] font-medium text-gray-900 tracking-tight leading-none">
+                <span className="italic font-light">Your</span> Dentist
+              </h1>
+              <p className="text-[9px] font-semibold text-[#2F80ED] uppercase tracking-[0.15em] mt-0.5">
+                Neutral Practice Platform
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4 pt-6 pb-4 space-y-2">
+          <button onClick={() => navigate('/dashboard')} className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]" style={{ height: '56px', transition: 'all 180ms ease' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoAtlas} alt="Atlas" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>Atlas</span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Dashboard</span>
+            </div>
+          </button>
+
+          <button onClick={() => navigate('/dashboard')} className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]" style={{ height: '56px', transition: 'all 180ms ease' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoSmileScan} alt="Tracker" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>Tracker</span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Intake & Triage</span>
+            </div>
+          </button>
+
+          <button onClick={() => navigate('/relay')} className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]" style={{ height: '56px', transition: 'all 180ms ease' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoRelay} alt="Relay" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>Relay</span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Aufgaben</span>
+            </div>
+          </button>
+
+          <button onClick={() => navigate('/profile')} className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]" style={{ height: '56px', transition: 'all 180ms ease' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoPortrait} alt="Benutzer" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>Benutzer</span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Profilverwaltung</span>
+            </div>
+          </button>
+
+          <button onClick={() => setActiveTab('journals')} className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative bg-[#EEF6FF]" style={{ height: '56px', transition: 'all 180ms ease' }}>
+            <div style={{ position: 'absolute', left: '6px', top: '50%', transform: 'translateY(-50%)', width: '2px', height: '20px', background: '#2F80ED', borderRadius: '2px' }} />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoJournals} alt="Journals" className="w-8 h-8 opacity-100" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium text-[#1E293B]">Journals</span>
+              <span className="block text-[11px] font-medium text-[#64748B]">Erklärungen</span>
+            </div>
+          </button>
+
+          <button onClick={() => navigate('/dashboard')} className="group w-full flex items-center gap-3.5 px-3 rounded-xl relative hover:bg-[#F8FAFC]" style={{ height: '56px', transition: 'all 180ms ease' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoSettings} alt="Admin" className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="block text-[15px] font-medium" style={{ color: '#64748B' }}>Admin</span>
+              <span className="block text-[11px] font-medium" style={{ color: '#94A3B8' }}>Einstellungen</span>
+            </div>
+          </button>
+        </nav>
+
+        {/* Bottom */}
+        <div className="px-4 py-4 border-t space-y-2" style={{ borderColor: '#EEF2F6' }}>
+          <button onClick={handleLogout} className="group w-full flex items-center gap-3 px-3 rounded-xl hover:bg-[#F8FAFC]" style={{ height: '48px', transition: 'all 180ms ease' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#F8FAFC' }}>
+              <LogOut className="w-4 h-4" style={{ color: '#64748B' }} />
+            </div>
+            <span className="text-[15px] font-medium" style={{ color: '#64748B' }}>Abmelden</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col relative">
+        {/* HEADER */}
+        <header className="bg-white/80 backdrop-blur-xl relative z-10" style={{ height: '80px' }}>
+          <div className="px-10 h-full flex items-center justify-between">
+            <div className="flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
+                <input type="text" placeholder="Patienten, Fälle oder Dokumente suchen..."
+                  className="w-full bg-white text-[15px] text-gray-900 focus:outline-none placeholder:text-gray-400"
+                  style={{ height: '48px', paddingLeft: '44px', paddingRight: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', transition: 'all 200ms ease' }}
+                  onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,128,237,0.12)'; }}
+                  onBlur={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 ml-6">
+              <button className="relative w-10 h-10 flex items-center justify-center hover:bg-[#F8FAFC] rounded-lg" style={{ transition: 'all 180ms ease' }}>
+                <Bell className="w-[18px] h-[18px]" style={{ color: '#64748B' }} />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ background: '#2F80ED' }}></span>
+              </button>
+
+              <button className="flex items-center gap-3 px-3 hover:bg-[#F8FAFC] rounded-xl" style={{ height: '44px', transition: 'all 180ms ease' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#2F80ED' }}>
+                  <User className="w-[16px] h-[16px] text-white" />
+                </div>
+                <div className="text-left hidden lg:block">
+                  <p className="text-[13px] font-medium" style={{ color: '#1E293B', marginBottom: '2px' }}>Dr. Cyrus Alamouti</p>
+                  <p className="text-[11px]" style={{ color: '#64748B' }}>Administrator</p>
+                </div>
+                <ChevronDown className="w-4 h-4 hidden lg:block" style={{ color: '#94A3B8' }} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* CONTENT */}
+        <div className="flex-1 overflow-auto">
+          <div style={{ maxWidth: '760px', margin: '0 auto', padding: '88px 56px 140px' }}>
+
+            {/* Writing Interface */}
+            {isWriting ? (
+              <div style={{ maxWidth: '680px' }}>
+                {/* Title */}
+                <div style={{ marginBottom: '56px' }}>
+                  <input
+                    type="text"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    placeholder="Titel Ihrer Erklärung"
+                    className="w-full text-[28px] font-medium focus:outline-none"
+                    style={{
+                      padding: '0 0 28px 0',
+                      border: 'none',
+                      borderBottom: '1px solid #F0F0F0',
+                      color: '#1a1a1a',
+                      background: 'transparent',
+                      transition: 'all 120ms ease',
+                      letterSpacing: '-0.016em',
+                      lineHeight: '1.3'
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderBottomColor = '#E0E0E0'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderBottomColor = '#F0F0F0'; }}
+                  />
+                </div>
+
+                {/* Text Area */}
+                <div style={{ marginBottom: '48px' }}>
+                  <textarea
+                    value={newContent}
+                    onChange={(e) => setNewContent(e.target.value)}
+                    placeholder="Ihre Erklärung für Patienten..."
+                    rows={18}
+                    autoFocus
+                    className="w-full text-[17px] focus:outline-none resize-none"
+                    style={{
+                      padding: '0',
+                      border: 'none',
+                      color: '#333333',
+                      background: 'transparent',
+                      lineHeight: '1.85',
+                      transition: 'all 120ms ease'
+                    }}
+                  />
+                </div>
+
+                {/* Subtle Assist Options */}
+                {newContent.trim() && (
+                  <div style={{ marginBottom: '64px', paddingTop: '32px', borderTop: '1px solid #F0F0F0' }}>
+                    <p className="text-[11px] font-medium uppercase" style={{ color: '#B3B3B3', marginBottom: '18px', letterSpacing: '0.04em' }}>
+                      Text anpassen
+                    </p>
+                    <div className="flex items-center gap-5">
+                      <button
+                        onClick={handleShorter}
+                        className="text-[13px] font-medium"
+                        style={{
+                          background: 'transparent',
+                          color: '#737373',
+                          border: 'none',
+                          padding: 0,
+                          transition: 'all 120ms ease'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#333333'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = '#737373'; }}
+                      >
+                        Kürzer formulieren
+                      </button>
+                      <span style={{ color: '#E0E0E0' }}>•</span>
+                      <button
+                        onClick={handleSimpler}
+                        className="text-[13px] font-medium"
+                        style={{
+                          background: 'transparent',
+                          color: '#737373',
+                          border: 'none',
+                          padding: 0,
+                          transition: 'all 120ms ease'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#333333'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = '#737373'; }}
+                      >
+                        Einfacher erklären
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center gap-5" style={{ paddingTop: newContent.trim() ? '0' : '56px' }}>
+                  <button
+                    onClick={() => handleSave(true)}
+                    disabled={!newTitle.trim() || !newContent.trim()}
+                    className="text-[14px] font-medium px-7 py-3.5 rounded-lg"
+                    style={{
+                      background: (!newTitle.trim() || !newContent.trim()) ? '#F5F5F5' : '#2F80ED',
+                      color: (!newTitle.trim() || !newContent.trim()) ? '#B3B3B3' : '#FFFFFF',
+                      border: 'none',
+                      cursor: (!newTitle.trim() || !newContent.trim()) ? 'not-allowed' : 'pointer',
+                      transition: 'all 120ms ease',
+                      boxShadow: (!newTitle.trim() || !newContent.trim()) ? 'none' : '0 2px 8px rgba(47,128,237,0.15)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (newTitle.trim() && newContent.trim()) {
+                        e.currentTarget.style.background = '#2874D9';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(47,128,237,0.25)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (newTitle.trim() && newContent.trim()) {
+                        e.currentTarget.style.background = '#2F80ED';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(47,128,237,0.15)';
+                      }
+                    }}
+                  >
+                    Veröffentlichen
+                  </button>
+                  <button
+                    onClick={() => handleSave(false)}
+                    disabled={!newTitle.trim() || !newContent.trim()}
+                    className="text-[14px] font-medium"
+                    style={{
+                      background: 'transparent',
+                      color: (!newTitle.trim() || !newContent.trim()) ? '#D4D4D4' : '#737373',
+                      border: 'none',
+                      padding: 0,
+                      cursor: (!newTitle.trim() || !newContent.trim()) ? 'not-allowed' : 'pointer',
+                      transition: 'all 120ms ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (newTitle.trim() && newContent.trim()) {
+                        e.currentTarget.style.color = '#333333';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (newTitle.trim() && newContent.trim()) {
+                        e.currentTarget.style.color = '#737373';
+                      }
+                    }}
+                  >
+                    Als Entwurf speichern
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className="text-[14px] font-medium"
+                    style={{
+                      background: 'transparent',
+                      color: '#999999',
+                      border: 'none',
+                      padding: 0,
+                      transition: 'all 120ms ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = '#666666'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = '#999999'; }}
+                  >
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Header */}
+                <div style={{ marginBottom: '48px' }}>
+                  <h1 className="text-[32px] font-medium" style={{ color: '#1a1a1a', marginBottom: '12px', letterSpacing: '-0.018em', lineHeight: '1.2' }}>
+                    {getPageTitle()}
+                  </h1>
+                  <p className="text-[15px]" style={{ color: '#8a8a8a', lineHeight: '1.6' }}>
+                    {getPageSubtitle()}
+                  </p>
+                </div>
+
+                {/* Segmented Control */}
+                <div style={{ marginBottom: '72px' }}>
+                  <div 
+                    className="inline-flex items-center gap-1 p-1.5 rounded-full"
+                    style={{ background: '#F8FAFC' }}
+                  >
+                    <button
+                      onClick={() => setContentView('create')}
+                      className="text-[14px] font-medium px-6 py-2.5 rounded-full"
+                      style={{
+                        background: contentView === 'create' ? '#FFFFFF' : 'transparent',
+                        color: contentView === 'create' ? '#1a1a1a' : '#737373',
+                        border: 'none',
+                        transition: 'all 200ms ease',
+                        boxShadow: contentView === 'create' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                        cursor: 'pointer',
+                        letterSpacing: '0.002em'
+                      }}
+                    >
+                      Erstellen
+                    </button>
+                    <button
+                      onClick={() => setContentView('published')}
+                      className="text-[14px] font-medium px-6 py-2.5 rounded-full"
+                      style={{
+                        background: contentView === 'published' ? '#FFFFFF' : 'transparent',
+                        color: contentView === 'published' ? '#1a1a1a' : '#737373',
+                        border: 'none',
+                        transition: 'all 200ms ease',
+                        boxShadow: contentView === 'published' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                        cursor: 'pointer',
+                        letterSpacing: '0.002em'
+                      }}
+                    >
+                      Veröffentlicht
+                    </button>
+                    <button
+                      onClick={() => setContentView('drafts')}
+                      className="text-[14px] font-medium px-6 py-2.5 rounded-full"
+                      style={{
+                        background: contentView === 'drafts' ? '#FFFFFF' : 'transparent',
+                        color: contentView === 'drafts' ? '#1a1a1a' : '#737373',
+                        border: 'none',
+                        transition: 'all 200ms ease',
+                        boxShadow: contentView === 'drafts' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                        cursor: 'pointer',
+                        letterSpacing: '0.002em'
+                      }}
+                    >
+                      Entwürfe
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content based on selected view */}
+                {contentView === 'create' && (
+                  <>
+                    {/* Guided Questions */}
+                    <div style={{ marginBottom: '64px' }}>
+                      <p className="text-[14px]" style={{ color: '#737373', marginBottom: '40px', lineHeight: '1.6' }}>
+                        Viele Patienten stellen genau diese Fragen:
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        {GUIDED_QUESTIONS.map((question, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleStartWriting(question)}
+                            className="text-left group"
+                            style={{
+                              fontSize: index === 0 ? '18px' : '16px',
+                              fontWeight: index === 0 ? 500 : 400,
+                              color: index === 0 ? '#1a1a1a' : '#4d4d4d',
+                              background: '#FAFAFA',
+                              border: 'none',
+                              borderRadius: '12px',
+                              lineHeight: '1.5',
+                              padding: '16px 18px',
+                              transition: 'all 140ms ease',
+                              cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#F5F5F5';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.06)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#FAFAFA';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                          >
+                            {question}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Free Entry */}
+                    <div style={{ marginBottom: '80px', paddingTop: '48px' }}>
+                      <p className="text-[14px]" style={{ color: '#8a8a8a', marginBottom: '24px', lineHeight: '1.6' }}>
+                        Oder erklären Sie etwas, das Ihnen wichtig ist
+                      </p>
+                      <button
+                        onClick={() => handleStartWriting()}
+                        className="text-[14px] font-medium px-6 py-3 rounded-lg"
+                        style={{
+                          background: '#2F80ED',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          transition: 'all 120ms ease',
+                          boxShadow: '0 2px 8px rgba(47,128,237,0.15)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#2874D9';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(47,128,237,0.25)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#2F80ED';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(47,128,237,0.15)';
+                        }}
+                      >
+                        Eigene Erklärung verfassen
+                      </button>
+                      
+                      {/* Emotional closing line */}
+                      <p className="text-[13px]" style={{ color: '#B3B3B3', marginTop: '28px', lineHeight: '1.6' }}>
+                        Ihre Patienten sehen diese Erklärung sofort.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Published View */}
+                {contentView === 'published' && (
+                  <div>
+                    {publishedExplanations.length > 0 ? (
+                      <>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                          {publishedExplanations.map((explanation) => (
+                            <div
+                              key={explanation.id}
+                              className="group cursor-pointer"
+                              onClick={() => handleEdit(explanation)}
+                              onMouseEnter={() => setHoveredItemId(explanation.id)}
+                              onMouseLeave={() => setHoveredItemId(null)}
+                              style={{
+                                padding: '24px 0',
+                                borderBottom: '1px solid #F4F5F7',
+                                transition: 'all 130ms ease'
+                              }}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div style={{ flex: 1, paddingRight: '24px' }}>
+                                  <h3 className="text-[19px]" style={{
+                                    fontWeight: 500,
+                                    color: hoveredItemId === explanation.id ? '#1a1a1a' : '#262626',
+                                    letterSpacing: '-0.014em',
+                                    lineHeight: '1.35',
+                                    marginBottom: '10px',
+                                    transition: 'all 130ms ease'
+                                  }}>
+                                    {explanation.title}
+                                  </h3>
+                                  <p className="text-[13px]" style={{ color: '#999999', lineHeight: '1.4' }}>
+                                    {explanation.publishedAt ? getRelativeTime(explanation.publishedAt) : explanation.date}
+                                  </p>
+                                </div>
+                                <span
+                                  className="text-[13px] font-medium"
+                                  style={{
+                                    color: '#2F80ED',
+                                    opacity: hoveredItemId === explanation.id ? 1 : 0,
+                                    transition: 'opacity 130ms ease',
+                                    flexShrink: 0,
+                                    paddingTop: '2px'
+                                  }}
+                                >
+                                  Bearbeiten
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Emotional Closing */}
+                        <div style={{ marginTop: '64px', textAlign: 'center' }}>
+                          <p className="text-[13px]" style={{ color: '#B3B3B3', lineHeight: '1.6' }}>
+                            Diese Inhalte helfen Ihren Patienten, sich besser zu orientieren.
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ paddingTop: '64px', textAlign: 'center' }}>
+                        <p className="text-[15px]" style={{ color: '#B3B3B3', lineHeight: '1.6', marginBottom: '32px' }}>
+                          Sie haben noch keine Erklärung veröffentlicht.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Drafts View */}
+                {contentView === 'drafts' && (
+                  <div>
+                    {draftExplanations.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                        {draftExplanations.map((explanation) => (
+                          <div
+                            key={explanation.id}
+                            className="group cursor-pointer"
+                            onClick={() => handleEdit(explanation)}
+                            onMouseEnter={() => setHoveredItemId(explanation.id)}
+                            onMouseLeave={() => setHoveredItemId(null)}
+                            style={{
+                              padding: '24px 0',
+                              borderBottom: '1px solid #F4F5F7',
+                              transition: 'all 130ms ease'
+                            }}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div style={{ flex: 1, paddingRight: '24px' }}>
+                                <h3 className="text-[19px]" style={{
+                                  fontWeight: 500,
+                                  color: hoveredItemId === explanation.id ? '#4d4d4d' : '#737373',
+                                  letterSpacing: '-0.014em',
+                                  lineHeight: '1.35',
+                                  marginBottom: '10px',
+                                  transition: 'all 130ms ease'
+                                }}>
+                                  {explanation.title}
+                                </h3>
+                                <p className="text-[13px]" style={{ color: '#B3B3B3', lineHeight: '1.4' }}>
+                                  Nicht veröffentlicht
+                                </p>
+                              </div>
+                              <span
+                                className="text-[13px] font-medium"
+                                style={{
+                                  color: '#2F80ED',
+                                  opacity: hoveredItemId === explanation.id ? 1 : 0,
+                                  transition: 'opacity 130ms ease',
+                                  flexShrink: 0,
+                                  paddingTop: '2px'
+                                }}
+                              >
+                                Bearbeiten
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ paddingTop: '64px', textAlign: 'center' }}>
+                        <p className="text-[15px]" style={{ color: '#B3B3B3', lineHeight: '1.6', marginBottom: '32px' }}>
+                          Sie haben keine gespeicherten Entwürfe.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

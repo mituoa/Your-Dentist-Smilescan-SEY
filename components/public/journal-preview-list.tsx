@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTopicLabel } from "@/lib/masterdata/journal-topics";
-import type { JournalEntry } from "@/lib/queries/journal";
+import type { JournalEntry } from "@/lib/types/journal-entry";
 
 interface JournalPreviewListProps {
   entries: JournalEntry[];

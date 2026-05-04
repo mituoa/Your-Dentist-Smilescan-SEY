@@ -17,9 +17,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const queryError = params.error;
   const inviteToken = params.invite?.trim() || "";
   const prefilledEmail = params.email?.trim() || "";
-  // Keep this stable: controls the horizontal spacing between the two login boxes on desktop.
-  // (~8cm feel at 100% zoom, depending on screen density)
-  const LOGIN_BOX_GAP = "lg:gap-[300px] xl:gap-[300px]";
+  const year = new Date().getFullYear();
 
   return (
     <div className="w-full bg-[#FAFAFA]">
@@ -33,7 +31,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           }}
         />
 
-        <div className={`relative mx-auto flex w-full max-w-7xl items-center justify-center gap-12 px-8 py-12 lg:justify-center lg:px-16 xl:px-24 ${LOGIN_BOX_GAP}`}>
+        <div className="relative mx-auto flex w-full max-w-7xl items-center justify-center gap-12 px-8 py-12 lg:justify-center lg:gap-[300px] lg:px-16 xl:gap-[300px] xl:px-24">
         <div className="hidden max-w-md shrink-0 flex-col justify-center lg:-mt-32 lg:flex xl:max-w-lg">
           <div className="mb-16">
             <div className="mb-2 flex items-center gap-3">
@@ -426,7 +424,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 Impressum
               </Link>
             </div>
-            <p className="mt-2 text-[11px] text-gray-400">© 2026 Your Dentist GmbH</p>
+            <p className="mt-2 text-[11px] text-gray-400">
+              © {year} Your Dentist GmbH
+            </p>
           </div>
         </div>
       </div>

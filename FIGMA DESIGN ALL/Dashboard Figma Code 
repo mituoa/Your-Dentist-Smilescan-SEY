@@ -1,0 +1,852 @@
+import { useState } from 'react';
+import { Search, Bell, User, ChevronDown, LogOut, Plus, FileText, UserPlus, CheckCircle, Upload, Clock, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router';
+// Product Logos
+import logoAtlas from '../../imports/logo-mark-2.svg';
+import logoSmileScan from '../../imports/logo-mark.svg';
+import logoJournals from '../../imports/logo-mark-3.svg';
+import logoPortrait from '../../imports/logo-mark-4.svg';
+import logoRelay from '../../imports/logo-mark-5.svg';
+import logoSettings from '../../imports/logo-mark-6.svg';
+
+export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState('atlas');
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/');
+  };
+
+  return (
+    <div className="min-h-screen flex relative" style={{
+      background: '#F8FAFC'
+    }}>
+      {/* Sophisticated ambient gradient */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at top right, rgba(47,128,237,0.05), transparent 32%)',
+        }}
+      />
+      {/* SIDEBAR - OS-quality navigation */}
+      <aside className="w-[280px] bg-white/95 backdrop-blur-xl border-r flex flex-col relative z-10"
+        style={{
+          borderColor: '#EEF2F6',
+          boxShadow: 'none',
+        }}
+      >
+        {/* Logo Section - Matching Login exactly */}
+        <div className="px-6 border-b" style={{
+          borderColor: '#EEF2F6',
+          height: '80px',
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <div className="flex items-center gap-3">
+            {/* Medical Blue Logo from Login */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" className="w-11 h-11">
+              <defs>
+                <linearGradient id="logo-dashboard" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#FFFFFF"/>
+                  <stop offset="1" stopColor="#E3F2FD"/>
+                </linearGradient>
+              </defs>
+              <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#logo-dashboard)"/>
+              <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#2F80ED" strokeOpacity="0.18" strokeWidth="1.5"/>
+              <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#2F80ED" strokeOpacity="0.34" strokeWidth="9" strokeLinecap="round"/>
+              <path d="M99 103L128 131L157 103" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M128 130V157" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round"/>
+              <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#2F80ED" strokeWidth="10" strokeLinecap="round"/>
+            </svg>
+            <div>
+              <h1 className="text-[19px] font-medium text-gray-900 tracking-tight leading-none">
+                <span className="italic font-light">Your</span> Dentist
+              </h1>
+              <p className="text-[9px] font-semibold text-[#2F80ED] uppercase tracking-[0.15em] mt-0.5">
+                Neutral Practice Platform
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation - Premium Product Icons */}
+        <nav className="flex-1 px-4 pt-6 pb-4 space-y-2">
+          {/* Atlas - Dashboard */}
+          <button
+            onClick={() => setActiveTab('atlas')}
+            className={`group w-full flex items-center gap-3.5 px-3 rounded-xl relative ${
+              activeTab === 'atlas'
+                ? 'bg-[#EEF6FF]'
+                : 'hover:bg-[#F8FAFC]'
+            }`}
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            {activeTab === 'atlas' && (
+              <div style={{
+                position: 'absolute',
+                left: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '2px',
+                height: '20px',
+                background: '#2F80ED',
+                borderRadius: '2px',
+              }} />
+            )}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoAtlas} alt="Atlas" className="w-8 h-8 opacity-80" style={activeTab === 'atlas' ? { opacity: 1 } : {}} />
+            </div>
+            <div className="flex-1 text-left">
+              <span className={`block text-[15px] font-medium ${
+                activeTab === 'atlas' ? 'text-[#1E293B]' : ''
+              }`}
+                style={activeTab !== 'atlas' ? { color: '#64748B' } : {}}
+              >
+                Atlas
+              </span>
+              <span className={`block text-[11px] font-medium ${
+                activeTab === 'atlas' ? 'text-[#64748B]' : ''
+              }`}
+                style={activeTab !== 'atlas' ? { color: '#94A3B8' } : {}}
+              >Dashboard</span>
+            </div>
+          </button>
+
+          {/* Tracker - SmileScan */}
+          <button
+            onClick={() => setActiveTab('tracker')}
+            className={`group w-full flex items-center gap-3.5 px-3 rounded-xl relative ${
+              activeTab === 'tracker'
+                ? 'bg-[#EEF6FF]'
+                : 'hover:bg-[#F8FAFC]'
+            }`}
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            {activeTab === 'tracker' && (
+              <div style={{
+                position: 'absolute',
+                left: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '2px',
+                height: '20px',
+                background: '#2F80ED',
+                borderRadius: '2px',
+              }} />
+            )}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoSmileScan} alt="Tracker" className="w-8 h-8 opacity-80" style={activeTab === 'tracker' ? { opacity: 1 } : {}} />
+            </div>
+            <div className="flex-1 text-left">
+              <span className={`block text-[15px] font-medium ${
+                activeTab === 'tracker' ? 'text-[#1E293B]' : ''
+              }`}
+                style={activeTab !== 'tracker' ? { color: '#64748B' } : {}}
+              >
+                Tracker
+              </span>
+              <span className={`block text-[11px] font-medium ${
+                activeTab === 'tracker' ? 'text-[#64748B]' : ''
+              }`}
+                style={activeTab !== 'tracker' ? { color: '#94A3B8' } : {}}
+              >Intake & Triage</span>
+            </div>
+          </button>
+
+          {/* Admin - Settings */}
+          <button
+            onClick={() => setActiveTab('admin')}
+            className={`group w-full flex items-center gap-3.5 px-3 rounded-xl relative ${
+              activeTab === 'admin'
+                ? 'bg-[#EEF6FF]'
+                : 'hover:bg-[#F8FAFC]'
+            }`}
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            {activeTab === 'admin' && (
+              <div style={{
+                position: 'absolute',
+                left: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '2px',
+                height: '20px',
+                background: '#2F80ED',
+                borderRadius: '2px',
+              }} />
+            )}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoSettings} alt="Admin" className="w-8 h-8 opacity-80" style={activeTab === 'admin' ? { opacity: 1 } : {}} />
+            </div>
+            <div className="flex-1 text-left">
+              <span className={`block text-[15px] font-medium ${
+                activeTab === 'admin' ? 'text-[#1E293B]' : ''
+              }`}
+                style={activeTab !== 'admin' ? { color: '#64748B' } : {}}
+              >
+                Admin
+              </span>
+              <span className={`block text-[11px] font-medium ${
+                activeTab === 'admin' ? 'text-[#64748B]' : ''
+              }`}
+                style={activeTab !== 'admin' ? { color: '#94A3B8' } : {}}
+              >Einstellungen</span>
+            </div>
+          </button>
+
+          {/* Benutzer - Portrait */}
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`group w-full flex items-center gap-3.5 px-3 rounded-xl relative ${
+              activeTab === 'users'
+                ? 'bg-[#EEF6FF]'
+                : 'hover:bg-[#F8FAFC]'
+            }`}
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            {activeTab === 'users' && (
+              <div style={{
+                position: 'absolute',
+                left: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '2px',
+                height: '20px',
+                background: '#2F80ED',
+                borderRadius: '2px',
+              }} />
+            )}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoPortrait} alt="Benutzer" className="w-8 h-8 opacity-80" style={activeTab === 'users' ? { opacity: 1 } : {}} />
+            </div>
+            <div className="flex-1 text-left">
+              <span className={`block text-[15px] font-medium ${
+                activeTab === 'users' ? 'text-[#1E293B]' : ''
+              }`}
+                style={activeTab !== 'users' ? { color: '#64748B' } : {}}
+              >
+                Benutzer
+              </span>
+              <span className={`block text-[11px] font-medium ${
+                activeTab === 'users' ? 'text-[#64748B]' : ''
+              }`}
+                style={activeTab !== 'users' ? { color: '#94A3B8' } : {}}
+              >Profilverwaltung</span>
+            </div>
+          </button>
+
+          {/* Dokumente - Journals */}
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={`group w-full flex items-center gap-3.5 px-3 rounded-xl relative ${
+              activeTab === 'documents'
+                ? 'bg-[#EEF6FF]'
+                : 'hover:bg-[#F8FAFC]'
+            }`}
+            style={{
+              height: '56px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            {activeTab === 'documents' && (
+              <div style={{
+                position: 'absolute',
+                left: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '2px',
+                height: '20px',
+                background: '#2F80ED',
+                borderRadius: '2px',
+              }} />
+            )}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoJournals} alt="Dokumente" className="w-8 h-8 opacity-80" style={activeTab === 'documents' ? { opacity: 1 } : {}} />
+            </div>
+            <div className="flex-1 text-left">
+              <span className={`block text-[15px] font-medium ${
+                activeTab === 'documents' ? 'text-[#1E293B]' : ''
+              }`}
+                style={activeTab !== 'documents' ? { color: '#64748B' } : {}}
+              >
+                Dokumente
+              </span>
+              <span className={`block text-[11px] font-medium ${
+                activeTab === 'documents' ? 'text-[#64748B]' : ''
+              }`}
+                style={activeTab !== 'documents' ? { color: '#94A3B8' } : {}}
+              >Fallakten</span>
+            </div>
+          </button>
+        </nav>
+
+        {/* Bottom Section */}
+        <div className="px-4 py-4 border-t space-y-2" style={{ borderColor: '#EEF2F6' }}>
+          {/* Hilfe - Relay */}
+          <button className="group w-full flex items-center gap-3 px-3 rounded-xl hover:bg-[#F8FAFC]"
+            style={{
+              height: '48px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+              <img src={logoRelay} alt="Hilfe" className="w-8 h-8" />
+            </div>
+            <span className="text-[15px] font-medium" style={{ color: '#64748B' }}>Hilfe & Support</span>
+          </button>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="group w-full flex items-center gap-3 px-3 rounded-xl hover:bg-[#F8FAFC]"
+            style={{
+              height: '48px',
+              transition: 'all 180ms ease',
+            }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: '#F8FAFC' }}
+            >
+              <LogOut className="w-4 h-4" style={{ color: '#64748B' }} />
+            </div>
+            <span className="text-[15px] font-medium" style={{ color: '#64748B' }}>Abmelden</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col relative">
+        {/* HEADER - Intelligent and refined */}
+        <header className="bg-white/80 backdrop-blur-xl border-b relative z-10"
+          style={{
+            borderColor: '#EEF2F6',
+            height: '80px',
+          }}
+        >
+          <div className="px-10 h-full flex items-center justify-between">
+            {/* Search */}
+            <div className="flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Patienten, Fälle oder Dokumente suchen..."
+                  className="w-full bg-white text-[15px] text-gray-900 focus:outline-none placeholder:text-gray-400"
+                  style={{
+                    height: '48px',
+                    paddingLeft: '44px',
+                    paddingRight: '16px',
+                    borderRadius: '12px',
+                    border: '1px solid #E2E8F0',
+                    transition: 'all 200ms ease',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,128,237,0.12)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Right Section */}
+            <div className="flex items-center gap-3 ml-6">
+              {/* Quick Action */}
+              <button
+                className="hidden lg:flex items-center gap-2 px-5 text-white font-medium text-[14px]"
+                style={{
+                  height: '48px',
+                  borderRadius: '12px',
+                  background: '#2F80ED',
+                  boxShadow: '0 4px 12px rgba(47,128,237,0.28), 0 2px 4px rgba(47,128,237,0.18)',
+                  transition: 'all 180ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#1C6FD8';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(47,128,237,0.34), 0 3px 6px rgba(47,128,237,0.22)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#2F80ED';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(47,128,237,0.28), 0 2px 4px rgba(47,128,237,0.18)';
+                }}
+                onMouseDown={(e) => {
+                  e.currentTarget.style.transform = 'scale(0.98)';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                <span>Neuer Fall</span>
+              </button>
+
+              {/* Notifications */}
+              <button className="relative w-10 h-10 flex items-center justify-center hover:bg-[#F8FAFC] rounded-lg"
+                style={{
+                  transition: 'all 180ms ease',
+                }}
+              >
+                <Bell className="w-[18px] h-[18px]" style={{ color: '#64748B' }} />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ background: '#2F80ED' }}></span>
+              </button>
+
+              {/* User Menu */}
+              <button className="flex items-center gap-3 px-3 hover:bg-[#F8FAFC] rounded-xl"
+                style={{
+                  height: '44px',
+                  transition: 'all 180ms ease',
+                }}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{
+                  background: '#2F80ED',
+                }}>
+                  <User className="w-[16px] h-[16px] text-white" />
+                </div>
+                <div className="text-left hidden lg:block">
+                  <p className="text-[13px] font-medium" style={{
+                    color: '#1E293B',
+                    marginBottom: '2px',
+                  }}>Dr. Cyrus Alamouti</p>
+                  <p className="text-[11px]" style={{ color: '#64748B' }}>Administrator</p>
+                </div>
+                <ChevronDown className="w-4 h-4 hidden lg:block" style={{ color: '#94A3B8' }} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* CONTENT AREA - Premium centered layout */}
+        <div className="flex-1 overflow-auto">
+          <div className="max-w-[1240px] mx-auto px-10" style={{ paddingTop: '32px', paddingBottom: '32px' }}>
+            {/* HERO AREA - Ruhiger Einstieg */}
+            <div className="relative overflow-hidden"
+              style={{
+                marginBottom: '32px',
+                paddingBottom: '32px',
+                borderBottom: '1px solid rgba(226,232,240,0.6)',
+              }}
+            >
+              <div className="relative">
+                <h1 className="text-[28px] font-semibold"
+                  style={{
+                    color: '#1E293B',
+                    letterSpacing: '-0.01em',
+                    lineHeight: '1.2',
+                    fontWeight: 600,
+                    marginBottom: '8px',
+                  }}
+                >
+                  Willkommen zurück, Dr. Cyrus Alamouti
+                </h1>
+                <p className="text-[13px]"
+                  style={{
+                    color: '#64748B',
+                    marginBottom: '24px',
+                  }}
+                >
+                  {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+
+                {/* Daily context */}
+                <div className="flex items-center" style={{ gap: '32px' }}>
+                  <div className="flex items-center" style={{ gap: '12px' }}>
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{
+                        background: 'rgba(47,128,237,0.08)',
+                      }}
+                    >
+                      <Clock className="w-[18px] h-[18px]" style={{ color: '#2F80ED' }} />
+                    </div>
+                    <div>
+                      <p className="text-[15px]" style={{
+                        color: '#1E293B',
+                        fontWeight: 600,
+                        marginBottom: '2px',
+                      }}>12 Termine</p>
+                      <p className="text-[13px]" style={{ color: '#64748B' }}>heute geplant</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center" style={{ gap: '12px' }}>
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{
+                        background: 'rgba(47,128,237,0.08)',
+                      }}
+                    >
+                      <AlertCircle className="w-[18px] h-[18px]" style={{ color: '#2F80ED' }} />
+                    </div>
+                    <div>
+                      <p className="text-[15px]" style={{
+                        color: '#1E293B',
+                        fontWeight: 600,
+                        marginBottom: '2px',
+                      }}>3 Fälle</p>
+                      <p className="text-[13px]" style={{ color: '#64748B' }}>benötigen Aufmerksamkeit</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* KPI CARDS - Strong hierarchy */}
+            <div className="grid grid-cols-12" style={{ gap: '24px', marginBottom: '40px' }}>
+
+              {/* PRIORITY CARD - Offene Fälle (DOMINANT, CLEAN) */}
+              <div className="col-span-12 lg:col-span-7"
+                style={{
+                  background: 'linear-gradient(135deg, #F0F7FF 0%, #F4F8FF 100%)',
+                  border: '1px solid #D6E6FF',
+                  borderRadius: '16px',
+                  padding: '28px 32px',
+                  boxShadow: '0 8px 24px rgba(47, 128, 237, 0.12)',
+                  transition: 'all 200ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(47, 128, 237, 0.16)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(47, 128, 237, 0.12)';
+                }}
+              >
+                <p className="text-[10px] uppercase" style={{
+                  color: '#2F80ED',
+                  fontWeight: 500,
+                  letterSpacing: '0.08em',
+                  marginBottom: '16px',
+                  opacity: 0.9,
+                }}>
+                  Erfordert Aufmerksamkeit
+                </p>
+
+                <p className="leading-none" style={{
+                  fontSize: '64px',
+                  color: '#0B4EA3',
+                  fontWeight: 650,
+                  letterSpacing: '-0.03em',
+                  marginBottom: '18px',
+                }}>56</p>
+
+                <p className="text-[13px]" style={{
+                  color: '#475569',
+                  lineHeight: '1.5',
+                  fontWeight: 500,
+                }}>
+                  3 Fälle benötigen sofortige Bearbeitung
+                </p>
+              </div>
+
+              {/* SECONDARY KPI CARDS */}
+              <div className="col-span-12 lg:col-span-5 grid grid-cols-1" style={{ gap: '24px' }}>
+
+                {/* Aktive Patienten */}
+                <div className="bg-white"
+                  style={{
+                    border: '1px solid #EEF2F6',
+                    borderRadius: '16px',
+                    padding: '28px 24px 20px 24px',
+                    boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+                    transition: 'all 200ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(15,23,42,0.08)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(15, 23, 42, 0.04)';
+                  }}
+                >
+                  <div className="flex items-start justify-between" style={{ marginBottom: '16px' }}>
+                    <p className="text-[12px]" style={{
+                      color: '#64748B',
+                      fontWeight: 500,
+                      letterSpacing: '0.01em',
+                    }}>Aktive Patienten</p>
+                    <span className="text-[11px] px-2 py-0.5"
+                      style={{
+                        color: '#16A34A',
+                        background: '#EAFBF1',
+                        borderRadius: '999px',
+                        fontWeight: 600,
+                        marginLeft: '12px',
+                      }}
+                    >
+                      +12%
+                    </span>
+                  </div>
+                  <p className="text-[40px] leading-none" style={{
+                    color: '#0F172A',
+                    letterSpacing: '-0.03em',
+                    fontWeight: 600,
+                  }}>1,234</p>
+                </div>
+
+                {/* Behandlungen */}
+                <div className="bg-white"
+                  style={{
+                    border: '1px solid #EEF2F6',
+                    borderRadius: '16px',
+                    padding: '28px 24px 20px 24px',
+                    boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+                    transition: 'all 200ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(15,23,42,0.08)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(15, 23, 42, 0.04)';
+                  }}
+                >
+                  <div className="flex items-start justify-between" style={{ marginBottom: '16px' }}>
+                    <p className="text-[12px]" style={{
+                      color: '#64748B',
+                      fontWeight: 500,
+                      letterSpacing: '0.01em',
+                    }}>Behandlungen</p>
+                    <span className="text-[11px] px-2 py-0.5"
+                      style={{
+                        color: '#16A34A',
+                        background: '#EAFBF1',
+                        borderRadius: '999px',
+                        fontWeight: 600,
+                        marginLeft: '12px',
+                      }}
+                    >
+                      +8%
+                    </span>
+                  </div>
+                  <p className="text-[40px] leading-none" style={{
+                    color: '#0F172A',
+                    letterSpacing: '-0.03em',
+                    fontWeight: 600,
+                  }}>342</p>
+                </div>
+              </div>
+            </div>
+
+            {/* RECENT ACTIVITY - Professional audit trail */}
+            <div className="bg-white"
+              style={{
+                padding: '28px 32px',
+                borderRadius: '16px',
+                border: '1px solid #EEF2F6',
+                boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+                transition: 'all 200ms ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(15,23,42,0.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(15, 23, 42, 0.04)';
+              }}
+            >
+              <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
+                <div>
+                  <h2 className="text-[18px] font-semibold" style={{
+                    color: '#1E293B',
+                    letterSpacing: '-0.01em',
+                    fontWeight: 600,
+                    marginBottom: '4px',
+                  }}>Letzte Aktivitäten</h2>
+                  <p className="text-[13px]" style={{ color: '#64748B' }}>
+                    Medizinisches Aktivitätsprotokoll
+                  </p>
+                </div>
+                <button className="text-[14px] font-medium px-4 py-2 rounded-xl"
+                  style={{
+                    color: '#2F80ED',
+                    background: 'rgba(47,128,237,0.08)',
+                    transition: 'all 180ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(47,128,237,0.14)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(47,128,237,0.08)';
+                  }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'scale(0.98)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  Alle anzeigen
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Activity Item 1 */}
+                <div className="flex items-start" style={{ gap: '12px' }}>
+                  <div className="flex items-center justify-center flex-shrink-0"
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      background: '#F8FAFC',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <FileText className="w-[20px] h-[20px]" style={{ color: '#64748B' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px]" style={{
+                      color: '#0F172A',
+                      fontWeight: 600,
+                      lineHeight: '1.4',
+                      marginBottom: '4px',
+                    }}>
+                      Neuer Fall erstellt
+                    </p>
+                    <p className="text-[13px]" style={{
+                      color: '#64748B',
+                      lineHeight: '1.5',
+                      marginBottom: '8px',
+                    }}>
+                      Patient: Anna Müller · Fall <span className="font-mono">#12345</span>
+                    </p>
+                    <p className="text-[11px]" style={{
+                      color: '#94A3B8',
+                      fontWeight: 400,
+                    }}>
+                      Vor 5 Minuten
+                    </p>
+                  </div>
+                </div>
+
+                {/* Activity Item 2 */}
+                <div className="flex items-start" style={{ gap: '12px' }}>
+                  <div className="flex items-center justify-center flex-shrink-0"
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      background: '#F8FAFC',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <UserPlus className="w-[20px] h-[20px]" style={{ color: '#64748B' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px]" style={{
+                      color: '#0F172A',
+                      fontWeight: 600,
+                      lineHeight: '1.4',
+                      marginBottom: '4px',
+                    }}>
+                      Patient hinzugefügt
+                    </p>
+                    <p className="text-[13px]" style={{
+                      color: '#64748B',
+                      lineHeight: '1.5',
+                      marginBottom: '8px',
+                    }}>
+                      Neuer Patient: Thomas Schmidt
+                    </p>
+                    <p className="text-[11px]" style={{
+                      color: '#94A3B8',
+                      fontWeight: 400,
+                    }}>
+                      Vor 23 Minuten
+                    </p>
+                  </div>
+                </div>
+
+                {/* Activity Item 3 */}
+                <div className="flex items-start" style={{ gap: '12px' }}>
+                  <div className="flex items-center justify-center flex-shrink-0"
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      background: '#F8FAFC',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <CheckCircle className="w-[20px] h-[20px]" style={{ color: '#64748B' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px]" style={{
+                      color: '#0F172A',
+                      fontWeight: 600,
+                      lineHeight: '1.4',
+                      marginBottom: '4px',
+                    }}>
+                      Behandlung abgeschlossen
+                    </p>
+                    <p className="text-[13px]" style={{
+                      color: '#64748B',
+                      lineHeight: '1.5',
+                      marginBottom: '8px',
+                    }}>
+                      Fall <span className="font-mono">#12340</span> · Lisa Weber
+                    </p>
+                    <p className="text-[11px]" style={{
+                      color: '#94A3B8',
+                      fontWeight: 400,
+                    }}>
+                      Vor 1 Stunde
+                    </p>
+                  </div>
+                </div>
+
+                {/* Activity Item 4 */}
+                <div className="flex items-start" style={{ gap: '12px' }}>
+                  <div className="flex items-center justify-center flex-shrink-0"
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      background: '#F8FAFC',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <Upload className="w-[20px] h-[20px]" style={{ color: '#64748B' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px]" style={{
+                      color: '#0F172A',
+                      fontWeight: 600,
+                      lineHeight: '1.4',
+                      marginBottom: '4px',
+                    }}>
+                      Dokument hochgeladen
+                    </p>
+                    <p className="text-[13px]" style={{
+                      color: '#64748B',
+                      lineHeight: '1.5',
+                      marginBottom: '8px',
+                    }}>
+                      Röntgenbild · Fall <span className="font-mono">#12338</span>
+                    </p>
+                    <p className="text-[11px]" style={{
+                      color: '#94A3B8',
+                      fontWeight: 400,
+                    }}>
+                      Vor 2 Stunden
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

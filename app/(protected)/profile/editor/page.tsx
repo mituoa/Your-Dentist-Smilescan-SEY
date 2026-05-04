@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 import { getProfileForEditor } from "@/lib/queries/profile-editor";
 import { ProfileEditorShell } from "@/components/profile-editor/profile-editor-shell";
 
@@ -8,17 +7,8 @@ export default async function ProfileEditorPage() {
   const workspace = await getCurrentWorkspace();
   if (!workspace) redirect("/login");
   if (workspace.role !== "doctor") {
-    redirect("/my-tasks");
+    redirect("/relay");
   }
-
-  const supabase = await createClient();
-  const { data: ws } = await supabase
-    .from("workspaces")
-    .select("id, name, slug")
-    .eq("id", workspace.workspace_id)
-    .single();
-
-  if (!ws) redirect("/login");
 
   const data = await getProfileForEditor(workspace.workspace_id);
   if (!data) {
@@ -28,10 +18,8 @@ export default async function ProfileEditorPage() {
   }
 
   return (
-    <ProfileEditorShell
-      initialData={data}
-      workspaceName={ws.name}
-      slug={ws.slug ?? ""}
-    />
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <ProfileEditorShell initialData={data} />
+    </div>
   );
 }

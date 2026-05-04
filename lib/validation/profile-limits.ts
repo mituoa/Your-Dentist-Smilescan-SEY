@@ -8,7 +8,7 @@ export const PROFILE_LIMITS = {
   service_name: 50,
   service_note: 30,
   practice_name: 50,
-  practice_address: 100,
+  practice_address: 180,
   practice_employment_status: 80,
   practice_phone: 30,
   practice_email: 80,

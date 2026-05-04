@@ -2,7 +2,18 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 // Routen, die einen Login erfordern
-const PROTECTED_PATHS = ["/dashboard", "/inbox", "/profile", "/journal", "/settings", "/my-tasks"];
+const PROTECTED_PATHS = [
+  "/dashboard",
+  "/inbox",
+  "/profile",
+  "/journal",
+  "/journals",
+  "/settings",
+  "/admin",
+  "/my-tasks",
+  "/relay",
+  "/create-case",
+];
 
 // Routen, die NICHT für eingeloggte User sichtbar sind (redirect zu dashboard)
 const AUTH_PATHS = ["/login", "/register"];

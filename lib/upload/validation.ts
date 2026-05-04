@@ -16,11 +16,47 @@ export interface ValidationResult {
   error?: string;
 }
 
+/** Dateiname → MIME, wenn der Browser keinen (oder nur octet-stream) liefert — z. B. iOS/HEIC. */
+function inferImageMimeFromName(fileName: string): string | null {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  switch (ext) {
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "webp":
+      return "image/webp";
+    case "heic":
+      return "image/heic";
+    case "heif":
+      return "image/heif";
+    default:
+      return null;
+  }
+}
+
+/**
+ * Effektiver Bild-MIME-Typ für Validierung und Storage-Upload.
+ */
+export function resolveImageMimeForUpload(file: File): string | null {
+  const raw = (file.type || "").toLowerCase().trim();
+  if (ALLOWED_MIME_TYPES.includes(raw)) {
+    return raw;
+  }
+  if (!raw || raw === "application/octet-stream") {
+    return inferImageMimeFromName(file.name);
+  }
+  return null;
+}
+
 export function validatePhoto(file: File): ValidationResult {
-  if (!ALLOWED_MIME_TYPES.includes(file.type.toLowerCase())) {
+  const mime = resolveImageMimeForUpload(file);
+  if (!mime) {
+    const hint = (file.type || "").trim() || "unbekanntes Format";
     return {
       valid: false,
-      error: `Format "${file.type}" nicht unterstützt. Erlaubt: JPG, PNG, HEIC, WEBP.`,
+      error: `Format (${hint}) nicht unterstützt. Erlaubt: JPG, PNG, HEIC, WEBP — ggf. Dateiendung prüfen.`,
     };
   }
 

@@ -18,25 +18,34 @@ export function Sidebar({
   const myTasksUrgent = myTasksOverdueCount > 0;
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-80 flex-col border-r border-white/45 bg-white/72 shadow-[0px_20px_44px_rgba(15,23,42,0.08)] backdrop-blur-xl md:flex">
+    <aside className="sticky top-0 hidden h-screen w-[280px] flex-col border-r bg-white/95 backdrop-blur-xl md:flex"
+      style={{ borderColor: "#EEF2F6" }}
+    >
       <BrandMark />
 
-      <nav className="flex-1 py-4 space-y-0.5">
+      <nav className="flex-1 px-4 pt-6 pb-4 space-y-2">
         {role === "doctor" && (
-          <NavItem href="/dashboard" iconName="dashboard" label="Atlas" />
+          <NavItem
+            href="/dashboard"
+            iconName="dashboard"
+            label="Atlas"
+            description="Dashboard"
+          />
         )}
 
         <NavItem
           href="/inbox"
           iconName="inbox"
-          label="SmileScan"
+          label="Tracker"
+          description="Intake & Triage"
           badge={inboxCount}
         />
 
         <NavItem
-          href="/my-tasks"
+          href="/relay"
           iconName="tasks"
           label="Relay"
+          description="Aufgaben"
           badge={myTasksCount}
           badgeUrgent={myTasksUrgent}
         />
@@ -46,20 +55,23 @@ export function Sidebar({
             <NavItem
               href="/profile/editor"
               iconName="profile"
-              label="Portrait"
+              label="Benutzer"
+              description="Profilverwaltung"
             />
             <JournalNavGroup />
             <NavItem
               href="/settings"
               iconName="settings"
-              label="Settings"
+              label="Admin"
+              description="Einstellungen"
             />
           </>
         )}
       </nav>
 
-      <div className="p-4 border-t border-border">
-        <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary">
+      <div className="px-4 py-4 border-t space-y-2" style={{ borderColor: "#EEF2F6" }}>
+        <div className="mx-2 text-[11px] font-medium text-[#94A3B8]">Hilfe &amp; Support</div>
+        <div className="mx-2 text-[10px] font-mono uppercase tracking-wider text-[#94A3B8]">
           v 0.1 · Alpha
         </div>
       </div>

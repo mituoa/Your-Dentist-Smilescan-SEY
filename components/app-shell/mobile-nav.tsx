@@ -60,7 +60,7 @@ export function MobileNav({
               badge={inboxCount}
             />
             <NavItem
-              href="/my-tasks"
+              href="/relay"
               iconName="tasks"
               label="Relay"
               badge={myTasksCount}

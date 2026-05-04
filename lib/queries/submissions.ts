@@ -10,6 +10,10 @@ export interface SubmissionDetail {
   patient_email: string | null;
   patient_phone: string | null;
   patient_notes: string | null;
+  patient_birth_date: string | null;
+  patient_external_id: string | null;
+  urgency: string | null;
+  is_draft: boolean;
   created_at: string;
   seen_at: string | null;
   seen_by: string | null;
@@ -31,6 +35,7 @@ export async function getSubmissionById(
     .select(
       `
       id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
+      patient_birth_date, patient_external_id, urgency, is_draft,
       created_at, seen_at, seen_by,
       submission_photos (id, storage_path, sort_order)
     `
@@ -76,6 +81,10 @@ export async function getSubmissionById(
     patient_email: data.patient_email,
     patient_phone: data.patient_phone,
     patient_notes: data.patient_notes,
+    patient_birth_date: (data.patient_birth_date as string | null) ?? null,
+    patient_external_id: (data.patient_external_id as string | null) ?? null,
+    urgency: (data.urgency as string | null) ?? null,
+    is_draft: Boolean(data.is_draft),
     created_at: data.created_at,
     seen_at: data.seen_at,
     seen_by: data.seen_by,

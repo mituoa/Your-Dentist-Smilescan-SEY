@@ -1,0 +1,651 @@
+import { useState } from 'react';
+import { Search, Bell, User, ChevronDown, LogOut, Copy, Check, Eye, Upload } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import logoAtlas from '../../imports/logo-mark-2.svg';
+import logoSmileScan from '../../imports/logo-mark.svg';
+import logoJournals from '../../imports/logo-mark-3.svg';
+import logoPortrait from '../../imports/logo-mark-4.svg';
+import logoRelay from '../../imports/logo-mark-5.svg';
+import logoSettings from '../../imports/logo-mark-6.svg';
+
+export default function AdminSettings() {
+  const navigate = useNavigate();
+  const [copiedCalendar, setCopiedCalendar] = useState(false);
+  const [copiedProfile, setCopiedProfile] = useState(false);
+  const [saveIndicator, setSaveIndicator] = useState<string | null>(null);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('editor');
+
+  const [settings, setSettings] = useState({
+    profileSlug: 'dr-alamouti',
+    accentColor: '#2F80ED',
+    calendarUrl: 'yourdentist.com/cal/dr-alamouti',
+    email: 'c.alamouti@praxis-alamouti.de',
+    workspaceName: 'Zahnarztpraxis Dr. Alamouti',
+  });
+
+  const teamMembers = [
+    { id: '1', name: 'Dr. Cyrus Alamouti', email: 'c.alamouti@praxis-alamouti.de', role: 'Administrator' },
+    { id: '2', name: 'Sarah Müller', email: 's.mueller@praxis-alamouti.de', role: 'Bearbeiter' },
+    { id: '3', name: 'Max Fischer', email: 'm.fischer@praxis-alamouti.de', role: 'Ausstehend', pending: true },
+  ];
+
+  const colorOptions = [
+    { value: '#2F80ED', default: true },
+    { value: '#27AE60' },
+    { value: '#95A5A6' },
+    { value: '#5D6D7E' },
+  ];
+
+  const handleCopy = (text: string, type: 'calendar' | 'profile') => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    }
+    if (type === 'calendar') {
+      setCopiedCalendar(true);
+      setTimeout(() => setCopiedCalendar(false), 1800);
+    } else {
+      setCopiedProfile(true);
+      setTimeout(() => setCopiedProfile(false), 1800);
+    }
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setSettings({ ...settings, [field]: value });
+    setSaveIndicator(field);
+    setTimeout(() => setSaveIndicator(null), 1800);
+  };
+
+  const handleInvite = () => {
+    console.log('Invite:', inviteEmail, inviteRole);
+    setInviteEmail('');
+  };
+
+  const handleLogout = () => {
+    navigate('/');
+  };
+
+  return (
+    <div className="min-h-screen flex" style={{ background: '#FAFAF8' }}>
+
+      {/* SIDEBAR */}
+      <aside className="w-[280px] bg-white border-r flex flex-col"
+        style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+
+        <div className="px-6 border-b" style={{ borderColor: 'rgba(0,0,0,0.06)', height: '80px', display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" className="w-11 h-11">
+              <defs>
+                <linearGradient id="logo-settings-blue" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#FFFFFF"/>
+                  <stop offset="1" stopColor="#E3F2FD"/>
+                </linearGradient>
+              </defs>
+              <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#logo-settings-blue)"/>
+              <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#2F80ED" strokeOpacity="0.18" strokeWidth="1.5"/>
+              <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#2F80ED" strokeOpacity="0.34" strokeWidth="9" strokeLinecap="round"/>
+              <path d="M99 103L128 131L157 103" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M128 130V157" stroke="#2F80ED" strokeWidth="11" strokeLinecap="round"/>
+              <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#2F80ED" strokeWidth="10" strokeLinecap="round"/>
+            </svg>
+            <div>
+              <h1 className="text-[19px] font-medium tracking-tight leading-none" style={{ color: '#1A1A1A' }}>
+                <span className="italic font-light">Your</span> Dentist
+              </h1>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.15em] mt-0.5" style={{ color: '#2F80ED' }}>
+                Neutral Practice Platform
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-4 pt-6 pb-4 space-y-1">
+          <button onClick={() => navigate('/dashboard')} className="group w-full flex items-center gap-3.5 px-3 rounded-lg hover:bg-black/[0.02]" style={{ height: '52px', transition: 'all 140ms ease' }}>
+            <div className="w-7 h-7 flex items-center justify-center">
+              <img src={logoAtlas} alt="Atlas" className="w-7 h-7 opacity-40 group-hover:opacity-60" style={{ transition: 'opacity 140ms' }} />
+            </div>
+            <span className="text-[14px]" style={{ color: '#666666' }}>Atlas</span>
+          </button>
+
+          <button onClick={() => navigate('/dashboard')} className="group w-full flex items-center gap-3.5 px-3 rounded-lg hover:bg-black/[0.02]" style={{ height: '52px', transition: 'all 140ms ease' }}>
+            <div className="w-7 h-7 flex items-center justify-center">
+              <img src={logoSmileScan} alt="Tracker" className="w-7 h-7 opacity-40 group-hover:opacity-60" style={{ transition: 'opacity 140ms' }} />
+            </div>
+            <span className="text-[14px]" style={{ color: '#666666' }}>Tracker</span>
+          </button>
+
+          <button onClick={() => navigate('/relay')} className="group w-full flex items-center gap-3.5 px-3 rounded-lg hover:bg-black/[0.02]" style={{ height: '52px', transition: 'all 140ms ease' }}>
+            <div className="w-7 h-7 flex items-center justify-center">
+              <img src={logoRelay} alt="Relay" className="w-7 h-7 opacity-40 group-hover:opacity-60" style={{ transition: 'opacity 140ms' }} />
+            </div>
+            <span className="text-[14px]" style={{ color: '#666666' }}>Relay</span>
+          </button>
+
+          <button onClick={() => navigate('/profile')} className="group w-full flex items-center gap-3.5 px-3 rounded-lg hover:bg-black/[0.02]" style={{ height: '52px', transition: 'all 140ms ease' }}>
+            <div className="w-7 h-7 flex items-center justify-center">
+              <img src={logoPortrait} alt="Benutzer" className="w-7 h-7 opacity-40 group-hover:opacity-60" style={{ transition: 'opacity 140ms' }} />
+            </div>
+            <span className="text-[14px]" style={{ color: '#666666' }}>Benutzer</span>
+          </button>
+
+          <button onClick={() => navigate('/journals')} className="group w-full flex items-center gap-3.5 px-3 rounded-lg hover:bg-black/[0.02]" style={{ height: '52px', transition: 'all 140ms ease' }}>
+            <div className="w-7 h-7 flex items-center justify-center">
+              <img src={logoJournals} alt="Journals" className="w-7 h-7 opacity-40 group-hover:opacity-60" style={{ transition: 'opacity 140ms' }} />
+            </div>
+            <span className="text-[14px]" style={{ color: '#666666' }}>Journals</span>
+          </button>
+
+          <button className="w-full flex items-center gap-3.5 px-3 rounded-lg" style={{ height: '52px', background: 'rgba(0,0,0,0.03)' }}>
+            <div className="w-7 h-7 flex items-center justify-center">
+              <img src={logoSettings} alt="Admin" className="w-7 h-7 opacity-90" />
+            </div>
+            <span className="text-[14px]" style={{ color: '#1A1A1A' }}>Einstellungen</span>
+          </button>
+        </nav>
+
+        <div className="px-4 py-4 border-t" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 rounded-lg hover:bg-black/[0.02]" style={{ height: '44px', transition: 'all 140ms ease' }}>
+            <LogOut className="w-4 h-4" style={{ color: '#999999' }} />
+            <span className="text-[14px]" style={{ color: '#666666' }}>Abmelden</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col">
+
+        {/* HEADER */}
+        <header className="bg-white border-b" style={{ height: '80px', borderColor: 'rgba(0,0,0,0.06)' }}>
+          <div className="px-12 h-full flex items-center justify-between">
+            <div className="flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[17px] h-[17px]" style={{ color: '#CCCCCC' }} />
+                <input type="text" placeholder="Suchen..."
+                  className="w-full bg-white text-[15px] focus:outline-none"
+                  style={{
+                    height: '44px',
+                    paddingLeft: '42px',
+                    paddingRight: '16px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(0,0,0,0.08)',
+                    color: '#1A1A1A',
+                    transition: 'border-color 140ms ease'
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; }}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 ml-6">
+              <button className="relative w-9 h-9 flex items-center justify-center hover:bg-black/[0.02] rounded-lg" style={{ transition: 'all 140ms ease' }}>
+                <Bell className="w-[17px] h-[17px]" style={{ color: '#999999' }} />
+              </button>
+
+              <button className="flex items-center gap-2.5 px-2.5 hover:bg-black/[0.02] rounded-lg" style={{ height: '40px', transition: 'all 140ms ease' }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: '#2F80ED' }}>
+                  <User className="w-[15px] h-[15px]" style={{ color: '#FFFFFF' }} />
+                </div>
+                <div className="text-left hidden lg:block">
+                  <p className="text-[13px]" style={{ color: '#1A1A1A' }}>Dr. Cyrus Alamouti</p>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 hidden lg:block" style={{ color: '#CCCCCC' }} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* SETTINGS CONTENT - 8px grid strict */}
+        <div className="flex-1 overflow-auto">
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 48px 160px' }}>
+
+            {/* HEADLINE AREA - 96px top spacing */}
+            <div style={{ paddingTop: '96px', marginBottom: '72px' }}>
+              <h1 className="font-medium" style={{ fontSize: '38px', color: '#1A1A1A', marginBottom: '8px', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+                Einstellungen
+              </h1>
+              <p style={{ fontSize: '15px', color: '#999999', lineHeight: '1.5' }}>
+                Verwalten Sie Ihre Praxis und Ihr Team
+              </p>
+            </div>
+
+            {/* SECTION 1: PRACTICE IDENTITY - 96px from previous */}
+            <section style={{ marginBottom: '96px' }}>
+              <h2 className="font-medium" style={{ fontSize: '20px', color: '#1A1A1A', marginBottom: '24px', letterSpacing: '-0.01em' }}>
+                Ihre Praxis
+              </h2>
+
+              {/* Public Profile - 8px label spacing */}
+              <div style={{ marginBottom: '32px' }}>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Öffentliches Profil
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center flex-1 focus-within:bg-[#F3F3F1]"
+                    style={{
+                      padding: '12px 14px',
+                      background: '#F7F7F5',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      color: '#1A1A1A',
+                      transition: 'background 140ms ease'
+                    }}
+                  >
+                    <span style={{ color: '#CCCCCC', marginRight: '4px' }}>yourdentist.com/</span>
+                    <input
+                      type="text"
+                      value={settings.profileSlug}
+                      onChange={(e) => handleChange('profileSlug', e.target.value)}
+                      className="flex-1 bg-transparent focus:outline-none"
+                      style={{ color: '#1A1A1A' }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleCopy(`yourdentist.com/${settings.profileSlug}`, 'profile')}
+                    className="flex items-center justify-center"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      color: copiedProfile ? '#2F80ED' : '#999999',
+                      transition: 'all 140ms ease',
+                      borderRadius: '10px'
+                    }}
+                    onMouseEnter={(e) => { if (!copiedProfile) e.currentTarget.style.background = 'rgba(0,0,0,0.02)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    {copiedProfile ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between" style={{ marginTop: '8px' }}>
+                  <p style={{ fontSize: '13px', color: '#CCCCCC' }}>
+                    Dieser Link ist für Ihre Patienten sichtbar
+                  </p>
+                  {saveIndicator === 'profileSlug' && (
+                    <p style={{ fontSize: '13px', color: '#999999' }}>
+                      Gespeichert
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div style={{ marginBottom: '32px' }}>
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-2"
+                  style={{
+                    fontSize: '14px',
+                    color: '#666666',
+                    transition: 'color 140ms ease',
+                    padding: '6px 0'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#2F80ED'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#666666'; }}
+                >
+                  <Eye className="w-4 h-4" />
+                  Vorschau anzeigen
+                </button>
+              </div>
+
+              {/* Logo */}
+              <div style={{ marginBottom: '32px' }}>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Logo
+                </label>
+                <div
+                  className="flex items-center justify-center cursor-pointer group"
+                  style={{
+                    height: '120px',
+                    background: '#F7F7F5',
+                    borderRadius: '10px',
+                    border: '1px dashed rgba(0,0,0,0.12)',
+                    transition: 'all 140ms ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F3F1'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.16)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#F7F7F5'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; }}
+                >
+                  <div className="text-center">
+                    <Upload className="w-5 h-5 mx-auto mb-2" style={{ color: '#CCCCCC' }} />
+                    <p style={{ fontSize: '13px', color: '#999999' }}>Logo hochladen</p>
+                    <p style={{ fontSize: '13px', color: '#CCCCCC', marginTop: '4px' }}>512×512px empfohlen</p>
+                  </div>
+                </div>
+                <p style={{ fontSize: '13px', color: '#CCCCCC', marginTop: '8px' }}>
+                  Ihr Logo erscheint in Ihrem öffentlichen Profil
+                </p>
+              </div>
+
+              {/* Accent Color */}
+              <div>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Akzentfarbe
+                </label>
+                <div className="flex items-center gap-2">
+                  {colorOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleChange('accentColor', option.value)}
+                      className="relative"
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '10px',
+                        background: option.value,
+                        border: settings.accentColor === option.value ? '2px solid #1A1A1A' : '1px solid rgba(0,0,0,0.08)',
+                        cursor: 'pointer',
+                        transition: 'all 140ms ease'
+                      }}
+                    >
+                      {option.default && settings.accentColor === option.value && (
+                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full" style={{ background: '#1A1A1A' }} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {saveIndicator === 'accentColor' && (
+                  <p style={{ fontSize: '13px', color: '#999999', marginTop: '8px' }}>
+                    Gespeichert
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {/* SECTION 2: ORGANIZATION - 96px from previous */}
+            <section style={{ marginBottom: '96px' }}>
+              <h2 className="font-medium" style={{ fontSize: '20px', color: '#1A1A1A', marginBottom: '24px', letterSpacing: '-0.01em' }}>
+                Team & Zugriff
+              </h2>
+
+              {/* Team Members List - 24px spacing between items */}
+              <div style={{ marginBottom: '32px' }}>
+                {teamMembers.map((member, index) => (
+                  <div
+                    key={member.id}
+                    className="flex items-start justify-between"
+                    style={{
+                      paddingTop: index === 0 ? '0' : '24px',
+                      paddingBottom: '24px',
+                      borderBottom: index < teamMembers.length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none'
+                    }}
+                  >
+                    <div className="flex-1">
+                      <p style={{ fontSize: '15px', color: member.pending ? '#999999' : '#1A1A1A', marginBottom: '4px', lineHeight: '1.5' }}>
+                        {member.name}
+                      </p>
+                      <p style={{ fontSize: '13px', color: '#CCCCCC', lineHeight: '1.5' }}>
+                        {member.email}
+                      </p>
+                    </div>
+                    <p style={{ fontSize: '13px', color: member.pending ? '#CCCCCC' : '#999999', lineHeight: '1.5' }}>
+                      {member.role}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Invite Member - Vertical Stack, 16px between inputs */}
+              <div>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Neues Mitglied einladen
+                </label>
+                <input
+                  type="email"
+                  placeholder="E-Mail-Adresse"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="w-full focus:outline-none"
+                  style={{
+                    padding: '12px 14px',
+                    background: '#F7F7F5',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    color: '#1A1A1A',
+                    marginBottom: '16px',
+                    transition: 'background 140ms ease'
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.background = '#F3F3F1'; }}
+                  onBlur={(e) => { e.currentTarget.style.background = '#F7F7F5'; }}
+                />
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="w-full focus:outline-none cursor-pointer"
+                  style={{
+                    padding: '12px 14px',
+                    background: '#F7F7F5',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    color: '#1A1A1A',
+                    marginBottom: '16px',
+                    border: 'none',
+                    transition: 'background 140ms ease'
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.background = '#F3F3F1'; }}
+                  onBlur={(e) => { e.currentTarget.style.background = '#F7F7F5'; }}
+                >
+                  <option value="admin">Administrator</option>
+                  <option value="editor">Bearbeiter</option>
+                  <option value="viewer">Betrachter</option>
+                </select>
+                <button
+                  onClick={handleInvite}
+                  disabled={!inviteEmail}
+                  className="w-full font-medium"
+                  style={{
+                    padding: '12px 14px',
+                    height: '44px',
+                    background: inviteEmail ? '#2F80ED' : 'rgba(0,0,0,0.04)',
+                    color: inviteEmail ? '#FFFFFF' : '#CCCCCC',
+                    fontSize: '15px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    cursor: inviteEmail ? 'pointer' : 'not-allowed',
+                    transition: 'background 140ms ease'
+                  }}
+                  onMouseEnter={(e) => { if (inviteEmail) e.currentTarget.style.background = '#2670D1'; }}
+                  onMouseLeave={(e) => { if (inviteEmail) e.currentTarget.style.background = '#2F80ED'; }}
+                >
+                  Einladung senden
+                </button>
+              </div>
+
+              {/* Workspace Name */}
+              <div style={{ marginTop: '32px' }}>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Workspace
+                </label>
+                <input
+                  type="text"
+                  value={settings.workspaceName}
+                  onChange={(e) => handleChange('workspaceName', e.target.value)}
+                  className="w-full focus:outline-none"
+                  style={{
+                    padding: '12px 14px',
+                    background: '#F7F7F5',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    color: '#1A1A1A',
+                    transition: 'background 140ms ease'
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.background = '#F3F3F1'; }}
+                  onBlur={(e) => { e.currentTarget.style.background = '#F7F7F5'; }}
+                />
+                {saveIndicator === 'workspaceName' && (
+                  <p style={{ fontSize: '13px', color: '#999999', marginTop: '8px' }}>
+                    Gespeichert
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {/* SECTION 3: INTEGRATIONS - 96px from previous */}
+            <section style={{ marginBottom: '96px' }}>
+              <h2 className="font-medium" style={{ fontSize: '20px', color: '#1A1A1A', marginBottom: '24px', letterSpacing: '-0.01em' }}>
+                Integrationen
+              </h2>
+
+              <div>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Kalender-Link
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={settings.calendarUrl}
+                    onChange={(e) => handleChange('calendarUrl', e.target.value)}
+                    className="flex-1 focus:outline-none"
+                    style={{
+                      padding: '12px 14px',
+                      background: '#F7F7F5',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      color: '#1A1A1A',
+                      transition: 'background 140ms ease'
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.background = '#F3F3F1'; }}
+                    onBlur={(e) => { e.currentTarget.style.background = '#F7F7F5'; }}
+                  />
+                  <button
+                    onClick={() => handleCopy(settings.calendarUrl, 'calendar')}
+                    className="flex items-center justify-center"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      color: copiedCalendar ? '#2F80ED' : '#999999',
+                      transition: 'all 140ms ease',
+                      borderRadius: '10px'
+                    }}
+                    onMouseEnter={(e) => { if (!copiedCalendar) e.currentTarget.style.background = 'rgba(0,0,0,0.02)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    {copiedCalendar ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between" style={{ marginTop: '8px' }}>
+                  <p style={{ fontSize: '13px', color: '#CCCCCC' }}>
+                    Über diesen Link können Patienten Termine buchen
+                  </p>
+                  {saveIndicator === 'calendarUrl' && (
+                    <p style={{ fontSize: '13px', color: '#999999' }}>
+                      Gespeichert
+                    </p>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* SECTION 4: ACCOUNT - 96px from previous */}
+            <section style={{ marginBottom: '96px' }}>
+              <h2 className="font-medium" style={{ fontSize: '20px', color: '#1A1A1A', marginBottom: '24px', letterSpacing: '-0.01em' }}>
+                Konto
+              </h2>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  E-Mail
+                </label>
+                <input
+                  type="email"
+                  value={settings.email}
+                  disabled
+                  className="w-full"
+                  style={{
+                    padding: '12px 14px',
+                    background: '#F7F7F5',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    color: '#999999',
+                    cursor: 'not-allowed'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Passwort
+                </label>
+                <button
+                  style={{
+                    fontSize: '14px',
+                    color: '#666666',
+                    transition: 'color 140ms ease',
+                    padding: '6px 0'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#2F80ED'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#666666'; }}
+                >
+                  Passwort ändern
+                </button>
+              </div>
+            </section>
+
+            {/* SECTION 5: SYSTEM - 96px from previous, 48px extra before logout */}
+            <section>
+              <h2 className="font-medium" style={{ fontSize: '20px', color: '#1A1A1A', marginBottom: '24px', letterSpacing: '-0.01em' }}>
+                System
+              </h2>
+
+              <div style={{ marginBottom: '48px' }}>
+                <label className="block" style={{ fontSize: '13px', color: '#999999', marginBottom: '8px' }}>
+                  Erscheinungsbild
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="flex-1 text-left"
+                    style={{
+                      padding: '12px 14px',
+                      background: '#F7F7F5',
+                      fontSize: '15px',
+                      color: '#1A1A1A',
+                      borderRadius: '10px',
+                      border: 'none',
+                      transition: 'background 140ms ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F3F1'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#F7F7F5'; }}
+                  >
+                    Hell
+                  </button>
+                  <button
+                    className="flex-1 text-left"
+                    style={{
+                      padding: '12px 14px',
+                      background: 'rgba(0,0,0,0.03)',
+                      fontSize: '15px',
+                      color: '#999999',
+                      borderRadius: '10px',
+                      border: 'none',
+                      transition: 'background 140ms ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.03)'; }}
+                  >
+                    Dunkel
+                  </button>
+                </div>
+              </div>
+
+              {/* Logout - clearly separated */}
+              <div>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    fontSize: '14px',
+                    color: '#999999',
+                    transition: 'color 140ms ease',
+                    padding: '6px 0'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#666666'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '#999999'; }}
+                >
+                  Abmelden
+                </button>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

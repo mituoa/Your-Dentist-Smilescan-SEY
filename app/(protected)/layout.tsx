@@ -83,7 +83,7 @@ export default async function ProtectedLayout({
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Patienten, Fälle oder Dokumente suchen..."
+                    placeholder="Aufgaben, Patienten oder Fälle suchen…"
                     className="w-full bg-white text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-[3px]"
                     style={{
                       height: "48px",
@@ -100,6 +100,18 @@ export default async function ProtectedLayout({
               </div>
 
               <div className="flex items-center gap-3 ml-6">
+                <Link
+                  href="/relay#relay-quick-create"
+                  className="hidden md:inline-flex items-center gap-2 px-4 text-[14px] font-medium text-[#1E293B] transition-colors hover:bg-[#F8FAFC]"
+                  style={{
+                    height: "48px",
+                    borderRadius: "12px",
+                    border: "1px solid #E2E8F0",
+                  }}
+                >
+                  <Plus className="h-4 w-4 text-[#2F80ED]" />
+                  <span>Neue Aufgabe</span>
+                </Link>
                 <Link
                   href="/create-case"
                   className="hidden lg:inline-flex items-center gap-2 px-5 text-white font-medium text-[14px] transition-all hover:opacity-95"
@@ -138,7 +150,7 @@ export default async function ProtectedLayout({
             </div>
           </header>
 
-          <main className="flex-1 overflow-hidden">{children}</main>
+          <main className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</main>
         </div>
       </div>
     </div>

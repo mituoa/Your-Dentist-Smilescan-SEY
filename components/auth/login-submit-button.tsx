@@ -10,12 +10,14 @@ export function LoginSubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-6 inline-flex h-14 w-full items-center justify-center rounded-xl px-4 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-      style={{
-        background: pending
-          ? "linear-gradient(to bottom, #0369A1 0%, #075985 100%)"
-          : "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
-      }}
+      className="mt-6 inline-flex h-[56px] w-full items-center justify-center rounded-xl px-4 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-sm bg-[linear-gradient(to_bottom,#0284C7_0%,#0369A1_100%)] hover:bg-[linear-gradient(to_bottom,#0369A1_0%,#075985_100%)]"
+      style={
+        pending
+          ? {
+              background: "linear-gradient(to bottom, #0369A1 0%, #075985 100%)",
+            }
+          : undefined
+      }
     >
       {pending ? (
         <span className="flex items-center justify-center gap-2">
