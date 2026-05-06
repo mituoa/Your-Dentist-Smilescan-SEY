@@ -51,7 +51,7 @@ export function NavItem({
     <Link
       href={href}
       className={cn(
-        "relative mx-2 flex items-center gap-3.5 rounded-xl px-3 py-2.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
+        "relative mx-2 flex min-h-11 items-center gap-3.5 rounded-xl px-3 py-3 md:py-2.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
         isActive ? "bg-[#EEF6FF]" : "hover:bg-[#F8FAFC]"
       )}
     >
@@ -69,7 +69,7 @@ export function NavItem({
       <div className="flex-1 min-w-0 text-left">
         <span
           className={cn(
-            "block truncate text-[15px] font-medium",
+            "block truncate text-[15px] font-medium leading-snug",
             isActive ? "text-[#1E293B]" : "text-[#64748B]"
           )}
         >
@@ -78,7 +78,7 @@ export function NavItem({
         {description ? (
           <span
             className={cn(
-              "block truncate text-[11px] font-medium",
+              "hidden md:block truncate text-[11px] font-medium",
               isActive ? "text-[#64748B]" : "text-[#94A3B8]"
             )}
           >

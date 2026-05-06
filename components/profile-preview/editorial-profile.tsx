@@ -63,7 +63,7 @@ export function EditorialProfile({
   return (
     <div className="bg-cream text-ink font-sans" style={brandCssVars}>
       <div className="max-w-[1280px] mx-auto px-6 md:px-10">
-        <nav className="flex items-center justify-between py-10 border-b border-border">
+        <nav className="flex items-center justify-between py-6 md:py-10 border-b border-border">
           {data.logo_url ? (
             <div className="flex items-center max-w-[220px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -83,7 +83,7 @@ export function EditorialProfile({
           )}
         </nav>
 
-        <section className="pt-20 md:pt-32 pb-20">
+        <section className="pt-14 md:pt-32 pb-16 md:pb-20">
           <div
             className={`grid gap-10 md:gap-20 ${data.photo_url ? "md:grid-cols-[1fr_400px]" : "grid-cols-1"} items-start`}
           >
@@ -102,7 +102,7 @@ export function EditorialProfile({
                   fullName
                 )}
               </h1>
-              <div className="flex flex-wrap gap-6 md:gap-12 pt-10 mt-10 border-t border-border">
+              <div className="flex flex-wrap gap-6 md:gap-12 pt-8 md:pt-10 mt-8 md:mt-10 border-t border-border">
                 {displayTitle && (
                   <div>
                     <div className="text-[10px] tracking-[0.2em] uppercase text-ink-faint mb-1.5">
@@ -152,7 +152,7 @@ export function EditorialProfile({
         </section>
 
         {vitaParagraphs.length > 0 && (
-          <section className="py-20 md:py-32 border-t border-border">
+          <section className="py-16 md:py-32 border-t border-border">
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 md:gap-16 mb-10">
               <div className="text-[10px] tracking-[0.3em] uppercase text-ink-faint">
                 I · Vita
@@ -182,7 +182,7 @@ export function EditorialProfile({
         )}
 
         {visibleSpecs.length > 0 && (
-          <section className="py-20 md:py-32 border-t border-border">
+          <section className="py-16 md:py-32 border-t border-border">
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 md:gap-16 mb-10">
               <div className="text-[10px] tracking-[0.3em] uppercase text-ink-faint">
                 II · Schwerpunkte
@@ -212,7 +212,7 @@ export function EditorialProfile({
         )}
 
         {visibleServices.length > 0 && (
-          <section className="py-20 md:py-32 border-t border-border">
+          <section className="py-16 md:py-32 border-t border-border">
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 md:gap-16 mb-10">
               <div className="text-[10px] tracking-[0.3em] uppercase text-ink-faint">
                 III · Leistungen
@@ -250,7 +250,7 @@ export function EditorialProfile({
           data.practice_phone ||
           data.practice_email ||
           data.practice_website) && (
-          <section className="py-20 md:py-32 border-t border-border">
+          <section className="py-16 md:py-32 border-t border-border">
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 md:gap-16 mb-10">
               <div className="text-[10px] tracking-[0.3em] uppercase text-ink-faint">
                 V · Praxis
@@ -338,7 +338,7 @@ export function EditorialProfile({
         )}
 
         {!previewMode && (
-          <section className="py-32 md:py-40 text-center bg-paper -mx-6 md:-mx-10 px-6 md:px-10 border-t border-border">
+          <section className="py-20 md:py-40 text-center bg-paper -mx-6 md:-mx-10 px-6 md:px-10 border-t border-border">
             <h2 className="font-serif font-light text-[clamp(3rem,7vw,6rem)] leading-none mb-5 max-w-[14ch] mx-auto">
               Unterlagen <span className="italic">einreichen</span>.
             </h2>
@@ -348,7 +348,7 @@ export function EditorialProfile({
             </p>
             <Link
               href={`/doc/${slug}/upload`}
-              className="inline-flex items-center gap-4 px-10 py-5 bg-ink text-cream no-underline text-sm tracking-[0.12em] uppercase font-medium hover:bg-brand-glow transition-colors rounded-sm"
+              className="inline-flex items-center gap-4 px-8 py-4 md:px-10 md:py-5 bg-ink text-cream no-underline text-sm tracking-[0.12em] uppercase font-medium hover:bg-brand-glow transition-colors rounded-sm"
             >
               Jetzt einsenden
               <span>→</span>

@@ -49,7 +49,7 @@ const FAQ = [
 export function LoginPricingBlock() {
   return (
     <section
-      className="w-full bg-white px-8 py-16 lg:px-16 xl:px-24"
+      className="w-full bg-white px-6 py-10 lg:px-12 xl:px-16"
       aria-labelledby="login-pricing-heading"
     >
       <div className="mx-auto max-w-5xl">
@@ -66,7 +66,7 @@ export function LoginPricingBlock() {
           </p>
         </div>
 
-        <div className="mb-12 flex flex-wrap items-center justify-center gap-6 text-[13px] text-gray-600">
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-4 text-[13px] text-gray-600">
           <div className="flex items-center gap-2">
             <svg
               className="h-4 w-4 text-green-600"
@@ -114,7 +114,7 @@ export function LoginPricingBlock() {
           </div>
         </div>
 
-        <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
           <div className="flex flex-col rounded-2xl border-2 border-gray-200 bg-white p-6 transition-all duration-200 hover:border-[#0284C7] hover:shadow-lg">
             <div className="h-[20px]" />
             <h3 className="mb-1 text-[20px] font-semibold text-gray-900">

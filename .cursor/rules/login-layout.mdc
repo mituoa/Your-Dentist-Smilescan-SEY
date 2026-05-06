@@ -1,0 +1,28 @@
+---
+description: Login — Kanonisches Layout & Abstände (Marketing ↔ Karte)
+globs: app/(auth)/login/**/*.tsx,components/marketing/login-pricing-block.tsx
+alwaysApply: false
+---
+
+# Login-Layout (SmileScan) — bitte nicht „verbessern“ ohne Auftrag
+
+Referenz: `FIGMA DESIGN ALL/Login Code Figma` und der Stand in `app/(auth)/login/page.tsx`.
+
+## Hauptzeile (Marketing links, Login-Karte rechts)
+
+- Container: **`relative mx-auto flex w-full max-w-7xl items-center justify-center gap-12 px-8 py-12 lg:justify-center lg:gap-[300px] lg:px-16 xl:gap-[300px] xl:px-24`**
+- **Nicht** auf kleine `gap-6` / `lg:justify-between` / schmales Padding umstellen — der Nutzer hat **`gap-[300px]`** ab `lg` als richtigen Abstand zwischen den Spalten festgelegt.
+- Linke Spalte: **`hidden max-w-md shrink-0 flex-col justify-center lg:-mt-32 lg:flex xl:max-w-lg`**
+- Außen: **`relative flex min-h-screen w-full`** um Hero + Karte (siehe aktuelle Datei).
+
+## Mobile
+
+- Logo-Zeile über der Karte typisch **`mb-12`**.
+
+## Pricing
+
+- `LoginPricingBlock` bleibt unter dem Login-Block; nur bei explizitem Wunsch Padding/Abstände ändern.
+
+## Funktion
+
+- Immer **`signIn`** Server Action, Invite-Hidden-Field, Links Passwort/Register — keine zweite Login-Route, kein Client-Mock statt Server Action.

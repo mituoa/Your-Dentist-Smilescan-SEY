@@ -8,6 +8,7 @@ type Plan = "monthly" | "halfyearly" | "yearly";
 type RegistrationStep = 1 | 2 | 3 | 4;
 
 type SignUpAction = (formData: FormData) => void | Promise<void>;
+type ResendAction = (formData: FormData) => void | Promise<void>;
 
 function coercePlan(value: string | null | undefined): Plan {
   if (!value) return "yearly";
@@ -18,11 +19,15 @@ function coercePlan(value: string | null | undefined): Plan {
 
 export function RegisterClient(props: {
   signUpAction: SignUpAction;
+  resendConfirmationAction: ResendAction;
   inviteToken: string;
   prefilledEmail: string;
   initialPlan?: string | null;
   queryError?: string;
+  success?: boolean;
+  loginHref?: string;
 }) {
+  const loginBackHref = props.loginHref ?? "/login";
   const plan = coercePlan(props.initialPlan);
   const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(1);
 
@@ -30,12 +35,50 @@ export function RegisterClient(props: {
   const [regPractice, setRegPractice] = React.useState("");
   const [regLicense, setRegLicense] = React.useState("");
   const [regEmail, setRegEmail] = React.useState(props.prefilledEmail ?? "");
+  const [regEmailConfirm, setRegEmailConfirm] = React.useState(props.prefilledEmail ?? "");
+  const [regEmailConfirmDirty, setRegEmailConfirmDirty] = React.useState(false);
   const [regPassword, setRegPassword] = React.useState("");
 
   const [selectedPlan, setSelectedPlan] = React.useState<Plan>(plan);
-  const [licenseFile, setLicenseFile] = React.useState<File | null>(null);
+  const [licenseFrontFile, setLicenseFrontFile] = React.useState<File | null>(null);
+  const [licenseBackFile, setLicenseBackFile] = React.useState<File | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
-  const [filePreview, setFilePreview] = React.useState<string | null>(null);
+  const [frontPreview, setFrontPreview] = React.useState<string | null>(null);
+  const [backPreview, setBackPreview] = React.useState<string | null>(null);
+  const [licenseStoragePath, setLicenseStoragePath] = React.useState<string>("");
+  const [licenseFrontStoragePath, setLicenseFrontStoragePath] = React.useState<string>("");
+  const [licenseBackStoragePath, setLicenseBackStoragePath] = React.useState<string>("");
+  const [licenseUploading, setLicenseUploading] = React.useState(false);
+  const [licenseUploadError, setLicenseUploadError] = React.useState<string>("");
+
+  const [frontQualityOk, setFrontQualityOk] = React.useState<boolean | null>(null);
+  const [backQualityOk, setBackQualityOk] = React.useState<boolean | null>(null);
+  const [frontQualityHint, setFrontQualityHint] = React.useState<string>("");
+  const [backQualityHint, setBackQualityHint] = React.useState<string>("");
+
+  const [acceptedTos, setAcceptedTos] = React.useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = React.useState(false);
+  const [acceptedWithdrawal, setAcceptedWithdrawal] = React.useState(false);
+  const [paymentMethod, setPaymentMethod] = React.useState<
+    "sepa_debit" | "card" | "invoice" | "paypal"
+  >("sepa_debit");
+
+  const [emailCheckStatus, setEmailCheckStatus] = React.useState<
+    "idle" | "checking" | "available" | "taken" | "invalid" | "error"
+  >("idle");
+  const [emailCheckMessage, setEmailCheckMessage] = React.useState("");
+  const [emailTypoSuggestion, setEmailTypoSuggestion] = React.useState<{
+    original: string;
+    suggested: string;
+  } | null>(null);
+  const [emailTypoUndo, setEmailTypoUndo] = React.useState<{
+    prevEmail: string;
+    prevConfirm: string;
+    appliedSuggested: string;
+  } | null>(null);
+
+  const [resendCooldown, setResendCooldown] = React.useState(0);
+  const [successEmail, setSuccessEmail] = React.useState(props.prefilledEmail ?? "");
 
   const getPasswordStrength = (pwd: string): { strength: number; label: string; color: string } => {
     let strength = 0;
@@ -51,6 +94,209 @@ export function RegisterClient(props: {
   };
 
   const passwordStrength = regPassword ? getPasswordStrength(regPassword) : null;
+
+  const normalizeEmail = (v: string) => v.trim().toLowerCase();
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(v));
+  const emailMatches = normalizeEmail(regEmail) !== "" && normalizeEmail(regEmail) === normalizeEmail(regEmailConfirm);
+
+  const normalizeLicenseNumber = (v: string) => v.replace(/\s+/g, "").trim();
+  const licenseFormatHint = React.useMemo(() => {
+    const v = normalizeLicenseNumber(regLicense);
+    if (!v) return null;
+    // Keep permissive: final verification remains manual approval by admin.
+    const ok =
+      /^z-?\d{6,10}$/i.test(v) || // e.g. Z-12345678
+      /^\d{7,10}$/.test(v) || // pure digits
+      /^[a-z]{1,3}-?\d{6,10}$/i.test(v); // e.g. prefix-1234567
+    if (ok) return { tone: "ok" as const, text: "Format sieht plausibel aus." };
+    return { tone: "warn" as const, text: "Bitte Nummer genau wie auf dem Ausweis eingeben (Format prüfen)." };
+  }, [regLicense]);
+
+  const suggestEmailFix = (raw: string): { original: string; suggested: string } | null => {
+    const original = raw.trim();
+    const value = normalizeEmail(original);
+    const at = value.lastIndexOf("@");
+    if (at <= 0) return null;
+    const local = value.slice(0, at);
+    const domain = value.slice(at + 1);
+    if (!local || !domain || !domain.includes(".")) return null;
+
+    const domainFixes: Record<string, string> = {
+      "gmial.com": "gmail.com",
+      "gmal.com": "gmail.com",
+      "gnail.com": "gmail.com",
+      "gmail.con": "gmail.com",
+      "gmai.com": "gmail.com",
+      "mgail.com": "gmail.com",
+      "outlok.com": "outlook.com",
+      "outllok.com": "outlook.com",
+      "hotnail.com": "hotmail.com",
+      "hotmai.com": "hotmail.com",
+      "icloud.con": "icloud.com",
+      "yaho.com": "yahoo.com",
+      "yahoo.con": "yahoo.com",
+      "gmx.con": "gmx.com",
+      "web.dee": "web.de",
+      "t-online.dee": "t-online.de",
+    };
+
+    // 1) Known hardcoded typos
+    const fixedDomainDirect = domainFixes[domain];
+    if (fixedDomainDirect) {
+      const suggested = `${local}@${fixedDomainDirect}`;
+      if (suggested === value) return null;
+      return { original, suggested };
+    }
+
+    // 2) Near-miss suggestions for common providers (edit distance <= 2).
+    // Keeps it conservative to avoid false positives.
+    const commonDomains = [
+      "gmail.com",
+      "outlook.com",
+      "hotmail.com",
+      "icloud.com",
+      "yahoo.com",
+      "gmx.com",
+      "web.de",
+      "t-online.de",
+    ] as const;
+
+    const levenshtein = (a: string, b: string) => {
+      if (a === b) return 0;
+      const m = a.length;
+      const n = b.length;
+      if (m === 0) return n;
+      if (n === 0) return m;
+
+      const dp = new Array<number>(n + 1);
+      for (let j = 0; j <= n; j++) dp[j] = j;
+
+      for (let i = 1; i <= m; i++) {
+        let prev = dp[0]!;
+        dp[0] = i;
+        for (let j = 1; j <= n; j++) {
+          const temp = dp[j]!;
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          dp[j] = Math.min(
+            dp[j]! + 1, // deletion
+            dp[j - 1]! + 1, // insertion
+            prev + cost // substitution
+          );
+          prev = temp;
+        }
+      }
+      return dp[n]!;
+    };
+
+    let best: { domain: string; dist: number } | null = null;
+    for (const d of commonDomains) {
+      const dist = levenshtein(domain, d);
+      if (dist === 0) return null;
+      if (dist <= 2 && (!best || dist < best.dist)) {
+        best = { domain: d, dist };
+      }
+    }
+
+    if (!best) return null;
+    const suggested = `${local}@${best.domain}`;
+    return { original, suggested };
+  };
+
+  React.useEffect(() => {
+    if (registrationStep !== 1) return;
+    const email = regEmail.trim();
+    if (!email) {
+      setEmailTypoSuggestion(null);
+      return;
+    }
+
+    const t = window.setTimeout(() => {
+      const suggestion = suggestEmailFix(email);
+      setEmailTypoSuggestion(suggestion);
+    }, 350);
+
+    return () => window.clearTimeout(t);
+  }, [regEmail, registrationStep]);
+
+  // Keep confirm email in sync until user edits it manually.
+  React.useEffect(() => {
+    if (props.success) return;
+    if (registrationStep !== 1) return;
+    if (regEmailConfirmDirty) return;
+    setRegEmailConfirm(regEmail);
+  }, [props.success, registrationStep, regEmail, regEmailConfirmDirty]);
+
+  React.useEffect(() => {
+    if (!emailTypoUndo) return;
+    const t = window.setTimeout(() => setEmailTypoUndo(null), 8000);
+    return () => window.clearTimeout(t);
+  }, [emailTypoUndo]);
+
+  React.useEffect(() => {
+    if (!props.success) return;
+    setResendCooldown(30);
+  }, [props.success]);
+
+  React.useEffect(() => {
+    if (!props.success) return;
+    setSuccessEmail(props.prefilledEmail ?? "");
+  }, [props.prefilledEmail, props.success]);
+
+  React.useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = window.setTimeout(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearTimeout(t);
+  }, [resendCooldown]);
+
+  React.useEffect(() => {
+    if (registrationStep !== 1) return;
+    const email = normalizeEmail(regEmail);
+    if (!email) {
+      setEmailCheckStatus("idle");
+      setEmailCheckMessage("");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setEmailCheckStatus("invalid");
+      setEmailCheckMessage("Bitte eine gültige E‑Mail-Adresse eingeben.");
+      return;
+    }
+
+    setEmailCheckStatus("checking");
+    setEmailCheckMessage("Prüfe Verfügbarkeit…");
+
+    const t = window.setTimeout(async () => {
+      try {
+        const res = await fetch("/api/auth/check-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const json = (await res.json()) as
+          | { ok: true; available: boolean }
+          | { ok: false; error: string };
+
+        if (!res.ok || !("ok" in json) || json.ok !== true) {
+          setEmailCheckStatus("error");
+          setEmailCheckMessage("Konnte Verfügbarkeit gerade nicht prüfen.");
+          return;
+        }
+
+        if (json.available) {
+          setEmailCheckStatus("available");
+          setEmailCheckMessage("E‑Mail ist verfügbar.");
+        } else {
+          setEmailCheckStatus("taken");
+          setEmailCheckMessage("Diese E‑Mail ist bereits registriert.");
+        }
+      } catch {
+        setEmailCheckStatus("error");
+        setEmailCheckMessage("Konnte Verfügbarkeit gerade nicht prüfen.");
+      }
+    }, 450);
+
+    return () => window.clearTimeout(t);
+  }, [regEmail, registrationStep]);
 
   const plans = {
     monthly: {
@@ -96,39 +342,172 @@ export function RegisterClient(props: {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      setLicenseFile(file);
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onloadend = () => setFilePreview(reader.result as string);
-        reader.readAsDataURL(file);
-      } else {
-        setFilePreview(null);
-      }
+      if (!licenseFrontFile) ingestLicenseFile(file, "front");
+      else ingestLicenseFile(file, "back");
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setLicenseFile(file);
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onloadend = () => setFilePreview(reader.result as string);
-        reader.readAsDataURL(file);
-      } else {
-        setFilePreview(null);
+  const ingestLicenseFile = (file: File, side: "front" | "back") => {
+    if (side === "front") setLicenseFrontFile(file);
+    else setLicenseBackFile(file);
+
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (side === "front") setFrontPreview(reader.result as string);
+        else setBackPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      if (side === "front") setFrontPreview(null);
+      else setBackPreview(null);
+    }
+  };
+
+  const handleFrontFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) ingestLicenseFile(e.target.files[0], "front");
+  };
+
+  const handleBackFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) ingestLicenseFile(e.target.files[0], "back");
+  };
+
+  const analyzeImageQuality = async (file: File): Promise<{ ok: boolean; hint: string }> => {
+    if (!file.type.startsWith("image/")) {
+      return { ok: true, hint: "PDF kann nicht automatisch geprüft werden." };
+    }
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result));
+      r.onerror = () => reject(new Error("read_failed"));
+      r.readAsDataURL(file);
+    });
+
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = () => reject(new Error("image_load_failed"));
+      i.src = dataUrl;
+    });
+
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    if (w < 1200 || h < 800) {
+      return { ok: false, hint: "Bild ist zu klein. Bitte näher ran und scharf fotografieren." };
+    }
+
+    const targetW = 420;
+    const scale = targetW / w;
+    const cw = Math.max(200, Math.round(w * scale));
+    const ch = Math.max(200, Math.round(h * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = cw;
+    canvas.height = ch;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return { ok: true, hint: "Qualitätsprüfung nicht verfügbar." };
+    ctx.drawImage(img, 0, 0, cw, ch);
+    const { data } = ctx.getImageData(0, 0, cw, ch);
+
+    let mean = 0;
+    const gray = new Float32Array(cw * ch);
+    for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+      const r = data[i]!;
+      const g = data[i + 1]!;
+      const b = data[i + 2]!;
+      const v = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      gray[p] = v;
+      mean += v;
+    }
+    mean /= gray.length;
+
+    if (mean < 60) return { ok: false, hint: "Bild ist sehr dunkel. Bitte bessere Beleuchtung nutzen." };
+    if (mean > 210) return { ok: false, hint: "Bild ist sehr hell/überbelichtet. Bitte ohne Blitz testen." };
+
+    let energy = 0;
+    for (let y = 1; y < ch - 1; y++) {
+      for (let x = 1; x < cw - 1; x++) {
+        const i = y * cw + x;
+        const gx = gray[i + 1] - gray[i - 1];
+        const gy = gray[i + cw] - gray[i - cw];
+        energy += Math.abs(gx) + Math.abs(gy);
       }
     }
+    const norm = energy / (cw * ch);
+    if (norm < 18) {
+      return { ok: false, hint: "Bild wirkt unscharf. Bitte ruhiger halten und Fokus abwarten." };
+    }
+
+    return { ok: true, hint: "Lesbar." };
   };
 
   const onStep1Submit = (e: FormEvent) => {
     e.preventDefault();
+    const email = normalizeEmail(regEmail);
+    if (!email || !isValidEmail(email)) return;
+    if (!emailMatches) return;
+    if (emailCheckStatus === "taken" || emailCheckStatus === "checking") return;
     setRegistrationStep(2);
   };
 
   const onStep2Submit = (e: FormEvent) => {
     e.preventDefault();
     setRegistrationStep(3);
+  };
+
+  const uploadLicenseSide = async (side: "front" | "back", file: File): Promise<string> => {
+    setLicenseUploading(true);
+    setLicenseUploadError("");
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      form.set("side", side);
+      const res = await fetch("/api/register-license-upload", {
+        method: "POST",
+        body: form,
+      });
+      const json = (await res.json()) as { storagePath?: string; error?: string };
+      if (!res.ok || !json.storagePath) {
+        throw new Error(json.error || "Upload fehlgeschlagen.");
+      }
+      return json.storagePath;
+    } finally {
+      setLicenseUploading(false);
+    }
+  };
+
+  const onStep3Submit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!licenseFrontFile || !licenseBackFile) {
+        throw new Error("Bitte laden Sie Vorder- und Rückseite hoch.");
+      }
+
+      const [frontQ, backQ] = await Promise.all([
+        analyzeImageQuality(licenseFrontFile),
+        analyzeImageQuality(licenseBackFile),
+      ]);
+      setFrontQualityOk(frontQ.ok);
+      setBackQualityOk(backQ.ok);
+      setFrontQualityHint(frontQ.hint);
+      setBackQualityHint(backQ.hint);
+      if (!frontQ.ok || !backQ.ok) {
+        throw new Error("Bitte laden Sie ein besser lesbares Foto hoch.");
+      }
+
+      const [frontPath, backPath] = await Promise.all([
+        uploadLicenseSide("front", licenseFrontFile),
+        uploadLicenseSide("back", licenseBackFile),
+      ]);
+      setLicenseFrontStoragePath(frontPath);
+      setLicenseBackStoragePath(backPath);
+      setLicenseStoragePath(frontPath);
+      setRegistrationStep(4);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
+      setLicenseUploadError(msg);
+    }
   };
 
   return (
@@ -174,7 +553,7 @@ export function RegisterClient(props: {
           }}
         >
           <Link
-            href="/login"
+            href={loginBackHref}
             aria-label="Schließen"
             className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-red-50"
           >
@@ -224,6 +603,98 @@ export function RegisterClient(props: {
             </div>
 
             <div className="px-10 pb-10">
+              {props.success ? (
+                <div className="py-6 text-center" style={{ animation: "slideIn 0.4s ease-out" }}>
+                  <h3 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">
+                    Bitte E‑Mail bestätigen
+                  </h3>
+                  <p className="mx-auto mb-5 max-w-md text-[14px] leading-relaxed text-gray-600">
+                    Um den Zugang zu aktivieren, bestätigen Sie bitte Ihre E‑Mail-Adresse über den Link in der
+                    Bestätigungs‑E‑Mail.
+                  </p>
+
+                  <div className="mx-auto mb-6 max-w-md rounded-2xl border border-gray-200 bg-gray-50/60 p-4 text-left">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
+                      Checkliste
+                    </p>
+                    <ul className="mt-3 space-y-2 text-[13px] text-gray-700">
+                      <li>1) Posteingang prüfen</li>
+                      <li>2) Spam/Promotion prüfen</li>
+                      <li>3) Absender als vertrauenswürdig markieren</li>
+                    </ul>
+                    <div className="mt-4">
+                      <label className="mb-2 block text-[12px] font-semibold uppercase tracking-wide text-gray-600">
+                        E‑Mail-Adresse
+                      </label>
+                      <input
+                        type="email"
+                        value={successEmail}
+                        onChange={(e) => setSuccessEmail(e.target.value)}
+                        placeholder="name@praxis.de"
+                        className="h-[48px] w-full rounded-xl border border-gray-200 bg-white px-3 text-[14px] text-gray-900 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                      />
+                      {successEmail.trim() && !isValidEmail(successEmail) ? (
+                        <p className="mt-2 text-[12px] text-red-600">Bitte eine gültige E‑Mail-Adresse eingeben.</p>
+                      ) : null}
+                      {(() => {
+                        const suggestion = suggestEmailFix(successEmail);
+                        if (!suggestion) return null;
+                        return (
+                          <div className="mt-2 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2">
+                            <p className="text-[12px] text-amber-900">
+                              Meinten Sie <span className="font-semibold">{suggestion.suggested}</span>?
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setSuccessEmail(suggestion.suggested)}
+                              className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-semibold text-amber-900 transition-colors hover:bg-amber-100"
+                            >
+                              Übernehmen
+                            </button>
+                          </div>
+                        );
+                      })()}
+                      <p className="mt-2 text-[12px] text-gray-500">
+                        Falls Sie sich vertippt haben: hier korrigieren und erneut senden.
+                      </p>
+                    </div>
+                  </div>
+
+                  <form action={props.resendConfirmationAction} className="mx-auto mb-4 max-w-md">
+                    <input type="hidden" name="email" value={successEmail.trim()} />
+                    {props.inviteToken ? (
+                      <input type="hidden" name="invite_token" value={props.inviteToken} />
+                    ) : null}
+                    <button
+                      type="submit"
+                      disabled={resendCooldown > 0 || !successEmail.trim() || !isValidEmail(successEmail)}
+                      onClick={() => {
+                        if (resendCooldown === 0) setResendCooldown(30);
+                      }}
+                      className="h-[52px] w-full rounded-xl border border-gray-200 bg-white text-[14px] font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {resendCooldown > 0 ? `E‑Mail erneut senden (${resendCooldown}s)` : "Bestätigungs‑E‑Mail erneut senden"}
+                    </button>
+                  </form>
+
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
+                  >
+                    Falsche E‑Mail eingegeben?
+                  </Link>
+
+                  <Link
+                    href={loginBackHref}
+                    className="mt-5 inline-flex items-center justify-center gap-2 text-[13px] font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
+                  >
+                    Zurück zur Login-Seite
+                  </Link>
+                </div>
+              ) : null}
+
+              {!props.success ? (
+                <>
               {props.queryError ? (
                 <p className="mb-6 rounded-xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-[14px] text-red-600">
                   {decodeURIComponent(props.queryError)}
@@ -329,12 +800,104 @@ export function RegisterClient(props: {
                         id="reg-email"
                         type="email"
                         value={regEmail}
-                        onChange={(e) => setRegEmail(e.target.value)}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setRegEmail(v);
+                          if (!regEmailConfirmDirty) setRegEmailConfirm(v);
+                        }}
                         placeholder="max.mustermann@praxis.de"
                         autoComplete="email"
                         className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
                         required
                       />
+                      {emailCheckStatus !== "idle" ? (
+                        <div className="mt-2 flex items-center justify-between">
+                          <p
+                            className={`text-[12px] ${
+                              emailCheckStatus === "available"
+                                ? "text-green-600"
+                                : emailCheckStatus === "taken" || emailCheckStatus === "invalid"
+                                  ? "text-red-600"
+                                  : "text-gray-500"
+                            }`}
+                          >
+                            {emailCheckMessage}
+                          </p>
+                          {emailCheckStatus === "checking" ? (
+                            <span className="text-[12px] text-gray-400">…</span>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      {emailTypoSuggestion ? (
+                        <div className="mt-3 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2">
+                          <p className="text-[12px] text-amber-900">
+                            Meinten Sie{" "}
+                            <span className="font-semibold">{emailTypoSuggestion.suggested}</span>?
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEmailTypoUndo({
+                                prevEmail: regEmail,
+                                prevConfirm: regEmailConfirm,
+                                appliedSuggested: emailTypoSuggestion.suggested,
+                              });
+                              setRegEmail(emailTypoSuggestion.suggested);
+                              setRegEmailConfirm(emailTypoSuggestion.suggested);
+                              setRegEmailConfirmDirty(false);
+                              setEmailTypoSuggestion(null);
+                            }}
+                            className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-semibold text-amber-900 transition-colors hover:bg-amber-100"
+                          >
+                            Übernehmen
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {emailTypoUndo ? (
+                        <div className="mt-2 flex items-center justify-between px-1">
+                          <p className="text-[12px] text-gray-500">
+                            E‑Mail auf <span className="font-medium text-gray-700">{emailTypoUndo.appliedSuggested}</span>{" "}
+                            korrigiert.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRegEmail(emailTypoUndo.prevEmail);
+                              setRegEmailConfirm(emailTypoUndo.prevConfirm);
+                              setEmailTypoUndo(null);
+                            }}
+                            className="text-[12px] font-semibold text-[#0284C7] hover:underline"
+                          >
+                            Rückgängig
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div>
+                      <label htmlFor="reg-email-confirm" className="mb-2 block text-[13px] font-medium text-gray-700">
+                        E-Mail-Adresse bestätigen *
+                      </label>
+                      <input
+                        id="reg-email-confirm"
+                        type="email"
+                        value={regEmailConfirm}
+                        onChange={(e) => {
+                          setRegEmailConfirmDirty(true);
+                          setRegEmailConfirm(e.target.value);
+                        }}
+                        placeholder="E-Mail-Adresse erneut eingeben"
+                        autoComplete="email"
+                        className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        required
+                      />
+                      {regEmailConfirm && !emailMatches ? (
+                        <p className="mt-2 text-[12px] text-red-600">
+                          Die E-Mail-Adressen stimmen nicht überein.
+                        </p>
+                      ) : null}
                     </div>
 
                     <div>
@@ -375,6 +938,12 @@ export function RegisterClient(props: {
 
                     <button
                       type="submit"
+                      disabled={
+                        emailCheckStatus === "taken" ||
+                        emailCheckStatus === "invalid" ||
+                        emailCheckStatus === "checking" ||
+                        !emailMatches
+                      }
                       className="mt-8 h-[56px] w-full rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
                       style={{
                         background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
@@ -426,6 +995,15 @@ export function RegisterClient(props: {
                         className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
                         required
                       />
+                      {licenseFormatHint ? (
+                        <p
+                          className={`mt-2 text-[12px] ${
+                            licenseFormatHint.tone === "ok" ? "text-green-700" : "text-amber-800"
+                          }`}
+                        >
+                          {licenseFormatHint.text}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="flex gap-3 pt-4">
@@ -461,84 +1039,159 @@ export function RegisterClient(props: {
                     </p>
                   </div>
 
-                  <form action={props.signUpAction} className="space-y-5">
-                    <input type="hidden" name="email" value={regEmail} />
-                    <input type="hidden" name="password" value={regPassword} />
-                    <input type="hidden" name="display_name" value={regName} />
-                    <input type="hidden" name="workspace_name" value={regPractice} />
-                    {props.inviteToken ? (
-                      <input type="hidden" name="invite_token" value={props.inviteToken} />
-                    ) : null}
+                  <form onSubmit={onStep3Submit} className="space-y-5">
 
                     <div>
-                      <div
-                        className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
-                          dragActive
-                            ? "border-[#0284C7] bg-[#0284C7]/10 scale-105"
-                            : licenseFile
-                              ? "border-green-400 bg-green-50"
-                              : "border-gray-300 bg-white hover:border-[#0284C7] hover:bg-[#0284C7]/5 hover:scale-[1.02]"
-                        }`}
-                        style={{
-                          boxShadow: dragActive ? "0 0 0 4px rgba(2, 132, 199, 0.1)" : "none",
-                        }}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={handleDrop}
-                      >
-                        <input
-                          id="license-file"
-                          type="file"
-                          accept="image/*,.pdf"
-                          onChange={handleFileChange}
-                          className="hidden"
-                        />
-                        <label
-                          htmlFor="license-file"
-                          className="flex cursor-pointer flex-col items-center justify-center px-6 py-12"
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {/* Vorderseite */}
+                        <div
+                          className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
+                            dragActive
+                              ? "border-[#0284C7] bg-[#0284C7]/10"
+                              : licenseFrontFile
+                                ? "border-green-400 bg-green-50"
+                                : "border-gray-300 bg-white hover:border-[#0284C7] hover:bg-[#0284C7]/5"
+                          }`}
+                          onDragEnter={handleDrag}
+                          onDragLeave={handleDrag}
+                          onDragOver={handleDrag}
+                          onDrop={handleDrop}
                         >
-                          {licenseFile ? (
-                            <div className="w-full" style={{ animation: "fadeIn 0.3s ease-out" }}>
-                              {filePreview ? (
-                                <div className="mb-4 overflow-hidden rounded-lg border-2 border-green-200">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={filePreview} alt="Preview" className="h-32 w-full object-cover" />
-                                </div>
-                              ) : null}
-                              <p className="mb-2 truncate text-center text-[14px] font-semibold text-gray-900">
-                                {licenseFile.name}
-                              </p>
-                              <p className="mb-3 text-center text-[12px] text-gray-500">
-                                {(licenseFile.size / 1024 / 1024).toFixed(2)} MB
-                              </p>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setLicenseFile(null);
-                                  setFilePreview(null);
-                                }}
-                                className="text-[13px] font-medium text-[#0284C7] hover:text-[#0369A1]"
-                              >
-                                Andere Datei wählen
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <p className="mb-1 text-[15px] font-semibold text-gray-900">
-                                Zahnarztausweis hochladen
-                              </p>
-                              <p className="mb-1 text-[12px] text-gray-500">
-                                Ziehen Sie die Datei hierher oder klicken Sie
-                              </p>
-                              <p className="text-[11px] text-gray-400">
-                                JPG, PNG oder PDF (max. 10 MB)
-                              </p>
-                            </>
-                          )}
-                        </label>
+                          <input
+                            id="license-front"
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={handleFrontFileChange}
+                            className="hidden"
+                          />
+                          <label htmlFor="license-front" className="flex cursor-pointer flex-col px-5 py-6">
+                            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
+                              Vorderseite
+                            </p>
+                            {licenseFrontFile ? (
+                              <div className="mt-3">
+                                {frontPreview ? (
+                                  <div className="mb-3 overflow-hidden rounded-lg border border-green-200 bg-white">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={frontPreview} alt="Vorderseite" className="h-28 w-full object-cover" />
+                                  </div>
+                                ) : null}
+                                <p className="truncate text-[13px] font-semibold text-gray-900">
+                                  {licenseFrontFile.name}
+                                </p>
+                                <p className="mt-1 text-[12px] text-gray-500">
+                                  {(licenseFrontFile.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                                {frontQualityOk !== null ? (
+                                  <p className={`mt-2 text-[12px] font-medium ${frontQualityOk ? "text-green-700" : "text-red-700"}`}>
+                                    {frontQualityHint}
+                                  </p>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setLicenseFrontFile(null);
+                                    setFrontPreview(null);
+                                    setFrontQualityOk(null);
+                                    setFrontQualityHint("");
+                                    setLicenseFrontStoragePath("");
+                                  }}
+                                  className="mt-3 text-[13px] font-medium text-[#0284C7] hover:text-[#0369A1]"
+                                >
+                                  Erneut auswählen
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="mt-3">
+                                <p className="text-[14px] font-semibold text-gray-900">
+                                  Foto hochladen
+                                </p>
+                                <p className="mt-1 text-[12px] text-gray-500">
+                                  JPG, PNG oder PDF (max. 10 MB)
+                                </p>
+                              </div>
+                            )}
+                          </label>
+                        </div>
+
+                        {/* Rückseite */}
+                        <div
+                          className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
+                            dragActive
+                              ? "border-[#0284C7] bg-[#0284C7]/10"
+                              : licenseBackFile
+                                ? "border-green-400 bg-green-50"
+                                : "border-gray-300 bg-white hover:border-[#0284C7] hover:bg-[#0284C7]/5"
+                          }`}
+                          onDragEnter={handleDrag}
+                          onDragLeave={handleDrag}
+                          onDragOver={handleDrag}
+                          onDrop={handleDrop}
+                        >
+                          <input
+                            id="license-back"
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={handleBackFileChange}
+                            className="hidden"
+                          />
+                          <label htmlFor="license-back" className="flex cursor-pointer flex-col px-5 py-6">
+                            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
+                              Rückseite
+                            </p>
+                            {licenseBackFile ? (
+                              <div className="mt-3">
+                                {backPreview ? (
+                                  <div className="mb-3 overflow-hidden rounded-lg border border-green-200 bg-white">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={backPreview} alt="Rückseite" className="h-28 w-full object-cover" />
+                                  </div>
+                                ) : null}
+                                <p className="truncate text-[13px] font-semibold text-gray-900">
+                                  {licenseBackFile.name}
+                                </p>
+                                <p className="mt-1 text-[12px] text-gray-500">
+                                  {(licenseBackFile.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                                {backQualityOk !== null ? (
+                                  <p className={`mt-2 text-[12px] font-medium ${backQualityOk ? "text-green-700" : "text-red-700"}`}>
+                                    {backQualityHint}
+                                  </p>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setLicenseBackFile(null);
+                                    setBackPreview(null);
+                                    setBackQualityOk(null);
+                                    setBackQualityHint("");
+                                    setLicenseBackStoragePath("");
+                                  }}
+                                  className="mt-3 text-[13px] font-medium text-[#0284C7] hover:text-[#0369A1]"
+                                >
+                                  Erneut auswählen
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="mt-3">
+                                <p className="text-[14px] font-semibold text-gray-900">
+                                  Foto hochladen
+                                </p>
+                                <p className="mt-1 text-[12px] text-gray-500">
+                                  JPG, PNG oder PDF (max. 10 MB)
+                                </p>
+                              </div>
+                            )}
+                          </label>
+                        </div>
                       </div>
+                      {licenseUploadError ? (
+                        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+                          {licenseUploadError}
+                        </p>
+                      ) : null}
                       <div
                         className="mt-3 flex items-start gap-2 rounded-lg p-3"
                         style={{
@@ -556,32 +1209,6 @@ export function RegisterClient(props: {
                       </div>
                     </div>
 
-                    <div
-                      className="rounded-xl p-5"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(2, 132, 199, 0.04) 100%)",
-                        border: "1.5px solid rgba(2, 132, 199, 0.2)",
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-600">
-                            Gewähltes Abo
-                          </p>
-                          <p className="text-[18px] font-semibold text-gray-900">
-                            {plans[selectedPlan].label}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[26px] font-semibold text-[#0284C7]">
-                            €{plans[selectedPlan].price}
-                          </p>
-                          <p className="text-[11px] text-gray-600">/Monat</p>
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="flex gap-3 pt-4">
                       <button
                         type="button"
@@ -592,37 +1219,269 @@ export function RegisterClient(props: {
                       </button>
                       <button
                         type="submit"
+                        disabled={licenseUploading}
                         className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
                         style={{
                           background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
                         }}
                       >
-                        Registrierung abschließen
+                        {licenseUploading ? "Upload läuft..." : "Weiter"}
                       </button>
                     </div>
-
-                    <p className="pt-3 text-center text-[11px] text-gray-500">
-                      Mit der Registrierung akzeptieren Sie unsere AGB und Datenschutzerklärung
-                    </p>
                   </form>
                 </div>
               ) : null}
 
               {registrationStep === 4 ? (
-                <div className="py-6 text-center" style={{ animation: "slideIn 0.4s ease-out" }}>
-                  <h3 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">
-                    Herzlich willkommen! 🎉
-                  </h3>
-                  <p className="mx-auto mb-7 max-w-md text-[14px] leading-relaxed text-gray-600">
-                    Wir haben dir gerade eine E-Mail geschickt. Bitte bestätige deinen Account, um fortzufahren.
-                  </p>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center gap-2 text-[13px] font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
-                  >
-                    Zurück zur Login-Seite
-                  </Link>
+                <div style={{ animation: "slideIn 0.4s ease-out" }}>
+                  <div className="mb-7 text-center">
+                    <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
+                      Zahlungsintervall wählen
+                    </h3>
+                    <p className="text-[13px] text-gray-500">
+                      Wählen Sie Ihren Abrechnungszeitraum und schließen Sie den Vertrag ab.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {(Object.keys(plans) as Plan[]).map((key) => {
+                      const p = plans[key];
+                      const active = selectedPlan === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setSelectedPlan(key)}
+                          className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                            active
+                              ? "border-[#0284C7] shadow-md"
+                              : "border-gray-200 hover:border-[#0284C7] hover:shadow-sm"
+                          }`}
+                        >
+                          <div className="mb-2 flex items-center justify-between">
+                            <p className="text-[15px] font-semibold text-gray-900">{p.label}</p>
+                            {p.save ? (
+                              <span className="rounded-full bg-[#0284C7] px-2 py-0.5 text-[10px] font-semibold text-white">
+                                −{p.save}
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="mb-3 text-[11px] text-gray-500">{p.billing}</p>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-[28px] font-semibold text-gray-900">€{p.price}</span>
+                            <span className="text-[12px] text-gray-500">/Monat</span>
+                          </div>
+                          {key !== "monthly" ? (
+                            <p className="mt-2 text-[11px] text-gray-500">€{p.total} Gesamt</p>
+                          ) : (
+                            <p className="mt-2 text-[11px] text-gray-500">&nbsp;</p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50/60 p-5">
+                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-600">
+                      Bestellübersicht
+                    </p>
+                    <div className="mb-4 flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[15px] font-semibold text-gray-900">SmileScan (SaaS)</p>
+                        <p className="mt-0.5 text-[12px] text-gray-600">
+                          Abrechnung: <span className="font-medium text-gray-900">{plans[selectedPlan].billing}</span>
+                        </p>
+                        <p className="mt-0.5 text-[12px] text-gray-600">
+                          Start: <span className="font-medium text-gray-900">sofort nach Freischaltung</span>
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[22px] font-semibold text-gray-900">€{plans[selectedPlan].price}</p>
+                        <p className="text-[11px] text-gray-500">pro Monat</p>
+                      </div>
+                    </div>
+
+                    <div className="h-px w-full bg-gray-200/70" />
+
+                    <p className="mt-4 mb-3 text-[12px] font-semibold uppercase tracking-wide text-gray-600">
+                      Zahlungsmethode
+                    </p>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("sepa_debit")}
+                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                          paymentMethod === "sepa_debit"
+                            ? "border-[#0284C7] bg-white"
+                            : "border-gray-200 bg-white hover:border-[#0284C7]"
+                        }`}
+                      >
+                        <p className="text-[14px] font-semibold text-gray-900">SEPA‑Lastschrift</p>
+                        <p className="mt-1 text-[12px] text-gray-600">
+                          Abbuchung automatisch gemäß gewähltem Intervall.
+                        </p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("card")}
+                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                          paymentMethod === "card"
+                            ? "border-[#0284C7] bg-white"
+                            : "border-gray-200 bg-white hover:border-[#0284C7]"
+                        }`}
+                      >
+                        <p className="text-[14px] font-semibold text-gray-900">Kreditkarte</p>
+                        <p className="mt-1 text-[12px] text-gray-600">
+                          Sicher bezahlen per Karte (Setup im nächsten Schritt).
+                        </p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (selectedPlan === "monthly") return;
+                          setPaymentMethod("invoice");
+                        }}
+                        aria-disabled={selectedPlan === "monthly"}
+                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                          selectedPlan === "monthly"
+                            ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                            : paymentMethod === "invoice"
+                              ? "border-[#0284C7] bg-white"
+                              : "border-gray-200 bg-white hover:border-[#0284C7]"
+                        }`}
+                      >
+                        <p className="text-[14px] font-semibold">Rechnung</p>
+                        <p className="mt-1 text-[12px]">
+                          {selectedPlan === "monthly"
+                            ? "Verfügbar ab Halbjährlich/Jährlich."
+                            : "Für Praxen – Zahlung per Rechnung."}
+                        </p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("paypal")}
+                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                          paymentMethod === "paypal"
+                            ? "border-[#0284C7] bg-white"
+                            : "border-gray-200 bg-white hover:border-[#0284C7]"
+                        }`}
+                      >
+                        <p className="text-[14px] font-semibold text-gray-900">PayPal</p>
+                        <p className="mt-1 text-[12px] text-gray-600">
+                          Optionale Alternative (Setup im nächsten Schritt).
+                        </p>
+                      </button>
+                    </div>
+
+                    <p className="mt-4 mb-3 text-[12px] font-semibold uppercase tracking-wide text-gray-600">
+                      Vertrag & Einwilligungen
+                    </p>
+                    <label className="flex items-start gap-3 text-[13px] text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTos}
+                        onChange={(e) => setAcceptedTos(e.target.checked)}
+                        className="mt-1 h-4 w-4"
+                      />
+                      <span>
+                        Ich akzeptiere die{" "}
+                        <Link href="/agb" className="font-medium text-[#0284C7] hover:underline">
+                          AGB
+                        </Link>
+                        . *
+                      </span>
+                    </label>
+                    <label className="mt-3 flex items-start gap-3 text-[13px] text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={acceptedPrivacy}
+                        onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                        className="mt-1 h-4 w-4"
+                      />
+                      <span>
+                        Ich habe die{" "}
+                        <Link href="/datenschutz" className="font-medium text-[#0284C7] hover:underline">
+                          Datenschutzerklärung
+                        </Link>{" "}
+                        gelesen. *
+                      </span>
+                    </label>
+                    <label className="mt-3 flex items-start gap-3 text-[13px] text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={acceptedWithdrawal}
+                        onChange={(e) => setAcceptedWithdrawal(e.target.checked)}
+                        className="mt-1 h-4 w-4"
+                      />
+                      <span>
+                        Ich verlange ausdrücklich, dass SmileScan vor Ablauf der Widerrufsfrist mit der Leistung
+                        beginnt, und bestätige, dass ich dadurch mein Widerrufsrecht verlieren kann. *
+                      </span>
+                    </label>
+                    <p className="mt-4 text-[11px] text-gray-500">
+                      * Pflichtfelder.{" "}
+                      <Link href="/widerruf" className="font-medium text-[#0284C7] hover:underline">
+                        Widerrufsbelehrung
+                      </Link>
+                      . Version: <span className="font-medium">v1</span>
+                    </p>
+                  </div>
+
+                  <form action={props.signUpAction} className="mt-6 space-y-3">
+                    <input type="hidden" name="email" value={regEmail} />
+                    <input type="hidden" name="password" value={regPassword} />
+                    <input type="hidden" name="display_name" value={regName} />
+                    <input type="hidden" name="workspace_name" value={regPractice} />
+                    <input type="hidden" name="billing_interval" value={selectedPlan} />
+                    <input type="hidden" name="contract_version" value="v1" />
+                    <input type="hidden" name="accepted_at" value={new Date().toISOString()} />
+                    <input type="hidden" name="accepted_tos" value={acceptedTos ? "1" : "0"} />
+                    <input type="hidden" name="accepted_privacy" value={acceptedPrivacy ? "1" : "0"} />
+                    <input type="hidden" name="accepted_withdrawal" value={acceptedWithdrawal ? "1" : "0"} />
+                    <input type="hidden" name="payment_method" value={paymentMethod} />
+                    <input type="hidden" name="dentist_license_number" value={regLicense} />
+                    <input type="hidden" name="dentist_license_storage_path" value={licenseStoragePath} />
+                    <input
+                      type="hidden"
+                      name="dentist_license_storage_path_front"
+                      value={licenseFrontStoragePath || licenseStoragePath}
+                    />
+                    <input
+                      type="hidden"
+                      name="dentist_license_storage_path_back"
+                      value={licenseBackStoragePath}
+                    />
+                    {props.inviteToken ? (
+                      <input type="hidden" name="invite_token" value={props.inviteToken} />
+                    ) : null}
+
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setRegistrationStep(3)}
+                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50"
+                      >
+                        Zurück
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!acceptedTos || !acceptedPrivacy || !acceptedWithdrawal || !licenseStoragePath}
+                        className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                        style={{
+                          background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
+                        }}
+                      >
+                        Zahlungspflichtig bestellen
+                      </button>
+                    </div>
+                    <p className="text-center text-[11px] text-gray-500">
+                      Sie wählen: <span className="font-medium text-gray-900">{plans[selectedPlan].label}</span>{" "}
+                      · {plans[selectedPlan].billing}
+                    </p>
+                  </form>
                 </div>
+              ) : null}
+                </>
               ) : null}
             </div>
           </div>

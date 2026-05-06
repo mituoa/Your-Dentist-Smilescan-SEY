@@ -39,3 +39,12 @@ export function requireSmtpMailConfig(): SmtpMailConfig {
 export function getAppBaseUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 }
+
+export function getAdminEmailsAllowlist(): string[] {
+  const raw = (process.env.ADMIN_EMAILS || "").trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}

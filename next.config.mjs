@@ -13,6 +13,21 @@ const nextConfig = {
       bodySizeLimit: "400mb",
     },
   },
+  webpack: (config) => {
+    config.watchOptions = {
+      ...(config.watchOptions ?? {}),
+      ignored: [
+        ...(Array.isArray(config.watchOptions?.ignored)
+          ? config.watchOptions.ignored
+          : config.watchOptions?.ignored
+            ? [config.watchOptions.ignored]
+            : []),
+        "**/FIGMA DESIGN ALL/**",
+        "**/.next/**",
+      ],
+    };
+    return config;
+  },
 };
 
 export default nextConfig;

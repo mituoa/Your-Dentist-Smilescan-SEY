@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
 
-import { requireUser, getCurrentWorkspace } from "@/lib/auth-helpers";
+import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { Sidebar } from "@/components/app-shell/sidebar";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { UserMenu } from "@/components/app-shell/user-menu";
@@ -17,7 +17,7 @@ export default async function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser();
-  const workspace = await getCurrentWorkspace();
+  const workspace = await requireApprovedWorkspace();
   const cookieStore = await cookies();
   const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE_NAME)?.value);
 
@@ -25,9 +25,7 @@ export default async function ProtectedLayout({
   // @ts-expect-error - workspaces is joined
   const workspaceName = workspace?.workspaces?.name || "Unbekannt";
 
-  if (!workspace) {
-    redirect("/login?error=workspace_missing");
-  }
+  if (!workspace) redirect("/login?error=workspace_missing");
 
   let myTasksCount = 0;
   let myTasksOverdueCount = 0;
@@ -150,7 +148,9 @@ export default async function ProtectedLayout({
             </div>
           </header>
 
-          <main className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</main>
+          <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            {children}
+          </main>
         </div>
       </div>
     </div>
