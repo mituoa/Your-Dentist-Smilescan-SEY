@@ -2,21 +2,23 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireUser } from "@/lib/auth-helpers";
-import { getAdminEmailsAllowlist } from "@/lib/env";
+import { isAdminAllowlistUser, requireUser } from "@/lib/auth-helpers";
+import { getAdminEmailsAllowlist, getAdminGithubUsernames } from "@/lib/env";
 
 import { approveWorkspace, openSignedLicenseUrl } from "./actions";
 
-function isAllowedAdminEmail(email: string | null | undefined) {
-  const allow = getAdminEmailsAllowlist();
-  if (allow.length === 0) return true; // dev default: allow if unset
-  const e = (email || "").trim().toLowerCase();
-  return Boolean(e && allow.includes(e));
+function canAccessRegistrations(
+  user: NonNullable<Awaited<ReturnType<typeof requireUser>>>
+) {
+  const hasEmail = getAdminEmailsAllowlist().length > 0;
+  const hasGh = getAdminGithubUsernames().length > 0;
+  if (!hasEmail && !hasGh) return true;
+  return isAdminAllowlistUser(user);
 }
 
 export default async function AdminRegistrationsPage() {
   const user = await requireUser();
-  if (!isAllowedAdminEmail(user.email)) {
+  if (!canAccessRegistrations(user)) {
     redirect("/dashboard");
   }
 

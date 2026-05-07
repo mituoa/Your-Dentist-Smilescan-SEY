@@ -1,6 +1,48 @@
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { isAdminAllowlistEmail } from "@/lib/env";
+import {
+  getAdminEmailsAllowlist,
+  getAdminGithubUsernames,
+} from "@/lib/env";
 import { redirect } from "next/navigation";
+
+/** Ops-Freigabe: E-Mail (`ADMIN_EMAILS`) oder GitHub-Login (`ADMIN_GITHUB_USERNAMES`). */
+export function isAdminAllowlistUser(user: User | null | undefined): boolean {
+  if (!user) return false;
+
+  const emails = getAdminEmailsAllowlist();
+  const email = (user.email || "").trim().toLowerCase();
+  if (email && emails.length > 0 && emails.includes(email)) return true;
+
+  const ghAllow = getAdminGithubUsernames();
+  if (ghAllow.length === 0) return false;
+
+  const meta = user.user_metadata as Record<string, unknown> | undefined;
+  const fromMeta = [
+    meta?.user_name,
+    meta?.preferred_username,
+    meta?.nickname,
+    meta?.user_login,
+  ]
+    .filter((v): v is string => typeof v === "string" && v.trim() !== "")
+    .map((s) => s.trim().toLowerCase());
+
+  const fromIdentities: string[] = [];
+  if (Array.isArray(user.identities)) {
+    for (const id of user.identities) {
+      if (id?.provider !== "github" || !id.identity_data) continue;
+      const d = id.identity_data as Record<string, unknown>;
+      for (const key of ["user_name", "nickname", "preferred_username"]) {
+        const v = d[key];
+        if (typeof v === "string" && v.trim())
+          fromIdentities.push(v.trim().toLowerCase());
+      }
+    }
+  }
+
+  const candidates = [...new Set([...fromMeta, ...fromIdentities])];
+  return candidates.some((c) => ghAllow.includes(c));
+}
 
 export async function getCurrentUser() {
   const supabase = await createClient();
@@ -52,7 +94,7 @@ export async function requireApprovedWorkspace() {
   // @ts-expect-error - workspaces is joined
   const approvedAt = workspace?.workspaces?.approved_at as string | null | undefined;
   if (!approvedAt) {
-    if (isAdminAllowlistEmail(user?.email)) {
+    if (isAdminAllowlistUser(user)) {
       return workspace;
     }
     redirect("/login?error=account_pending_approval");

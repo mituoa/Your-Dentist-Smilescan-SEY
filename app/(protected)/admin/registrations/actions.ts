@@ -4,21 +4,21 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireUser } from "@/lib/auth-helpers";
-import { getAdminEmailsAllowlist } from "@/lib/env";
+import { isAdminAllowlistUser, requireUser } from "@/lib/auth-helpers";
+import { getAdminEmailsAllowlist, getAdminGithubUsernames } from "@/lib/env";
 
-function requireAdminByEmail(userEmail: string | null | undefined) {
-  const allow = getAdminEmailsAllowlist();
-  if (allow.length === 0) return;
-  const email = (userEmail || "").trim().toLowerCase();
-  if (!email || !allow.includes(email)) {
-    throw new Error("Not authorized");
-  }
+function requirePlatformAdmin(
+  user: NonNullable<Awaited<ReturnType<typeof requireUser>>>
+) {
+  const hasEmailAllow = getAdminEmailsAllowlist().length > 0;
+  const hasGhAllow = getAdminGithubUsernames().length > 0;
+  if (!hasEmailAllow && !hasGhAllow) return;
+  if (!isAdminAllowlistUser(user)) throw new Error("Not authorized");
 }
 
 export async function approveWorkspace(workspaceId: string) {
   const user = await requireUser();
-  requireAdminByEmail(user.email);
+  requirePlatformAdmin(user);
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -36,7 +36,7 @@ export async function approveWorkspace(workspaceId: string) {
 
 export async function openSignedLicenseUrl(storagePath: string) {
   const user = await requireUser();
-  requireAdminByEmail(user.email);
+  requirePlatformAdmin(user);
 
   const admin = createAdminClient();
   const { data, error } = await admin.storage

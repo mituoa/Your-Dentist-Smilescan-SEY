@@ -49,6 +49,16 @@ export function getAdminEmailsAllowlist(): string[] {
     .filter(Boolean);
 }
 
+/** GitHub-Login-Namen (klein/Klein egal), Komma-getrennt — für Ops ohne/mit verstecker E-Mail */
+export function getAdminGithubUsernames(): string[] {
+  const raw = (process.env.ADMIN_GITHUB_USERNAMES || "").trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 /** Plattform-Ops: darf geschützte Bereiche nutzen auch wenn der Workspace noch nicht freigeschaltet ist (`ADMIN_EMAILS`). */
 export function isAdminAllowlistEmail(email: string | null | undefined): boolean {
   const allow = getAdminEmailsAllowlist();

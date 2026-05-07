@@ -48,6 +48,31 @@ export async function signInWithGoogle(formData: FormData) {
   redirect(data.url);
 }
 
+export async function signInWithGitHub(formData: FormData) {
+  const inviteToken = (formData.get("invite_token") as string | null)?.trim();
+
+  const origin = getAppBaseUrl().replace(/\/$/, "");
+  const nextPath = inviteToken
+    ? `/accept-invite?token=${encodeURIComponent(inviteToken)}`
+    : "/auth/continue";
+  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "github",
+    options: { redirectTo },
+  });
+
+  if (error || !data.url) {
+    const p = new URLSearchParams();
+    p.set("error", error?.message || "GitHub-Anmeldung ist gerade nicht möglich.");
+    if (inviteToken) p.set("invite", inviteToken);
+    redirect(`/login?${p.toString()}`);
+  }
+
+  redirect(data.url);
+}
+
 export async function signIn(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
