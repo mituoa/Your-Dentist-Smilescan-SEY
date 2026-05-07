@@ -48,3 +48,11 @@ export function getAdminEmailsAllowlist(): string[] {
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
 }
+
+/** Plattform-Ops: darf geschützte Bereiche nutzen auch wenn der Workspace noch nicht freigeschaltet ist (`ADMIN_EMAILS`). */
+export function isAdminAllowlistEmail(email: string | null | undefined): boolean {
+  const allow = getAdminEmailsAllowlist();
+  if (allow.length === 0) return false;
+  const e = (email || "").trim().toLowerCase();
+  return Boolean(e && allow.includes(e));
+}

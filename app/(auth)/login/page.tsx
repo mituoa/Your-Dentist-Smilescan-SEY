@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "@/components/auth/login-page-client";
+import { isAdminAllowlistEmail } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 
@@ -43,8 +44,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     if (inviteToken) {
       redirect(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
     }
-    // If the user is logged in but can't proceed, don't auto-redirect into a loop.
-    if (!queryError || !blockingAuthErrors.has(queryError)) {
+    // Ops-Admin (ADMIN_EMAILS) may enter despite pending workspace; others stay to avoid redirect loops.
+    if (
+      isAdminAllowlistEmail(user.email) ||
+      !queryError ||
+      !blockingAuthErrors.has(queryError)
+    ) {
       redirect(await resolveAuthenticatedEntryPath());
     }
   }

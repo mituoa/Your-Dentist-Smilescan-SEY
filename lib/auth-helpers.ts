@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isAdminAllowlistEmail } from "@/lib/env";
 import { redirect } from "next/navigation";
 
 export async function getCurrentUser() {
@@ -45,11 +46,15 @@ export async function getCurrentWorkspace() {
 }
 
 export async function requireApprovedWorkspace() {
+  const user = await getCurrentUser();
   const workspace = await getCurrentWorkspace();
   if (!workspace) return null;
   // @ts-expect-error - workspaces is joined
   const approvedAt = workspace?.workspaces?.approved_at as string | null | undefined;
   if (!approvedAt) {
+    if (isAdminAllowlistEmail(user?.email)) {
+      return workspace;
+    }
     redirect("/login?error=account_pending_approval");
   }
   return workspace;
