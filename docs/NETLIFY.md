@@ -47,6 +47,8 @@ Die App hat bereits **„Mit GitHub anmelden“** (`signInWithOAuth` → `github
 1. **Supabase** → **Authentication** → **Providers** → **GitHub** → **Enable**.
 2. **Client ID** und **Client Secret** von der GitHub OAuth App eintragen → **Save**.
 
+**Oder per Terminal (ein Befehl):** Repo-Skript `scripts/configure-supabase-github-auth.sh` — setzt dieselben Werte über die [Management API](https://supabase.com/docs/guides/auth/social-login/auth-github). Dafür brauchst du ein **Personal Access Token** von [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) (nicht der Anon-Key der App).
+
 ### 3) Weitere URLs in Supabase
 
 **Authentication** → **URL configuration**:
