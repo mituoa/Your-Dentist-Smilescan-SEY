@@ -12,10 +12,26 @@ Set **exact key names** (case-sensitive):
 | `NEXT_PUBLIC_APP_URL` | Your live site, e.g. `https://<site>.netlify.app` (no trailing slash optional) |
 | `ADMIN_EMAILS` | Optional: comma-separated ops emails (bypass workspace approval for testing) |
 | `ADMIN_GITHUB_USERNAMES` | Optional: comma-separated GitHub logins (same bypass), e.g. `mituoa` |
-
-Use **either** the new `sb_*` pair **or** the legacy `eyJ…` pair for anon + service_role — do not mix publishable with a mismatched secret.
+| `AUTH_RELAX_MODE` | **Nur Demos:** `true` = E-Mail-Bestätigung + Freischaltung aus; Demo-Workspace wenn leer (braucht Service Role) | `sb_*` pair **or** the legacy `eyJ…` pair for anon + service_role — do not mix publishable with a mismatched secret.
 
 After any change: **Deploys → Trigger deploy → Clear cache and deploy site**.
+
+## Notfall: Chef-Demo / kein Zugang (`AUTH_RELAX_MODE`)
+
+Wenn **Freischaltung**, **fehlende Praxis** oder **E-Mail-Bestätigung** euch aussperren, könnt ihr **nur auf der Demo-Seite** (Netlify) setzen:
+
+| Variable | Wert |
+|----------|------|
+| `AUTH_RELAX_MODE` | `true` |
+| `SUPABASE_SERVICE_ROLE_KEY` | muss gesetzt sein (sonst kein Auto-Workspace) |
+
+Wirkung:
+
+- Keine Weiterleitung wegen unbestätigter E-Mail.
+- Keine Sperre wegen `approved_at` (Praxis-Freischaltung).
+- Wenn der User **keine** Zeile in `workspace_members` hat, legt die App einen **Demo-Workspace** an (Name „Relax-Modus (Demo)“).
+
+**⚠️ Für Produktion wieder `AUTH_RELAX_MODE` löschen oder auf `false` setzen** — sonst ist der Schutz aus.
 
 ## Google OAuth (Supabase Auth)
 

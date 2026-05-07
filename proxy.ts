@@ -1,3 +1,4 @@
+import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
@@ -69,7 +70,7 @@ export async function proxy(request: NextRequest) {
     // Wenn eingeloggt und auf Auth-Route → /dashboard (außer blockierende Fehler: sonst Redirect-Schleife)
     if (user && AUTH_PATHS.some((p) => pathname.startsWith(p))) {
       const authError = request.nextUrl.searchParams.get("error");
-      if (authError && BLOCKING_AUTH_ERRORS.has(authError)) {
+      if (authError && BLOCKING_AUTH_ERRORS.has(authError) && !isAuthRelaxMode()) {
         return supabaseResponse;
       }
       // Login page sends invite holders to /accept-invite; do not bounce to dashboard first.
