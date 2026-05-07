@@ -4,7 +4,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripeServer } from "@/lib/stripe/server";
 
 export async function POST(req: NextRequest) {
-  const stripe = getStripeServer();
+  let stripe: ReturnType<typeof getStripeServer>;
+  try {
+    stripe = getStripeServer();
+  } catch {
+    return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+  }
   const signature = req.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -22,7 +27,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const admin = createAdminClient();
+  let admin: ReturnType<typeof createAdminClient>;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return NextResponse.json({ error: "Supabase admin not configured" }, { status: 503 });
+  }
 
   try {
     if (event.type === "checkout.session.completed") {

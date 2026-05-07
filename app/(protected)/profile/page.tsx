@@ -20,7 +20,7 @@ export default async function ProfilePage() {
     .from("workspaces")
     .select("slug")
     .eq("id", workspace.workspace_id)
-    .single();
+    .maybeSingle();
 
   const publicUrl = ws?.slug ? `/doc/${ws.slug}` : null;
 

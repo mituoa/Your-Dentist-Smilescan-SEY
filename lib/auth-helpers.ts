@@ -30,11 +30,16 @@ export async function getCurrentWorkspace() {
   if (!user) return null;
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("workspace_members")
     .select("workspace_id, role, workspaces(id, name, slug, approved_at)")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
+
+  if (error) {
+    console.error("[getCurrentWorkspace]", error);
+    return null;
+  }
 
   return data;
 }

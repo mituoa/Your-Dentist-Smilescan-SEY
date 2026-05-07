@@ -1,18 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
-import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
-
-/** Root: Login zuerst; eingeloggt → gleiche Ziel-Logik wie nach OAuth/Login. */
-export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    redirect(await resolveAuthenticatedEntryPath());
-  }
-
+/**
+ * Root: immer zuerst Login. Eingeloggt → Weiterleitung übernimmt `app/(auth)/login/page.tsx`
+ * (ohne extra Supabase/Admin-Logik hier — weniger Fehlerquellen auf Netlify).
+ */
+export default function HomePage() {
   redirect("/login");
 }

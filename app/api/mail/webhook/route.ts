@@ -59,7 +59,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ignored: "missing_message_id" });
   }
 
-  const admin = createAdminClient();
+  let admin: ReturnType<typeof createAdminClient>;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return NextResponse.json({ error: "server_misconfigured" }, { status: 503 });
+  }
+
   const { data: matches, error: lookupError } = await admin
     .from("task_delivery_receipts")
     .select("task_id, recipient_user_id, recipient_email, delivered_at")

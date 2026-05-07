@@ -30,24 +30,37 @@ export default async function ProtectedLayout({
   let myTasksCount = 0;
   let myTasksOverdueCount = 0;
   if (workspace) {
-    const counts = await countMyOpenTasks(
-      user.id,
-      workspace.workspace_id,
-      role
-    );
-    myTasksCount = counts.total;
-    myTasksOverdueCount = counts.overdue;
+    try {
+      const counts = await countMyOpenTasks(
+        user.id,
+        workspace.workspace_id,
+        role
+      );
+      myTasksCount = counts.total;
+      myTasksOverdueCount = counts.overdue;
+    } catch (e) {
+      console.error("[ProtectedLayout] countMyOpenTasks failed:", e);
+    }
   }
 
   // TODO: replace with countOpenInboxItems(workspace_id) when implemented
   const inboxCount = 0;
 
-  const supabase = await createClient();
-  const { data: profileData } = await supabase
-    .from("profile_data")
-    .select("photo_url, display_name")
-    .eq("workspace_id", workspace.workspace_id)
-    .maybeSingle();
+  let profileData: { photo_url: string | null; display_name: string | null } | null = null;
+  try {
+    const supabase = await createClient();
+    const res = await supabase
+      .from("profile_data")
+      .select("photo_url, display_name")
+      .eq("workspace_id", workspace.workspace_id)
+      .maybeSingle();
+    profileData = res.data;
+    if (res.error) {
+      console.error("[ProtectedLayout] profile_data query:", res.error);
+    }
+  } catch (e) {
+    console.error("[ProtectedLayout] profile fetch failed:", e);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">

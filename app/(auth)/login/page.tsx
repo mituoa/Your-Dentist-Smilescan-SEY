@@ -1,7 +1,9 @@
+import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "@/components/auth/login-page-client";
 import { createClient } from "@/lib/supabase/server";
+import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 
 interface LoginPageProps {
   searchParams: Promise<{
@@ -20,16 +22,22 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resent = params.resent === "1";
   const year = new Date().getFullYear();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user: User | null = null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user: u },
+    } = await supabase.auth.getUser();
+    user = u;
+  } catch (e) {
+    console.error("[LoginPage] getUser failed:", e);
+  }
 
   if (user) {
     if (inviteToken) {
       redirect(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
     }
-    redirect("/dashboard");
+    redirect(await resolveAuthenticatedEntryPath());
   }
 
   return (

@@ -28,7 +28,7 @@ export default async function DashboardPage() {
     .from("profile_data")
     .select("display_name")
     .eq("workspace_id", workspaceId)
-    .single();
+    .maybeSingle();
 
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "";
