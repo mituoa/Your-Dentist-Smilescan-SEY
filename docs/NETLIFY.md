@@ -12,7 +12,10 @@ Set **exact key names** (case-sensitive):
 | `NEXT_PUBLIC_APP_URL` | Your live site, e.g. `https://<site>.netlify.app` (no trailing slash optional) |
 | `ADMIN_EMAILS` | Optional: comma-separated ops emails (bypass workspace approval for testing) |
 | `ADMIN_GITHUB_USERNAMES` | Optional: comma-separated GitHub logins (same bypass), e.g. `mituoa` |
-| `AUTH_RELAX_MODE` | **Nur Demos:** `true` = E-Mail-Bestätigung + Freischaltung aus; Demo-Workspace wenn leer (braucht Service Role) | `sb_*` pair **or** the legacy `eyJ…` pair for anon + service_role — do not mix publishable with a mismatched secret.
+| `AUTH_RELAX_MODE` | **Nur Demos:** `true` = E-Mail-Bestätigung + Freischaltung aus; Demo-Workspace wenn leer (braucht Service Role) |
+| `EMERGENCY_PASSWORD_LOGIN_ENABLED` | `true` + `EMERGENCY_LOGIN_EMAIL` + `EMERGENCY_LOGIN_PASSWORD` = festes Login ohne OAuth (setzt/löscht Passwort in Supabase per Service Role) |
+
+Use **either** the new `sb_*` pair **or** the legacy `eyJ…` pair for anon + service_role — do not mix publishable with a mismatched secret.
 
 After any change: **Deploys → Trigger deploy → Clear cache and deploy site**.
 
@@ -32,6 +35,23 @@ Wirkung:
 - Wenn der User **keine** Zeile in `workspace_members` hat, legt die App einen **Demo-Workspace** an (Name „Relax-Modus (Demo)“).
 
 **⚠️ Für Produktion wieder `AUTH_RELAX_MODE` löschen oder auf `false` setzen** — sonst ist der Schutz aus.
+
+## Notfall: Festes E-Mail-Passwort ohne GitHub/Google (`EMERGENCY_*`)
+
+Wenn **keine Zeit für OAuth**, aber ihr braucht **ein normales Login** auf der Login-Seite:
+
+| Variable | Beispiel |
+|----------|----------|
+| `EMERGENCY_PASSWORD_LOGIN_ENABLED` | `true` |
+| `EMERGENCY_LOGIN_EMAIL` | die E-Mail, die ihr nutzen wollt (z. B. dieselbe wie bei GitHub in Supabase **Authentication → Users**) |
+| `EMERGENCY_LOGIN_PASSWORD` | ein starkes Passwort (nur in Netlify speichern) |
+| `SUPABASE_SERVICE_ROLE_KEY` | muss gesetzt sein |
+
+Beim ersten erfolgreichen Versuch legt die Server-Action den User **an** oder setzt **Passwort + E-Mail bestätigt** für diese Adresse. Danach wie gewohnt **E-Mail + Passwort** einloggen.
+
+Kombiniert mit **`AUTH_RELAX_MODE=true`** kommt ihr auch ohne Freischaltung/Workspace rein.
+
+**⚠️ Nach der Demo `EMERGENCY_PASSWORD_LOGIN_ENABLED` aus / `false` — das ist ein Hoheitsschlüssel.**
 
 ## Google OAuth (Supabase Auth)
 

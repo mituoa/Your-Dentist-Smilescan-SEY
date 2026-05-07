@@ -6,6 +6,10 @@ import { getAppBaseUrl } from "@/lib/env";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { acceptInvitation } from "@/app/(protected)/settings/actions";
+import {
+  matchesEmergencyLogin,
+  syncEmergencyUserToSupabase,
+} from "@/lib/emergency-password-login";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 import { getStripePriceIdForInterval, getStripeServer, isStripeCheckoutConfigured } from "@/lib/stripe/server";
 
@@ -91,10 +95,22 @@ export async function signIn(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+
+  let { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
+
+  if (error && matchesEmergencyLogin(email, password)) {
+    const sync = await syncEmergencyUserToSupabase(email, password);
+    if (!sync.ok) {
+      redirect(loginQuery(sync.message));
+    }
+    ({ error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    }));
+  }
 
   if (error) {
     redirect(loginQuery(error.message));
