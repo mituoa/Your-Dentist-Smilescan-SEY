@@ -18,6 +18,13 @@ const PROTECTED_PATHS = [
 // Routen, die NICHT für eingeloggte User sichtbar sind (redirect zu dashboard)
 const AUTH_PATHS = ["/login", "/register"];
 
+/** Must stay aligned with `app/(auth)/login/page.tsx` — show message instead of bouncing to /dashboard */
+const BLOCKING_AUTH_ERRORS = new Set([
+  "workspace_missing",
+  "account_pending_approval",
+  "email_not_confirmed",
+]);
+
 export async function proxy(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -59,8 +66,19 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Wenn eingeloggt und auf Auth-Route → /dashboard
+    // Wenn eingeloggt und auf Auth-Route → /dashboard (außer blockierende Fehler: sonst Redirect-Schleife)
     if (user && AUTH_PATHS.some((p) => pathname.startsWith(p))) {
+      const authError = request.nextUrl.searchParams.get("error");
+      if (authError && BLOCKING_AUTH_ERRORS.has(authError)) {
+        return supabaseResponse;
+      }
+      // Login page sends invite holders to /accept-invite; do not bounce to dashboard first.
+      if (
+        pathname.startsWith("/login") &&
+        request.nextUrl.searchParams.get("invite")?.trim()
+      ) {
+        return supabaseResponse;
+      }
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
