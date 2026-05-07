@@ -145,6 +145,14 @@ export function LoginPageClient({
       };
     }
 
+    if (/provider is not enabled|unsupported provider/i.test(raw)) {
+      return {
+        tone: "warning" as const,
+        title: "GitHub ist in Supabase noch nicht eingeschaltet",
+        body: "Supabase → Authentication → Providers → GitHub aktivieren und mit einer GitHub OAuth App verbinden (Callback-URL auf die Supabase-Adresse setzen). Kurzanleitung: docs/NETLIFY.md Abschnitt „GitHub OAuth“.",
+      };
+    }
+
     // fallback: show original error (already used before)
     return {
       tone: "danger" as const,

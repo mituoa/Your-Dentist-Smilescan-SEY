@@ -10,6 +10,8 @@ Set **exact key names** (case-sensitive):
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → API Keys → **Publishable** (`sb_publishable_…`) **or** Legacy tab → **anon** (`eyJ…`) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API Keys → **Secret** (`sb_secret_…`) **or** Legacy → **service_role** (`eyJ…`) |
 | `NEXT_PUBLIC_APP_URL` | Your live site, e.g. `https://<site>.netlify.app` (no trailing slash optional) |
+| `ADMIN_EMAILS` | Optional: comma-separated ops emails (bypass workspace approval for testing) |
+| `ADMIN_GITHUB_USERNAMES` | Optional: comma-separated GitHub logins (same bypass), e.g. `mituoa` |
 
 Use **either** the new `sb_*` pair **or** the legacy `eyJ…` pair for anon + service_role — do not mix publishable with a mismatched secret.
 
@@ -21,6 +23,49 @@ After any change: **Deploys → Trigger deploy → Clear cache and deploy site**
 2. Supabase → Authentication → URL configuration → add redirect URL:  
    `https://<site>.netlify.app/auth/callback`
 3. `NEXT_PUBLIC_APP_URL` must match that host so server actions build the same `redirectTo`.
+
+## GitHub OAuth (Supabase Auth)
+
+Die App hat bereits **„Mit GitHub anmelden“** (`signInWithOAuth` → `github`). Ohne die folgenden Schritte liefert Supabase z. B.  
+`Unsupported provider: provider is not enabled`.
+
+### 1) GitHub OAuth App anlegen
+
+1. Auf **GitHub** einloggen → **Settings** → **Developer settings** → **OAuth Apps** → **New OAuth App**.
+2. **Application name:** z. B. `SmileScan`  
+   **Homepage URL:** eure Netlify-URL, z. B. `https://<site>.netlify.app`
+3. **Authorization callback URL** (wichtig): **exakt** die Supabase-Callback-URL eures Projekts:
+
+   `https://<PROJECT_REF>.supabase.co/auth/v1/callback`
+
+   `<PROJECT_REF>` steht in Supabase unter **Settings → General → Reference ID** (in eurem Fall z. B. `exsgywpbpslgxzbccbjh`).
+
+4. Nach dem Erstellen: **Client ID** kopieren und ein **Client secret** erzeugen.
+
+### 2) GitHub in Supabase aktivieren
+
+1. **Supabase** → **Authentication** → **Providers** → **GitHub** → **Enable**.
+2. **Client ID** und **Client Secret** von der GitHub OAuth App eintragen → **Save**.
+
+### 3) Weitere URLs in Supabase
+
+**Authentication** → **URL configuration**:
+
+- **Site URL:** `https://<site>.netlify.app`
+- **Redirect URLs** (eintragen, eine Zeile pro URL), mindestens:
+
+  - `https://<site>.netlify.app/auth/callback`
+  - `http://localhost:3000/auth/callback` (optional, für lokal)
+
+`NEXT_PUBLIC_APP_URL` auf Netlify = dieselbe `https://<site>.netlify.app` ohne Slash am Ende (oder konsistent zu eurer Live-Domain).
+
+### 4) Ops-Admin per GitHub-Username (optional)
+
+Netlify **Environment variables**:
+
+- `ADMIN_GITHUB_USERNAMES` = euer GitHub-Login (z. B. `mituoa`), kommagetrennt bei mehreren.
+
+Danach **Clear cache and deploy**. Ohne Workspace-Freischaltung könnt ihr so trotzdem ins Dashboard, wenn der Code die Allowlist nutzt.
 
 ## Stripe / mail webhooks
 
