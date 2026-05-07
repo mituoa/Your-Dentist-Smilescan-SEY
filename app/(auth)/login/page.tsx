@@ -22,6 +22,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resent = params.resent === "1";
   const year = new Date().getFullYear();
 
+  const blockingAuthErrors = new Set([
+    "workspace_missing",
+    "account_pending_approval",
+    "email_not_confirmed",
+  ]);
+
   let user: User | null = null;
   try {
     const supabase = await createClient();
@@ -37,7 +43,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     if (inviteToken) {
       redirect(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
     }
-    redirect(await resolveAuthenticatedEntryPath());
+    // If the user is logged in but can't proceed, don't auto-redirect into a loop.
+    if (!queryError || !blockingAuthErrors.has(queryError)) {
+      redirect(await resolveAuthenticatedEntryPath());
+    }
   }
 
   return (
