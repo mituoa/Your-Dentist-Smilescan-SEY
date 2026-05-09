@@ -3,12 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-import {
-  resendSignupConfirmation,
-  signIn,
-  signInWithGitHub,
-  signInWithGoogle,
-} from "@/app/(auth)/actions";
+import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
 
 const RETURN_PRICING_STORAGE_KEY = "smilescan-return-pricing-v1";
@@ -148,8 +143,8 @@ export function LoginPageClient({
     if (/provider is not enabled|unsupported provider/i.test(raw)) {
       return {
         tone: "warning" as const,
-        title: "GitHub ist in Supabase noch nicht eingeschaltet",
-        body: "Supabase → Authentication → Providers → GitHub aktivieren und mit einer GitHub OAuth App verbinden (Callback-URL auf die Supabase-Adresse setzen). Kurzanleitung: docs/NETLIFY.md Abschnitt „GitHub OAuth“.",
+        title: "Anmeldung mit diesem Anbieter nicht verfügbar",
+        body: "Der gewählte Anmelde‑Anbieter ist in Ihrer Umgebung noch nicht freigeschaltet. Bitte nutzen Sie E‑Mail oder Google, oder wenden Sie sich an den Support.",
       };
     }
 
@@ -281,7 +276,7 @@ export function LoginPageClient({
         ) : null}
         {/* LOGIN SECTION */}
         <div
-          className="flex min-h-screen items-center justify-center bg-[#F8F7F3] pb-[calc(9rem+env(safe-area-inset-bottom,0px))] md:pb-0"
+          className="flex min-h-screen items-center justify-center bg-[#F8F7F3] pb-[max(2rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] md:pb-0"
           style={{
             backgroundImage:
               "radial-gradient(ellipse at center, rgba(255,255,255,0.6) 0%, rgba(248,247,243,0) 60%, rgba(240,240,240,0.3) 100%)",
@@ -649,19 +644,6 @@ export function LoginPageClient({
                   </button>
                 </form>
 
-                <form action={signInWithGitHub} className="mt-2.5 lg:mt-3">
-                  {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
-                  <button
-                    type="submit"
-                    className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-[#24292F] bg-[#24292F] text-[13px] text-white transition-all duration-150 hover:bg-[#1a1e24] active:scale-[0.99] lg:h-[48px] lg:gap-3 lg:rounded-xl lg:text-[14px]"
-                  >
-                    <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-                      <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.154 8.986 7.53 10.437.55.101.748-.235.748-.522 0-.257-.009-.966-.014-1.895-3.048.662-3.692-1.467-3.692-1.467-.498-1.265-1.216-1.601-1.216-1.601-.994-.679.076-.666.076-.666 1.101.078 1.68 1.13 1.68 1.13.977 1.674 2.563 1.19 3.187.911.099-.708.382-1.19.695-1.463-2.433-.277-4.992-1.217-4.992-5.417 0-1.197.428-2.176 1.13-2.943-.114-.277-.491-1.395.107-2.908 0 0 .921-.295 3.017 1.124a10.436 10.436 0 0 1 5.494 0c2.096-1.419 3.016-1.124 3.016-1.124.598 1.513.222 2.631.108 2.908.702.767 1.129 1.746 1.129 2.943 0 4.21-2.562 5.137-5.004 5.409.393.337.744 1.005.744 2.022 0 1.461-.014 2.639-.014 2.999 0 .29.196.627.752.521C19.848 20.982 23 16.865 23 12c0-6.077-4.923-11-11-11z" />
-                    </svg>
-                    Mit GitHub anmelden
-                  </button>
-                </form>
-
                 <div className="mt-5 text-center lg:mt-8">
                   <p className="text-[13px] text-gray-600 lg:text-[14px]">
                     Noch kein Konto?{" "}
@@ -774,39 +756,9 @@ export function LoginPageClient({
           </div>
         </div>
 
-        {/* Mobile sticky CTA */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#F8F7F3] via-[#F8F7F3]/82 to-transparent" />
-          <div
-            className="relative px-3 pt-1"
-            style={{ paddingBottom: "max(0.25rem, env(safe-area-inset-bottom, 0px))" }}
-          >
-            <div className="mx-auto max-w-md rounded-lg border border-gray-200/50 bg-white/[0.86] p-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] backdrop-blur-sm">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0 pr-1">
-                  <p className="truncate text-[11px] font-medium leading-snug tracking-tight text-gray-900">
-                    14 Tage kostenlos testen
-                  </p>
-                  <p className="mt-px truncate text-[10px] leading-snug text-gray-500">
-                    Plan wählen und starten
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={openPlanSheet}
-                  className="inline-flex h-10 min-h-[44px] shrink-0 items-center justify-center rounded-md px-3 text-[11px] font-semibold text-white active:scale-[0.98]"
-                  style={{ background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)" }}
-                >
-                  Plan wählen
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div
           id="pricing"
-          className="w-full min-w-0 scroll-mt-20 border-t border-transparent bg-white px-4 pb-[calc(7.25rem+env(safe-area-inset-bottom,0px))] pt-4 max-md:border-gray-200/25 sm:px-6 sm:pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pt-7 md:scroll-mt-24 md:border-t-0 md:px-8 md:py-14 md:pb-16 lg:px-16 lg:py-16"
+          className="w-full min-w-0 scroll-mt-20 border-t border-transparent bg-white px-4 pb-[max(2.75rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] pt-4 max-md:border-gray-200/25 sm:px-6 sm:pb-[max(3rem,calc(1.75rem+env(safe-area-inset-bottom,0px)))] sm:pt-7 md:scroll-mt-24 md:border-t-0 md:px-8 md:py-14 md:pb-16 lg:px-16 lg:py-16"
         >
           <div className="mx-auto max-w-5xl">
             <div className="max-md:mb-2.5 mb-3 text-center md:mb-4">
@@ -852,7 +804,7 @@ export function LoginPageClient({
             </div>
 
             <div
-              className="max-md:mb-7 mb-8 grid grid-cols-1 gap-2 max-md:gap-2 md:mb-16 md:grid-cols-3 md:gap-4"
+              className="max-md:mb-6 mb-8 grid grid-cols-1 gap-2 max-md:gap-2 md:mb-16 md:grid-cols-3 md:gap-4"
               style={{ animation: "fadeIn 0.6s ease-out" }}
             >
               <div
