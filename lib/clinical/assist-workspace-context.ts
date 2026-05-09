@@ -1,5 +1,5 @@
 /**
- * Kontext-Zonen für Assistenz (Navigation + Schnelltexte, kein Auto-Versand).
+ * Kontext-Zonen für Command (Navigation + Schnelltexte, kein Auto-Versand).
  */
 
 export type AssistZone =

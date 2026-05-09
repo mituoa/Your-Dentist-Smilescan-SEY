@@ -7,7 +7,7 @@ import { useAssistContextOptional, type InboxAssistCasePayload } from "./assist-
 type InboxAssistHydrationProps = Omit<InboxAssistCasePayload, "kind">;
 
 /**
- * Aktiver Fall + eingebetteter Assist (rechte Spalte) — bei Unmount wieder Floating.
+ * Aktiver Fall für Command (systemweite Leiste) — Kontext ohne Layout-Einbettung.
  */
 export function InboxAssistHydration({
   submissionId,
@@ -19,11 +19,9 @@ export function InboxAssistHydration({
 }: InboxAssistHydrationProps) {
   const ctx = useAssistContextOptional();
   const setCasePayload = ctx?.setCasePayload;
-  const setChromeLayout = ctx?.setChromeLayout;
 
   useEffect(() => {
-    if (!setCasePayload || !setChromeLayout) return;
-    setChromeLayout("tracker_embedded");
+    if (!setCasePayload) return;
     setCasePayload({
       kind: "inbox",
       submissionId,
@@ -35,11 +33,9 @@ export function InboxAssistHydration({
     });
     return () => {
       setCasePayload(null);
-      setChromeLayout("floating");
     };
   }, [
     setCasePayload,
-    setChromeLayout,
     submissionId,
     patientName,
     urgency,

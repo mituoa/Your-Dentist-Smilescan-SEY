@@ -116,11 +116,6 @@ export function SubmissionActions({
             </p>
           </div>
         </div>
-
-        <div
-          id="tracker-assist-root"
-          className="shrink-0 border-t border-slate-100 bg-[#F2F5F9] px-3 py-3 sm:px-4 sm:py-3.5"
-        />
       </div>
     </div>
   );
