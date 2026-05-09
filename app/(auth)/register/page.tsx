@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { resendSignupConfirmation, signUp } from "../actions";
+import { isRegistrationDemoMode, skipPaymentAtSignup } from "@/lib/registration-demo";
 import { RegisterClient } from "./RegisterClient";
 
 interface RegisterPageProps {
@@ -34,7 +35,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   })();
 
   return (
-    <>
+    <div className="w-full min-w-0 max-w-full overflow-x-hidden">
       <RegisterClient
         signUpAction={signUp}
         resendConfirmationAction={resendSignupConfirmation}
@@ -45,8 +46,10 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         success={success}
         loginHref={loginHref}
         registrationDemoUi={registrationDemoUi}
+        skipPaymentAtSignup={skipPaymentAtSignup()}
+        licenseStepOptional={isRegistrationDemoMode()}
       />
-      <div className="pb-10 text-center text-[13px] text-gray-500">
+      <div className="px-4 pb-10 pt-2 text-center text-[13px] text-gray-500 sm:px-5">
         Schon ein Konto?{" "}
         <Link
           href={loginHref}
@@ -55,6 +58,6 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           Anmelden
         </Link>
       </div>
-    </>
+    </div>
   );
 }

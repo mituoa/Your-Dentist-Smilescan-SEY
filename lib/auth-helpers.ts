@@ -6,6 +6,10 @@ import {
 } from "@/lib/env";
 import { ensureRelaxBootstrapWorkspace } from "@/lib/auth-relax-bootstrap";
 import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
+import {
+  requireEmailConfirmationBeforeApp,
+  requireWorkspaceApprovalBeforeApp,
+} from "@/lib/launch-guards";
 import { redirect } from "next/navigation";
 
 /** Ops-Freigabe: E-Mail (`ADMIN_EMAILS`) oder GitHub-Login (`ADMIN_GITHUB_USERNAMES`). */
@@ -59,9 +63,7 @@ export async function requireUser() {
   if (!user) {
     redirect("/login");
   }
-  // Enforce email confirmation before entering protected areas.
-  // Supabase sets email_confirmed_at once the user clicks the confirmation link.
-  if (!user.email_confirmed_at && !isAuthRelaxMode()) {
+  if (!user.email_confirmed_at && !isAuthRelaxMode() && requireEmailConfirmationBeforeApp()) {
     const p = new URLSearchParams();
     p.set("error", "email_not_confirmed");
     if (user.email) p.set("email", user.email);
@@ -103,11 +105,10 @@ export async function requireApprovedWorkspace() {
   if (!workspace) return null;
   // @ts-expect-error - workspaces is joined
   const approvedAt = workspace?.workspaces?.approved_at as string | null | undefined;
-  if (!approvedAt) {
-    if (isAuthRelaxMode() || isAdminAllowlistUser(user)) {
-      return workspace;
+  if (requireWorkspaceApprovalBeforeApp() && !approvedAt) {
+    if (!(isAuthRelaxMode() || isAdminAllowlistUser(user))) {
+      redirect("/login?error=account_pending_approval");
     }
-    redirect("/login?error=account_pending_approval");
   }
   return workspace;
 }

@@ -4,6 +4,6 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative">{children}</div>
+    <div className="relative w-full min-w-0 max-w-full overflow-x-hidden">{children}</div>
   );
 }

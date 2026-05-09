@@ -4,6 +4,9 @@ import * as React from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 
+import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
+import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
+
 type Plan = "monthly" | "halfyearly" | "yearly";
 type RegistrationStep = 1 | 2 | 3 | 4;
 
@@ -28,6 +31,10 @@ export function RegisterClient(props: {
   loginHref?: string;
   /** Zeigt zweiten Submit „ohne Stripe“ (wirksam nur mit REGISTRATION_DEMO_MODE am Server). */
   registrationDemoUi?: boolean;
+  /** Server: Registrierung ohne Stripe-Redirect (Standard bis ENABLE_STRIPE_CHECKOUT_AT_SIGNUP). */
+  skipPaymentAtSignup?: boolean;
+  /** Server (REGISTRATION_DEMO_MODE): Lizenz-Upload-Schritt optional überspringbar. */
+  licenseStepOptional?: boolean;
 }) {
   const loginBackHref = props.loginHref ?? "/login";
   const plan = coercePlan(props.initialPlan);
@@ -37,8 +44,9 @@ export function RegisterClient(props: {
   const [regPractice, setRegPractice] = React.useState("");
   const [regLicense, setRegLicense] = React.useState("");
   const [regEmail, setRegEmail] = React.useState(props.prefilledEmail ?? "");
-  const [regEmailConfirm, setRegEmailConfirm] = React.useState(props.prefilledEmail ?? "");
+  const [regEmailConfirm, setRegEmailConfirm] = React.useState("");
   const [regEmailConfirmDirty, setRegEmailConfirmDirty] = React.useState(false);
+  const [emailPairError, setEmailPairError] = React.useState("");
   const [regPassword, setRegPassword] = React.useState("");
 
   const [selectedPlan, setSelectedPlan] = React.useState<Plan>(plan);
@@ -100,6 +108,10 @@ export function RegisterClient(props: {
   const normalizeEmail = (v: string) => v.trim().toLowerCase();
   const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(v));
   const emailMatches = normalizeEmail(regEmail) !== "" && normalizeEmail(regEmail) === normalizeEmail(regEmailConfirm);
+
+  const registrationDocsSatisfied =
+    props.licenseStepOptional === true ||
+    Boolean(licenseFrontStoragePath || licenseBackStoragePath || licenseStoragePath);
 
   const normalizeLicenseNumber = (v: string) => v.replace(/\s+/g, "").trim();
   const licenseFormatHint = React.useMemo(() => {
@@ -220,14 +232,6 @@ export function RegisterClient(props: {
     return () => window.clearTimeout(t);
   }, [regEmail, registrationStep]);
 
-  // Keep confirm email in sync until user edits it manually.
-  React.useEffect(() => {
-    if (props.success) return;
-    if (registrationStep !== 1) return;
-    if (regEmailConfirmDirty) return;
-    setRegEmailConfirm(regEmail);
-  }, [props.success, registrationStep, regEmail, regEmailConfirmDirty]);
-
   React.useEffect(() => {
     if (!emailTypoUndo) return;
     const t = window.setTimeout(() => setEmailTypoUndo(null), 8000);
@@ -299,6 +303,14 @@ export function RegisterClient(props: {
 
     return () => window.clearTimeout(t);
   }, [regEmail, registrationStep]);
+
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem("smilescan-registration-plan", selectedPlan);
+    } catch {
+      /* ignore */
+    }
+  }, [selectedPlan]);
 
   const plans = {
     monthly: {
@@ -447,8 +459,17 @@ export function RegisterClient(props: {
   const onStep1Submit = (e: FormEvent) => {
     e.preventDefault();
     const email = normalizeEmail(regEmail);
+    const confirm = normalizeEmail(regEmailConfirm);
+    setEmailPairError("");
     if (!email || !isValidEmail(email)) return;
-    if (!emailMatches) return;
+    if (!confirm) {
+      setEmailPairError("Bitte geben Sie Ihre E-Mail-Adresse zur Bestätigung erneut ein.");
+      return;
+    }
+    if (!emailMatches) {
+      setEmailPairError("Die E-Mail-Adressen stimmen nicht überein.");
+      return;
+    }
     if (emailCheckStatus === "taken" || emailCheckStatus === "checking") return;
     setRegistrationStep(2);
   };
@@ -481,34 +502,55 @@ export function RegisterClient(props: {
 
   const onStep3Submit = async (e: FormEvent) => {
     e.preventDefault();
+    const optional = props.licenseStepOptional === true;
     try {
-      if (!licenseFrontFile || !licenseBackFile) {
-        throw new Error("Bitte laden Sie Vorder- und Rückseite hoch.");
+      if (!licenseFrontFile && !licenseBackFile) {
+        if (optional) {
+          setLicenseUploadError("");
+          setLicenseFrontStoragePath("");
+          setLicenseBackStoragePath("");
+          setLicenseStoragePath("");
+          setFrontQualityOk(null);
+          setBackQualityOk(null);
+          setFrontQualityHint("");
+          setBackQualityHint("");
+          setRegistrationStep(4);
+          return;
+        }
+        setLicenseUploadError("Bitte laden Sie Vorder- und Rückseite hoch (oder eine Seite als Bild/PDF).");
+        return;
       }
 
-      const [frontQ, backQ] = await Promise.all([
-        analyzeImageQuality(licenseFrontFile),
-        analyzeImageQuality(licenseBackFile),
-      ]);
-      setFrontQualityOk(frontQ.ok);
-      setBackQualityOk(backQ.ok);
-      setFrontQualityHint(frontQ.hint);
-      setBackQualityHint(backQ.hint);
-      if (!frontQ.ok || !backQ.ok) {
-        throw new Error("Bitte laden Sie ein besser lesbares Foto hoch.");
+      const frontQ = licenseFrontFile ? await analyzeImageQuality(licenseFrontFile) : { ok: true, hint: "" };
+      const backQ = licenseBackFile ? await analyzeImageQuality(licenseBackFile) : { ok: true, hint: "" };
+      setFrontQualityOk(licenseFrontFile ? frontQ.ok : null);
+      setBackQualityOk(licenseBackFile ? backQ.ok : null);
+      setFrontQualityHint(licenseFrontFile ? frontQ.hint : "");
+      setBackQualityHint(licenseBackFile ? backQ.hint : "");
+
+      let frontPath = "";
+      let backPath = "";
+      if (licenseFrontFile) {
+        frontPath = await uploadLicenseSide("front", licenseFrontFile);
+      }
+      if (licenseBackFile) {
+        backPath = await uploadLicenseSide("back", licenseBackFile);
       }
 
-      const [frontPath, backPath] = await Promise.all([
-        uploadLicenseSide("front", licenseFrontFile),
-        uploadLicenseSide("back", licenseBackFile),
-      ]);
       setLicenseFrontStoragePath(frontPath);
       setLicenseBackStoragePath(backPath);
-      setLicenseStoragePath(frontPath);
+      setLicenseStoragePath(frontPath || backPath);
+      setLicenseUploadError("");
+      if (!frontQ.ok || !backQ.ok) {
+        setLicenseUploadError(
+          "Hinweis: Die Scan-Qualität ist für eine manuelle Prüfung grenzwertig. Sie können fortfahren; wir prüfen das Dokument später."
+        );
+      }
       setRegistrationStep(4);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
-      setLicenseUploadError(msg);
+      const raw = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
+      console.error("[RegisterClient] license upload", raw);
+      setLicenseUploadError(userFacingAuthError(raw));
     }
   };
 
@@ -538,26 +580,29 @@ export function RegisterClient(props: {
       `}</style>
 
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-y-contain"
         style={{ animation: "fadeIn 0.2s ease-out" }}
       >
         <div
-          className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+          className="pointer-events-none fixed inset-0 z-0 bg-slate-900/60 backdrop-blur-md"
           style={{ animation: "fadeIn 0.25s ease-out" }}
-        />
-
-        <div
-          className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white"
-          style={{
-            boxShadow:
-              "0 4px 6px rgba(0,0,0,0.05), 0 10px 20px rgba(0,0,0,0.10), 0 20px 40px rgba(0,0,0,0.15)",
-            animation: "modalSlideIn 0.25s ease-out",
-          }}
+          aria-hidden
         >
+        </div>
+
+        <div className="relative z-10 flex w-full max-w-full min-w-0 flex-col items-stretch px-4 pb-28 pt-4 sm:px-5 md:min-h-screen md:items-center md:justify-center md:px-8 md:py-12 md:pb-16">
+          <div
+            className="relative mx-auto w-full min-w-0 max-w-2xl overflow-x-hidden rounded-3xl bg-white max-md:max-h-[min(calc(100dvh-2rem),920px)] max-md:overflow-y-auto md:overflow-visible md:max-h-none"
+            style={{
+              boxShadow:
+                "0 4px 6px rgba(0,0,0,0.05), 0 10px 20px rgba(0,0,0,0.10), 0 20px 40px rgba(0,0,0,0.15)",
+              animation: "modalSlideIn 0.25s ease-out",
+            }}
+          >
           <Link
             href={loginBackHref}
             aria-label="Schließen"
-            className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-red-50"
+            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-red-50 md:right-5 md:top-5"
           >
             <svg
               className="h-4 w-4 text-gray-600 transition-all duration-200 group-hover:rotate-90"
@@ -572,7 +617,7 @@ export function RegisterClient(props: {
           </Link>
 
             <div
-              className="relative px-10 pt-8 pb-6"
+              className="relative px-4 pb-5 pt-6 sm:px-5 md:px-10 md:pb-6 md:pt-8"
               style={{
                 background:
                   "linear-gradient(to bottom, rgba(2, 132, 199, 0.03) 0%, rgba(255,255,255,0) 100%)",
@@ -604,7 +649,7 @@ export function RegisterClient(props: {
               </p>
             </div>
 
-            <div className="px-10 pb-10">
+            <div className="px-4 pb-12 sm:px-5 md:px-10 md:pb-10">
               {props.success ? (
                 <div className="py-6 text-center" style={{ animation: "slideIn 0.4s ease-out" }}>
                   <h3 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">
@@ -633,7 +678,7 @@ export function RegisterClient(props: {
                         value={successEmail}
                         onChange={(e) => setSuccessEmail(e.target.value)}
                         placeholder="name@praxis.de"
-                        className="h-[48px] w-full rounded-xl border border-gray-200 bg-white px-3 text-[14px] text-gray-900 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        className="h-[48px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-3 text-base text-gray-900 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[14px]"
                       />
                       {successEmail.trim() && !isValidEmail(successEmail) ? (
                         <p className="mt-2 text-[12px] text-red-600">Bitte eine gültige E‑Mail-Adresse eingeben.</p>
@@ -699,7 +744,15 @@ export function RegisterClient(props: {
                 <>
               {props.queryError ? (
                 <p className="mb-6 rounded-xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-[14px] text-red-600">
-                  {decodeURIComponent(props.queryError)}
+                  {userFacingAuthError(
+                    (() => {
+                      try {
+                        return decodeURIComponent(props.queryError);
+                      } catch {
+                        return props.queryError;
+                      }
+                    })()
+                  )}
                 </p>
               ) : null}
 
@@ -735,9 +788,7 @@ export function RegisterClient(props: {
                               ? "bg-gradient-to-b from-green-500 to-green-600 text-white"
                               : "bg-gray-100 text-gray-400"
                         }`}
-                        style={{
-                          animation: registrationStep === step ? "pulse 2s ease-in-out infinite" : "none",
-                        }}
+                        style={{ animation: "none" }}
                       >
                         {registrationStep > step ? (
                           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" style={{ animation: "checkmark 0.3s ease-out" }}>
@@ -789,7 +840,7 @@ export function RegisterClient(props: {
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
                         placeholder="Dr. med. dent. Max Mustermann"
-                        className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                     </div>
@@ -803,13 +854,12 @@ export function RegisterClient(props: {
                         type="email"
                         value={regEmail}
                         onChange={(e) => {
-                          const v = e.target.value;
-                          setRegEmail(v);
-                          if (!regEmailConfirmDirty) setRegEmailConfirm(v);
+                          setRegEmail(e.target.value);
+                          setEmailPairError("");
                         }}
                         placeholder="max.mustermann@praxis.de"
                         autoComplete="email"
-                        className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                       {emailCheckStatus !== "idle" ? (
@@ -846,9 +896,9 @@ export function RegisterClient(props: {
                                 appliedSuggested: emailTypoSuggestion.suggested,
                               });
                               setRegEmail(emailTypoSuggestion.suggested);
-                              setRegEmailConfirm(emailTypoSuggestion.suggested);
-                              setRegEmailConfirmDirty(false);
                               setEmailTypoSuggestion(null);
+                              setRegEmailConfirmDirty(true);
+                              setEmailPairError("");
                             }}
                             className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-semibold text-amber-900 transition-colors hover:bg-amber-100"
                           >
@@ -889,14 +939,18 @@ export function RegisterClient(props: {
                         onChange={(e) => {
                           setRegEmailConfirmDirty(true);
                           setRegEmailConfirm(e.target.value);
+                          setEmailPairError("");
                         }}
                         placeholder="E-Mail-Adresse erneut eingeben"
-                        autoComplete="email"
-                        className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        autoComplete="off"
+                        name="email_confirm_register"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
-                      {regEmailConfirm && !emailMatches ? (
-                        <p className="mt-2 text-[12px] text-red-600">
+                      {emailPairError ? (
+                        <p className="mt-2 text-[12px] text-amber-800">{emailPairError}</p>
+                      ) : regEmailConfirm && !emailMatches ? (
+                        <p className="mt-2 text-[12px] text-amber-800">
                           Die E-Mail-Adressen stimmen nicht überein.
                         </p>
                       ) : null}
@@ -914,7 +968,7 @@ export function RegisterClient(props: {
                         placeholder="Mindestens 8 Zeichen"
                         autoComplete="new-password"
                         minLength={8}
-                        className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
 
@@ -944,6 +998,7 @@ export function RegisterClient(props: {
                         emailCheckStatus === "taken" ||
                         emailCheckStatus === "invalid" ||
                         emailCheckStatus === "checking" ||
+                        !normalizeEmail(regEmailConfirm) ||
                         !emailMatches
                       }
                       className="mt-8 h-[56px] w-full rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
@@ -979,7 +1034,7 @@ export function RegisterClient(props: {
                         value={regPractice}
                         onChange={(e) => setRegPractice(e.target.value)}
                         placeholder="Zahnarztpraxis Mustermann"
-                        className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                     </div>
@@ -994,7 +1049,7 @@ export function RegisterClient(props: {
                         value={regLicense}
                         onChange={(e) => setRegLicense(e.target.value)}
                         placeholder="Z-12345678"
-                        className="h-[52px] w-full rounded-xl border border-gray-200 bg-white px-4 text-[15px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                       {licenseFormatHint ? (
@@ -1039,6 +1094,11 @@ export function RegisterClient(props: {
                     <p className="text-[13px] text-gray-500">
                       Bitte verifizieren Sie Ihre Zahnarzt-Zulassung
                     </p>
+                    {props.licenseStepOptional ? (
+                      <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-gray-500">
+                        Demo: Sie können ohne Upload fortfahren — die Dokumente können Sie später nachreichen.
+                      </p>
+                    ) : null}
                   </div>
 
                   <form onSubmit={onStep3Submit} className="space-y-5">
@@ -1085,7 +1145,11 @@ export function RegisterClient(props: {
                                   {(licenseFrontFile.size / 1024 / 1024).toFixed(2)} MB
                                 </p>
                                 {frontQualityOk !== null ? (
-                                  <p className={`mt-2 text-[12px] font-medium ${frontQualityOk ? "text-green-700" : "text-red-700"}`}>
+                                  <p
+                                    className={`mt-2 text-[12px] font-medium ${
+                                      frontQualityOk ? "text-green-700" : "text-amber-800"
+                                    }`}
+                                  >
                                     {frontQualityHint}
                                   </p>
                                 ) : null}
@@ -1157,7 +1221,11 @@ export function RegisterClient(props: {
                                   {(licenseBackFile.size / 1024 / 1024).toFixed(2)} MB
                                 </p>
                                 {backQualityOk !== null ? (
-                                  <p className={`mt-2 text-[12px] font-medium ${backQualityOk ? "text-green-700" : "text-red-700"}`}>
+                                  <p
+                                    className={`mt-2 text-[12px] font-medium ${
+                                      backQualityOk ? "text-green-700" : "text-amber-800"
+                                    }`}
+                                  >
                                     {backQualityHint}
                                   </p>
                                 ) : null}
@@ -1190,7 +1258,13 @@ export function RegisterClient(props: {
                         </div>
                       </div>
                       {licenseUploadError ? (
-                        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+                        <p
+                          className={`mt-3 rounded-lg border px-3 py-2 text-[12px] ${
+                            licenseUploadError.startsWith("Hinweis:")
+                              ? "border-amber-200 bg-amber-50 text-amber-900"
+                              : "border-red-200 bg-red-50 text-red-700"
+                          }`}
+                        >
                           {licenseUploadError}
                         </p>
                       ) : null}
@@ -1289,7 +1363,7 @@ export function RegisterClient(props: {
                     </p>
                     <div className="mb-4 flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-[15px] font-semibold text-gray-900">SmileScan (SaaS)</p>
+                        <p className="text-[15px] font-semibold text-gray-900">Your Dentist (Plattform)</p>
                         <p className="mt-0.5 text-[12px] text-gray-600">
                           Abrechnung: <span className="font-medium text-gray-900">{plans[selectedPlan].billing}</span>
                         </p>
@@ -1416,7 +1490,7 @@ export function RegisterClient(props: {
                         className="mt-1 h-4 w-4"
                       />
                       <span>
-                        Ich verlange ausdrücklich, dass SmileScan vor Ablauf der Widerrufsfrist mit der Leistung
+                        Ich verlange ausdrücklich, dass Your Dentist vor Ablauf der Widerrufsfrist mit der Leistung
                         beginnt, und bestätige, dass ich dadurch mein Widerrufsrecht verlieren kann. *
                       </span>
                     </label>
@@ -1457,6 +1531,13 @@ export function RegisterClient(props: {
                       <input type="hidden" name="invite_token" value={props.inviteToken} />
                     ) : null}
 
+                    {props.skipPaymentAtSignup ? (
+                      <p className="text-center text-[11px] leading-relaxed text-gray-500">
+                        Ihr gewählter Plan wird mit dem Konto verknüpft. Online-Zahlung (Stripe) ist aktuell
+                        deaktiviert — Sie können den Zugang dennoch starten.
+                      </p>
+                    ) : null}
+
                     <div className="flex gap-3">
                       <button
                         type="button"
@@ -1465,37 +1546,48 @@ export function RegisterClient(props: {
                       >
                         Zurück
                       </button>
-                      <button
-                        type="submit"
-                        disabled={!acceptedTos || !acceptedPrivacy || !acceptedWithdrawal || !licenseStoragePath}
+                      <RegisterFormSubmitButton
+                        label={
+                          props.skipPaymentAtSignup ? "Registrierung abschließen" : "Zahlungspflichtig bestellen"
+                        }
+                        pendingLabel="Wird gesendet…"
+                        disabled={
+                          !acceptedTos ||
+                          !acceptedPrivacy ||
+                          !acceptedWithdrawal ||
+                          !registrationDocsSatisfied
+                        }
                         className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                        style={{
-                          background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
-                        }}
-                      >
-                        Zahlungspflichtig bestellen
-                      </button>
+                      />
                     </div>
 
-                    {props.registrationDemoUi ? (
+                    {props.registrationDemoUi && !props.skipPaymentAtSignup ? (
                       <div
                         className="rounded-2xl border border-dashed border-amber-300/90 bg-amber-50/80 p-4"
                         role="region"
                         aria-label="Demo-Registrierung ohne Zahlung"
                       >
                         <p className="mb-3 text-[12px] leading-relaxed text-amber-950">
-                          Demo: Plan und Zahlungsarten bleiben wie im Live-Produkt sichtbar. Hier können Sie die
-                          Registrierung ohne Stripe-Checkout abschließen (nur wenn der Server den Demo-Modus erlaubt).
+                          Demo: Registrierung ohne Stripe-Checkout abschließen (nur wenn der Server den Demo-Modus
+                          erlaubt).
                         </p>
-                        <button
-                          type="submit"
+                        <RegisterFormSubmitButton
                           name="registration_demo_skip"
                           value="1"
-                          disabled={!acceptedTos || !acceptedPrivacy || !acceptedWithdrawal || !licenseStoragePath}
+                          label="Registrierung abschließen (Demo, ohne Zahlung)"
+                          pendingLabel="Wird gesendet…"
+                          disabled={
+                            !acceptedTos ||
+                            !acceptedPrivacy ||
+                            !acceptedWithdrawal ||
+                            !registrationDocsSatisfied
+                          }
                           className="h-[48px] w-full rounded-xl border-2 border-amber-400/80 bg-white text-[14px] font-semibold text-amber-950 shadow-sm transition-all duration-200 active:scale-[0.99] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Registrierung abschließen (Demo, ohne Zahlung)
-                        </button>
+                          style={{ background: "linear-gradient(to bottom, #fffbeb 0%, #ffffff 100%)" }}
+                          pendingStyle={{
+                            background: "linear-gradient(to bottom, #fef9c3 0%, #fef3c7 100%)",
+                          }}
+                        />
                       </div>
                     ) : null}
 
@@ -1511,6 +1603,7 @@ export function RegisterClient(props: {
             </div>
           </div>
         </div>
+      </div>
     </>
   );
 }

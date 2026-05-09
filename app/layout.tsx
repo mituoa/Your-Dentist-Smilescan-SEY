@@ -26,9 +26,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SmileScan — Die fehlende Schicht",
+  title: "Your Dentist — Neutral Practice Platform",
   description:
-    "SmileScan ist die diskrete Brücke zwischen Beobachtung und klinischer Versorgung.",
+    "Your Dentist verbindet Praxisabläufe mit klarer, vertrauenswürdiger Software.",
 };
 
 export default async function RootLayout({

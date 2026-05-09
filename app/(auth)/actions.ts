@@ -10,9 +10,13 @@ import {
   matchesEmergencyLogin,
   syncEmergencyUserToSupabase,
 } from "@/lib/emergency-password-login";
-import { isRegistrationDemoMode } from "@/lib/registration-demo";
+import {
+  isRegistrationDemoMode,
+  shouldEnforceStripeCheckoutAtSignup,
+} from "@/lib/registration-demo";
+import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
-import { getStripePriceIdForInterval, getStripeServer, isStripeCheckoutConfigured } from "@/lib/stripe/server";
+import { getStripePriceIdForInterval, getStripeServer } from "@/lib/stripe/server";
 
 function sanitizeReturnTo(value: string | null | undefined): string | null {
   if (!value || typeof value !== "string") return null;
@@ -45,7 +49,10 @@ export async function signInWithGoogle(formData: FormData) {
 
   if (error || !data.url) {
     const p = new URLSearchParams();
-    p.set("error", error?.message || "Google-Anmeldung ist gerade nicht möglich.");
+    p.set(
+      "error",
+      userFacingAuthError(error?.message || "Google-Anmeldung ist gerade nicht möglich.")
+    );
     if (inviteToken) p.set("invite", inviteToken);
     redirect(`/login?${p.toString()}`);
   }
@@ -70,7 +77,10 @@ export async function signInWithGitHub(formData: FormData) {
 
   if (error || !data.url) {
     const p = new URLSearchParams();
-    p.set("error", error?.message || "GitHub-Anmeldung ist gerade nicht möglich.");
+    p.set(
+      "error",
+      userFacingAuthError(error?.message || "GitHub-Anmeldung ist gerade nicht möglich.")
+    );
     if (inviteToken) p.set("invite", inviteToken);
     redirect(`/login?${p.toString()}`);
   }
@@ -105,7 +115,8 @@ export async function signIn(formData: FormData) {
   if (error && matchesEmergencyLogin(email, password)) {
     const sync = await syncEmergencyUserToSupabase(email, password);
     if (!sync.ok) {
-      redirect(loginQuery(sync.message));
+      console.error("[signIn] emergency sync", sync.message);
+      redirect(loginQuery(userFacingAuthError(sync.message)));
     }
     ({ error } = await supabase.auth.signInWithPassword({
       email,
@@ -114,7 +125,8 @@ export async function signIn(formData: FormData) {
   }
 
   if (error) {
-    redirect(loginQuery(error.message));
+    console.error("[signIn]", error.message);
+    redirect(loginQuery(userFacingAuthError(error.message)));
   }
 
   revalidatePath("/", "layout");
@@ -218,11 +230,12 @@ export async function signUp(formData: FormData) {
   });
 
   if (error) {
+    console.error("[signUp]", error.message);
     const inviteQ = inviteToken
       ? `&invite=${encodeURIComponent(inviteToken)}`
       : "";
     redirect(
-      `/register?error=${encodeURIComponent(error.message)}${inviteQ}`
+      `/register?error=${encodeURIComponent(userFacingAuthError(error.message))}${inviteQ}`
     );
   }
 
@@ -301,64 +314,73 @@ export async function signUp(formData: FormData) {
       const interval = billingInterval as "monthly" | "halfyearly" | "yearly";
       const pm = paymentMethod || "sepa_debit";
 
+      // Stripe Checkout nur wenn ENABLE_STRIPE_CHECKOUT_AT_SIGNUP + vollständige Stripe-Konfiguration (s. lib/registration-demo.ts).
       const skipStripeCheckout =
-        (registrationDemoSkip && isRegistrationDemoMode()) || !isStripeCheckoutConfigured();
+        !shouldEnforceStripeCheckoutAtSignup() ||
+        (registrationDemoSkip && isRegistrationDemoMode());
 
       if (pm === "invoice") {
         // invoice flow handled manually later
       } else if (skipStripeCheckout) {
-        // Demo ohne Checkout / Stripe nicht konfiguriert — Registrierung abschließen ohne Subscription-Redirect
+        // Registrierung ohne Checkout (Standard bis Stripe aktiv geschaltet ist).
       } else {
-        const stripe = getStripeServer();
+        try {
+          const stripe = getStripeServer();
           const priceId = getStripePriceIdForInterval(interval);
 
-        const paymentMethodTypes: Array<"card" | "sepa_debit" | "paypal"> = [];
-        if (pm === "card") paymentMethodTypes.push("card");
-        if (pm === "sepa_debit") paymentMethodTypes.push("sepa_debit");
-        if (pm === "paypal") {
-          // PayPal on Stripe Checkout requires dashboard enablement and eligible account.
-          // We also include card as a safe fallback.
-          paymentMethodTypes.push("card", "paypal");
-        }
-        if (paymentMethodTypes.length === 0) paymentMethodTypes.push("card");
+          const paymentMethodTypes: Array<"card" | "sepa_debit" | "paypal"> = [];
+          if (pm === "card") paymentMethodTypes.push("card");
+          if (pm === "sepa_debit") paymentMethodTypes.push("sepa_debit");
+          if (pm === "paypal") {
+            paymentMethodTypes.push("card", "paypal");
+          }
+          if (paymentMethodTypes.length === 0) paymentMethodTypes.push("card");
 
           const session = await stripe.checkout.sessions.create({
-          mode: "subscription",
-          customer_email: email,
-          line_items: [{ price: priceId, quantity: 1 }],
-          payment_method_types: paymentMethodTypes,
-          allow_promotion_codes: true,
-          subscription_data: {
-            trial_period_days: 14,
+            mode: "subscription",
+            customer_email: email,
+            line_items: [{ price: priceId, quantity: 1 }],
+            payment_method_types: paymentMethodTypes,
+            allow_promotion_codes: true,
+            subscription_data: {
+              trial_period_days: 14,
+              metadata: {
+                workspace_id: membership.workspace_id,
+                user_id: userId,
+              },
+            },
             metadata: {
               workspace_id: membership.workspace_id,
               user_id: userId,
+              billing_interval: interval,
+              payment_method: pm,
             },
-          },
-          metadata: {
-            workspace_id: membership.workspace_id,
-            user_id: userId,
-            billing_interval: interval,
-            payment_method: pm,
-          },
-          success_url: `${origin}/register?success=1&email=${encodeURIComponent(email)}&checkout=success`,
-          cancel_url: `${origin}/register?error=${encodeURIComponent("checkout_cancelled")}&email=${encodeURIComponent(email)}`,
+            success_url: `${origin}/register?success=1&email=${encodeURIComponent(email)}&checkout=success`,
+            cancel_url: `${origin}/register?error=${encodeURIComponent("checkout_cancelled")}&email=${encodeURIComponent(email)}`,
           });
 
           await admin.from("workspace_billing").upsert(
-          {
-            workspace_id: membership.workspace_id,
-            status: "pending",
-            stripe_checkout_session_id: session.id,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "workspace_id" }
+            {
+              workspace_id: membership.workspace_id,
+              status: "pending",
+              stripe_checkout_session_id: session.id,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "workspace_id" }
           );
 
           if (session.url) {
             redirect(session.url);
           }
+        } catch (stripeErr) {
+          const raw = stripeErr instanceof Error ? stripeErr.message : String(stripeErr);
+          console.error("[signUp] Stripe checkout", raw);
+          const inviteQ = inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : "";
+          redirect(
+            `/register?error=${encodeURIComponent(userFacingAuthError(raw))}&email=${encodeURIComponent(email)}${inviteQ}`
+          );
         }
+      }
     }
   }
 
