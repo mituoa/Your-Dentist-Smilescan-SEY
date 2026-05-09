@@ -1,10 +1,17 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronUp, Mic, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronUp, Mic, Sparkles, Stethoscope } from "lucide-react";
 
-/** Minimal intent routing — no backend AI; physician stays in control. */
+import {
+  buildAssistQuickDraft,
+  type AssistQuickActionId,
+} from "@/lib/clinical/message-templates";
+
+import { useAssistCaseOptional } from "./assist-shell";
+
+/** Navigation — nur Seiten öffnen, keine Serveraktion. */
 function suggestRoutes(text: string): { label: string; href: string }[] {
   const t = text.toLowerCase();
   const out: { label: string; href: string }[] = [];
@@ -26,9 +33,20 @@ function suggestRoutes(text: string): { label: string; href: string }[] {
   return out.slice(0, 4);
 }
 
+const INBOX_QUICK: { id: AssistQuickActionId; label: string }[] = [
+  { id: "invite_today", label: "Heute einbestellen" },
+  { id: "pain_followup", label: "Rückfrage Schmerzen" },
+  { id: "appointment_link_text", label: "Terminlink-Text" },
+  { id: "polish_placeholder", label: "Formulierung prüfen" },
+];
+
 export function CommandAssist() {
   const pathname = usePathname();
   const router = useRouter();
+  const assistCtx = useAssistCaseOptional();
+  const inboxCase =
+    assistCtx?.casePayload?.kind === "inbox" ? assistCtx.casePayload : null;
+
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
@@ -38,6 +56,27 @@ export function CommandAssist() {
     pathname.startsWith("/settings") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/login");
+
+  const draftParams = useMemo(
+    () =>
+      inboxCase
+        ? {
+            patientName: inboxCase.patientName || "Patient",
+            urgency: (inboxCase.urgency as "today" | "this_week" | "not_urgent") || null,
+            practicePhone: inboxCase.practicePhone || "",
+            appointmentUrl: inboxCase.appointmentUrl,
+          }
+        : null,
+    [inboxCase]
+  );
+
+  const applyQuickDraft = useCallback(
+    (id: AssistQuickActionId) => {
+      if (!draftParams) return;
+      setText(buildAssistQuickDraft(id, draftParams));
+    },
+    [draftParams]
+  );
 
   const startDictation = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -96,49 +135,91 @@ export function CommandAssist() {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-0 right-0 z-[45] flex flex-col items-end gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-6"
+      className="pointer-events-none fixed bottom-0 right-0 z-[45] flex flex-col items-end gap-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-8"
       aria-live="polite"
     >
       <div
         id="command-assist-panel"
-        className={`pointer-events-auto max-w-[min(100vw-2rem,380px)] overflow-hidden rounded-xl border border-border/90 bg-surface-card/95 shadow-sm backdrop-blur-md transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none dark:border-border/60 dark:shadow-[0_1px_0_rgb(255_255_255/0.04)] ${
+        className={`pointer-events-auto w-[min(100vw-1.5rem,460px)] overflow-hidden rounded-2xl border border-border/70 bg-surface-card/88 shadow-[0_20px_50px_-18px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-[opacity,transform,box-shadow] duration-300 ease-out motion-reduce:transition-none dark:border-border/50 dark:bg-surface-card/90 dark:shadow-[0_24px_48px_-20px_rgba(0,0,0,0.55)] ${
           open
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-1 opacity-0"
+            : "pointer-events-none translate-y-2 opacity-0"
         }`}
       >
-        <div className="border-b border-border/80 px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-tertiary">
-            ⌘ Assist
-          </p>
-          <p className="mt-1 text-[13px] leading-snug text-text-secondary">
-            Befehle oder Diktat — Vorschläge öffnen nur Seiten.{" "}
-            <span className="font-medium text-text-primary">Keine automatische Aktion.</span>
-          </p>
+        <div className="border-b border-border/60 px-5 py-4 sm:px-6 sm:py-5">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/12 text-brand">
+              <Stethoscope className="h-5 w-5" strokeWidth={1.75} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold tracking-wide text-text-primary">
+                Praxisassistent
+              </p>
+              <p className="mt-1 text-[13px] leading-relaxed text-text-secondary">
+                Entwürfe und Spracheingabe — nur Vorbereitung.{" "}
+                <span className="font-medium text-text-primary">Kein automatischer Versand.</span>
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="p-3">
+
+        <div className="space-y-4 px-5 py-4 sm:px-6 sm:py-5">
+          {inboxCase && draftParams ? (
+            <div className="rounded-xl border border-border/50 bg-surface-page/50 px-3 py-3 dark:bg-surface-sunken/40">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-text-tertiary">
+                Aktueller Fall
+              </p>
+              <p className="mt-1 truncate text-[14px] font-medium text-text-primary">
+                {inboxCase.patientName || "Patient"}
+              </p>
+              {inboxCase.concernLine ? (
+                <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-text-secondary">
+                  {inboxCase.concernLine}
+                </p>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {INBOX_QUICK.map((q) => (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => applyQuickDraft(q.id)}
+                    className="min-h-9 rounded-full border border-border/80 bg-surface-card/90 px-3.5 py-1.5 text-left text-[12px] font-medium text-text-secondary transition hover:border-brand/35 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+                  >
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={3}
-            placeholder="z. B. „Neuer Fall“ oder „Relay Aufgabe“…"
-            className="mb-2 w-full resize-none rounded-lg border border-border bg-surface-card px-3 py-2.5 text-[14px] text-text-primary shadow-sm outline-none placeholder:text-text-tertiary focus:border-brand/40 focus:ring-2 focus:ring-brand/15"
+            rows={5}
+            placeholder={
+              inboxCase
+                ? "Entwurf bearbeiten oder Diktat nutzen …"
+                : "z. B. „Neuer Fall“ oder „Relay“ …"
+            }
+            className="w-full resize-none rounded-xl border border-border/80 bg-surface-card/95 px-4 py-3.5 text-[15px] leading-relaxed text-text-primary shadow-inner outline-none placeholder:text-text-tertiary focus:border-brand/40 focus:ring-2 focus:ring-brand/12"
           />
+
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={startDictation}
               disabled={listening}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-page px-3 text-[13px] font-medium text-text-secondary transition hover:bg-surface-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 disabled:opacity-50"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/80 bg-surface-page/90 px-4 text-[14px] font-medium text-text-secondary transition hover:bg-surface-card hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 disabled:opacity-50"
             >
               <Mic className="h-4 w-4" strokeWidth={1.75} />
-              {listening ? "Hört zu…" : "Diktat"}
+              {listening ? "Hört zu …" : "Diktat"}
             </button>
           </div>
+
           {hints.length > 0 ? (
-            <div className="mt-3 space-y-1.5 border-t border-border/80 pt-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
-                Vorschläge
+            <div className="space-y-2 border-t border-border/60 pt-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
+                Navigation
               </p>
               {hints.map((h) => (
                 <button
@@ -148,10 +229,10 @@ export function CommandAssist() {
                     router.push(h.href);
                     setOpen(false);
                   }}
-                  className="flex w-full min-h-10 items-center justify-between rounded-lg border border-border/80 bg-surface-page/90 px-3 py-2 text-left text-[13px] font-medium text-text-primary transition hover:border-brand/30 hover:bg-surface-card"
+                  className="flex w-full min-h-11 items-center justify-between rounded-xl border border-border/70 bg-surface-page/80 px-4 py-2.5 text-left text-[14px] font-medium text-text-primary transition hover:border-brand/30 hover:bg-surface-card"
                 >
                   <span className="flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-brand" strokeWidth={1.75} />
+                    <Sparkles className="h-4 w-4 text-brand" strokeWidth={1.75} />
                     {h.label}
                   </span>
                   <span className="text-text-tertiary">→</span>
@@ -165,14 +246,16 @@ export function CommandAssist() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="pointer-events-auto flex min-h-12 items-center gap-2 rounded-full border border-border/90 bg-surface-card/95 px-4 py-2.5 text-[13px] font-semibold text-text-primary shadow-sm backdrop-blur-md transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+        className="pointer-events-auto flex min-h-[52px] items-center gap-2.5 rounded-full border border-border/80 bg-surface-card/92 px-5 py-3 text-[14px] font-semibold text-text-primary shadow-[0_12px_32px_-16px_rgba(15,23,42,0.35)] backdrop-blur-xl transition hover:shadow-[0_16px_40px_-14px_rgba(15,23,42,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 dark:shadow-[0_12px_36px_-12px_rgba(0,0,0,0.65)]"
         aria-expanded={open}
         aria-controls="command-assist-panel"
       >
-        <span className="text-text-tertiary">⌘</span>
-        Assist
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/12 text-brand">
+          <Stethoscope className="h-4 w-4" strokeWidth={1.75} />
+        </span>
+        <span className="text-text-primary">Assist</span>
         <ChevronUp
-          className={`h-4 w-4 text-text-tertiary transition-transform duration-200 ${open ? "" : "rotate-180"}`}
+          className={`h-4 w-4 text-text-tertiary transition-transform duration-300 ${open ? "" : "rotate-180"}`}
         />
       </button>
     </div>

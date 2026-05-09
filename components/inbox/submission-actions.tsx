@@ -1,12 +1,9 @@
-import { pilotGlassPanel } from "@/lib/pilot-surface";
-import type { TaskItem } from "@/lib/queries/submissions";
-import type { AssignableMember } from "@/lib/queries/team-members";
+import Link from "next/link";
 
 import { AppointmentLinkButton } from "./appointment-link-button";
 import { FollowUpMessageDraft } from "./follow-up-message-draft";
-import { TaskForm } from "./task-form";
-import { TaskList } from "./task-list";
 import { SubmissionMeta } from "./submission-meta";
+
 interface SubmissionActionsProps {
   submissionId: string;
   patientName: string | null;
@@ -20,14 +17,18 @@ interface SubmissionActionsProps {
   seenAt?: string | null;
   updatedAt?: string | null;
   photoCount?: number;
-  tasks: TaskItem[];
-  assignableMembers: AssignableMember[];
-  canCheckOff: boolean;
+  /** @deprecated Nur Relay — nicht verwenden. */
+  tasks?: unknown;
+  assignableMembers?: unknown;
+  canCheckOff?: boolean;
   canSendAppointmentLink: boolean;
   practicePhone?: string | null;
   appointmentUrl?: string | null;
 }
 
+/**
+ * Rechte Spalte im Tracker: Korrespondenz, Terminlink, Fallkontext — ohne Aufgaben (die gehören zu Relay).
+ */
 export function SubmissionActions({
   submissionId,
   patientName,
@@ -41,62 +42,58 @@ export function SubmissionActions({
   seenAt,
   updatedAt,
   photoCount,
-  tasks,
-  assignableMembers,
-  canCheckOff,
   canSendAppointmentLink,
   practicePhone,
   appointmentUrl,
 }: SubmissionActionsProps) {
   return (
-    <div className="space-y-4 sm:space-y-5">
-      <FollowUpMessageDraft
-        patientName={patientName}
-        urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
-        practicePhone={practicePhone ?? null}
-        appointmentUrl={appointmentUrl ?? null}
-      />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="px-6 pb-8 pt-8 sm:px-8 sm:pt-10">
+        <p
+          className="mb-6 text-[11px] font-semibold uppercase tracking-[0.12em]"
+          style={{ color: "#94A3B8" }}
+        >
+          Kommunikation
+        </p>
+        <FollowUpMessageDraft
+          patientName={patientName}
+          urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
+          practicePhone={practicePhone ?? null}
+          appointmentUrl={appointmentUrl ?? null}
+        />
+      </div>
 
-      <section className={`p-4 sm:p-5 ${pilotGlassPanel}`}>
-        <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
-          Nächster Schritt
-        </h3>
-        <p className="mb-4 text-sm leading-5 text-text-secondary">
-          Wählen Sie den nächsten Schritt für diesen Fall.
+      <div
+        className="border-t px-6 py-8 sm:px-8"
+        style={{ borderColor: "rgba(226, 232, 240, 0.85)" }}
+      >
+        <p
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
+          style={{ color: "#94A3B8" }}
+        >
+          Terminvereinbarung
+        </p>
+        <p className="mb-5 text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
+          Senden Sie dem Patienten auf Wunsch den Online-Terminlink per E-Mail. Die Praxis bleibt
+          datenschutzkonform in der Kontrolle.
         </p>
         <AppointmentLinkButton
           submissionId={submissionId}
           hasPatientEmail={!!patientEmail}
           canSend={canSendAppointmentLink}
         />
-      </section>
+      </div>
 
-      <section className={`p-4 sm:p-5 ${pilotGlassPanel}`}>
-        <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
-          Aufgaben
-        </h3>
-        <p className="mb-4 text-sm leading-5 text-text-secondary">
-          Offene Aufgaben zuerst, danach Bestätigungen und erledigte Einträge.
+      <div
+        className="border-t px-6 py-8 sm:px-8"
+        style={{ borderColor: "rgba(226, 232, 240, 0.85)" }}
+      >
+        <p
+          className="mb-5 text-[11px] font-semibold uppercase tracking-[0.12em]"
+          style={{ color: "#94A3B8" }}
+        >
+          Fallkontext
         </p>
-        <div className="space-y-4 sm:space-y-5">
-          <TaskForm
-            submissionId={submissionId}
-            assignableMembers={assignableMembers}
-          />
-          <div className="border-t border-border/80 pt-4">
-            <TaskList
-              tasks={tasks}
-              canCheckOff={canCheckOff}
-              submissionId={submissionId}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className={`p-4 sm:p-5 ${pilotGlassPanel}`}>
-        <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
-          Details
-        </h3>
         <SubmissionMeta
           patientName={patientName}
           patientEmail={patientEmail}
@@ -110,7 +107,14 @@ export function SubmissionActions({
           updatedAt={updatedAt}
           photoCount={photoCount}
         />
-      </section>
+        <p className="mt-8 text-[13px] leading-relaxed text-text-tertiary">
+          Teamaufgaben und Delegation werden in{" "}
+          <Link href="/relay" className="font-medium text-brand underline-offset-2 hover:underline">
+            Relay
+          </Link>{" "}
+          geführt — getrennt vom Patienten-Intake hier im Tracker.
+        </p>
+      </div>
     </div>
   );
 }

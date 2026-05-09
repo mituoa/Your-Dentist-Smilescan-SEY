@@ -11,7 +11,7 @@ import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
 import { Plus } from "lucide-react";
-import { CommandAssist } from "@/components/command-assist/command-assist";
+import { AssistShell } from "@/components/command-assist/assist-shell";
 
 export default async function ProtectedLayout({
   children,
@@ -83,6 +83,7 @@ export default async function ProtectedLayout({
   const profileData = headerState.profileData;
 
   return (
+    <AssistShell>
     <div
       className="flex min-h-screen flex-col bg-gradient-to-br from-surface-page via-surface-page to-surface-sunken/40 max-md:max-h-[100dvh] max-md:overflow-hidden"
     >
@@ -161,7 +162,7 @@ export default async function ProtectedLayout({
         </div>
       </div>
 
-      <CommandAssist />
     </div>
+    </AssistShell>
   );
 }

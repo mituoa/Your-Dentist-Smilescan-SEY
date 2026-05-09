@@ -114,7 +114,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
 
         {/* RIGHT DETAIL PANE */}
         <section
-          className="min-h-0 min-w-0 flex-1 overflow-hidden max-md:min-h-[50vh]"
+          className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden max-md:min-h-[50vh] md:h-full"
           style={{ background: "#FFFFFF" }}
         >
           {children}
