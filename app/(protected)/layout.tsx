@@ -63,7 +63,9 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div
+      className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50 max-md:max-h-[100dvh] max-md:overflow-hidden"
+    >
       {/* Mobile nav at top */}
       <MobileNav
         role={role}
@@ -73,7 +75,7 @@ export default async function ProtectedLayout({
         initialTheme={theme}
       />
 
-      <div className="flex">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         {/* Desktop sidebar (hidden on mobile) */}
         <Sidebar
           role={role}
@@ -82,7 +84,7 @@ export default async function ProtectedLayout({
           myTasksOverdueCount={myTasksOverdueCount}
         />
 
-        <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex min-h-0 flex-1 flex-col md:min-h-screen">
           {/* Topbar (dashboard-style) */}
           <header
             className="sticky top-0 z-30 hidden bg-white/80 backdrop-blur-xl md:block"

@@ -28,16 +28,19 @@ export function MobileNav({
 
   useEffect(() => {
     if (!open) return;
-    const prevOverflow = document.body.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
     };
   }, [open]);
 
   return (
     <>
-      <div className="flex h-14 items-center justify-between gap-2 border-b border-white/45 bg-white/78 px-4 backdrop-blur-xl md:hidden">
+      <div className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/45 bg-white/78 px-4 backdrop-blur-xl md:hidden">
         <BrandMark compact />
         <div className="flex items-center gap-2">
           <ThemeToggle initialTheme={initialTheme} />

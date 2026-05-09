@@ -10,6 +10,7 @@ import {
   matchesEmergencyLogin,
   syncEmergencyUserToSupabase,
 } from "@/lib/emergency-password-login";
+import { isRegistrationDemoMode } from "@/lib/registration-demo";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 import { getStripePriceIdForInterval, getStripeServer, isStripeCheckoutConfigured } from "@/lib/stripe/server";
 
@@ -182,6 +183,8 @@ export async function signUp(formData: FormData) {
   const dentistLicenseStoragePathBack =
     (formData.get("dentist_license_storage_path_back") as string | null)?.trim() || null;
   const paymentMethod = (formData.get("payment_method") as string | null)?.trim() || null;
+  const registrationDemoSkip =
+    (formData.get("registration_demo_skip") as string | null)?.trim() === "1";
 
   if (!email || !password) {
     redirect(
@@ -298,14 +301,15 @@ export async function signUp(formData: FormData) {
       const interval = billingInterval as "monthly" | "halfyearly" | "yearly";
       const pm = paymentMethod || "sepa_debit";
 
+      const skipStripeCheckout =
+        (registrationDemoSkip && isRegistrationDemoMode()) || !isStripeCheckoutConfigured();
+
       if (pm === "invoice") {
         // invoice flow handled manually later
+      } else if (skipStripeCheckout) {
+        // Demo ohne Checkout / Stripe nicht konfiguriert — Registrierung abschließen ohne Subscription-Redirect
       } else {
-        // If Stripe isn't configured yet, we just finish signup and let billing be set up later.
-        if (!isStripeCheckoutConfigured()) {
-          // no-op
-        } else {
-          const stripe = getStripeServer();
+        const stripe = getStripeServer();
           const priceId = getStripePriceIdForInterval(interval);
 
         const paymentMethodTypes: Array<"card" | "sepa_debit" | "paypal"> = [];
@@ -355,7 +359,6 @@ export async function signUp(formData: FormData) {
             redirect(session.url);
           }
         }
-      }
     }
   }
 

@@ -22,6 +22,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   const success = params.success === "1";
   const fromPricing = params.from?.trim() === "pricing";
 
+  const demoUiRaw = (process.env.NEXT_PUBLIC_REGISTRATION_DEMO_MODE ?? "").trim().toLowerCase();
+  const registrationDemoUi = demoUiRaw === "true" || demoUiRaw === "1";
+
   const loginHref = (() => {
     if (inviteToken) {
       const q = `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`;
@@ -41,6 +44,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         queryError={queryError}
         success={success}
         loginHref={loginHref}
+        registrationDemoUi={registrationDemoUi}
       />
       <div className="pb-10 text-center text-[13px] text-gray-500">
         Schon ein Konto?{" "}

@@ -14,8 +14,12 @@ Set **exact key names** (case-sensitive):
 | `ADMIN_GITHUB_USERNAMES` | Optional: comma-separated GitHub logins (same bypass), e.g. `mituoa` |
 | `AUTH_RELAX_MODE` | **Nur Demos:** `true` = E-Mail-Bestätigung + Freischaltung aus; Demo-Workspace wenn leer (braucht Service Role) |
 | `EMERGENCY_PASSWORD_LOGIN_ENABLED` | `true` + `EMERGENCY_LOGIN_EMAIL` + `EMERGENCY_LOGIN_PASSWORD` = festes Login ohne OAuth (setzt/löscht Passwort in Supabase per Service Role) |
+| `NEXT_PUBLIC_REGISTRATION_DEMO_MODE` | **Nur Demos:** `true` = auf `/register` (Schritt 4) zweiter Button „Registrierung ohne Zahlung“ anzeigen |
+| `REGISTRATION_DEMO_MODE` | **Nur Demos:** `true` = Server akzeptiert diesen Button und überspringt Stripe-Checkout; ohne diese Variable bleibt der Checkout-Schutz aktiv |
 
 Use **either** the new `sb_*` pair **or** the legacy `eyJ…` pair for anon + service_role — do not mix publishable with a mismatched secret.
+
+Für **Demo-Registrierung ohne Stripe** beide auf `true` setzen, nach Tests wieder entfernen oder `false`.
 
 After any change: **Deploys → Trigger deploy → Clear cache and deploy site**.
 

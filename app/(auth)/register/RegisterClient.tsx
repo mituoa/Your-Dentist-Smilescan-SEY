@@ -26,6 +26,8 @@ export function RegisterClient(props: {
   queryError?: string;
   success?: boolean;
   loginHref?: string;
+  /** Zeigt zweiten Submit „ohne Stripe“ (wirksam nur mit REGISTRATION_DEMO_MODE am Server). */
+  registrationDemoUi?: boolean;
 }) {
   const loginBackHref = props.loginHref ?? "/login";
   const plan = coercePlan(props.initialPlan);
@@ -1474,6 +1476,29 @@ export function RegisterClient(props: {
                         Zahlungspflichtig bestellen
                       </button>
                     </div>
+
+                    {props.registrationDemoUi ? (
+                      <div
+                        className="rounded-2xl border border-dashed border-amber-300/90 bg-amber-50/80 p-4"
+                        role="region"
+                        aria-label="Demo-Registrierung ohne Zahlung"
+                      >
+                        <p className="mb-3 text-[12px] leading-relaxed text-amber-950">
+                          Demo: Plan und Zahlungsarten bleiben wie im Live-Produkt sichtbar. Hier können Sie die
+                          Registrierung ohne Stripe-Checkout abschließen (nur wenn der Server den Demo-Modus erlaubt).
+                        </p>
+                        <button
+                          type="submit"
+                          name="registration_demo_skip"
+                          value="1"
+                          disabled={!acceptedTos || !acceptedPrivacy || !acceptedWithdrawal || !licenseStoragePath}
+                          className="h-[48px] w-full rounded-xl border-2 border-amber-400/80 bg-white text-[14px] font-semibold text-amber-950 shadow-sm transition-all duration-200 active:scale-[0.99] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Registrierung abschließen (Demo, ohne Zahlung)
+                        </button>
+                      </div>
+                    ) : null}
+
                     <p className="text-center text-[11px] text-gray-500">
                       Sie wählen: <span className="font-medium text-gray-900">{plans[selectedPlan].label}</span>{" "}
                       · {plans[selectedPlan].billing}
