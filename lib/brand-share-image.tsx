@@ -2,7 +2,8 @@ import { ImageResponse } from "next/og";
 
 import { SITE_DESCRIPTION } from "@/lib/site-metadata";
 
-function BrandMarkCard({ size }: { size: number }) {
+/** Rounded mark card used in favicon, Apple touch, and OG artwork (Your Dentist smile mark). */
+export function BrandMarkCard({ size }: { size: number }) {
   const r = Math.round(size * 0.19);
   const inner = Math.round(size * 0.78);
   return (
@@ -137,6 +138,7 @@ export function openGraphBrandImageResponse() {
   );
 }
 
+/** Apple touch / PWA: centered mark with safe padding for iOS squircle mask. */
 export function appleTouchBrandImageResponse() {
   return new ImageResponse(
     (
@@ -147,14 +149,56 @@ export function appleTouchBrandImageResponse() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(160deg, #FFFFFF 0%, #E3F3EC 100%)",
+          background: "linear-gradient(160deg, #FFFFFF 0%, #E8F5EF 55%, #E3F3EC 100%)",
           fontFamily:
             'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         }}
       >
-        <BrandMarkCard size={128} />
+        <BrandMarkCard size={132} />
       </div>
     ),
     { width: 180, height: 180 }
+  );
+}
+
+/** Small raster favicon (tabs); matches brand mark. */
+export function faviconBrandImageResponse() {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#FFFFFF",
+        }}
+      >
+        <BrandMarkCard size={26} />
+      </div>
+    ),
+    { width: 32, height: 32 }
+  );
+}
+
+/** Optional 16×16 for legacy `<link sizes="16x16">`; browsers scale 32 well — kept for spec parity. */
+export function favicon16BrandImageResponse() {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#FFFFFF",
+        }}
+      >
+        <BrandMarkCard size={13} />
+      </div>
+    ),
+    { width: 16, height: 16 }
   );
 }

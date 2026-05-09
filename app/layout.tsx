@@ -3,7 +3,12 @@ import { cookies } from "next/headers";
 import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 
 import { getAppBaseUrl } from "@/lib/env";
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_TITLE_TEMPLATE } from "@/lib/site-metadata";
+import {
+  SITE_DESCRIPTION,
+  SITE_OG_IMAGE_ALT,
+  SITE_TITLE,
+  SITE_TITLE_TEMPLATE,
+} from "@/lib/site-metadata";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 
 import "./globals.css";
@@ -29,7 +34,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppBaseUrl()),
-  applicationName: "Your Dentist",
+  applicationName: SITE_TITLE,
   title: {
     default: SITE_TITLE,
     template: SITE_TITLE_TEMPLATE,
@@ -45,11 +50,20 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
+    icon: [
+      { url: "/favicon-16", sizes: "16x16", type: "image/png" },
+      { url: "/icon", sizes: "32x32", type: "image/png" },
+      {
+        url: "/brand/your-dentist/logo-mark.svg",
+        type: "image/svg+xml",
+        sizes: "any",
+      },
+    ],
     apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,
-    title: "Your Dentist",
+    title: SITE_TITLE,
     statusBarStyle: "default",
   },
   openGraph: {
@@ -59,11 +73,28 @@ export const metadata: Metadata = {
     url: "/",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: SITE_OG_IMAGE_ALT,
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/twitter-image",
+        width: 1200,
+        height: 630,
+        alt: SITE_OG_IMAGE_ALT,
+      },
+    ],
   },
   robots: {
     index: true,

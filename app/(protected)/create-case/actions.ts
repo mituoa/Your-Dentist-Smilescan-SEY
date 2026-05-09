@@ -7,6 +7,54 @@ import { getCurrentWorkspace } from "@/lib/auth-helpers";
 
 export type PracticeCaseUrgency = "not_urgent" | "this_week" | "today" | null;
 
+const URGENCY_LABEL_DE: Record<NonNullable<PracticeCaseUrgency>, string> = {
+  not_urgent: "Nicht dringend",
+  this_week: "Diese Woche",
+  today: "Heute",
+};
+
+function looksLikeMissingCaseColumnsError(
+  err: { message?: string; code?: string } | null
+): boolean {
+  if (!err) return false;
+  const msg = (err.message ?? "").toLowerCase();
+  const code = err.code;
+  return (
+    code === "42703" ||
+    (msg.includes("column") &&
+      (msg.includes("patient_birth_date") ||
+        msg.includes("patient_external_id") ||
+        msg.includes("urgency") ||
+        msg.includes("is_draft")))
+  );
+}
+
+function mergeCaseFieldsIntoNotes(
+  baseNotes: string | null,
+  opts: {
+    birth: string | null;
+    externalId: string | null;
+    urgency: PracticeCaseUrgency;
+    isDraft: boolean;
+  }
+): string | null {
+  const lines: string[] = [];
+  const trimmed = (baseNotes || "").trim();
+  if (trimmed) lines.push(trimmed);
+  const meta: string[] = [];
+  if (opts.birth) meta.push(`Geburtsdatum: ${opts.birth}`);
+  if (opts.externalId) meta.push(`Patienten-ID: ${opts.externalId}`);
+  if (opts.urgency) {
+    meta.push(`Dringlichkeit: ${URGENCY_LABEL_DE[opts.urgency]}`);
+  }
+  if (opts.isDraft) meta.push("Status: Entwurf");
+  if (meta.length) {
+    lines.push(`\n—\n${meta.join("\n")}`);
+  }
+  const out = lines.join("").trim();
+  return out.length > 0 ? out : null;
+}
+
 export async function createPracticeCase(input: {
   patientName: string;
   patientBirthDate: string | null;
@@ -53,7 +101,9 @@ export async function createPracticeCase(input: {
     return { error: "Nicht angemeldet." };
   }
 
-  const { data: inserted, error: insertError } = await supabase
+  let insertedRow: { id: string } | null = null;
+
+  const fullInsert = await supabase
     .from("submissions")
     .insert({
       workspace_id: workspaceId,
@@ -69,25 +119,45 @@ export async function createPracticeCase(input: {
     .select("id")
     .single();
 
-  if (insertError || !inserted?.id) {
-    console.error("[createPracticeCase] insert", insertError);
-    const msg = (insertError?.message ?? "").toLowerCase();
-    const code = insertError?.code;
-    const looksLikeMissingCaseColumns =
-      code === "42703" ||
-      (msg.includes("column") &&
-        (msg.includes("patient_birth_date") ||
-          msg.includes("patient_external_id") ||
-          msg.includes("urgency") ||
-          msg.includes("is_draft")));
-    return {
-      error: looksLikeMissingCaseColumns
-        ? "Die Datenbank-Tabelle „submissions“ hat noch nicht alle Felder für „Neuer Fall“. Bitte Migration 023 auf dieser Datenbank ausführen (Spalten Geburtsdatum, Patienten-ID, Dringlichkeit, Entwurf)."
-        : "Fall konnte nicht gespeichert werden.",
-    };
+  if (fullInsert.error || !fullInsert.data?.id) {
+    console.error("[createPracticeCase] insert", fullInsert.error);
+    if (
+      fullInsert.error &&
+      looksLikeMissingCaseColumnsError(fullInsert.error)
+    ) {
+      console.warn(
+        "[createPracticeCase] DB ohne Migration-023-Felder — Fallback mit strukturierten Notizen. Migration 023 ausführen, um Felder nativ zu speichern."
+      );
+      const legacyNotes = mergeCaseFieldsIntoNotes(notesTrim, {
+        birth,
+        externalId: extIdTrim,
+        urgency: input.urgency,
+        isDraft: input.isDraft,
+      });
+      const legacy = await supabase
+        .from("submissions")
+        .insert({
+          workspace_id: workspaceId,
+          patient_name: nameTrim || null,
+          patient_email: null,
+          patient_phone: null,
+          patient_notes: legacyNotes,
+        })
+        .select("id")
+        .single();
+      if (legacy.error || !legacy.data?.id) {
+        console.error("[createPracticeCase] legacy insert", legacy.error);
+        return { error: "Fall konnte momentan nicht erstellt werden." };
+      }
+      insertedRow = { id: legacy.data.id as string };
+    } else {
+      return { error: "Fall konnte momentan nicht erstellt werden." };
+    }
+  } else {
+    insertedRow = { id: fullInsert.data.id as string };
   }
 
-  const submissionId = inserted.id as string;
+  const submissionId = insertedRow.id;
   const admin = createAdminClient();
   const finalPaths: string[] = [];
 
@@ -122,6 +192,9 @@ export async function createPracticeCase(input: {
   revalidatePath("/inbox", "layout");
   revalidatePath("/inbox", "page");
   revalidatePath(`/inbox/${submissionId}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/relay");
+  revalidatePath("/create-case");
 
   return { submissionId };
 }

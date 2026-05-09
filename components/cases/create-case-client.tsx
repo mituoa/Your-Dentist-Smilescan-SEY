@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
-import { Upload, X } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { Check, Upload, X } from "lucide-react";
 import {
   createPracticeCase,
   type PracticeCaseUrgency,
@@ -18,6 +18,8 @@ import {
 } from "@/lib/upload/validation";
 
 type UrgencyUi = "not_urgent" | "this_week" | "today";
+
+type LocalAttachment = { id: string; file: File; previewUrl: string };
 
 const URGENCY_OPTIONS: { id: UrgencyUi; label: string }[] = [
   { id: "not_urgent", label: "Nicht dringend" },
@@ -38,6 +40,9 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
   const router = useRouter();
   const birthRef = useRef<SmartDateInputHandle>(null);
   const [isPending, startTransition] = useTransition();
+  const [pendingKind, setPendingKind] = useState<"draft" | "publish" | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
   const [uploadZoneError, setUploadZoneError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -47,13 +52,23 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
   const [externalId, setExternalId] = useState("");
   const [notes, setNotes] = useState("");
   const [urgency, setUrgency] = useState<UrgencyUi | null>(null);
-  const [files, setFiles] = useState<File[]>([]);
+  const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
 
   const close = () => {
     router.push("/inbox");
   };
 
   const fileKey = (f: File) => `${f.name}-${f.size}-${f.lastModified}`;
+
+  const attachmentsRef = useRef(attachments);
+  attachmentsRef.current = attachments;
+  useEffect(() => {
+    return () => {
+      for (const a of attachmentsRef.current) {
+        URL.revokeObjectURL(a.previewUrl);
+      }
+    };
+  }, []);
 
   const addPickedFiles = (list: FileList | null) => {
     if (!list?.length) return;
@@ -73,19 +88,28 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
       return;
     }
 
-    setFiles((prev) => {
-      const keys = new Set(prev.map(fileKey));
+    setAttachments((prev) => {
+      const keys = new Set(prev.map((p) => p.id));
       const merged = [...prev];
       for (const f of accepted) {
         const k = fileKey(f);
         if (keys.has(k)) continue;
         keys.add(k);
-        merged.push(f);
+        merged.push({
+          id: k,
+          file: f,
+          previewUrl: URL.createObjectURL(f),
+        });
       }
-      const next =
-        merged.length > MAX_PHOTOS ? merged.slice(0, MAX_PHOTOS) : merged;
+      const over = merged.length > MAX_PHOTOS;
+      const next = over ? merged.slice(0, MAX_PHOTOS) : merged;
+      if (over) {
+        for (const dropped of merged.slice(MAX_PHOTOS)) {
+          URL.revokeObjectURL(dropped.previewUrl);
+        }
+      }
       queueMicrotask(() => {
-        if (merged.length > MAX_PHOTOS) {
+        if (over) {
           setUploadZoneError(`Maximal ${MAX_PHOTOS} Fotos pro Fall.`);
         } else if (firstReject && accepted.length < incoming.length) {
           setUploadZoneError(
@@ -97,10 +121,18 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
     });
   };
 
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => {
+      const row = prev[index];
+      if (row) URL.revokeObjectURL(row.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
   const uploadFiles = async (): Promise<string[] | { error: string }> => {
     const paths: string[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (let i = 0; i < attachments.length; i++) {
+      const file = attachments[i].file;
       if (file.size > MAX_PHOTO_SIZE_BYTES) {
         return {
           error: `Datei „${file.name}“ ist zu groß (max. ${Math.round(MAX_PHOTO_SIZE_BYTES / 1024 / 1024)} MB).`,
@@ -124,42 +156,49 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
   const submit = (isDraft: boolean) => {
     setError(null);
     setUploadZoneError(null);
+    setPendingKind(isDraft ? "draft" : "publish");
     startTransition(async () => {
-      const flu = birthRef.current?.flush();
-      if (flu?.ok === false) {
-        setError(
-          "Bitte prüfen Sie das Geburtsdatum (Format TT.MM.JJJJ) oder das Feld leeren."
-        );
-        return;
-      }
-      const patientBirthDate = flu?.ok ? flu.iso : birthIso;
+      try {
+        const flu = birthRef.current?.flush();
+        if (flu?.ok === false) {
+          setError(
+            "Bitte prüfen Sie das Geburtsdatum (Format TT.MM.JJJJ) oder das Feld leeren."
+          );
+          return;
+        }
+        const patientBirthDate = flu?.ok ? flu.iso : birthIso;
 
-      const pathsResult = await uploadFiles();
-      if ("error" in pathsResult) {
-        setError(pathsResult.error);
-        return;
-      }
+        const pathsResult = await uploadFiles();
+        if ("error" in pathsResult) {
+          setError(pathsResult.error);
+          return;
+        }
 
-      const result = await createPracticeCase({
-        patientName,
-        patientBirthDate,
-        patientExternalId: externalId || null,
-        patientNotes: notes || null,
-        urgency: toServerUrgency(urgency),
-        isDraft,
-        tempStoragePaths: pathsResult,
-      });
+        const result = await createPracticeCase({
+          patientName,
+          patientBirthDate,
+          patientExternalId: externalId || null,
+          patientNotes: notes || null,
+          urgency: toServerUrgency(urgency),
+          isDraft,
+          tempStoragePaths: pathsResult,
+        });
 
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-      if (result.submissionId) {
-        router.push(`/inbox/${result.submissionId}`);
-        router.refresh();
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+        if (result.submissionId) {
+          router.push(`/inbox/${result.submissionId}?angelegt=1`);
+          router.refresh();
+        }
+      } finally {
+        setPendingKind(null);
       }
     });
   };
+
+  const busy = isPending || pendingKind !== null;
 
   return (
     <>
@@ -175,13 +214,14 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-case-title"
-          className="create-case-modal pointer-events-auto w-full max-w-[680px] max-h-[min(100vh-48px,900px)] overflow-y-auto rounded-2xl bg-white p-8 shadow-xl"
+          className="create-case-modal pointer-events-auto flex w-full max-w-[680px] max-h-[min(100vh-40px,920px)] flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
           style={{
             boxShadow:
-              "0 20px 60px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08)",
+              "0 28px 80px -12px rgba(15, 23, 42, 0.18), 0 12px 32px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(15, 23, 42, 0.04)",
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          <div className="min-h-0 flex-1 overflow-y-auto px-8 pb-6 pt-8">
           <header className="mb-8">
             <p
               className="mb-2 text-[12px] font-semibold uppercase tracking-wider"
@@ -201,14 +241,19 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             </p>
           </header>
 
-          {error ? (
-            <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-              {error}
-            </p>
-          ) : null}
+          <div className="mb-6 min-h-[52px]">
+            {error ? (
+              <p
+                className="rounded-xl border border-red-100/90 bg-red-50/90 px-4 py-3 text-[14px] leading-snug text-red-900/90"
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
+          </div>
 
-          <div className="space-y-8">
-            <section>
+          <div className="space-y-0">
+            <section className="pb-8">
               <h2
                 className="mb-4 text-[11px] font-bold uppercase tracking-wider"
                 style={{ color: "#94A3B8" }}
@@ -245,7 +290,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
               </div>
             </section>
 
-            <section>
+            <section className="border-t border-[#F1F5F9] pt-8">
               <h2
                 className="mb-4 text-[11px] font-bold uppercase tracking-wider"
                 style={{ color: "#94A3B8" }}
@@ -257,18 +302,18 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={5}
                 placeholder="Was ist passiert? Wo genau? Seit wann bestehen die Beschwerden?"
-                className="w-full resize-y rounded-[10px] border border-[#E2E8F0] px-4 py-3 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.08)]"
+                className="w-full resize-y rounded-[10px] border border-[#E2E8F0] px-4 py-3 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
               />
             </section>
 
-            <section>
+            <section className="border-t border-[#F1F5F9] pt-8">
               <h2
                 className="mb-4 text-[11px] font-bold uppercase tracking-wider"
                 style={{ color: "#94A3B8" }}
               >
                 Einschätzung der Dringlichkeit
               </h2>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 {URGENCY_OPTIONS.map((opt) => {
                   const active = urgency === opt.id;
                   return (
@@ -276,12 +321,11 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                       key={opt.id}
                       type="button"
                       onClick={() => setUrgency(active ? null : opt.id)}
-                      className="rounded-[10px] border px-4 py-2.5 text-[14px] font-medium transition"
-                      style={{
-                        borderColor: active ? "#2F80ED" : "#E2E8F0",
-                        background: active ? "rgba(47,128,237,0.08)" : "#FFFFFF",
-                        color: active ? "#1C6FD8" : "#0F172A",
-                      }}
+                      className={`min-h-[44px] rounded-[11px] border px-4 py-2.5 text-[14px] font-medium transition-[border-color,background-color,color,box-shadow,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:active:scale-100 ${
+                        active
+                          ? "border-[#2F80ED] bg-[rgba(47,128,237,0.1)] text-[#1557C7] shadow-[0_0_0_2px_rgba(47,128,237,0.22),0_1px_2px_rgba(15,23,42,0.04)]"
+                          : "border-[#E2E8F0] bg-white text-[#0F172A] shadow-[0_1px_2px_rgba(15,23,42,0.03)] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
+                      }`}
                     >
                       {opt.label}
                     </button>
@@ -290,7 +334,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
               </div>
             </section>
 
-            <section>
+            <section className="border-t border-[#F1F5F9] pt-8">
               <h2
                 className="mb-4 text-[11px] font-bold uppercase tracking-wider"
                 style={{ color: "#94A3B8" }}
@@ -355,10 +399,14 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                     <Upload className="h-5 w-5" />
                   </div>
                   <p className="text-[14px] font-medium" style={{ color: "#0F172A" }}>
-                    Bilder hinzufügen
+                    {attachments.length > 0
+                      ? "Weitere Bilder hinzufügen"
+                      : "Bilder hinzufügen"}
                   </p>
                   <p className="max-w-[280px] text-center text-[12px] leading-snug" style={{ color: "#94A3B8" }}>
-                    Klick zum Auswählen oder Dateien hierher ziehen · JPG, PNG, HEIC, WEBP
+                    {attachments.length > 0
+                      ? "Weitere Dateien auswählen oder hierher ziehen · wird beim Speichern mit übermittelt"
+                      : "Klick zum Auswählen oder Dateien hierher ziehen · JPG, PNG, HEIC, WEBP"}
                   </p>
                 </div>
               </div>
@@ -368,55 +416,83 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                 </p>
               ) : null}
 
-              {files.length > 0 ? (
-                <ul className="mt-4 space-y-2">
-                  {files.map((file, index) => (
+              {attachments.length > 0 ? (
+                <ul className="mt-4 space-y-2.5" aria-label="Ausgewählte Bilder">
+                  {attachments.map((row, index) => (
                     <li
-                      key={`${file.name}-${index}`}
-                      className="flex items-center justify-between rounded-lg bg-[#F8FAFC] px-4 py-3"
+                      key={row.id}
+                      className="flex items-center gap-3 rounded-xl border border-[#EEF2F6] bg-white px-3 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
                     >
-                      <span className="text-[14px] font-medium text-[#0F172A]">{file.name}</span>
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={row.previewUrl}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                        <span
+                          className="absolute bottom-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-white shadow-sm"
+                          aria-hidden
+                        >
+                          <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[14px] font-medium text-[#0F172A]">
+                          {row.file.name || "Bild"}
+                        </p>
+                        <p className="text-[12px] text-emerald-700/90">
+                          Ausgewählt · wird mit dem Fall übertragen
+                        </p>
+                      </div>
                       <button
                         type="button"
-                        className="flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] hover:bg-[#E5E7EB]"
-                        onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))}
-                        aria-label="Datei entfernen"
+                        className="flex h-10 min-w-[40px] shrink-0 items-center justify-center rounded-lg text-[#64748B] transition hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F80ED]/30"
+                        onClick={() => removeAttachment(index)}
+                        aria-label="Bild entfernen"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </li>
                   ))}
                 </ul>
-              ) : null}
+              ) : (
+                <p className="mt-3 text-center text-[12px] leading-relaxed" style={{ color: "#94A3B8" }}>
+                  Noch keine Bilder — optional, empfohlen bei sichtbaren Veränderungen.
+                </p>
+              )}
             </section>
           </div>
+          </div>
 
-          <footer className="mt-10 flex flex-wrap items-center justify-end gap-3 border-t border-[#EEF2F6] pt-8">
+          <footer className="shrink-0 border-t border-[#E8EDF4] bg-white/95 px-8 py-5 backdrop-blur-md shadow-[0_-12px_32px_-12px_rgba(15,23,42,0.07)]">
+            <div className="flex flex-wrap items-center justify-end gap-3">
             <button
               type="button"
-              disabled={isPending}
-              className="h-11 rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] hover:bg-[#F8FAFC] hover:text-[#64748B] disabled:opacity-50"
+              disabled={busy}
+              className="h-11 min-h-[44px] rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] transition hover:bg-[#F8FAFC] hover:text-[#64748B] disabled:pointer-events-none disabled:opacity-45"
               onClick={() => submit(true)}
             >
-              Speichern als Entwurf
+              {pendingKind === "draft" ? "Entwurf wird gespeichert…" : "Speichern als Entwurf"}
             </button>
             <button
               type="button"
-              disabled={isPending}
-              className="h-11 rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:opacity-50"
+              disabled={busy}
+              className="h-11 min-h-[44px] rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] transition hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:pointer-events-none disabled:opacity-45"
               onClick={close}
             >
               Abbrechen
             </button>
             <button
               type="button"
-              disabled={isPending}
-              className="h-11 rounded-[10px] px-8 text-[15px] font-semibold text-white shadow-sm transition disabled:opacity-60"
-              style={{ background: "#2F80ED", boxShadow: "0 2px 4px rgba(47,128,237,0.2)" }}
+              disabled={busy}
+              className="h-11 min-h-[44px] min-w-[200px] rounded-[11px] px-8 text-[15px] font-semibold text-white shadow-[0_4px_14px_rgba(47,128,237,0.35),0_1px_2px_rgba(15,23,42,0.06)] transition-[box-shadow,transform,opacity] duration-150 hover:shadow-[0_6px_20px_rgba(47,128,237,0.4)] active:scale-[0.99] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-55"
+              style={{ background: "#2F80ED" }}
               onClick={() => submit(false)}
             >
-              {isPending ? "Wird gespeichert…" : "Fall erstellen"}
+              {pendingKind === "publish" ? "Fall wird erstellt…" : "Fall erstellen"}
             </button>
+            </div>
           </footer>
         </div>
       </div>

@@ -113,8 +113,9 @@ nextjs-portal,
 }
 
 .create-case-backdrop {
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   animation: create-case-fade-in 200ms ease;
 }
 
@@ -126,5 +127,27 @@ nextjs-portal,
   .create-case-backdrop,
   .create-case-modal {
     animation: none;
+  }
+}
+
+@keyframes case-created-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.case-created-toast-panel {
+  animation: case-created-toast-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-created-toast-panel {
+    animation: none;
+    opacity: 1;
   }
 }

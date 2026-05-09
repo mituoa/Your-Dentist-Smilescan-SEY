@@ -5,6 +5,7 @@ import {
   getTasksForSubmission,
 } from "@/lib/queries/submissions";
 import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
+import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
 import { PhotoViewer } from "@/components/inbox/photo-viewer";
 import { SubmissionActions } from "@/components/inbox/submission-actions";
 import { markSubmissionSeen } from "./actions";
@@ -143,6 +144,7 @@ export default async function InboxDetailPage({
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: "#FFFFFF" }}>
+      <CaseCreatedToast />
       {/* Detail Header */}
       <div
         style={{
