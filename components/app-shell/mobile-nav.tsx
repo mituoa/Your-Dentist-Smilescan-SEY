@@ -11,7 +11,8 @@ import { signOut } from "@/app/(auth)/actions";
 
 interface MobileNavProps {
   role: "doctor" | "team";
-  inboxCount: number;
+  /** Unread inbox count; omit when unknown or zero (no badge). */
+  inboxCount?: number;
   myTasksCount: number;
   myTasksOverdueCount: number;
   initialTheme: ThemePreference;

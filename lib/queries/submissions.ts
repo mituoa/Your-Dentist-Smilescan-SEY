@@ -15,6 +15,7 @@ export interface SubmissionDetail {
   urgency: string | null;
   is_draft: boolean;
   created_at: string;
+  updated_at: string;
   seen_at: string | null;
   seen_by: string | null;
   photos: Array<{
@@ -36,7 +37,7 @@ export async function getSubmissionById(
       `
       id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
       patient_birth_date, patient_external_id, urgency, is_draft,
-      created_at, seen_at, seen_by,
+      created_at, updated_at, seen_at, seen_by,
       submission_photos (id, storage_path, sort_order)
     `
     )
@@ -86,6 +87,7 @@ export async function getSubmissionById(
     urgency: (data.urgency as string | null) ?? null,
     is_draft: Boolean(data.is_draft),
     created_at: data.created_at,
+    updated_at: data.updated_at as string,
     seen_at: data.seen_at,
     seen_by: data.seen_by,
     photos,

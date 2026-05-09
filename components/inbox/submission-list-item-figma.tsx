@@ -51,6 +51,7 @@ interface SubmissionListItemFigmaProps {
   createdAt: string;
   seenAt: string | null;
   isDraft: boolean;
+  urgency?: string | null;
   /** Optional: z. B. `/inbox-preview?id=…` für UI-Demos ohne Supabase */
   hrefOverride?: string;
   /** Muss gesetzt sein, wenn hrefOverride gesetzt ist */
@@ -64,6 +65,7 @@ export function SubmissionListItemFigma({
   createdAt,
   seenAt,
   isDraft,
+  urgency,
   hrefOverride,
   activeOverride,
 }: SubmissionListItemFigmaProps) {
@@ -77,6 +79,15 @@ export function SubmissionListItemFigma({
   const issue = isDraft ? `Entwurf: ${issueBase}` : issueBase;
   const preview = derivePreview(patientNotes);
   const patientLabel = patientName?.trim() || "Unbekannter Patient";
+
+  const urgencyShort =
+    urgency === "today"
+      ? "Dringend"
+      : urgency === "this_week"
+        ? "Diese Woche"
+        : urgency === "not_urgent"
+          ? "Routine"
+          : null;
 
   return (
     <Link
@@ -114,6 +125,21 @@ export function SubmissionListItemFigma({
         }}
       >
         {patientLabel}
+      </p>
+
+      <p className="mb-1 flex flex-wrap gap-2 text-[11px] font-semibold">
+        {isDraft ? (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900">Entwurf</span>
+        ) : null}
+        {!isDraft && isUnseen ? (
+          <span className="rounded-full bg-[#EEF6FF] px-2 py-0.5 text-[#1C6FD8]">Neu</span>
+        ) : null}
+        {!isDraft && !isUnseen ? (
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">Gelesen</span>
+        ) : null}
+        {urgencyShort ? (
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">{urgencyShort}</span>
+        ) : null}
       </p>
 
       <p

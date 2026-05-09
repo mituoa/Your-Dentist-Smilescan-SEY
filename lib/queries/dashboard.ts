@@ -1,6 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
 
-export async function getNewSubmissionsCount(workspaceId: string) {
+/** Count query: `ok: false` means DB/RLS error — UI must not show a fake zero. */
+export type SafeCount = { ok: true; count: number } | { ok: false };
+
+export type OpenTaskRow = {
+  id: string;
+  content: string;
+  submission_id: string | null;
+  created_at: string;
+};
+
+export type OpenTasksResult = { ok: true; tasks: OpenTaskRow[] } | { ok: false };
+
+export type ActivityEvent = {
+  type: "submission_received" | "task_created" | "task_done";
+  id: string;
+  text: string;
+  timestamp: string;
+  link?: string;
+};
+
+export type RecentActivityResult = { ok: true; events: ActivityEvent[] } | { ok: false };
+
+export async function getNewSubmissionsCount(workspaceId: string): Promise<SafeCount> {
   const supabase = await createClient();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -13,13 +35,13 @@ export async function getNewSubmissionsCount(workspaceId: string) {
 
   if (error) {
     console.error("[dashboard] new submissions count failed:", error);
-    return 0;
+    return { ok: false };
   }
 
-  return count || 0;
+  return { ok: true, count: count || 0 };
 }
 
-export async function getTotalUnseenSubmissions(workspaceId: string) {
+export async function getTotalUnseenSubmissions(workspaceId: string): Promise<SafeCount> {
   const supabase = await createClient();
 
   const { count, error } = await supabase
@@ -30,20 +52,18 @@ export async function getTotalUnseenSubmissions(workspaceId: string) {
 
   if (error) {
     console.error("[dashboard] unseen count failed:", error);
-    return 0;
+    return { ok: false };
   }
 
-  return count || 0;
+  return { ok: true, count: count || 0 };
 }
 
-export async function getOpenTasks(workspaceId: string) {
+export async function getOpenTasks(workspaceId: string): Promise<OpenTasksResult> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("tasks")
-    .select(
-      "id, content, submission_id, created_at, created_by, recipient_type, specific_recipient_id, status"
-    )
+    .select("id, content, submission_id, created_at")
     .eq("workspace_id", workspaceId)
     .in("status", ["open", "pending_review"])
     .order("created_at", { ascending: false })
@@ -51,13 +71,20 @@ export async function getOpenTasks(workspaceId: string) {
 
   if (error) {
     console.error("[dashboard] tasks failed:", error);
-    return [];
+    return { ok: false };
   }
 
-  return data || [];
+  const tasks: OpenTaskRow[] = (data || []).map((row) => ({
+    id: row.id as string,
+    content: row.content as string,
+    submission_id: (row.submission_id as string | null) ?? null,
+    created_at: row.created_at as string,
+  }));
+
+  return { ok: true, tasks };
 }
 
-export async function getRecentActivity(workspaceId: string) {
+export async function getRecentActivity(workspaceId: string): Promise<RecentActivityResult> {
   const supabase = await createClient();
 
   const [submissionsRes, tasksRes, doneTasksRes] = await Promise.all([
@@ -82,25 +109,20 @@ export async function getRecentActivity(workspaceId: string) {
       .limit(3),
   ]);
 
-  type ActivityEvent = {
-    type: "submission_received" | "task_created" | "task_done";
-    id: string;
-    text: string;
-    timestamp: string;
-    link?: string;
-  };
+  if (submissionsRes.error || tasksRes.error || doneTasksRes.error) {
+    if (submissionsRes.error) {
+      console.error("[dashboard] recent submissions failed:", submissionsRes.error);
+    }
+    if (tasksRes.error) {
+      console.error("[dashboard] recent tasks failed:", tasksRes.error);
+    }
+    if (doneTasksRes.error) {
+      console.error("[dashboard] recent done tasks failed:", doneTasksRes.error);
+    }
+    return { ok: false };
+  }
 
   const events: ActivityEvent[] = [];
-
-  if (submissionsRes.error) {
-    console.error("[dashboard] recent submissions failed:", submissionsRes.error);
-  }
-  if (tasksRes.error) {
-    console.error("[dashboard] recent tasks failed:", tasksRes.error);
-  }
-  if (doneTasksRes.error) {
-    console.error("[dashboard] recent done tasks failed:", doneTasksRes.error);
-  }
 
   (submissionsRes.data || []).forEach((s) => {
     events.push({
@@ -118,7 +140,7 @@ export async function getRecentActivity(workspaceId: string) {
       id: t.id,
       text: `Aufgabe: ${t.content.substring(0, 60)}${t.content.length > 60 ? "…" : ""}`,
       timestamp: t.created_at,
-      link: t.submission_id ? `/inbox/${t.submission_id}` : undefined,
+      link: `/my-tasks/${t.id}`,
     });
   });
 
@@ -129,7 +151,7 @@ export async function getRecentActivity(workspaceId: string) {
         id: `done-${t.id}`,
         text: `Aufgabe erledigt: ${t.content.substring(0, 60)}${t.content.length > 60 ? "…" : ""}`,
         timestamp: t.done_at,
-        link: t.submission_id ? `/inbox/${t.submission_id}` : undefined,
+        link: t.submission_id ? `/inbox/${t.submission_id}` : `/my-tasks/${t.id}`,
       });
     }
   });
@@ -137,5 +159,5 @@ export async function getRecentActivity(workspaceId: string) {
   events.sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
-  return events.slice(0, 4);
+  return { ok: true, events: events.slice(0, 4) };
 }

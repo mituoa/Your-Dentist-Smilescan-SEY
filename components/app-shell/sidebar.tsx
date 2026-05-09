@@ -4,7 +4,8 @@ import { JournalNavGroup } from "./journal-nav-group";
 
 export interface SidebarProps {
   role: "doctor" | "team";
-  inboxCount: number;
+  /** Unread inbox; omit when unknown or zero (no badge). */
+  inboxCount?: number;
   myTasksCount: number;
   myTasksOverdueCount: number;
 }

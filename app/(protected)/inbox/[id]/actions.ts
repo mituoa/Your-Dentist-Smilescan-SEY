@@ -88,6 +88,7 @@ export async function markSubmissionSeen(submissionId: string) {
 
   revalidatePath(`/inbox/${submissionId}`);
   revalidatePath("/inbox");
+  revalidatePath("/dashboard");
   return { success: true };
 }
 

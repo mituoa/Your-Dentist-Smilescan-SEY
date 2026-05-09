@@ -20,35 +20,30 @@ function SearchFallback() {
   );
 }
 
-export default async function InboxLayout({
-  children,
-}: InboxLayoutProps) {
+export default async function InboxLayout({ children }: InboxLayoutProps) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) redirect("/login?error=workspace_missing");
 
-  // Layouts don't receive searchParams in Next.js app router.
-  // We fetch without filtering here; the page redirect + detail view are still correct.
-  const submissions = await getInboxSubmissions(workspace.workspace_id);
+  const listResult = await getInboxSubmissions(workspace.workspace_id);
+  const listFailed = !listResult.ok;
+  const submissions = listResult.ok ? listResult.items : [];
   const openCaseCount = submissions.filter((s) => !s.is_draft).length;
 
   return (
-    <div className="h-full flex relative" style={{ background: "#FAFBFC" }}>
+    <div className="relative h-full min-h-0" style={{ background: "#FAFBFC" }}>
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(circle at top right, rgba(47,128,237,0.05), transparent 32%)",
         }}
       />
 
-      <div className="flex-1 flex overflow-hidden relative z-10">
+      <div className="relative z-10 flex min-h-0 max-md:flex-col max-md:overflow-y-auto md:h-full md:overflow-hidden">
         {/* LEFT LIST PANE */}
         <aside
-          className="flex flex-col"
+          className="flex min-h-0 w-full min-w-0 flex-col max-md:max-h-[42vh] max-md:border-b max-md:border-slate-200/80 md:w-[38%] md:max-w-[480px] md:min-w-[280px]"
           style={{
-            width: "38%",
-            maxWidth: "480px",
-            minWidth: "380px",
             background: "#FAFBFC",
           }}
         >
@@ -70,7 +65,9 @@ export default async function InboxLayout({
                 Einsendungen
               </h1>
               <p className="text-[13px]" style={{ color: "#2F80ED", fontWeight: 500 }}>
-                {openCaseCount} offene {openCaseCount === 1 ? "Fall" : "Fälle"}
+                {listFailed
+                  ? "Liste momentan nicht verfügbar"
+                  : `${openCaseCount} offene ${openCaseCount === 1 ? "Fall" : "Fälle"}`}
               </p>
             </div>
 
@@ -79,27 +76,50 @@ export default async function InboxLayout({
             </Suspense>
           </div>
 
-          <div className="flex-1 overflow-y-auto" style={{ padding: "8px 12px" }}>
-            {submissions.map((s) => (
-              <SubmissionListItemFigma
-                key={s.id}
-                id={s.id}
-                patientName={s.patient_name}
-                patientNotes={s.patient_notes}
-                createdAt={s.created_at}
-                seenAt={s.seen_at}
-                isDraft={s.is_draft}
-              />
-            ))}
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden" style={{ padding: "8px 12px" }}>
+            {listFailed ? (
+              <div
+                className="mx-2 rounded-xl border px-4 py-4 text-[13px]"
+                style={{ borderColor: "#E2E8F0", color: "#64748B", background: "#FFFFFF" }}
+              >
+                Die Einsendungen konnten nicht geladen werden. Bitte die Seite in Kürze erneut
+                öffnen.
+              </div>
+            ) : submissions.length === 0 ? (
+              <div
+                className="mx-2 rounded-xl border px-4 py-6 text-center text-[13px]"
+                style={{ borderColor: "#E2E8F0", color: "#64748B", background: "#FFFFFF" }}
+              >
+                <p className="font-medium text-[#0F172A]">Noch keine Einsendungen</p>
+                <p className="mt-2 leading-relaxed">
+                  Sobald Patienten Fotos einreichen, erscheinen die Fälle hier.
+                </p>
+              </div>
+            ) : (
+              submissions.map((s) => (
+                <SubmissionListItemFigma
+                  key={s.id}
+                  id={s.id}
+                  patientName={s.patient_name}
+                  patientNotes={s.patient_notes}
+                  createdAt={s.created_at}
+                  seenAt={s.seen_at}
+                  isDraft={s.is_draft}
+                  urgency={s.urgency}
+                />
+              ))
+            )}
           </div>
         </aside>
 
         {/* RIGHT DETAIL PANE */}
-        <section className="flex-1 overflow-hidden" style={{ background: "#FFFFFF" }}>
+        <section
+          className="min-h-0 min-w-0 flex-1 overflow-hidden max-md:min-h-[50vh]"
+          style={{ background: "#FFFFFF" }}
+        >
           {children}
         </section>
       </div>
     </div>
   );
 }
-

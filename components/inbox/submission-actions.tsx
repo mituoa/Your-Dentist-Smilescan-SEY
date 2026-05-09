@@ -12,6 +12,13 @@ interface SubmissionActionsProps {
   patientEmail: string | null;
   patientPhone: string | null;
   createdAt: string;
+  patientBirthDate?: string | null;
+  patientExternalId?: string | null;
+  urgency?: string | null;
+  isDraft?: boolean;
+  seenAt?: string | null;
+  updatedAt?: string | null;
+  photoCount?: number;
   tasks: TaskItem[];
   assignableMembers: AssignableMember[];
   canCheckOff: boolean;
@@ -24,6 +31,13 @@ export function SubmissionActions({
   patientEmail,
   patientPhone,
   createdAt,
+  patientBirthDate,
+  patientExternalId,
+  urgency,
+  isDraft,
+  seenAt,
+  updatedAt,
+  photoCount,
   tasks,
   assignableMembers,
   canCheckOff,
@@ -76,6 +90,13 @@ export function SubmissionActions({
           patientEmail={patientEmail}
           patientPhone={patientPhone}
           createdAt={createdAt}
+          patientBirthDate={patientBirthDate}
+          patientExternalId={patientExternalId}
+          urgency={urgency}
+          isDraft={isDraft}
+          seenAt={seenAt}
+          updatedAt={updatedAt}
+          photoCount={photoCount}
         />
       </section>
     </div>

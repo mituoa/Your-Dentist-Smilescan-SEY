@@ -6,10 +6,11 @@ import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { Sidebar } from "@/components/app-shell/sidebar";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { UserMenu } from "@/components/app-shell/user-menu";
+import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
-import { Bell, Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export default async function ProtectedLayout({
   children,
@@ -43,8 +44,15 @@ export default async function ProtectedLayout({
     }
   }
 
-  // TODO: replace with countOpenInboxItems(workspace_id) when implemented
-  const inboxCount = 0;
+  let inboxCount: number | undefined;
+  try {
+    const unseen = await countUnseenInboxSubmissions(workspace.workspace_id);
+    if (unseen.ok && unseen.count > 0) {
+      inboxCount = unseen.count;
+    }
+  } catch (e) {
+    console.error("[ProtectedLayout] inbox unseen count failed:", e);
+  }
 
   let profileData: { photo_url: string | null; display_name: string | null } | null = null;
   try {
@@ -94,29 +102,8 @@ export default async function ProtectedLayout({
             className="sticky top-0 z-30 hidden bg-white/80 backdrop-blur-xl md:block"
             style={{ height: "80px" }}
           >
-            <div className="px-10 h-full flex items-center justify-between">
-              <div className="flex-1 max-w-xl">
-                <div className="relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Aufgaben, Patienten oder Fälle suchen…"
-                    className="w-full bg-white text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-[3px]"
-                    style={{
-                      height: "48px",
-                      paddingLeft: "44px",
-                      paddingRight: "16px",
-                      borderRadius: "12px",
-                      border: "1px solid #E2E8F0",
-                      boxShadow: "none",
-                      // ring color
-                      ["--tw-ring-color" as any]: "rgba(47,128,237,0.12)",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 ml-6">
+            <div className="flex h-full w-full items-center justify-end gap-3 px-10">
+              <div className="flex items-center gap-3">
                 <Link
                   href="/relay#relay-quick-create"
                   className="hidden md:inline-flex items-center gap-2 px-4 text-[14px] font-medium text-[#1E293B] transition-colors hover:bg-[#F8FAFC]"
@@ -143,17 +130,6 @@ export default async function ProtectedLayout({
                   <Plus className="h-4 w-4" />
                   <span>Neuer Fall</span>
                 </Link>
-
-                <button
-                  type="button"
-                  className="relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[#F8FAFC]"
-                >
-                  <Bell className="h-[18px] w-[18px]" style={{ color: "#64748B" }} />
-                  <span
-                    className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full"
-                    style={{ background: "#2F80ED" }}
-                  />
-                </button>
 
                 <UserMenu
                   email={user.email || ""}

@@ -286,6 +286,13 @@ export default async function InboxDetailPage({
                 patientEmail={submission.patient_email}
                 patientPhone={submission.patient_phone}
                 createdAt={submission.created_at}
+                patientBirthDate={submission.patient_birth_date}
+                patientExternalId={submission.patient_external_id}
+                urgency={submission.urgency}
+                isDraft={submission.is_draft}
+                seenAt={submission.seen_at}
+                updatedAt={submission.updated_at}
+                photoCount={submission.photos.length}
                 tasks={tasks}
                 assignableMembers={assignableMembers}
                 canCheckOff

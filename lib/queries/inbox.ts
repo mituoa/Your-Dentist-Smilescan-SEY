@@ -14,10 +14,35 @@ export interface SubmissionListItem {
   photo_count: number;
 }
 
+export type InboxSubmissionsResult =
+  | { ok: true; items: SubmissionListItem[] }
+  | { ok: false };
+
+/** Count of submissions not yet marked seen (same rule as dashboard unseen). */
+export type UnseenCountResult = { ok: true; count: number } | { ok: false };
+
+export async function countUnseenInboxSubmissions(
+  workspaceId: string
+): Promise<UnseenCountResult> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("submissions")
+    .select("*", { count: "exact", head: true })
+    .eq("workspace_id", workspaceId)
+    .is("seen_at", null);
+
+  if (error) {
+    console.error("[inbox] countUnseenInboxSubmissions failed:", error);
+    return { ok: false };
+  }
+
+  return { ok: true, count: count ?? 0 };
+}
+
 export async function getInboxSubmissions(
   workspaceId: string,
   searchQuery?: string
-): Promise<SubmissionListItem[]> {
+): Promise<InboxSubmissionsResult> {
   const supabase = await createClient();
 
   let query = supabase
@@ -37,10 +62,10 @@ export async function getInboxSubmissions(
 
   if (error) {
     console.error("[inbox] getInboxSubmissions failed:", error);
-    return [];
+    return { ok: false };
   }
 
-  return (data || []).map((s: Record<string, unknown>) => ({
+  const items = (data || []).map((s: Record<string, unknown>) => ({
     id: s.id as string,
     patient_name: s.patient_name as string | null,
     patient_email: s.patient_email as string | null,
@@ -54,4 +79,6 @@ export async function getInboxSubmissions(
     photo_count:
       (s.submission_photos as { count: number }[] | undefined)?.[0]?.count || 0,
   }));
+
+  return { ok: true, items };
 }
