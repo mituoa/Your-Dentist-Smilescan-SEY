@@ -149,10 +149,13 @@ export default async function InboxDetailPage({
       <CaseCreatedToast />
 
       {/* Figma: rechter Bereich flex-1; hier: medizinischer Canvas + schmale Kommunikationsspalte */}
-      <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+      <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-hidden lg:flex-row">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC]">
-          {/* Detail-Header — Figma: padding 48px 56px 0, background #FFFFFF */}
-          <div className="shrink-0 bg-white" style={headerPad}>
+          {/* Detail-Header — Desktop unverändert; Tablet/Phone: sticky für Kontext beim Scrollen */}
+          <div
+            className="z-[6] shrink-0 bg-white max-lg:sticky max-lg:top-0 max-lg:shadow-[0_1px_0_rgba(15,23,42,0.06)] lg:static lg:shadow-none"
+            style={headerPad}
+          >
             <h2
               className="text-[22px] sm:text-[24px]"
               style={{
@@ -226,7 +229,10 @@ export default async function InboxDetailPage({
           </div>
 
           {/* Scrollbarer Inhalt — Figma: background #FFFFFF, padding 24|32 / 56 / 56 */}
-          <div className="min-h-0 flex-1 overflow-y-auto bg-white" style={scrollPad}>
+          <div
+            className="min-h-0 flex-1 overflow-y-auto bg-white max-lg:scroll-pb-8"
+            style={scrollPad}
+          >
             <div style={{ marginBottom: "32px" }}>
               <PhotoViewer
                 photos={submission.photos}
@@ -293,7 +299,7 @@ export default async function InboxDetailPage({
 
         {/* Kommunikation — nicht im Figma-Snippet; schmale sekundäre Spalte, gleiche Canvas-Farbe */}
         <aside
-          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0"
+          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] pb-[max(12px,env(safe-area-inset-bottom))] max-lg:min-h-0 lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0 lg:pb-0"
         >
           <SubmissionActions
             submissionId={submission.id}

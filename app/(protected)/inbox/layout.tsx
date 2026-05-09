@@ -41,10 +41,10 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
       <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
         {/* LEFT — Einsendungen (Figma: width 40%, maxWidth 480, minWidth 380, #F8FAFC) */}
         <aside
-          className="flex min-h-0 w-full min-w-0 flex-col border-b border-[rgba(15,23,42,0.06)] max-md:max-w-none md:w-[40%] md:max-w-[480px] md:min-w-[380px] md:flex-none md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
+          className="flex min-h-0 w-full min-w-0 shrink-0 flex-col border-b border-[rgba(15,23,42,0.06)] max-md:max-h-[min(42dvh,360px)] max-md:max-w-none max-md:overflow-hidden max-md:flex-none md:max-h-none md:overflow-visible md:w-[40%] md:max-w-[480px] md:min-w-[380px] md:flex-none md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
           style={{ background: "#F8FAFC" }}
         >
-          <div style={{ padding: "48px 24px 0" }} className="max-md:pt-8">
+          <div className="px-4 pt-8 pb-0 sm:px-6 md:px-6 md:pt-12">
             <div
               style={{ marginBottom: "24px" }}
               className="flex items-start justify-between gap-4"
@@ -87,10 +87,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
             </Suspense>
           </div>
 
-          <div
-            className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
-            style={{ padding: "32px 12px 16px" }}
-          >
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-4 pt-7 max-md:px-2 max-md:pt-5 md:px-3 md:pt-8">
             {listFailed ? (
               <div
                 className="mx-1 rounded-xl px-4 py-5 text-[14px] leading-relaxed"
@@ -129,7 +126,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
         </aside>
 
         {/* RIGHT — Detail + Kommunikation (Figma: flex-1, #F7F9FC; Kinder setzen weißen Fall-Canvas) */}
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC] md:min-h-0">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC] max-md:min-h-0 md:min-h-0">
           {children}
         </section>
       </div>

@@ -18,7 +18,7 @@ function scrollToId(id: string, focusDraft?: boolean) {
  */
 export function TrackerPrimaryActions() {
   return (
-    <div>
+    <div className="tracker-mobile-touch-targets">
       <button
         type="button"
         onClick={() => scrollToId("tracker-termin")}

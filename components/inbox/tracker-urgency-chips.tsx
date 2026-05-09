@@ -49,7 +49,7 @@ export function TrackerUrgencyChips({
   };
 
   return (
-    <div>
+    <div className="tracker-mobile-chip-targets">
       <p
         className="text-[12px]"
         style={{

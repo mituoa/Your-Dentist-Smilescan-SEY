@@ -58,7 +58,7 @@ function ActivityRow({ event }: { event: ActivityEvent }) {
     return (
       <Link
         href={event.link}
-        className="flex min-w-0 items-start gap-3 rounded-lg py-1 transition-colors hover:bg-[#F8FAFC]"
+        className="flex min-w-0 items-start gap-3 rounded-lg py-1 transition-colors hover:bg-[#F8FAFC] max-lg:py-2.5"
       >
         {inner}
       </Link>
@@ -124,7 +124,7 @@ export default async function DashboardPage() {
       />
 
       <div className="relative">
-        <div className="mx-auto max-w-[1240px] px-4 py-8 md:px-10">
+        <div className="mx-auto max-w-[1240px] touch-manipulation px-4 py-8 max-md:py-6 md:px-10">
           <div
             className="mb-8 overflow-hidden pb-6"
             style={{ borderBottom: "1px solid rgba(226,232,240,0.6)" }}
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div className="mb-10 grid grid-cols-12 gap-6">
+          <div className="mb-10 grid grid-cols-12 gap-5 lg:gap-6">
             <div
               className="col-span-12 lg:col-span-7"
               style={{
@@ -248,9 +248,8 @@ export default async function DashboardPage() {
               ) : (
                 <>
                   <p
-                    className="leading-none"
+                    className="text-[56px] leading-none tracking-tight lg:text-[64px]"
                     style={{
-                      fontSize: "64px",
                       color: "#0B4EA3",
                       fontWeight: 650,
                       letterSpacing: "-0.03em",
@@ -321,7 +320,7 @@ export default async function DashboardPage() {
                     </p>
                   ) : (
                     <p
-                      className="text-[40px] leading-none"
+                      className="text-[34px] leading-none tracking-tight lg:text-[40px]"
                       style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 600 }}
                     >
                       {openTaskCount}
@@ -366,7 +365,7 @@ export default async function DashboardPage() {
                     </p>
                   ) : (
                     <p
-                      className="text-[40px] leading-none"
+                      className="text-[34px] leading-none tracking-tight lg:text-[40px]"
                       style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 600 }}
                     >
                       {newCount}

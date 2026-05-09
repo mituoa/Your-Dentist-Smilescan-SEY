@@ -1,15 +1,14 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import Link from "next/link";
 
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { Sidebar, SIDEBAR_MAIN_PAD } from "@/components/app-shell/sidebar";
+import { TopbarContextActions } from "@/components/app-shell/topbar-context-actions";
 import { UserMenu } from "@/components/app-shell/user-menu";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
-import { Plus } from "lucide-react";
 import { AssistShell } from "@/components/command-assist/assist-shell";
 
 export default async function ProtectedLayout({
@@ -101,30 +100,8 @@ export default async function ProtectedLayout({
             style={{ minHeight: "64px" }}
           >
             <div className="flex h-full min-h-[64px] w-full items-center justify-end gap-2 px-4 md:min-h-[80px] md:gap-3 md:px-10">
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/relay#relay-quick-create"
-                  title="Neue Aufgabe"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#E2E8F0] px-3 text-[13px] font-medium text-[#1E293B] transition-colors hover:bg-[#F8FAFC] md:min-h-12 md:px-4 md:text-[14px]"
-                  style={{ borderRadius: "12px" }}
-                >
-                  <Plus className="h-4 w-4 shrink-0 text-[#2F80ED]" />
-                  <span className="hidden sm:inline">Neue Aufgabe</span>
-                </Link>
-                <Link
-                  href="/create-case"
-                  title="Neuer Fall"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-[13px] font-medium text-white transition-all hover:opacity-95 sm:px-4 md:min-h-12 md:px-5 md:text-[14px]"
-                  style={{
-                    borderRadius: "12px",
-                    background: "#2F80ED",
-                    boxShadow:
-                      "0 4px 12px rgba(47,128,237,0.28), 0 2px 4px rgba(47,128,237,0.18)",
-                  }}
-                >
-                  <Plus className="h-4 w-4 shrink-0" />
-                  <span className="hidden sm:inline">Neuer Fall</span>
-                </Link>
+              <div className="flex min-w-0 items-center gap-2 md:gap-3">
+                <TopbarContextActions />
 
                 <UserMenu
                   email={user.email || ""}
@@ -138,7 +115,7 @@ export default async function ProtectedLayout({
             </div>
           </header>
 
-          <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+          <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain max-lg:[-webkit-overflow-scrolling:touch]">
             {children}
           </main>
         </div>

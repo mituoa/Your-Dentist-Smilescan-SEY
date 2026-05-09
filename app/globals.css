@@ -151,3 +151,21 @@ nextjs-portal,
     opacity: 1;
   }
 }
+
+/**
+ * Tracker primäre Aktionen — Touch-Ziele nur <lg (Desktop lg+ unverändert).
+ */
+@media (max-width: 1023px) {
+  .tracker-mobile-touch-targets > button[type="button"] {
+    min-height: 48px !important;
+    height: auto !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .tracker-mobile-chip-targets button[type="button"] {
+    min-height: 44px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}

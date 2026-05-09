@@ -82,7 +82,7 @@ export function SubmissionListItemFigma({
   return (
     <Link
       href={href}
-      className={`block transition-all duration-150 ease-out ${
+      className={`block touch-manipulation transition-all duration-150 ease-out ${
         isActive ? "" : "hover:-translate-y-0.5 hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
       }`}
       style={{

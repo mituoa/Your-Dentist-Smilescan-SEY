@@ -51,7 +51,7 @@ export function SubmissionActions({
 }: SubmissionActionsProps) {
   return (
     <div
-      className="flex min-h-0 flex-1 flex-col gap-4"
+      className="flex min-h-0 flex-1 touch-manipulation flex-col gap-4"
       style={{ padding: "16px 14px 20px" }}
     >
       <div className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden ${shell}`}>

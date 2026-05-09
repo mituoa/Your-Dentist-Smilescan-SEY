@@ -180,7 +180,7 @@ export function CommandAssist() {
 
   const inner = (
     <div
-      className={`flex flex-col gap-3 ${embeddedMode ? "w-full" : "w-[min(100vw-1.5rem,520px)]"}`}
+      className={`flex flex-col gap-3 ${embeddedMode ? "w-full" : "w-full lg:w-[min(100vw-1.5rem,520px)]"}`}
     >
       <div
         id="command-assist-panel"
@@ -355,14 +355,18 @@ export function CommandAssist() {
 
   return (
     <div
-      className={`pointer-events-none fixed z-[45] flex flex-col gap-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-8 ${
+      className={`pointer-events-none fixed z-[45] flex flex-col gap-3 pb-[max(1rem,env(safe-area-inset-bottom))] ${
         inTracker
-          ? "bottom-0 right-0 items-end md:bottom-8 md:right-8"
-          : "bottom-0 right-0 items-end"
+          ? "bottom-0 right-0 max-lg:inset-x-0 max-lg:px-3 max-lg:pt-0 max-lg:items-stretch lg:bottom-8 lg:right-8 lg:items-end lg:p-8"
+          : "bottom-0 right-0 items-end p-4 md:p-8"
       }`}
       aria-live="polite"
     >
-      <div className="pointer-events-auto flex flex-col items-end gap-3">{inner}</div>
+      <div
+        className={`pointer-events-auto flex flex-col gap-3 max-lg:w-full ${inTracker ? "max-lg:items-stretch lg:items-end" : "items-end"}`}
+      >
+        {inner}
+      </div>
     </div>
   );
 }

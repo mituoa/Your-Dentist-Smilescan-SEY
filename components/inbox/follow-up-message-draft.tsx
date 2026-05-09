@@ -105,7 +105,7 @@ export function FollowUpMessageDraft({
         };
 
   return (
-    <div className="space-y-8">
+    <div className="touch-manipulation space-y-8">
       <div
         className="transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none"
         style={{
@@ -125,7 +125,7 @@ export function FollowUpMessageDraft({
           }}
           rows={11}
           spellCheck={false}
-          className="min-h-[240px] w-full resize-y border-0 bg-transparent px-6 py-6 outline-none"
+          className="min-h-[200px] w-full resize-y border-0 bg-transparent px-5 py-5 outline-none max-lg:min-h-[220px] max-lg:px-4 max-lg:py-4 lg:min-h-[240px] lg:px-6 lg:py-6"
           style={{
             fontSize: "16px",
             lineHeight: 1.75,
@@ -155,7 +155,7 @@ export function FollowUpMessageDraft({
               transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
               ...chip(activeSnippetId === null),
             }}
-            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+            className="max-lg:min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
           >
             Standard
           </button>
@@ -175,7 +175,7 @@ export function FollowUpMessageDraft({
                   transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
                   ...chip(active),
                 }}
-                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+                className="max-lg:min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
               >
                 {s.label}
               </button>
