@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
-
-const RETURN_PRICING_STORAGE_KEY = "smilescan-return-pricing-v1";
+import {
+  clearReturnToPricingFlag,
+  markReturnToPricingFlag,
+  RETURN_PRICING_STORAGE_KEY,
+} from "@/lib/login-pricing-return";
 
 interface LoginPageClientProps {
   queryError?: string;
@@ -32,13 +35,15 @@ export function LoginPageClient({
   const registerFromPricingHref = (plan: "monthly" | "halfyearly" | "yearly") =>
     `/register?plan=${plan}&from=pricing`;
 
-  const markReturnToPricing = () => {
-    try {
-      sessionStorage.setItem(RETURN_PRICING_STORAGE_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-  };
+  /** Login-card „Registrieren“ / Test: ohne `from=pricing`, damit Abbruch immer oben auf /login landet. */
+  const registerDefaultHref = useMemo(() => {
+    const qs = new URLSearchParams();
+    qs.set("plan", "yearly");
+    if (inviteToken) qs.set("invite", inviteToken);
+    if (prefilledEmail) qs.set("email", prefilledEmail);
+    const q = qs.toString();
+    return q ? `/register?${q}` : "/register";
+  }, [inviteToken, prefilledEmail]);
 
   const scrollToPricing = (behavior: ScrollBehavior = "smooth") => {
     const el = document.getElementById("pricing");
@@ -46,13 +51,21 @@ export function LoginPageClient({
     el.scrollIntoView({ behavior, block: "start" });
   };
 
+  useLayoutEffect(() => {
+    if (signedOut) return;
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#pricing") return;
+    try {
+      if (sessionStorage.getItem(RETURN_PRICING_STORAGE_KEY) === "1") return;
+    } catch {
+      /* ignore */
+    }
+    window.scrollTo(0, 0);
+  }, [signedOut]);
+
   useEffect(() => {
     if (signedOut) {
-      try {
-        sessionStorage.removeItem(RETURN_PRICING_STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
+      clearReturnToPricingFlag();
       requestAnimationFrame(() => {
         window.scrollTo(0, 0);
         if (typeof window === "undefined") return;
@@ -89,11 +102,7 @@ export function LoginPageClient({
       });
 
       if (fromStorage) {
-        try {
-          sessionStorage.removeItem(RETURN_PRICING_STORAGE_KEY);
-        } catch {
-          /* ignore */
-        }
+        clearReturnToPricingFlag();
       }
     };
 
@@ -270,7 +279,7 @@ export function LoginPageClient({
                           : "border border-gray-900 bg-white text-gray-900 hover:bg-gray-900 hover:text-white"
                       }`}
                       onClick={() => {
-                        markReturnToPricing();
+                        markReturnToPricingFlag();
                         setActiveCta(null);
                         closePlanSheet();
                       }}
@@ -671,8 +680,8 @@ export function LoginPageClient({
                   <p className="text-[13px] text-gray-600 lg:text-[14px]">
                     Noch kein Konto?{" "}
                     <Link
-                      href={registerFromPricingHref("yearly")}
-                      onClick={markReturnToPricing}
+                      href={registerDefaultHref}
+                      onClick={clearReturnToPricingFlag}
                       className="font-semibold text-[#0284C7] hover:text-[#0369A1] transition-colors duration-150"
                     >
                       Jetzt registrieren
@@ -681,9 +690,9 @@ export function LoginPageClient({
 
                   <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 lg:mt-3">
                     <Link
-                      href={registerFromPricingHref("yearly")}
+                      href={registerDefaultHref}
                       onClick={() => {
-                        markReturnToPricing();
+                        clearReturnToPricingFlag();
                         setActiveCta("trial");
                       }}
                       className={`inline-flex h-8 items-center justify-center rounded-full border px-3 text-[11px] font-semibold transition-colors lg:h-9 lg:px-4 lg:text-[12px] ${
@@ -844,7 +853,7 @@ export function LoginPageClient({
                 <div className="mb-2.5 h-1.5 max-md:mb-2 md:mb-8 md:h-[20px]" />
                 <Link
                   href={registerFromPricingHref("monthly")}
-                  onClick={markReturnToPricing}
+                  onClick={() => markReturnToPricingFlag()}
                   className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px] md:hover:-translate-y-0.5"
                 >
                   Jetzt starten
@@ -872,7 +881,7 @@ export function LoginPageClient({
                 </div>
                 <Link
                   href={registerFromPricingHref("halfyearly")}
-                  onClick={markReturnToPricing}
+                  onClick={() => markReturnToPricingFlag()}
                   className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px] md:hover:-translate-y-0.5"
                 >
                   Jetzt starten
@@ -902,7 +911,7 @@ export function LoginPageClient({
                 </div>
                 <Link
                   href={registerFromPricingHref("yearly")}
-                  onClick={markReturnToPricing}
+                  onClick={() => markReturnToPricingFlag()}
                   className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg text-[14px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] max-md:shadow-none md:h-[48px] md:rounded-xl md:text-[15px] md:shadow-md md:hover:-translate-y-0.5 md:hover:shadow-xl"
                   style={{
                     background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",

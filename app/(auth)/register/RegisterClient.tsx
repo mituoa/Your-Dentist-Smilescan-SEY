@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
+import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
 type Plan = "monthly" | "halfyearly" | "yearly";
 type RegistrationStep = 1 | 2 | 3 | 4;
@@ -49,15 +50,15 @@ export function RegisterClient(props: {
   const handleRegistrationModalClose = () => {
     setNavBusy(false);
     if (props.success) {
-      router.push(loginBackHref);
+      router.replace(loginBackHref);
       return;
     }
     if (registrationStep === 4 && loginPricingReturnHref) {
-      router.push(loginPricingReturnHref);
+      router.replace(loginPricingReturnHref);
       return;
     }
     if (registrationStep === 4) {
-      router.push(loginBackHref);
+      router.replace(loginBackHref);
       return;
     }
     if (registrationStep > 1) {
@@ -65,10 +66,10 @@ export function RegisterClient(props: {
       return;
     }
     if (fromPricingFlow && loginPricingReturnHref) {
-      router.push(loginPricingReturnHref);
+      router.replace(loginPricingReturnHref);
       return;
     }
-    router.push(loginBackHref);
+    router.replace(loginBackHref);
   };
   const plan = coercePlan(props.initialPlan);
   const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(1);
@@ -86,6 +87,10 @@ export function RegisterClient(props: {
   /** Short overlay when advancing steps (calm brand mark). */
   const [navBusy, setNavBusy] = React.useState(false);
   const [regPassword, setRegPassword] = React.useState("");
+
+  React.useEffect(() => {
+    if (!fromPricingFlow) clearReturnToPricingFlag();
+  }, [fromPricingFlow]);
 
   const [selectedPlan, setSelectedPlan] = React.useState<Plan>(plan);
   const [licenseFrontFile, setLicenseFrontFile] = React.useState<File | null>(null);

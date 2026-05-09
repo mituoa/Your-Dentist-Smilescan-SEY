@@ -19,6 +19,7 @@ import {
   removeLogo,
 } from "@/app/(protected)/settings/actions";
 import { setThemePreference } from "@/app/actions/theme";
+import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -301,11 +302,7 @@ export function SettingsFigmaView({
     void (async () => {
       const supabase = createClient();
       await supabase.auth.signOut();
-      try {
-        sessionStorage.removeItem("smilescan-return-pricing-v1");
-      } catch {
-        /* ignore */
-      }
+      clearReturnToPricingFlag();
       router.push("/login?signed_out=1");
     })();
   };

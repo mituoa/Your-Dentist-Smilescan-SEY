@@ -2,6 +2,7 @@
 
 import { LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { SectionHeader } from "./section-header";
@@ -15,11 +16,7 @@ export function DangerZone() {
     startTransition(async () => {
       const supabase = createClient();
       await supabase.auth.signOut();
-      try {
-        sessionStorage.removeItem("smilescan-return-pricing-v1");
-      } catch {
-        /* ignore */
-      }
+      clearReturnToPricingFlag();
       router.push("/login?signed_out=1");
     });
   };
