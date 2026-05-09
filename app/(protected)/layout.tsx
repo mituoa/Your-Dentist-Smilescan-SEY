@@ -73,6 +73,10 @@ export default async function ProtectedLayout({
         myTasksCount={myTasksCount}
         myTasksOverdueCount={myTasksOverdueCount}
         initialTheme={theme}
+        email={user.email || ""}
+        workspaceName={workspaceName}
+        avatarUrl={profileData?.photo_url ?? null}
+        displayName={profileData?.display_name ?? null}
       />
 
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">

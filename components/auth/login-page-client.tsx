@@ -164,7 +164,7 @@ export function LoginPageClient({
   const shouldShowResend = (queryError ? decodeURIComponent(queryError).trim() : "") === "email_not_confirmed";
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
@@ -199,13 +199,13 @@ export function LoginPageClient({
               aria-label="Schließen"
             />
             <div
-              className="relative w-full max-w-xl -translate-y-10 rounded-3xl border border-gray-200 bg-white p-5 shadow-2xl"
+              className="relative max-h-[min(92dvh,92vh)] w-full max-w-xl translate-y-0 overflow-y-auto rounded-2xl border border-gray-200/80 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-5 md:-translate-y-10"
               style={{ animation: "modalSlideIn 0.2s ease-out" }}
               role="dialog"
               aria-modal="true"
             >
-              <div className="mb-4 flex items-start justify-between gap-4">
-                <div>
+              <div className="mb-4 flex min-w-0 items-start justify-between gap-3 sm:gap-4">
+                <div className="min-w-0 pr-2">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     Preise
                   </p>
@@ -228,25 +228,25 @@ export function LoginPageClient({
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-3 sm:gap-3">
                 {(["monthly", "halfyearly", "yearly"] as const).map((p) => (
                   <div
                     key={p}
-                    className={`flex h-full flex-col rounded-2xl border p-4 ${
-                      p === "yearly" ? "border-[#0284C7]/40 bg-[#0284C7]/5" : "border-gray-200 bg-white"
+                    className={`flex h-full flex-col rounded-xl border p-3 sm:rounded-2xl sm:p-4 ${
+                      p === "yearly" ? "border-[#0284C7]/50 bg-white sm:border-[#0284C7]/40 sm:bg-[#0284C7]/5" : "border-gray-200/90 bg-white"
                     }`}
                   >
-                    <p className="text-[12px] font-semibold text-gray-900">{plans[p].label}</p>
-                    <p className="mt-1 text-[12px] text-gray-500">{plans[p].billing}</p>
-                    <div className="mt-3">
-                      <span className={`text-[22px] font-semibold ${p === "yearly" ? "text-[#0284C7]" : "text-gray-900"}`}>
+                    <p className="text-[11px] font-semibold text-gray-900 sm:text-[12px]">{plans[p].label}</p>
+                    <p className="mt-0.5 text-[11px] text-gray-500 sm:mt-1 sm:text-[12px]">{plans[p].billing}</p>
+                    <div className="mt-2 sm:mt-3">
+                      <span className={`text-xl font-semibold sm:text-[22px] ${p === "yearly" ? "text-[#0284C7]" : "text-gray-900"}`}>
                         €{plans[p].price}
                       </span>
-                      <span className="ml-1 text-[12px] text-gray-500">/Monat</span>
+                      <span className="ml-1 text-[11px] text-gray-500 sm:text-[12px]">/Monat</span>
                     </div>
                     <Link
                       href={registerFromPricingHref(p)}
-                      className={`mt-auto inline-flex h-10 w-full items-center justify-center rounded-xl text-[13px] font-semibold ${
+                      className={`mt-auto inline-flex h-11 min-h-[44px] w-full items-center justify-center rounded-lg text-[12px] font-semibold md:h-10 md:min-h-0 md:rounded-xl md:text-[13px] ${
                         p === "yearly"
                           ? "bg-gradient-to-b from-[#0284C7] to-[#0369A1] text-white shadow-sm"
                           : "border border-gray-900 bg-white text-gray-900 hover:bg-gray-900 hover:text-white"
@@ -263,31 +263,31 @@ export function LoginPageClient({
                 ))}
               </div>
 
-              <div className="mt-4 flex items-center justify-between gap-3">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     closePlanSheet();
                     scrollToPricing();
                   }}
-                  className="text-[13px] font-semibold text-[#0284C7] hover:text-[#0369A1]"
+                  className="min-w-0 text-left text-[13px] font-semibold text-[#0284C7] hover:text-[#0369A1]"
                 >
                   Alle Details ansehen
                 </button>
-                <p className="text-[12px] text-gray-500">Preise zzgl. MwSt.</p>
+                <p className="shrink-0 text-[12px] text-gray-500">Preise zzgl. MwSt.</p>
               </div>
             </div>
           </div>
         ) : null}
         {/* LOGIN SECTION */}
         <div
-          className="min-h-screen flex items-center justify-center bg-[#F8F7F3]"
+          className="flex min-h-screen items-center justify-center bg-[#F8F7F3] pb-[calc(9rem+env(safe-area-inset-bottom,0px))] md:pb-0"
           style={{
             backgroundImage:
               "radial-gradient(ellipse at center, rgba(255,255,255,0.6) 0%, rgba(248,247,243,0) 60%, rgba(240,240,240,0.3) 100%)",
           }}
         >
-          <div className="w-full max-w-[1050px] grid grid-cols-1 lg:grid-cols-[420px_390px] gap-x-[140px] items-center px-10">
+          <div className="grid min-w-0 w-full max-w-[1050px] grid-cols-1 items-center gap-x-[140px] px-4 sm:px-6 lg:grid-cols-[420px_390px] lg:px-10">
             {/* LEFT SECTION */}
             <div
               className="hidden lg:flex w-[420px] max-w-[420px] flex-col items-start text-left"
@@ -436,8 +436,8 @@ export function LoginPageClient({
             </div>
 
             {/* RIGHT SECTION */}
-            <div className="w-full lg:w-[360px]">
-              <div className="lg:hidden flex items-center justify-center gap-3 mb-12">
+            <div className="w-full min-w-0 lg:w-[360px]">
+              <div className="mb-6 flex items-center justify-center gap-3 lg:mb-12 lg:hidden">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="256"
@@ -509,17 +509,17 @@ export function LoginPageClient({
               </div>
 
               <div
-                className="bg-white border border-gray-100/80 p-8 rounded-[22px]"
+                className="rounded-2xl border border-gray-200/70 bg-white p-5 lg:rounded-[22px] lg:border-gray-100/80 lg:p-8"
                 style={{
                   boxShadow:
                     "0 1px 2px rgba(0,0,0,0.02), 0 4px 8px rgba(0,0,0,0.02), 0 16px 24px rgba(0,0,0,0.03)",
                 }}
               >
-                <div className="mb-10">
-                  <h2 className="text-[32px] font-semibold text-gray-900 mb-2 tracking-tight leading-tight">
+                <div className="mb-6 lg:mb-10">
+                  <h2 className="mb-1.5 text-2xl font-semibold leading-tight tracking-tight text-gray-900 sm:text-[28px] lg:mb-2 lg:text-[32px]">
                     Anmelden
                   </h2>
-                  <p className="text-[14px] text-gray-500">
+                  <p className="text-[13px] text-gray-500 lg:text-[14px]">
                     Greifen Sie auf Ihr Your Dentist-Konto zu
                   </p>
                 </div>
@@ -545,7 +545,7 @@ export function LoginPageClient({
                   </p>
                 ) : null}
 
-                <form action={signIn} className="space-y-4">
+                <form action={signIn} className="space-y-3 lg:space-y-4">
                   {inviteToken ? (
                     <input type="hidden" name="invite_token" value={inviteToken} />
                   ) : null}
@@ -559,13 +559,13 @@ export function LoginPageClient({
                       placeholder="E-Mail-Adresse"
                       autoComplete="email"
                       onChange={(e) => setResendEmail(e.target.value)}
-                      className="w-full h-[52px] px-4 bg-white border border-gray-200 rounded-xl text-[15px] text-gray-900 focus:outline-none focus:border-[#0284C7] focus:ring-[3px] focus:ring-[#0284C7]/10 transition-all duration-150 placeholder:text-gray-400 disabled:opacity-50 disabled:bg-gray-50"
+                      className="h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
                       required
                     />
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-end mb-2">
+                    <div className="mb-1.5 flex items-center justify-end lg:mb-2">
                       <Link
                         href={
                           inviteToken
@@ -583,7 +583,7 @@ export function LoginPageClient({
                       type="password"
                       placeholder="Passwort"
                       autoComplete="current-password"
-                      className="w-full h-[52px] px-4 bg-white border border-gray-200 rounded-xl text-[15px] text-gray-900 focus:outline-none focus:border-[#0284C7] focus:ring-[3px] focus:ring-[#0284C7]/10 transition-all duration-150 placeholder:text-gray-400 disabled:opacity-50 disabled:bg-gray-50"
+                      className="h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
                       required
                     />
                   </div>
@@ -612,12 +612,12 @@ export function LoginPageClient({
                   </div>
                 ) : null}
 
-                <div className="relative my-8">
+                <div className="relative my-5 lg:my-8">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200" style={{ borderWidth: "0.5px" }} />
+                    <div className="w-full border-t border-gray-200/90" style={{ borderWidth: "0.5px" }} />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-5 text-[13px] text-gray-500">oder</span>
+                    <span className="bg-white px-4 text-[12px] text-gray-500 lg:px-5 lg:text-[13px]">oder</span>
                   </div>
                 </div>
 
@@ -625,7 +625,7 @@ export function LoginPageClient({
                   {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
                   <button
                     type="submit"
-                    className="w-full h-[48px] bg-white hover:bg-gray-50 text-gray-900 rounded-xl flex items-center justify-center gap-3 border border-gray-200 text-[14px] transition-all duration-150 hover:border-gray-300 active:scale-[0.99]"
+                    className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-gray-200/90 bg-white text-[13px] text-gray-900 transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 active:scale-[0.99] lg:h-[48px] lg:gap-3 lg:rounded-xl lg:text-[14px]"
                   >
                     <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" aria-hidden="true">
                       <path
@@ -649,11 +649,11 @@ export function LoginPageClient({
                   </button>
                 </form>
 
-                <form action={signInWithGitHub} className="mt-3">
+                <form action={signInWithGitHub} className="mt-2.5 lg:mt-3">
                   {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
                   <button
                     type="submit"
-                    className="w-full h-[48px] bg-[#24292F] hover:bg-[#1a1e24] text-white rounded-xl flex items-center justify-center gap-3 border border-[#24292F] text-[14px] transition-all duration-150 active:scale-[0.99]"
+                    className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-[#24292F] bg-[#24292F] text-[13px] text-white transition-all duration-150 hover:bg-[#1a1e24] active:scale-[0.99] lg:h-[48px] lg:gap-3 lg:rounded-xl lg:text-[14px]"
                   >
                     <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                       <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.154 8.986 7.53 10.437.55.101.748-.235.748-.522 0-.257-.009-.966-.014-1.895-3.048.662-3.692-1.467-3.692-1.467-.498-1.265-1.216-1.601-1.216-1.601-.994-.679.076-.666.076-.666 1.101.078 1.68 1.13 1.68 1.13.977 1.674 2.563 1.19 3.187.911.099-.708.382-1.19.695-1.463-2.433-.277-4.992-1.217-4.992-5.417 0-1.197.428-2.176 1.13-2.943-.114-.277-.491-1.395.107-2.908 0 0 .921-.295 3.017 1.124a10.436 10.436 0 0 1 5.494 0c2.096-1.419 3.016-1.124 3.016-1.124.598 1.513.222 2.631.108 2.908.702.767 1.129 1.746 1.129 2.943 0 4.21-2.562 5.137-5.004 5.409.393.337.744 1.005.744 2.022 0 1.461-.014 2.639-.014 2.999 0 .29.196.627.752.521C19.848 20.982 23 16.865 23 12c0-6.077-4.923-11-11-11z" />
@@ -662,8 +662,8 @@ export function LoginPageClient({
                   </button>
                 </form>
 
-                <div className="mt-8 text-center">
-                  <p className="text-[14px] text-gray-600">
+                <div className="mt-5 text-center lg:mt-8">
+                  <p className="text-[13px] text-gray-600 lg:text-[14px]">
                     Noch kein Konto?{" "}
                     <Link
                       href={registerFromPricingHref("yearly")}
@@ -674,14 +674,14 @@ export function LoginPageClient({
                     </Link>
                   </p>
 
-                  <div className="mt-3 flex items-center justify-center gap-2">
+                  <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 lg:mt-3">
                     <Link
                       href={registerFromPricingHref("yearly")}
                       onClick={() => {
                         markReturnToPricing();
                         setActiveCta("trial");
                       }}
-                      className={`inline-flex h-9 items-center justify-center rounded-full border px-4 text-[12px] font-semibold transition-colors ${
+                      className={`inline-flex h-8 items-center justify-center rounded-full border px-3 text-[11px] font-semibold transition-colors lg:h-9 lg:px-4 lg:text-[12px] ${
                         activeCta === "trial"
                           ? "border-[#0284C7]/40 bg-[#0284C7]/10 text-[#0284C7]"
                           : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
@@ -692,7 +692,7 @@ export function LoginPageClient({
                     <button
                       type="button"
                       onClick={openPlanSheet}
-                      className={`inline-flex h-9 items-center justify-center rounded-full border px-4 text-[12px] font-semibold transition-colors ${
+                      className={`inline-flex h-8 items-center justify-center rounded-full border px-3 text-[11px] font-semibold transition-colors lg:h-9 lg:px-4 lg:text-[12px] ${
                         activeCta === "plan"
                           ? "border-[#0284C7]/40 bg-[#0284C7]/10 text-[#0284C7]"
                           : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
@@ -704,7 +704,7 @@ export function LoginPageClient({
                 </div>
               </div>
 
-              <div className="mt-8 flex items-center justify-center gap-6 text-[12px] text-gray-500">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-gray-500 sm:gap-6 sm:text-[12px] lg:mt-8">
                 <div className="flex items-center gap-1.5">
                   <svg
                     className="w-3.5 h-3.5 text-[#0284C7]"
@@ -758,8 +758,8 @@ export function LoginPageClient({
                 </div>
               </div>
 
-              <div className="mt-8 text-center">
-                <div className="flex items-center justify-center gap-3 text-[12px] text-gray-400">
+              <div className="mt-5 text-center lg:mt-8">
+                <div className="flex items-center justify-center gap-3 text-[11px] text-gray-400 lg:text-[12px]">
                   <Link href="/datenschutz" className="hover:text-[#0284C7] transition-colors duration-150">
                     Datenschutz
                   </Link>
@@ -777,17 +777,24 @@ export function LoginPageClient({
         {/* Mobile sticky CTA */}
         <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#F8F7F3] via-[#F8F7F3]/95 to-transparent" />
-          <div className="relative px-4 pb-4 pt-3">
-            <div className="mx-auto max-w-md rounded-2xl border border-gray-200/70 bg-white/85 p-3 shadow-lg backdrop-blur">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate text-[13px] font-semibold text-gray-900">14 Tage kostenlos testen</p>
-                  <p className="truncate text-[12px] text-gray-500">Plan wählen und Registrierung starten</p>
+          <div
+            className="relative px-3 pt-2"
+            style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom, 0px))" }}
+          >
+            <div className="mx-auto max-w-md rounded-xl border border-gray-200/60 bg-white/90 p-2.5 shadow-md backdrop-blur-md">
+              <div className="flex items-center justify-between gap-2.5">
+                <div className="min-w-0 pr-1">
+                  <p className="truncate text-[12px] font-semibold leading-tight text-gray-900">
+                    14 Tage kostenlos testen
+                  </p>
+                  <p className="mt-0.5 truncate text-[11px] leading-tight text-gray-500">
+                    Plan wählen und starten
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={openPlanSheet}
-                  className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-4 text-[13px] font-semibold text-white shadow-sm active:scale-[0.98]"
+                  className="inline-flex h-11 min-h-[44px] shrink-0 items-center justify-center rounded-lg px-3 text-[12px] font-semibold text-white shadow-sm active:scale-[0.98]"
                   style={{ background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)" }}
                 >
                   Plan wählen
@@ -797,18 +804,21 @@ export function LoginPageClient({
           </div>
         </div>
 
-        <div id="pricing" className="w-full bg-white py-16 px-8 lg:px-16 scroll-mt-24">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-4">
-              <h2 className="text-[36px] font-semibold text-gray-900 mb-3 tracking-tight">
+        <div
+          id="pricing"
+          className="w-full min-w-0 scroll-mt-24 bg-white px-4 py-10 pb-[calc(7.75rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-12 md:px-8 md:py-14 md:pb-16 lg:px-16 lg:py-16"
+        >
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-4 text-center">
+              <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl md:mb-3 md:text-4xl lg:text-[36px]">
                 Einfache, transparente Preise
               </h2>
-              <p className="text-[16px] text-gray-600 max-w-xl mx-auto">
+              <p className="mx-auto max-w-xl text-[14px] text-gray-600 md:text-[16px]">
                 Alle Pläne beinhalten den vollen Funktionsumfang. Wählen Sie einfach Ihren Abrechnungszeitraum.
               </p>
             </div>
 
-            <div className="flex items-center justify-center gap-6 mb-12 text-[13px] text-gray-600">
+            <div className="mb-8 flex flex-col items-center justify-center gap-3 text-[12px] text-gray-600 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-[13px] md:mb-12 md:gap-6">
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path
@@ -842,83 +852,83 @@ export function LoginPageClient({
             </div>
 
             <div
-              className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16"
+              className="mb-10 grid grid-cols-1 gap-3 md:mb-16 md:grid-cols-3 md:gap-4"
               style={{ animation: "fadeIn 0.6s ease-out" }}
             >
               <div
-                className="bg-white rounded-2xl border-2 border-gray-200 p-6 hover:border-[#0284C7] hover:shadow-lg transition-all duration-200 flex flex-col"
+                className="flex flex-col rounded-xl border border-gray-200/90 bg-white p-4 transition-all duration-200 hover:border-[#0284C7] hover:shadow-lg md:rounded-2xl md:border-2 md:border-gray-200 md:p-6"
                 style={{ animation: "fadeIn 0.5s ease-out 0.1s both" }}
               >
-                <div className="h-[20px]" />
-                <h3 className="text-[20px] font-semibold text-gray-900 mb-1">Monatlich</h3>
-                <p className="text-[13px] text-gray-500 mb-6">{plans.monthly.billing}</p>
-                <div className="mb-2">
-                  <span className="text-[40px] font-semibold text-gray-900">€{plans.monthly.price}</span>
-                  <span className="text-[16px] text-gray-500 ml-1">/Monat</span>
+                <div className="h-3 md:h-[20px]" />
+                <h3 className="mb-0.5 text-lg font-semibold text-gray-900 md:text-[20px]">Monatlich</h3>
+                <p className="mb-3 text-[12px] text-gray-500 md:mb-6 md:text-[13px]">{plans.monthly.billing}</p>
+                <div className="mb-1 md:mb-2">
+                  <span className="text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.monthly.price}</span>
+                  <span className="ml-1 text-[14px] text-gray-500 md:text-[16px]">/Monat</span>
                 </div>
-                <div className="h-[20px] mb-8" />
+                <div className="mb-4 h-3 md:mb-8 md:h-[20px]" />
                 <Link
                   href={registerFromPricingHref("monthly")}
                   onClick={markReturnToPricing}
-                  className="w-full h-[48px] bg-white text-gray-900 border-2 border-gray-900 rounded-xl hover:bg-gray-900 hover:text-white hover:-translate-y-0.5 transition-all duration-200 text-[15px] font-semibold active:scale-[0.98] mt-auto inline-flex items-center justify-center"
+                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px]"
                 >
                   Jetzt starten
                 </Link>
               </div>
 
               <div
-                className="bg-white rounded-2xl border-2 border-gray-200 p-6 hover:border-[#0284C7] hover:shadow-lg transition-all duration-200 relative flex flex-col"
+                className="relative flex flex-col rounded-xl border border-gray-200/90 bg-white p-4 transition-all duration-200 hover:border-[#0284C7] hover:shadow-lg md:rounded-2xl md:border-2 md:border-gray-200 md:p-6"
                 style={{ animation: "fadeIn 0.5s ease-out 0.2s both" }}
               >
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#F59E0B] text-white px-3 py-1 rounded-full text-[11px] font-semibold">
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 md:-top-3">
+                  <span className="rounded-full bg-[#F59E0B] px-2.5 py-0.5 text-[10px] font-semibold text-white md:px-3 md:py-1 md:text-[11px]">
                     SPARE 10%
                   </span>
                 </div>
-                <div className="h-[20px]" />
-                <h3 className="text-[20px] font-semibold text-gray-900 mb-1">Halbjährlich</h3>
-                <p className="text-[13px] text-gray-500 mb-6">{plans.halfyearly.billing}</p>
-                <div className="mb-2">
-                  <span className="text-[40px] font-semibold text-gray-900">€{plans.halfyearly.price}</span>
-                  <span className="text-[16px] text-gray-500 ml-1">/Monat</span>
+                <div className="h-3 md:h-[20px]" />
+                <h3 className="mb-0.5 text-lg font-semibold text-gray-900 md:text-[20px]">Halbjährlich</h3>
+                <p className="mb-3 text-[12px] text-gray-500 md:mb-6 md:text-[13px]">{plans.halfyearly.billing}</p>
+                <div className="mb-1 md:mb-2">
+                  <span className="text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.halfyearly.price}</span>
+                  <span className="ml-1 text-[14px] text-gray-500 md:text-[16px]">/Monat</span>
                 </div>
-                <div className="h-[20px] mb-8 flex items-center justify-start">
-                  <span className="text-[12px] text-gray-500">€{plans.halfyearly.total} alle 6 Monate</span>
+                <div className="mb-4 flex h-3 items-center justify-start md:mb-8 md:h-[20px]">
+                  <span className="text-[11px] text-gray-500 md:text-[12px]">€{plans.halfyearly.total} alle 6 Monate</span>
                 </div>
                 <Link
                   href={registerFromPricingHref("halfyearly")}
                   onClick={markReturnToPricing}
-                  className="w-full h-[48px] bg-white text-gray-900 border-2 border-gray-900 rounded-xl hover:bg-gray-900 hover:text-white hover:-translate-y-0.5 transition-all duration-200 text-[15px] font-semibold active:scale-[0.98] mt-auto inline-flex items-center justify-center"
+                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px]"
                 >
                   Jetzt starten
                 </Link>
               </div>
 
               <div
-                className="bg-white rounded-2xl border-2 border-[#0284C7] p-6 shadow-lg relative flex flex-col"
+                className="relative flex flex-col rounded-xl border border-[#0284C7] bg-white p-4 shadow-md md:rounded-2xl md:border-2 md:p-6 md:shadow-lg"
                 style={{ animation: "fadeIn 0.5s ease-out 0.3s both" }}
               >
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#0284C7] text-white px-3 py-1 rounded-full text-[11px] font-semibold">
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 md:-top-3">
+                  <span className="rounded-full bg-[#0284C7] px-2.5 py-0.5 text-[10px] font-semibold text-white md:px-3 md:py-1 md:text-[11px]">
                     AM BELIEBTESTEN
                   </span>
                 </div>
-                <div className="h-[20px]" />
-                <h3 className="text-[20px] font-semibold text-gray-900 mb-1">Jährlich</h3>
-                <p className="text-[13px] text-gray-500 mb-6">{plans.yearly.billing}</p>
-                <div className="mb-2">
-                  <span className="text-[40px] font-semibold text-gray-900">€{plans.yearly.price}</span>
-                  <span className="text-[16px] text-gray-500 ml-1">/Monat</span>
+                <div className="h-3 md:h-[20px]" />
+                <h3 className="mb-0.5 text-lg font-semibold text-gray-900 md:text-[20px]">Jährlich</h3>
+                <p className="mb-3 text-[12px] text-gray-500 md:mb-6 md:text-[13px]">{plans.yearly.billing}</p>
+                <div className="mb-1 md:mb-2">
+                  <span className="text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.yearly.price}</span>
+                  <span className="ml-1 text-[14px] text-gray-500 md:text-[16px]">/Monat</span>
                 </div>
-                <div className="h-[20px] mb-8 flex items-center justify-start">
-                  <span className="text-[12px] text-green-600 font-semibold">
+                <div className="mb-4 flex h-3 items-center justify-start md:mb-8 md:h-[20px]">
+                  <span className="text-[11px] font-semibold text-green-600 md:text-[12px]">
                     Spare €{(plans.monthly.price - plans.yearly.price) * 12}/Jahr
                   </span>
                 </div>
                 <Link
                   href={registerFromPricingHref("yearly")}
                   onClick={markReturnToPricing}
-                  className="w-full h-[48px] text-white rounded-xl transition-all duration-200 shadow-md hover:shadow-xl text-[15px] font-semibold active:scale-[0.98] hover:-translate-y-0.5 mt-auto inline-flex items-center justify-center"
+                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg text-[14px] font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98] md:h-[48px] md:rounded-xl md:text-[15px]"
                   style={{
                     background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
                   }}
