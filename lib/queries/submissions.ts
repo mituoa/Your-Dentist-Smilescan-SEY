@@ -187,7 +187,7 @@ export async function getProfileData(workspaceId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profile_data")
-    .select("display_name, practice_name, appointment_link")
+    .select("display_name, practice_name, practice_phone, appointment_link")
     .eq("workspace_id", workspaceId)
     .single();
   return data;

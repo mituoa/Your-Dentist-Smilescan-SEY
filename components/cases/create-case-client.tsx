@@ -50,6 +50,8 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
   const [patientName, setPatientName] = useState("");
   const [birthIso, setBirthIso] = useState<string | null>(null);
   const [externalId, setExternalId] = useState("");
+  const [patientEmail, setPatientEmail] = useState("");
+  const [patientPhone, setPatientPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [urgency, setUrgency] = useState<UrgencyUi | null>(null);
   const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
@@ -178,6 +180,8 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
           patientName,
           patientBirthDate,
           patientExternalId: externalId || null,
+          patientEmail: patientEmail || null,
+          patientPhone: patientPhone || null,
           patientNotes: notes || null,
           urgency: toServerUrgency(urgency),
           isDraft,
@@ -284,7 +288,27 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                     value={externalId}
                     onChange={(e) => setExternalId(e.target.value)}
                     placeholder="z.B. 12345"
-                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.08)]"
+                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
+                  />
+                </Field>
+                <Field label="E-Mail (optional)">
+                  <input
+                    type="email"
+                    value={patientEmail}
+                    onChange={(e) => setPatientEmail(e.target.value)}
+                    autoComplete="email"
+                    placeholder="für Terminlink & Rückfragen"
+                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
+                  />
+                </Field>
+                <Field label="Telefon (optional)">
+                  <input
+                    type="tel"
+                    value={patientPhone}
+                    onChange={(e) => setPatientPhone(e.target.value)}
+                    autoComplete="tel"
+                    placeholder="+49 …"
+                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
                   />
                 </Field>
               </div>

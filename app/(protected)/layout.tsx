@@ -11,6 +11,7 @@ import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
 import { Plus } from "lucide-react";
+import { CommandAssist } from "@/components/command-assist/command-assist";
 
 export default async function ProtectedLayout({
   children,
@@ -83,7 +84,7 @@ export default async function ProtectedLayout({
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50 max-md:max-h-[100dvh] max-md:overflow-hidden"
+      className="flex min-h-screen flex-col bg-gradient-to-br from-surface-page via-surface-page to-surface-sunken/40 max-md:max-h-[100dvh] max-md:overflow-hidden"
     >
       {/* Mobile nav at top */}
       <MobileNav
@@ -159,6 +160,8 @@ export default async function ProtectedLayout({
           </main>
         </div>
       </div>
+
+      <CommandAssist />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser, getCurrentWorkspace } from "@/lib/auth-helpers";
 import {
+  getProfileData,
   getSubmissionById,
   getTasksForSubmission,
 } from "@/lib/queries/submissions";
@@ -88,13 +89,13 @@ function urgencyHeadline(urgency: string | null): {
 function recommendedAction(urgency: string | null): string {
   switch (urgency) {
     case "today":
-      return "Empfohlene Aktion: Termin in den nächsten 24 Stunden sinnvoll.";
+      return "Klinische Empfehlung: zeitnahe Kontaktaufnahme und Einordnung innerhalb von 24 Stunden.";
     case "this_week":
-      return "Empfohlene Aktion: Termin innerhalb der nächsten Tage sinnvoll.";
+      return "Klinische Empfehlung: Rückmeldung und Terminierung innerhalb weniger Werktage.";
     case "not_urgent":
-      return "Empfohlene Aktion: Termin nach Kapazität planen.";
+      return "Klinische Empfehlung: routinemäßige Terminierung nach Praxiskapazität.";
     default:
-      return "Empfohlene Aktion: Nach klinischer Einschätzung weiterverfolgen.";
+      return "Bitte Einsendung klinisch einordnen und den weiteren Verlauf dokumentieren.";
   }
 }
 
@@ -115,9 +116,10 @@ export default async function InboxDetailPage({
   }
 
   const user = await getCurrentUser();
-  const [tasks, assignableMembers] = await Promise.all([
+  const [tasks, assignableMembers, profileRow] = await Promise.all([
     getTasksForSubmission(id),
     getAssignableWorkspaceMembers(workspace.workspace_id, user?.id),
+    getProfileData(workspace.workspace_id),
   ]);
   const openTasks = tasks.filter((task) => task.status === "open").length;
   const pendingTasks = tasks.filter(
@@ -130,17 +132,18 @@ export default async function InboxDetailPage({
   }
 
   const isDoctor = workspace.role === "doctor";
-  const issueTitle = deriveIssue(submission.patient_notes, submission.patient_name);
+  const concernPreview = deriveIssue(submission.patient_notes, submission.patient_name);
   const patientLabel = submission.patient_name || "Unbekannter Patient";
-  const metaLabel = `${patientLabel} · ${formatRelativeTime(submission.created_at)}`;
   const birthStr = formatBirthDe(submission.patient_birth_date);
   const idStr = submission.patient_external_id?.trim() || null;
-  const secondMetaParts: string[] = [];
-  if (birthStr) secondMetaParts.push(birthStr);
-  if (idStr) secondMetaParts.push(`ID: ${idStr}`);
-  const secondMeta = secondMetaParts.join(" · ");
+  const patientMetaParts: string[] = [];
+  if (birthStr) patientMetaParts.push(`Geb. ${birthStr}`);
+  if (idStr) patientMetaParts.push(`ID ${idStr}`);
+  const patientMeta = patientMetaParts.join(" · ");
   const urgencyLine = urgencyHeadline(submission.urgency);
   const recAction = recommendedAction(submission.urgency);
+  const practicePhone = profileRow?.practice_phone ?? null;
+  const appointmentUrl = profileRow?.appointment_link ?? null;
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: "#FFFFFF" }}>
@@ -153,31 +156,58 @@ export default async function InboxDetailPage({
           background: "#FFFFFF",
         }}
       >
+        <p
+          className="mb-2 text-[12px] font-medium uppercase tracking-wider"
+          style={{ color: "#94A3B8" }}
+        >
+          Patient
+        </p>
         <h2
           className="text-[26px]"
           style={{
             color: "#0F172A",
             fontWeight: 600,
             letterSpacing: "-0.01em",
-            marginBottom: "8px",
+            marginBottom: "6px",
             lineHeight: "1.3",
           }}
         >
-          {issueTitle}
+          {patientLabel}
         </h2>
-        <p className="text-[14px]" style={{ color: "#64748B" }}>
-          {metaLabel}
+        {patientMeta ? (
+          <p className="text-[14px]" style={{ color: "#64748B" }}>
+            {patientMeta}
+          </p>
+        ) : null}
+        {(submission.patient_email || submission.patient_phone) ? (
+          <p className="mt-2 text-[14px]" style={{ color: "#64748B" }}>
+            {submission.patient_email ? (
+              <span className="mr-3">{submission.patient_email}</span>
+            ) : null}
+            {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
+          </p>
+        ) : null}
+        <p className="mt-3 text-[13px]" style={{ color: "#94A3B8" }}>
+          Eingang {formatRelativeTime(submission.created_at)}
           {submission.is_draft ? (
-            <span className="ml-2 text-[12px] font-medium text-amber-700">Entwurf</span>
+            <span
+              className="ml-2 rounded-md px-2 py-0.5 text-[12px] font-medium"
+              style={{ background: "#FFFBEB", color: "#92400E" }}
+            >
+              Entwurf
+            </span>
           ) : null}
         </p>
-        {secondMeta ? (
-          <p className="mt-1 text-[14px]" style={{ color: "#64748B" }}>
-            {secondMeta}
+        {concernPreview && concernPreview !== patientLabel ? (
+          <p
+            className="mt-4 text-[15px] font-medium leading-snug"
+            style={{ color: "#334155" }}
+          >
+            {concernPreview}
           </p>
         ) : null}
         {urgencyLine ? (
-          <p className="mt-2 text-[14px] font-medium" style={{ color: urgencyLine.color }}>
+          <p className="mt-3 text-[14px] font-medium" style={{ color: urgencyLine.color }}>
             {urgencyLine.text}
           </p>
         ) : null}
@@ -299,6 +329,8 @@ export default async function InboxDetailPage({
                 assignableMembers={assignableMembers}
                 canCheckOff
                 canSendAppointmentLink={isDoctor}
+                practicePhone={practicePhone}
+                appointmentUrl={appointmentUrl}
               />
               <div className="mt-3 text-[12px]" style={{ color: "#94A3B8" }}>
                 Offen {openTasks} · Ausstehend {pendingTasks} · Erledigt {doneTasks}

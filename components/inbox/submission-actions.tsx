@@ -3,6 +3,7 @@ import type { TaskItem } from "@/lib/queries/submissions";
 import type { AssignableMember } from "@/lib/queries/team-members";
 
 import { AppointmentLinkButton } from "./appointment-link-button";
+import { FollowUpMessageDraft } from "./follow-up-message-draft";
 import { TaskForm } from "./task-form";
 import { TaskList } from "./task-list";
 import { SubmissionMeta } from "./submission-meta";
@@ -23,6 +24,8 @@ interface SubmissionActionsProps {
   assignableMembers: AssignableMember[];
   canCheckOff: boolean;
   canSendAppointmentLink: boolean;
+  practicePhone?: string | null;
+  appointmentUrl?: string | null;
 }
 
 export function SubmissionActions({
@@ -42,9 +45,18 @@ export function SubmissionActions({
   assignableMembers,
   canCheckOff,
   canSendAppointmentLink,
+  practicePhone,
+  appointmentUrl,
 }: SubmissionActionsProps) {
   return (
     <div className="space-y-4 sm:space-y-5">
+      <FollowUpMessageDraft
+        patientName={patientName}
+        urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
+        practicePhone={practicePhone ?? null}
+        appointmentUrl={appointmentUrl ?? null}
+      />
+
       <section className={`p-4 sm:p-5 ${pilotGlassPanel}`}>
         <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
           Nächster Schritt

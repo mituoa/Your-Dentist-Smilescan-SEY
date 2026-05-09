@@ -97,7 +97,7 @@ export function SubmissionListItemFigma({
         marginBottom: "8px",
         borderRadius: "10px",
         cursor: "pointer",
-        transition: "all 200ms ease",
+        transition: "background-color 180ms ease, border-color 180ms ease, opacity 180ms ease",
         background: isActive ? "#EFF6FF" : "transparent",
         borderLeft: isActive ? "2px solid #2F80ED" : "2px solid transparent",
         opacity: isUnseen ? 1 : 0.72,
@@ -135,10 +135,20 @@ export function SubmissionListItemFigma({
           <span className="rounded-full bg-[#EEF6FF] px-2 py-0.5 text-[#1C6FD8]">Neu</span>
         ) : null}
         {!isDraft && !isUnseen ? (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">Gelesen</span>
+          <span
+            className="rounded-full px-2 py-0.5"
+            style={{ background: "#F1F5F9", color: "#64748B" }}
+          >
+            Gelesen
+          </span>
         ) : null}
         {urgencyShort ? (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">{urgencyShort}</span>
+          <span
+            className="rounded-full px-2 py-0.5"
+            style={{ background: "#F1F5F9", color: "#334155" }}
+          >
+            {urgencyShort}
+          </span>
         ) : null}
       </p>
 

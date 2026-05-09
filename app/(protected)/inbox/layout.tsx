@@ -42,7 +42,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
       <div className="relative z-10 flex min-h-0 max-md:flex-col max-md:overflow-y-auto md:h-full md:overflow-hidden">
         {/* LEFT LIST PANE */}
         <aside
-          className="flex min-h-0 w-full min-w-0 flex-col max-md:max-h-[42vh] max-md:border-b max-md:border-slate-200/80 md:w-[38%] md:max-w-[480px] md:min-w-[280px]"
+          className="flex min-h-0 w-full min-w-0 flex-col max-md:max-h-[42vh] max-md:border-b max-md:border-border/80 md:w-[38%] md:max-w-[480px] md:min-w-[280px]"
           style={{
             background: "#FAFBFC",
           }}

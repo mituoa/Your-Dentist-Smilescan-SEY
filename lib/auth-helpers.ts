@@ -1,5 +1,4 @@
 import type { User } from "@supabase/supabase-js";
-import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   getAdminEmailsAllowlist,
@@ -73,7 +72,12 @@ export async function requireUser() {
   return user;
 }
 
-export const getCurrentWorkspace = cache(async () => {
+/**
+ * Not wrapped in `react/cache`: `requireApprovedWorkspace` may call
+ * `ensureRelaxBootstrapWorkspace` and then must see a fresh row — caching
+ * would return stale `null` and break the protected app shell.
+ */
+export async function getCurrentWorkspace() {
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -91,7 +95,7 @@ export const getCurrentWorkspace = cache(async () => {
   }
 
   return data;
-});
+}
 
 export async function requireApprovedWorkspace() {
   const user = await getCurrentUser();

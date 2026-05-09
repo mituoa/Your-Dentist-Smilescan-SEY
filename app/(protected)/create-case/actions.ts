@@ -34,6 +34,8 @@ function mergeCaseFieldsIntoNotes(
   opts: {
     birth: string | null;
     externalId: string | null;
+    email: string | null;
+    phone: string | null;
     urgency: PracticeCaseUrgency;
     isDraft: boolean;
   }
@@ -44,6 +46,8 @@ function mergeCaseFieldsIntoNotes(
   const meta: string[] = [];
   if (opts.birth) meta.push(`Geburtsdatum: ${opts.birth}`);
   if (opts.externalId) meta.push(`Patienten-ID: ${opts.externalId}`);
+  if (opts.email) meta.push(`E-Mail: ${opts.email}`);
+  if (opts.phone) meta.push(`Telefon: ${opts.phone}`);
   if (opts.urgency) {
     meta.push(`Dringlichkeit: ${URGENCY_LABEL_DE[opts.urgency]}`);
   }
@@ -59,6 +63,8 @@ export async function createPracticeCase(input: {
   patientName: string;
   patientBirthDate: string | null;
   patientExternalId: string | null;
+  patientEmail: string | null;
+  patientPhone: string | null;
   patientNotes: string | null;
   urgency: PracticeCaseUrgency;
   isDraft: boolean;
@@ -73,6 +79,8 @@ export async function createPracticeCase(input: {
   const nameTrim = input.patientName.trim();
   const notesTrim = (input.patientNotes || "").trim() || null;
   const extIdTrim = (input.patientExternalId || "").trim() || null;
+  const emailTrim = (input.patientEmail || "").trim() || null;
+  const phoneTrim = (input.patientPhone || "").trim() || null;
 
   if (!input.isDraft && !nameTrim) {
     return { error: "Bitte geben Sie den Namen des Patienten ein." };
@@ -108,8 +116,8 @@ export async function createPracticeCase(input: {
     .insert({
       workspace_id: workspaceId,
       patient_name: nameTrim || null,
-      patient_email: null,
-      patient_phone: null,
+      patient_email: emailTrim,
+      patient_phone: phoneTrim,
       patient_notes: notesTrim,
       patient_birth_date: birth,
       patient_external_id: extIdTrim,
@@ -131,6 +139,8 @@ export async function createPracticeCase(input: {
       const legacyNotes = mergeCaseFieldsIntoNotes(notesTrim, {
         birth,
         externalId: extIdTrim,
+        email: emailTrim,
+        phone: phoneTrim,
         urgency: input.urgency,
         isDraft: input.isDraft,
       });
@@ -139,8 +149,8 @@ export async function createPracticeCase(input: {
         .insert({
           workspace_id: workspaceId,
           patient_name: nameTrim || null,
-          patient_email: null,
-          patient_phone: null,
+          patient_email: emailTrim,
+          patient_phone: phoneTrim,
           patient_notes: legacyNotes,
         })
         .select("id")
