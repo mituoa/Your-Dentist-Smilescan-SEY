@@ -19,6 +19,9 @@ interface TrackerUrgencyChipsProps {
   initialUrgency: string | null;
 }
 
+/**
+ * Zeitraum-Chips — Figma: Label „Zeitraum wählen“, gap 8px, Chip 6px 12px / 6px radius / 13px.
+ */
 export function TrackerUrgencyChips({
   submissionId,
   initialUrgency,
@@ -47,6 +50,17 @@ export function TrackerUrgencyChips({
 
   return (
     <div>
+      <p
+        className="text-[12px]"
+        style={{
+          color: "#94A3B8",
+          marginBottom: "8px",
+          fontWeight: 500,
+          letterSpacing: "0.01em",
+        }}
+      >
+        Zeitraum wählen
+      </p>
       <div className="flex flex-wrap gap-2">
         {OPTIONS.map((opt) => {
           const active = urgency === opt.id;
@@ -56,7 +70,7 @@ export function TrackerUrgencyChips({
               type="button"
               disabled={pending}
               onClick={() => select(opt.id)}
-              className="text-[13px] font-medium transition disabled:opacity-50"
+              className="cursor-pointer text-[13px] font-medium transition duration-150 ease-out disabled:opacity-50"
               style={{
                 padding: "6px 12px",
                 borderRadius: "6px",

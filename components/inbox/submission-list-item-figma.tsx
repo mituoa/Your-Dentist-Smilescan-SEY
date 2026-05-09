@@ -82,7 +82,9 @@ export function SubmissionListItemFigma({
   return (
     <Link
       href={href}
-      className="block transition-[background,transform,box-shadow] duration-150 ease-out hover:bg-white/55"
+      className={`block transition-all duration-150 ease-out ${
+        isActive ? "" : "hover:-translate-y-0.5 hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+      }`}
       style={{
         padding: "16px",
         marginBottom: "4px",

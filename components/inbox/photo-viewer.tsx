@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ImageIcon, Download, Loader2, Check } from "lucide-react";
+import { ImageIcon, Download, Loader2, Check, Maximize2 } from "lucide-react";
 import { saveAs } from "file-saver";
 import { downloadSubmissionPhotos } from "@/app/(protected)/inbox/[id]/actions";
 import { useParams } from "next/navigation";
@@ -30,7 +30,7 @@ function base64ToBytes(base64: string): Uint8Array {
 }
 
 /**
- * Klinische Bildfläche — dominanter Bildausschnitt (PACS/Workspace), nicht Thumbnail-Optik.
+ * Bildbereich — Figma-Referenz: maxHeight 220px, radius 12px, Hover-Expand-Chrome.
  */
 export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
   const params = useParams<{ id: string }>();
@@ -38,19 +38,18 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [downloadStatus, setDownloadStatus] = useState<ZipDownloadStatus>("idle");
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [hoverImage, setHoverImage] = useState(false);
 
   if (photos.length === 0) {
     return (
       <div
-        className="flex min-h-[min(42vh,520px)] flex-col items-center justify-center rounded-lg bg-[#EEF2F7]"
+        className="flex flex-col items-center justify-center rounded-[12px] bg-[#F1F5F9]"
+        style={{ maxHeight: "220px", minHeight: "160px" }}
         aria-label={`Fotos: ${patientName}`}
       >
-        <ImageIcon className="h-14 w-14 text-[#94A3B8]/50" strokeWidth={1} />
-        <p className="mt-3 text-[14px] font-medium" style={{ color: "#64748B" }}>
+        <ImageIcon className="h-12 w-12 text-[#94A3B8]/50" strokeWidth={1} />
+        <p className="mt-2 text-[14px] font-medium" style={{ color: "#64748B" }}>
           Noch keine Fotos
-        </p>
-        <p className="mt-1 max-w-md px-6 text-center text-[13px] leading-relaxed" style={{ color: "#94A3B8" }}>
-          Sobald der Patient Bilder einreicht, erscheinen sie hier.
         </p>
       </div>
     );
@@ -92,43 +91,85 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
     }
   }
 
+  function openFullscreen() {
+    if (selectedUrl && typeof window !== "undefined") {
+      window.open(selectedUrl, "_blank", "noopener,noreferrer");
+    }
+  }
+
   return (
     <div className="space-y-4" aria-label={`Fotos: ${patientName}`}>
       <div
-        className="relative w-full overflow-hidden rounded-lg bg-[#E2E8F0]"
-        style={{ height: "clamp(380px, min(58vh, 820px), 900px)" }}
+        className="relative cursor-pointer"
+        onMouseEnter={() => setHoverImage(true)}
+        onMouseLeave={() => setHoverImage(false)}
       >
-        {selectedUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
-          <img
-            src={selectedUrl}
-            alt={`Klinisches Bild ${selectedIndex + 1} von ${photos.length}`}
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ filter: "saturate(0.94) contrast(0.98)" }}
-          />
-        ) : (
-          <div className="flex h-full min-h-[280px] items-center justify-center">
-            <ImageIcon className="h-16 w-16 text-[#94A3B8]/45" strokeWidth={1} />
-          </div>
-        )}
+        <div
+          className="overflow-hidden bg-[#EEF2F6]"
+          style={{
+            borderRadius: "12px",
+            maxHeight: "220px",
+          }}
+        >
+          {selectedUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
+            <img
+              src={selectedUrl}
+              alt={`Klinisches Bild ${selectedIndex + 1} von ${photos.length}`}
+              className="block w-full object-cover"
+              style={{
+                maxHeight: "220px",
+                filter: "saturate(0.92) contrast(0.96)",
+              }}
+            />
+          ) : (
+            <div className="flex min-h-[160px] items-center justify-center">
+              <ImageIcon className="h-14 w-14 text-[#94A3B8]/45" strokeWidth={1} />
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            openFullscreen();
+          }}
+          className="absolute flex cursor-pointer items-center justify-center transition duration-160 ease-out"
+          style={{
+            top: "12px",
+            right: "12px",
+            width: "36px",
+            height: "36px",
+            borderRadius: "8px",
+            background: "rgba(255, 255, 255, 0.95)",
+            opacity: hoverImage ? 1 : 0,
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+            backdropFilter: "blur(8px)",
+          }}
+          aria-label="Bild vergrößern"
+        >
+          <Maximize2 className="h-[18px] w-[18px]" style={{ color: "#64748B" }} strokeWidth={1.75} />
+        </button>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[12px] text-slate-500">
+        <p className="text-[13px]" style={{ color: "#64748B" }}>
           Bild {selectedIndex + 1} von {photos.length}
         </p>
         <button
           type="button"
           onClick={handleDownloadAllPhotos}
           disabled={isLoading}
-          className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 self-start rounded-lg border border-slate-200/90 bg-white px-4 text-[12px] font-medium text-slate-600 transition hover:border-[#2B6FE8]/35 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium transition hover:border-[#2B6FE8]/40 hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+          style={{ color: "#475569" }}
         >
           {isLoading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.75} />
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
           ) : downloadStatus === "success" ? (
-            <Check className="h-3.5 w-3.5 text-emerald-700" strokeWidth={2} />
+            <Check className="h-4 w-4 text-[#047857]" strokeWidth={2} />
           ) : (
-            <Download className="h-3.5 w-3.5 opacity-70" strokeWidth={1.75} />
+            <Download className="h-4 w-4 opacity-70" strokeWidth={1.75} />
           )}
           {isLoading
             ? "ZIP wird erstellt…"
@@ -141,7 +182,7 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
       </div>
 
       {downloadStatus === "error" && (
-        <p className="text-[13px] leading-relaxed text-red-700">
+        <p className="text-[14px] leading-relaxed text-red-700">
           {downloadError || "Download nicht möglich. Bitte erneut versuchen."}
         </p>
       )}
@@ -153,10 +194,10 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
               key={photo.id}
               type="button"
               onClick={() => setSelectedIndex(i)}
-              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] ${
+              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] ${
                 i === selectedIndex
                   ? "border-[#2B6FE8] ring-1 ring-[#2B6FE8]/30"
-                  : "border-transparent hover:border-slate-200"
+                  : "border-transparent hover:border-[#E2E8F0]"
               }`}
             >
               {photo.signed_url ? (

@@ -13,7 +13,8 @@ interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-const sectionRule = "border-t border-slate-200/70 first:border-t-0 first:pt-0";
+/** Horizontale Innenabstände — Figma: 56px Desktop, adaptiv kleiner. */
+const padX = "clamp(20px, 4vw, 56px)";
 
 function formatRelativeTime(timestamp: string): string {
   const now = new Date();
@@ -63,39 +64,30 @@ function formatBirthDe(value: string | null): string | null {
 
 function urgencyHeadline(urgency: string | null): {
   text: string;
-  color: string;
 } | null {
   switch (urgency) {
     case "today":
-      return {
-        text: "Hohe Wahrscheinlichkeit für akuten Behandlungsbedarf",
-        color: "#1D4ED8",
-      };
+      return { text: "Hohe Wahrscheinlichkeit für akuten Behandlungsbedarf" };
     case "this_week":
-      return {
-        text: "Behandlung innerhalb dieser Woche sinnvoll",
-        color: "#475569",
-      };
+      return { text: "Behandlung innerhalb dieser Woche sinnvoll" };
     case "not_urgent":
-      return {
-        text: "Nicht dringend — routinemäßig planbar",
-        color: "#64748B",
-      };
+      return { text: "Nicht dringend — routinemäßig planbar" };
     default:
       return null;
   }
 }
 
-function recommendedAction(urgency: string | null): string {
+/** Kurz-Zeile unter „Empfohlene Aktion“ — analog Figma getUrgencyGuidance. */
+function urgencyGuidanceShort(urgency: string | null): string {
   switch (urgency) {
     case "today":
-      return "Zeitnahe Kontaktaufnahme und klinische Einordnung innerhalb von 24 Stunden.";
+      return "Termin in den nächsten 24 Stunden sinnvoll";
     case "this_week":
-      return "Rückmeldung und Terminierung innerhalb weniger Werktage.";
+      return "Termin innerhalb von 2–3 Tagen empfohlen";
     case "not_urgent":
-      return "Routinemäßige Terminierung nach Praxiskapazität.";
+      return "Regulärer Termin ausreichend";
     default:
-      return "Bitte Einsendung klinisch einordnen und den weiteren Verlauf dokumentieren.";
+      return "Einschätzung ausstehend";
   }
 }
 
@@ -127,16 +119,22 @@ export default async function InboxDetailPage({
   const birthStr = formatBirthDe(submission.patient_birth_date);
   const idStr = submission.patient_external_id?.trim() || null;
   const patientMetaParts: string[] = [];
-  if (birthStr) patientMetaParts.push(`Geb. ${birthStr}`);
-  if (idStr) patientMetaParts.push(`ID ${idStr}`);
+  if (birthStr) patientMetaParts.push(birthStr);
+  if (idStr) patientMetaParts.push(`ID: ${idStr}`);
   const patientMeta = patientMetaParts.join(" · ");
   const urgencyLine = urgencyHeadline(submission.urgency);
-  const recAction = recommendedAction(submission.urgency);
+  const guidanceShort = urgencyGuidanceShort(submission.urgency);
   const practicePhone = profileRow?.practice_phone ?? null;
   const appointmentUrl = profileRow?.appointment_link ?? null;
 
-  const primaryTitle =
+  const issueTitle =
     concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
+
+  const headerPad = { padding: `clamp(28px, 5vw, 48px) ${padX} 0` };
+  const scrollPadTop = urgencyLine ? "24px" : "32px";
+  const scrollPad = {
+    padding: `${scrollPadTop} ${padX} 56px`,
+  };
 
   return (
     <>
@@ -150,126 +148,171 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      <div className="grid h-full min-h-0 grid-cols-1 grid-rows-[minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_minmax(340px,380px)] xl:grid-rows-1">
-      {/* Mitte: dominante medizinische Hauptfläche — eine ruhige Workspace-Säule, keine Karten-Kaskade */}
-      <div className="relative flex min-h-0 min-w-0 flex-col overflow-hidden bg-[#D5DCE6] shadow-[inset_-1px_0_0_rgba(15,23,42,0.06)] xl:min-w-0">
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="min-h-full xl:min-h-0">
-            <article className="min-h-full border-slate-200/60 bg-white pb-12 xl:min-h-0 xl:border-r xl:pb-16">
-              <div className="px-5 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-12 xl:px-14 xl:py-14">
-                <header className="max-w-[920px]">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    Aktueller Fall
-                  </p>
-                  <h1 className="mt-2 text-pretty text-[21px] font-semibold leading-[1.28] tracking-[-0.02em] text-slate-900 sm:text-[23px] lg:text-[24px] xl:text-[26px]">
-                    {primaryTitle}
-                  </h1>
+      {/* Figma: rechter Bereich flex-1; hier: medizinischer Canvas + schmale Kommunikationsspalte */}
+      <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC]">
+          {/* Detail-Header — Figma: padding 48px 56px 0, background #FFFFFF */}
+          <div className="shrink-0 bg-white" style={headerPad}>
+            <h2
+              className="text-[22px] sm:text-[24px]"
+              style={{
+                color: "#0F172A",
+                fontWeight: 600,
+                letterSpacing: "-0.02em",
+                marginBottom: "8px",
+                lineHeight: 1.3,
+              }}
+            >
+              {issueTitle}
+            </h2>
 
-                  <p className="mt-3 text-[14px] font-medium leading-snug text-slate-600">
-                    {patientLabel}
-                    <span className="mx-2 font-normal text-slate-400">·</span>
-                    <span className="font-normal text-slate-500">
-                      Eingang {formatRelativeTime(submission.created_at)}
-                    </span>
-                    {submission.is_draft ? (
-                      <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-800">
-                        Entwurf
-                      </span>
-                    ) : null}
-                  </p>
+            <p
+              className="text-[14px]"
+              style={{
+                color: "#64748B",
+                fontWeight: 500,
+                letterSpacing: "-0.005em",
+              }}
+            >
+              {patientLabel} · Eingang {formatRelativeTime(submission.created_at)}
+              {submission.is_draft ? (
+                <span className="ml-2 text-[12px]" style={{ color: "#B45309" }}>
+                  Entwurf
+                </span>
+              ) : null}
+            </p>
 
-                  {patientMeta ? (
-                    <p className="mt-2 text-[13px] text-slate-500">{patientMeta}</p>
-                  ) : null}
+            {patientMeta ? (
+              <p
+                className="text-[13px]"
+                style={{
+                  color: "#94A3B8",
+                  fontWeight: 400,
+                  letterSpacing: "-0.003em",
+                  marginTop: "4px",
+                }}
+              >
+                {patientMeta}
+              </p>
+            ) : null}
 
-                  {submission.patient_email || submission.patient_phone ? (
-                    <p className="mt-4 text-[13px] leading-relaxed text-slate-600">
-                      {submission.patient_email ? (
-                        <span className="mr-4 inline-block">{submission.patient_email}</span>
-                      ) : null}
-                      {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
-                    </p>
-                  ) : null}
+            {submission.patient_email || submission.patient_phone ? (
+              <p
+                className="mt-3 text-[13px] leading-relaxed"
+                style={{ color: "#64748B", fontWeight: 400 }}
+              >
+                {submission.patient_email ? (
+                  <span className="mr-3 inline-block">{submission.patient_email}</span>
+                ) : null}
+                {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
+              </p>
+            ) : null}
 
-                  {urgencyLine ? (
-                    <div className="mt-8 border-t border-slate-100 pt-8">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
-                        Klinische Einschätzung
-                      </p>
-                      <p
-                        className="mt-2 max-w-[920px] text-pretty text-[15px] font-medium leading-snug"
-                        style={{ color: urgencyLine.color }}
-                      >
-                        {urgencyLine.text}
-                      </p>
-                    </div>
-                  ) : null}
-                </header>
-
-                <div className={`${sectionRule} mt-10 max-w-none pt-10`}>
-                  <PhotoViewer
-                    photos={submission.photos}
-                    patientName={submission.patient_name || "Patient"}
-                  />
-                </div>
-
-                <div className={`${sectionRule} mt-12 max-w-[72ch] pt-12`}>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    Patientenbericht
-                  </p>
-                  <p className="mt-4 text-[15px] leading-[1.68] text-slate-800">
-                    {submission.patient_notes?.trim()
-                      ? submission.patient_notes
-                      : "Keine Beschreibung vorhanden."}
-                  </p>
-                </div>
-
-                <div id="tracker-empfehlung" className={`${sectionRule} mt-12 scroll-mt-24 pt-12`}>
-                  <div className="max-w-[920px]">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                      Empfohlene Aktion
-                    </p>
-                    <p className="mt-2 text-[14px] leading-relaxed text-slate-600">{recAction}</p>
-
-                    <div className="mt-8 border border-slate-200/60 bg-slate-50/50 px-5 py-6 sm:px-6 sm:py-7">
-                      <TrackerPrimaryActions />
-
-                      <p className="mb-3 mt-8 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
-                        Zeitraum (Einschätzung)
-                      </p>
-                      <TrackerUrgencyChips
-                        submissionId={submission.id}
-                        initialUrgency={submission.urgency}
-                      />
-                    </div>
-                  </div>
-                </div>
+            {urgencyLine ? (
+              <div style={{ marginTop: "24px", paddingBottom: "24px" }}>
+                <p
+                  className="text-[14px]"
+                  style={{
+                    color: "#2563EB",
+                    lineHeight: 1.5,
+                    letterSpacing: "-0.005em",
+                    fontWeight: 500,
+                  }}
+                >
+                  {urgencyLine.text}
+                </p>
               </div>
-            </article>
+            ) : null}
+          </div>
+
+          {/* Scrollbarer Inhalt — Figma: background #FFFFFF, padding 24|32 / 56 / 56 */}
+          <div className="min-h-0 flex-1 overflow-y-auto bg-white" style={scrollPad}>
+            <div style={{ marginBottom: "32px" }}>
+              <PhotoViewer
+                photos={submission.photos}
+                patientName={submission.patient_name || "Patient"}
+              />
+            </div>
+
+            <div style={{ marginBottom: "40px", maxWidth: "600px" }}>
+              <p
+                className="text-[15px]"
+                style={{
+                  color: "#1E293B",
+                  lineHeight: 1.6,
+                  letterSpacing: "-0.008em",
+                }}
+              >
+                {submission.patient_notes?.trim()
+                  ? submission.patient_notes
+                  : "Keine Beschreibung vorhanden."}
+              </p>
+            </div>
+
+            <div id="tracker-empfehlung" className="scroll-mt-24" style={{ maxWidth: "520px" }}>
+              <div style={{ marginBottom: "16px" }}>
+                <p
+                  className="text-[13px]"
+                  style={{
+                    color: "#0A0F1A",
+                    fontWeight: 700,
+                    letterSpacing: "-0.01em",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Empfohlene Aktion
+                </p>
+                <p
+                  className="text-[14px]"
+                  style={{
+                    color: "#64748B",
+                    letterSpacing: "-0.005em",
+                  }}
+                >
+                  {guidanceShort}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  background: "#F8FAFC",
+                  padding: "20px",
+                  borderRadius: "12px",
+                }}
+              >
+                <TrackerPrimaryActions />
+
+                <TrackerUrgencyChips
+                  submissionId={submission.id}
+                  initialUrgency={submission.urgency}
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Rechts: sekundär, kompakt — erst ab xl horizontal neben der Mitte */}
-      <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.08)] bg-[#E4E9F0] xl:max-w-[380px] xl:border-l xl:border-t-0 xl:border-[rgba(15,23,42,0.08)]">
-        <SubmissionActions
-          submissionId={submission.id}
-          patientName={submission.patient_name}
-          patientEmail={submission.patient_email}
-          patientPhone={submission.patient_phone}
-          createdAt={submission.created_at}
-          patientBirthDate={submission.patient_birth_date}
-          patientExternalId={submission.patient_external_id}
-          urgency={submission.urgency}
-          isDraft={submission.is_draft}
-          seenAt={submission.seen_at}
-          updatedAt={submission.updated_at}
-          photoCount={submission.photos.length}
-          canSendAppointmentLink={isDoctor}
-          practicePhone={practicePhone}
-          appointmentUrl={appointmentUrl}
-        />
-      </aside>
+        {/* Kommunikation — nicht im Figma-Snippet; schmale sekundäre Spalte, gleiche Canvas-Farbe */}
+        <aside
+          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0"
+        >
+          <SubmissionActions
+            submissionId={submission.id}
+            patientName={submission.patient_name}
+            patientEmail={submission.patient_email}
+            patientPhone={submission.patient_phone}
+            createdAt={submission.created_at}
+            patientBirthDate={submission.patient_birth_date}
+            patientExternalId={submission.patient_external_id}
+            urgency={submission.urgency}
+            isDraft={submission.is_draft}
+            seenAt={submission.seen_at}
+            updatedAt={submission.updated_at}
+            photoCount={submission.photos.length}
+            canSendAppointmentLink={isDoctor}
+            practicePhone={practicePhone}
+            appointmentUrl={appointmentUrl}
+          />
+        </aside>
       </div>
     </>
   );

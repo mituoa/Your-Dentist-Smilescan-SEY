@@ -25,8 +25,8 @@ interface SubmissionActionsProps {
   appointmentUrl?: string | null;
 }
 
-/** Sekundäre Spalte: ruhig, flach integriert — kein schweres „Card-Deck“. */
-const shell = "rounded-lg border border-slate-200/70 bg-white/95 shadow-[0_1px_2px_rgba(15,23,42,0.03)]";
+/** Sekundäre Spalte — Figma-Canvas #F7F9FC, Panel weiß / dezent. */
+const shell = "rounded-lg border border-[#E5E7EB] bg-white shadow-none";
 const sectionPad = "px-4 py-5 sm:px-5 sm:py-6";
 
 /**

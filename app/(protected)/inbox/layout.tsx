@@ -22,6 +22,9 @@ function SearchFallback() {
   );
 }
 
+/**
+ * Tracker-Shell — Struktur aus Figma-Referenz (Split: Liste 40% / max 480 / min 380, Canvas #F7F9FC).
+ */
 export default async function InboxLayout({ children }: InboxLayoutProps) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) redirect("/login?error=workspace_missing");
@@ -34,31 +37,31 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   const openCaseCount = submissions.filter((s) => !s.is_draft).length;
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col" style={{ background: "#E8EDF4" }}>
+    <div className="relative flex h-full min-h-0 flex-col" style={{ background: "#F7F9FC" }}>
       <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
-        {/* Linke Fallliste — schmal, fix: ~320–360px (nicht vw), Mitte dominiert */}
+        {/* LEFT — Einsendungen (Figma: width 40%, maxWidth 480, minWidth 380, #F8FAFC) */}
         <aside
-          className="flex min-h-0 w-full min-w-0 shrink-0 flex-col border-b border-[rgba(15,23,42,0.06)] md:w-[320px] md:flex-none lg:w-[332px] xl:w-[360px] md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
-          style={{ background: "#F0F3F8" }}
+          className="flex min-h-0 w-full min-w-0 flex-col border-b border-[rgba(15,23,42,0.06)] max-md:max-w-none md:w-[40%] md:max-w-[480px] md:min-w-[380px] md:flex-none md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
+          style={{ background: "#F8FAFC" }}
         >
-          <div style={{ padding: "28px 16px 0" }} className="max-md:pt-8 md:px-5">
+          <div style={{ padding: "48px 24px 0" }} className="max-md:pt-8">
             <div
-              style={{ marginBottom: "20px" }}
+              style={{ marginBottom: "24px" }}
               className="flex items-start justify-between gap-4"
             >
               <div>
                 <h1
-                  className="text-[16px] tracking-tight md:text-[17px]"
+                  className="text-[17px]"
                   style={{
                     color: "#0F172A",
                     fontWeight: 600,
-                    letterSpacing: "-0.02em",
-                    marginBottom: "6px",
+                    letterSpacing: "-0.015em",
+                    marginBottom: "8px",
                   }}
                 >
                   Einsendungen
                 </h1>
-                <p className="text-[13px] md:text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
+                <p className="text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
                   {listFailed
                     ? "Liste momentan nicht verfügbar"
                     : `${openCaseCount} offene ${openCaseCount === 1 ? "Fall" : "Fälle"}`}
@@ -86,7 +89,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
 
           <div
             className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
-            style={{ padding: "28px 12px 20px" }}
+            style={{ padding: "32px 12px 16px" }}
           >
             {listFailed ? (
               <div
@@ -125,8 +128,8 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
           </div>
         </aside>
 
-        {/* Mitte + rechte Spalte: Kind-Routen */}
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#E8EDF4] md:min-h-0">
+        {/* RIGHT — Detail + Kommunikation (Figma: flex-1, #F7F9FC; Kinder setzen weißen Fall-Canvas) */}
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC] md:min-h-0">
           {children}
         </section>
       </div>

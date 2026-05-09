@@ -14,45 +14,71 @@ function scrollToId(id: string, focusDraft?: boolean) {
 }
 
 /**
- * Primäre Aktionen — horizontaler Workspace: zwei Hauptaktionen nebeneinander, wo Breite reicht.
+ * Primäre Aktionen — Figma-Referenz: vertikaler Stack, feste Höhen, 9px Radius, 15px/14px Typo.
  */
 export function TrackerPrimaryActions() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3">
+    <div>
       <button
         type="button"
         onClick={() => scrollToId("tracker-termin")}
-        className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-3 text-[13px] font-semibold text-white transition hover:opacity-95 disabled:opacity-50 sm:min-h-11 sm:text-[14px]"
+        className="flex w-full cursor-pointer items-center justify-center gap-2 border-0 transition duration-150 ease-out hover:opacity-[0.98] active:scale-[0.98]"
         style={{
+          padding: "0 20px",
+          height: "44px",
           background: "#2B6FE8",
-          boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
+          color: "#FFFFFF",
+          borderRadius: "9px",
+          fontSize: "15px",
+          fontWeight: 600,
           letterSpacing: "-0.01em",
+          marginBottom: "12px",
+          boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
         }}
       >
-        <Calendar className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
-        <span className="text-center leading-snug">Terminlink vorbereiten</span>
+        <Calendar className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+        Termin vorschlagen
       </button>
 
       <button
         type="button"
         onClick={() => scrollToId("tracker-korrespondenz", true)}
-        className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border bg-white px-3 text-[13px] font-medium transition hover:bg-slate-50 sm:min-h-11 sm:text-[14px]"
+        className="flex w-full cursor-pointer items-center justify-center gap-2 transition duration-150 ease-out active:scale-[0.98]"
         style={{
-          borderColor: "#CBD5E1",
-          color: "#1D4ED8",
+          padding: "0 20px",
+          height: "42px",
+          background: "#FFFFFF",
+          color: "#2B6FE8",
+          border: "1px solid #CBD5E1",
+          borderRadius: "9px",
+          fontSize: "15px",
+          fontWeight: 500,
           letterSpacing: "-0.01em",
+          marginBottom: "8px",
         }}
       >
-        <MessageSquare className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
-        <span className="text-center leading-snug">Rückfrage formulieren</span>
+        <MessageSquare className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+        Rückfrage an Patient
       </button>
 
       <button
         type="button"
         onClick={() => scrollToId("tracker-empfehlung")}
-        className="flex min-h-9 w-full items-center justify-center gap-2 rounded-lg border-0 bg-transparent text-[13px] font-normal text-slate-500 transition hover:bg-slate-100/80 sm:col-span-2 sm:min-h-10"
+        className="flex w-full cursor-pointer items-center justify-center gap-[7px] border-0 transition duration-150 ease-out hover:bg-[#F1F5F9] hover:text-[#64748B] hover:opacity-100 active:scale-[0.98]"
+        style={{
+          padding: "0 20px",
+          height: "40px",
+          background: "transparent",
+          color: "#94A3B8",
+          borderRadius: "9px",
+          fontSize: "14px",
+          fontWeight: 400,
+          letterSpacing: "-0.005em",
+          marginBottom: "16px",
+          opacity: 0.75,
+        }}
       >
-        <Clock className="h-3.5 w-3.5 shrink-0 opacity-80" strokeWidth={1.75} />
+        <Clock className="h-4 w-4 shrink-0" strokeWidth={1.75} />
         Zunächst beobachten
       </button>
     </div>

@@ -36,7 +36,7 @@ export function InboxSearchFigma({ routeBase = "/inbox" }: InboxSearchFigmaProps
   return (
     <div className="relative">
       <Search
-        className="absolute left-3 top-1/2 -translate-y-1/2 h-[16px] w-[16px]"
+        className="absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2"
         style={{ color: "#94A3B8" }}
         strokeWidth={2}
       />
