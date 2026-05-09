@@ -509,17 +509,17 @@ export function LoginPageClient({
               </div>
 
               <div
-                className="rounded-2xl border border-gray-200/70 bg-white p-5 lg:rounded-[22px] lg:border-gray-100/80 lg:p-8"
+                className="max-md:border-gray-200/55 max-md:p-4 rounded-2xl border border-gray-200/70 bg-white p-5 lg:rounded-[22px] lg:border-gray-100/80 lg:p-8"
                 style={{
                   boxShadow:
                     "0 1px 2px rgba(0,0,0,0.02), 0 4px 8px rgba(0,0,0,0.02), 0 16px 24px rgba(0,0,0,0.03)",
                 }}
               >
-                <div className="mb-6 lg:mb-10">
-                  <h2 className="mb-1.5 text-2xl font-semibold leading-tight tracking-tight text-gray-900 sm:text-[28px] lg:mb-2 lg:text-[32px]">
+                <div className="max-md:mb-5 mb-6 lg:mb-10">
+                  <h2 className="max-md:text-[1.375rem] max-md:leading-[1.25] max-md:tracking-tight mb-1.5 text-2xl font-semibold leading-tight tracking-tight text-gray-900 sm:text-[28px] lg:mb-2 lg:text-[32px]">
                     Anmelden
                   </h2>
-                  <p className="text-[13px] text-gray-500 lg:text-[14px]">
+                  <p className="max-md:text-[12.5px] max-md:leading-relaxed text-[13px] text-gray-500 lg:text-[14px]">
                     Greifen Sie auf Ihr Your Dentist-Konto zu
                   </p>
                 </div>
@@ -545,7 +545,7 @@ export function LoginPageClient({
                   </p>
                 ) : null}
 
-                <form action={signIn} className="space-y-3 lg:space-y-4">
+                <form action={signIn} className="max-md:space-y-2.5 space-y-3 lg:space-y-4">
                   {inviteToken ? (
                     <input type="hidden" name="invite_token" value={inviteToken} />
                   ) : null}
@@ -559,13 +559,13 @@ export function LoginPageClient({
                       placeholder="E-Mail-Adresse"
                       autoComplete="email"
                       onChange={(e) => setResendEmail(e.target.value)}
-                      className="h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
+                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
                       required
                     />
                   </div>
 
                   <div>
-                    <div className="mb-1.5 flex items-center justify-end lg:mb-2">
+                    <div className="max-md:mb-1 mb-1.5 flex items-center justify-end lg:mb-2">
                       <Link
                         href={
                           inviteToken
@@ -583,7 +583,7 @@ export function LoginPageClient({
                       type="password"
                       placeholder="Passwort"
                       autoComplete="current-password"
-                      className="h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
+                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
                       required
                     />
                   </div>
@@ -612,7 +612,7 @@ export function LoginPageClient({
                   </div>
                 ) : null}
 
-                <div className="relative my-5 lg:my-8">
+                <div className="relative max-md:my-4 my-5 lg:my-8">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200/90" style={{ borderWidth: "0.5px" }} />
                   </div>
@@ -776,25 +776,25 @@ export function LoginPageClient({
 
         {/* Mobile sticky CTA */}
         <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#F8F7F3] via-[#F8F7F3]/95 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#F8F7F3] via-[#F8F7F3]/82 to-transparent" />
           <div
-            className="relative px-3 pt-2"
-            style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom, 0px))" }}
+            className="relative px-3 pt-1"
+            style={{ paddingBottom: "max(0.25rem, env(safe-area-inset-bottom, 0px))" }}
           >
-            <div className="mx-auto max-w-md rounded-xl border border-gray-200/60 bg-white/90 p-2.5 shadow-md backdrop-blur-md">
-              <div className="flex items-center justify-between gap-2.5">
+            <div className="mx-auto max-w-md rounded-lg border border-gray-200/50 bg-white/[0.86] p-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0 pr-1">
-                  <p className="truncate text-[12px] font-semibold leading-tight text-gray-900">
+                  <p className="truncate text-[11px] font-medium leading-snug tracking-tight text-gray-900">
                     14 Tage kostenlos testen
                   </p>
-                  <p className="mt-0.5 truncate text-[11px] leading-tight text-gray-500">
+                  <p className="mt-px truncate text-[10px] leading-snug text-gray-500">
                     Plan wählen und starten
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={openPlanSheet}
-                  className="inline-flex h-11 min-h-[44px] shrink-0 items-center justify-center rounded-lg px-3 text-[12px] font-semibold text-white shadow-sm active:scale-[0.98]"
+                  className="inline-flex h-10 min-h-[44px] shrink-0 items-center justify-center rounded-md px-3 text-[11px] font-semibold text-white active:scale-[0.98]"
                   style={{ background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)" }}
                 >
                   Plan wählen
@@ -806,19 +806,19 @@ export function LoginPageClient({
 
         <div
           id="pricing"
-          className="w-full min-w-0 scroll-mt-24 bg-white px-4 py-10 pb-[calc(7.75rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-12 md:px-8 md:py-14 md:pb-16 lg:px-16 lg:py-16"
+          className="w-full min-w-0 scroll-mt-20 border-t border-transparent bg-white px-4 pb-[calc(7.25rem+env(safe-area-inset-bottom,0px))] pt-4 max-md:border-gray-200/25 sm:px-6 sm:pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pt-7 md:scroll-mt-24 md:border-t-0 md:px-8 md:py-14 md:pb-16 lg:px-16 lg:py-16"
         >
           <div className="mx-auto max-w-5xl">
-            <div className="mb-4 text-center">
-              <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl md:mb-3 md:text-4xl lg:text-[36px]">
+            <div className="max-md:mb-2.5 mb-3 text-center md:mb-4">
+              <h2 className="max-md:text-[1.375rem] max-md:leading-tight mb-1.5 text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl md:mb-3 md:text-4xl lg:text-[36px]">
                 Einfache, transparente Preise
               </h2>
-              <p className="mx-auto max-w-xl text-[14px] text-gray-600 md:text-[16px]">
+              <p className="mx-auto max-w-xl max-md:text-[13px] max-md:leading-relaxed text-[14px] text-gray-600 md:text-[16px]">
                 Alle Pläne beinhalten den vollen Funktionsumfang. Wählen Sie einfach Ihren Abrechnungszeitraum.
               </p>
             </div>
 
-            <div className="mb-8 flex flex-col items-center justify-center gap-3 text-[12px] text-gray-600 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-[13px] md:mb-12 md:gap-6">
+            <div className="max-md:mb-5 mb-6 flex flex-col items-center justify-center gap-2.5 text-[12px] text-gray-600 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-[13px] md:mb-12 md:gap-6">
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path
@@ -852,32 +852,32 @@ export function LoginPageClient({
             </div>
 
             <div
-              className="mb-10 grid grid-cols-1 gap-3 md:mb-16 md:grid-cols-3 md:gap-4"
+              className="max-md:mb-7 mb-8 grid grid-cols-1 gap-2 max-md:gap-2 md:mb-16 md:grid-cols-3 md:gap-4"
               style={{ animation: "fadeIn 0.6s ease-out" }}
             >
               <div
-                className="flex flex-col rounded-xl border border-gray-200/90 bg-white p-4 transition-all duration-200 hover:border-[#0284C7] hover:shadow-lg md:rounded-2xl md:border-2 md:border-gray-200 md:p-6"
+                className="flex flex-col rounded-xl border border-gray-200/90 bg-white p-3.5 transition-all duration-200 hover:border-[#0284C7] max-md:border-gray-200/70 max-md:p-3 md:rounded-2xl md:border-2 md:border-gray-200 md:p-6 md:hover:shadow-lg"
                 style={{ animation: "fadeIn 0.5s ease-out 0.1s both" }}
               >
-                <div className="h-3 md:h-[20px]" />
+                <div className="h-1.5 md:h-[20px]" />
                 <h3 className="mb-0.5 text-lg font-semibold text-gray-900 md:text-[20px]">Monatlich</h3>
-                <p className="mb-3 text-[12px] text-gray-500 md:mb-6 md:text-[13px]">{plans.monthly.billing}</p>
-                <div className="mb-1 md:mb-2">
-                  <span className="text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.monthly.price}</span>
+                <p className="max-md:mb-1.5 mb-2 text-[12px] leading-snug text-gray-500 md:mb-6 md:text-[13px]">{plans.monthly.billing}</p>
+                <div className="max-md:mb-0 mb-0 md:mb-2">
+                  <span className="max-md:text-[1.625rem] text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.monthly.price}</span>
                   <span className="ml-1 text-[14px] text-gray-500 md:text-[16px]">/Monat</span>
                 </div>
-                <div className="mb-4 h-3 md:mb-8 md:h-[20px]" />
+                <div className="mb-2.5 h-1.5 max-md:mb-2 md:mb-8 md:h-[20px]" />
                 <Link
                   href={registerFromPricingHref("monthly")}
                   onClick={markReturnToPricing}
-                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px]"
+                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px] md:hover:-translate-y-0.5"
                 >
                   Jetzt starten
                 </Link>
               </div>
 
               <div
-                className="relative flex flex-col rounded-xl border border-gray-200/90 bg-white p-4 transition-all duration-200 hover:border-[#0284C7] hover:shadow-lg md:rounded-2xl md:border-2 md:border-gray-200 md:p-6"
+                className="relative flex flex-col rounded-xl border border-gray-200/90 bg-white p-3.5 transition-all duration-200 hover:border-[#0284C7] max-md:border-gray-200/70 max-md:p-3 md:rounded-2xl md:border-2 md:border-gray-200 md:p-6 md:hover:shadow-lg"
                 style={{ animation: "fadeIn 0.5s ease-out 0.2s both" }}
               >
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 md:-top-3">
@@ -885,27 +885,27 @@ export function LoginPageClient({
                     SPARE 10%
                   </span>
                 </div>
-                <div className="h-3 md:h-[20px]" />
+                <div className="h-1.5 md:h-[20px]" />
                 <h3 className="mb-0.5 text-lg font-semibold text-gray-900 md:text-[20px]">Halbjährlich</h3>
-                <p className="mb-3 text-[12px] text-gray-500 md:mb-6 md:text-[13px]">{plans.halfyearly.billing}</p>
-                <div className="mb-1 md:mb-2">
-                  <span className="text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.halfyearly.price}</span>
+                <p className="max-md:mb-1.5 mb-2 text-[12px] leading-snug text-gray-500 md:mb-6 md:text-[13px]">{plans.halfyearly.billing}</p>
+                <div className="max-md:mb-0 mb-0 md:mb-2">
+                  <span className="max-md:text-[1.625rem] text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.halfyearly.price}</span>
                   <span className="ml-1 text-[14px] text-gray-500 md:text-[16px]">/Monat</span>
                 </div>
-                <div className="mb-4 flex h-3 items-center justify-start md:mb-8 md:h-[20px]">
+                <div className="mb-2.5 flex min-h-[1.125rem] items-center justify-start max-md:mb-2 md:mb-8 md:h-[20px]">
                   <span className="text-[11px] text-gray-500 md:text-[12px]">€{plans.halfyearly.total} alle 6 Monate</span>
                 </div>
                 <Link
                   href={registerFromPricingHref("halfyearly")}
                   onClick={markReturnToPricing}
-                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px]"
+                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-900 bg-white text-[14px] font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-900 hover:text-white active:scale-[0.98] md:h-[48px] md:rounded-xl md:border-2 md:text-[15px] md:hover:-translate-y-0.5"
                 >
                   Jetzt starten
                 </Link>
               </div>
 
               <div
-                className="relative flex flex-col rounded-xl border border-[#0284C7] bg-white p-4 shadow-md md:rounded-2xl md:border-2 md:p-6 md:shadow-lg"
+                className="relative flex flex-col rounded-xl border border-[#0284C7] bg-white p-3.5 shadow-sm max-md:p-3 max-md:shadow-[0_1px_2px_rgba(15,23,42,0.04)] md:rounded-2xl md:border-2 md:p-6 md:shadow-lg"
                 style={{ animation: "fadeIn 0.5s ease-out 0.3s both" }}
               >
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 md:-top-3">
@@ -913,14 +913,14 @@ export function LoginPageClient({
                     AM BELIEBTESTEN
                   </span>
                 </div>
-                <div className="h-3 md:h-[20px]" />
+                <div className="h-1.5 md:h-[20px]" />
                 <h3 className="mb-0.5 text-lg font-semibold text-gray-900 md:text-[20px]">Jährlich</h3>
-                <p className="mb-3 text-[12px] text-gray-500 md:mb-6 md:text-[13px]">{plans.yearly.billing}</p>
-                <div className="mb-1 md:mb-2">
-                  <span className="text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.yearly.price}</span>
+                <p className="max-md:mb-1.5 mb-2 text-[12px] leading-snug text-gray-500 md:mb-6 md:text-[13px]">{plans.yearly.billing}</p>
+                <div className="max-md:mb-0 mb-0 md:mb-2">
+                  <span className="max-md:text-[1.625rem] text-3xl font-semibold text-gray-900 md:text-[40px]">€{plans.yearly.price}</span>
                   <span className="ml-1 text-[14px] text-gray-500 md:text-[16px]">/Monat</span>
                 </div>
-                <div className="mb-4 flex h-3 items-center justify-start md:mb-8 md:h-[20px]">
+                <div className="mb-2.5 flex min-h-[1.125rem] items-center justify-start max-md:mb-2 md:mb-8 md:h-[20px]">
                   <span className="text-[11px] font-semibold text-green-600 md:text-[12px]">
                     Spare €{(plans.monthly.price - plans.yearly.price) * 12}/Jahr
                   </span>
@@ -928,7 +928,7 @@ export function LoginPageClient({
                 <Link
                   href={registerFromPricingHref("yearly")}
                   onClick={markReturnToPricing}
-                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg text-[14px] font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98] md:h-[48px] md:rounded-xl md:text-[15px]"
+                  className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-lg text-[14px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] max-md:shadow-none md:h-[48px] md:rounded-xl md:text-[15px] md:shadow-md md:hover:-translate-y-0.5 md:hover:shadow-xl"
                   style={{
                     background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
                   }}
@@ -939,7 +939,7 @@ export function LoginPageClient({
             </div>
 
             <div className="text-center">
-              <p className="text-[14px] text-gray-600 mb-8">Alle Pläne beinhalten:</p>
+              <p className="max-md:mb-4 mb-5 text-[14px] text-gray-600 md:mb-8">Alle Pläne beinhalten:</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
                 {["Unbegrenzte Fälle", "Cloud-Speicher", "Alle Updates inkl."].map((label) => (
                   <div key={label} className="flex items-center gap-2 justify-center text-[13px] text-gray-700">
