@@ -217,7 +217,7 @@ export function LoginPageClient({
               aria-label="Schließen"
             />
             <div
-              className="relative max-h-[min(92dvh,92vh)] w-full max-w-xl translate-y-0 overflow-y-auto rounded-2xl border border-gray-200/80 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-5 md:-translate-y-10"
+              className="relative max-h-[min(calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)),92dvh,92vh)] w-full max-w-xl translate-y-0 overflow-y-auto overscroll-contain rounded-2xl border border-gray-200/80 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-5 md:-translate-y-10"
               style={{ animation: "modalSlideIn 0.2s ease-out" }}
               role="dialog"
               aria-modal="true"
@@ -577,7 +577,7 @@ export function LoginPageClient({
                       placeholder="E-Mail-Adresse"
                       autoComplete="email"
                       onChange={(e) => setResendEmail(e.target.value)}
-                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
+                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4 lg:text-[15px]"
                       required
                     />
                   </div>
@@ -601,7 +601,7 @@ export function LoginPageClient({
                       type="password"
                       placeholder="Passwort"
                       autoComplete="current-password"
-                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[15px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4"
+                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4 lg:text-[15px]"
                       required
                     />
                   </div>

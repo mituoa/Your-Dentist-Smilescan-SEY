@@ -34,7 +34,7 @@ export function DangerZone() {
         className="inline-flex items-center gap-2 text-sm text-danger hover:underline"
       >
         <LogOut className="w-4 h-4" strokeWidth={1.75} />
-        Aus SmileScan abmelden
+        Bei Your Dentist abmelden
       </button>
     </section>
   );

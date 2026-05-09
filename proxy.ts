@@ -1,6 +1,18 @@
 import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
+import { normalizePublicEnvUrl } from "@/lib/env-url";
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+
+function isUsableSupabaseHttpUrl(raw: string): boolean {
+  const url = normalizePublicEnvUrl(raw);
+  if (!url || !url.startsWith("https://")) return false;
+  try {
+    const u = new URL(url);
+    return Boolean(u.host) && (u.protocol === "https:" || u.protocol === "http:");
+  } catch {
+    return false;
+  }
+}
 
 // Routen, die einen Login erfordern
 const PROTECTED_PATHS = [
@@ -27,10 +39,10 @@ const BLOCKING_AUTH_ERRORS = new Set([
 ]);
 
 export async function proxy(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = normalizePublicEnvUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseKey = normalizePublicEnvUrl(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
-  if (!supabaseUrl || !supabaseKey || !supabaseUrl.startsWith("https://")) {
+  if (!supabaseUrl || !supabaseKey || !isUsableSupabaseHttpUrl(supabaseUrl)) {
     return NextResponse.next({ request });
   }
 

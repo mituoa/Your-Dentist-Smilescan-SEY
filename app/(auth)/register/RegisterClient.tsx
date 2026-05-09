@@ -572,7 +572,7 @@ export function RegisterClient(props: {
       return;
     }
     if (email !== confirm) {
-      setEmailPairError("Die E-Mail-Adressen stimmen nicht überein.");
+      setEmailPairError("Die beiden E-Mail-Eingaben passen nicht zueinander.");
       setConfirmMismatchAfterContinueAttempt(true);
       return;
     }
@@ -684,7 +684,7 @@ export function RegisterClient(props: {
       `}</style>
 
       <div
-        className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-y-contain"
+        className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-y-contain max-md:[-webkit-overflow-scrolling:touch]"
         style={{ animation: "fadeIn 0.2s ease-out" }}
       >
         <div
@@ -694,9 +694,9 @@ export function RegisterClient(props: {
         >
         </div>
 
-        <div className="relative z-10 flex w-full max-w-full min-w-0 flex-col items-stretch px-4 pb-28 pt-4 sm:px-5 md:min-h-screen md:items-center md:justify-center md:px-8 md:py-12 md:pb-16">
+        <div className="relative z-10 flex w-full max-w-full min-w-0 flex-col items-stretch px-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-5 md:min-h-screen md:items-center md:justify-center md:px-8 md:py-12 md:pb-16">
           <div
-            className="relative mx-auto w-full min-w-0 max-w-2xl overflow-x-hidden rounded-3xl bg-white max-md:max-h-[min(calc(100dvh-2rem),920px)] max-md:overflow-y-auto md:overflow-visible md:max-h-none"
+            className="relative mx-auto flex w-full min-w-0 max-w-2xl flex-col overflow-x-hidden rounded-3xl bg-white max-md:max-h-[min(calc(100dvh-1.25rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)),920px)] max-md:min-h-0 max-md:overflow-y-auto max-md:overscroll-contain md:max-h-none md:overflow-visible"
             style={{
               boxShadow:
                 "0 4px 6px rgba(0,0,0,0.05), 0 10px 20px rgba(0,0,0,0.10), 0 20px 40px rgba(0,0,0,0.15)",
@@ -707,7 +707,7 @@ export function RegisterClient(props: {
             type="button"
             onClick={handleRegistrationModalClose}
             aria-label="Schließen"
-            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-red-50 md:right-5 md:top-5"
+            className="absolute right-3 top-3 z-10 flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-gray-200 md:right-5 md:top-5 md:h-9 md:w-9 md:min-h-0 md:min-w-0"
           >
             <svg
               className="h-4 w-4 text-gray-600 transition-all duration-200 group-hover:rotate-90"
@@ -754,7 +754,7 @@ export function RegisterClient(props: {
               </p>
             </div>
 
-            <div className="px-4 pb-12 sm:px-5 md:px-10 md:pb-10">
+            <div className="flex min-h-0 flex-1 flex-col px-4 pb-[max(2.5rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] pt-0 sm:px-5 md:px-10 md:pb-10">
               {props.success ? (
                 <div className="py-6 text-center" style={{ animation: "slideIn 0.4s ease-out" }}>
                   <h3 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">
@@ -783,7 +783,7 @@ export function RegisterClient(props: {
                         value={successEmail}
                         onChange={(e) => setSuccessEmail(e.target.value)}
                         placeholder="name@praxis.de"
-                        className="h-[48px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-3 text-base text-gray-900 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[14px]"
+                        className="h-[48px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-3 text-[16px] text-gray-900 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[14px]"
                       />
                       {successEmail.trim() && !isValidEmail(successEmail) ? (
                         <p className="mt-2 text-[12px] text-amber-800">Bitte eine gültige E‑Mail-Adresse eingeben.</p>
@@ -795,13 +795,15 @@ export function RegisterClient(props: {
                         if (!suggestion) return null;
                         return (
                           <p className="mt-2 text-[12px] leading-relaxed text-gray-600">
-                            Meinten Sie vielleicht{" "}
+                            Meinten Sie{" "}
                             <button
                               type="button"
                               onClick={() => setSuccessEmail(suggestion.suggested)}
                               className="font-medium text-[#0284C7] underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                             >
-                              {suggestion.suggested}
+                              {suggestion.suggested.includes("@")
+                                ? (suggestion.suggested.split("@")[1] ?? suggestion.suggested)
+                                : suggestion.suggested}
                             </button>
                             ?
                           </p>
@@ -946,7 +948,7 @@ export function RegisterClient(props: {
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
                         placeholder="Dr. med. dent. Max Mustermann"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                     </div>
@@ -965,7 +967,7 @@ export function RegisterClient(props: {
                         }}
                         placeholder="max.mustermann@praxis.de"
                         autoComplete="email"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                       {emailCheckStatus !== "idle" ? (
@@ -989,7 +991,7 @@ export function RegisterClient(props: {
 
                       {emailTypoSuggestion ? (
                         <p className="mt-2.5 text-[12px] leading-relaxed text-gray-600">
-                          Meinten Sie vielleicht{" "}
+                          Meinten Sie{" "}
                           <button
                             type="button"
                             onClick={() => {
@@ -1006,7 +1008,9 @@ export function RegisterClient(props: {
                             }}
                             className="font-medium text-[#0284C7] underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                           >
-                            {emailTypoSuggestion.suggested}
+                            {emailTypoSuggestion.suggested.includes("@")
+                              ? (emailTypoSuggestion.suggested.split("@")[1] ?? emailTypoSuggestion.suggested)
+                              : emailTypoSuggestion.suggested}
                           </button>
                           ?
                         </p>
@@ -1052,14 +1056,14 @@ export function RegisterClient(props: {
                         placeholder="E-Mail-Adresse erneut eingeben"
                         autoComplete="off"
                         name="email_confirm_register"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                       {emailPairError ? (
                         <p className="mt-2 text-[12px] text-amber-800">{emailPairError}</p>
                       ) : showConfirmMismatchHint ? (
                         <p className="mt-2 text-[12px] text-amber-800">
-                          Die E-Mail-Adressen stimmen nicht überein.
+                          Die E-Mail-Adressen sollten übereinstimmen.
                         </p>
                       ) : null}
                     </div>
@@ -1076,7 +1080,7 @@ export function RegisterClient(props: {
                         placeholder="Mindestens 8 Zeichen"
                         autoComplete="new-password"
                         minLength={8}
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
 
@@ -1142,7 +1146,7 @@ export function RegisterClient(props: {
                         value={regPractice}
                         onChange={(e) => setRegPractice(e.target.value)}
                         placeholder="Zahnarztpraxis Mustermann"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                     </div>
@@ -1157,7 +1161,7 @@ export function RegisterClient(props: {
                         value={regLicense}
                         onChange={(e) => setRegLicense(e.target.value)}
                         placeholder="Z-12345678"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
                         required
                       />
                       {licenseFormatHint ? (
@@ -1197,10 +1201,10 @@ export function RegisterClient(props: {
                 <div style={{ animation: "slideIn 0.4s ease-out" }}>
                   <div className="mb-7 text-center">
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Fast geschafft! 🎉
+                      Verifizierung
                     </h3>
                     <p className="text-[13px] text-gray-500">
-                      Bitte verifizieren Sie Ihre Zahnarzt-Zulassung
+                      Bitte laden Sie Ihre Zahnarzt-Zulassung hoch (Vorder- und Rückseite).
                     </p>
                     {props.licenseStepOptional ? (
                       <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-gray-500">
@@ -1409,7 +1413,21 @@ export function RegisterClient(props: {
                           background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
                         }}
                       >
-                        {licenseUploading ? "Upload läuft..." : "Weiter"}
+                        {licenseUploading ? (
+                          <span className="inline-flex items-center justify-center gap-2">
+                            <svg className="h-5 w-5 shrink-0 animate-spin text-white/90" viewBox="0 0 24 24" aria-hidden="true">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
+                              <path
+                                className="opacity-80"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                            Wird gesendet…
+                          </span>
+                        ) : (
+                          "Weiter"
+                        )}
                       </button>
                     </div>
                   </form>
@@ -1431,8 +1449,8 @@ export function RegisterClient(props: {
                   <div className="mb-6 rounded-2xl border border-slate-200/70 bg-slate-50/45 px-4 py-3.5 text-left">
                     <p className="text-[12px] font-semibold text-gray-800">14 Tage kostenlos testen</p>
                     <ul className="mt-2 list-none space-y-1.5 text-[11px] leading-relaxed text-gray-600">
-                      <li>Keine Zahlung während der Testphase erforderlich.</li>
-                      <li>Zahlungsdaten können später ergänzt werden.</li>
+                      <li>Keine Abbuchung während der Testphase.</li>
+                      <li>Zahlungsmethode kann später aktiviert werden.</li>
                     </ul>
                   </div>
 
@@ -1574,15 +1592,54 @@ export function RegisterClient(props: {
                       </button>
                     </div>
 
+                    <div
+                      className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-gray-200/80 pt-4 text-[10px] font-medium uppercase tracking-wide text-gray-400"
+                      aria-label="Gängige Zahlungsarten"
+                    >
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0 opacity-80">
+                          <path
+                            fill="#003087"
+                            d="M7.4 19.3H4L6.1 4.7h3.4l-2.1 14.6zm12.6-10.5c0-1.1-.8-1.7-2.2-1.7-1.5 0-3.3.1-5.1.4L12 19.3h3.2l.5-3.2h2.2c2.5 0 4.1-1.2 4.6-3.5.2-1 .1-1.8-.5-2.4-.5-.5-1.4-.8-2.5-.8h-2.1l.2-1.1c1.2-.1 2.1-.2 2.7-.2 1 0 1.6.2 2 .6.3.3.4.8.3 1.4z"
+                          />
+                          <path fill="#009cde" d="M19.5 8.8c-.5 3.2-2.8 4.3-5.6 4.3h-1.4l-1 6.2h2.7c.6 0 1.1-.4 1.2-1l.9-5.7c.1-.6-.3-1.1-.9-1.1h-.8z" />
+                        </svg>
+                        PayPal
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg width="22" height="14" viewBox="0 0 32 20" aria-hidden="true" className="shrink-0 opacity-85">
+                          <rect width="32" height="20" rx="3" fill="#1A1F71" />
+                          <path d="M11 14h4l1-8h-4l-1 8z" fill="#F9A533" />
+                        </svg>
+                        Visa
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg width="22" height="14" viewBox="0 0 32 20" aria-hidden="true" className="shrink-0 opacity-85">
+                          <rect width="32" height="20" rx="3" fill="#000" />
+                          <circle cx="13" cy="10" r="6" fill="#EB001B" />
+                          <circle cx="19" cy="10" r="6" fill="#F79E1B" />
+                        </svg>
+                        Mastercard
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <svg width="20" height="14" viewBox="0 0 28 20" aria-hidden="true" className="shrink-0 opacity-80">
+                          <rect width="28" height="20" rx="2" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                          <path d="M4 12h20" stroke="currentColor" strokeWidth="1" />
+                          <path d="M8 8v8M14 6v12M20 8v8" stroke="currentColor" strokeWidth="0.8" />
+                        </svg>
+                        SEPA
+                      </span>
+                    </div>
+
                     <p className="mt-4 mb-3 text-[12px] font-semibold uppercase tracking-wide text-gray-600">
                       Vertrag & Einwilligungen
                     </p>
-                    <label className="flex items-start gap-3 text-[13px] text-gray-700">
+                    <label className="flex min-h-[44px] cursor-pointer items-start gap-3 text-[13px] text-gray-700 max-md:py-1 md:min-h-0 md:py-0">
                       <input
                         type="checkbox"
                         checked={acceptedTos}
                         onChange={(e) => setAcceptedTos(e.target.checked)}
-                        className="mt-1 h-4 w-4"
+                        className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-[#0284C7] focus:ring-[#0284C7]/25 md:h-4 md:w-4"
                       />
                       <span>
                         Ich akzeptiere die{" "}
@@ -1592,12 +1649,12 @@ export function RegisterClient(props: {
                         . *
                       </span>
                     </label>
-                    <label className="mt-3 flex items-start gap-3 text-[13px] text-gray-700">
+                    <label className="mt-3 flex min-h-[44px] cursor-pointer items-start gap-3 text-[13px] text-gray-700 max-md:py-1 md:min-h-0 md:py-0">
                       <input
                         type="checkbox"
                         checked={acceptedPrivacy}
                         onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                        className="mt-1 h-4 w-4"
+                        className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-[#0284C7] focus:ring-[#0284C7]/25 md:h-4 md:w-4"
                       />
                       <span>
                         Ich habe die{" "}
@@ -1607,12 +1664,12 @@ export function RegisterClient(props: {
                         gelesen. *
                       </span>
                     </label>
-                    <label className="mt-3 flex items-start gap-3 text-[13px] text-gray-700">
+                    <label className="mt-3 flex min-h-[44px] cursor-pointer items-start gap-3 text-[13px] text-gray-700 max-md:py-1 md:min-h-0 md:py-0">
                       <input
                         type="checkbox"
                         checked={acceptedWithdrawal}
                         onChange={(e) => setAcceptedWithdrawal(e.target.checked)}
-                        className="mt-1 h-4 w-4"
+                        className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-[#0284C7] focus:ring-[#0284C7]/25 md:h-4 md:w-4"
                       />
                       <span>
                         Ich verlange ausdrücklich, dass Your Dentist vor Ablauf der Widerrufsfrist mit der Leistung
@@ -1673,7 +1730,9 @@ export function RegisterClient(props: {
                       </button>
                       <RegisterFormSubmitButton
                         label={
-                          props.skipPaymentAtSignup ? "Registrierung abschließen" : "Zahlungspflichtig bestellen"
+                          props.skipPaymentAtSignup
+                            ? "Konto anlegen (Testphase)"
+                            : "Vertrag wählen & fortfahren"
                         }
                         pendingLabel=""
                         disabled={
@@ -1699,7 +1758,7 @@ export function RegisterClient(props: {
                         <RegisterFormSubmitButton
                           name="registration_demo_skip"
                           value="1"
-                          label="Registrierung abschließen (Demo, ohne Zahlung)"
+                          label="Demo: Konto ohne Zahlung anlegen"
                           pendingLabel=""
                           disabled={
                             !acceptedTos ||

@@ -7,7 +7,7 @@ import { NavBadge } from "./nav-badge";
 
 const BRAND_MARK_BY_ROUTE: Record<string, { src: string; alt: string }> = {
   "/dashboard": { src: "/brand/atlas/logo-mark.svg", alt: "Atlas mark" },
-  "/inbox": { src: "/brand/smilescan/logo-mark.svg", alt: "SmileScan mark" },
+  "/inbox": { src: "/brand/your-dentist/logo-mark.svg", alt: "Inbox" },
   "/my-tasks": { src: "/brand/relay/logo-mark.svg", alt: "Relay mark" },
   "/relay": { src: "/brand/relay/logo-mark.svg", alt: "Relay mark" },
   "/profile/editor": { src: "/brand/portrait/logo-mark.svg", alt: "Portrait mark" },

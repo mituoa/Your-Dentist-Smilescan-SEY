@@ -113,7 +113,7 @@ export function MobileNav({
                 <NavItem
                   href="/inbox"
                   iconName="inbox"
-                  label="SmileScan"
+                  label="Inbox"
                   badge={inboxCount}
                 />
                 <NavItem

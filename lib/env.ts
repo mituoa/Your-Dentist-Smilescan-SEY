@@ -1,5 +1,7 @@
 import "server-only";
 
+import { toSafeAbsoluteHttpUrl } from "@/lib/env-url";
+
 export interface SmtpMailConfig {
   host: string;
   port: number;
@@ -37,7 +39,7 @@ export function requireSmtpMailConfig(): SmtpMailConfig {
 }
 
 export function getAppBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  return toSafeAbsoluteHttpUrl(process.env.NEXT_PUBLIC_APP_URL, "http://localhost:3000");
 }
 
 export function getAdminEmailsAllowlist(): string[] {
