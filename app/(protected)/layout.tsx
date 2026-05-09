@@ -3,8 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
-import { Sidebar } from "@/components/app-shell/sidebar";
-import { MobileNav } from "@/components/app-shell/mobile-nav";
+import { Sidebar, SIDEBAR_MAIN_PAD } from "@/components/app-shell/sidebar";
 import { UserMenu } from "@/components/app-shell/user-menu";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
@@ -84,24 +83,8 @@ export default async function ProtectedLayout({
 
   return (
     <AssistShell>
-    <div
-      className="flex min-h-screen flex-col bg-gradient-to-br from-surface-page via-surface-page to-surface-sunken/40 max-md:max-h-[100dvh] max-md:overflow-hidden"
-    >
-      {/* Mobile nav at top */}
-      <MobileNav
-        role={role}
-        inboxCount={inboxCount}
-        myTasksCount={myTasksCount}
-        myTasksOverdueCount={myTasksOverdueCount}
-        initialTheme={theme}
-        email={user.email || ""}
-        workspaceName={workspaceName}
-        avatarUrl={profileData?.photo_url ?? null}
-        displayName={profileData?.display_name ?? null}
-      />
-
-      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        {/* Desktop sidebar (hidden on mobile) */}
+    <div className="flex min-h-[100dvh] flex-col bg-gradient-to-br from-surface-page via-surface-page to-surface-sunken/40">
+      <div className="flex min-h-0 flex-1 flex-row">
         <Sidebar
           role={role}
           inboxCount={inboxCount}
@@ -109,39 +92,38 @@ export default async function ProtectedLayout({
           myTasksOverdueCount={myTasksOverdueCount}
         />
 
-        <div className="flex min-h-0 flex-1 flex-col md:min-h-screen">
-          {/* Topbar (dashboard-style) */}
+        <div
+          className={`flex min-h-0 min-w-0 flex-1 flex-col ${SIDEBAR_MAIN_PAD}`}
+        >
+          {/* Topbar — immer sichtbar, Inhalt scrollt darunter */}
           <header
-            className="sticky top-0 z-30 hidden bg-white/80 backdrop-blur-xl md:block"
-            style={{ height: "80px" }}
+            className="sticky top-0 z-30 flex shrink-0 items-center bg-white/85 backdrop-blur-xl"
+            style={{ minHeight: "64px" }}
           >
-            <div className="flex h-full w-full items-center justify-end gap-3 px-10">
+            <div className="flex h-full min-h-[64px] w-full items-center justify-end gap-2 px-4 md:min-h-[80px] md:gap-3 md:px-10">
               <div className="flex items-center gap-3">
                 <Link
                   href="/relay#relay-quick-create"
-                  className="hidden md:inline-flex items-center gap-2 px-4 text-[14px] font-medium text-[#1E293B] transition-colors hover:bg-[#F8FAFC]"
-                  style={{
-                    height: "48px",
-                    borderRadius: "12px",
-                    border: "1px solid #E2E8F0",
-                  }}
+                  title="Neue Aufgabe"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#E2E8F0] px-3 text-[13px] font-medium text-[#1E293B] transition-colors hover:bg-[#F8FAFC] md:min-h-12 md:px-4 md:text-[14px]"
+                  style={{ borderRadius: "12px" }}
                 >
-                  <Plus className="h-4 w-4 text-[#2F80ED]" />
-                  <span>Neue Aufgabe</span>
+                  <Plus className="h-4 w-4 shrink-0 text-[#2F80ED]" />
+                  <span className="hidden sm:inline">Neue Aufgabe</span>
                 </Link>
                 <Link
                   href="/create-case"
-                  className="hidden lg:inline-flex items-center gap-2 px-5 text-white font-medium text-[14px] transition-all hover:opacity-95"
+                  title="Neuer Fall"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-[13px] font-medium text-white transition-all hover:opacity-95 sm:px-4 md:min-h-12 md:px-5 md:text-[14px]"
                   style={{
-                    height: "48px",
                     borderRadius: "12px",
                     background: "#2F80ED",
                     boxShadow:
                       "0 4px 12px rgba(47,128,237,0.28), 0 2px 4px rgba(47,128,237,0.18)",
                   }}
                 >
-                  <Plus className="h-4 w-4" />
-                  <span>Neuer Fall</span>
+                  <Plus className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Neuer Fall</span>
                 </Link>
 
                 <UserMenu

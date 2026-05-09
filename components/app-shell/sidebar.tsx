@@ -10,6 +10,10 @@ export interface SidebarProps {
   myTasksOverdueCount: number;
 }
 
+/** Breite muss mit `pl-*` im geschützten Layout identisch bleiben. */
+const RAIL =
+  "w-[72px] min-[420px]:w-[240px] lg:w-[260px] xl:w-[280px]" as const;
+
 export function Sidebar({
   role,
   inboxCount,
@@ -19,12 +23,23 @@ export function Sidebar({
   const myTasksUrgent = myTasksOverdueCount > 0;
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[280px] flex-col border-r bg-white/95 backdrop-blur-xl md:flex"
+    <aside
+      className={`fixed inset-y-0 left-0 z-20 flex ${RAIL} shrink-0 flex-col border-r bg-white/95 backdrop-blur-xl`}
       style={{ borderColor: "#EEF2F6" }}
     >
-      <BrandMark />
+      <div
+        className="flex shrink-0 flex-col border-b max-[419px]:items-center max-[419px]:justify-center max-[419px]:py-3 min-[420px]:block"
+        style={{ borderColor: "#EEF2F6" }}
+      >
+        <div className="hidden min-[420px]:block">
+          <BrandMark />
+        </div>
+        <div className="flex min-[420px]:hidden justify-center px-2">
+          <BrandMark compact />
+        </div>
+      </div>
 
-      <nav className="flex-1 px-4 pt-6 pb-4 space-y-2">
+      <nav className="min-h-0 flex-1 space-y-2 overflow-y-auto overflow-x-hidden px-2 pt-4 pb-4 min-[420px]:px-4">
         {role === "doctor" && (
           <NavItem
             href="/dashboard"
@@ -41,15 +56,6 @@ export function Sidebar({
           description="Intake & Triage"
           badge={inboxCount}
         />
-
-        {role === "doctor" && (
-          <NavItem
-            href="/create-case"
-            iconName="inbox"
-            label="Neuer Fall"
-            description="Patientenfall"
-          />
-        )}
 
         <NavItem
           href="/relay"
@@ -79,12 +85,21 @@ export function Sidebar({
         )}
       </nav>
 
-      <div className="px-4 py-4 border-t space-y-2" style={{ borderColor: "#EEF2F6" }}>
-        <div className="mx-2 text-[11px] font-medium text-[#94A3B8]">Hilfe &amp; Support</div>
-        <div className="mx-2 text-[10px] font-mono uppercase tracking-wider text-[#94A3B8]">
+      <div
+        className="shrink-0 space-y-2 border-t px-2 py-4 max-[419px]:text-center min-[420px]:px-4"
+        style={{ borderColor: "#EEF2F6", paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+      >
+        <div className="mx-2 text-[11px] font-medium text-[#94A3B8] max-[419px]:hidden">
+          Hilfe &amp; Support
+        </div>
+        <div className="mx-2 font-mono text-[10px] uppercase tracking-wider text-[#94A3B8] max-[419px]:mx-0 max-[419px]:text-[9px]">
           v 0.1 · Alpha
         </div>
       </div>
     </aside>
   );
 }
+
+/** Abstand für die fixierte Sidebar — Werte wie in `RAIL` in dieser Datei. */
+export const SIDEBAR_MAIN_PAD =
+  "pl-[72px] min-[420px]:pl-[240px] lg:pl-[260px] xl:pl-[280px]" as const;

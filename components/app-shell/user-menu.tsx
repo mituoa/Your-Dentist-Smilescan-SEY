@@ -30,9 +30,9 @@ export function UserMenu({
     .join("") || "U";
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 items-center gap-2 md:gap-3">
       <ThemeToggle initialTheme={initialTheme} />
-      <div className="text-right leading-tight">
+      <div className="hidden text-right leading-tight sm:block">
         <div className="text-sm font-medium text-text-primary">
           {displayName || workspaceName}
         </div>

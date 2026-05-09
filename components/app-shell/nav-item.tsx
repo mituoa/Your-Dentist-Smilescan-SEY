@@ -55,12 +55,12 @@ export function NavItem({
     <Link
       href={href}
       className={cn(
-        "relative mx-2 flex min-h-[52px] items-center gap-3.5 rounded-xl px-3 py-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 md:min-h-[3.25rem] md:py-2.5",
+        "relative mx-2 flex min-h-[52px] items-center gap-3.5 rounded-xl px-3 py-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 max-[419px]:mx-1 max-[419px]:min-h-[48px] max-[419px]:justify-center max-[419px]:gap-0 max-[419px]:px-2 md:min-h-[3.25rem] md:py-2.5",
         isActive ? "bg-[#EEF6FF]" : "hover:bg-[#F8FAFC]"
       )}
     >
       {isActive ? (
-        <span className="absolute left-[6px] top-1/2 h-5 w-0.5 -translate-y-1/2 rounded bg-[#2F80ED]" />
+        <span className="absolute left-[6px] top-1/2 hidden h-5 w-0.5 -translate-y-1/2 rounded bg-[#2F80ED] min-[420px]:block" />
       ) : null}
       <img
         src={brandMark.src}
@@ -70,7 +70,7 @@ export function NavItem({
           isActive && "opacity-100"
         )}
       />
-      <div className="flex-1 min-w-0 text-left">
+      <div className="min-w-0 flex-1 text-left max-[419px]:sr-only">
         <span
           className={cn(
             "block truncate text-[15px] font-medium leading-snug",
@@ -82,7 +82,7 @@ export function NavItem({
         {description ? (
           <span
             className={cn(
-              "mt-0.5 block line-clamp-2 text-left text-[11px] font-medium leading-snug",
+              "mt-0.5 block line-clamp-2 text-left text-[11px] font-medium leading-snug max-[419px]:hidden",
               isActive ? "text-[#64748B]" : "text-[#94A3B8]"
             )}
           >
