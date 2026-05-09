@@ -34,26 +34,26 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   const openCaseCount = submissions.filter((s) => !s.is_draft).length;
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col" style={{ background: "#F7F9FC" }}>
+    <div className="relative flex h-full min-h-0 flex-col" style={{ background: "#E8EDF4" }}>
       <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
         {/* Linke Fallliste — Figma: ~40 %, max 480, ruhige Fläche */}
         <aside
-          className="flex min-h-0 w-full min-w-0 flex-col border-b border-[rgba(15,23,42,0.06)] md:w-[40%] md:max-w-[480px] md:min-w-[280px] md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
-          style={{ background: "#F8FAFC" }}
+          className="flex min-h-0 w-full min-w-0 flex-col border-b border-[rgba(15,23,42,0.06)] md:min-w-[272px] md:max-w-[400px] md:w-[min(100%,32vw)] md:flex-none md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
+          style={{ background: "#F4F7FB" }}
         >
-          <div style={{ padding: "40px 24px 0" }} className="max-md:pt-8">
+          <div style={{ padding: "32px 20px 0" }} className="max-md:pt-8 md:px-6">
             <div
-              style={{ marginBottom: "24px" }}
+              style={{ marginBottom: "20px" }}
               className="flex items-start justify-between gap-4"
             >
               <div>
                 <h1
-                  className="text-[17px]"
+                  className="text-[18px] tracking-tight"
                   style={{
                     color: "#0F172A",
                     fontWeight: 600,
-                    letterSpacing: "-0.015em",
-                    marginBottom: "8px",
+                    letterSpacing: "-0.02em",
+                    marginBottom: "6px",
                   }}
                 >
                   Einsendungen
@@ -126,7 +126,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
         </aside>
 
         {/* Mitte + rechte Spalte: Kind-Routen */}
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC] md:min-h-0">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#E8EDF4] md:min-h-0">
           {children}
         </section>
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChevronUp, Mic, Sparkles, Stethoscope } from "lucide-react";
 
 import {
@@ -21,7 +22,7 @@ function suggestRoutes(text: string): { label: string; href: string }[] {
   if (/inbox|tracker|einsendung|posteingang/.test(t)) {
     out.push({ label: "Tracker", href: "/inbox" });
   }
-  if (/relay|aufgabe|task/.test(t)) {
+  if (/relay|aufgabe|task|empfang|assistenz/.test(t)) {
     out.push({ label: "Relay", href: "/relay" });
   }
   if (/journal|artikel/.test(t)) {
@@ -30,7 +31,30 @@ function suggestRoutes(text: string): { label: string; href: string }[] {
   if (/dashboard|atlas/.test(t)) {
     out.push({ label: "Atlas", href: "/dashboard" });
   }
+  if (/einstellung|profil|praxis/.test(t)) {
+    out.push({ label: "Einstellungen", href: "/settings" });
+  }
   return out.slice(0, 4);
+}
+
+function suggestInboxDeepLinks(
+  text: string,
+  submissionId: string | null
+): { label: string; href: string }[] {
+  if (!submissionId) return [];
+  const t = text.toLowerCase();
+  const base = `/inbox/${submissionId}`;
+  const out: { label: string; href: string }[] = [];
+  if (/(rückfrage|nachricht|korrespondenz|schreiben|entwurf)/.test(t)) {
+    out.push({ label: "Nachrichtentwurf", href: `${base}#tracker-korrespondenz` });
+  }
+  if (/(termin|einladen|einbestellen|link)/.test(t)) {
+    out.push({ label: "Terminlink", href: `${base}#tracker-termin` });
+  }
+  if (/(dringlich|einschätzung|empfehlung)/.test(t)) {
+    out.push({ label: "Empfohlene Aktion", href: `${base}#tracker-empfehlung` });
+  }
+  return out.slice(0, 3);
 }
 
 const INBOX_QUICK: { id: AssistQuickActionId; label: string }[] = [
@@ -46,16 +70,28 @@ export function CommandAssist() {
   const assistCtx = useAssistCaseOptional();
   const inboxCase =
     assistCtx?.casePayload?.kind === "inbox" ? assistCtx.casePayload : null;
+  const chromeLayout = assistCtx?.chromeLayout ?? "floating";
+  const embeddedMode = chromeLayout === "tracker_embedded";
 
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
+  const [embedTarget, setEmbedTarget] = useState<HTMLElement | null>(null);
   const recRef = useRef<{ stop: () => void } | null>(null);
 
   const hidden =
     pathname.startsWith("/settings") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/login");
+
+  useLayoutEffect(() => {
+    if (hidden || !embeddedMode) {
+      setEmbedTarget(null);
+      return;
+    }
+    const el = document.getElementById("tracker-assist-root");
+    setEmbedTarget(el);
+  }, [hidden, embeddedMode, pathname]);
 
   const draftParams = useMemo(
     () =>
@@ -131,28 +167,27 @@ export function CommandAssist() {
 
   if (hidden) return null;
 
-  const hints = suggestRoutes(text);
   const inTracker = pathname.startsWith("/inbox");
+  const routeHints = suggestRoutes(text);
+  const deepHints = suggestInboxDeepLinks(text, inboxCase?.submissionId ?? null);
+  const hints = [...deepHints, ...routeHints].slice(0, 5);
 
-  return (
+  const panelShell = embeddedMode
+    ? "border-[rgba(15,23,42,0.08)] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.05)]"
+    : inTracker
+      ? "border-[rgba(15,23,42,0.08)] bg-white/92 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[rgb(28_30_34/0.94)] dark:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.4)]"
+      : "border-border/70 bg-surface-card/88 shadow-[0_20px_50px_-18px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-border/50 dark:bg-surface-card/90 dark:shadow-[0_24px_48px_-20px_rgba(0,0,0,0.55)]";
+
+  const inner = (
     <div
-      className={`pointer-events-none fixed z-[45] flex flex-col gap-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-8 ${
-        inTracker
-          ? "bottom-0 right-0 items-end md:bottom-8 md:right-8"
-          : "bottom-0 right-0 items-end"
-      }`}
-      aria-live="polite"
+      className={`flex flex-col gap-3 ${embeddedMode ? "w-full" : "w-[min(100vw-1.5rem,520px)]"}`}
     >
       <div
         id="command-assist-panel"
-        className={`pointer-events-auto w-[min(100vw-1.5rem,520px)] overflow-hidden rounded-2xl border transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none ${
-          inTracker
-            ? "border-[rgba(15,23,42,0.08)] bg-white/92 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[rgb(28_30_34/0.94)] dark:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.4)]"
-            : "border-border/70 bg-surface-card/88 shadow-[0_20px_50px_-18px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-border/50 dark:bg-surface-card/90 dark:shadow-[0_24px_48px_-20px_rgba(0,0,0,0.55)]"
-        } ${
+        className={`overflow-hidden rounded-2xl border transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none ${panelShell} ${
           open
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-2 opacity-0"
+            : "pointer-events-none max-h-0 translate-y-1 opacity-0"
         }`}
       >
         <div
@@ -169,11 +204,11 @@ export function CommandAssist() {
               </div>
             ) : null}
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-semibold tracking-tight text-text-primary">
+              <p className="text-[15px] font-semibold tracking-tight text-text-primary">
                 {inTracker ? "Klinische Assistenz" : "Praxisassistent"}
               </p>
               <p className="mt-1 text-[13px] leading-relaxed text-text-secondary">
-                Kontextbezogene Entwürfe und Diktat — nur zur Prüfung in der Praxis.{" "}
+                Entwürfe, Diktat und Sprungmarken — nur zur Prüfung in der Praxis.{" "}
                 <span className="font-medium text-text-primary">Kein automatischer Versand.</span>
               </p>
             </div>
@@ -183,7 +218,7 @@ export function CommandAssist() {
         <div className="space-y-4 px-5 py-4 sm:px-6 sm:py-5">
           {inboxCase && draftParams ? (
             <div
-              className={`rounded-xl px-3 py-3 ${inTracker ? "bg-[#F8FAFC]" : "border border-border/50 bg-surface-page/50 dark:bg-surface-sunken/40"}`}
+              className={`rounded-xl px-3 py-3 ${inTracker ? "bg-[#F4F7FB]" : "border border-border/50 bg-surface-page/50 dark:bg-surface-sunken/40"}`}
             >
               <p className="text-[12px] font-medium" style={{ color: "#94A3B8" }}>
                 Aktueller Fall
@@ -196,17 +231,17 @@ export function CommandAssist() {
                   {inboxCase.concernLine}
                 </p>
               ) : null}
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {INBOX_QUICK.map((q) => (
                   <button
                     key={q.id}
                     type="button"
                     onClick={() => applyQuickDraft(q.id)}
-                    className="min-h-9 rounded-md border px-3 py-1.5 text-left text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)]"
+                    className="min-h-9 rounded-lg border px-3 py-1.5 text-left text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)]"
                     style={{
-                      borderColor: "#E5E7EB",
+                      borderColor: "#E2E8F0",
                       background: "#FFFFFF",
-                      color: "#64748B",
+                      color: "#475569",
                     }}
                   >
                     {q.label}
@@ -219,10 +254,10 @@ export function CommandAssist() {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={5}
+            rows={embeddedMode ? 4 : 5}
             placeholder={
               inboxCase
-                ? "Entwurf bearbeiten oder Diktat nutzen …"
+                ? "z. B. „Rückfrage wegen Schmerzen“ oder Diktat …"
                 : "z. B. „Neuer Fall“ oder „Relay“ …"
             }
             className="w-full resize-none rounded-xl border border-border/80 bg-surface-card/95 px-4 py-3.5 text-[15px] leading-relaxed text-text-primary shadow-inner outline-none placeholder:text-text-tertiary focus:border-brand/40 focus:ring-2 focus:ring-brand/12"
@@ -243,7 +278,7 @@ export function CommandAssist() {
           {hints.length > 0 ? (
             <div className="space-y-2 border-t border-border/60 pt-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
-                Navigation
+                {deepHints.length > 0 ? "Aktion & Navigation" : "Navigation"}
               </p>
               {hints.map((h) => (
                 <button
@@ -270,24 +305,54 @@ export function CommandAssist() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`pointer-events-auto flex min-h-[48px] items-center gap-2.5 px-4 py-2.5 text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)] md:min-h-[52px] md:px-5 ${
-          inTracker
-            ? "rounded-2xl border border-[rgba(15,23,42,0.1)] bg-white/95 text-[#0F172A] shadow-[0_4px_24px_-8px_rgba(15,23,42,0.12)] backdrop-blur-md hover:border-[rgba(43,111,232,0.25)]"
-            : "rounded-full border border-border/80 bg-surface-card/92 text-text-primary shadow-[0_12px_32px_-16px_rgba(15,23,42,0.35)] backdrop-blur-xl hover:shadow-[0_16px_40px_-14px_rgba(15,23,42,0.4)] dark:shadow-[0_12px_36px_-12px_rgba(0,0,0,0.65)]"
+        className={`flex min-h-[48px] w-full items-center justify-between gap-2.5 rounded-xl border px-4 py-2.5 text-left text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)] md:min-h-[50px] md:px-4 ${
+          embeddedMode
+            ? "border-[rgba(15,23,42,0.08)] bg-white text-[#0F172A] shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:border-[rgba(43,111,232,0.22)]"
+            : inTracker
+              ? "pointer-events-auto rounded-2xl border-[rgba(15,23,42,0.1)] bg-white/95 text-[#0F172A] shadow-[0_4px_24px_-8px_rgba(15,23,42,0.12)] backdrop-blur-md hover:border-[rgba(43,111,232,0.25)]"
+              : "pointer-events-auto rounded-full border-border/80 bg-surface-card/92 text-text-primary shadow-[0_12px_32px_-16px_rgba(15,23,42,0.35)] backdrop-blur-xl hover:shadow-[0_16px_40px_-14px_rgba(15,23,42,0.4)] dark:shadow-[0_12px_36px_-12px_rgba(0,0,0,0.65)]"
         }`}
         aria-expanded={open}
         aria-controls="command-assist-panel"
       >
-        <span
-          className={`flex h-8 w-8 items-center justify-center ${inTracker ? "rounded-lg bg-[#EEF6FF] text-[#2563EB]" : "rounded-full bg-brand/12 text-brand"}`}
-        >
-          <Stethoscope className="h-4 w-4" strokeWidth={1.75} />
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span
+            className={`flex h-8 w-8 shrink-0 items-center justify-center ${inTracker ? "rounded-lg bg-[#EEF6FF] text-[#2563EB]" : "rounded-full bg-brand/12 text-brand"}`}
+          >
+            <Stethoscope className="h-4 w-4" strokeWidth={1.75} />
+          </span>
+          <span className="truncate">{inTracker ? "Assistenz" : "Assist"}</span>
         </span>
-        <span>{inTracker ? "Assistenz" : "Assist"}</span>
         <ChevronUp
-          className={`h-4 w-4 text-text-tertiary transition-transform duration-300 ${open ? "" : "rotate-180"}`}
+          className={`h-4 w-4 shrink-0 text-text-tertiary transition-transform duration-300 ${open ? "" : "rotate-180"}`}
         />
       </button>
+    </div>
+  );
+
+  if (embeddedMode && embedTarget) {
+    return createPortal(
+      <div className="pointer-events-auto w-full" aria-live="polite">
+        {inner}
+      </div>,
+      embedTarget
+    );
+  }
+
+  if (embeddedMode && !embedTarget) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`pointer-events-none fixed z-[45] flex flex-col gap-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-8 ${
+        inTracker
+          ? "bottom-0 right-0 items-end md:bottom-8 md:right-8"
+          : "bottom-0 right-0 items-end"
+      }`}
+      aria-live="polite"
+    >
+      <div className="pointer-events-auto flex flex-col items-end gap-3">{inner}</div>
     </div>
   );
 }

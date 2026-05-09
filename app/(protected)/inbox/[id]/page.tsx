@@ -4,12 +4,17 @@ import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
 import { PhotoViewer } from "@/components/inbox/photo-viewer";
 import { SubmissionActions } from "@/components/inbox/submission-actions";
+import { TrackerPrimaryActions } from "@/components/inbox/tracker-primary-actions";
+import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
 import { markSubmissionSeen } from "./actions";
 
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
 }
+
+const card =
+  "rounded-2xl border border-[rgba(15,23,42,0.07)] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04)]";
 
 function formatRelativeTime(timestamp: string): string {
   const now = new Date();
@@ -65,7 +70,7 @@ function urgencyHeadline(urgency: string | null): {
     case "today":
       return {
         text: "Hohe Wahrscheinlichkeit für akuten Behandlungsbedarf",
-        color: "#2563EB",
+        color: "#1D4ED8",
       };
     case "this_week":
       return {
@@ -135,7 +140,7 @@ export default async function InboxDetailPage({
     concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
       <InboxAssistHydration
         submissionId={submission.id}
         patientName={submission.patient_name}
@@ -146,166 +151,101 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Mitte: dominanter Fall-Workspace (Figma: weiße Fläche, viel Luft) */}
-      <div
-        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
-        style={{
-          background: "#FFFFFF",
-          boxShadow: "inset -1px 0 0 rgba(15, 23, 42, 0.04)",
-        }}
-      >
-        <header className="shrink-0" style={{ padding: "40px clamp(24px,4vw,56px) 0" }}>
-          <h1
-            className="text-[22px] leading-[1.25] md:text-[24px]"
-            style={{
-              color: "#0F172A",
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-              marginBottom: "8px",
-            }}
-          >
-            {primaryTitle}
-          </h1>
-
-          <p
-            className="text-[14px]"
-            style={{ color: "#64748B", fontWeight: 500, letterSpacing: "-0.005em" }}
-          >
-            {patientLabel} · Eingang {formatRelativeTime(submission.created_at)}
-            {submission.is_draft ? (
-              <span className="ml-2 text-[12px]" style={{ color: "#B45309" }}>
-                Entwurf
-              </span>
-            ) : null}
-          </p>
-
-          {patientMeta ? (
-            <p
-              className="mt-1 text-[13px]"
-              style={{ color: "#94A3B8", fontWeight: 400, letterSpacing: "-0.003em" }}
-            >
-              {patientMeta}
-            </p>
-          ) : null}
-
-          {(submission.patient_email || submission.patient_phone) ? (
-            <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "#64748B" }}>
-              {submission.patient_email ? <span className="mr-3">{submission.patient_email}</span> : null}
-              {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
-            </p>
-          ) : null}
-
-          {urgencyLine ? (
-            <div style={{ marginTop: "24px", paddingBottom: "8px" }}>
-              <p
-                className="text-[14px] leading-[1.5]"
-                style={{
-                  color: urgencyLine.color,
-                  fontWeight: 500,
-                  letterSpacing: "-0.005em",
-                }}
-              >
-                {urgencyLine.text}
+      {/* Mitte: medizinischer Hauptfall — Workspace-Dichte, klare Karten */}
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#E4E9F0] shadow-[inset_-1px_0_0_rgba(15,23,42,0.05)]">
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:max-w-none lg:px-8 lg:py-10 xl:pr-10">
+            <div className={`${card} p-6 sm:p-8`}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                Aktueller Fall
               </p>
+              <h1 className="mt-2 text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-slate-900 sm:text-[28px]">
+                {primaryTitle}
+              </h1>
+
+              <p className="mt-3 text-[15px] font-medium leading-snug text-slate-600">
+                {patientLabel}
+                <span className="mx-2 font-normal text-slate-400">·</span>
+                <span className="font-normal text-slate-500">
+                  Eingang {formatRelativeTime(submission.created_at)}
+                </span>
+                {submission.is_draft ? (
+                  <span className="ml-2 rounded-md bg-amber-50 px-2 py-0.5 text-[12px] font-medium text-amber-800">
+                    Entwurf
+                  </span>
+                ) : null}
+              </p>
+
+              {patientMeta ? (
+                <p className="mt-2 text-[14px] text-slate-500">{patientMeta}</p>
+              ) : null}
+
+              {submission.patient_email || submission.patient_phone ? (
+                <p className="mt-4 text-[14px] leading-relaxed text-slate-600">
+                  {submission.patient_email ? (
+                    <span className="mr-4 block sm:inline">{submission.patient_email}</span>
+                  ) : null}
+                  {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
+                </p>
+              ) : null}
+
+              {urgencyLine ? (
+                <div className="mt-6 border-t border-slate-100 pt-6">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                    Klinische Einschätzung
+                  </p>
+                  <p
+                    className="mt-2 text-[16px] font-medium leading-snug"
+                    style={{ color: urgencyLine.color }}
+                  >
+                    {urgencyLine.text}
+                  </p>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </header>
 
-        <div
-          className="min-h-0 flex-1 overflow-y-auto"
-          style={{
-            padding: "24px clamp(24px,4vw,56px) 56px",
-            background: "#FFFFFF",
-          }}
-        >
-          <div className="mb-10">
-            <PhotoViewer
-              photos={submission.photos}
-              patientName={submission.patient_name || "Patient"}
-            />
-          </div>
+            <div className={`${card} overflow-hidden p-0`}>
+              <PhotoViewer
+                photos={submission.photos}
+                patientName={submission.patient_name || "Patient"}
+              />
+            </div>
 
-          <div style={{ marginBottom: "40px", maxWidth: "640px" }}>
-            <p
-              className="text-[15px] md:text-[16px]"
-              style={{
-                color: "#1E293B",
-                lineHeight: 1.65,
-                letterSpacing: "-0.008em",
-              }}
-            >
-              {submission.patient_notes?.trim()
-                ? submission.patient_notes
-                : "Keine Beschreibung vorhanden."}
-            </p>
-          </div>
-
-          <div style={{ maxWidth: "560px" }}>
-            <div style={{ marginBottom: "16px" }}>
-              <p
-                className="text-[13px]"
-                style={{ color: "#0F172A", fontWeight: 700, letterSpacing: "-0.01em" }}
-              >
-                Empfohlene Einordnung
+            <div className={`${card} p-6 sm:p-8`}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                Patientenbericht
               </p>
-              <p
-                className="mt-1 text-[14px] leading-relaxed"
-                style={{ color: "#64748B", letterSpacing: "-0.005em" }}
-              >
-                {recAction}
+              <p className="mt-4 text-[16px] leading-[1.7] tracking-[-0.01em] text-slate-800">
+                {submission.patient_notes?.trim()
+                  ? submission.patient_notes
+                  : "Keine Beschreibung vorhanden."}
               </p>
             </div>
 
-            <div
-              style={{
-                background: "#F8FAFC",
-                padding: "20px",
-                borderRadius: "12px",
-              }}
-            >
-              <p
-                className="mb-3 text-[12px]"
-                style={{ color: "#94A3B8", fontWeight: 500, letterSpacing: "0.02em" }}
-              >
-                Zeitraum (Einschätzung)
+            <div id="tracker-empfehlung" className={`${card} scroll-mt-24 p-6 sm:p-8`}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                Empfohlene Aktion
               </p>
-              <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    { id: "today", label: "Heute" },
-                    { id: "this_week", label: "Diese Woche" },
-                    { id: "not_urgent", label: "Nicht dringend" },
-                  ] as const
-                ).map((opt) => {
-                  const active = submission.urgency === opt.id;
-                  return (
-                    <span
-                      key={opt.id}
-                      className="text-[13px] font-medium"
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        border: active ? "1px solid #2B6FE8" : "1px solid #E5E7EB",
-                        background: active ? "#EEF6FF" : "#FFFFFF",
-                        color: active ? "#2B6FE8" : "#64748B",
-                        letterSpacing: "-0.005em",
-                      }}
-                    >
-                      {opt.label}
-                    </span>
-                  );
-                })}
+              <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{recAction}</p>
+
+              <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50/80 p-5 sm:p-6">
+                <TrackerPrimaryActions />
+
+                <p className="mb-3 mt-8 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                  Zeitraum (Einschätzung)
+                </p>
+                <TrackerUrgencyChips
+                  submissionId={submission.id}
+                  initialUrgency={submission.urgency}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Rechts: Kommunikationszentrale — weiche Fläche, weniger „Formular“ */}
-      <aside
-        className="flex min-h-0 w-full shrink-0 flex-col overflow-y-auto border-t border-[rgba(15,23,42,0.06)] md:w-[min(380px,34vw)] md:max-w-[400px] md:border-l md:border-t-0 md:border-[rgba(15,23,42,0.06)]"
-        style={{ background: "#F5F7FA" }}
-      >
+      {/* Rechts: Kommunikation & Assist */}
+      <aside className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.07)] bg-[#ECEFF4] lg:w-[min(100%,400px)] lg:max-w-[420px] lg:border-l lg:border-t-0 xl:w-[min(100%,420px)]">
         <SubmissionActions
           submissionId={submission.id}
           patientName={submission.patient_name}

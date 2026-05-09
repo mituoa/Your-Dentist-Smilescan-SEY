@@ -93,6 +93,46 @@ export async function markSubmissionSeen(submissionId: string) {
   return { success: true };
 }
 
+export type SubmissionUrgencyValue = "today" | "this_week" | "not_urgent";
+
+export async function updateSubmissionUrgency(
+  submissionId: string,
+  urgency: SubmissionUrgencyValue
+) {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { error: "Arbeitsbereich nicht gefunden." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Nicht angemeldet." };
+  }
+
+  const { error } = await supabase
+    .from("submissions")
+    .update({
+      urgency,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id);
+
+  if (error) {
+    console.error("[updateSubmissionUrgency]", error);
+    return { error: "Zeitraum konnte nicht gespeichert werden." };
+  }
+
+  revalidatePath(`/inbox/${submissionId}`);
+  revalidatePath("/inbox");
+  revalidatePath("/inbox", "layout");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
 export async function createTask(formData: FormData) {
   const submissionId = formData.get("submission_id") as string;
   const title = ((formData.get("title") as string) || "").trim();

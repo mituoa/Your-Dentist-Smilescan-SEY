@@ -134,6 +134,7 @@ export function FollowUpMessageDraft({
             fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
           }}
           aria-label="Nachrichtentwurf"
+          data-tracker-draft
         />
       </div>
 

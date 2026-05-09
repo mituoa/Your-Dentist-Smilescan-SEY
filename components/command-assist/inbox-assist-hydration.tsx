@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 
-import { useAssistCaseOptional, type InboxAssistCasePayload } from "./assist-shell";
+import { useAssistContextOptional, type InboxAssistCasePayload } from "./assist-shell";
 
 type InboxAssistHydrationProps = Omit<InboxAssistCasePayload, "kind">;
 
 /**
- * Registers the active inbox case with the global assist (cleared on leave).
+ * Aktiver Fall + eingebetteter Assist (rechte Spalte) — bei Unmount wieder Floating.
  */
 export function InboxAssistHydration({
   submissionId,
@@ -17,11 +17,13 @@ export function InboxAssistHydration({
   appointmentUrl,
   concernLine,
 }: InboxAssistHydrationProps) {
-  const ctx = useAssistCaseOptional();
+  const ctx = useAssistContextOptional();
   const setCasePayload = ctx?.setCasePayload;
+  const setChromeLayout = ctx?.setChromeLayout;
 
   useEffect(() => {
-    if (!setCasePayload) return;
+    if (!setCasePayload || !setChromeLayout) return;
+    setChromeLayout("tracker_embedded");
     setCasePayload({
       kind: "inbox",
       submissionId,
@@ -31,9 +33,13 @@ export function InboxAssistHydration({
       appointmentUrl,
       concernLine,
     });
-    return () => setCasePayload(null);
+    return () => {
+      setCasePayload(null);
+      setChromeLayout("floating");
+    };
   }, [
     setCasePayload,
+    setChromeLayout,
     submissionId,
     patientName,
     urgency,
