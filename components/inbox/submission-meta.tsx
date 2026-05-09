@@ -73,28 +73,29 @@ export function SubmissionMeta({
       ? "Neu / noch nicht geöffnet"
       : "Geöffnet";
 
+  const lab = { color: "#94A3B8", fontSize: "12px", fontWeight: 500, letterSpacing: "0.02em" } as const;
+  const val = { color: "#1E293B", fontSize: "15px", lineHeight: 1.55, fontWeight: 500 } as const;
+
   return (
-    <div className="space-y-3 text-sm">
+    <div className="space-y-5">
       <div>
-        <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-          Status
+        <div style={lab}>Status</div>
+        <div className="mt-1" style={val}>
+          {statusLine}
         </div>
-        <div className="text-sm font-medium leading-6 text-text-primary">{statusLine}</div>
       </div>
 
       <div>
-        <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-          Eingereicht
+        <div style={lab}>Eingereicht</div>
+        <div className="mt-1" style={val}>
+          {formattedCreated}
         </div>
-        <div className="text-sm font-medium leading-6 text-text-primary">{formattedCreated}</div>
       </div>
 
       {updatedAt && updatedAt !== createdAt ? (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Zuletzt aktualisiert
-          </div>
-          <div className="text-sm font-medium leading-6 text-text-primary">
+          <div style={lab}>Zuletzt aktualisiert</div>
+          <div className="mt-1" style={val}>
             {formatDeDate(updatedAt)}
           </div>
         </div>
@@ -102,60 +103,60 @@ export function SubmissionMeta({
 
       {typeof photoCount === "number" ? (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Fotos
+          <div style={lab}>Fotos</div>
+          <div className="mt-1" style={val}>
+            {photoCount}
           </div>
-          <div className="text-sm font-medium leading-6 text-text-primary">{photoCount}</div>
         </div>
       ) : null}
 
       {urg ? (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Dringlichkeit (Einschätzung)
+          <div style={lab}>Dringlichkeit</div>
+          <div className="mt-1" style={val}>
+            {urg}
           </div>
-          <div className="text-sm font-medium leading-6 text-text-primary">{urg}</div>
         </div>
       ) : null}
 
       {patientName && (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Name
+          <div style={lab}>Name</div>
+          <div className="mt-1" style={val}>
+            {patientName}
           </div>
-          <div className="text-sm font-medium leading-6 text-text-primary">{patientName}</div>
         </div>
       )}
       {patientEmail && (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            E-Mail
+          <div style={lab}>E-Mail</div>
+          <div className="mt-1 break-all" style={val}>
+            {patientEmail}
           </div>
-          <div className="break-all text-sm leading-6 text-text-primary">{patientEmail}</div>
         </div>
       )}
       {patientPhone && (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Telefon
+          <div style={lab}>Telefon</div>
+          <div className="mt-1" style={{ ...val, fontWeight: 400 }}>
+            {patientPhone}
           </div>
-          <div className="text-sm leading-6 text-text-primary">{patientPhone}</div>
         </div>
       )}
       {birthDisplay ? (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Geburtsdatum
+          <div style={lab}>Geburtsdatum</div>
+          <div className="mt-1" style={{ ...val, fontWeight: 400 }}>
+            {birthDisplay}
           </div>
-          <div className="text-sm leading-6 text-text-primary">{birthDisplay}</div>
         </div>
       ) : null}
       {patientExternalId?.trim() ? (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Patienten-ID
+          <div style={lab}>Patienten-ID</div>
+          <div className="mt-1 break-all" style={{ ...val, fontWeight: 400 }}>
+            {patientExternalId.trim()}
           </div>
-          <div className="break-all text-sm leading-6 text-text-primary">{patientExternalId.trim()}</div>
         </div>
       ) : null}
     </div>

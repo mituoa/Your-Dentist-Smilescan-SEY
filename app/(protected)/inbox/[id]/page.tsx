@@ -1,9 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
-import {
-  getProfileData,
-  getSubmissionById,
-} from "@/lib/queries/submissions";
+import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
 import { PhotoViewer } from "@/components/inbox/photo-viewer";
 import { SubmissionActions } from "@/components/inbox/submission-actions";
@@ -38,13 +35,13 @@ function deriveIssue(
   if (raw) {
     const firstSentence = raw.split("\n")[0]?.split(".")[0]?.trim();
     if (firstSentence) {
-      return firstSentence.length > 64
-        ? `${firstSentence.slice(0, 64).trim()}…`
+      return firstSentence.length > 120
+        ? `${firstSentence.slice(0, 120).trim()}…`
         : firstSentence;
     }
   }
   const n = (patientName || "").trim();
-  if (n) return n.length > 64 ? `${n.slice(0, 64).trim()}…` : n;
+  if (n) return n.length > 120 ? `${n.slice(0, 120).trim()}…` : n;
   return "Einsendung";
 }
 
@@ -68,12 +65,12 @@ function urgencyHeadline(urgency: string | null): {
     case "today":
       return {
         text: "Hohe Wahrscheinlichkeit für akuten Behandlungsbedarf",
-        color: "#2F80ED",
+        color: "#2563EB",
       };
     case "this_week":
       return {
         text: "Behandlung innerhalb dieser Woche sinnvoll",
-        color: "#64748B",
+        color: "#475569",
       };
     case "not_urgent":
       return {
@@ -88,11 +85,11 @@ function urgencyHeadline(urgency: string | null): {
 function recommendedAction(urgency: string | null): string {
   switch (urgency) {
     case "today":
-      return "Klinische Empfehlung: zeitnahe Kontaktaufnahme und Einordnung innerhalb von 24 Stunden.";
+      return "Zeitnahe Kontaktaufnahme und klinische Einordnung innerhalb von 24 Stunden.";
     case "this_week":
-      return "Klinische Empfehlung: Rückmeldung und Terminierung innerhalb weniger Werktage.";
+      return "Rückmeldung und Terminierung innerhalb weniger Werktage.";
     case "not_urgent":
-      return "Klinische Empfehlung: routinemäßige Terminierung nach Praxiskapazität.";
+      return "Routinemäßige Terminierung nach Praxiskapazität.";
     default:
       return "Bitte Einsendung klinisch einordnen und den weiteren Verlauf dokumentieren.";
   }
@@ -134,8 +131,11 @@ export default async function InboxDetailPage({
   const practicePhone = profileRow?.practice_phone ?? null;
   const appointmentUrl = profileRow?.appointment_link ?? null;
 
+  const primaryTitle =
+    concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
+
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-white md:flex-row">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
       <InboxAssistHydration
         submissionId={submission.id}
         patientName={submission.patient_name}
@@ -146,129 +146,135 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Mitte: Fallinhalt */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <div
-          className="shrink-0"
-          style={{
-            padding: "28px 32px 22px",
-            borderBottom: "1px solid #EEF2F6",
-            background: "#FFFFFF",
-          }}
-        >
-          <p
-            className="mb-2 text-[12px] font-medium uppercase tracking-wider"
-            style={{ color: "#94A3B8" }}
-          >
-            Patient
-          </p>
-          <h2
-            className="text-[24px] md:text-[26px]"
+      {/* Mitte: dominanter Fall-Workspace (Figma: weiße Fläche, viel Luft) */}
+      <div
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+        style={{
+          background: "#FFFFFF",
+          boxShadow: "inset -1px 0 0 rgba(15, 23, 42, 0.04)",
+        }}
+      >
+        <header className="shrink-0" style={{ padding: "40px clamp(24px,4vw,56px) 0" }}>
+          <h1
+            className="text-[22px] leading-[1.25] md:text-[24px]"
             style={{
               color: "#0F172A",
               fontWeight: 600,
-              letterSpacing: "-0.01em",
-              marginBottom: "6px",
-              lineHeight: "1.3",
+              letterSpacing: "-0.02em",
+              marginBottom: "8px",
             }}
           >
-            {patientLabel}
-          </h2>
-          {patientMeta ? (
-            <p className="text-[14px]" style={{ color: "#64748B" }}>
-              {patientMeta}
-            </p>
-          ) : null}
-          {(submission.patient_email || submission.patient_phone) ? (
-            <p className="mt-2 text-[14px]" style={{ color: "#64748B" }}>
-              {submission.patient_email ? (
-                <span className="mr-3">{submission.patient_email}</span>
-              ) : null}
-              {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
-            </p>
-          ) : null}
-          <p className="mt-3 text-[13px]" style={{ color: "#94A3B8" }}>
-            Eingang {formatRelativeTime(submission.created_at)}
+            {primaryTitle}
+          </h1>
+
+          <p
+            className="text-[14px]"
+            style={{ color: "#64748B", fontWeight: 500, letterSpacing: "-0.005em" }}
+          >
+            {patientLabel} · Eingang {formatRelativeTime(submission.created_at)}
             {submission.is_draft ? (
-              <span
-                className="ml-2 rounded-md px-2 py-0.5 text-[12px] font-medium"
-                style={{ background: "#FFFBEB", color: "#92400E" }}
-              >
+              <span className="ml-2 text-[12px]" style={{ color: "#B45309" }}>
                 Entwurf
               </span>
             ) : null}
           </p>
-          {concernPreview && concernPreview !== patientLabel ? (
+
+          {patientMeta ? (
             <p
-              className="mt-4 text-[15px] font-medium leading-snug"
-              style={{ color: "#334155" }}
+              className="mt-1 text-[13px]"
+              style={{ color: "#94A3B8", fontWeight: 400, letterSpacing: "-0.003em" }}
             >
-              {concernPreview}
+              {patientMeta}
             </p>
           ) : null}
+
+          {(submission.patient_email || submission.patient_phone) ? (
+            <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "#64748B" }}>
+              {submission.patient_email ? <span className="mr-3">{submission.patient_email}</span> : null}
+              {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
+            </p>
+          ) : null}
+
           {urgencyLine ? (
-            <p className="mt-3 text-[14px] font-medium" style={{ color: urgencyLine.color }}>
-              {urgencyLine.text}
-            </p>
+            <div style={{ marginTop: "24px", paddingBottom: "8px" }}>
+              <p
+                className="text-[14px] leading-[1.5]"
+                style={{
+                  color: urgencyLine.color,
+                  fontWeight: 500,
+                  letterSpacing: "-0.005em",
+                }}
+              >
+                {urgencyLine.text}
+              </p>
+            </div>
           ) : null}
-        </div>
+        </header>
 
         <div
           className="min-h-0 flex-1 overflow-y-auto"
-          style={{ padding: "28px 32px 40px", background: "#FFFFFF" }}
+          style={{
+            padding: "24px clamp(24px,4vw,56px) 56px",
+            background: "#FFFFFF",
+          }}
         >
-          <div className="mx-auto max-w-[720px]">
-            <div className="mb-8">
-              <div
-                style={{
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  border: "1px solid #EEF2F6",
-                  maxHeight: "320px",
-                  background: "#FFFFFF",
-                }}
-              >
-                <PhotoViewer
-                  photos={submission.photos}
-                  patientName={submission.patient_name || "Patient"}
-                />
-              </div>
+          <div className="mb-8">
+            <div
+              style={{
+                borderRadius: "12px",
+                overflow: "hidden",
+                maxHeight: "240px",
+                background: "#F8FAFC",
+              }}
+            >
+              <PhotoViewer
+                photos={submission.photos}
+                patientName={submission.patient_name || "Patient"}
+              />
             </div>
+          </div>
 
-            <div className="mb-10">
+          <div style={{ marginBottom: "40px", maxWidth: "640px" }}>
+            <p
+              className="text-[15px] md:text-[16px]"
+              style={{
+                color: "#1E293B",
+                lineHeight: 1.65,
+                letterSpacing: "-0.008em",
+              }}
+            >
+              {submission.patient_notes?.trim()
+                ? submission.patient_notes
+                : "Keine Beschreibung vorhanden."}
+            </p>
+          </div>
+
+          <div style={{ maxWidth: "560px" }}>
+            <div style={{ marginBottom: "16px" }}>
               <p
-                className="text-[11px] uppercase"
-                style={{
-                  color: "#94A3B8",
-                  fontWeight: 600,
-                  letterSpacing: "0.05em",
-                  marginBottom: "12px",
-                }}
+                className="text-[13px]"
+                style={{ color: "#0F172A", fontWeight: 700, letterSpacing: "-0.01em" }}
               >
-                Beschreibung
+                Empfohlene Einordnung
               </p>
-              <p className="text-[16px] leading-[1.65]" style={{ color: "#1E293B" }}>
-                {submission.patient_notes?.trim()
-                  ? submission.patient_notes
-                  : "Keine Beschreibung vorhanden."}
+              <p
+                className="mt-1 text-[14px] leading-relaxed"
+                style={{ color: "#64748B", letterSpacing: "-0.005em" }}
+              >
+                {recAction}
               </p>
             </div>
 
             <div
-              className="border-t pt-10"
-              style={{ borderColor: "#EEF2F6" }}
+              style={{
+                background: "#F8FAFC",
+                padding: "20px",
+                borderRadius: "12px",
+              }}
             >
-              <p className="text-[15px] leading-relaxed" style={{ color: "#475569" }}>
-                {recAction}
-              </p>
               <p
-                className="mt-8 text-[11px] uppercase"
-                style={{
-                  color: "#94A3B8",
-                  fontWeight: 600,
-                  letterSpacing: "0.05em",
-                  marginBottom: "12px",
-                }}
+                className="mb-3 text-[12px]"
+                style={{ color: "#94A3B8", fontWeight: 500, letterSpacing: "0.02em" }}
               >
                 Zeitraum (Einschätzung)
               </p>
@@ -284,11 +290,14 @@ export default async function InboxDetailPage({
                   return (
                     <span
                       key={opt.id}
-                      className="rounded-[10px] border px-4 py-2 text-[14px] font-medium"
+                      className="text-[13px] font-medium"
                       style={{
-                        borderColor: active ? "#2F80ED" : "#E2E8F0",
-                        background: active ? "rgba(47,128,237,0.08)" : "#FFFFFF",
-                        color: active ? "#1C6FD8" : "#64748B",
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        border: active ? "1px solid #2B6FE8" : "1px solid #E5E7EB",
+                        background: active ? "#EEF6FF" : "#FFFFFF",
+                        color: active ? "#2B6FE8" : "#64748B",
+                        letterSpacing: "-0.005em",
                       }}
                     >
                       {opt.label}
@@ -301,9 +310,10 @@ export default async function InboxDetailPage({
         </div>
       </div>
 
-      {/* Rechts: Kommunikation & Kontext */}
+      {/* Rechts: Kommunikationszentrale — weiche Fläche, weniger „Formular“ */}
       <aside
-        className="flex max-h-[52vh] min-h-0 w-full shrink-0 flex-col overflow-y-auto border-t border-border/70 bg-surface-page md:max-h-none md:w-[min(100%,420px)] md:max-w-[440px] md:border-l md:border-t-0"
+        className="flex min-h-0 w-full shrink-0 flex-col overflow-y-auto border-t border-[rgba(15,23,42,0.06)] md:w-[min(380px,34vw)] md:max-w-[400px] md:border-l md:border-t-0 md:border-[rgba(15,23,42,0.06)]"
+        style={{ background: "#F5F7FA" }}
       >
         <SubmissionActions
           submissionId={submission.id}

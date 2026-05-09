@@ -39,14 +39,14 @@ export function AppointmentLinkButton({
 
   if (!hasPatientEmail) {
     return (
-      <div className="rounded-lg bg-surface-sunken p-3 text-sm leading-5 text-text-tertiary">
-        Keine E-Mail-Adresse hinterlegt. Terminlink kann nicht gesendet werden.
-      </div>
+      <p className="text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
+        Keine E-Mail-Adresse hinterlegt — Terminlink kann nicht automatisiert versendet werden.
+      </p>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <Button
         type="button"
         onClick={handleClick}
@@ -56,7 +56,7 @@ export function AppointmentLinkButton({
             ? "Nur Ärzte dürfen Terminlinks versenden."
             : undefined
         }
-        className="min-h-11 w-full"
+        className="h-11 w-full rounded-[10px] border-0 bg-[#2B6FE8] text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(43,111,232,0.12)] hover:bg-[#2361CC]"
       >
         <Send className="w-4 h-4 mr-2" strokeWidth={1.75} />
         {isPending ? "Wird gesendet…" : "Terminlink per E-Mail senden"}
@@ -64,10 +64,10 @@ export function AppointmentLinkButton({
 
       {result && (
         <div
-          className={`flex items-start gap-2 rounded-lg p-2.5 text-sm leading-5 ${
+          className={`flex items-start gap-2 rounded-[10px] px-3 py-2.5 text-[14px] leading-relaxed ${
             result.type === "success"
-              ? "bg-brand/10 text-brand"
-              : "bg-danger/10 text-danger"
+              ? "bg-[#ECFDF5] text-[#047857]"
+              : "bg-[#FEF2F2] text-[#B91C1C]"
           }`}
         >
           {result.type === "success" ? (

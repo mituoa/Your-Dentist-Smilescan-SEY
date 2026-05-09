@@ -17,7 +17,6 @@ interface SubmissionActionsProps {
   seenAt?: string | null;
   updatedAt?: string | null;
   photoCount?: number;
-  /** @deprecated Nur Relay — nicht verwenden. */
   tasks?: unknown;
   assignableMembers?: unknown;
   canCheckOff?: boolean;
@@ -27,7 +26,7 @@ interface SubmissionActionsProps {
 }
 
 /**
- * Rechte Spalte im Tracker: Korrespondenz, Terminlink, Fallkontext — ohne Aufgaben (die gehören zu Relay).
+ * Rechte Spalte: ein vertikaler Kommunikations-Workspace (Figma: weniger Boxen, mehr Fläche).
  */
 export function SubmissionActions({
   submissionId,
@@ -47,36 +46,36 @@ export function SubmissionActions({
   appointmentUrl,
 }: SubmissionActionsProps) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="px-6 pb-8 pt-8 sm:px-8 sm:pt-10">
-        <p
-          className="mb-6 text-[11px] font-semibold uppercase tracking-[0.12em]"
-          style={{ color: "#94A3B8" }}
+    <div
+      className="flex min-h-0 flex-1 flex-col"
+      style={{ padding: "clamp(28px,4vw,48px) clamp(20px,3vw,32px) 40px" }}
+    >
+      <div className="space-y-3" style={{ marginBottom: "36px" }}>
+        <h2
+          className="text-[13px] font-semibold tracking-wide"
+          style={{ color: "#64748B", letterSpacing: "0.04em" }}
         >
-          Kommunikation
+          Korrespondenz
+        </h2>
+        <p className="text-[15px] leading-relaxed" style={{ color: "#475569" }}>
+          Entwürfe prüfen und manuell versenden. Keine automatische Patientenkommunikation.
         </p>
-        <FollowUpMessageDraft
-          patientName={patientName}
-          urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
-          practicePhone={practicePhone ?? null}
-          appointmentUrl={appointmentUrl ?? null}
-        />
       </div>
 
-      <div
-        className="border-t px-6 py-8 sm:px-8"
-        style={{ borderColor: "rgba(226, 232, 240, 0.85)" }}
-      >
-        <p
-          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
-          style={{ color: "#94A3B8" }}
+      <FollowUpMessageDraft
+        patientName={patientName}
+        urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
+        practicePhone={practicePhone ?? null}
+        appointmentUrl={appointmentUrl ?? null}
+      />
+
+      <div className="mt-14 space-y-4">
+        <h2
+          className="text-[13px] font-semibold tracking-wide"
+          style={{ color: "#64748B", letterSpacing: "0.04em" }}
         >
-          Terminvereinbarung
-        </p>
-        <p className="mb-5 text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-          Senden Sie dem Patienten auf Wunsch den Online-Terminlink per E-Mail. Die Praxis bleibt
-          datenschutzkonform in der Kontrolle.
-        </p>
+          Terminlink
+        </h2>
         <AppointmentLinkButton
           submissionId={submissionId}
           hasPatientEmail={!!patientEmail}
@@ -84,16 +83,13 @@ export function SubmissionActions({
         />
       </div>
 
-      <div
-        className="border-t px-6 py-8 sm:px-8"
-        style={{ borderColor: "rgba(226, 232, 240, 0.85)" }}
-      >
-        <p
-          className="mb-5 text-[11px] font-semibold uppercase tracking-[0.12em]"
-          style={{ color: "#94A3B8" }}
+      <div className="mt-14">
+        <h2
+          className="mb-6 text-[13px] font-semibold tracking-wide"
+          style={{ color: "#64748B", letterSpacing: "0.04em" }}
         >
           Fallkontext
-        </p>
+        </h2>
         <SubmissionMeta
           patientName={patientName}
           patientEmail={patientEmail}
@@ -107,12 +103,12 @@ export function SubmissionActions({
           updatedAt={updatedAt}
           photoCount={photoCount}
         />
-        <p className="mt-8 text-[13px] leading-relaxed text-text-tertiary">
-          Teamaufgaben und Delegation werden in{" "}
-          <Link href="/relay" className="font-medium text-brand underline-offset-2 hover:underline">
+        <p className="mt-10 text-[13px] leading-relaxed" style={{ color: "#94A3B8" }}>
+          Teamaufgaben in{" "}
+          <Link href="/relay" className="font-medium underline-offset-2" style={{ color: "#2563EB" }}>
             Relay
-          </Link>{" "}
-          geführt — getrennt vom Patienten-Intake hier im Tracker.
+          </Link>
+          .
         </p>
       </div>
     </div>

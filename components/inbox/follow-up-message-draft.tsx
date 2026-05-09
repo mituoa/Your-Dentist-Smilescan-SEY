@@ -46,7 +46,6 @@ export function FollowUpMessageDraft({
   );
 
   const [body, setBody] = useState(canonicalBase);
-  /** null = Standard-Einladung aktiv; "custom" = manuell bearbeitet; sonst Snippet-ID */
   const [activeSnippetId, setActiveSnippetId] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -70,7 +69,7 @@ export function FollowUpMessageDraft({
       setActiveSnippetId(snippetId);
       setBody(next);
       setFlash(true);
-      window.setTimeout(() => setFlash(false), 220);
+      window.setTimeout(() => setFlash(false), 200);
     },
     [params]
   );
@@ -79,7 +78,7 @@ export function FollowUpMessageDraft({
     setBody(canonicalBase);
     setActiveSnippetId(null);
     setFlash(true);
-    window.setTimeout(() => setFlash(false), 220);
+    window.setTimeout(() => setFlash(false), 200);
   }, [canonicalBase]);
 
   const copy = async () => {
@@ -92,22 +91,31 @@ export function FollowUpMessageDraft({
     }
   };
 
-  return (
-    <div className="space-y-5">
-      <header className="space-y-2">
-        <h3 className="text-[12px] font-semibold uppercase tracking-[0.1em] text-text-tertiary">
-          Patientenkorrespondenz
-        </h3>
-        <p className="text-[14px] leading-relaxed text-text-secondary">
-          Entwurf zur Prüfung durch die Praxis.{" "}
-          <span className="font-medium text-text-primary">Es wird nichts automatisch versendet.</span>
-        </p>
-      </header>
+  const chip = (active: boolean) =>
+    active
+      ? {
+          border: "1px solid #2B6FE8",
+          background: "#EEF6FF",
+          color: "#1D4ED8",
+        }
+      : {
+          border: "1px solid #E5E7EB",
+          background: "#FFFFFF",
+          color: "#64748B",
+        };
 
+  return (
+    <div className="space-y-8">
       <div
-        className={`rounded-xl border border-border/80 bg-surface-card/90 shadow-sm transition-[box-shadow,background-color] duration-200 ease-out motion-reduce:transition-none ${
-          flash ? "shadow-md ring-1 ring-brand/15" : ""
-        }`}
+        className="transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none"
+        style={{
+          borderRadius: "14px",
+          background: "#FDFEFE",
+          boxShadow: flash
+            ? "inset 0 0 0 1px rgba(43,111,232,0.12), 0 2px 12px rgba(15,23,42,0.05)"
+            : "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 3px rgba(15,23,42,0.04)",
+          border: "1px solid rgba(226, 232, 240, 0.75)",
+        }}
       >
         <textarea
           value={body}
@@ -115,27 +123,40 @@ export function FollowUpMessageDraft({
             setBody(e.target.value);
             setActiveSnippetId("custom");
           }}
-          rows={12}
-          className="min-h-[220px] w-full resize-y rounded-xl border-0 bg-transparent px-4 py-4 text-[15px] leading-[1.65] text-text-primary outline-none transition-opacity duration-200 motion-reduce:transition-none placeholder:text-text-tertiary"
+          rows={11}
+          spellCheck={false}
+          className="min-h-[240px] w-full resize-y border-0 bg-transparent px-6 py-6 outline-none"
+          style={{
+            fontSize: "16px",
+            lineHeight: 1.75,
+            letterSpacing: "-0.01em",
+            color: "#0F172A",
+            fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+          }}
           aria-label="Nachrichtentwurf"
         />
       </div>
 
       <div>
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
+        <p className="mb-3 text-[12px] font-medium" style={{ color: "#94A3B8", letterSpacing: "0.06em" }}>
           Vorlagen
         </p>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={resetToStandard}
-            className={`min-h-10 rounded-full border px-4 py-2 text-left text-[13px] font-medium transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 ${
-              activeSnippetId === null
-                ? "border-brand/40 bg-brand/8 text-text-primary"
-                : "border-border/80 bg-surface-page/90 text-text-secondary hover:border-brand/30 hover:bg-surface-card hover:text-text-primary"
-            }`}
+            style={{
+              padding: "7px 12px",
+              borderRadius: "6px",
+              fontSize: "13px",
+              fontWeight: 500,
+              letterSpacing: "-0.005em",
+              transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
+              ...chip(activeSnippetId === null),
+            }}
+            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
           >
-            Standard-Einladung
+            Standard
           </button>
           {FOLLOW_UP_SNIPPETS.map((s) => {
             const active = activeSnippetId !== "custom" && activeSnippetId === s.id;
@@ -144,11 +165,16 @@ export function FollowUpMessageDraft({
                 key={s.id}
                 type="button"
                 onClick={() => applySnippet(s.id)}
-                className={`min-h-10 rounded-full border px-4 py-2 text-left text-[13px] font-medium transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 ${
-                  active
-                    ? "border-brand/40 bg-brand/8 text-text-primary"
-                    : "border-border/80 bg-surface-page/90 text-text-secondary hover:border-brand/30 hover:bg-surface-card hover:text-text-primary"
-                }`}
+                style={{
+                  padding: "7px 12px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  letterSpacing: "-0.005em",
+                  transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
+                  ...chip(active),
+                }}
+                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
               >
                 {s.label}
               </button>
@@ -160,12 +186,18 @@ export function FollowUpMessageDraft({
       <button
         type="button"
         onClick={copy}
-        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-card px-4 text-[14px] font-medium text-text-primary shadow-sm transition hover:border-brand/35 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 sm:w-auto"
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] px-5 text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+        style={{
+          color: "#0F172A",
+          background: "#FFFFFF",
+          border: "1px solid #E5E7EB",
+          boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+        }}
       >
         {copied ? (
-          <Check className="h-4 w-4 text-brand" strokeWidth={2} />
+          <Check className="h-4 w-4" style={{ color: "#2563EB" }} strokeWidth={2} />
         ) : (
-          <Copy className="h-4 w-4 opacity-70" strokeWidth={1.75} />
+          <Copy className="h-4 w-4 opacity-60" strokeWidth={1.75} />
         )}
         {copied ? "Kopiert" : "In Zwischenablage kopieren"}
       </button>

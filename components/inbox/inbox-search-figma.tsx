@@ -51,16 +51,16 @@ export function InboxSearchFigma({ routeBase = "/inbox" }: InboxSearchFigmaProps
           paddingLeft: "36px",
           paddingRight: "12px",
           borderRadius: "8px",
-          border: "1px solid #E2E8F0",
-          color: "#1E293B",
-          transition: "all 200ms ease",
+          border: "1px solid #E5E7EB",
+          color: "#0F172A",
+          transition: "all 150ms ease",
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = "#2F80ED";
-          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(47,128,237,0.08)";
+          e.currentTarget.style.borderColor = "#2B6FE8";
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(43,111,232,0.06)";
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = "#E2E8F0";
+          e.currentTarget.style.borderColor = "#E5E7EB";
           e.currentTarget.style.boxShadow = "none";
         }}
       />
