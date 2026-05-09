@@ -218,20 +218,11 @@ export default async function InboxDetailPage({
             background: "#FFFFFF",
           }}
         >
-          <div className="mb-8">
-            <div
-              style={{
-                borderRadius: "12px",
-                overflow: "hidden",
-                maxHeight: "240px",
-                background: "#F8FAFC",
-              }}
-            >
-              <PhotoViewer
-                photos={submission.photos}
-                patientName={submission.patient_name || "Patient"}
-              />
-            </div>
+          <div className="mb-10">
+            <PhotoViewer
+              photos={submission.photos}
+              patientName={submission.patient_name || "Patient"}
+            />
           </div>
 
           <div style={{ marginBottom: "40px", maxWidth: "640px" }}>

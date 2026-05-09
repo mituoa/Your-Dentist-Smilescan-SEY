@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ImageIcon, Download, Loader2, Check } from "lucide-react";
 import { saveAs } from "file-saver";
 import { downloadSubmissionPhotos } from "@/app/(protected)/inbox/[id]/actions";
-import { pilotGlassPanel } from "@/lib/pilot-surface";
 import { useParams } from "next/navigation";
 
 interface Photo {
@@ -30,10 +29,10 @@ function base64ToBytes(base64: string): Uint8Array {
   return bytes;
 }
 
-export function PhotoViewer({
-  photos,
-  patientName,
-}: PhotoViewerProps) {
+/**
+ * Klinische Bildfläche — an Figma angelehnt: großes Bild, wenig Chrome, kein „Dashboard“-Panel.
+ */
+export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
   const params = useParams<{ id: string }>();
   const submissionId = params?.id || "";
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -43,21 +42,16 @@ export function PhotoViewer({
   if (photos.length === 0) {
     return (
       <div
-        className={`overflow-hidden ${pilotGlassPanel}`}
+        className="flex aspect-[16/10] max-h-[280px] flex-col items-center justify-center rounded-xl bg-[#F1F5F9]"
         aria-label={`Fotos: ${patientName}`}
       >
-        <div className="aspect-[4/3] bg-surface-sunken flex flex-col items-center justify-center gap-3">
-          <ImageIcon
-            className="w-16 h-16 text-text-tertiary/40"
-            strokeWidth={1}
-          />
-          <p className="text-sm font-medium leading-6 text-text-tertiary">
-            Noch keine Fotos vorhanden
-          </p>
-          <p className="max-w-xs px-6 text-center text-sm leading-6 text-text-tertiary/80">
-            Sobald der Patient Fotos hochlädt, sehen Sie sie hier.
-          </p>
-        </div>
+        <ImageIcon className="h-14 w-14 text-[#94A3B8]/50" strokeWidth={1} />
+        <p className="mt-3 text-[15px] font-medium" style={{ color: "#64748B" }}>
+          Noch keine Fotos
+        </p>
+        <p className="mt-1 max-w-sm px-6 text-center text-[14px] leading-relaxed" style={{ color: "#94A3B8" }}>
+          Sobald der Patient Bilder einreicht, erscheinen sie hier.
+        </p>
       </div>
     );
   }
@@ -99,72 +93,71 @@ export function PhotoViewer({
   }
 
   return (
-    <div className="space-y-4 sm:space-y-5" aria-label={`Fotos: ${patientName}`}>
-      <div className={`overflow-hidden ${pilotGlassPanel}`}>
-        <div className="aspect-[4/3] bg-surface-sunken flex items-center justify-center relative">
-          {selectedUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
-            <img
-              src={selectedUrl}
-              alt={`Foto ${selectedIndex + 1}`}
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-          ) : (
-            <ImageIcon
-              className="w-24 h-24 text-text-tertiary/40"
-              strokeWidth={1}
-            />
-          )}
-          <div className="absolute bottom-3 left-3 right-3 flex min-h-12 flex-col items-stretch gap-2.5 rounded-lg border border-border/70 bg-surface-page/90 px-3 py-2.5 backdrop-blur sm:bottom-4 sm:left-4 sm:right-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-            <div className="min-w-0">
-              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-                Fotoübersicht
-              </p>
-              <span className="text-sm font-medium tabular-nums text-text-secondary">
-                {selectedIndex + 1} / {photos.length}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handleDownloadAllPhotos}
-              disabled={isLoading}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-md border border-border bg-surface-card px-2.5 py-2 text-xs font-medium text-text-secondary transition-colors hover:border-brand/40 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0 sm:w-auto sm:shrink-0 sm:py-1.5"
-            >
-              {isLoading ? (
-                <Loader2 className="w-3 h-3 animate-spin" strokeWidth={1.75} />
-              ) : downloadStatus === "success" ? (
-                <Check className="w-3 h-3" strokeWidth={1.75} />
-              ) : (
-                <Download className="w-3 h-3" strokeWidth={1.75} />
-              )}
-              {isLoading
-                ? "ZIP wird erstellt…"
-                : downloadStatus === "success"
-                  ? "Download gestartet"
-                  : downloadStatus === "error"
-                    ? "Erneut versuchen"
-                    : "Alle Fotos laden"}
-            </button>
+    <div className="space-y-4" aria-label={`Fotos: ${patientName}`}>
+      <div
+        className="relative overflow-hidden rounded-xl bg-[#EEF2F6]"
+        style={{ maxHeight: "280px", minHeight: "200px" }}
+      >
+        {selectedUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
+          <img
+            src={selectedUrl}
+            alt={`Klinisches Bild ${selectedIndex + 1} von ${photos.length}`}
+            className="h-full w-full max-h-[280px] object-cover"
+            style={{ filter: "saturate(0.94) contrast(0.98)" }}
+          />
+        ) : (
+          <div className="flex min-h-[200px] items-center justify-center">
+            <ImageIcon className="h-16 w-16 text-[#94A3B8]/45" strokeWidth={1} />
           </div>
-        </div>
+        )}
       </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[13px]" style={{ color: "#64748B" }}>
+          Bild {selectedIndex + 1} von {photos.length}
+        </p>
+        <button
+          type="button"
+          onClick={handleDownloadAllPhotos}
+          disabled={isLoading}
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium transition hover:border-[#2B6FE8]/40 hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+          style={{ color: "#475569" }}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+          ) : downloadStatus === "success" ? (
+            <Check className="h-4 w-4 text-[#047857]" strokeWidth={2} />
+          ) : (
+            <Download className="h-4 w-4 opacity-70" strokeWidth={1.75} />
+          )}
+          {isLoading
+            ? "ZIP wird erstellt…"
+            : downloadStatus === "success"
+              ? "Download gestartet"
+              : downloadStatus === "error"
+                ? "Erneut versuchen"
+                : "Alle Fotos laden (ZIP)"}
+        </button>
+      </div>
+
       {downloadStatus === "error" && (
-        <p className="text-sm leading-5 text-danger">
+        <p className="text-[14px] leading-relaxed text-red-700">
           {downloadError || "Download nicht möglich. Bitte erneut versuchen."}
         </p>
       )}
 
-      {photos.length > 1 && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-4 lg:gap-3">
+      {photos.length > 1 ? (
+        <div className="flex flex-wrap gap-2">
           {photos.map((photo, i) => (
             <button
               key={photo.id}
               type="button"
               onClick={() => setSelectedIndex(i)}
-              className={`relative aspect-square bg-surface-sunken rounded-md border-2 transition-colors overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 ${
+              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] ${
                 i === selectedIndex
-                  ? "border-brand"
-                  : "border-transparent hover:border-border"
+                  ? "border-[#2B6FE8] ring-1 ring-[#2B6FE8]/30"
+                  : "border-transparent hover:border-[#E2E8F0]"
               }`}
             >
               {photo.signed_url ? (
@@ -172,18 +165,15 @@ export function PhotoViewer({
                 <img
                   src={photo.signed_url}
                   alt=""
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <ImageIcon
-                  className="w-6 h-6 text-text-tertiary/50"
-                  strokeWidth={1}
-                />
+                <ImageIcon className="m-auto h-5 w-5 text-[#94A3B8]/50" strokeWidth={1} />
               )}
             </button>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
