@@ -1,7 +1,5 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
 
@@ -91,28 +89,18 @@ export function RelayWorkspaceView({
           <p className="mt-2 text-[13px] text-[#64748B]">Praxisorganisation &amp; Aufgaben</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div
-            className="inline-flex rounded-[10px] p-1"
-            style={{ background: "#F8FAFC" }}
-            role="group"
-            aria-label="Aufgaben filtern"
-          >
-            <button type="button" className={toggleBtn(scope === "all")} onClick={() => setScopeNav("all")}>
-              Alle Aufgaben
-            </button>
-            <button type="button" className={toggleBtn(scope === "mine")} onClick={() => setScopeNav("mine")}>
-              Meine Aufgaben
-            </button>
-          </div>
-
-          <Link
-            href={`${basePath}#relay-quick-create`}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#2F80ED] px-4 text-[14px] font-medium text-white shadow-[0_4px_12px_rgba(47,128,237,0.28)] transition-opacity hover:opacity-95 lg:h-11 lg:px-5"
-          >
-            <Plus className="h-4 w-4" />
-            Neue Aufgabe
-          </Link>
+        <div
+          className="inline-flex rounded-[10px] p-1"
+          style={{ background: "#F8FAFC" }}
+          role="group"
+          aria-label="Aufgaben filtern"
+        >
+          <button type="button" className={toggleBtn(scope === "all")} onClick={() => setScopeNav("all")}>
+            Alle Aufgaben
+          </button>
+          <button type="button" className={toggleBtn(scope === "mine")} onClick={() => setScopeNav("mine")}>
+            Meine Aufgaben
+          </button>
         </div>
       </div>
 
