@@ -501,13 +501,6 @@ export function RegisterClient(props: {
 
     const w = img.naturalWidth || img.width;
     const h = img.naturalHeight || img.height;
-    // Lesbare Smartphone-Fotos zulassen — nur bei sehr kleinen Bildern dezent hinweisen (blockiert nicht).
-    if (w < 480 || h < 360) {
-      return {
-        ok: true,
-        hint: "Hinweis: Bei etwas höherer Auflösung ist die spätere Prüfung für uns einfacher.",
-      };
-    }
 
     const targetW = 420;
     const scale = targetW / w;
@@ -593,28 +586,24 @@ export function RegisterClient(props: {
   };
 
   const uploadLicenseSide = async (side: "front" | "back", file: File): Promise<string> => {
-    setLicenseUploading(true);
-    setLicenseUploadError("");
-    try {
-      const form = new FormData();
-      form.set("file", file);
-      form.set("side", side);
-      const res = await fetch("/api/register-license-upload", {
-        method: "POST",
-        body: form,
-      });
-      const json = (await res.json()) as { storagePath?: string; error?: string };
-      if (!res.ok || !json.storagePath) {
-        throw new Error(json.error || "Upload fehlgeschlagen.");
-      }
-      return json.storagePath;
-    } finally {
-      setLicenseUploading(false);
+    const form = new FormData();
+    form.set("file", file);
+    form.set("side", side);
+    const res = await fetch("/api/register-license-upload", {
+      method: "POST",
+      body: form,
+    });
+    const json = (await res.json()) as { storagePath?: string; error?: string };
+    if (!res.ok || !json.storagePath) {
+      throw new Error(json.error || "Upload fehlgeschlagen.");
     }
+    return json.storagePath;
   };
 
   const onStep3Submit = async (e: FormEvent) => {
     e.preventDefault();
+    setLicenseUploading(true);
+    setLicenseUploadError("");
     const optional = props.licenseStepOptional === true;
     try {
       if (!licenseFrontFile && !licenseBackFile) {
@@ -664,6 +653,8 @@ export function RegisterClient(props: {
       const raw = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
       console.error("[RegisterClient] license upload", raw);
       setLicenseUploadError(userFacingAuthError(raw));
+    } finally {
+      setLicenseUploading(false);
     }
   };
 
