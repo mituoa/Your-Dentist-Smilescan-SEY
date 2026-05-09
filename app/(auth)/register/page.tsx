@@ -26,13 +26,16 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   const demoUiRaw = (process.env.NEXT_PUBLIC_REGISTRATION_DEMO_MODE ?? "").trim().toLowerCase();
   const registrationDemoUi = demoUiRaw === "true" || demoUiRaw === "1";
 
-  const loginHref = (() => {
-    if (inviteToken) {
-      const q = `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`;
-      return fromPricing ? `${q}#pricing` : q;
-    }
-    return fromPricing ? "/login#pricing" : "/login";
-  })();
+  const loginHrefPlain = inviteToken
+    ? `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
+    : "/login";
+
+  /** Only for pricing-origin flow: return to pricing section after closing the plan/payment step. */
+  const loginHrefWithPricingHash = fromPricing
+    ? inviteToken
+      ? `${loginHrefPlain}#pricing`
+      : "/login#pricing"
+    : null;
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-hidden">
@@ -44,7 +47,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         initialPlan={params.plan}
         queryError={queryError}
         success={success}
-        loginHref={loginHref}
+        fromPricing={fromPricing}
+        loginHref={loginHrefPlain}
+        loginHrefWithPricingHash={loginHrefWithPricingHash}
         registrationDemoUi={registrationDemoUi}
         skipPaymentAtSignup={skipPaymentAtSignup()}
         licenseStepOptional={isRegistrationDemoMode()}
@@ -52,7 +57,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
       <div className="px-4 pb-10 pt-2 text-center text-[13px] text-gray-500 sm:px-5">
         Schon ein Konto?{" "}
         <Link
-          href={loginHref}
+          href={loginHrefPlain}
           className="font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
         >
           Anmelden

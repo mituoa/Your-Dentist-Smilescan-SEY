@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
@@ -28,7 +29,11 @@ export function RegisterClient(props: {
   initialPlan?: string | null;
   queryError?: string;
   success?: boolean;
-  loginHref?: string;
+  /** Plain /login (or invite login) — no #pricing. */
+  loginHref: string;
+  /** When registration started from pricing (`from=pricing`), used only to return to #pricing after closing step 4. */
+  loginHrefWithPricingHash?: string | null;
+  fromPricing?: boolean;
   /** Zeigt zweiten Submit „ohne Stripe“ (wirksam nur mit REGISTRATION_DEMO_MODE am Server). */
   registrationDemoUi?: boolean;
   /** Server: Registrierung ohne Stripe-Redirect (Standard bis ENABLE_STRIPE_CHECKOUT_AT_SIGNUP). */
@@ -36,7 +41,35 @@ export function RegisterClient(props: {
   /** Server (REGISTRATION_DEMO_MODE): Lizenz-Upload-Schritt optional überspringbar. */
   licenseStepOptional?: boolean;
 }) {
-  const loginBackHref = props.loginHref ?? "/login";
+  const router = useRouter();
+  const loginBackHref = props.loginHref;
+  const loginPricingReturnHref = props.loginHrefWithPricingHash ?? null;
+  const fromPricingFlow = Boolean(props.fromPricing);
+
+  const handleRegistrationModalClose = () => {
+    setNavBusy(false);
+    if (props.success) {
+      router.push(loginBackHref);
+      return;
+    }
+    if (registrationStep === 4 && loginPricingReturnHref) {
+      router.push(loginPricingReturnHref);
+      return;
+    }
+    if (registrationStep === 4) {
+      router.push(loginBackHref);
+      return;
+    }
+    if (registrationStep > 1) {
+      setRegistrationStep((s) => (s - 1) as RegistrationStep);
+      return;
+    }
+    if (fromPricingFlow && loginPricingReturnHref) {
+      router.push(loginPricingReturnHref);
+      return;
+    }
+    router.push(loginBackHref);
+  };
   const plan = coercePlan(props.initialPlan);
   const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(1);
 
@@ -47,6 +80,11 @@ export function RegisterClient(props: {
   const [regEmailConfirm, setRegEmailConfirm] = React.useState("");
   const [regEmailConfirmDirty, setRegEmailConfirmDirty] = React.useState(false);
   const [emailPairError, setEmailPairError] = React.useState("");
+  /** Mismatch hint only after blur, length near primary, or failed „Weiter“ — not on every keystroke. */
+  const [confirmEmailBlurred, setConfirmEmailBlurred] = React.useState(false);
+  const [confirmMismatchAfterContinueAttempt, setConfirmMismatchAfterContinueAttempt] = React.useState(false);
+  /** Short overlay when advancing steps (calm brand mark). */
+  const [navBusy, setNavBusy] = React.useState(false);
   const [regPassword, setRegPassword] = React.useState("");
 
   const [selectedPlan, setSelectedPlan] = React.useState<Plan>(plan);
@@ -98,16 +136,55 @@ export function RegisterClient(props: {
     if (/[0-9]/.test(pwd)) strength++;
     if (/[^a-zA-Z0-9]/.test(pwd)) strength++;
 
-    if (strength <= 1) return { strength: 1, label: "Schwach", color: "#EF4444" };
-    if (strength <= 3) return { strength: 2, label: "Mittel", color: "#F59E0B" };
-    return { strength: 3, label: "Stark", color: "#10B981" };
+    if (strength <= 1) return { strength: 1, label: "Ausbaufähig", color: "#B45309" };
+    if (strength <= 3) return { strength: 2, label: "Solide", color: "#CA8A04" };
+    return { strength: 3, label: "Stark", color: "#047857" };
   };
 
   const passwordStrength = regPassword ? getPasswordStrength(regPassword) : null;
 
+  /** Trim + lowercase only; used for validation/submit — display state stays as typed. */
   const normalizeEmail = (v: string) => v.trim().toLowerCase();
+
   const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(v));
-  const emailMatches = normalizeEmail(regEmail) !== "" && normalizeEmail(regEmail) === normalizeEmail(regEmailConfirm);
+
+  const emailsMatchNormalized = React.useMemo(() => {
+    const e = normalizeEmail(regEmail);
+    const c = normalizeEmail(regEmailConfirm);
+    return e.length > 0 && e === c;
+  }, [regEmail, regEmailConfirm]);
+
+  const emailConfirmMismatch = React.useMemo(
+    () => normalizeEmail(regEmailConfirm).length > 0 && !emailsMatchNormalized,
+    [regEmailConfirm, emailsMatchNormalized]
+  );
+
+  const showConfirmMismatchHint = React.useMemo(() => {
+    if (!emailConfirmMismatch) return false;
+    const confirmMeaningful =
+      regEmailConfirm.trim().length > 0 && emailLooksCompleteForTypoHint(regEmailConfirm);
+    return (
+      confirmMismatchAfterContinueAttempt ||
+      confirmEmailBlurred ||
+      confirmMeaningful
+    );
+  }, [
+    emailConfirmMismatch,
+    regEmailConfirm,
+    confirmEmailBlurred,
+    confirmMismatchAfterContinueAttempt,
+  ]);
+
+  React.useEffect(() => {
+    setConfirmEmailBlurred(false);
+    setConfirmMismatchAfterContinueAttempt(false);
+  }, [regEmail]);
+
+  const goToStep = React.useCallback((next: RegistrationStep) => {
+    setNavBusy(true);
+    setRegistrationStep(next);
+    window.setTimeout(() => setNavBusy(false), 160);
+  }, []);
 
   const registrationDocsSatisfied =
     props.licenseStepOptional === true ||
@@ -125,6 +202,17 @@ export function RegisterClient(props: {
     if (ok) return { tone: "ok" as const, text: "Format sieht plausibel aus." };
     return { tone: "warn" as const, text: "Bitte Nummer genau wie auf dem Ausweis eingeben (Format prüfen)." };
   }, [regLicense]);
+
+  /** Domain looks complete (user past „local@domain.tld“) — avoids hints while typing only the local part. */
+  const emailLooksCompleteForTypoHint = (raw: string) => {
+    const t = raw.trim();
+    const at = t.lastIndexOf("@");
+    if (at <= 0 || at >= t.length - 1) return false;
+    const domain = t.slice(at + 1);
+    if (!domain.includes(".")) return false;
+    const lastDot = domain.lastIndexOf(".");
+    return lastDot >= 1 && lastDot < domain.length - 2;
+  };
 
   const suggestEmailFix = (raw: string): { original: string; suggested: string } | null => {
     const original = raw.trim();
@@ -144,9 +232,11 @@ export function RegisterClient(props: {
       "mgail.com": "gmail.com",
       "outlok.com": "outlook.com",
       "outllok.com": "outlook.com",
+      "outlook.con": "outlook.com",
       "hotnail.com": "hotmail.com",
       "hotmai.com": "hotmail.com",
       "icloud.con": "icloud.com",
+      "icoud.com": "icloud.com",
       "yaho.com": "yahoo.com",
       "yahoo.con": "yahoo.com",
       "gmx.con": "gmx.com",
@@ -225,9 +315,13 @@ export function RegisterClient(props: {
     }
 
     const t = window.setTimeout(() => {
+      if (!emailLooksCompleteForTypoHint(email)) {
+        setEmailTypoSuggestion(null);
+        return;
+      }
       const suggestion = suggestEmailFix(email);
       setEmailTypoSuggestion(suggestion);
-    }, 350);
+    }, 400);
 
     return () => window.clearTimeout(t);
   }, [regEmail, registrationStep]);
@@ -306,7 +400,7 @@ export function RegisterClient(props: {
 
   React.useEffect(() => {
     try {
-      sessionStorage.setItem("smilescan-registration-plan", selectedPlan);
+      sessionStorage.setItem("yd-registration-plan", selectedPlan);
     } catch {
       /* ignore */
     }
@@ -388,7 +482,7 @@ export function RegisterClient(props: {
 
   const analyzeImageQuality = async (file: File): Promise<{ ok: boolean; hint: string }> => {
     if (!file.type.startsWith("image/")) {
-      return { ok: true, hint: "PDF kann nicht automatisch geprüft werden." };
+      return { ok: true, hint: "PDF wird bei der Prüfung gesondert betrachtet." };
     }
 
     const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -407,8 +501,12 @@ export function RegisterClient(props: {
 
     const w = img.naturalWidth || img.width;
     const h = img.naturalHeight || img.height;
-    if (w < 1200 || h < 800) {
-      return { ok: false, hint: "Bild ist zu klein. Bitte näher ran und scharf fotografieren." };
+    // Lesbare Smartphone-Fotos zulassen — nur bei sehr kleinen Bildern dezent hinweisen (blockiert nicht).
+    if (w < 480 || h < 360) {
+      return {
+        ok: true,
+        hint: "Hinweis: Bei etwas höherer Auflösung ist die spätere Prüfung für uns einfacher.",
+      };
     }
 
     const targetW = 420;
@@ -436,8 +534,18 @@ export function RegisterClient(props: {
     }
     mean /= gray.length;
 
-    if (mean < 60) return { ok: false, hint: "Bild ist sehr dunkel. Bitte bessere Beleuchtung nutzen." };
-    if (mean > 210) return { ok: false, hint: "Bild ist sehr hell/überbelichtet. Bitte ohne Blitz testen." };
+    if (mean < 60) {
+      return {
+        ok: false,
+        hint: "Das Bild wirkt sehr dunkel. Bei etwas mehr Licht lässt sich der Inhalt leichter prüfen.",
+      };
+    }
+    if (mean > 210) {
+      return {
+        ok: false,
+        hint: "Das Bild wirkt sehr hell. Ohne harten Blitz wirkt die Darstellung oft ruhiger.",
+      };
+    }
 
     let energy = 0;
     for (let y = 1; y < ch - 1; y++) {
@@ -450,7 +558,10 @@ export function RegisterClient(props: {
     }
     const norm = energy / (cw * ch);
     if (norm < 18) {
-      return { ok: false, hint: "Bild wirkt unscharf. Bitte ruhiger halten und Fokus abwarten." };
+      return {
+        ok: false,
+        hint: "Das Bild könnte klarer sein. Für eine schnellere Prüfung empfehlen wir eine ruhigere Aufnahme.",
+      };
     }
 
     return { ok: true, hint: "Lesbar." };
@@ -461,22 +572,24 @@ export function RegisterClient(props: {
     const email = normalizeEmail(regEmail);
     const confirm = normalizeEmail(regEmailConfirm);
     setEmailPairError("");
+    setConfirmMismatchAfterContinueAttempt(false);
     if (!email || !isValidEmail(email)) return;
     if (!confirm) {
       setEmailPairError("Bitte geben Sie Ihre E-Mail-Adresse zur Bestätigung erneut ein.");
       return;
     }
-    if (!emailMatches) {
+    if (email !== confirm) {
       setEmailPairError("Die E-Mail-Adressen stimmen nicht überein.");
+      setConfirmMismatchAfterContinueAttempt(true);
       return;
     }
     if (emailCheckStatus === "taken" || emailCheckStatus === "checking") return;
-    setRegistrationStep(2);
+    goToStep(2);
   };
 
   const onStep2Submit = (e: FormEvent) => {
     e.preventDefault();
-    setRegistrationStep(3);
+    goToStep(3);
   };
 
   const uploadLicenseSide = async (side: "front" | "back", file: File): Promise<string> => {
@@ -514,7 +627,7 @@ export function RegisterClient(props: {
           setBackQualityOk(null);
           setFrontQualityHint("");
           setBackQualityHint("");
-          setRegistrationStep(4);
+          goToStep(4);
           return;
         }
         setLicenseUploadError("Bitte laden Sie Vorder- und Rückseite hoch (oder eine Seite als Bild/PDF).");
@@ -546,7 +659,7 @@ export function RegisterClient(props: {
           "Hinweis: Die Scan-Qualität ist für eine manuelle Prüfung grenzwertig. Sie können fortfahren; wir prüfen das Dokument später."
         );
       }
-      setRegistrationStep(4);
+      goToStep(4);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
       console.error("[RegisterClient] license upload", raw);
@@ -599,8 +712,9 @@ export function RegisterClient(props: {
               animation: "modalSlideIn 0.25s ease-out",
             }}
           >
-          <Link
-            href={loginBackHref}
+          <button
+            type="button"
+            onClick={handleRegistrationModalClose}
             aria-label="Schließen"
             className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-red-50 md:right-5 md:top-5"
           >
@@ -614,7 +728,7 @@ export function RegisterClient(props: {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </Link>
+          </button>
 
             <div
               className="relative px-4 pb-5 pt-6 sm:px-5 md:px-10 md:pb-6 md:pt-8"
@@ -681,24 +795,25 @@ export function RegisterClient(props: {
                         className="h-[48px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-3 text-base text-gray-900 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[14px]"
                       />
                       {successEmail.trim() && !isValidEmail(successEmail) ? (
-                        <p className="mt-2 text-[12px] text-red-600">Bitte eine gültige E‑Mail-Adresse eingeben.</p>
+                        <p className="mt-2 text-[12px] text-amber-800">Bitte eine gültige E‑Mail-Adresse eingeben.</p>
                       ) : null}
                       {(() => {
-                        const suggestion = suggestEmailFix(successEmail);
+                        const raw = successEmail.trim();
+                        if (!emailLooksCompleteForTypoHint(raw)) return null;
+                        const suggestion = suggestEmailFix(raw);
                         if (!suggestion) return null;
                         return (
-                          <div className="mt-2 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2">
-                            <p className="text-[12px] text-amber-900">
-                              Meinten Sie <span className="font-semibold">{suggestion.suggested}</span>?
-                            </p>
+                          <p className="mt-2 text-[12px] leading-relaxed text-gray-600">
+                            Meinten Sie vielleicht{" "}
                             <button
                               type="button"
                               onClick={() => setSuccessEmail(suggestion.suggested)}
-                              className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-semibold text-amber-900 transition-colors hover:bg-amber-100"
+                              className="font-medium text-[#0284C7] underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                             >
-                              Übernehmen
+                              {suggestion.suggested}
                             </button>
-                          </div>
+                            ?
+                          </p>
                         );
                       })()}
                       <p className="mt-2 text-[12px] text-gray-500">
@@ -743,7 +858,7 @@ export function RegisterClient(props: {
               {!props.success ? (
                 <>
               {props.queryError ? (
-                <p className="mb-6 rounded-xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-[14px] text-red-600">
+                <p className="mb-6 rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-[14px] text-amber-950">
                   {userFacingAuthError(
                     (() => {
                       try {
@@ -869,7 +984,7 @@ export function RegisterClient(props: {
                               emailCheckStatus === "available"
                                 ? "text-green-600"
                                 : emailCheckStatus === "taken" || emailCheckStatus === "invalid"
-                                  ? "text-red-600"
+                                  ? "text-amber-800"
                                   : "text-gray-500"
                             }`}
                           >
@@ -882,11 +997,8 @@ export function RegisterClient(props: {
                       ) : null}
 
                       {emailTypoSuggestion ? (
-                        <div className="mt-3 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2">
-                          <p className="text-[12px] text-amber-900">
-                            Meinten Sie{" "}
-                            <span className="font-semibold">{emailTypoSuggestion.suggested}</span>?
-                          </p>
+                        <p className="mt-2.5 text-[12px] leading-relaxed text-gray-600">
+                          Meinten Sie vielleicht{" "}
                           <button
                             type="button"
                             onClick={() => {
@@ -899,12 +1011,14 @@ export function RegisterClient(props: {
                               setEmailTypoSuggestion(null);
                               setRegEmailConfirmDirty(true);
                               setEmailPairError("");
+                              setConfirmMismatchAfterContinueAttempt(false);
                             }}
-                            className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-semibold text-amber-900 transition-colors hover:bg-amber-100"
+                            className="font-medium text-[#0284C7] underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                           >
-                            Übernehmen
+                            {emailTypoSuggestion.suggested}
                           </button>
-                        </div>
+                          ?
+                        </p>
                       ) : null}
 
                       {emailTypoUndo ? (
@@ -940,7 +1054,10 @@ export function RegisterClient(props: {
                           setRegEmailConfirmDirty(true);
                           setRegEmailConfirm(e.target.value);
                           setEmailPairError("");
+                          setConfirmMismatchAfterContinueAttempt(false);
                         }}
+                        onFocus={() => setConfirmEmailBlurred(false)}
+                        onBlur={() => setConfirmEmailBlurred(true)}
                         placeholder="E-Mail-Adresse erneut eingeben"
                         autoComplete="off"
                         name="email_confirm_register"
@@ -949,7 +1066,7 @@ export function RegisterClient(props: {
                       />
                       {emailPairError ? (
                         <p className="mt-2 text-[12px] text-amber-800">{emailPairError}</p>
-                      ) : regEmailConfirm && !emailMatches ? (
+                      ) : showConfirmMismatchHint ? (
                         <p className="mt-2 text-[12px] text-amber-800">
                           Die E-Mail-Adressen stimmen nicht überein.
                         </p>
@@ -999,7 +1116,7 @@ export function RegisterClient(props: {
                         emailCheckStatus === "invalid" ||
                         emailCheckStatus === "checking" ||
                         !normalizeEmail(regEmailConfirm) ||
-                        !emailMatches
+                        !emailsMatchNormalized
                       }
                       className="mt-8 h-[56px] w-full rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
                       style={{
@@ -1066,7 +1183,7 @@ export function RegisterClient(props: {
                     <div className="flex gap-3 pt-4">
                       <button
                         type="button"
-                        onClick={() => setRegistrationStep(1)}
+                        onClick={() => goToStep(1)}
                         className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50"
                       >
                         Zurück
@@ -1288,7 +1405,7 @@ export function RegisterClient(props: {
                     <div className="flex gap-3 pt-4">
                       <button
                         type="button"
-                        onClick={() => setRegistrationStep(2)}
+                        onClick={() => goToStep(2)}
                         className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50"
                       >
                         Zurück
@@ -1315,8 +1432,17 @@ export function RegisterClient(props: {
                       Zahlungsintervall wählen
                     </h3>
                     <p className="text-[13px] text-gray-500">
-                      Wählen Sie Ihren Abrechnungszeitraum und schließen Sie den Vertrag ab.
+                      Wählen Sie Ihr bevorzugtes Abrechnungsintervall — die Registrierung ist unabhängig von der
+                      Zahlungserfassung möglich.
                     </p>
+                  </div>
+
+                  <div className="mb-6 rounded-2xl border border-slate-200/70 bg-slate-50/45 px-4 py-3.5 text-left">
+                    <p className="text-[12px] font-semibold text-gray-800">14 Tage kostenlos testen</p>
+                    <ul className="mt-2 list-none space-y-1.5 text-[11px] leading-relaxed text-gray-600">
+                      <li>Keine Zahlung während der Testphase erforderlich.</li>
+                      <li>Zahlungsdaten können später ergänzt werden.</li>
+                    </ul>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -1394,7 +1520,9 @@ export function RegisterClient(props: {
                       >
                         <p className="text-[14px] font-semibold text-gray-900">SEPA‑Lastschrift</p>
                         <p className="mt-1 text-[12px] text-gray-600">
-                          Abbuchung automatisch gemäß gewähltem Intervall.
+                          {props.skipPaymentAtSignup
+                            ? "Für später — Abbuchung erst nach Testphase und Setup."
+                            : "Abbuchung automatisch gemäß gewähltem Intervall."}
                         </p>
                       </button>
                       <button
@@ -1408,7 +1536,9 @@ export function RegisterClient(props: {
                       >
                         <p className="text-[14px] font-semibold text-gray-900">Kreditkarte</p>
                         <p className="mt-1 text-[12px] text-gray-600">
-                          Sicher bezahlen per Karte (Setup im nächsten Schritt).
+                          {props.skipPaymentAtSignup
+                            ? "Für später — Kartendaten können nach der Testphase ergänzt werden."
+                            : "Sicher bezahlen per Karte (Setup im nächsten Schritt)."}
                         </p>
                       </button>
                       <button
@@ -1430,7 +1560,9 @@ export function RegisterClient(props: {
                         <p className="mt-1 text-[12px]">
                           {selectedPlan === "monthly"
                             ? "Verfügbar ab Halbjährlich/Jährlich."
-                            : "Für Praxen – Zahlung per Rechnung."}
+                            : props.skipPaymentAtSignup
+                              ? "Für Praxen — Abrechnung nach Testphase."
+                              : "Für Praxen – Zahlung per Rechnung."}
                         </p>
                       </button>
                       <button
@@ -1444,7 +1576,9 @@ export function RegisterClient(props: {
                       >
                         <p className="text-[14px] font-semibold text-gray-900">PayPal</p>
                         <p className="mt-1 text-[12px] text-gray-600">
-                          Optionale Alternative (Setup im nächsten Schritt).
+                          {props.skipPaymentAtSignup
+                            ? "Für später — optional nach der Testphase."
+                            : "Optionale Alternative (Setup im nächsten Schritt)."}
                         </p>
                       </button>
                     </div>
@@ -1504,7 +1638,7 @@ export function RegisterClient(props: {
                   </div>
 
                   <form action={props.signUpAction} className="mt-6 space-y-3">
-                    <input type="hidden" name="email" value={regEmail} />
+                    <input type="hidden" name="email" value={normalizeEmail(regEmail)} />
                     <input type="hidden" name="password" value={regPassword} />
                     <input type="hidden" name="display_name" value={regName} />
                     <input type="hidden" name="workspace_name" value={regPractice} />
@@ -1541,7 +1675,7 @@ export function RegisterClient(props: {
                     <div className="flex gap-3">
                       <button
                         type="button"
-                        onClick={() => setRegistrationStep(3)}
+                        onClick={() => goToStep(3)}
                         className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50"
                       >
                         Zurück
@@ -1550,7 +1684,7 @@ export function RegisterClient(props: {
                         label={
                           props.skipPaymentAtSignup ? "Registrierung abschließen" : "Zahlungspflichtig bestellen"
                         }
-                        pendingLabel="Wird gesendet…"
+                        pendingLabel=""
                         disabled={
                           !acceptedTos ||
                           !acceptedPrivacy ||
@@ -1575,7 +1709,7 @@ export function RegisterClient(props: {
                           name="registration_demo_skip"
                           value="1"
                           label="Registrierung abschließen (Demo, ohne Zahlung)"
-                          pendingLabel="Wird gesendet…"
+                          pendingLabel=""
                           disabled={
                             !acceptedTos ||
                             !acceptedPrivacy ||
@@ -1600,6 +1734,66 @@ export function RegisterClient(props: {
               ) : null}
                 </>
               ) : null}
+
+            {navBusy ? (
+              <div
+                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-3 rounded-3xl bg-white/90 backdrop-blur-[2px]"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="256"
+                  height="256"
+                  viewBox="0 0 256 256"
+                  fill="none"
+                  className="h-10 w-10"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <linearGradient id="reg-nav-logo" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#FFFFFF" />
+                      <stop offset="1" stopColor="#E0F2FE" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#reg-nav-logo)" />
+                  <rect
+                    x="42.75"
+                    y="42.75"
+                    width="170.5"
+                    height="170.5"
+                    rx="47.25"
+                    stroke="#0284C7"
+                    strokeOpacity="0.18"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90"
+                    stroke="#0284C7"
+                    strokeOpacity="0.34"
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M99 103L128 131L157 103"
+                    stroke="#0284C7"
+                    strokeWidth="11"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M128 130V157" stroke="#0284C7" strokeWidth="11" strokeLinecap="round" />
+                  <path
+                    d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171"
+                    stroke="#0284C7"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <p className="text-center text-[15px] font-medium tracking-tight text-gray-900">
+                  <span className="font-light italic">Your</span> Dentist
+                </p>
+              </div>
+            ) : null}
             </div>
           </div>
         </div>

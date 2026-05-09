@@ -397,7 +397,11 @@ export async function signOut(formData?: FormData) {
   revalidatePath("/", "layout");
   const raw = formData?.get("return_to");
   const to = sanitizeReturnTo(typeof raw === "string" ? raw : null);
-  redirect(to ?? "/login");
+  // Always land on plain login after logout (top of page, no pricing hash). Accept-invite may opt back into its flow.
+  if (to && to.startsWith("/accept-invite")) {
+    redirect(to);
+  }
+  redirect("/login?signed_out=1");
 }
 
 export async function requestPasswordResetFromLogin(formData: FormData) {

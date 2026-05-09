@@ -13,6 +13,7 @@ interface LoginPageProps {
     invite?: string;
     email?: string;
     resent?: string;
+    signed_out?: string;
   }>;
 }
 
@@ -22,6 +23,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const inviteToken = params.invite?.trim() || "";
   const prefilledEmail = params.email?.trim() || "";
   const resent = params.resent === "1";
+  const signedOut = params.signed_out === "1";
   const year = new Date().getFullYear();
 
   const blockingAuthErrors = new Set([
@@ -60,6 +62,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <LoginPageClient
       queryError={queryError}
       resent={resent}
+      signedOut={signedOut}
       inviteToken={inviteToken}
       prefilledEmail={prefilledEmail}
       year={year}

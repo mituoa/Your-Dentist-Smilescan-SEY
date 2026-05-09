@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="yd-app-icon-panel" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E3F3EC"/>
+    </linearGradient>
+  </defs>
+  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#yd-app-icon-panel)"/>
+  <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#0F6E56" stroke-opacity="0.18" stroke-width="1.5"/>
+  <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#0F6E56" stroke-opacity="0.34" stroke-width="9" stroke-linecap="round"/>
+  <path d="M99 103L128 131L157 103" stroke="#0F6E56" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M128 130V157" stroke="#0F6E56" stroke-width="11" stroke-linecap="round"/>
+  <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#0F6E56" stroke-width="10" stroke-linecap="round"/>
+</svg>

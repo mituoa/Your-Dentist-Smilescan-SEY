@@ -301,7 +301,12 @@ export function SettingsFigmaView({
     void (async () => {
       const supabase = createClient();
       await supabase.auth.signOut();
-      router.push("/login");
+      try {
+        sessionStorage.removeItem("smilescan-return-pricing-v1");
+      } catch {
+        /* ignore */
+      }
+      router.push("/login?signed_out=1");
     })();
   };
 

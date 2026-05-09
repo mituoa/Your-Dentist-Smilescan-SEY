@@ -11,6 +11,8 @@ const RETURN_PRICING_STORAGE_KEY = "smilescan-return-pricing-v1";
 interface LoginPageClientProps {
   queryError?: string;
   resent?: boolean;
+  /** After server/client sign-out: clear pricing-return flag and keep viewport at top. */
+  signedOut?: boolean;
   inviteToken?: string;
   prefilledEmail?: string;
   year: number;
@@ -19,6 +21,7 @@ interface LoginPageClientProps {
 export function LoginPageClient({
   queryError,
   resent = false,
+  signedOut = false,
   inviteToken = "",
   prefilledEmail = "",
   year,
@@ -44,6 +47,26 @@ export function LoginPageClient({
   };
 
   useEffect(() => {
+    if (signedOut) {
+      try {
+        sessionStorage.removeItem(RETURN_PRICING_STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        if (typeof window === "undefined") return;
+        const u = new URL(window.location.href);
+        if (u.searchParams.get("signed_out") === "1") {
+          u.searchParams.delete("signed_out");
+          const qs = u.searchParams.toString();
+          // Drop hash so logout never leaves #pricing on the URL.
+          window.history.replaceState(null, "", `${u.pathname}${qs ? `?${qs}` : ""}`);
+        }
+      });
+      return;
+    }
+
     const restore = () => {
       const el = document.getElementById("pricing");
       if (!el) return;
@@ -77,7 +100,7 @@ export function LoginPageClient({
     restore();
     window.addEventListener("hashchange", restore);
     return () => window.removeEventListener("hashchange", restore);
-  }, []);
+  }, [signedOut]);
 
   const openPlanSheet = () => {
     setActiveCta("plan");

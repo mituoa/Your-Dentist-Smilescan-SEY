@@ -1,5 +1,5 @@
-/** Route transition — brand mark only (no product copy, no generic wait text). */
-export default function AuthLoading() {
+/** Global route transition — matches auth loading identity (logo + wordmark, minimal motion). */
+export default function RootLoading() {
   return (
     <div className="flex min-h-[100dvh] w-full max-w-full min-w-0 flex-col items-center justify-center gap-3 bg-[#FAFAFA] px-4">
       <svg
@@ -12,12 +12,12 @@ export default function AuthLoading() {
         aria-hidden="true"
       >
         <defs>
-          <linearGradient id="auth-loading-logo" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+          <linearGradient id="root-loading-logo" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
             <stop stopColor="#FFFFFF" />
             <stop offset="1" stopColor="#E0F2FE" />
           </linearGradient>
         </defs>
-        <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#auth-loading-logo)" />
+        <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#root-loading-logo)" />
         <rect
           x="42.75"
           y="42.75"
