@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { summarizeTaskReceipts, type TaskDeliveryAggregate } from "@/lib/tasks/receipts";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
@@ -152,22 +153,26 @@ export async function getMyOpenTasks(
   return getMyTasks(userId, workspaceId, role === "doctor", "open");
 }
 
-export async function countMyOpenTasks(
-  userId: string,
-  workspaceId: string,
-  role: "doctor" | "team"
-): Promise<{ total: number; overdue: number }> {
-  const isDoctor = role === "doctor";
-  const statuses = isDoctor ? (["open", "pending_review"] as const) : (["open"] as const);
-  const tasksByStatus = await Promise.all(
-    statuses.map((currentStatus) =>
-      getMyTasks(userId, workspaceId, isDoctor, currentStatus)
-    )
-  );
-  const total = tasksByStatus.reduce((sum, items) => sum + items.length, 0);
+export const countMyOpenTasks = cache(
+  async (
+    userId: string,
+    workspaceId: string,
+    role: "doctor" | "team"
+  ): Promise<{ total: number; overdue: number }> => {
+    const isDoctor = role === "doctor";
+    const statuses = isDoctor
+      ? (["open", "pending_review"] as const)
+      : (["open"] as const);
+    const tasksByStatus = await Promise.all(
+      statuses.map((currentStatus) =>
+        getMyTasks(userId, workspaceId, isDoctor, currentStatus)
+      )
+    );
+    const total = tasksByStatus.reduce((sum, items) => sum + items.length, 0);
 
-  return {
-    total,
-    overdue: 0,
-  };
-}
+    return {
+      total,
+      overdue: 0,
+    };
+  }
+);

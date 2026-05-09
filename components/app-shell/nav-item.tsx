@@ -8,6 +8,7 @@ import { NavBadge } from "./nav-badge";
 const BRAND_MARK_BY_ROUTE: Record<string, { src: string; alt: string }> = {
   "/dashboard": { src: "/brand/atlas/logo-mark.svg", alt: "Atlas mark" },
   "/inbox": { src: "/brand/your-dentist/logo-mark.svg", alt: "Inbox" },
+  "/create-case": { src: "/brand/your-dentist/logo-mark.svg", alt: "Neuer Fall" },
   "/my-tasks": { src: "/brand/relay/logo-mark.svg", alt: "Relay mark" },
   "/relay": { src: "/brand/relay/logo-mark.svg", alt: "Relay mark" },
   "/profile/editor": { src: "/brand/portrait/logo-mark.svg", alt: "Portrait mark" },
@@ -34,6 +35,7 @@ export function NavItem({
   const pathname = usePathname();
   const isRelayNav = href === "/relay";
   const isSettingsNav = href === "/settings";
+  const isCreateCaseNav = href === "/create-case";
   const isActive = isRelayNav
     ? pathname === "/relay" ||
       pathname.startsWith("/relay/") ||
@@ -41,7 +43,9 @@ export function NavItem({
       pathname.startsWith("/my-tasks/")
     : isSettingsNav
       ? pathname === "/settings" || pathname === "/admin"
-      : pathname === href || pathname.startsWith(href + "/");
+      : isCreateCaseNav
+        ? pathname === "/create-case"
+        : pathname === href || pathname.startsWith(href + "/");
   const brandMark = BRAND_MARK_BY_ROUTE[href] || {
     src: "/brand/your-dentist/logo-mark.svg",
     alt: `${label} mark`,
@@ -51,7 +55,7 @@ export function NavItem({
     <Link
       href={href}
       className={cn(
-        "relative mx-2 flex min-h-11 items-center gap-3.5 rounded-xl px-3 py-3 md:py-2.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
+        "relative mx-2 flex min-h-[52px] items-center gap-3.5 rounded-xl px-3 py-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 md:min-h-[3.25rem] md:py-2.5",
         isActive ? "bg-[#EEF6FF]" : "hover:bg-[#F8FAFC]"
       )}
     >
@@ -78,7 +82,7 @@ export function NavItem({
         {description ? (
           <span
             className={cn(
-              "hidden md:block truncate text-[11px] font-medium",
+              "mt-0.5 block line-clamp-2 text-left text-[11px] font-medium leading-snug",
               isActive ? "text-[#64748B]" : "text-[#94A3B8]"
             )}
           >

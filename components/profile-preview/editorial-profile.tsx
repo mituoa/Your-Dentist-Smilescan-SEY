@@ -63,23 +63,25 @@ export function EditorialProfile({
   return (
     <div className="bg-cream text-ink font-sans" style={brandCssVars}>
       <div className="max-w-[1280px] mx-auto px-6 md:px-10">
-        <nav className="flex items-center justify-between py-6 md:py-10 border-b border-border">
+        <nav className="flex flex-col gap-4 border-b border-border py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:py-10">
           {data.logo_url ? (
-            <div className="flex items-center max-w-[220px]">
+            <div className="flex max-w-full items-center sm:max-w-[220px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={data.logo_url}
                 alt={data.practice_name || workspaceName}
-                className="max-h-12 w-auto object-contain object-left"
+                className="max-h-11 w-auto object-contain object-left sm:max-h-12"
               />
             </div>
           ) : (
-            <div className="text-sm tracking-[0.14em] uppercase">
+            <div className="text-[13px] tracking-[0.12em] uppercase leading-snug sm:text-sm sm:tracking-[0.14em]">
               {data.practice_name || workspaceName}
             </div>
           )}
           {tagline && (
-            <div className="text-xs tracking-wider text-ink-soft">{tagline}</div>
+            <div className="max-w-full text-left text-[11px] leading-relaxed tracking-wider text-ink-soft sm:max-w-[min(100%,280px)] sm:text-right sm:text-xs">
+              {tagline}
+            </div>
           )}
         </nav>
 
@@ -227,11 +229,13 @@ export function EditorialProfile({
                 {visibleServices.map((s) => (
                   <li
                     key={s.id}
-                    className="flex justify-between items-baseline gap-10 py-5 border-b border-border last:border-b-0"
+                    className="flex flex-col gap-1 border-b border-border py-5 last:border-b-0 sm:flex-row sm:items-baseline sm:justify-between sm:gap-10"
                   >
-                    <span className="font-serif text-lg text-ink">{s.name}</span>
+                    <span className="font-serif text-[1.05rem] leading-snug text-ink sm:text-lg">
+                      {s.name}
+                    </span>
                     {s.note && (
-                      <span className="text-xs tracking-wider uppercase text-ink-faint">
+                      <span className="shrink-0 text-[11px] uppercase tracking-wider text-ink-faint sm:text-xs">
                         {s.note}
                       </span>
                     )}
@@ -348,10 +352,10 @@ export function EditorialProfile({
             </p>
             <Link
               href={`/doc/${slug}/upload`}
-              className="inline-flex items-center gap-4 px-8 py-4 md:px-10 md:py-5 bg-ink text-cream no-underline text-sm tracking-[0.12em] uppercase font-medium hover:bg-brand-glow transition-colors rounded-sm"
+              className="inline-flex min-h-[48px] items-center justify-center gap-3 rounded-sm bg-ink px-8 py-3.5 text-sm font-medium uppercase tracking-[0.12em] text-cream no-underline transition-colors hover:bg-brand-glow sm:min-h-[52px] md:px-10 md:py-5"
             >
               Jetzt einsenden
-              <span>→</span>
+              <span aria-hidden>→</span>
             </Link>
             <div className="mt-10 text-xs tracking-wider uppercase text-ink-faint">
               Ende-zu-Ende verschlüsselt · DSGVO-konform
@@ -359,10 +363,12 @@ export function EditorialProfile({
           </section>
         )}
 
-        <footer className="py-10 border-t border-border flex justify-between text-xs text-ink-faint">
-          <div>© 2026 {data.practice_name || workspaceName}</div>
-          <div>
-            Via <strong>SmileScan</strong>
+        <footer className="flex flex-col gap-3 border-t border-border py-10 text-xs leading-relaxed text-ink-faint sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0">
+            © 2026 {data.practice_name || workspaceName}
+          </div>
+          <div className="shrink-0">
+            Via <strong className="text-ink-soft">SmileScan</strong>
           </div>
         </footer>
       </div>

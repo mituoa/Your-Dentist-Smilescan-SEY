@@ -83,11 +83,12 @@ export async function markSubmissionSeen(submissionId: string) {
 
   if (error) {
     console.error("[markSubmissionSeen]", error);
-    return { error: error.message };
+    return { error: "Status konnte nicht aktualisiert werden." };
   }
 
   revalidatePath(`/inbox/${submissionId}`);
   revalidatePath("/inbox");
+  revalidatePath("/inbox", "layout");
   revalidatePath("/dashboard");
   return { success: true };
 }

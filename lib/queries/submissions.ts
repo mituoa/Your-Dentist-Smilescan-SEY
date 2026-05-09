@@ -1,7 +1,22 @@
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 
 const SIGNED_PHOTO_URL_TTL_SEC = 3600;
+
+const SUBMISSION_DETAIL_SELECT_FULL = `
+      id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
+      patient_birth_date, patient_external_id, urgency, is_draft,
+      created_at, updated_at, seen_at, seen_by,
+      submission_photos (id, storage_path, sort_order)
+    `;
+
+const SUBMISSION_DETAIL_SELECT_BASE = `
+      id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
+      created_at, updated_at, seen_at, seen_by,
+      submission_photos (id, storage_path, sort_order)
+    `;
 
 export interface SubmissionDetail {
   id: string;
@@ -26,25 +41,55 @@ export interface SubmissionDetail {
   }>;
 }
 
-export async function getSubmissionById(
+async function signSubmissionPhotos(
+  sortedPhotos: Array<{
+    id: string;
+    storage_path: string;
+    sort_order: number;
+  }>
+) {
+  const admin = createAdminClient();
+  return Promise.all(
+    sortedPhotos.map(async (photo) => {
+      const { data: signed } = await admin.storage
+        .from("submission-photos")
+        .createSignedUrl(photo.storage_path, SIGNED_PHOTO_URL_TTL_SEC);
+      return {
+        id: photo.id,
+        storage_path: photo.storage_path,
+        sort_order: photo.sort_order,
+        signed_url: signed?.signedUrl ?? null,
+      };
+    })
+  );
+}
+
+async function getSubmissionByIdInner(
   submissionId: string
 ): Promise<SubmissionDetail | null> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  let res = await supabase
     .from("submissions")
-    .select(
-      `
-      id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
-      patient_birth_date, patient_external_id, urgency, is_draft,
-      created_at, updated_at, seen_at, seen_by,
-      submission_photos (id, storage_path, sort_order)
-    `
-    )
+    .select(SUBMISSION_DETAIL_SELECT_FULL)
     .eq("id", submissionId)
     .single();
 
-  if (error) {
+  let extendedCaseFields = true;
+  if (res.error && isLikelyMissingDbColumnError(res.error)) {
+    console.warn(
+      "[submissions] detail: case columns missing — retrying without migration-023 fields."
+    );
+    extendedCaseFields = false;
+    res = await supabase
+      .from("submissions")
+      .select(SUBMISSION_DETAIL_SELECT_BASE)
+      .eq("id", submissionId)
+      .single();
+  }
+
+  const { data, error } = res;
+  if (error || !data) {
     console.error("[submissions] getSubmissionById failed:", error);
     return null;
   }
@@ -54,26 +99,7 @@ export async function getSubmissionById(
       a.sort_order - b.sort_order
   );
 
-  const admin = createAdminClient();
-  const photos = await Promise.all(
-    sortedPhotos.map(
-      async (photo: {
-        id: string;
-        storage_path: string;
-        sort_order: number;
-      }) => {
-        const { data: signed } = await admin.storage
-          .from("submission-photos")
-          .createSignedUrl(photo.storage_path, SIGNED_PHOTO_URL_TTL_SEC);
-        return {
-          id: photo.id,
-          storage_path: photo.storage_path,
-          sort_order: photo.sort_order,
-          signed_url: signed?.signedUrl ?? null,
-        };
-      }
-    )
-  );
+  const photos = await signSubmissionPhotos(sortedPhotos);
 
   return {
     id: data.id,
@@ -82,10 +108,14 @@ export async function getSubmissionById(
     patient_email: data.patient_email,
     patient_phone: data.patient_phone,
     patient_notes: data.patient_notes,
-    patient_birth_date: (data.patient_birth_date as string | null) ?? null,
-    patient_external_id: (data.patient_external_id as string | null) ?? null,
-    urgency: (data.urgency as string | null) ?? null,
-    is_draft: Boolean(data.is_draft),
+    patient_birth_date: extendedCaseFields
+      ? ((data.patient_birth_date as string | null) ?? null)
+      : null,
+    patient_external_id: extendedCaseFields
+      ? ((data.patient_external_id as string | null) ?? null)
+      : null,
+    urgency: extendedCaseFields ? ((data.urgency as string | null) ?? null) : null,
+    is_draft: extendedCaseFields ? Boolean(data.is_draft) : false,
     created_at: data.created_at,
     updated_at: data.updated_at as string,
     seen_at: data.seen_at,
@@ -93,6 +123,13 @@ export async function getSubmissionById(
     photos,
   };
 }
+
+/** Same-request dedupe when multiple server components load one submission. */
+export const getSubmissionById = cache(
+  async (submissionId: string): Promise<SubmissionDetail | null> => {
+    return getSubmissionByIdInner(submissionId);
+  }
+);
 
 export interface TaskItem {
   id: string;

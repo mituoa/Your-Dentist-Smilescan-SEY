@@ -14,27 +14,27 @@ export default async function UploadSuccessPage({ params }: SuccessPageProps) {
     profile?.practice_name || profile?.display_name || "der Praxis";
 
   return (
-    <div className="max-w-xl mx-auto px-6 py-20">
+    <div className="mx-auto max-w-xl px-4 py-16 sm:px-6 sm:py-20">
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand/10 mb-6">
-          <Check className="w-8 h-8 text-brand" strokeWidth={2} />
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand/10">
+          <Check className="h-8 w-8 text-brand" strokeWidth={2} />
         </div>
 
-        <h1 className="font-serif text-4xl font-light tracking-tight text-text-primary mb-4">
+        <h1 className="mb-4 font-serif text-[clamp(1.75rem,6vw,2.25rem)] font-light leading-tight tracking-tight text-text-primary sm:text-4xl">
           Unterlagen eingegangen
         </h1>
 
-        <p className="text-text-secondary leading-relaxed mb-2">
+        <p className="mb-2 text-[15px] leading-relaxed text-text-secondary sm:text-base">
           Ihre Einsendung wurde bei {practiceName} registriert.
         </p>
-        <p className="text-text-secondary leading-relaxed mb-8">
+        <p className="mb-8 text-[15px] leading-relaxed text-text-secondary sm:text-base">
           Eine Bestätigung haben wir an Ihre E-Mail-Adresse gesendet.
         </p>
 
         {profile.slug && (
           <Link
             href={`/doc/${profile.slug}`}
-            className="text-sm text-brand hover:underline"
+            className="inline-flex min-h-[44px] items-center justify-center text-sm font-medium text-brand underline-offset-4 hover:underline"
           >
             Zurück zum Profil
           </Link>

@@ -30,45 +30,56 @@ export default async function ProtectedLayout({
 
   let myTasksCount = 0;
   let myTasksOverdueCount = 0;
-  if (workspace) {
-    try {
-      const counts = await countMyOpenTasks(
-        user.id,
-        workspace.workspace_id,
-        role
-      );
-      myTasksCount = counts.total;
-      myTasksOverdueCount = counts.overdue;
-    } catch (e) {
-      console.error("[ProtectedLayout] countMyOpenTasks failed:", e);
-    }
-  }
-
   let inboxCount: number | undefined;
-  try {
-    const unseen = await countUnseenInboxSubmissions(workspace.workspace_id);
-    if (unseen.ok && unseen.count > 0) {
-      inboxCount = unseen.count;
-    }
-  } catch (e) {
-    console.error("[ProtectedLayout] inbox unseen count failed:", e);
-  }
+  type ProfileHeader = { photo_url: string | null; display_name: string | null };
+  const headerState = { profileData: null as ProfileHeader | null };
 
-  let profileData: { photo_url: string | null; display_name: string | null } | null = null;
-  try {
-    const supabase = await createClient();
-    const res = await supabase
-      .from("profile_data")
-      .select("photo_url, display_name")
-      .eq("workspace_id", workspace.workspace_id)
-      .maybeSingle();
-    profileData = res.data;
-    if (res.error) {
-      console.error("[ProtectedLayout] profile_data query:", res.error);
-    }
-  } catch (e) {
-    console.error("[ProtectedLayout] profile fetch failed:", e);
-  }
+  await Promise.all([
+    (async () => {
+      if (!workspace) return;
+      try {
+        const counts = await countMyOpenTasks(
+          user.id,
+          workspace.workspace_id,
+          role
+        );
+        myTasksCount = counts.total;
+        myTasksOverdueCount = counts.overdue;
+      } catch (e) {
+        console.error("[ProtectedLayout] countMyOpenTasks failed:", e);
+      }
+    })(),
+    (async () => {
+      if (!workspace) return;
+      try {
+        const unseen = await countUnseenInboxSubmissions(workspace.workspace_id);
+        if (unseen.ok && unseen.count > 0) {
+          inboxCount = unseen.count;
+        }
+      } catch (e) {
+        console.error("[ProtectedLayout] inbox unseen count failed:", e);
+      }
+    })(),
+    (async () => {
+      if (!workspace) return;
+      try {
+        const supabase = await createClient();
+        const res = await supabase
+          .from("profile_data")
+          .select("photo_url, display_name")
+          .eq("workspace_id", workspace.workspace_id)
+          .maybeSingle();
+        headerState.profileData = res.data as ProfileHeader | null;
+        if (res.error) {
+          console.error("[ProtectedLayout] profile_data query:", res.error);
+        }
+      } catch (e) {
+        console.error("[ProtectedLayout] profile fetch failed:", e);
+      }
+    })(),
+  ]);
+
+  const profileData = headerState.profileData;
 
   return (
     <div

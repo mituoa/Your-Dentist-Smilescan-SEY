@@ -109,18 +109,33 @@ export function MobileNav({
             <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-3">
               <div className="space-y-0.5 pr-0.5" onClick={() => setOpen(false)}>
                 {role === "doctor" && (
-                  <NavItem href="/dashboard" iconName="dashboard" label="Atlas" />
+                  <NavItem
+                    href="/dashboard"
+                    iconName="dashboard"
+                    label="Atlas"
+                    description="Dashboard"
+                  />
                 )}
                 <NavItem
                   href="/inbox"
                   iconName="inbox"
-                  label="Inbox"
+                  label="Tracker"
+                  description="Intake & Triage"
                   badge={inboxCount}
                 />
+                {role === "doctor" && (
+                  <NavItem
+                    href="/create-case"
+                    iconName="inbox"
+                    label="Neuer Fall"
+                    description="Patientenfall"
+                  />
+                )}
                 <NavItem
                   href="/relay"
                   iconName="tasks"
                   label="Relay"
+                  description="Aufgaben"
                   badge={myTasksCount}
                   badgeUrgent={myTasksUrgent}
                 />
@@ -129,10 +144,16 @@ export function MobileNav({
                     <NavItem
                       href="/profile/editor"
                       iconName="profile"
-                      label="Portrait"
+                      label="Benutzer"
+                      description="Profilverwaltung"
                     />
                     <JournalNavGroup />
-                    <NavItem href="/settings" iconName="settings" label="Settings" />
+                    <NavItem
+                      href="/settings"
+                      iconName="settings"
+                      label="Admin"
+                      description="Einstellungen"
+                    />
                   </>
                 )}
               </div>

@@ -1,4 +1,5 @@
 import type { User } from "@supabase/supabase-js";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
   getAdminEmailsAllowlist,
@@ -72,7 +73,7 @@ export async function requireUser() {
   return user;
 }
 
-export async function getCurrentWorkspace() {
+export const getCurrentWorkspace = cache(async () => {
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -81,6 +82,7 @@ export async function getCurrentWorkspace() {
     .from("workspace_members")
     .select("workspace_id, role, workspaces(id, name, slug, approved_at)")
     .eq("user_id", user.id)
+    .limit(1)
     .maybeSingle();
 
   if (error) {
@@ -89,7 +91,7 @@ export async function getCurrentWorkspace() {
   }
 
   return data;
-}
+});
 
 export async function requireApprovedWorkspace() {
   const user = await getCurrentUser();

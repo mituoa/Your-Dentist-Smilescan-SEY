@@ -42,6 +42,15 @@ export function Sidebar({
           badge={inboxCount}
         />
 
+        {role === "doctor" && (
+          <NavItem
+            href="/create-case"
+            iconName="inbox"
+            label="Neuer Fall"
+            description="Patientenfall"
+          />
+        )}
+
         <NavItem
           href="/relay"
           iconName="tasks"

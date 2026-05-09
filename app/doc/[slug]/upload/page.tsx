@@ -15,25 +15,26 @@ export default async function UploadPage({ params }: UploadPageProps) {
     profile.practice_name || profile.display_name || "Zahnarztpraxis";
 
   return (
-    <div className="max-w-xl mx-auto px-6 py-12">
+    <div className="mx-auto max-w-xl px-4 pb-12 pt-8 sm:px-6 sm:pb-14 sm:pt-12">
       <Link
         href={`/doc/${profile.slug}`}
-        className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary mb-8"
+        className="mb-6 inline-flex min-h-[44px] items-center gap-1.5 text-sm text-text-secondary transition-colors hover:text-text-primary sm:mb-8"
       >
-        <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+        <ArrowLeft className="h-4 w-4 shrink-0" strokeWidth={1.75} />
         Zurück zum Profil
       </Link>
 
-      <div className="mb-8">
-        <p className="text-xs font-mono uppercase tracking-wider text-text-tertiary mb-3">
+      <div className="mb-8 sm:mb-10">
+        <p className="mb-2 text-[11px] font-mono uppercase tracking-wider text-text-tertiary sm:mb-3 sm:text-xs">
           Einsendung
         </p>
-        <h1 className="font-serif text-4xl font-light tracking-tight text-text-primary mb-3">
+        <h1 className="mb-3 font-serif text-[clamp(1.75rem,6vw,2.25rem)] font-light leading-tight tracking-tight text-text-primary sm:text-4xl">
           Unterlagen einreichen
         </h1>
-        <p className="text-sm text-text-secondary">
+        <p className="text-[15px] leading-relaxed text-text-secondary sm:text-sm">
           Ihre Daten werden verschlüsselt an{" "}
-          <strong>{practiceName}</strong> übermittelt.
+          <strong className="font-medium text-text-primary">{practiceName}</strong>{" "}
+          übermittelt.
         </p>
       </div>
 
