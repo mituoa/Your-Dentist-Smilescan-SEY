@@ -36,19 +36,19 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   return (
     <div className="relative flex h-full min-h-0 flex-col" style={{ background: "#E8EDF4" }}>
       <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
-        {/* Linke Fallliste — Figma: ~40 %, max 480, ruhige Fläche */}
+        {/* Linke Fallliste — schmal, fix: ~320–360px (nicht vw), Mitte dominiert */}
         <aside
-          className="flex min-h-0 w-full min-w-0 flex-col border-b border-[rgba(15,23,42,0.06)] md:min-w-[272px] md:max-w-[400px] md:w-[min(100%,32vw)] md:flex-none md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
-          style={{ background: "#F4F7FB" }}
+          className="flex min-h-0 w-full min-w-0 shrink-0 flex-col border-b border-[rgba(15,23,42,0.06)] md:w-[320px] md:flex-none lg:w-[332px] xl:w-[360px] md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]"
+          style={{ background: "#F0F3F8" }}
         >
-          <div style={{ padding: "32px 20px 0" }} className="max-md:pt-8 md:px-6">
+          <div style={{ padding: "28px 16px 0" }} className="max-md:pt-8 md:px-5">
             <div
               style={{ marginBottom: "20px" }}
               className="flex items-start justify-between gap-4"
             >
               <div>
                 <h1
-                  className="text-[18px] tracking-tight"
+                  className="text-[16px] tracking-tight md:text-[17px]"
                   style={{
                     color: "#0F172A",
                     fontWeight: 600,
@@ -58,7 +58,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
                 >
                   Einsendungen
                 </h1>
-                <p className="text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
+                <p className="text-[13px] md:text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
                   {listFailed
                     ? "Liste momentan nicht verfügbar"
                     : `${openCaseCount} offene ${openCaseCount === 1 ? "Fall" : "Fälle"}`}

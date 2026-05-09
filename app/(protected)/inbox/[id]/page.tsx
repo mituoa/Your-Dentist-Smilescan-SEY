@@ -13,8 +13,7 @@ interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-const card =
-  "rounded-2xl border border-[rgba(15,23,42,0.07)] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04)]";
+const sectionRule = "border-t border-slate-200/70 first:border-t-0 first:pt-0";
 
 function formatRelativeTime(timestamp: string): string {
   const now = new Date();
@@ -140,7 +139,7 @@ export default async function InboxDetailPage({
     concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+    <>
       <InboxAssistHydration
         submissionId={submission.id}
         patientName={submission.patient_name}
@@ -151,101 +150,108 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Mitte: medizinischer Hauptfall — Workspace-Dichte, klare Karten */}
-      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#E4E9F0] shadow-[inset_-1px_0_0_rgba(15,23,42,0.05)]">
+      <div className="grid h-full min-h-0 grid-cols-1 grid-rows-[minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_minmax(340px,380px)] xl:grid-rows-1">
+      {/* Mitte: dominante medizinische Hauptfläche — eine ruhige Workspace-Säule, keine Karten-Kaskade */}
+      <div className="relative flex min-h-0 min-w-0 flex-col overflow-hidden bg-[#D5DCE6] shadow-[inset_-1px_0_0_rgba(15,23,42,0.06)] xl:min-w-0">
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:max-w-none lg:px-8 lg:py-10 xl:pr-10">
-            <div className={`${card} p-6 sm:p-8`}>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-                Aktueller Fall
-              </p>
-              <h1 className="mt-2 text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-slate-900 sm:text-[28px]">
-                {primaryTitle}
-              </h1>
-
-              <p className="mt-3 text-[15px] font-medium leading-snug text-slate-600">
-                {patientLabel}
-                <span className="mx-2 font-normal text-slate-400">·</span>
-                <span className="font-normal text-slate-500">
-                  Eingang {formatRelativeTime(submission.created_at)}
-                </span>
-                {submission.is_draft ? (
-                  <span className="ml-2 rounded-md bg-amber-50 px-2 py-0.5 text-[12px] font-medium text-amber-800">
-                    Entwurf
-                  </span>
-                ) : null}
-              </p>
-
-              {patientMeta ? (
-                <p className="mt-2 text-[14px] text-slate-500">{patientMeta}</p>
-              ) : null}
-
-              {submission.patient_email || submission.patient_phone ? (
-                <p className="mt-4 text-[14px] leading-relaxed text-slate-600">
-                  {submission.patient_email ? (
-                    <span className="mr-4 block sm:inline">{submission.patient_email}</span>
-                  ) : null}
-                  {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
-                </p>
-              ) : null}
-
-              {urgencyLine ? (
-                <div className="mt-6 border-t border-slate-100 pt-6">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
-                    Klinische Einschätzung
+          <div className="min-h-full xl:min-h-0">
+            <article className="min-h-full border-slate-200/60 bg-white pb-12 xl:min-h-0 xl:border-r xl:pb-16">
+              <div className="px-5 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-12 xl:px-14 xl:py-14">
+                <header className="max-w-[920px]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                    Aktueller Fall
                   </p>
-                  <p
-                    className="mt-2 text-[16px] font-medium leading-snug"
-                    style={{ color: urgencyLine.color }}
-                  >
-                    {urgencyLine.text}
+                  <h1 className="mt-2 text-pretty text-[21px] font-semibold leading-[1.28] tracking-[-0.02em] text-slate-900 sm:text-[23px] lg:text-[24px] xl:text-[26px]">
+                    {primaryTitle}
+                  </h1>
+
+                  <p className="mt-3 text-[14px] font-medium leading-snug text-slate-600">
+                    {patientLabel}
+                    <span className="mx-2 font-normal text-slate-400">·</span>
+                    <span className="font-normal text-slate-500">
+                      Eingang {formatRelativeTime(submission.created_at)}
+                    </span>
+                    {submission.is_draft ? (
+                      <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-800">
+                        Entwurf
+                      </span>
+                    ) : null}
+                  </p>
+
+                  {patientMeta ? (
+                    <p className="mt-2 text-[13px] text-slate-500">{patientMeta}</p>
+                  ) : null}
+
+                  {submission.patient_email || submission.patient_phone ? (
+                    <p className="mt-4 text-[13px] leading-relaxed text-slate-600">
+                      {submission.patient_email ? (
+                        <span className="mr-4 inline-block">{submission.patient_email}</span>
+                      ) : null}
+                      {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
+                    </p>
+                  ) : null}
+
+                  {urgencyLine ? (
+                    <div className="mt-8 border-t border-slate-100 pt-8">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+                        Klinische Einschätzung
+                      </p>
+                      <p
+                        className="mt-2 max-w-[920px] text-pretty text-[15px] font-medium leading-snug"
+                        style={{ color: urgencyLine.color }}
+                      >
+                        {urgencyLine.text}
+                      </p>
+                    </div>
+                  ) : null}
+                </header>
+
+                <div className={`${sectionRule} mt-10 max-w-none pt-10`}>
+                  <PhotoViewer
+                    photos={submission.photos}
+                    patientName={submission.patient_name || "Patient"}
+                  />
+                </div>
+
+                <div className={`${sectionRule} mt-12 max-w-[72ch] pt-12`}>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                    Patientenbericht
+                  </p>
+                  <p className="mt-4 text-[15px] leading-[1.68] text-slate-800">
+                    {submission.patient_notes?.trim()
+                      ? submission.patient_notes
+                      : "Keine Beschreibung vorhanden."}
                   </p>
                 </div>
-              ) : null}
-            </div>
 
-            <div className={`${card} overflow-hidden p-0`}>
-              <PhotoViewer
-                photos={submission.photos}
-                patientName={submission.patient_name || "Patient"}
-              />
-            </div>
+                <div id="tracker-empfehlung" className={`${sectionRule} mt-12 scroll-mt-24 pt-12`}>
+                  <div className="max-w-[920px]">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                      Empfohlene Aktion
+                    </p>
+                    <p className="mt-2 text-[14px] leading-relaxed text-slate-600">{recAction}</p>
 
-            <div className={`${card} p-6 sm:p-8`}>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-                Patientenbericht
-              </p>
-              <p className="mt-4 text-[16px] leading-[1.7] tracking-[-0.01em] text-slate-800">
-                {submission.patient_notes?.trim()
-                  ? submission.patient_notes
-                  : "Keine Beschreibung vorhanden."}
-              </p>
-            </div>
+                    <div className="mt-8 border border-slate-200/60 bg-slate-50/50 px-5 py-6 sm:px-6 sm:py-7">
+                      <TrackerPrimaryActions />
 
-            <div id="tracker-empfehlung" className={`${card} scroll-mt-24 p-6 sm:p-8`}>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-                Empfohlene Aktion
-              </p>
-              <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{recAction}</p>
-
-              <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50/80 p-5 sm:p-6">
-                <TrackerPrimaryActions />
-
-                <p className="mb-3 mt-8 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
-                  Zeitraum (Einschätzung)
-                </p>
-                <TrackerUrgencyChips
-                  submissionId={submission.id}
-                  initialUrgency={submission.urgency}
-                />
+                      <p className="mb-3 mt-8 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+                        Zeitraum (Einschätzung)
+                      </p>
+                      <TrackerUrgencyChips
+                        submissionId={submission.id}
+                        initialUrgency={submission.urgency}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            </article>
           </div>
         </div>
       </div>
 
-      {/* Rechts: Kommunikation & Assist */}
-      <aside className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.07)] bg-[#ECEFF4] lg:w-[min(100%,400px)] lg:max-w-[420px] lg:border-l lg:border-t-0 xl:w-[min(100%,420px)]">
+      {/* Rechts: sekundär, kompakt — erst ab xl horizontal neben der Mitte */}
+      <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.08)] bg-[#E4E9F0] xl:max-w-[380px] xl:border-l xl:border-t-0 xl:border-[rgba(15,23,42,0.08)]">
         <SubmissionActions
           submissionId={submission.id}
           patientName={submission.patient_name}
@@ -264,6 +270,7 @@ export default async function InboxDetailPage({
           appointmentUrl={appointmentUrl}
         />
       </aside>
-    </div>
+      </div>
+    </>
   );
 }

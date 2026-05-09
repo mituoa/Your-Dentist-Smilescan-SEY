@@ -10,9 +10,9 @@ export interface SidebarProps {
   myTasksOverdueCount: number;
 }
 
-/** Breite muss mit `pl-*` im geschützten Layout identisch bleiben. */
+/** Breite muss mit `pl-*` im geschützten Layout identisch bleiben. ~240–256px Desktop. */
 const RAIL =
-  "w-[72px] min-[420px]:w-[240px] lg:w-[260px] xl:w-[280px]" as const;
+  "w-[72px] min-[420px]:w-[240px] lg:w-[256px]" as const;
 
 export function Sidebar({
   role,
@@ -102,4 +102,4 @@ export function Sidebar({
 
 /** Abstand für die fixierte Sidebar — Werte wie in `RAIL` in dieser Datei. */
 export const SIDEBAR_MAIN_PAD =
-  "pl-[72px] min-[420px]:pl-[240px] lg:pl-[260px] xl:pl-[280px]" as const;
+  "pl-[72px] min-[420px]:pl-[240px] lg:pl-[256px]" as const;

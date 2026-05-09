@@ -14,46 +14,45 @@ function scrollToId(id: string, focusDraft?: boolean) {
 }
 
 /**
- * Figma-nahe primäre Aktionen: führt zur passenden Spalte / zum Entwurf (kein Auto-Versand).
+ * Primäre Aktionen — horizontaler Workspace: zwei Hauptaktionen nebeneinander, wo Breite reicht.
  */
 export function TrackerPrimaryActions() {
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3">
       <button
         type="button"
         onClick={() => scrollToId("tracker-termin")}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] text-[15px] font-semibold text-white transition hover:opacity-95 disabled:opacity-50"
+        className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-3 text-[13px] font-semibold text-white transition hover:opacity-95 disabled:opacity-50 sm:min-h-11 sm:text-[14px]"
         style={{
           background: "#2B6FE8",
           boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
           letterSpacing: "-0.01em",
         }}
       >
-        <Calendar className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-        Terminlink vorbereiten
+        <Calendar className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
+        <span className="text-center leading-snug">Terminlink vorbereiten</span>
       </button>
 
       <button
         type="button"
         onClick={() => scrollToId("tracker-korrespondenz", true)}
-        className="flex h-[42px] w-full items-center justify-center gap-2 rounded-[10px] border bg-white text-[15px] font-medium transition hover:bg-[#F8FAFC]"
+        className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border bg-white px-3 text-[13px] font-medium transition hover:bg-slate-50 sm:min-h-11 sm:text-[14px]"
         style={{
           borderColor: "#CBD5E1",
-          color: "#2B6FE8",
+          color: "#1D4ED8",
           letterSpacing: "-0.01em",
         }}
       >
-        <MessageSquare className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-        Rückfrage formulieren
+        <MessageSquare className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
+        <span className="text-center leading-snug">Rückfrage formulieren</span>
       </button>
 
       <button
         type="button"
         onClick={() => scrollToId("tracker-empfehlung")}
-        className="flex h-10 w-full items-center justify-center gap-2 rounded-[10px] border-0 bg-transparent text-[14px] font-normal transition hover:bg-[#F1F5F9]"
-        style={{ color: "#94A3B8", letterSpacing: "-0.005em" }}
+        className="flex min-h-9 w-full items-center justify-center gap-2 rounded-lg border-0 bg-transparent text-[13px] font-normal text-slate-500 transition hover:bg-slate-100/80 sm:col-span-2 sm:min-h-10"
       >
-        <Clock className="h-4 w-4 shrink-0 opacity-80" strokeWidth={1.75} />
+        <Clock className="h-3.5 w-3.5 shrink-0 opacity-80" strokeWidth={1.75} />
         Zunächst beobachten
       </button>
     </div>

@@ -173,7 +173,7 @@ export function CommandAssist() {
   const hints = [...deepHints, ...routeHints].slice(0, 5);
 
   const panelShell = embeddedMode
-    ? "border-[rgba(15,23,42,0.08)] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.05)]"
+    ? "rounded-lg border border-slate-200/80 bg-white shadow-none"
     : inTracker
       ? "border-[rgba(15,23,42,0.08)] bg-white/92 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[rgb(28_30_34/0.94)] dark:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.4)]"
       : "border-border/70 bg-surface-card/88 shadow-[0_20px_50px_-18px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-border/50 dark:bg-surface-card/90 dark:shadow-[0_24px_48px_-20px_rgba(0,0,0,0.55)]";
@@ -184,14 +184,14 @@ export function CommandAssist() {
     >
       <div
         id="command-assist-panel"
-        className={`overflow-hidden rounded-2xl border transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none ${panelShell} ${
+        className={`overflow-hidden ${embeddedMode ? "rounded-lg" : "rounded-2xl"} border transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none ${panelShell} ${
           open
             ? "translate-y-0 opacity-100"
             : "pointer-events-none max-h-0 translate-y-1 opacity-0"
         }`}
       >
         <div
-          className={`px-5 py-4 sm:px-6 sm:py-5 ${inTracker ? "border-b border-[rgba(15,23,42,0.06)]" : "border-b border-border/60"}`}
+          className={`${embeddedMode ? "px-4 py-3" : "px-5 py-4 sm:px-6 sm:py-5"} ${inTracker ? "border-b border-[rgba(15,23,42,0.06)]" : "border-b border-border/60"}`}
         >
           <div className="flex items-start gap-3">
             <div
@@ -204,10 +204,14 @@ export function CommandAssist() {
               </div>
             ) : null}
             <div className="min-w-0 flex-1">
-              <p className="text-[15px] font-semibold tracking-tight text-text-primary">
+              <p
+                className={`font-semibold tracking-tight text-text-primary ${embeddedMode ? "text-[13px]" : "text-[15px]"}`}
+              >
                 {inTracker ? "Klinische Assistenz" : "Praxisassistent"}
               </p>
-              <p className="mt-1 text-[13px] leading-relaxed text-text-secondary">
+              <p
+                className={`mt-1 leading-relaxed text-text-secondary ${embeddedMode ? "text-[11px]" : "text-[13px]"}`}
+              >
                 Entwürfe, Diktat und Sprungmarken — nur zur Prüfung in der Praxis.{" "}
                 <span className="font-medium text-text-primary">Kein automatischer Versand.</span>
               </p>
@@ -215,7 +219,11 @@ export function CommandAssist() {
           </div>
         </div>
 
-        <div className="space-y-4 px-5 py-4 sm:px-6 sm:py-5">
+        <div
+          className={
+            embeddedMode ? "space-y-3 px-4 py-3" : "space-y-4 px-5 py-4 sm:px-6 sm:py-5"
+          }
+        >
           {inboxCase && draftParams ? (
             <div
               className={`rounded-xl px-3 py-3 ${inTracker ? "bg-[#F4F7FB]" : "border border-border/50 bg-surface-page/50 dark:bg-surface-sunken/40"}`}
@@ -254,13 +262,13 @@ export function CommandAssist() {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={embeddedMode ? 4 : 5}
+            rows={embeddedMode ? 3 : 5}
             placeholder={
               inboxCase
                 ? "z. B. „Rückfrage wegen Schmerzen“ oder Diktat …"
                 : "z. B. „Neuer Fall“ oder „Relay“ …"
             }
-            className="w-full resize-none rounded-xl border border-border/80 bg-surface-card/95 px-4 py-3.5 text-[15px] leading-relaxed text-text-primary shadow-inner outline-none placeholder:text-text-tertiary focus:border-brand/40 focus:ring-2 focus:ring-brand/12"
+            className={`w-full resize-none border border-border/80 bg-surface-card/95 leading-relaxed text-text-primary shadow-inner outline-none placeholder:text-text-tertiary focus:border-brand/40 focus:ring-2 focus:ring-brand/12 ${embeddedMode ? "rounded-lg px-3 py-2.5 text-[13px]" : "rounded-xl px-4 py-3.5 text-[15px]"}`}
           />
 
           <div className="flex flex-wrap gap-2">
@@ -305,21 +313,23 @@ export function CommandAssist() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex min-h-[48px] w-full items-center justify-between gap-2.5 rounded-xl border px-4 py-2.5 text-left text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)] md:min-h-[50px] md:px-4 ${
+        className={
           embeddedMode
-            ? "border-[rgba(15,23,42,0.08)] bg-white text-[#0F172A] shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:border-[rgba(43,111,232,0.22)]"
-            : inTracker
-              ? "pointer-events-auto rounded-2xl border-[rgba(15,23,42,0.1)] bg-white/95 text-[#0F172A] shadow-[0_4px_24px_-8px_rgba(15,23,42,0.12)] backdrop-blur-md hover:border-[rgba(43,111,232,0.25)]"
-              : "pointer-events-auto rounded-full border-border/80 bg-surface-card/92 text-text-primary shadow-[0_12px_32px_-16px_rgba(15,23,42,0.35)] backdrop-blur-xl hover:shadow-[0_16px_40px_-14px_rgba(15,23,42,0.4)] dark:shadow-[0_12px_36px_-12px_rgba(0,0,0,0.65)]"
-        }`}
+            ? "flex min-h-9 w-full items-center justify-between gap-2 rounded-md border border-slate-200/90 bg-white px-3 py-2 text-left text-[12px] font-medium text-slate-800 transition hover:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)]"
+            : `flex min-h-[48px] w-full items-center justify-between gap-2.5 rounded-xl border px-4 py-2.5 text-left text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)] md:min-h-[50px] md:px-4 ${
+                inTracker
+                  ? "pointer-events-auto rounded-2xl border-[rgba(15,23,42,0.1)] bg-white/95 text-[#0F172A] shadow-[0_4px_24px_-8px_rgba(15,23,42,0.12)] backdrop-blur-md hover:border-[rgba(43,111,232,0.25)]"
+                  : "pointer-events-auto rounded-full border-border/80 bg-surface-card/92 text-text-primary shadow-[0_12px_32px_-16px_rgba(15,23,42,0.35)] backdrop-blur-xl hover:shadow-[0_16px_40px_-14px_rgba(15,23,42,0.4)] dark:shadow-[0_12px_36px_-12px_rgba(0,0,0,0.65)]"
+              }`
+        }
         aria-expanded={open}
         aria-controls="command-assist-panel"
       >
-        <span className="flex min-w-0 items-center gap-2.5">
+        <span className={`flex min-w-0 items-center ${embeddedMode ? "gap-2" : "gap-2.5"}`}>
           <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center ${inTracker ? "rounded-lg bg-[#EEF6FF] text-[#2563EB]" : "rounded-full bg-brand/12 text-brand"}`}
+            className={`flex shrink-0 items-center justify-center ${embeddedMode ? "h-7 w-7" : "h-8 w-8"} ${inTracker ? "rounded-lg bg-[#EEF6FF] text-[#2563EB]" : "rounded-full bg-brand/12 text-brand"}`}
           >
-            <Stethoscope className="h-4 w-4" strokeWidth={1.75} />
+            <Stethoscope className={embeddedMode ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.75} />
           </span>
           <span className="truncate">{inTracker ? "Assistenz" : "Assist"}</span>
         </span>
