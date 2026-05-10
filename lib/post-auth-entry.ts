@@ -1,4 +1,5 @@
 import { getCurrentUser, getCurrentWorkspace } from "@/lib/auth-helpers";
+import { workspaceRoleToHomePath } from "@/lib/auth-app-home";
 import { findPendingInviteTokenByEmail } from "@/lib/team-invitations/find-pending-invite-token-by-email";
 
 /**
@@ -14,7 +15,7 @@ export async function resolveAuthenticatedEntryPath(): Promise<string> {
 
     const workspace = await getCurrentWorkspace();
     if (workspace) {
-      return "/dashboard";
+      return workspaceRoleToHomePath(workspace.role);
     }
 
     const token = await findPendingInviteTokenByEmail(user.email);
@@ -22,9 +23,9 @@ export async function resolveAuthenticatedEntryPath(): Promise<string> {
       return `/accept-invite?token=${encodeURIComponent(token)}`;
     }
 
-    return "/dashboard";
+    return "/login?error=workspace_missing";
   } catch (e) {
     console.error("[resolveAuthenticatedEntryPath]", e);
-    return "/dashboard";
+    return "/login";
   }
 }

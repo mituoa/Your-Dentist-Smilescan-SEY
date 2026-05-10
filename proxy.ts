@@ -1,3 +1,5 @@
+import { resolveMiddlewareAuthenticatedHomeUrl } from "@/lib/auth-app-home";
+import { isBlockingAuthError } from "@/lib/auth-blocking-errors";
 import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
 import { normalizePublicEnvUrl } from "@/lib/env-url";
 import { NextResponse, type NextRequest } from "next/server";
@@ -28,15 +30,8 @@ const PROTECTED_PATHS = [
   "/create-case",
 ];
 
-// Routen, die NICHT für eingeloggte User sichtbar sind (redirect zu dashboard)
+// Routen, die NICHT für eingeloggte User sichtbar sind (redirect zu App-Home)
 const AUTH_PATHS = ["/login", "/register"];
-
-/** Must stay aligned with `app/(auth)/login/page.tsx` — show message instead of bouncing to /dashboard */
-const BLOCKING_AUTH_ERRORS = new Set([
-  "workspace_missing",
-  "account_pending_approval",
-  "email_not_confirmed",
-]);
 
 export async function proxy(request: NextRequest) {
   const supabaseUrl = normalizePublicEnvUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
@@ -79,10 +74,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Wenn eingeloggt und auf Auth-Route → /dashboard (außer blockierende Fehler: sonst Redirect-Schleife)
+    // Wenn eingeloggt und auf Auth-Route → rollenkorrektes App-Home (außer blockierende Fehler: sonst Redirect-Schleife)
     if (user && AUTH_PATHS.some((p) => pathname.startsWith(p))) {
       const authError = request.nextUrl.searchParams.get("error");
-      if (authError && BLOCKING_AUTH_ERRORS.has(authError) && !isAuthRelaxMode()) {
+      if (authError && isBlockingAuthError(authError) && !isAuthRelaxMode()) {
         return supabaseResponse;
       }
       // Login page sends invite holders to /accept-invite; do not bounce to dashboard first.
@@ -92,9 +87,8 @@ export async function proxy(request: NextRequest) {
       ) {
         return supabaseResponse;
       }
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      const nextPath = await resolveMiddlewareAuthenticatedHomeUrl(supabase, user);
+      return NextResponse.redirect(new URL(nextPath, request.nextUrl.origin));
     }
   } catch (error) {
     console.error("[proxy] Auth check failed:", error);

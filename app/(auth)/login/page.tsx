@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "@/components/auth/login-page-client";
+import { isBlockingAuthError } from "@/lib/auth-blocking-errors";
 import { isAdminAllowlistUser } from "@/lib/auth-helpers";
 import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
 import { createClient } from "@/lib/supabase/server";
@@ -26,12 +27,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const signedOut = params.signed_out === "1";
   const year = new Date().getFullYear();
 
-  const blockingAuthErrors = new Set([
-    "workspace_missing",
-    "account_pending_approval",
-    "email_not_confirmed",
-  ]);
-
   let user: User | null = null;
   try {
     const supabase = await createClient();
@@ -48,12 +43,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       redirect(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
     }
     // Ops-Admin (ADMIN_EMAILS / ADMIN_GITHUB_USERNAMES) may enter despite pending workspace.
-    if (
-      isAuthRelaxMode() ||
-      isAdminAllowlistUser(user) ||
-      !queryError ||
-      !blockingAuthErrors.has(queryError)
-    ) {
+    if (isAuthRelaxMode() || isAdminAllowlistUser(user) || !isBlockingAuthError(queryError)) {
       redirect(await resolveAuthenticatedEntryPath());
     }
   }
