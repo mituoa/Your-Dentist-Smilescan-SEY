@@ -1,7 +1,10 @@
-/** Global route transition — matches auth loading identity (logo + wordmark, minimal motion). */
+/** Global route transition — clinical workspace canvas (no warm paper flash). */
 export default function RootLoading() {
   return (
-    <div className="flex min-h-[100dvh] w-full max-w-full min-w-0 flex-col items-center justify-center gap-3 bg-[#FAFAFA] px-4">
+    <div
+      className="flex min-h-[100dvh] w-full max-w-full min-w-0 flex-col items-center justify-center gap-3 px-4"
+      style={{ background: "#F7F9FC" }}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="256"

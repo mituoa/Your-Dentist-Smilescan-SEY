@@ -13,6 +13,7 @@ import {
   detectAssistZone,
 } from "@/lib/clinical/assist-workspace-context";
 
+import { clinicalCommandSheetWidthMd } from "@/lib/clinical-ui";
 import { cn } from "@/lib/utils";
 import { useAssistCaseOptional } from "./assist-shell";
 
@@ -449,7 +450,8 @@ export function CommandAssist() {
         aria-label="Command — Praxis"
         className={cn(
           "fixed z-[45] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
-          "left-3 right-3 bottom-0 w-auto max-w-none md:left-auto md:right-8 md:w-[min(440px,calc(100vw-2rem))]",
+          "left-3 right-3 bottom-0 w-auto max-w-none md:left-auto md:right-8",
+          clinicalCommandSheetWidthMd,
           "md:bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))]",
           SHEET,
           open

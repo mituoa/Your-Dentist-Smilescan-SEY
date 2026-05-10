@@ -20,6 +20,11 @@ import {
 } from "@/app/(protected)/settings/actions";
 import { setThemePreference } from "@/app/actions/theme";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
+import {
+  clinicalFormColumnMax,
+  clinicalWorkspaceFrame,
+  clinicalWorkspaceVerticalPadding,
+} from "@/lib/clinical-ui";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -346,9 +351,9 @@ export function SettingsFigmaView({
   const profileCopyUrl = fullProfileUrl(appBaseUrl, slug);
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-auto" style={{ background: "#FAFAF8" }}>
-      <div className="flex-1 overflow-auto">
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: "0 48px 160px" }}>
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-auto" style={{ background: "#F7F9FC" }}>
+      <div className={`flex-1 overflow-auto ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} pb-24`}>
+        <div className={`mx-auto w-full ${clinicalFormColumnMax}`}>
           {formError ? (
             <div
               className="mb-8 mt-8 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"

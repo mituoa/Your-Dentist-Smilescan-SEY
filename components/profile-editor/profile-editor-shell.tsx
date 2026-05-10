@@ -523,8 +523,8 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
           </div>
         </div>
 
-        {/* RIGHT — Live-Vorschau (#FAFAFA, zentriert wie Figma) */}
-        <div className="flex min-h-0 min-w-[min(100%,360px)] flex-1 flex-col overflow-y-auto bg-[#FAFAFA]">
+        {/* RIGHT — Live-Vorschau (kühles Clinical-Grau, Tracker-Rhythmus) */}
+        <div className="flex min-h-0 min-w-[min(100%,360px)] flex-1 flex-col overflow-y-auto bg-[#EEF2F8]">
           <div className="flex min-h-full w-full flex-1 items-center justify-center">
             <ProfileFigmaLivePreview data={mergedProfile} />
           </div>

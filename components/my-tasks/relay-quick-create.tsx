@@ -86,8 +86,10 @@ export function RelayQuickCreate({
       ref={wrapRef}
       id="relay-quick-create"
       className={cn(
-        "mb-8 rounded-xl border bg-white px-5 py-4 transition-shadow",
-        focused ? "border-[#2F80ED] shadow-[0_0_0_3px_rgba(47,128,237,0.08)]" : "border-[#E2E8F0]"
+        "mb-8 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow",
+        focused
+          ? "border-[#2B6FE8] shadow-[0_0_0_3px_rgba(43,111,232,0.08),0_4px_24px_-12px_rgba(43,111,232,0.1)]"
+          : "hover:border-[rgba(43,111,232,0.12)]"
       )}
     >
       <input
@@ -110,12 +112,12 @@ export function RelayQuickCreate({
       />
 
       {showOptions ? (
-        <div className="mt-4 flex flex-col gap-3 border-t border-[#F1F5F9] pt-4 sm:flex-row sm:items-stretch">
+        <div className="mt-4 flex flex-col gap-3 border-t border-[rgba(15,23,42,0.06)] pt-4 sm:flex-row sm:items-stretch">
           <div className="relative min-w-0 flex-1">
             <button
               type="button"
               onClick={() => setDropdownOpen((o) => !o)}
-              className="flex h-10 w-full items-center gap-2 rounded-lg border border-[#F1F5F9] px-3 text-left transition-colors hover:bg-[#F8FAFC]"
+              className="flex h-10 w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(43,111,232,0.15)] hover:bg-[#F4F7FB]"
             >
               {assignAll ? (
                 <>
@@ -159,10 +161,10 @@ export function RelayQuickCreate({
 
             {dropdownOpen ? (
               <div
-                className="absolute left-0 right-0 z-50 mt-2 max-h-56 overflow-auto rounded-lg border border-[#E2E8F0] bg-white p-2 shadow-lg"
+                className="absolute left-0 right-0 z-50 mt-2 max-h-56 overflow-auto rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-2 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.15)]"
                 onMouseDown={(e) => e.preventDefault()}
               >
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F8FAFC]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F4F7FB]">
                   <input
                     type="radio"
                     name="relay-assign-mode"
@@ -175,7 +177,7 @@ export function RelayQuickCreate({
                   />
                   <span>Mir zuweisen</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F8FAFC]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F4F7FB]">
                   <input
                     type="radio"
                     name="relay-assign-mode"
@@ -188,7 +190,7 @@ export function RelayQuickCreate({
                   />
                   <span>An alle Mitarbeitenden</span>
                 </label>
-                <div className="my-1 border-t border-[#F1F5F9]" />
+                <div className="my-1 border-t border-[rgba(15,23,42,0.06)]" />
                 {assignableMembers
                   .filter((m) => m.user_id !== currentUserId)
                   .map((m) => {
@@ -202,7 +204,7 @@ export function RelayQuickCreate({
                           setAssignAll(false);
                           toggleMember(m.user_id);
                         }}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[13px] hover:bg-[#F8FAFC]"
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[13px] hover:bg-[#F4F7FB]"
                       >
                         <span
                           className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
@@ -223,8 +225,8 @@ export function RelayQuickCreate({
             type="button"
             onClick={() => setImportant((v) => !v)}
             className={cn(
-              "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-[#F1F5F9] px-3 transition-colors sm:self-start",
-              important ? "bg-[rgba(220,38,38,0.06)]" : "hover:bg-[#F8FAFC]"
+              "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 transition-colors sm:self-start",
+              important ? "bg-[rgba(220,38,38,0.06)]" : "hover:border-[rgba(43,111,232,0.12)] hover:bg-[#F4F7FB]"
             )}
           >
             <span

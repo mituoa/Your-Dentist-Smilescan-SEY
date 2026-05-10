@@ -88,7 +88,10 @@ export default async function ProtectedLayout({
   return (
     <AssistShell>
       <MobileNavProvider>
-        <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-gradient-to-br from-surface-page via-surface-page to-surface-sunken/40">
+        <div
+          className="flex min-h-[100dvh] flex-col overflow-x-hidden"
+          style={{ background: "#F7F9FC" }}
+        >
           <div className="flex min-h-0 flex-1 flex-row">
             <MobileSidebarFrame>
               <Sidebar
@@ -103,11 +106,8 @@ export default async function ProtectedLayout({
               className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden ${SIDEBAR_MAIN_PAD}`}
             >
               {/* Topbar — immer sichtbar, Inhalt scrollt darunter */}
-              <header
-                className="sticky top-0 z-30 flex shrink-0 items-center bg-white/85 backdrop-blur-xl"
-                style={{ minHeight: "64px" }}
-              >
-                <div className="flex h-full min-h-[64px] w-full items-center gap-2 px-4 md:min-h-[80px] md:gap-3 md:px-10">
+              <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b border-[rgba(15,23,42,0.06)] bg-white/90 backdrop-blur-xl">
+                <div className="flex h-16 w-full items-center gap-2 px-4 md:gap-3 md:px-10">
                   <MobileMenuButton />
                   <div className="flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">
                     <TopbarContextActions />

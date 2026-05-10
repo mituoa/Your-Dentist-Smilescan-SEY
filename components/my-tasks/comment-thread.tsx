@@ -8,7 +8,7 @@ interface CommentThreadProps {
 export function CommentThread({ comments, currentUserId }: CommentThreadProps) {
   if (comments.length === 0) {
     return (
-      <p className="text-sm italic leading-6 text-text-tertiary">
+      <p className="text-sm italic leading-6 text-[#94A3B8]">
         Noch keine Kommentare.
       </p>
     );
@@ -44,15 +44,15 @@ export function CommentThread({ comments, currentUserId }: CommentThreadProps) {
 
         return (
           <div key={c.id} className="flex items-start gap-3">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-border/70 bg-surface-sunken text-xs font-medium text-text-secondary">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(43,111,232,0.15)] bg-[#EEF6FF] text-xs font-medium text-[#1E40AF]">
               {initial}
             </div>
             <div className="flex-1 min-w-0">
               <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="text-sm font-semibold leading-6 text-text-primary">
+                <span className="text-sm font-semibold leading-6 text-[#0F172A]">
                   {c.author_email || "Unbekannt"} {isCurrent && "(Sie)"}
                 </span>
-                <span className="text-xs tabular-nums text-text-tertiary">
+                <span className="text-xs tabular-nums text-[#94A3B8]">
                   {new Date(c.created_at).toLocaleDateString("de-DE", {
                     day: "numeric",
                     month: "short",
@@ -61,7 +61,7 @@ export function CommentThread({ comments, currentUserId }: CommentThreadProps) {
                   })}
                 </span>
               </div>
-              <p className="whitespace-pre-wrap text-sm leading-6 text-text-primary">
+              <p className="whitespace-pre-wrap text-sm leading-6 text-[#334155]">
                 {c.content}
               </p>
             </div>

@@ -39,7 +39,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
 
   const list = (
     <>
-      <div className="px-4 pt-6 pb-0 sm:px-6 md:px-6 md:pt-12">
+      <div className="px-4 pt-6 pb-0 sm:px-6 md:px-10 md:pt-12">
         <div
           style={{ marginBottom: "24px" }}
           className="flex items-start justify-between gap-4"

@@ -73,6 +73,35 @@
   animation: login-pricing-badge-pulse 3s ease-in-out infinite;
 }
 
+@keyframes clinicalSkeletonPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.88;
+  }
+}
+
+@keyframes workspaceEnter {
+  from {
+    opacity: 0.86;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.protected-workspace-enter {
+  animation: workspaceEnter 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .protected-workspace-enter {
+    animation: none;
+  }
+}
+
 /* Hide Next.js dev activity badge in development overlays. */
 nextjs-portal,
 [data-next-badge-root],

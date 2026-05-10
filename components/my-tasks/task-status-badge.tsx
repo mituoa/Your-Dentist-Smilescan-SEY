@@ -13,7 +13,7 @@ export function TaskStatusBadge({ status, size = "sm" }: TaskStatusBadgeProps) {
   if (status === "pending_review") {
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded font-medium bg-amber-100 text-amber-900 ${cls}`}
+        className={`inline-flex items-center gap-1 rounded-md font-medium bg-[#EEF6FF] text-[#1E40AF] ring-1 ring-[rgba(43,111,232,0.12)] ${cls}`}
       >
         <Clock className={iconCls} strokeWidth={2} />
         Auf Bestätigung
@@ -23,7 +23,7 @@ export function TaskStatusBadge({ status, size = "sm" }: TaskStatusBadgeProps) {
   if (status === "done") {
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded font-medium bg-emerald-100 text-emerald-900 ${cls}`}
+        className={`inline-flex items-center gap-1 rounded-md font-medium bg-[#ECFDF5] text-[#047857] ring-1 ring-[rgba(16,185,129,0.15)] ${cls}`}
       >
         <Check className={iconCls} strokeWidth={2} />
         Erledigt
@@ -32,7 +32,7 @@ export function TaskStatusBadge({ status, size = "sm" }: TaskStatusBadgeProps) {
   }
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded font-medium bg-surface-sunken text-text-secondary ${cls}`}
+      className={`inline-flex items-center gap-1 rounded-md font-medium bg-[#F1F5F9] text-[#334155] ring-1 ring-[rgba(15,23,42,0.06)] ${cls}`}
     >
       <AlertCircle className={iconCls} strokeWidth={2} />
       Offen

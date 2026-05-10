@@ -7,6 +7,10 @@ import { FileText, Plus, Trash2 } from "lucide-react";
 import { createDraftArticle, deleteArticle } from "@/app/(protected)/journal/actions";
 import type { JournalEntry } from "@/lib/types/journal-entry";
 import { getTopicLabel } from "@/lib/masterdata/journal-topics";
+import {
+  clinicalWorkspaceFrame,
+  clinicalWorkspaceVerticalPadding,
+} from "@/lib/clinical-ui";
 
 interface JournalListProps {
   entries: JournalEntry[];
@@ -62,7 +66,8 @@ export function JournalList({ entries }: JournalListProps) {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
+      <div className="mx-auto w-full max-w-4xl">
       <div className="mb-8">
         <div className="mb-3 text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Journal
@@ -191,6 +196,7 @@ export function JournalList({ entries }: JournalListProps) {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }

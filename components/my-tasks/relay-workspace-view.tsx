@@ -10,6 +10,7 @@ import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayScope } from "@/lib/tasks/relay-helpers";
 import { buildMemberAvatarMap, emailInitials, filterColumnTasks } from "@/lib/tasks/relay-helpers";
 import { cn } from "@/lib/utils";
+import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/clinical-ui";
 
 /** Mirrors `TaskCounts` from task-counts (client-safe). */
 export interface RelayTaskCounts {
@@ -77,21 +78,31 @@ export function RelayWorkspaceView({
 
   const toggleBtn = (active: boolean) =>
     cn(
-      "rounded-lg px-4 py-2 text-[13px] font-medium transition-all duration-200",
-      active ? "bg-white text-[#1E293B] shadow-[0_1px_3px_rgba(15,23,42,0.08)]" : "bg-transparent text-[#64748B]"
+      "rounded-lg px-4 py-2.5 text-[13px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.28)]",
+      active
+        ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(43,111,232,0.12)] ring-1 ring-[rgba(43,111,232,0.14)]"
+        : "bg-transparent text-[#64748B] hover:bg-[rgba(43,111,232,0.05)] hover:text-[#334155]"
     );
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
+    <div className="min-h-0 flex-1" style={{ background: "#F7F9FC" }}>
+      <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-[#1E293B]">Relay</h1>
-          <p className="mt-2 text-[13px] text-[#64748B]">Praxisorganisation &amp; Aufgaben</p>
+          <h1
+            className="text-[26px] font-semibold leading-tight tracking-[-0.02em] sm:text-[28px]"
+            style={{ color: "#0F172A" }}
+          >
+            Relay
+          </h1>
+          <p className="mt-2 text-[14px] font-medium" style={{ color: "#2563EB" }}>
+            Praxisorganisation &amp; Aufgaben
+          </p>
         </div>
 
         <div
-          className="inline-flex rounded-[10px] p-1"
-          style={{ background: "#F8FAFC" }}
+          className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"
+          style={{ background: "rgba(43, 111, 232, 0.06)" }}
           role="group"
           aria-label="Aufgaben filtern"
         >
@@ -104,18 +115,18 @@ export function RelayWorkspaceView({
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2 text-[11px] font-medium text-[#64748B]">
-        <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5">
-          Offen: <strong className="tabular-nums text-[#1E293B]">{counts.open}</strong>
+      <div className="mb-6 flex flex-wrap gap-2 text-[11px] font-medium">
+        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          Offen: <strong className="tabular-nums text-[#0F172A]">{counts.open}</strong>
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5">
-          In Bearbeitung: <strong className="tabular-nums text-[#1E293B]">{counts.pending}</strong>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          In Bearbeitung: <strong className="tabular-nums text-[#0F172A]">{counts.pending}</strong>
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5">
-          Erledigt: <strong className="tabular-nums text-[#1E293B]">{counts.done}</strong>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          Erledigt: <strong className="tabular-nums text-[#0F172A]">{counts.done}</strong>
         </span>
         {scope === "mine" ? (
-          <span className="inline-flex items-center rounded-md border border-[#2F80ED]/20 bg-[#EEF6FF] px-3 py-1.5 text-[#1E293B]">
+          <span className="inline-flex items-center rounded-md border border-[rgba(43,111,232,0.22)] bg-[#EEF6FF] px-3 py-1.5 text-[#1E3A8A]">
             Gefiltert: nur Einträge, an denen du beteiligt bist
           </span>
         ) : null}
@@ -138,10 +149,12 @@ export function RelayWorkspaceView({
           done: "Erledigt",
         }}
         columnSurfaceClass={{
-          pending: "bg-[rgba(47,128,237,0.03)]",
-          done: "bg-[rgba(22,163,74,0.03)]",
+          open: "bg-white/[0.98]",
+          pending: "bg-[rgba(43,111,232,0.045)]",
+          done: "bg-[rgba(71,85,105,0.04)]",
         }}
       />
+      </div>
     </div>
   );
 }

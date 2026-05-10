@@ -76,7 +76,7 @@ export function TaskActions({
           type="button"
           onClick={handleSubmit}
           disabled={isPending}
-          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm text-cream transition-colors hover:bg-ink/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#2F80ED] px-5 py-2.5 text-sm font-medium text-white shadow-[0_2px_8px_rgba(47,128,237,0.25)] transition-colors hover:bg-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] focus-visible:ring-offset-2 disabled:opacity-50"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -93,7 +93,7 @@ export function TaskActions({
             type="button"
             onClick={handleApprove}
             disabled={isPending}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-brand px-5 py-2.5 text-sm text-white transition-colors hover:bg-brand/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#2F80ED] px-5 py-2.5 text-sm font-medium text-white shadow-[0_2px_8px_rgba(47,128,237,0.25)] transition-colors hover:bg-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] focus-visible:ring-offset-2 disabled:opacity-50"
           >
             {isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -106,7 +106,7 @@ export function TaskActions({
             type="button"
             onClick={() => setShowReject(true)}
             disabled={isPending}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-border px-5 py-2.5 text-sm text-text-secondary transition-colors hover:border-danger hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[rgba(15,23,42,0.1)] bg-white px-5 py-2.5 text-sm font-medium text-[#475569] transition-colors hover:border-[rgba(220,38,38,0.35)] hover:bg-[#FEF2F2] hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:opacity-50"
           >
             <X className="w-4 h-4" />
             Zurückweisen
@@ -115,8 +115,8 @@ export function TaskActions({
       )}
 
       {canReview && showReject && (
-        <div className="space-y-3 rounded-lg border border-border bg-surface-sunken p-4">
-          <div className="text-sm font-semibold leading-6 text-text-primary">
+        <div className="space-y-3 rounded-xl border border-[rgba(15,23,42,0.08)] bg-[#F8FAFC] p-4">
+          <div className="text-sm font-semibold leading-6 text-[#0F172A]">
             Aufgabe zurückweisen
           </div>
           <textarea
@@ -125,7 +125,7 @@ export function TaskActions({
             placeholder="Begründung: Warum ist die Aufgabe noch nicht erledigt?"
             rows={3}
             maxLength={500}
-            className="w-full rounded-md border border-border bg-paper px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-danger/30"
+            className="w-full resize-none rounded-lg border border-[rgba(15,23,42,0.1)] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgba(220,38,38,0.2)]"
           />
           <div className="flex flex-col gap-2 sm:flex-row">
             <button
@@ -142,7 +142,7 @@ export function TaskActions({
                 setShowReject(false);
                 setRejectReason("");
               }}
-              className="min-h-10 rounded-md px-4 py-2 text-sm text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+              className="min-h-10 rounded-lg px-4 py-2 text-sm font-medium text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)]"
             >
               Abbrechen
             </button>

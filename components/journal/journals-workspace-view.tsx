@@ -12,6 +12,10 @@ import {
 import { GUIDED_QUESTIONS, generateGuidedDraftMarkdown } from "@/lib/journal/guided-drafts";
 import { excerptFromMarkdown } from "@/lib/journal/excerpt-from-markdown";
 import { JOURNAL_LIMITS } from "@/lib/validation/journal-limits";
+import {
+  clinicalWorkspaceFrame,
+  clinicalWorkspaceVerticalPadding,
+} from "@/lib/clinical-ui";
 
 export type JournalsContentTab = "create" | "published" | "drafts";
 
@@ -212,7 +216,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
   const listTitle = (e: JournalEntry) => (e.title?.trim() ? e.title : "Ohne Titel");
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-auto" style={{ background: "#F8FAFC" }}>
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-auto" style={{ background: "#F7F9FC" }}>
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -221,7 +225,8 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
       />
 
       <div className="relative flex-1 overflow-auto">
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "88px 56px 140px" }}>
+        <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} pb-16 md:pb-24`}>
+          <div className="mx-auto w-full max-w-[min(760px,100%)]">
           {actionError ? (
             <div
               className="mb-8 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
@@ -587,6 +592,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
               ) : null}
             </>
           )}
+        </div>
         </div>
       </div>
     </div>

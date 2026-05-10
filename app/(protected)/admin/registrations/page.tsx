@@ -6,6 +6,10 @@ import { isAdminAllowlistUser, requireUser } from "@/lib/auth-helpers";
 import { getAdminEmailsAllowlist, getAdminGithubUsernames } from "@/lib/env";
 
 import { approveWorkspace, openSignedLicenseUrl } from "./actions";
+import {
+  clinicalWorkspaceFrame,
+  clinicalWorkspaceVerticalPadding,
+} from "@/lib/clinical-ui";
 
 function canAccessRegistrations(
   user: NonNullable<Awaited<ReturnType<typeof requireUser>>>
@@ -40,7 +44,8 @@ export default async function AdminRegistrationsPage() {
     data?.filter((r: any) => !r?.workspaces?.approved_at) ?? [];
 
   return (
-    <main className="min-h-screen bg-surface-page px-6 py-10 text-text-primary">
+    <main className="min-h-screen text-text-primary" style={{ background: "#F7F9FC" }}>
+      <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
       <div className="mx-auto w-full max-w-5xl">
         <div className="mb-8 flex items-end justify-between gap-6">
           <div>
@@ -174,6 +179,7 @@ export default async function AdminRegistrationsPage() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </main>
   );

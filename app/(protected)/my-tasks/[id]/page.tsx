@@ -39,6 +39,8 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
     await markTaskAsRead(task.id, user.id);
   }
 
+  const listHref = isDoctor ? "/relay" : "/my-tasks";
+
   return (
     <TaskDetailView
       task={task}
@@ -46,6 +48,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
       currentUserId={user.id}
       isDoctor={isDoctor}
       isMyTask={isMyTask}
+      listHref={listHref}
     />
   );
 }

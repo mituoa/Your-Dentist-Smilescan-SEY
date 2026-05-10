@@ -37,7 +37,7 @@ function NeueAufgabeLink() {
     <Link
       href="/relay#relay-quick-create"
       title="Neue Aufgabe"
-      className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#E2E8F0] px-3 text-[13px] font-medium text-[#1E293B] transition-colors hover:bg-[#F8FAFC] md:min-h-12 md:px-4 md:text-[14px]"
+      className="inline-flex h-10 items-center gap-2 rounded-xl border border-[rgba(15,23,42,0.1)] px-3 text-[13px] font-medium text-[#0F172A] transition-colors hover:border-[rgba(43,111,232,0.18)] hover:bg-[#F4F7FB] md:px-4 md:text-[14px]"
       style={{ borderRadius: "12px" }}
     >
       <Plus className="h-4 w-4 shrink-0 text-[#2F80ED]" />
@@ -51,7 +51,7 @@ function NeuerFallLink() {
     <Link
       href="/create-case"
       title="Neuer Fall"
-      className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-[13px] font-medium text-white transition-all hover:opacity-95 sm:px-4 md:min-h-12 md:px-5 md:text-[14px]"
+      className="inline-flex h-10 items-center gap-2 rounded-xl px-3 text-[13px] font-medium text-white transition-all hover:opacity-95 sm:px-4 md:px-5 md:text-[14px]"
       style={{
         borderRadius: "12px",
         background: "#2F80ED",
@@ -72,7 +72,7 @@ export function TopbarContextActions() {
   const variant = resolveVariant(pathname);
 
   return (
-    <div className="flex min-h-11 shrink-0 items-center gap-2 md:min-h-12 md:gap-3">
+    <div className="flex h-10 shrink-0 items-center gap-2 md:gap-3">
       {(variant === "both" || variant === "newTask") && <NeueAufgabeLink />}
       {(variant === "both" || variant === "newCase") && <NeuerFallLink />}
     </div>

@@ -11,6 +11,11 @@ import {
 } from "@/lib/queries/dashboard";
 import { AlertCircle, Clock, FileText, CheckCircle2, ClipboardList } from "lucide-react";
 
+import {
+  clinicalWorkspaceFrame,
+  clinicalWorkspaceVerticalPadding,
+} from "@/lib/clinical-ui";
+
 function formatDeDateTime(iso: string) {
   return new Date(iso).toLocaleString("de-DE", {
     day: "2-digit",
@@ -114,7 +119,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#F8FAFC" }}>
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#F7F9FC" }}>
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -123,8 +128,8 @@ export default async function DashboardPage() {
         }}
       />
 
-      <div className="relative">
-        <div className="mx-auto max-w-[1240px] touch-manipulation px-4 py-8 max-md:py-6 md:px-10">
+      <div className={`relative touch-manipulation ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
+        <div>
           <div
             className="mb-8 overflow-hidden pb-6"
             style={{ borderBottom: "1px solid rgba(226,232,240,0.6)" }}

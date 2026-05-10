@@ -28,7 +28,7 @@ import {
   reorderTasksInColumn,
 } from "@/app/(protected)/my-tasks/actions";
 import type { MyTask } from "@/lib/queries/my-tasks";
-import { pilotGlassPanel } from "@/lib/pilot-surface";
+import { clinicalCorePanel } from "@/lib/pilot-surface";
 import {
   canMoveTask,
   taskStatusToColumn,
@@ -289,21 +289,21 @@ function BoardColumn({
     <section
       id={id}
       ref={setNodeRef}
-      className={`max-h-[72vh] overflow-y-auto rounded-xl border border-[#E2E8F0] p-4 sm:p-5 ${surfaceClassName ?? ""} ${
-        pilotGlassPanel
-      } ${isOver && canDropActiveTask ? "ring-2 ring-brand/30" : ""}`}
+      className={`max-h-[72vh] overflow-y-auto rounded-xl border border-[rgba(15,23,42,0.06)] p-4 sm:p-5 ${surfaceClassName ?? ""} ${
+        clinicalCorePanel
+      } ${isOver && canDropActiveTask ? "ring-2 ring-[rgba(43,111,232,0.32)]" : ""}`}
     >
-      <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[#F1F5F9] bg-white/90 pb-3 backdrop-blur">
+      <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] bg-white/95 pb-3 backdrop-blur-sm">
         <h2 className="text-[13px] font-semibold uppercase tracking-[0.05em] text-[#64748B]">{title}</h2>
-        <span className="inline-flex min-w-[24px] items-center justify-center rounded-full bg-[#F8FAFC] px-2 py-0.5 text-[12px] font-medium tabular-nums text-[#64748B]">
+        <span className="inline-flex min-w-[24px] items-center justify-center rounded-full bg-[#EEF6FF] px-2 py-0.5 text-[12px] font-medium tabular-nums text-[#2563EB]">
           {count > 99 ? "99+" : count}
         </span>
       </header>
 
       {tasks.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#E2E8F0] px-3 py-8 text-center">
-          <p className="text-sm font-medium text-text-primary">{emptyTitle}</p>
-          <p className="mt-1 text-xs text-text-secondary">{emptyText}</p>
+        <div className="rounded-lg border border-dashed border-[rgba(43,111,232,0.18)] bg-[rgba(43,111,232,0.02)] px-3 py-8 text-center">
+          <p className="text-sm font-medium text-[#0F172A]">{emptyTitle}</p>
+          <p className="mt-1 text-xs text-[#64748B]">{emptyText}</p>
         </div>
       ) : (
         <SortableContext items={tasks.map((task) => `card-${task.id}`)} strategy={verticalListSortingStrategy}>
@@ -377,7 +377,7 @@ function TaskMiniCard({
         className={`block rounded-lg border px-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F80ED]/30 ${
           isMine
             ? "border-[rgba(47,128,237,0.15)] bg-[rgba(47,128,237,0.02)] hover:bg-[rgba(47,128,237,0.04)]"
-            : "border-[#EEF2F6] bg-white hover:bg-[#F8FAFC]"
+            : "border-[rgba(15,23,42,0.06)] bg-white hover:border-[rgba(43,111,232,0.15)] hover:bg-[#F4F7FB]"
         }`}
       >
         <div className="mb-2 flex items-start gap-2">
@@ -429,12 +429,12 @@ function TaskMiniCard({
 
 function TaskOverlayCard({ task }: { task: MyTask }) {
   return (
-    <div className="w-[280px] rounded-md border border-border bg-surface-card px-3 py-2.5 shadow-lg">
+    <div className="w-[280px] rounded-xl border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.18)]">
       <div className="mb-1.5 flex items-start justify-between gap-2">
-        <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-text-primary">{task.title}</h3>
+        <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-[#0F172A]">{task.title}</h3>
         <ReceiptMark task={task} />
       </div>
-      <div className="flex items-center gap-2 text-[11px] text-text-tertiary">
+      <div className="flex items-center gap-2 text-[11px] text-[#64748B]">
         {task.priority === "important" && (
           <span className="rounded bg-danger/15 px-1.5 py-0.5 font-semibold uppercase tracking-[0.08em] text-danger">
             Wichtig
