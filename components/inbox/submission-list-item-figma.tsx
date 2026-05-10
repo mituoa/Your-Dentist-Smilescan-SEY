@@ -86,8 +86,8 @@ export function SubmissionListItemFigma({
         isActive ? "" : "hover:-translate-y-0.5 hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
       }`}
       style={{
-        padding: "16px",
-        marginBottom: "4px",
+        padding: "18px 16px",
+        marginBottom: "6px",
         borderRadius: "8px",
         cursor: "pointer",
         background: isActive ? "#EEF6FF" : "transparent",

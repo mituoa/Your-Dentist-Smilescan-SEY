@@ -98,7 +98,7 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
   }
 
   return (
-    <div className="space-y-4" aria-label={`Fotos: ${patientName}`}>
+    <div className="space-y-4 overflow-x-hidden" aria-label={`Fotos: ${patientName}`}>
       <div
         className="relative cursor-pointer"
         onMouseEnter={() => setHoverImage(true)}

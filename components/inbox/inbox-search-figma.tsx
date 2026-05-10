@@ -45,9 +45,8 @@ export function InboxSearchFigma({ routeBase = "/inbox" }: InboxSearchFigmaProps
         value={value}
         onChange={handleChange}
         placeholder="Suchen..."
-        className="w-full touch-manipulation bg-white text-[14px] focus:outline-none placeholder:text-gray-400"
+        className="h-11 w-full touch-manipulation bg-white text-[15px] focus:outline-none placeholder:text-gray-400 md:h-10 md:text-[14px]"
         style={{
-          height: "40px",
           paddingLeft: "36px",
           paddingRight: "12px",
           borderRadius: "8px",

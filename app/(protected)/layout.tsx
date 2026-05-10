@@ -3,6 +3,11 @@ import { cookies } from "next/headers";
 
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { Sidebar, SIDEBAR_MAIN_PAD } from "@/components/app-shell/sidebar";
+import {
+  MobileMenuButton,
+  MobileNavProvider,
+  MobileSidebarFrame,
+} from "@/components/app-shell/mobile-nav";
 import { TopbarContextActions } from "@/components/app-shell/topbar-context-actions";
 import { UserMenu } from "@/components/app-shell/user-menu";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
@@ -82,46 +87,50 @@ export default async function ProtectedLayout({
 
   return (
     <AssistShell>
-    <div className="flex min-h-[100dvh] flex-col bg-gradient-to-br from-surface-page via-surface-page to-surface-sunken/40">
-      <div className="flex min-h-0 flex-1 flex-row">
-        <Sidebar
-          role={role}
-          inboxCount={inboxCount}
-          myTasksCount={myTasksCount}
-          myTasksOverdueCount={myTasksOverdueCount}
-        />
+      <MobileNavProvider>
+        <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-gradient-to-br from-surface-page via-surface-page to-surface-sunken/40">
+          <div className="flex min-h-0 flex-1 flex-row">
+            <MobileSidebarFrame>
+              <Sidebar
+                role={role}
+                inboxCount={inboxCount}
+                myTasksCount={myTasksCount}
+                myTasksOverdueCount={myTasksOverdueCount}
+              />
+            </MobileSidebarFrame>
 
-        <div
-          className={`flex min-h-0 min-w-0 flex-1 flex-col ${SIDEBAR_MAIN_PAD}`}
-        >
-          {/* Topbar — immer sichtbar, Inhalt scrollt darunter */}
-          <header
-            className="sticky top-0 z-30 flex shrink-0 items-center bg-white/85 backdrop-blur-xl"
-            style={{ minHeight: "64px" }}
-          >
-            <div className="flex h-full min-h-[64px] w-full items-center justify-end gap-2 px-4 md:min-h-[80px] md:gap-3 md:px-10">
-              <div className="flex min-w-0 items-center gap-2 md:gap-3">
-                <TopbarContextActions />
+            <div
+              className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden ${SIDEBAR_MAIN_PAD}`}
+            >
+              {/* Topbar — immer sichtbar, Inhalt scrollt darunter */}
+              <header
+                className="sticky top-0 z-30 flex shrink-0 items-center bg-white/85 backdrop-blur-xl"
+                style={{ minHeight: "64px" }}
+              >
+                <div className="flex h-full min-h-[64px] w-full items-center gap-2 px-4 md:min-h-[80px] md:gap-3 md:px-10">
+                  <MobileMenuButton />
+                  <div className="flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">
+                    <TopbarContextActions />
 
-                <UserMenu
-                  email={user.email || ""}
-                  workspaceName={workspaceName}
-                  role={role}
-                  initialTheme={theme}
-                  avatarUrl={profileData?.photo_url ?? null}
-                  displayName={profileData?.display_name ?? null}
-                />
-              </div>
+                    <UserMenu
+                      email={user.email || ""}
+                      workspaceName={workspaceName}
+                      role={role}
+                      initialTheme={theme}
+                      avatarUrl={profileData?.photo_url ?? null}
+                      displayName={profileData?.display_name ?? null}
+                    />
+                  </div>
+                </div>
+              </header>
+
+              <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[calc(5rem+env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch] md:pb-0">
+                {children}
+              </main>
             </div>
-          </header>
-
-          <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain max-lg:[-webkit-overflow-scrolling:touch]">
-            {children}
-          </main>
+          </div>
         </div>
-      </div>
-
-    </div>
+      </MobileNavProvider>
     </AssistShell>
   );
 }

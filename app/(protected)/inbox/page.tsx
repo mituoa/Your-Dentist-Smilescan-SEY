@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
+import { InboxDesktopAutoSelect } from "@/components/inbox/inbox-desktop-auto-select";
 
 interface InboxPageProps {
   searchParams: Promise<{ q?: string }>;
@@ -15,10 +16,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
     redirect("/login?error=workspace_missing");
   }
 
-  const listResult = await getInboxSubmissions(
-    workspace.workspace_id,
-    params.q
-  );
+  const listResult = await getInboxSubmissions(workspace.workspace_id, params.q);
 
   if (!listResult.ok) {
     return (
@@ -29,9 +27,12 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
         <p className="max-w-md text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>
           Posteingang kann nicht geladen werden
         </p>
-        <p className="mt-3 max-w-md text-center text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-          Bitte versuchen Sie es in einem Moment erneut. Wenn das Problem bleibt, laden Sie die
-          Seite neu.
+        <p
+          className="mt-3 max-w-md text-center text-[14px] leading-relaxed"
+          style={{ color: "#64748B" }}
+        >
+          Bitte versuchen Sie es in einem Moment erneut. Wenn das Problem bleibt, laden Sie die Seite
+          neu.
         </p>
       </div>
     );
@@ -40,10 +41,11 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   const submissions = listResult.items;
 
   if (submissions.length > 0) {
-    const next = params.q?.trim()
+    const desktopHref = params.q?.trim()
       ? `/inbox/${submissions[0].id}?q=${encodeURIComponent(params.q)}`
       : `/inbox/${submissions[0].id}`;
-    redirect(next);
+
+    return <InboxDesktopAutoSelect href={desktopHref} />;
   }
 
   return (

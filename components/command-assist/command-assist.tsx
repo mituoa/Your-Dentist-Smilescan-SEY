@@ -67,13 +67,15 @@ const INBOX_QUICK: { id: AssistQuickActionId; label: string }[] = [
   { id: "polish_placeholder", label: "Formulierung prüfen" },
 ];
 
-/** Systemweite Dock-Position: identisch auf allen Routen (Desktop unten rechts). */
+/** Systemweite Dock-Position — mobil: kompaktes Utility-Dock; Desktop: unten rechts. */
 const DOCK_OUTER =
-  "pointer-events-none fixed z-[45] flex w-full flex-col gap-2 " +
-  "bottom-0 right-0 items-stretch px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-0 " +
+  "pointer-events-none fixed z-[45] flex w-full flex-col gap-1.5 " +
+  "bottom-0 right-0 items-stretch px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-0 " +
+  "md:gap-2 md:px-3 md:pb-[max(1rem,env(safe-area-inset-bottom))] " +
   "lg:bottom-8 lg:right-8 lg:w-auto lg:items-end lg:self-end lg:px-8 lg:pb-8 lg:pt-0";
 
-const DOCK_INNER = "pointer-events-auto flex w-full flex-col gap-2 lg:w-[min(100vw-2rem,520px)] lg:items-end";
+const DOCK_INNER =
+  "pointer-events-auto mx-auto flex w-full max-w-[min(100vw-1rem,420px)] flex-col gap-1.5 md:max-w-none lg:w-[min(100vw-2rem,520px)] lg:items-end";
 
 /** Panel — weiche Elevation, ruhige Radien, Glass. */
 const PANEL =
@@ -85,7 +87,8 @@ const HEADER_DIVIDER =
 
 /** Konstante Bar-Höhe, Raycast/Linear-artig. */
 const COMMAND_BAR =
-  "group/command-bar pointer-events-auto flex h-12 w-full shrink-0 items-center justify-between gap-3 rounded-xl border border-black/[0.07] bg-white/[0.78] px-3.5 " +
+  "group/command-bar pointer-events-auto flex h-10 w-full shrink-0 items-center justify-between gap-2 rounded-[14px] border border-black/[0.07] bg-white/[0.78] px-2.5 " +
+  "md:h-12 md:gap-3 md:rounded-xl md:px-3.5 " +
   "shadow-[0_1px_0_rgba(255,255,255,0.7)_inset,0_10px_38px_-22px_rgba(15,23,42,0.18),0_2px_8px_-4px_rgba(43,111,232,0.06)] backdrop-blur-xl backdrop-saturate-150 " +
   "transition-[border-color,box-shadow,background-color,color] duration-200 ease-out " +
   "hover:border-[rgba(43,111,232,0.22)] hover:bg-white/[0.92] hover:shadow-[0_1px_0_rgba(255,255,255,0.75)_inset,0_14px_44px_-20px_rgba(43,111,232,0.14),0_4px_12px_-4px_rgba(15,23,42,0.08)] " +
@@ -93,7 +96,7 @@ const COMMAND_BAR =
   "dark:border-white/[0.1] dark:bg-[rgb(28_30_34/0.88)] dark:shadow-[0_12px_40px_-20px_rgba(0,0,0,0.45)] dark:hover:border-[rgba(96,165,250,0.28)] dark:hover:bg-[rgb(32_34_40/0.92)]";
 
 const ICON_WRAP =
-  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.12)] " +
+  "flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.12)] md:h-8 md:w-8 md:rounded-lg " +
   "dark:bg-[rgba(43,111,232,0.15)] dark:text-[#93C5FD] dark:ring-[rgba(59,130,246,0.2)]";
 
 const INPUT_AREA =
@@ -408,10 +411,12 @@ export function CommandAssist() {
               <Command className="h-4 w-4" strokeWidth={2} />
             </span>
             <span className="min-w-0 flex-1 text-left">
-              <span className="block truncate text-[14px] font-semibold tracking-tight text-[#0F172A] dark:text-slate-100">
+              <span className="block truncate text-[13px] font-semibold tracking-tight text-[#0F172A] dark:text-slate-100 md:text-[14px]">
                 Command
               </span>
-              <span className="block truncate text-[11px] font-medium leading-tight text-[#64748B] dark:text-slate-400">
+              <span
+                className={`block truncate text-[11px] font-medium leading-tight text-[#64748B] dark:text-slate-400 ${open ? "" : "max-md:hidden"}`}
+              >
                 {open ? "Eingeben oder wählen" : "Klinische Kommandoebene"}
               </span>
             </span>

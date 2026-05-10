@@ -1,6 +1,11 @@
+"use client";
+
+import { X } from "lucide-react";
+
 import { BrandMark } from "./brand-mark";
 import { NavItem } from "./nav-item";
 import { JournalNavGroup } from "./journal-nav-group";
+import { useMobileNavOptional } from "./mobile-nav";
 
 export interface SidebarProps {
   role: "doctor" | "team";
@@ -10,9 +15,9 @@ export interface SidebarProps {
   myTasksOverdueCount: number;
 }
 
-/** Breite muss mit `pl-*` im geschützten Layout identisch bleiben. ~240–256px Desktop. */
+/** Desktop rail width — muss mit `SIDEBAR_MAIN_PAD` im geschützten Layout übereinstimmen. */
 const RAIL =
-  "w-[72px] min-[420px]:w-[240px] lg:w-[256px]" as const;
+  "w-full md:w-[72px] min-[420px]:md:w-[240px] lg:w-[256px]" as const;
 
 export function Sidebar({
   role,
@@ -21,25 +26,35 @@ export function Sidebar({
   myTasksOverdueCount,
 }: SidebarProps) {
   const myTasksUrgent = myTasksOverdueCount > 0;
+  const mobileNav = useMobileNavOptional();
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-20 flex ${RAIL} shrink-0 flex-col border-r bg-white/95 backdrop-blur-xl`}
+      id="app-sidebar"
+      className={`flex h-full min-h-0 ${RAIL} shrink-0 flex-col border-r bg-white/95 backdrop-blur-xl md:min-h-[100dvh]`}
       style={{ borderColor: "#EEF2F6" }}
     >
       <div
-        className="flex shrink-0 flex-col border-b max-[419px]:items-center max-[419px]:justify-center max-[419px]:py-3 min-[420px]:block"
+        className="flex shrink-0 flex-col border-b md:block"
         style={{ borderColor: "#EEF2F6" }}
       >
-        <div className="hidden min-[420px]:block">
-          <BrandMark />
-        </div>
-        <div className="flex min-[420px]:hidden justify-center px-2">
+        <div className="flex items-center justify-between gap-2 px-3 py-3 md:hidden">
           <BrandMark compact />
+          <button
+            type="button"
+            onClick={() => mobileNav?.close()}
+            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-xl text-[#64748B] transition hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+            aria-label="Menü schließen"
+          >
+            <X className="h-5 w-5" strokeWidth={2} />
+          </button>
+        </div>
+        <div className="hidden md:block">
+          <BrandMark />
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 space-y-2 overflow-y-auto overflow-x-hidden px-2 pt-4 pb-4 min-[420px]:px-4">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-2 pt-3 pb-4 min-[420px]:md:space-y-2 min-[420px]:md:px-4 min-[420px]:md:pt-4">
         {role === "doctor" && (
           <NavItem
             href="/dashboard"
@@ -86,13 +101,16 @@ export function Sidebar({
       </nav>
 
       <div
-        className="shrink-0 space-y-2 border-t px-2 py-4 max-[419px]:text-center min-[420px]:px-4"
-        style={{ borderColor: "#EEF2F6", paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+        className="shrink-0 space-y-2 border-t px-2 py-4 min-[420px]:md:px-4"
+        style={{
+          borderColor: "#EEF2F6",
+          paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+        }}
       >
-        <div className="mx-2 text-[11px] font-medium text-[#94A3B8] max-[419px]:hidden">
+        <div className="mx-2 hidden text-[11px] font-medium text-[#94A3B8] md:block">
           Hilfe &amp; Support
         </div>
-        <div className="mx-2 font-mono text-[10px] uppercase tracking-wider text-[#94A3B8] max-[419px]:mx-0 max-[419px]:text-[9px]">
+        <div className="mx-2 font-mono text-[10px] uppercase tracking-wider text-[#94A3B8] max-md:mx-1 md:mx-2">
           v 0.1 · Alpha
         </div>
       </div>
@@ -100,6 +118,6 @@ export function Sidebar({
   );
 }
 
-/** Abstand für die fixierte Sidebar — Werte wie in `RAIL` in dieser Datei. */
+/** Abstand für die Sidebar — mobil kein permanenter Rail; ab md wie zuvor. */
 export const SIDEBAR_MAIN_PAD =
-  "pl-[72px] min-[420px]:pl-[240px] lg:pl-[256px]" as const;
+  "pl-0 md:pl-[72px] min-[420px]:md:pl-[240px] lg:pl-[256px]" as const;

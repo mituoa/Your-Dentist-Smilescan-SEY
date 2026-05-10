@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
@@ -7,6 +8,7 @@ import { SubmissionActions } from "@/components/inbox/submission-actions";
 import { TrackerPrimaryActions } from "@/components/inbox/tracker-primary-actions";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
+import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
 import { markSubmissionSeen } from "./actions";
 
 interface InboxDetailPageProps {
@@ -133,7 +135,7 @@ export default async function InboxDetailPage({
   const headerPad = { padding: `clamp(28px, 5vw, 48px) ${padX} 0` };
   const scrollPadTop = urgencyLine ? "24px" : "32px";
   const scrollPad = {
-    padding: `${scrollPadTop} ${padX} 56px`,
+    padding: `${scrollPadTop} ${padX} clamp(72px, 18vw, 120px)`,
   };
 
   return (
@@ -148,14 +150,17 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Figma: rechter Bereich flex-1; hier: medizinischer Canvas + schmale Kommunikationsspalte */}
-      <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-hidden lg:flex-row">
+      {/* Desktop: Canvas + Kommunikation nebeneinander. Mobil: alles untereinander (eine Spalte). */}
+      <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-hidden lg:flex-row">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC]">
           {/* Detail-Header — Desktop unverändert; Tablet/Phone: sticky für Kontext beim Scrollen */}
           <div
             className="z-[6] shrink-0 bg-white max-lg:sticky max-lg:top-0 max-lg:shadow-[0_1px_0_rgba(15,23,42,0.06)] lg:static lg:shadow-none"
             style={headerPad}
           >
+            <Suspense fallback={null}>
+              <InboxMobileBack />
+            </Suspense>
             <h2
               className="text-[22px] sm:text-[24px]"
               style={{
@@ -230,7 +235,7 @@ export default async function InboxDetailPage({
 
           {/* Scrollbarer Inhalt — Figma: background #FFFFFF, padding 24|32 / 56 / 56 */}
           <div
-            className="min-h-0 flex-1 overflow-y-auto bg-white max-lg:scroll-pb-8"
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-white [-webkit-overflow-scrolling:touch] max-lg:scroll-pb-8"
             style={scrollPad}
           >
             <div style={{ marginBottom: "32px" }}>
