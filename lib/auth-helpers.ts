@@ -73,6 +73,27 @@ export async function requireUser() {
 }
 
 /**
+ * Workspace-Zeile für eine bekannte User-ID (eine PostgREST-Runde, kein zweites getUser).
+ * Für Root-Redirect und `getCurrentWorkspace` gemeinsam genutzt.
+ */
+export async function getWorkspaceMembershipForUserId(userId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("workspace_members")
+    .select("workspace_id, role, workspaces(id, name, slug, approved_at)")
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[getWorkspaceMembershipForUserId]", error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
  * Not wrapped in `react/cache`: `requireApprovedWorkspace` may call
  * `ensureRelaxBootstrapWorkspace` and then must see a fresh row — caching
  * would return stale `null` and break the protected app shell.
@@ -80,21 +101,7 @@ export async function requireUser() {
 export async function getCurrentWorkspace() {
   const user = await getCurrentUser();
   if (!user) return null;
-
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("workspace_members")
-    .select("workspace_id, role, workspaces(id, name, slug, approved_at)")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[getCurrentWorkspace]", error);
-    return null;
-  }
-
-  return data;
+  return getWorkspaceMembershipForUserId(user.id);
 }
 
 export async function requireApprovedWorkspace() {
