@@ -124,7 +124,7 @@ export default async function ProtectedLayout({
                 </div>
               </header>
 
-              <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[calc(5rem+env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch] md:pb-0">
+              <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[max(4.25rem,env(safe-area-inset-bottom)+3.25rem)] [-webkit-overflow-scrolling:touch] md:pb-0">
                 {children}
               </main>
             </div>

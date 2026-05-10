@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronUp, Command, Mic, Sparkles } from "lucide-react";
+import { Command, Mic, Sparkles } from "lucide-react";
 
 import {
   buildAssistQuickDraft,
@@ -13,6 +13,7 @@ import {
   detectAssistZone,
 } from "@/lib/clinical/assist-workspace-context";
 
+import { cn } from "@/lib/utils";
 import { useAssistCaseOptional } from "./assist-shell";
 
 /** Navigation — nur Seiten öffnen, keine Serveraktion. */
@@ -67,36 +68,25 @@ const INBOX_QUICK: { id: AssistQuickActionId; label: string }[] = [
   { id: "polish_placeholder", label: "Formulierung prüfen" },
 ];
 
-/** Systemweite Dock-Position — mobil: kompaktes Utility-Dock; Desktop: unten rechts. */
-const DOCK_OUTER =
-  "pointer-events-none fixed z-[45] flex w-full flex-col gap-1.5 " +
-  "bottom-0 right-0 items-stretch px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-0 " +
-  "md:gap-2 md:px-3 md:pb-[max(1rem,env(safe-area-inset-bottom))] " +
-  "lg:bottom-8 lg:right-8 lg:w-auto lg:items-end lg:self-end lg:px-8 lg:pb-8 lg:pt-0";
-
-const DOCK_INNER =
-  "pointer-events-auto mx-auto flex w-full max-w-[min(100vw-1rem,420px)] flex-col gap-1.5 md:max-w-none lg:w-[min(100vw-2rem,520px)] lg:items-end";
-
-/** Panel — weiche Elevation, ruhige Radien, Glass. */
-const PANEL =
-  "rounded-[20px] border border-black/[0.06] bg-white/[0.88] shadow-[0_18px_50px_-28px_rgba(15,23,42,0.25),0_4px_14px_-6px_rgba(43,111,232,0.12)] backdrop-blur-2xl backdrop-saturate-150 " +
-  "dark:border-white/[0.08] dark:bg-[rgb(24_26_30/0.92)] dark:shadow-[0_20px_50px_-24px_rgba(0,0,0,0.55)]";
+/** Sheet — schwebend, klinisch ruhig, iOS-nah. */
+const SHEET =
+  "flex max-h-[min(88dvh,920px)] flex-col overflow-hidden rounded-t-[20px] border border-black/[0.07] bg-white/[0.92] shadow-[0_-8px_40px_-12px_rgba(15,23,42,0.18),0_0_0_1px_rgba(255,255,255,0.6)_inset,0_24px_64px_-32px_rgba(43,111,232,0.12)] backdrop-blur-2xl backdrop-saturate-150 " +
+  "md:max-h-[min(82dvh,880px)] md:rounded-2xl md:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.22),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_12px_40px_-20px_rgba(43,111,232,0.1)] " +
+  "dark:border-white/[0.08] dark:bg-[rgb(24_26_30/0.94)] dark:shadow-[0_24px_64px_-28px_rgba(0,0,0,0.55)]";
 
 const HEADER_DIVIDER =
   "border-b border-black/[0.05] dark:border-white/[0.06]";
 
-/** Konstante Bar-Höhe, Raycast/Linear-artig. */
-const COMMAND_BAR =
-  "group/command-bar pointer-events-auto flex h-10 w-full shrink-0 items-center justify-between gap-2 rounded-[14px] border border-black/[0.07] bg-white/[0.78] px-2.5 " +
-  "md:h-12 md:gap-3 md:rounded-xl md:px-3.5 " +
-  "shadow-[0_1px_0_rgba(255,255,255,0.7)_inset,0_10px_38px_-22px_rgba(15,23,42,0.18),0_2px_8px_-4px_rgba(43,111,232,0.06)] backdrop-blur-xl backdrop-saturate-150 " +
-  "transition-[border-color,box-shadow,background-color,color] duration-200 ease-out " +
-  "hover:border-[rgba(43,111,232,0.22)] hover:bg-white/[0.92] hover:shadow-[0_1px_0_rgba(255,255,255,0.75)_inset,0_14px_44px_-20px_rgba(43,111,232,0.14),0_4px_12px_-4px_rgba(15,23,42,0.08)] " +
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.28)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent " +
-  "dark:border-white/[0.1] dark:bg-[rgb(28_30_34/0.88)] dark:shadow-[0_12px_40px_-20px_rgba(0,0,0,0.45)] dark:hover:border-[rgba(96,165,250,0.28)] dark:hover:bg-[rgb(32_34_40/0.92)]";
+const FAB =
+  "pointer-events-auto flex h-12 w-12 touch-manipulation items-center justify-center rounded-2xl border border-black/[0.06] bg-white/[0.82] text-[#2563EB] shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08),0_8px_24px_-12px_rgba(43,111,232,0.15),0_0_0_1px_rgba(255,255,255,0.7)_inset] backdrop-blur-xl backdrop-saturate-150 " +
+  "transition-[transform,box-shadow,background-color,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none " +
+  "hover:border-[rgba(43,111,232,0.18)] hover:bg-white/[0.92] hover:shadow-[0_4px_14px_-4px_rgba(15,23,42,0.1),0_12px_32px_-16px_rgba(43,111,232,0.18)] " +
+  "active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.28)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent " +
+  "md:h-[52px] md:w-[52px] md:rounded-[14px] " +
+  "dark:border-white/[0.1] dark:bg-[rgb(28_30_34/0.88)] dark:text-[#93C5FD] dark:shadow-[0_12px_36px_-20px_rgba(0,0,0,0.45)]";
 
 const ICON_WRAP =
-  "flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.12)] md:h-8 md:w-8 md:rounded-lg " +
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.1)] " +
   "dark:bg-[rgba(43,111,232,0.15)] dark:text-[#93C5FD] dark:ring-[rgba(59,130,246,0.2)]";
 
 const INPUT_AREA =
@@ -175,6 +165,8 @@ export function CommandAssist() {
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const fabRef = useRef<HTMLButtonElement | null>(null);
 
   const hidden = pathname.startsWith("/login");
 
@@ -262,171 +254,230 @@ export function CommandAssist() {
     };
   }, []);
 
+  /** iOS-/SaaS-like dismiss: außerhalb tippen, Scroll im Hintergrund, Escape. */
+  useEffect(() => {
+    if (!open) return;
+
+    const insideCommandUi = (n: Node | null) => {
+      if (!n) return false;
+      if (fabRef.current?.contains(n)) return true;
+      if (sheetRef.current?.contains(n)) return true;
+      return false;
+    };
+
+    const onPointerDownCapture = (e: PointerEvent) => {
+      if (insideCommandUi(e.target as Node)) return;
+      setOpen(false);
+    };
+
+    const onScrollCapture = (e: Event) => {
+      const t = e.target;
+      if (t === document || t === document.documentElement) {
+        setOpen(false);
+        return;
+      }
+      if (t instanceof Node && sheetRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDownCapture, true);
+    document.addEventListener("scroll", onScrollCapture, true);
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDownCapture, true);
+      document.removeEventListener("scroll", onScrollCapture, true);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   if (hidden) return null;
 
   const routeHints = suggestRoutes(text);
   const deepHints = suggestInboxDeepLinks(text, inboxCase?.submissionId ?? null);
   const hints = [...deepHints, ...routeHints].slice(0, 5);
 
-  return (
-    <div className={DOCK_OUTER} aria-live="polite">
-      <div className={DOCK_INNER}>
-        <div
-          id="command-assist-panel"
-          className={`overflow-hidden transition-[opacity,transform,max-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${PANEL} ${
-            open
-              ? "max-h-[min(85vh,920px)] translate-y-0 opacity-100"
-              : "pointer-events-none max-h-0 translate-y-1 opacity-0"
-          }`}
-        >
-          <div className={`px-5 py-4 sm:px-6 sm:py-5 ${HEADER_DIVIDER}`}>
-            <div className="flex items-start gap-3.5">
-              <div className={ICON_WRAP} aria-hidden>
-                <Command className="h-4 w-4" strokeWidth={2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <p className="text-[15px] font-semibold tracking-tight text-[#0F172A] dark:text-slate-100">
-                    Command
-                  </p>
-                  <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[#94A3B8] dark:text-slate-500">
-                    Praxis
-                  </span>
-                </div>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-[#64748B] dark:text-slate-400">
-                  Klinische Kommandoebene — Entwürfe, Navigation, Diktat. Nur zur Prüfung,{" "}
-                  <span className="font-medium text-[#475569] dark:text-slate-300">kein automatischer Versand</span>.
-                </p>
-              </div>
-            </div>
+  const sheetBody = (
+    <>
+      <div className={`shrink-0 px-5 pb-3 pt-2 md:px-6 md:pb-4 md:pt-5 ${HEADER_DIVIDER}`}>
+        <div className="flex justify-center pb-2 md:hidden" aria-hidden>
+          <span className="h-1 w-9 rounded-full bg-[#E2E8F0] dark:bg-slate-600" />
+        </div>
+        <div className="flex items-start gap-3">
+          <div className={ICON_WRAP} aria-hidden>
+            <Command className="h-4 w-4" strokeWidth={2} />
           </div>
-
-          <div className="space-y-4 px-5 py-4 sm:px-6 sm:py-5">
-            {inboxCase && draftParams ? (
-              <div className="rounded-xl border border-[rgba(43,111,232,0.12)] bg-[#F4F7FB] px-3.5 py-3.5 dark:border-[rgba(59,130,246,0.2)] dark:bg-[rgba(43,111,232,0.08)]">
-                <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Aktueller Fall</p>
-                <p className="mt-1 truncate text-[15px] font-semibold text-[#0F172A] dark:text-slate-100">
-                  {inboxCase.patientName || "Patient"}
-                </p>
-                {inboxCase.concernLine ? (
-                  <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-[#64748B] dark:text-slate-400">
-                    {inboxCase.concernLine}
-                  </p>
-                ) : null}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {INBOX_QUICK.map((q) => (
-                    <button
-                      key={q.id}
-                      type="button"
-                      onClick={() => applyQuickDraft(q.id)}
-                      className={CHIP}
-                    >
-                      {q.label}
-                    </button>
-                  ))}
-                  {caseExtras.map((q) => (
-                    <button
-                      key={q.id}
-                      type="button"
-                      onClick={() => setText(q.text)}
-                      className={CHIP}
-                    >
-                      {q.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {!inboxCase && contextQuick.length > 0 ? (
-              <div className="rounded-xl border border-black/[0.06] bg-[#FAFBFF] px-3.5 py-3.5 dark:border-white/[0.08] dark:bg-[rgba(43,111,232,0.06)]">
-                <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Schnellaktionen</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {contextQuick.map((q) => (
-                    <button
-                      key={q.id}
-                      type="button"
-                      onClick={() => setText(q.template)}
-                      className={CHIP}
-                    >
-                      {q.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={5}
-              placeholder={placeholderForZone(zone, Boolean(inboxCase && draftParams))}
-              className={INPUT_AREA}
-            />
-
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={startDictation} disabled={listening} className={BTN_SECONDARY}>
-                <Mic className="h-4 w-4 text-[#2563EB]" strokeWidth={1.75} />
-                {listening ? "Hört zu …" : "Diktat"}
-              </button>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <p className="text-[15px] font-semibold tracking-tight text-[#0F172A] dark:text-slate-100">
+                Command
+              </p>
+              <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[#94A3B8] dark:text-slate-500">
+                Praxis
+              </span>
             </div>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-[#64748B] dark:text-slate-400">
+              Klinische Kommandoebene — Entwürfe, Navigation, Diktat. Nur zur Prüfung,{" "}
+              <span className="font-medium text-[#475569] dark:text-slate-300">kein automatischer Versand</span>.
+            </p>
+          </div>
+        </div>
+      </div>
 
-            {hints.length > 0 ? (
-              <div className="space-y-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.08]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] dark:text-slate-500">
-                  {deepHints.length > 0 ? "Aktion & Navigation" : "Navigation"}
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 [-webkit-overflow-scrolling:touch] sm:px-6 sm:py-5">
+        <div className="space-y-4">
+          {inboxCase && draftParams ? (
+            <div className="rounded-xl border border-[rgba(43,111,232,0.12)] bg-[#F4F7FB] px-3.5 py-3.5 dark:border-[rgba(59,130,246,0.2)] dark:bg-[rgba(43,111,232,0.08)]">
+              <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Aktueller Fall</p>
+              <p className="mt-1 truncate text-[15px] font-semibold text-[#0F172A] dark:text-slate-100">
+                {inboxCase.patientName || "Patient"}
+              </p>
+              {inboxCase.concernLine ? (
+                <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-[#64748B] dark:text-slate-400">
+                  {inboxCase.concernLine}
                 </p>
-                {hints.map((h) => (
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {INBOX_QUICK.map((q) => (
                   <button
-                    key={h.href + h.label}
+                    key={q.id}
                     type="button"
-                    onClick={() => {
-                      router.push(h.href);
-                      setOpen(false);
-                    }}
-                    className={HINT_ROW}
+                    onClick={() => applyQuickDraft(q.id)}
+                    className={CHIP}
                   >
-                    <span className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 shrink-0 text-[#2563EB]" strokeWidth={1.75} />
-                      {h.label}
-                    </span>
-                    <span className="shrink-0 text-[#94A3B8]">→</span>
+                    {q.label}
+                  </button>
+                ))}
+                {caseExtras.map((q) => (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setText(q.text)}
+                    className={CHIP}
+                  >
+                    {q.label}
                   </button>
                 ))}
               </div>
-            ) : null}
-          </div>
-        </div>
+            </div>
+          ) : null}
 
+          {!inboxCase && contextQuick.length > 0 ? (
+            <div className="rounded-xl border border-black/[0.06] bg-[#FAFBFF] px-3.5 py-3.5 dark:border-white/[0.08] dark:bg-[rgba(43,111,232,0.06)]">
+              <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Schnellaktionen</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {contextQuick.map((q) => (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setText(q.template)}
+                    className={CHIP}
+                  >
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={5}
+            placeholder={placeholderForZone(zone, Boolean(inboxCase && draftParams))}
+            className={INPUT_AREA}
+          />
+
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={startDictation} disabled={listening} className={BTN_SECONDARY}>
+              <Mic className="h-4 w-4 text-[#2563EB]" strokeWidth={1.75} />
+              {listening ? "Hört zu …" : "Diktat"}
+            </button>
+          </div>
+
+          {hints.length > 0 ? (
+            <div className="space-y-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.08]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] dark:text-slate-500">
+                {deepHints.length > 0 ? "Aktion & Navigation" : "Navigation"}
+              </p>
+              {hints.map((h) => (
+                <button
+                  key={h.href + h.label}
+                  type="button"
+                  onClick={() => {
+                    router.push(h.href);
+                    setOpen(false);
+                  }}
+                  className={HINT_ROW}
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 shrink-0 text-[#2563EB]" strokeWidth={1.75} />
+                    {h.label}
+                  </span>
+                  <span className="shrink-0 text-[#94A3B8]">→</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      <div
+        className={cn(
+          "fixed inset-0 z-[44] transition-[opacity,backdrop-filter] duration-200 ease-out motion-reduce:transition-none",
+          open
+            ? "bg-slate-950/[0.22] opacity-100 backdrop-blur-[8px] md:bg-slate-950/[0.15] md:backdrop-blur-[6px]"
+            : "pointer-events-none opacity-0"
+        )}
+        aria-hidden={!open}
+        aria-live="polite"
+      />
+
+      <div
+        ref={sheetRef}
+        id="command-assist-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command — Praxis"
+        className={cn(
+          "fixed z-[45] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
+          "left-3 right-3 bottom-0 w-auto max-w-none md:left-auto md:right-8 md:w-[min(440px,calc(100vw-2rem))]",
+          "md:bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))]",
+          SHEET,
+          open
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-[calc(100%+1.5rem)] opacity-0 md:translate-y-3 md:opacity-0"
+        )}
+      >
+        {sheetBody}
+      </div>
+
+      <div
+        className={cn(
+          "fixed z-[46]",
+          "bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 md:bottom-8 md:right-8"
+        )}
+      >
         <button
+          ref={fabRef}
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className={COMMAND_BAR}
+          className={FAB}
           aria-expanded={open}
           aria-controls="command-assist-panel"
           aria-label={open ? "Command schließen" : "Command öffnen"}
         >
-          <span className="flex min-w-0 flex-1 items-center gap-3">
-            <span className={ICON_WRAP}>
-              <Command className="h-4 w-4" strokeWidth={2} />
-            </span>
-            <span className="min-w-0 flex-1 text-left">
-              <span className="block truncate text-[13px] font-semibold tracking-tight text-[#0F172A] dark:text-slate-100 md:text-[14px]">
-                Command
-              </span>
-              <span
-                className={`block truncate text-[11px] font-medium leading-tight text-[#64748B] dark:text-slate-400 ${open ? "" : "max-md:hidden"}`}
-              >
-                {open ? "Eingeben oder wählen" : "Klinische Kommandoebene"}
-              </span>
-            </span>
-          </span>
-          <ChevronUp
-            className={`h-4 w-4 shrink-0 text-[#94A3B8] transition-transform duration-300 ease-out dark:text-slate-500 ${open ? "" : "rotate-180"}`}
-            aria-hidden
-          />
+          <Command className="h-[22px] w-[22px] shrink-0" strokeWidth={2} aria-hidden />
         </button>
       </div>
-    </div>
+    </>
   );
 }
