@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
+import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-button";
 import {
   clearReturnToPricingFlag,
   markReturnToPricingFlag,
@@ -650,11 +651,11 @@ export function LoginPageClient({
 
                 <form action={signInWithGoogle}>
                   {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
-                  <button
-                    type="submit"
-                    className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-gray-200/90 bg-white text-[13px] text-gray-900 transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 active:scale-[0.99] lg:h-[48px] lg:gap-3 lg:rounded-xl lg:text-[14px]"
+                  <OAuthFormSubmitButton
+                    pendingLabel="Weiter zu Google…"
+                    className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-gray-200/90 bg-white text-[13px] text-gray-900 transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 lg:h-[48px] lg:gap-3 lg:rounded-xl lg:text-[14px]"
                   >
-                    <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fill="currentColor"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -673,7 +674,7 @@ export function LoginPageClient({
                       />
                     </svg>
                     Mit Google anmelden
-                  </button>
+                  </OAuthFormSubmitButton>
                 </form>
 
                 <div className="mt-5 text-center lg:mt-8">
