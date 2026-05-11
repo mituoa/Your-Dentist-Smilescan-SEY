@@ -60,68 +60,67 @@ export function ClinicalDashboardSkeleton() {
       >
         <div className="min-w-0 w-full max-w-full">
           <div
-            className="mb-6 overflow-hidden pb-5"
+            className="mb-5 overflow-hidden pb-4"
             style={{ borderBottom: "1px solid rgba(226,232,240,0.6)" }}
           >
             {barDashboard("mb-1.5 h-8 max-w-[min(100%,20rem)]")}
-            {barDashboard("mb-3 h-3.5 w-52 max-w-full")}
-            <div className="mb-5 grid max-w-lg grid-cols-2 gap-4 sm:gap-8">
-              <div className="min-w-0 space-y-2">
-                {barDashboard("h-8 w-16 rounded-md")}
-                {barDashboard("h-2 w-20")}
+            {barDashboard("mb-4 h-3 w-52 max-w-full")}
+            <div className="grid max-w-md grid-cols-2 gap-3 sm:gap-10">
+              <div className="min-w-0 space-y-1.5">
+                {barDashboard("h-9 w-20 rounded-md")}
+                {barDashboard("h-2 w-16")}
               </div>
-              <div className="min-w-0 space-y-2">
-                {barDashboard("h-8 w-16 rounded-md")}
-                {barDashboard("h-2 w-24")}
+              <div className="min-w-0 space-y-1.5">
+                {barDashboard("h-9 w-20 rounded-md")}
+                {barDashboard("h-2 w-20")}
               </div>
             </div>
           </div>
 
-          <div className="mb-8 grid min-w-0 grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
+          <div className="mb-6 grid min-w-0 grid-cols-12 gap-3 sm:gap-4 lg:gap-5">
             <div
-              className="col-span-12 flex min-h-[220px] min-w-0 flex-col rounded-2xl border border-[#D6E6FF] p-5 sm:p-5 md:px-7 md:py-6 lg:col-span-7"
+              className="col-span-12 flex min-h-[180px] min-w-0 flex-col rounded-xl border border-[#D6E6FF] p-4 sm:p-4 md:px-6 md:py-5 lg:col-span-7"
               style={{
                 background: "linear-gradient(135deg, #F0F7FF 0%, #F4F8FF 100%)",
-                boxShadow: "0 2px 12px rgba(15, 23, 42, 0.06)",
+                boxShadow: "0 1px 8px rgba(15, 23, 42, 0.05)",
               }}
             >
-              {barDashboard("mb-3 h-2 w-32")}
-              <div className="mb-3 space-y-2">
-                {barDashboard("h-14 max-w-[6rem] rounded-lg")}
-                {barDashboard("h-3 w-full max-w-sm")}
+              {barDashboard("mb-2 h-2 w-28")}
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                {barDashboard("h-16 max-w-[7rem] rounded-lg")}
+                {barDashboard("h-3.5 w-24")}
               </div>
-              {barDashboard("mt-2 h-3.5 w-28")}
+              {barDashboard("mt-2 h-2.5 w-20")}
             </div>
 
-            <div className="col-span-12 flex min-h-0 min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-5">
+            <div className="col-span-12 flex min-h-0 min-w-0 flex-col gap-3 sm:gap-4 lg:col-span-5">
               {[0, 1].map((i) => (
                 <div
                   key={i}
-                  className="min-h-[120px] min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4"
+                  className="min-h-[92px] min-w-0 rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4"
                 >
-                  {barDashboard("mb-2 h-2 w-24")}
-                  {barDashboard("h-10 w-20 rounded-md")}
-                  {barDashboard("mt-2 h-3 w-28")}
+                  {barDashboard("mb-1 h-2 w-20")}
+                  <div className="flex items-end justify-between gap-2">
+                    {barDashboard("h-10 w-16 rounded-md")}
+                    {barDashboard("h-3 w-6")}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="min-h-[160px] min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 md:px-6 md:py-5">
-            <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-              <div className="min-w-0 space-y-1.5">
-                {barDashboard("h-5 w-28")}
-                {barDashboard("h-2 w-20")}
-              </div>
-              {barDashboard("h-10 w-[7.5rem] shrink-0 rounded-lg")}
+          <div className="min-h-[140px] min-w-0 rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4">
+            <div className="mb-2 flex min-w-0 flex-col gap-2 border-b border-[#F1F5F9] pb-2 sm:flex-row sm:items-center sm:justify-between">
+              {barDashboard("h-5 w-24")}
+              {barDashboard("h-9 w-28 shrink-0 rounded-md")}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1 pt-2">
               {[0, 1].map((row) => (
-                <div key={row} className="flex items-start gap-2.5 py-1 sm:gap-3 sm:py-2">
-                  {barDashboard("h-9 w-9 shrink-0 rounded-lg sm:h-10 sm:w-10")}
-                  <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
-                    {barDashboard("h-3 w-full max-w-xl")}
-                    {barDashboard("h-2 w-28")}
+                <div key={row} className="flex items-start gap-2 py-1 sm:gap-2.5">
+                  {barDashboard("h-8 w-8 shrink-0 rounded-md sm:h-9 sm:w-9")}
+                  <div className="min-w-0 flex-1 space-y-1 pt-0.5">
+                    {barDashboard("h-2.5 w-full max-w-xl")}
+                    {barDashboard("h-2 w-24")}
                   </div>
                 </div>
               ))}

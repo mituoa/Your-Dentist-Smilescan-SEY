@@ -28,9 +28,9 @@ export const dynamic = "force-dynamic";
  * (`/inbox`); offene Aufgaben bearbeiten → **Aufgabenliste** (`/my-tasks`). Teammitglieder werden
  * serverseitig nach `/my-tasks` geleitet (kein paralleles „Doctor-Dashboard“ für `team`).
  *
- * **Hierarchie (oben → unten):** Begrüßung → **Zahl-first-Kurzmetriken** (Neu 24h · Posteingang) →
- * **Priorität Posteingang** (große Kennzahl) → Karten **Aufgaben** / **Neu (24h)** + ggf. nächste
- * Aufgaben → **Chronik** (Auszug).
+ * **Hierarchie (oben → unten):** Begrüßung / Datum → **Zahl-first** (Neu 24h · Posteingang) →
+ * **Priorität Posteingang** (dominante Kennzahl, kompakte `rounded-xl`-Karte) → **Aufgaben** / **Neu 24h**
+ * (kompakte KPI-Kacheln) → **Chronik** (dichter Auszug).
  *
  * **Nicht-Ziele dieser Route:** tiefe Auswertungen, neue KPI-Familien, Marketing-Widgets,
  * freie Navigations-Bausteine — bewusst ruhig und fokussiert gehalten.
@@ -143,22 +143,22 @@ function ActivityRow({ event }: { event: ActivityEvent }) {
   const inner = (
     <>
       <div
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center sm:h-10 sm:w-10"
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center sm:h-9 sm:w-9"
         style={{
           background: "#F8FAFC",
-          borderRadius: "8px",
+          borderRadius: "6px",
         }}
       >
-        <Icon className="h-[18px] w-[18px] sm:h-[19px] sm:w-[19px]" style={{ color: "#64748B" }} />
+        <Icon className="h-[16px] w-[16px] sm:h-[17px] sm:w-[17px]" style={{ color: "#94A3B8" }} />
       </div>
       <div className="min-w-0 flex-1">
         <p
-          className="mb-0.5 break-words text-[13px] leading-snug sm:text-[13.5px]"
-          style={{ color: "#0F172A", fontWeight: 600, lineHeight: "1.35" }}
+          className="break-words text-[12px] font-semibold leading-tight sm:text-[12.5px]"
+          style={{ color: "#0F172A", lineHeight: "1.3" }}
         >
           {event.text}
         </p>
-        <p className="text-[10px] tabular-nums" style={{ color: "#94A3B8" }}>
+        <p className="mt-0.5 text-[10px] tabular-nums tracking-tight" style={{ color: "#94A3B8" }}>
           {formatDeDateTime(event.timestamp)}
         </p>
       </div>
@@ -169,7 +169,7 @@ function ActivityRow({ event }: { event: ActivityEvent }) {
     return (
       <Link
         href={event.link}
-        className="flex min-h-[40px] min-w-0 items-start gap-2.5 rounded-lg py-2 transition-colors hover:bg-[#F8FAFC] sm:min-h-[44px] sm:gap-3 sm:py-2"
+        className="flex min-h-[40px] min-w-0 items-start gap-2 rounded-md py-1.5 transition-colors hover:bg-[#F8FAFC] sm:min-h-[44px] sm:gap-2.5 sm:py-1.5"
       >
         {inner}
       </Link>
@@ -177,7 +177,7 @@ function ActivityRow({ event }: { event: ActivityEvent }) {
   }
 
   return (
-    <div className="flex min-h-[40px] min-w-0 cursor-default items-start gap-2.5 rounded-lg py-2 sm:min-h-[44px] sm:gap-3 sm:py-2">
+    <div className="flex min-h-[40px] min-w-0 cursor-default items-start gap-2 rounded-md py-1.5 sm:min-h-[44px] sm:gap-2.5 sm:py-1.5">
       {inner}
     </div>
   );
@@ -271,7 +271,7 @@ export default async function DashboardPage() {
       <div className={`relative touch-manipulation ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
         <div className="min-w-0 w-full max-w-full">
           <div
-            className="mb-6 overflow-hidden pb-5"
+            className="mb-5 overflow-hidden pb-4"
             style={{ borderBottom: "1px solid rgba(226,232,240,0.6)" }}
           >
             <h1
@@ -284,329 +284,300 @@ export default async function DashboardPage() {
             >
               Guten Tag, {displayName}
             </h1>
-            <p className="mb-3 text-[13px]" style={{ color: "#64748B" }}>
+            <p className="mb-3 text-[12px] tabular-nums" style={{ color: "#64748B" }}>
               {todayLabel}
+              {profileDisplayNameMissing ? (
+                <>
+                  {" "}
+                  <span style={{ color: "#CBD5E1" }}>·</span>{" "}
+                  <Link
+                    href="/profile/editor"
+                    className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
+                  >
+                    Profil
+                  </Link>
+                </>
+              ) : null}
             </p>
-            {profileDisplayNameMissing ? (
-              <p className="mb-4 max-w-2xl text-[11px] leading-snug" style={{ color: "#94A3B8" }}>
-                <Link
-                  href="/profile/editor"
-                  className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                >
-                  Anzeigename im Profil
-                </Link>{" "}
-                ergänzen.
-              </p>
-            ) : null}
 
             {overviewQuietEmpty && !dashboardOverviewIncomplete ? (
-              <p
-                className="mb-5 max-w-xl break-words rounded-lg border border-slate-200/60 bg-white/80 px-3 py-2 text-[12px] leading-snug text-[#64748B]"
-                style={{ boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)" }}
-              >
-                Keine offenen Punkte in dieser Übersicht.
+              <p className="mb-4 text-[11px] font-medium tracking-wide text-[#94A3B8]">
+                Alles ruhig.
               </p>
             ) : null}
 
             {dashboardOverviewIncomplete ? (
               <p
-                className="mb-5 max-w-xl break-words rounded-lg border border-slate-200/80 bg-white/85 px-3 py-2 text-[12px] leading-snug text-slate-600 shadow-sm"
+                className="mb-4 max-w-2xl text-[11px] font-medium leading-snug text-slate-500"
                 role="status"
                 aria-live="polite"
               >
                 {onlyProfileQueryFailed ? (
-                  <>
-                    Profilname nicht geladen — Begrüßung per E-Mail. Kennzahlen wie angezeigt.
-                  </>
+                  <>Profil n. v. — Kennzahlen gültig.</>
                 ) : (
                   <>
-                    Teilweise nicht geladen —{" "}
-                    <Link href="/inbox" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
+                    Teilweise n. v. —{" "}
+                    <Link href="/inbox" className="text-[#2F80ED] underline-offset-2 hover:underline">
                       Posteingang
-                    </Link>
-                    ,{" "}
-                    <Link href="/my-tasks" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
+                    </Link>{" "}
+                    ·{" "}
+                    <Link href="/my-tasks" className="text-[#2F80ED] underline-offset-2 hover:underline">
                       Aufgaben
                     </Link>
-                    .
                   </>
                 )}
               </p>
             ) : null}
 
-            <div className="grid max-w-lg grid-cols-2 gap-4 sm:gap-8">
+            <div className="grid max-w-md grid-cols-2 gap-3 sm:gap-10">
               <div className="min-w-0">
                 <p
-                  className="tabular-nums text-[clamp(1.85rem,6.5vw,2.5rem)] leading-none tracking-tight"
-                  style={{ color: "#0F172A", fontWeight: 650, letterSpacing: "-0.03em" }}
+                  className="tabular-nums text-[clamp(2rem,7.5vw,2.85rem)] leading-none tracking-tight"
+                  style={{ color: "#0F172A", fontWeight: 650, letterSpacing: "-0.035em" }}
                 >
                   {newCount === null ? "—" : newCount}
                 </p>
                 <p
-                  className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]"
-                  style={{ lineHeight: 1.35 }}
+                  className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]"
+                  style={{ lineHeight: 1.3 }}
                 >
-                  Neu (24h)
+                  Neu 24h
                 </p>
-                {newCount === null ? (
-                  <p className="mt-1 text-[11px]" style={{ color: "#94A3B8" }}>
-                    n. v.
-                  </p>
-                ) : null}
               </div>
               <div className="min-w-0">
                 <p
-                  className="tabular-nums text-[clamp(1.85rem,6.5vw,2.5rem)] leading-none tracking-tight"
+                  className="tabular-nums text-[clamp(2rem,7.5vw,2.85rem)] leading-none tracking-tight"
                   style={{
                     color: unseenCount !== null && unseenCount > 0 ? "#0B4EA3" : "#0F172A",
                     fontWeight: 650,
-                    letterSpacing: "-0.03em",
+                    letterSpacing: "-0.035em",
                   }}
                 >
                   {unseenCount === null ? "—" : unseenCount}
                 </p>
                 <p
-                  className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]"
-                  style={{ lineHeight: 1.35 }}
+                  className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]"
+                  style={{ lineHeight: 1.3 }}
                 >
                   Posteingang
                 </p>
-                {unseenCount === null ? (
-                  <p className="mt-1 text-[11px]" style={{ color: "#94A3B8" }}>
-                    n. v.
-                  </p>
-                ) : null}
               </div>
             </div>
           </div>
 
-          <div className="mb-8 grid min-w-0 grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
+          <div className="mb-6 grid min-w-0 grid-cols-12 gap-3 sm:gap-4 lg:gap-5">
             <div
-              className="col-span-12 min-w-0 rounded-2xl border border-[#D6E6FF] p-5 sm:p-5 md:px-7 md:py-6 lg:col-span-7"
+              className="col-span-12 min-w-0 rounded-xl border border-[#D6E6FF] p-4 sm:p-4 md:px-6 md:py-5 lg:col-span-7"
               style={{
                 background: "linear-gradient(135deg, #F0F7FF 0%, #F4F8FF 100%)",
                 boxShadow:
                   unseenCount !== null && unseenCount > 0
-                    ? "0 6px 22px rgba(47, 128, 237, 0.1)"
-                    : "0 2px 12px rgba(15, 23, 42, 0.06)",
+                    ? "0 5px 20px rgba(47, 128, 237, 0.09)"
+                    : "0 1px 8px rgba(15, 23, 42, 0.05)",
               }}
             >
-              <p
-                className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]"
-                style={{ lineHeight: 1.35 }}
-              >
-                {unseenCount !== null && unseenCount > 0 ? "Noch zu öffnen" : "Posteingang"}
-              </p>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <p
+                  className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#2563EB]"
+                  style={{ lineHeight: 1.3 }}
+                >
+                  {unseenCount !== null && unseenCount > 0 ? "Aufmerksamkeit" : "Posteingang"}
+                </p>
+              </div>
               {unseenCount === null ? (
-                <p className="break-words text-[14px] leading-snug" style={{ color: "#64748B" }}>
-                  Kennzahl nicht geladen.{" "}
+                <div className="flex min-h-[5.5rem] flex-col justify-center">
+                  <p
+                    className="tabular-nums text-[clamp(2.25rem,8vw,3rem)] leading-none text-[#CBD5E1]"
+                    style={{ fontWeight: 650, letterSpacing: "-0.03em" }}
+                  >
+                    —
+                  </p>
                   <Link
                     href="/inbox"
-                    className="inline-flex min-h-[44px] items-center font-medium text-[#2F80ED] underline-offset-2 hover:underline"
+                    className="mt-2 inline-flex min-h-[44px] max-w-fit items-center text-[12px] font-medium text-[#2F80ED] underline-offset-2 hover:underline"
                   >
                     Posteingang
                   </Link>
-                </p>
+                </div>
               ) : unseenCount === 0 ? (
-                <>
-                  <p
-                    className="min-w-0 tabular-nums text-[clamp(2.5rem,11vw,3.5rem)] leading-none tracking-tight lg:text-[56px]"
-                    style={{
-                      color: "#94A3B8",
-                      fontWeight: 650,
-                      letterSpacing: "-0.03em",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    0
-                  </p>
-                  <p className="text-[13px] font-medium" style={{ color: "#475569", lineHeight: 1.45 }}>
-                    Alles mindestens einmal geöffnet.
-                  </p>
-                  <div className="mt-4">
+                <div className="flex flex-col">
+                  <div className="flex flex-wrap items-end justify-between gap-2">
+                    <p
+                      className="min-w-0 tabular-nums text-[clamp(2.75rem,12vw,4rem)] leading-none tracking-tight text-[#CBD5E1] lg:text-[64px]"
+                      style={{ letterSpacing: "-0.04em", fontWeight: 650 }}
+                    >
+                      0
+                    </p>
                     <Link
                       href="/inbox"
-                      className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#2F80ED] hover:underline"
+                      className="mb-1 inline-flex min-h-[44px] shrink-0 items-center text-[12px] font-medium text-[#2F80ED] hover:underline"
+                    >
+                      Öffnen
+                    </Link>
+                  </div>
+                  <p className="mt-1 text-[11px] font-medium text-[#64748B]">Alles geöffnet.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <p
+                      className="min-w-0 tabular-nums text-[clamp(3.25rem,15vw,5rem)] leading-none tracking-tight text-[#0B4EA3] lg:text-[80px]"
+                      style={{ fontWeight: 650, letterSpacing: "-0.04em" }}
+                    >
+                      {unseenCount}
+                    </p>
+                    <Link
+                      href="/inbox"
+                      className="mb-1.5 inline-flex min-h-[44px] shrink-0 items-center text-[12px] font-medium text-[#2F80ED] hover:underline"
                     >
                       Posteingang
                     </Link>
                   </div>
-                </>
-              ) : (
-                <>
-                  <p
-                    className="min-w-0 tabular-nums text-[clamp(3rem,14vw,4.5rem)] leading-none tracking-tight lg:text-[72px]"
-                    style={{
-                      color: "#0B4EA3",
-                      fontWeight: 650,
-                      letterSpacing: "-0.03em",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    {unseenCount}
+                  <p className="mt-1 text-[11px] font-medium text-[#64748B]">
+                    {unseenCount === 1 ? "1 ungeöffnet" : `${unseenCount} ungeöffnet`}
                   </p>
-                  <p className="text-[13px] font-medium" style={{ color: "#475569", lineHeight: 1.45 }}>
-                    {unseenCount === 1
-                      ? "1 Einsendung noch nicht geöffnet"
-                      : `${unseenCount} Einsendungen noch nicht geöffnet`}
-                  </p>
-                  <div className="mt-4">
-                    <Link
-                      href="/inbox"
-                      className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#2F80ED] hover:underline"
-                    >
-                      Zum Posteingang
-                    </Link>
-                  </div>
-                </>
+                </div>
               )}
             </div>
 
-            <div className="col-span-12 grid min-w-0 grid-cols-1 gap-4 sm:gap-5 lg:col-span-5">
+            <div className="col-span-12 grid min-w-0 grid-cols-1 gap-3 sm:gap-4 lg:col-span-5">
               {openTasks === null ? (
-                <div className="block min-w-0 rounded-2xl">
-                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
-                    <div className="mb-2">
+                <div className="block min-w-0 rounded-xl">
+                  <div className="rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
+                      Aufgaben
+                    </p>
+                    <div className="mt-1 flex items-end justify-between gap-2">
                       <p
-                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
-                        style={{ fontWeight: 600 }}
+                        className="tabular-nums text-[2rem] leading-none text-[#CBD5E1] sm:text-[2.25rem]"
+                        style={{ fontWeight: 650, letterSpacing: "-0.03em" }}
                       >
-                        Aufgaben
+                        —
                       </p>
-                    </div>
-                    <p className="text-[13px]" style={{ color: "#94A3B8" }}>
-                      Nicht geladen.
-                    </p>
-                    <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                      <Link href="/my-tasks" className="hover:underline">
-                        Aufgabenliste
+                      <Link
+                        href="/my-tasks"
+                        className="mb-0.5 inline-flex min-h-[44px] items-center text-[12px] font-medium text-[#2F80ED] underline-offset-2 hover:underline"
+                      >
+                        Liste
                       </Link>
-                    </p>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <Link href="/my-tasks" className="block min-w-0 rounded-2xl no-underline">
-                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
-                    <div className="mb-2">
-                      <p
-                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
-                        style={{ fontWeight: 600 }}
-                      >
-                        Aufgaben
-                      </p>
+                <Link href="/my-tasks" className="block min-w-0 rounded-xl no-underline">
+                  <div className="rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
+                      Aufgaben
+                    </p>
+                    <div className="mt-1 flex items-end justify-between gap-2">
+                      {openTaskCount > 0 ? (
+                        <>
+                          <p
+                            className="min-w-0 tabular-nums text-[clamp(2.1rem,9.5vw,3.25rem)] leading-none tracking-tight text-[#0F172A] lg:text-[52px]"
+                            style={{ letterSpacing: "-0.035em", fontWeight: 650 }}
+                          >
+                            {openTaskCount}
+                          </p>
+                          <span className="mb-1 text-[12px] font-medium text-[#2F80ED]" aria-hidden>
+                            →
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <p
+                            className="min-w-0 tabular-nums text-[clamp(2rem,9vw,2.85rem)] leading-none tracking-tight text-[#CBD5E1] lg:text-[44px]"
+                            style={{ letterSpacing: "-0.035em", fontWeight: 650 }}
+                          >
+                            0
+                          </p>
+                          <span className="mb-1 text-[12px] font-medium text-[#2F80ED]" aria-hidden>
+                            →
+                          </span>
+                        </>
+                      )}
                     </div>
-                    {openTaskCount > 0 ? (
-                      <>
-                        <p
-                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,3rem)] leading-none tracking-tight lg:text-[48px]"
-                          style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 650 }}
-                        >
-                          {openTaskCount}
-                        </p>
-                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Liste</span>
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p
-                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,2.75rem)] leading-none tracking-tight text-[#94A3B8] lg:text-[44px]"
-                          style={{ letterSpacing: "-0.03em", fontWeight: 650 }}
-                        >
-                          0
-                        </p>
-                        <p className="mt-1.5 text-[12px] font-medium" style={{ color: "#64748B" }}>
-                          Offen · in Prüfung
-                        </p>
-                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Liste</span>
-                        </p>
-                      </>
-                    )}
+                    {openTaskCount === 0 ? (
+                      <p className="mt-0.5 text-[10px] font-medium text-[#64748B]">Offen · Prüfung</p>
+                    ) : null}
                   </div>
                 </Link>
               )}
 
               {newCount === null ? (
-                <div className="block min-w-0 rounded-2xl">
-                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
-                    <div className="mb-2">
-                      <p
-                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
-                        style={{ fontWeight: 600 }}
-                      >
-                        Neu (24h)
-                      </p>
-                    </div>
-                    <p className="text-[13px]" style={{ color: "#94A3B8" }}>
-                      Nicht geladen.
+                <div className="block min-w-0 rounded-xl">
+                  <div className="rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
+                      Neu 24h
                     </p>
-                    <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                      <Link href="/inbox" className="hover:underline">
+                    <div className="mt-1 flex items-end justify-between gap-2">
+                      <p
+                        className="tabular-nums text-[2rem] leading-none text-[#CBD5E1] sm:text-[2.25rem]"
+                        style={{ fontWeight: 650, letterSpacing: "-0.03em" }}
+                      >
+                        —
+                      </p>
+                      <Link
+                        href="/inbox"
+                        className="mb-0.5 inline-flex min-h-[44px] items-center text-[12px] font-medium text-[#2F80ED] underline-offset-2 hover:underline"
+                      >
                         Posteingang
                       </Link>
-                    </p>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <Link href="/inbox" className="block min-w-0 rounded-2xl no-underline">
-                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
-                    <div className="mb-2">
-                      <p
-                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
-                        style={{ fontWeight: 600 }}
-                      >
-                        Neu (24h)
-                      </p>
+                <Link href="/inbox" className="block min-w-0 rounded-xl no-underline">
+                  <div className="rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
+                      Neu 24h
+                    </p>
+                    <div className="mt-1 flex items-end justify-between gap-2">
+                      {newCount > 0 ? (
+                        <>
+                          <p
+                            className="min-w-0 tabular-nums text-[clamp(2.1rem,9.5vw,3.25rem)] leading-none tracking-tight text-[#0F172A] lg:text-[52px]"
+                            style={{ letterSpacing: "-0.035em", fontWeight: 650 }}
+                          >
+                            {newCount}
+                          </p>
+                          <span className="mb-1 text-[12px] font-medium text-[#2F80ED]" aria-hidden>
+                            →
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <p
+                            className="min-w-0 tabular-nums text-[clamp(2rem,9vw,2.85rem)] leading-none tracking-tight text-[#CBD5E1] lg:text-[44px]"
+                            style={{ letterSpacing: "-0.035em", fontWeight: 650 }}
+                          >
+                            0
+                          </p>
+                          <span className="mb-1 text-[12px] font-medium text-[#2F80ED]" aria-hidden>
+                            →
+                          </span>
+                        </>
+                      )}
                     </div>
-                    {newCount > 0 ? (
-                      <>
-                        <p
-                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,3rem)] leading-none tracking-tight lg:text-[48px]"
-                          style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 650 }}
-                        >
-                          {newCount}
-                        </p>
-                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Posteingang</span>
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p
-                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,2.75rem)] leading-none tracking-tight text-[#94A3B8] lg:text-[44px]"
-                          style={{ letterSpacing: "-0.03em", fontWeight: 650 }}
-                        >
-                          0
-                        </p>
-                        <p className="mt-1.5 text-[12px] font-medium" style={{ color: "#64748B" }}>
-                          Letzte 24h
-                        </p>
-                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Posteingang</span>
-                        </p>
-                      </>
-                    )}
+                    {newCount === 0 ? (
+                      <p className="mt-0.5 text-[10px] font-medium text-[#64748B]">Keine Eingänge</p>
+                    ) : null}
                   </div>
                 </Link>
               )}
 
               {openTasks && topTasks.length > 0 ? (
-                <div className="min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5">
-                  <p
-                    className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]"
-                    style={{ lineHeight: 1.35 }}
-                  >
-                    Nächste Aufgaben
+                <div className="min-w-0 rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4">
+                  <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#94A3B8]">
+                    Als Nächstes
                   </p>
-                  <ul className="space-y-0.5">
+                  <ul className="divide-y divide-[#F1F5F9]">
                     {topTasks.map((t) => (
                       <li key={t.id} className="min-w-0">
                         <Link
                           href={`/my-tasks/${t.id}`}
-                          className="block min-h-[40px] break-words py-2 text-[13px] font-medium leading-snug text-[#1E293B] hover:text-[#2F80ED] sm:min-h-[44px] sm:py-2.5"
+                          className="block min-h-[40px] break-words py-1.5 text-[12px] font-medium leading-snug text-[#1E293B] hover:text-[#2F80ED] sm:min-h-[44px] sm:py-2"
                         >
-                          {t.content.length > 72 ? `${t.content.slice(0, 72)}…` : t.content}
+                          {t.content.length > 56 ? `${t.content.slice(0, 56)}…` : t.content}
                         </Link>
                       </li>
                     ))}
@@ -617,75 +588,49 @@ export default async function DashboardPage() {
           </div>
 
           <div
-            className="min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 md:px-6 md:py-5"
+            className="min-w-0 rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4"
             role="region"
             aria-label="Chronik"
           >
-            <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-              <div className="min-w-0">
-                <h2
-                  className="mb-0.5 text-[17px] font-semibold"
-                  style={{ color: "#1E293B", letterSpacing: "-0.01em" }}
-                >
-                  Chronik
-                </h2>
-                <p className="break-words text-[11px] font-medium uppercase tracking-[0.1em] text-[#94A3B8]">
-                  Kurzauszug
-                </p>
-              </div>
+            <div className="mb-2 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h2
+                className="text-[15px] font-semibold tracking-tight"
+                style={{ color: "#1E293B", letterSpacing: "-0.02em" }}
+              >
+                Chronik
+              </h2>
               {activity !== null ? (
                 <Link
                   href="/inbox"
-                  className="inline-flex min-h-[40px] w-full min-w-0 shrink-0 items-center justify-center rounded-lg px-3 py-2 text-center text-[13px] font-medium transition-colors hover:opacity-90 sm:min-h-[44px] sm:w-auto"
-                  style={{ color: "#2F80ED", background: "rgba(47,128,237,0.08)" }}
+                  className="inline-flex min-h-[40px] w-full shrink-0 items-center justify-center rounded-md px-2.5 py-1.5 text-center text-[12px] font-medium text-[#2F80ED] transition-colors hover:bg-[#F0F7FF] sm:ml-auto sm:w-auto"
                 >
                   Posteingang
                 </Link>
               ) : null}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-0.5 border-t border-[#F1F5F9] pt-2">
               {activity === null ? (
-                <div role="status" aria-live="polite">
-                  <p className="text-[12px] leading-snug" style={{ color: "#64748B" }}>
-                    Auszug nicht geladen.
-                  </p>
-                  <p className="mt-2 text-[12px]" style={{ color: "#64748B" }}>
-                    <Link
-                      href="/inbox"
-                      className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                    >
-                      Posteingang
-                    </Link>
-                    <span style={{ color: "#94A3B8" }}> · </span>
-                    <Link
-                      href="/my-tasks"
-                      className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                    >
-                      Aufgaben
-                    </Link>
-                  </p>
+                <div role="status" aria-live="polite" className="py-1 text-[11px] text-[#64748B]">
+                  <span className="text-[#CBD5E1]">—</span>{" "}
+                  <Link href="/inbox" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
+                    Posteingang
+                  </Link>
+                  <span className="text-[#CBD5E1]"> · </span>
+                  <Link href="/my-tasks" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
+                    Aufgaben
+                  </Link>
                 </div>
               ) : activity.length === 0 ? (
-                <div>
-                  <p className="text-[12px] leading-snug" style={{ color: "#64748B" }}>
-                    Keine Einträge in diesem Ausschnitt.
-                  </p>
-                  <p className="mt-2 text-[12px]" style={{ color: "#64748B" }}>
-                    <Link
-                      href="/inbox"
-                      className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                    >
-                      Posteingang
-                    </Link>
-                    <span style={{ color: "#94A3B8" }}> · </span>
-                    <Link
-                      href="/my-tasks"
-                      className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                    >
-                      Aufgaben
-                    </Link>
-                  </p>
+                <div className="py-1 text-[11px] text-[#64748B]">
+                  Leer ·{" "}
+                  <Link href="/inbox" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
+                    Posteingang
+                  </Link>
+                  <span className="text-[#CBD5E1]"> · </span>
+                  <Link href="/my-tasks" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
+                    Aufgaben
+                  </Link>
                 </div>
               ) : (
                 activity.map((event) => <ActivityRow key={event.id} event={event} />)
