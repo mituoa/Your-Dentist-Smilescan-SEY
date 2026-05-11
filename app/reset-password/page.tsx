@@ -10,6 +10,7 @@ import {
   authCardShellShadowStyle,
   authScreenCanvasStyle,
 } from "@/lib/auth/auth-screen-shell";
+import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
 
 interface ResetPasswordPageProps {
   searchParams: Promise<{ token_hash?: string; type?: string; invite?: string }>;
@@ -21,7 +22,7 @@ export default async function ResetPasswordPage({
   const params = await searchParams;
   const tokenHash = params.token_hash?.trim() || null;
   const type = params.type?.trim() || null;
-  const invite = params.invite?.trim() || null;
+  const invite = sanitizeTeamInvitationTokenForAuth(params.invite);
 
   return (
     <div className={AUTH_SCREEN_CANVAS_CLASS} style={authScreenCanvasStyle}>
@@ -39,13 +40,14 @@ export default async function ResetPasswordPage({
           <ResetPasswordForm
             tokenHashFromQuery={tokenHash}
             typeFromQuery={type}
-            inviteTokenFromQuery={invite}
+            inviteTokenFromQuery={invite || null}
           />
 
           <p className="mt-8 border-t border-gray-100/90 pt-7 text-center text-[13px] text-slate-600 sm:mt-9 sm:pt-8 sm:text-sm">
             <Link
+              prefetch
               href="/login"
-              className="font-medium text-[#0284C7] underline-offset-2 transition-colors hover:text-[#0369A1] hover:underline"
+              className="inline-flex min-h-[44px] items-center font-medium text-[#0284C7] underline-offset-2 transition-colors hover:text-[#0369A1] hover:underline max-md:py-2 md:min-h-0 md:py-0"
             >
               Zurück zum Login
             </Link>

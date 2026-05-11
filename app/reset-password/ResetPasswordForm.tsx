@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getAuthenticatedEntryPath } from "@/app/(auth)/actions";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
+import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,9 @@ type Props = {
   typeFromQuery: string | null;
   inviteTokenFromQuery?: string | null;
 };
+
+/** Supabase-Recovery (PKCE): E-Mail-Link liefert `token_hash` + `type=recovery` in **Query** oder im **URL-Hash** — nicht `access_token`-implicit ohne Anpassung. Keine Token-Werte loggen. */
+const MAX_TOKEN_HASH_LEN = 2048;
 
 function parseHashParams(): {
   token_hash: string | null;
@@ -67,19 +71,22 @@ export function ResetPasswordForm({
   const [confirm, setConfirm] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [inviteToken, setInviteToken] = useState<string | null>(
-    inviteTokenFromQuery || null
+  const [inviteToken, setInviteToken] = useState<string | null>(() =>
+    sanitizeTeamInvitationTokenForAuth(inviteTokenFromQuery) || null
   );
 
   const runVerify = useCallback(async (token_hash: string, type: string) => {
     setVerifying(true);
     setVerifyError(null);
     const supabase = createClient();
-    if (type !== "recovery") {
+    const typeNorm = type.trim().toLowerCase();
+    if (typeNorm !== "recovery") {
       setVerifyError("Ungültiger oder abgelaufener Link.");
       setVerifying(false);
       return;
     }
+    /** Bestehende lokale Session löschen, damit Recovery nicht mit einem anderen angemeldeten Konto kollidiert. */
+    await supabase.auth.signOut();
     const { error } = await supabase.auth.verifyOtp({
       token_hash,
       type: "recovery",
@@ -107,13 +114,21 @@ export function ResetPasswordForm({
         type = type || fromHash.type;
         invite = invite || fromHash.invite;
       }
-      setInviteToken(invite || null);
+      setInviteToken(sanitizeTeamInvitationTokenForAuth(invite ?? undefined) || null);
 
       if (!token_hash || !type) {
         if (!cancelled) {
           setVerifyError(
             "Kein Wiederherstellungs-Token in der URL. Bitte den Link aus der E-Mail erneut öffnen."
           );
+          setVerifying(false);
+        }
+        return;
+      }
+
+      if (token_hash.length > MAX_TOKEN_HASH_LEN) {
+        if (!cancelled) {
+          setVerifyError("Der Link aus der E-Mail ist ungültig. Bitte fordern Sie einen neuen Link an.");
           setVerifying(false);
         }
         return;
@@ -134,8 +149,17 @@ export function ResetPasswordForm({
     return password === confirm;
   }, [verified, submitting, password, confirm]);
 
+  const forgotPasswordHref = useMemo(
+    () =>
+      inviteToken
+        ? `/forgot-password?invite=${encodeURIComponent(inviteToken)}`
+        : "/forgot-password",
+    [inviteToken]
+  );
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting) return;
     setSubmitError(null);
     if (password.length < 8) {
       setSubmitError("Passwort muss mindestens 8 Zeichen haben.");
@@ -168,9 +192,13 @@ export function ResetPasswordForm({
         <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-gray-900 sm:text-2xl">
           Neues Passwort setzen
         </h1>
-        <p className="mx-auto mt-3 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-3.5 sm:text-[14px]">
-          Your Dentist — sicheres Passwort für Ihr Konto.
-        </p>
+        {(verifying || verified) && (
+          <p className="mx-auto mt-3 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-3.5 sm:text-[14px]">
+            {verifying
+              ? "Der Link aus Ihrer Passwort-Mail wird geprüft. Bitte einen kurzen Moment."
+              : "Geben Sie Ihr neues Passwort zweimal ein (mindestens 8 Zeichen). Nach dem Speichern leiten wir Sie weiter."}
+          </p>
+        )}
       </header>
 
       {verifying ? <AuthInlineSpinner label="Link wird geprüft …" /> : null}
@@ -178,47 +206,68 @@ export function ResetPasswordForm({
       {!verifying && verifyError ? (
         <div className="space-y-4 rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center sm:text-left">
           <p className="text-[13px] font-normal leading-relaxed text-red-900 sm:text-sm">{verifyError}</p>
-          <Link
-            href="/login"
-            className="inline-block text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline sm:text-sm"
-          >
-            Zum Login
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
+            <Link
+              href={forgotPasswordHref}
+              prefetch
+              className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
+            >
+              Neuen Link anfordern
+            </Link>
+            <Link
+              href="/login"
+              prefetch
+              className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
+            >
+              Zum Login
+            </Link>
+          </div>
         </div>
       ) : null}
 
       {!verifying && verified ? (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="new-password" className="text-[13px] font-medium text-slate-700">
-              Neues Passwort
-            </Label>
-            <Input
-              id="new-password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password" className="text-[13px] font-medium text-slate-700">
-              Bestätigung
-            </Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
-            />
-          </div>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-5 sm:gap-6"
+          aria-busy={submitting}
+        >
+          <fieldset
+            disabled={submitting}
+            className="m-0 flex min-w-0 flex-col gap-5 border-0 p-0 sm:gap-6 disabled:pointer-events-none disabled:opacity-[0.58]"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="new-password" className="text-[13px] font-medium text-slate-700">
+                Neues Passwort
+              </Label>
+              <Input
+                id="new-password"
+                name="new_password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password" className="text-[13px] font-medium text-slate-700">
+                Bestätigung
+              </Label>
+              <Input
+                id="confirm-password"
+                name="new_password_confirm"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
+              />
+            </div>
+          </fieldset>
           <div className="mt-2 flex flex-col gap-3 sm:mt-3 sm:gap-3.5">
             {submitError ? (
               <p className="rounded-xl border border-red-200/80 bg-red-50/90 px-3 py-2 text-[13px] text-red-900 sm:text-sm">
@@ -230,8 +279,9 @@ export function ResetPasswordForm({
               variant="primary"
               className="h-11 w-full rounded-lg text-[14px] font-semibold shadow-sm transition-shadow duration-200 hover:shadow-md sm:h-12 sm:rounded-xl sm:text-[15px]"
               disabled={!canSubmit}
+              aria-busy={submitting}
             >
-              Passwort speichern
+              {submitting ? "Wird gespeichert …" : "Passwort speichern"}
             </Button>
           </div>
         </form>
