@@ -106,15 +106,16 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
   };
 
   return (
-    <form ref={formRef} action={handleSubmit} className="space-y-3">
+    <form ref={formRef} action={handleSubmit} className="space-y-3" aria-busy={isPending}>
       <input type="hidden" name="submission_id" value={submissionId} />
 
       <div className={`space-y-2 ${isDropdownOpen ? "pb-72" : ""}`}>
         <div ref={dropdownRef} className="relative">
           <button
             type="button"
+            disabled={isPending}
             onClick={() => setIsDropdownOpen((prev) => !prev)}
-            className="flex h-11 w-full items-center justify-between rounded border border-border bg-surface-card px-3 text-left text-sm text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-brand/40 sm:h-9"
+            className="flex h-11 w-full items-center justify-between rounded border border-border bg-surface-card px-3 text-left text-sm text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9"
           >
             <span className="truncate">{triggerLabel}</span>
             <span className="ml-2 text-text-tertiary">{isDropdownOpen ? "▴" : "▾"}</span>
@@ -125,14 +126,15 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="User suchen..."
-                className="mb-2 h-9 w-full rounded border border-border bg-surface-page px-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand/40"
+                disabled={isPending}
+                className="mb-2 h-9 w-full rounded border border-border bg-surface-page px-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
                 <label className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm font-medium text-text-primary hover:bg-surface-page/80">
                   <input
                     type="checkbox"
                     checked={assignToMe}
-                    disabled={assignAllTeam}
+                    disabled={assignAllTeam || isPending}
                     onChange={(event) => toggleMe(event.target.checked)}
                     className="h-4 w-4 rounded border-border"
                   />
@@ -142,6 +144,7 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
                   <input
                     type="checkbox"
                     checked={assignAllTeam}
+                    disabled={isPending}
                     onChange={(event) => toggleAllTeam(event.target.checked)}
                     className="h-4 w-4 rounded border-border"
                   />
@@ -160,7 +163,7 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
                           <input
                             type="checkbox"
                             checked={checked}
-                            disabled={assignAllTeam}
+                            disabled={assignAllTeam || isPending}
                             onChange={() => toggleRecipient(member.user_id)}
                             className="h-4 w-4 rounded border-border"
                           />
@@ -183,7 +186,7 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
                           <input
                             type="checkbox"
                             checked={checked}
-                            disabled={assignAllTeam}
+                            disabled={assignAllTeam || isPending}
                             onChange={() => toggleRecipient(member.user_id)}
                             className="h-4 w-4 rounded border-border"
                           />
@@ -218,14 +221,16 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
         name="title"
         placeholder="Titel"
         maxLength={120}
-        className="h-10 w-full rounded border border-border bg-surface-card px-3 text-sm text-text-primary placeholder:text-text-tertiary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/40"
+        disabled={isPending}
+        className="h-10 w-full rounded border border-border bg-surface-card px-3 text-sm text-text-primary placeholder:text-text-tertiary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-50"
       />
       <textarea
         name="content"
         placeholder="Aufgabe kurz und klar beschreiben…"
         required
         rows={2}
-        className="w-full resize-none rounded border border-border bg-surface-card px-3 py-2 text-sm leading-6 text-text-primary placeholder:text-text-tertiary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/40"
+        disabled={isPending}
+        className="w-full resize-none rounded border border-border bg-surface-card px-3 py-2 text-sm leading-6 text-text-primary placeholder:text-text-tertiary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-50"
       />
       <Button
         type="submit"
@@ -239,7 +244,13 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
         {isPending ? "Wird gespeichert…" : "Aufgabe hinzufügen"}
       </Button>
       <label className="inline-flex items-center gap-2 text-sm text-text-secondary">
-        <input type="checkbox" name="is_important" value="true" className="h-4 w-4 rounded border-border" />
+        <input
+          type="checkbox"
+          name="is_important"
+          value="true"
+          disabled={isPending}
+          className="h-4 w-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-50"
+        />
         Als wichtig markieren
       </label>
 

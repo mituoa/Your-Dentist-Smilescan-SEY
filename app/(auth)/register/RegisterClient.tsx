@@ -4,7 +4,10 @@ import * as React from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useFormStatus } from "react-dom";
 
+import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
+import { RegisterFormBackButton } from "@/components/auth/register-form-back-button";
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
 import { ResendSignupSubmitButton } from "@/components/auth/resend-signup-submit-button";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
@@ -24,6 +27,28 @@ function coercePlan(value: string | null | undefined): Plan {
   const v = value.toLowerCase();
   if (v === "monthly" || v === "halfyearly" || v === "yearly") return v;
   return "yearly";
+}
+
+/** Sperrt Plan, Zahlungsart und Vertrags-Checkboxen während Server-Action (ein Formular). */
+function RegisterStep4LockableFieldset({ children }: { children: React.ReactNode }) {
+  const { pending } = useFormStatus();
+  return (
+    <fieldset
+      disabled={pending}
+      className="min-w-0 border-0 p-0 m-0 disabled:pointer-events-none disabled:opacity-[0.58] disabled:[&_a]:pointer-events-none"
+    >
+      {children}
+    </fieldset>
+  );
+}
+
+/** Intent-Ref zurücksetzen, sobald keine Action mehr pending ist (Recovery nach Fehler). */
+function RegisterStep4PendingIntentSync({ intentRef }: { intentRef: React.MutableRefObject<string | null> }) {
+  const { pending } = useFormStatus();
+  React.useEffect(() => {
+    if (!pending) intentRef.current = null;
+  }, [pending, intentRef]);
+  return null;
 }
 
 export function RegisterClient(props: {
@@ -114,6 +139,8 @@ export function RegisterClient(props: {
   const [confirmMismatchAfterContinueAttempt, setConfirmMismatchAfterContinueAttempt] = React.useState(false);
   /** Short overlay when advancing steps (calm brand mark). */
   const [navBusy, setNavBusy] = React.useState(false);
+  /** Welcher Step-4-Submit (standard | demo) gerade läuft — gemeinsames Formular, ein Spinner. */
+  const registerStep4SubmitIntentRef = React.useRef<string | null>(null);
   const [regPassword, setRegPassword] = React.useState("");
 
   React.useEffect(() => {
@@ -504,7 +531,6 @@ export function RegisterClient(props: {
       total: 20,
       label: "Monatlich",
       save: null as string | null,
-      support: "E-Mail Support (24h)",
       billing: "Monatlich abgerechnet",
     },
     halfyearly: {
@@ -512,7 +538,6 @@ export function RegisterClient(props: {
       total: 108,
       label: "Halbjährlich",
       save: "10%",
-      support: "Prioritäts-Support (4h)",
       billing: "Alle 6 Monate abgerechnet",
     },
     yearly: {
@@ -520,7 +545,6 @@ export function RegisterClient(props: {
       total: 192,
       label: "Jährlich",
       save: "20%",
-      support: "VIP-Support (1h) + Onboarding",
       billing: "Jährlich abgerechnet",
     },
   };
@@ -1035,7 +1059,11 @@ export function RegisterClient(props: {
                     </p>
                   </div>
 
-                  <form onSubmit={onStep1Submit} className="space-y-5">
+                  <form
+                    onSubmit={onStep1Submit}
+                    className="space-y-5"
+                    aria-busy={emailCheckStatus === "checking"}
+                  >
                     <div>
                       <label htmlFor="reg-name" className="mb-2 block text-[13px] font-medium text-gray-700">
                         Vollständiger Name *
@@ -1490,7 +1518,8 @@ export function RegisterClient(props: {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <p className="text-[12px] leading-relaxed text-gray-700">
-                          Ihre Daten werden verschlüsselt und nur zur Verifizierung verwendet.
+                          Ihre Dateien werden über eine geschützte Verbindung übertragen und nur zur fachlichen
+                          Verifizierung verwendet.
                         </p>
                       </div>
                     </div>
@@ -1499,29 +1528,23 @@ export function RegisterClient(props: {
                       <button
                         type="button"
                         onClick={() => goToStep(2)}
-                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50"
+                        disabled={licenseUploading}
+                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Zurück
                       </button>
                       <button
                         type="submit"
                         disabled={licenseUploading}
-                        className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
+                        className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-90"
                         style={{
                           background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
                         }}
                       >
                         {licenseUploading ? (
                           <span className="inline-flex items-center justify-center gap-2">
-                            <svg className="h-5 w-5 shrink-0 animate-spin text-white/90" viewBox="0 0 24 24" aria-hidden="true">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
-                              <path
-                                className="opacity-80"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
-                            Wird gesendet…
+                            <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-white/90 motion-reduce:animate-none motion-reduce:opacity-90" />
+                            Wird hochgeladen…
                           </span>
                         ) : (
                           "Weiter"
@@ -1545,13 +1568,38 @@ export function RegisterClient(props: {
                   </div>
 
                   <div className="mb-6 rounded-2xl border border-slate-200/70 bg-slate-50/45 px-4 py-3.5 text-left">
-                    <p className="text-[12px] font-semibold text-gray-800">14 Tage kostenlos testen</p>
-                    <ul className="mt-2 list-none space-y-1.5 text-[11px] leading-relaxed text-gray-600">
-                      <li>Keine Abbuchung während der Testphase.</li>
-                      <li>Zahlungsmethode kann später aktiviert werden.</li>
-                    </ul>
+                    {props.skipPaymentAtSignup ? (
+                      <>
+                        <p className="text-[12px] font-semibold text-gray-800">Zahlung in dieser Konfiguration</p>
+                        <ul className="mt-2 list-none space-y-1.5 text-[11px] leading-relaxed text-gray-600">
+                          <li>Über diese Registrierung wird hier kein Betrag eingezogen.</li>
+                          <li>Leistungsumfang und ggf. spätere Zahlungsaktivierung ergeben sich aus AGB und Onboarding.</li>
+                        </ul>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[12px] font-semibold text-gray-800">Testphase und Online-Zahlung</p>
+                        <ul className="mt-2 list-none space-y-1.5 text-[11px] leading-relaxed text-gray-600">
+                          <li>
+                            Wenn Sie eine Online-Zahlung abschließen, ist in der Regel mit einer begrenzten Testphase zu
+                            rechnen — Details im Checkout und Vertrag.
+                          </li>
+                          <li>Zahlungsmethode kann später angepasst werden.</li>
+                        </ul>
+                      </>
+                    )}
                   </div>
 
+                  <form
+                    action={props.signUpAction}
+                    className="block min-w-0"
+                    onSubmit={(e) => {
+                      const sub = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null | undefined;
+                      registerStep4SubmitIntentRef.current =
+                        sub?.name === "register_submit" && sub.value ? sub.value : "standard";
+                    }}
+                  >
+                    <RegisterStep4LockableFieldset>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {(Object.keys(plans) as Plan[]).map((key) => {
                       const p = plans[key];
@@ -1628,7 +1676,7 @@ export function RegisterClient(props: {
                         <p className="text-[14px] font-semibold text-gray-900">SEPA‑Lastschrift</p>
                         <p className="mt-1 text-[12px] text-gray-600">
                           {props.skipPaymentAtSignup
-                            ? "Für später — Abbuchung erst nach Testphase und Setup."
+                            ? "Für später — Abbuchung erst nach vertraglicher Freischaltung und Setup."
                             : "Abbuchung automatisch gemäß gewähltem Intervall."}
                         </p>
                       </button>
@@ -1644,7 +1692,7 @@ export function RegisterClient(props: {
                         <p className="text-[14px] font-semibold text-gray-900">Kreditkarte</p>
                         <p className="mt-1 text-[12px] text-gray-600">
                           {props.skipPaymentAtSignup
-                            ? "Für später — Kartendaten können nach der Testphase ergänzt werden."
+                            ? "Für später — Kartendaten können nach Freischaltung ergänzt werden."
                             : "Sicher bezahlen per Karte (Setup im nächsten Schritt)."}
                         </p>
                       </button>
@@ -1665,7 +1713,7 @@ export function RegisterClient(props: {
                           {selectedPlan === "monthly"
                             ? "Verfügbar ab Halbjährlich/Jährlich."
                             : props.skipPaymentAtSignup
-                              ? "Für Praxen — Abrechnung nach Testphase."
+                              ? "Für Praxen — Abrechnung nach Vereinbarung."
                               : "Für Praxen – Zahlung per Rechnung."}
                         </p>
                       </button>
@@ -1681,7 +1729,7 @@ export function RegisterClient(props: {
                         <p className="text-[14px] font-semibold text-gray-900">PayPal</p>
                         <p className="mt-1 text-[12px] text-gray-600">
                           {props.skipPaymentAtSignup
-                            ? "Für später — optional nach der Testphase."
+                            ? "Für später — optional nach Freischaltung."
                             : "Optionale Alternative (Setup im nächsten Schritt)."}
                         </p>
                       </button>
@@ -1779,8 +1827,10 @@ export function RegisterClient(props: {
                       . Version: <span className="font-medium">v1</span>
                     </p>
                   </div>
+                    </RegisterStep4LockableFieldset>
+                    <RegisterStep4PendingIntentSync intentRef={registerStep4SubmitIntentRef} />
 
-                  <form action={props.signUpAction} className="mt-6 space-y-3">
+                    <div className="mt-6 space-y-3">
                     <input type="hidden" name="email" value={normalizeEmail(regEmail)} />
                     <input type="hidden" name="password" value={regPassword} />
                     <input type="hidden" name="display_name" value={regName} />
@@ -1810,26 +1860,29 @@ export function RegisterClient(props: {
 
                     {props.skipPaymentAtSignup ? (
                       <p className="text-center text-[11px] leading-relaxed text-gray-500">
-                        Ihr gewählter Plan wird mit dem Konto verknüpft. Online-Zahlung (Stripe) ist aktuell
-                        deaktiviert — Sie können den Zugang dennoch starten.
+                        Ihr gewählter Plan wird mit dem Konto verknüpft. Online-Zahlung ist in dieser Konfiguration
+                        deaktiviert — es erfolgt kein Checkout über diese Seite.
                       </p>
                     ) : null}
 
                     <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => goToStep(3)}
-                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50"
+                      <RegisterFormBackButton
+                        onBack={() => goToStep(3)}
+                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Zurück
-                      </button>
+                      </RegisterFormBackButton>
                       <RegisterFormSubmitButton
+                        name="register_submit"
+                        value="standard"
+                        submitIntentRef={registerStep4SubmitIntentRef}
+                        submitIntentValue="standard"
                         label={
                           props.skipPaymentAtSignup
-                            ? "Konto anlegen (Testphase)"
+                            ? "Konto anlegen (ohne Checkout)"
                             : "Vertrag wählen & fortfahren"
                         }
-                        pendingLabel="Konto wird angelegt…"
+                        pendingLabel="Konto wird vorbereitet…"
                         disabled={
                           !acceptedTos ||
                           !acceptedPrivacy ||
@@ -1839,7 +1892,7 @@ export function RegisterClient(props: {
                         className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                       />
                     </div>
-                  </form>
+                    </div>
 
                   {props.registrationDemoUi &&
                   props.registrationDemoServer &&
@@ -1850,55 +1903,32 @@ export function RegisterClient(props: {
                       aria-label="Demo-Registrierung ohne Zahlung"
                     >
                       <p className="mb-3 text-[12px] leading-relaxed text-amber-950">
-                        Demo: Registrierung ohne Stripe-Checkout abschließen (nur wenn der Server den Demo-Modus
-                        erlaubt).
+                        Nur für Demonstrations- oder Testumgebungen: Registrierung ohne Online-Checkout abschließen
+                        (serverseitig freigegeben).
                       </p>
-                      <form action={props.signUpAction} className="space-y-3">
-                        <input type="hidden" name="email" value={normalizeEmail(regEmail)} />
-                        <input type="hidden" name="password" value={regPassword} />
-                        <input type="hidden" name="display_name" value={regName} />
-                        <input type="hidden" name="workspace_name" value={regPractice} />
-                        <input type="hidden" name="billing_interval" value={selectedPlan} />
-                        <input type="hidden" name="contract_version" value="v1" />
-                        <input type="hidden" name="accepted_at" value={new Date().toISOString()} />
-                        <input type="hidden" name="accepted_tos" value={acceptedTos ? "1" : "0"} />
-                        <input type="hidden" name="accepted_privacy" value={acceptedPrivacy ? "1" : "0"} />
-                        <input type="hidden" name="accepted_withdrawal" value={acceptedWithdrawal ? "1" : "0"} />
-                        <input type="hidden" name="payment_method" value={paymentMethod} />
-                        <input type="hidden" name="dentist_license_number" value={regLicense} />
-                        <input type="hidden" name="dentist_license_storage_path" value={licenseStoragePath} />
-                        <input
-                          type="hidden"
-                          name="dentist_license_storage_path_front"
-                          value={licenseFrontStoragePath || licenseStoragePath}
-                        />
-                        <input
-                          type="hidden"
-                          name="dentist_license_storage_path_back"
-                          value={licenseBackStoragePath}
-                        />
-                        <input type="hidden" name="registration_demo_skip" value="1" />
-                        {props.inviteToken ? (
-                          <input type="hidden" name="invite_token" value={props.inviteToken} />
-                        ) : null}
-                        <RegisterFormSubmitButton
-                          label="Demo: Konto ohne Zahlung anlegen"
-                          pendingLabel="Demo wird verarbeitet…"
-                          disabled={
-                            !acceptedTos ||
-                            !acceptedPrivacy ||
-                            !acceptedWithdrawal ||
-                            !registrationDocsSatisfied
-                          }
-                          className="h-[48px] w-full rounded-xl border-2 border-amber-400/80 bg-white text-[14px] font-semibold text-amber-950 shadow-sm transition-all duration-200 active:scale-[0.99] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
-                          style={{ background: "linear-gradient(to bottom, #fffbeb 0%, #ffffff 100%)" }}
-                          pendingStyle={{
-                            background: "linear-gradient(to bottom, #fef9c3 0%, #fef3c7 100%)",
-                          }}
-                        />
-                      </form>
+                      <RegisterFormSubmitButton
+                        name="register_submit"
+                        value="demo"
+                        submitIntentRef={registerStep4SubmitIntentRef}
+                        submitIntentValue="demo"
+                        label="Demo: Konto ohne Zahlung anlegen"
+                        pendingLabel="Demo wird abgeschlossen…"
+                        disabled={
+                          !acceptedTos ||
+                          !acceptedPrivacy ||
+                          !acceptedWithdrawal ||
+                          !registrationDocsSatisfied
+                        }
+                        className="h-[48px] w-full rounded-xl border-2 border-amber-400/80 bg-white text-[14px] font-semibold text-amber-950 shadow-sm transition-all duration-200 active:scale-[0.99] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        style={{ background: "linear-gradient(to bottom, #fffbeb 0%, #ffffff 100%)" }}
+                        pendingStyle={{
+                          background: "linear-gradient(to bottom, #fef9c3 0%, #fef3c7 100%)",
+                        }}
+                      />
                     </div>
                   ) : null}
+
+                  </form>
 
                   <p className="mt-3 text-center text-[11px] text-gray-500">
                     Sie wählen: <span className="font-medium text-gray-900">{plans[selectedPlan].label}</span>{" "}
@@ -1911,11 +1941,12 @@ export function RegisterClient(props: {
 
             {navBusy ? (
               <div
-                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-3 rounded-3xl bg-white/90 backdrop-blur-[2px]"
+                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-4 rounded-3xl bg-white/90 backdrop-blur-[2px]"
                 aria-live="polite"
                 aria-busy="true"
               >
                 <YourDentistBrandLockup size="md" centered />
+                <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-[#0284C7]/70 motion-reduce:animate-none motion-reduce:opacity-80" />
               </div>
             ) : null}
             </div>

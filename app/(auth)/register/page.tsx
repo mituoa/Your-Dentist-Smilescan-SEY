@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { resendSignupConfirmation, signUp } from "../actions";
 import { isRegistrationDemoMode, skipPaymentAtSignup } from "@/lib/registration-demo";
 import { RegisterClient } from "./RegisterClient";
@@ -53,9 +55,17 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
       <Suspense
         fallback={
           <div
-            className="mx-auto min-h-[min(420px,70dvh)] w-full max-w-2xl animate-pulse rounded-3xl bg-gray-100"
-            aria-hidden
-          />
+            className="mx-auto flex min-h-[min(480px,75dvh)] w-full max-w-2xl flex-col items-center justify-center rounded-3xl border border-gray-200/80 bg-white px-6 py-16 shadow-[0_4px_6px_rgba(0,0,0,0.05),0_10px_20px_rgba(0,0,0,0.08)]"
+            role="status"
+            aria-live="polite"
+            aria-label="Registrierung wird geladen"
+          >
+            <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
+            <div className="mt-8 flex flex-col items-center gap-3 text-center">
+              <AuthLoadingSpinner />
+              <p className="text-[13px] text-gray-500">Registrierung wird geladen…</p>
+            </div>
+          </div>
         }
       >
         <RegisterClient

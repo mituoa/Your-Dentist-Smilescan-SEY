@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useFormStatus } from "react-dom";
 
 import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
@@ -27,9 +28,31 @@ function safeDecodeQueryParam(value: string | undefined): string {
   }
 }
 
+type LoginSubmitChannel = "password" | "google" | "resend";
+
+function LoginPasswordControlsFieldset({
+  otherChannelActive,
+  children,
+}: {
+  otherChannelActive: boolean;
+  children: ReactNode;
+}) {
+  const { pending } = useFormStatus();
+  return (
+    <fieldset
+      disabled={pending || otherChannelActive}
+      className="min-w-0 border-0 p-0 m-0 disabled:pointer-events-none disabled:opacity-[0.58]"
+    >
+      {children}
+    </fieldset>
+  );
+}
+
 interface LoginPageClientProps {
   queryError?: string;
   resent?: boolean;
+  /** Server-seitig abgeleiteter Schlüssel — bei geändertem Login-Feedback Sperre der parallelen Kanäle lösen. */
+  authFlowResetKey: string;
   /** After server/client sign-out: clear pricing-return flag and keep viewport at top. */
   signedOut?: boolean;
   inviteToken?: string;
@@ -40,6 +63,7 @@ interface LoginPageClientProps {
 export function LoginPageClient({
   queryError,
   resent = false,
+  authFlowResetKey,
   signedOut = false,
   inviteToken = "",
   prefilledEmail = "",
@@ -47,6 +71,15 @@ export function LoginPageClient({
 }: LoginPageClientProps) {
   const [activeCta, setActiveCta] = useState<"trial" | "plan" | null>(null);
   const [showPlanSheet, setShowPlanSheet] = useState(false);
+  const [loginChannelLock, setLoginChannelLock] = useState<LoginSubmitChannel | null>(null);
+
+  useEffect(() => {
+    setLoginChannelLock(null);
+  }, [authFlowResetKey]);
+
+  const passwordBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "password";
+  const googleBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "google";
+  const resendBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "resend";
 
   const registerFromPricingHref = (plan: "monthly" | "halfyearly" | "yearly") =>
     `/register?plan=${plan}&from=pricing`;
@@ -456,50 +489,57 @@ export function LoginPageClient({
                   </p>
                 ) : null}
 
-                <form action={signIn} className="max-md:space-y-2.5 space-y-3 lg:space-y-4">
+                <form
+                  action={signIn}
+                  onSubmit={() => setLoginChannelLock("password")}
+                  className="max-md:space-y-2.5 space-y-3 lg:space-y-4"
+                  aria-busy={loginChannelLock === "password"}
+                >
                   {inviteToken ? (
                     <input type="hidden" name="invite_token" value={inviteToken} />
                   ) : null}
 
-                  <div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      defaultValue={prefilledEmail}
-                      placeholder="E-Mail-Adresse"
-                      autoComplete="email"
-                      onChange={(e) => setResendEmail(e.target.value)}
-                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4 lg:text-[15px]"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <div className="max-md:mb-1 mb-1.5 flex items-center justify-end lg:mb-2">
-                      <Link
-                        href={
-                          inviteToken
-                            ? `/forgot-password?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
-                            : "/forgot-password"
-                        }
-                        className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1] max-md:py-2 md:min-h-0 md:py-0"
-                      >
-                        Passwort vergessen?
-                      </Link>
+                  <LoginPasswordControlsFieldset otherChannelActive={passwordBlockedByOthers}>
+                    <div>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        defaultValue={prefilledEmail}
+                        placeholder="E-Mail-Adresse"
+                        autoComplete="email"
+                        onChange={(e) => setResendEmail(e.target.value)}
+                        className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4 lg:text-[15px]"
+                        required
+                      />
                     </div>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="Passwort"
-                      autoComplete="current-password"
-                      className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4 lg:text-[15px]"
-                      required
-                    />
-                  </div>
 
-                  <LoginSubmitButton />
+                    <div>
+                      <div className="max-md:mb-1 mb-1.5 flex items-center justify-end lg:mb-2">
+                        <Link
+                          href={
+                            inviteToken
+                              ? `/forgot-password?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
+                              : "/forgot-password"
+                          }
+                          className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1] max-md:py-2 md:min-h-0 md:py-0"
+                        >
+                          Passwort vergessen?
+                        </Link>
+                      </div>
+                      <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="Passwort"
+                        autoComplete="current-password"
+                        className="max-md:border-gray-200/65 max-md:shadow-none max-md:focus:ring-2 h-11 w-full rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-all duration-150 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 disabled:bg-gray-50 disabled:opacity-50 lg:h-[52px] lg:rounded-xl lg:px-4 lg:text-[15px]"
+                        required
+                      />
+                    </div>
+                  </LoginPasswordControlsFieldset>
+
+                  <LoginSubmitButton disabledExternal={passwordBlockedByOthers} />
                 </form>
 
                 {shouldShowResend ? (
@@ -508,12 +548,22 @@ export function LoginPageClient({
                     <p className="mt-1 text-[13px] text-amber-900/80">
                       Wir senden Ihnen den Bestätigungs‑Link erneut an die oben eingegebene Adresse.
                     </p>
-                    <form action={resendSignupConfirmation} className="mt-3">
+                    <form
+                      action={resendSignupConfirmation}
+                      onSubmit={() => setLoginChannelLock("resend")}
+                      className="mt-3"
+                      aria-busy={loginChannelLock === "resend"}
+                    >
                       {inviteToken ? (
                         <input type="hidden" name="invite_token" value={inviteToken} />
                       ) : null}
                       <input type="hidden" name="email" value={resendEmail} />
-                      <ResendConfirmationSubmitButton />
+                      <fieldset
+                        disabled={resendBlockedByOthers}
+                        className="min-w-0 border-0 p-0 m-0 disabled:pointer-events-none disabled:opacity-[0.58]"
+                      >
+                        <ResendConfirmationSubmitButton />
+                      </fieldset>
                     </form>
                   </div>
                 ) : null}
@@ -527,12 +577,20 @@ export function LoginPageClient({
                   </div>
                 </div>
 
-                <form action={signInWithGoogle}>
+                <form
+                  action={signInWithGoogle}
+                  onSubmit={() => setLoginChannelLock("google")}
+                  aria-busy={loginChannelLock === "google"}
+                >
                   {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
-                  <OAuthFormSubmitButton
-                    pendingLabel="Weiter zu Google…"
-                    className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-gray-200/90 bg-white text-[13px] text-gray-900 transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 lg:h-[48px] lg:gap-3 lg:rounded-xl lg:text-[14px]"
+                  <fieldset
+                    disabled={googleBlockedByOthers}
+                    className="min-w-0 border-0 p-0 m-0 disabled:pointer-events-none disabled:opacity-[0.58]"
                   >
+                    <OAuthFormSubmitButton
+                      pendingLabel="Weiter zu Google…"
+                      className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-gray-200/90 bg-white text-[13px] text-gray-900 transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 lg:h-[48px] lg:gap-3 lg:rounded-xl lg:text-[14px]"
+                    >
                     <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -553,6 +611,7 @@ export function LoginPageClient({
                     </svg>
                     Mit Google anmelden
                   </OAuthFormSubmitButton>
+                  </fieldset>
                 </form>
 
                 <div className="mt-5 text-center lg:mt-8">

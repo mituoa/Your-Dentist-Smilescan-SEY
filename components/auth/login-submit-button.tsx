@@ -1,15 +1,16 @@
 "use client";
 
-import * as React from "react";
 import { useFormStatus } from "react-dom";
 
-export function LoginSubmitButton() {
+export function LoginSubmitButton(props: { disabledExternal?: boolean }) {
   const { pending } = useFormStatus();
+  const disabled = pending || Boolean(props.disabledExternal);
 
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={disabled}
+      aria-busy={pending}
       className="max-md:mt-3 max-md:h-11 max-md:rounded-md max-md:text-[13px] max-md:shadow-none max-md:hover:shadow-sm mt-4 inline-flex h-12 w-full items-center justify-center rounded-lg px-4 text-[14px] font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-sm bg-[linear-gradient(to_bottom,#0284C7_0%,#0369A1_100%)] hover:bg-[linear-gradient(to_bottom,#0369A1_0%,#075985_100%)] lg:mt-6 lg:h-[56px] lg:rounded-xl lg:text-[15px]"
       style={
         pending
@@ -45,4 +46,3 @@ export function LoginSubmitButton() {
     </button>
   );
 }
-

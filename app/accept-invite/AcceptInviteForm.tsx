@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
-import { AlertCircle, ArrowRight, CheckCircle2, LogOut } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { acceptInvitation } from "@/app/(protected)/settings/actions";
-import { AUTH_SIGN_OUT_PATH } from "@/lib/auth/sign-out-constants";
+import { SignOutReturnForm } from "@/components/app-shell/sign-out-form";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { Button } from "@/components/ui/button";
 
@@ -205,17 +205,7 @@ export function AcceptInviteForm({
                   melden Sie sich ab.
                 </p>
               </div>
-              <form action={AUTH_SIGN_OUT_PATH} method="post" className="w-full">
-                <input type="hidden" name="return_to" value={returnToAccept} />
-                <Button
-                  type="submit"
-                  variant="secondary"
-                  className="flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] border-2 border-slate-200 bg-white text-[15px] font-medium text-slate-900 shadow-none hover:bg-slate-50"
-                >
-                  <LogOut className="h-5 w-5 shrink-0" aria-hidden />
-                  Abmelden
-                </Button>
-              </form>
+              <SignOutReturnForm returnTo={returnToAccept} />
             </div>
           )}
 
@@ -237,17 +227,7 @@ export function AcceptInviteForm({
                   abmelden.
                 </p>
               </div>
-              <form action={AUTH_SIGN_OUT_PATH} method="post" className="w-full">
-                <input type="hidden" name="return_to" value={returnToAccept} />
-                <Button
-                  type="submit"
-                  variant="secondary"
-                  className="flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] border-2 border-slate-200 bg-white text-[15px] font-medium text-slate-900 shadow-none hover:bg-slate-50"
-                >
-                  <LogOut className="h-5 w-5 shrink-0" aria-hidden />
-                  Abmelden
-                </Button>
-              </form>
+              <SignOutReturnForm returnTo={returnToAccept} />
             </div>
           )}
 

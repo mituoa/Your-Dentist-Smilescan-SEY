@@ -37,6 +37,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resent = params.resent === "1";
   const signedOut = params.signed_out === "1";
   const year = new Date().getFullYear();
+  const authFlowResetKey = [queryError, inviteToken, prefilledEmail, resent ? "1" : "0", signedOut ? "1" : "0"].join(
+    "\u001f"
+  );
 
   let user: User | null = null;
   try {
@@ -63,6 +66,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <LoginPageClient
       queryError={queryError}
       resent={resent}
+      authFlowResetKey={authFlowResetKey}
       signedOut={signedOut}
       inviteToken={inviteToken}
       prefilledEmail={prefilledEmail}

@@ -1,7 +1,9 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, MutableRefObject } from "react";
 import { useFormStatus } from "react-dom";
+
+import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
 
 export function RegisterFormSubmitButton(props: {
   label: string;
@@ -13,8 +15,21 @@ export function RegisterFormSubmitButton(props: {
   style?: CSSProperties;
   /** When set, used while `pending` instead of the default blue gradient (e.g. demo/secondary submit). */
   pendingStyle?: CSSProperties;
+  /**
+   * Mehrere Submits im selben Formular: Spinner nur, wenn dieses `value` die laufende Aktion ausgelöst hat
+   * (`submitIntentRef` wird per Form-`onSubmit` / Submitter gesetzt).
+   */
+  submitIntentRef?: MutableRefObject<string | null>;
+  submitIntentValue?: string;
 }) {
   const { pending } = useFormStatus();
+  const intentAware = Boolean(props.submitIntentRef && props.submitIntentValue);
+  const intentMatches =
+    !intentAware ||
+    (props.submitIntentRef &&
+      props.submitIntentValue &&
+      props.submitIntentRef.current === props.submitIntentValue);
+  const isActivePending = pending && intentMatches;
   const disabled = Boolean(props.disabled) || pending;
   const idleBg =
     props.style ??
@@ -22,7 +37,7 @@ export function RegisterFormSubmitButton(props: {
   const defaultPending = {
     background: "linear-gradient(to bottom, #0369A1 0%, #075985 100%)",
   } satisfies CSSProperties;
-  const style: CSSProperties = pending ? (props.pendingStyle ?? defaultPending) : idleBg;
+  const style: CSSProperties = isActivePending ? (props.pendingStyle ?? defaultPending) : idleBg;
 
   return (
     <button
@@ -30,21 +45,14 @@ export function RegisterFormSubmitButton(props: {
       name={props.name}
       value={props.value}
       disabled={disabled}
-      aria-busy={pending}
-      aria-label={pending && !props.pendingLabel?.trim() ? props.label : undefined}
+      aria-busy={isActivePending}
+      aria-label={isActivePending && !props.pendingLabel?.trim() ? props.label : undefined}
       className={props.className}
       style={style}
     >
-      {pending ? (
+      {isActivePending ? (
         <span className={`inline-flex items-center justify-center ${props.pendingLabel?.trim() ? "gap-2" : ""}`}>
-          <svg className="h-5 w-5 shrink-0 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
+          <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-white motion-reduce:animate-none motion-reduce:opacity-80" />
           {props.pendingLabel?.trim() ? props.pendingLabel : null}
         </span>
       ) : (

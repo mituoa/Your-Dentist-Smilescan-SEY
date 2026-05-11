@@ -207,7 +207,9 @@ export async function signUp(formData: FormData) {
   const dentistLicenseStoragePathBack =
     (formData.get("dentist_license_storage_path_back") as string | null)?.trim() || null;
   const paymentMethod = (formData.get("payment_method") as string | null)?.trim() || null;
+  const registerSubmit = (formData.get("register_submit") as string | null)?.trim();
   const registrationDemoSkip =
+    registerSubmit === "demo" ||
     (formData.get("registration_demo_skip") as string | null)?.trim() === "1";
 
   const licensePaths = collectRegisterLicenseStoragePaths(
