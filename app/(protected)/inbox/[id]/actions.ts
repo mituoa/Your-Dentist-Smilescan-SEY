@@ -64,7 +64,13 @@ function toBase64(buffer: Buffer): string {
   return buffer.toString("base64");
 }
 
+/** Markiert „gelesen“ nur für Submissions des **aktuellen App-Workspaces** (wie `updateSubmissionUrgency`). */
 export async function markSubmissionSeen(submissionId: string) {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { error: "Arbeitsbereich nicht gefunden." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -79,6 +85,7 @@ export async function markSubmissionSeen(submissionId: string) {
       seen_by: user.id,
     })
     .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id)
     .is("seen_at", null);
 
   if (error) {
@@ -224,7 +231,9 @@ export async function createTask(formData: FormData) {
 
   if (error) {
     console.error("[createTask]", error);
-    return { error: error.message };
+    return {
+      error: "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen.",
+    };
   }
 
   const newTaskId = inserted?.id as string;
@@ -353,13 +362,17 @@ export async function sendAppointmentLink(submissionId: string) {
 
   if (!user) return { error: "Nicht angemeldet" };
 
-  const { data: submission } = await supabase
+  const { data: submission, error: submissionLookupError } = await supabase
     .from("submissions")
     .select("patient_name, patient_email, workspace_id")
     .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id)
     .single();
 
-  if (!submission || !submission.patient_email) {
+  if (submissionLookupError || !submission) {
+    return { error: "Fall nicht gefunden." };
+  }
+  if (!submission.patient_email) {
     return { error: "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt." };
   }
 

@@ -4,10 +4,15 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
+import { inboxSearchQueryFromParam } from "@/lib/inbox-search-q";
+
+/** Mobil: zurück zur Einsendungsliste; erhält gültiges `q` wie die Suche (getrimmt). */
 export function InboxMobileBack({ fallbackHref = "/inbox" }: { fallbackHref?: string }) {
   const searchParams = useSearchParams();
-  const q = searchParams.get("q");
-  const href = q ? `${fallbackHref}?q=${encodeURIComponent(q)}` : fallbackHref;
+  const qEffective = inboxSearchQueryFromParam(searchParams.get("q") ?? undefined);
+  const href = qEffective
+    ? `${fallbackHref}?q=${encodeURIComponent(qEffective)}`
+    : fallbackHref;
 
   return (
     <Link

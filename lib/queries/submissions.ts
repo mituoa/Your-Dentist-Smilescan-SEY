@@ -65,7 +65,8 @@ async function signSubmissionPhotos(
 }
 
 async function getSubmissionByIdInner(
-  submissionId: string
+  submissionId: string,
+  workspaceId: string
 ): Promise<SubmissionDetail | null> {
   const supabase = await createClient();
 
@@ -73,6 +74,7 @@ async function getSubmissionByIdInner(
     .from("submissions")
     .select(SUBMISSION_DETAIL_SELECT_FULL)
     .eq("id", submissionId)
+    .eq("workspace_id", workspaceId)
     .single();
 
   let extendedCaseFields = true;
@@ -85,6 +87,7 @@ async function getSubmissionByIdInner(
       .from("submissions")
       .select(SUBMISSION_DETAIL_SELECT_BASE)
       .eq("id", submissionId)
+      .eq("workspace_id", workspaceId)
       .single();
   }
 
@@ -124,10 +127,13 @@ async function getSubmissionByIdInner(
   };
 }
 
-/** Same-request dedupe when multiple server components load one submission. */
+/**
+ * Lädt eine Submission für den **bekannten Workspace** (PostgREST + RLS).
+ * `workspace_id` explizit im Query: konsistent mit App-Shell und kein Vertrauen nur auf URL-ID.
+ */
 export const getSubmissionById = cache(
-  async (submissionId: string): Promise<SubmissionDetail | null> => {
-    return getSubmissionByIdInner(submissionId);
+  async (submissionId: string, workspaceId: string): Promise<SubmissionDetail | null> => {
+    return getSubmissionByIdInner(submissionId, workspaceId);
   }
 );
 

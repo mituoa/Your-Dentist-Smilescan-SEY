@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 function formatRelativeTime(iso: string): string {
   const now = new Date();
@@ -34,7 +34,8 @@ function deriveIssue(
   }
   const name = (patientName || "").trim();
   if (name) return name.length > 56 ? `${name.slice(0, 56).trim()}…` : name;
-  return "Neue Einsendung";
+  /** Neutral: keine erfundene „Aktivität“ — es fehlen nur Kurzinfos in der Liste. */
+  return "Ohne Kurztext";
 }
 
 interface SubmissionListItemFigmaProps {
@@ -61,9 +62,13 @@ export function SubmissionListItemFigma({
   activeOverride,
 }: SubmissionListItemFigmaProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isActive =
     typeof activeOverride === "boolean" ? activeOverride : pathname === `/inbox/${id}`;
-  const href = hrefOverride ?? `/inbox/${id}`;
+  const q = searchParams.get("q")?.trim();
+  const href =
+    hrefOverride ??
+    (q ? `/inbox/${id}?q=${encodeURIComponent(q)}` : `/inbox/${id}`);
   const isUnseen = !seenAt;
 
   const issueBase = deriveIssue(patientNotes, patientName);
@@ -82,21 +87,20 @@ export function SubmissionListItemFigma({
   return (
     <Link
       href={href}
-      className={`block touch-manipulation transition-all duration-150 ease-out ${
-        isActive ? "" : "hover:-translate-y-0.5 hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+      aria-current={isActive ? "page" : undefined}
+      className={`block min-w-0 max-w-full touch-manipulation break-words transition-all duration-150 ease-out mb-2 md:mb-1.5 ${
+        isActive ? "" : "hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
       }`}
       style={{
         padding: "18px 16px",
-        marginBottom: "6px",
         borderRadius: "8px",
         cursor: "pointer",
         background: isActive ? "#EEF6FF" : "transparent",
         borderLeft: isActive ? "3px solid #2B6FE8" : "3px solid transparent",
-        opacity: isUnseen ? 1 : 0.66,
       }}
     >
       <p
-        className="text-[15px]"
+        className="break-words text-[15px]"
         style={{
           color: isActive ? "#1E3A8A" : "#0F172A",
           fontWeight: 600,
@@ -109,7 +113,7 @@ export function SubmissionListItemFigma({
       </p>
 
       <p
-        className="text-[14px]"
+        className="break-words text-[14px]"
         style={{
           color: "#64748B",
           fontWeight: 500,

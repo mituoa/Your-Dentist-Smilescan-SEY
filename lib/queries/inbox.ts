@@ -2,6 +2,19 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 
+/**
+ * Posteingangsliste (`submissions`) für den **App-Workspace** (`getCurrentWorkspace`).
+ * PostgREST filtert zusätzlich per RLS (`workspace_id = current_workspace_id()`); die explizite
+ * `.eq("workspace_id", …)`-Filterung entspricht der Shell und verhindert Divergenz-Hinweise in Logs.
+ *
+ * **Security (Punkt 10):** RLS + App-`workspace_id`; Such-`q` wird für `.or(...ilike...)` bereinigt
+ * (Länge, Zeichen die PostgREST/Wildcards verzerren). Logs nur mit `code`, keine Roh-`q` in DB-Logs.
+ * DB-`current_workspace_id()` muss mit Migration **030** zur App-Regel passen.
+ *
+ * **MVP (Punkt 11):** Keine Pagination — alle passenden Zeilen einer Abfrage; bei sehr großen
+ * Datenmengen späteres Produkt-Thema, nicht Pilot-Blocker.
+ */
+
 export interface SubmissionListItem {
   id: string;
   patient_name: string | null;
@@ -78,6 +91,31 @@ type FetchRowsResult =
   | { ok: true; items: SubmissionListItem[] }
   | { ok: false; err: { code?: string; message?: string } };
 
+const MAX_INBOX_SEARCH_LEN = 200;
+
+/**
+ * PostgREST-`.or(...)` mit `ilike.%…%`: Zeichen entfernen, die Filter-Syntax oder Wildcards stören
+ * (`%`, `_`, Komma, Klammern, Backslash). Kein Ersatz für RLS — nur stabile Oberfläche innerhalb
+ * des Workspaces.
+ */
+function inboxSearchTokenForFilter(trimmed: string): string {
+  return trimmed
+    .replace(/\\/g, "")
+    .replace(/%/g, "")
+    .replace(/_/g, "")
+    .replace(/,/g, "")
+    .replace(/[()]/g, "")
+    .slice(0, MAX_INBOX_SEARCH_LEN);
+}
+
+function logInboxQueryFailure(label: string, err: unknown): void {
+  const code =
+    err && typeof err === "object" && "code" in err && typeof (err as { code: unknown }).code === "string"
+      ? (err as { code: string }).code
+      : "unknown";
+  console.error(`[inbox] ${label} code=${code}`);
+}
+
 async function fetchInboxRowsOnce(
   workspaceId: string,
   searchQuery: string | undefined,
@@ -93,8 +131,10 @@ async function fetchInboxRowsOnce(
     .order("created_at", { ascending: false });
 
   if (searchQuery && searchQuery.trim()) {
-    const q = searchQuery.trim();
-    query = query.or(`patient_name.ilike.%${q}%,patient_email.ilike.%${q}%`);
+    const token = inboxSearchTokenForFilter(searchQuery.trim());
+    if (token) {
+      query = query.or(`patient_name.ilike.%${token}%,patient_email.ilike.%${token}%`);
+    }
   }
 
   const { data, error } = await query;
@@ -133,11 +173,11 @@ async function getInboxSubmissionsInner(
       true
     );
     if (second.ok) return { ok: true, items: second.items };
-    console.error("[inbox] getInboxSubmissions fallback failed:", second.err);
+    logInboxQueryFailure("getInboxSubmissions fallback failed", second.err);
     return { ok: false };
   }
 
-  console.error("[inbox] getInboxSubmissions failed:", first.err);
+  logInboxQueryFailure("getInboxSubmissions failed", first.err);
   return { ok: false };
 }
 
@@ -161,7 +201,7 @@ export const countUnseenInboxSubmissions = cache(
       .is("seen_at", null);
 
     if (error) {
-      console.error("[inbox] countUnseenInboxSubmissions failed:", error);
+      logInboxQueryFailure("countUnseenInboxSubmissions failed", error);
       return { ok: false };
     }
 

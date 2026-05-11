@@ -11,6 +11,10 @@ import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-h
 import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
 import { markSubmissionSeen } from "./actions";
 
+/**
+ * Fall-Detail im geschützten Bereich: Daten nur für `getCurrentWorkspace().workspace_id`
+ * (`getSubmissionById` filtert explizit; RLS zusätzlich).
+ */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
 }
@@ -103,7 +107,7 @@ export default async function InboxDetailPage({
     redirect("/login?error=workspace_missing");
   }
 
-  const submission = await getSubmissionById(id);
+  const submission = await getSubmissionById(id, workspace.workspace_id);
 
   if (!submission || submission.workspace_id !== workspace.workspace_id) {
     notFound();

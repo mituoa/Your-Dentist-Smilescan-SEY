@@ -15,6 +15,14 @@ const bar = (className: string) => (
   />
 );
 
+/** Ruhige, statische Balken für Posteingang — kein Puls (Punkt 6: klinisch, keine Schein-Aktivität). */
+const inboxBarStatic = (className: string) => (
+  <div
+    className={`rounded-md bg-[#E2E8F0]/85 dark:bg-slate-600/30 ${className}`}
+    aria-hidden
+  />
+);
+
 const barDashboard = (className: string) => (
   <div
     className={`rounded-lg bg-[#E2E8F7]/40 ${pulseDashboard} dark:bg-slate-600/25 ${className}`}
@@ -133,30 +141,45 @@ export function ClinicalDashboardSkeleton() {
   );
 }
 
+/**
+ * Ladezustand für `/inbox` (nur **Seiten-Segment** rechts im Split): ruhige statische Balken,
+ * gleiche Tönung wie Tracker — kein Puls, keine „vollen“ Fake-Zeilen (Punkt 6).
+ */
 export function ClinicalInboxSkeleton() {
   return (
-    <div className="flex h-full min-h-[320px] flex-col px-6 py-10" style={{ background: "#F7F9FC" }}>
-      {bar("mx-auto h-10 w-48")}
-      <div className="mx-auto mt-8 w-full max-w-md space-y-2">
-        {bar("h-3.5 w-full")}
-        {bar("h-3.5 w-4/5")}
+    <section
+      className="flex h-full min-h-[280px] flex-1 flex-col items-center justify-center px-6 md:px-10"
+      style={{ background: "#F7F9FC", paddingTop: "32px", paddingBottom: "40px" }}
+      aria-busy="true"
+      aria-label="Inhalt wird geladen"
+    >
+      <div className="w-full max-w-md space-y-2.5">
+        {inboxBarStatic("mx-auto h-2 w-28 md:mx-0")}
+        {inboxBarStatic("h-2.5 w-full max-w-lg")}
+        {inboxBarStatic("h-2.5 w-[88%] max-w-lg")}
       </div>
-    </div>
+    </section>
   );
 }
 
+/** Ladezustand `/inbox/[id]`: statische Gerüste, an Detail-Header/Canvas angelehnt (Punkt 6). */
 export function ClinicalInboxDetailSkeleton() {
   return (
-    <div className="flex h-full min-h-[320px] flex-col overflow-hidden" style={{ background: "#F7F9FC" }}>
-      <div className="border-b border-[rgba(15,23,42,0.06)] bg-white/90 px-6 py-8 md:px-10">
-        {bar("mb-3 h-8 max-w-lg")}
-        {bar("h-3.5 w-44")}
+    <section
+      className="flex h-full min-h-[280px] flex-col overflow-hidden"
+      style={{ background: "#F7F9FC" }}
+      aria-busy="true"
+      aria-label="Fall wird geladen"
+    >
+      <div className="shrink-0 border-b border-[rgba(15,23,42,0.06)] bg-white/90 px-6 py-8 md:px-10">
+        {inboxBarStatic("mb-3 h-7 max-w-lg")}
+        {inboxBarStatic("h-2.5 w-40")}
       </div>
-      <div className="flex-1 space-y-6 overflow-y-auto bg-white px-6 py-8 md:px-10">
-        {bar("h-48 max-w-xl rounded-xl")}
-        {bar("h-24 max-w-xl rounded-lg")}
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-white px-6 py-8 md:px-10">
+        {inboxBarStatic("h-44 max-w-xl rounded-xl")}
+        {inboxBarStatic("h-20 max-w-xl rounded-lg")}
       </div>
-    </div>
+    </section>
   );
 }
 

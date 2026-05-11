@@ -83,6 +83,9 @@ export async function requireUser() {
  * `resolveAuthenticatedEntryPath` / `resolveMiddlewareAuthenticatedHomeUrl`. `/dashboard`, Posteingang,
  * Aufgaben und Einstellungen lesen alle denselben `workspace_id` daraus; es gibt keinen stillen
  * Wechsel zwischen Routen.
+ *
+ * **Supabase RLS:** `current_workspace_id()` in Postgres folgt derselben Reihenfolge (Migration
+ * `030_align_current_workspace_id_with_app.sql`).
  */
 export async function getWorkspaceMembershipForUserId(userId: string, client?: SupabaseClient) {
   const supabase = client ?? (await createClient());
@@ -99,7 +102,8 @@ export async function getWorkspaceMembershipForUserId(userId: string, client?: S
       typeof error.code === "string" && error.code.trim() !== ""
         ? error.code
         : "unknown";
-    console.error(`[getWorkspaceMembershipForUserId] code=${code}`);
+    const message = typeof error.message === "string" ? error.message : "";
+    console.error(`[getWorkspaceMembershipForUserId] code=${code}`, message || undefined);
     return null;
   }
 

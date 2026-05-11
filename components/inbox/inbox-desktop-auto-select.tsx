@@ -6,7 +6,8 @@ import { useEffect } from "react";
 const MD_MIN = "(min-width: 768px)";
 
 /**
- * Preserves split-inbox on desktop (auto-open first case) without forcing mobile into a detail route.
+ * **Zweck (nur Desktop, md+):** Split-Posteingang mit sofort sichtbarem Fall — ersetzt `/inbox` durch
+ * `/inbox/[id]` (erste Zeile der Liste), optional mit `q`. Mobil unverändert auf der Liste (`/inbox`).
  */
 export function InboxDesktopAutoSelect({ href }: { href: string }) {
   const router = useRouter();

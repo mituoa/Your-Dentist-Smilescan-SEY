@@ -13,18 +13,79 @@ interface InboxLayoutProps {
   children: React.ReactNode;
 }
 
+/** Workspace-abhängige Daten — keine statische Zwischenspeicherung öffentlicher CDN-Kanten. */
+export const dynamic = "force-dynamic";
+
 function SearchFallback() {
   return (
     <div
       className="h-11 w-full rounded-lg"
       style={{ background: "#FFFFFF", border: "1px solid #E5E7EB" }}
-      aria-hidden
+      role="status"
+      aria-live="polite"
+      aria-label="Suchfeld wird geladen"
     />
   );
 }
 
 /**
- * Tracker-Shell — Desktop: Split Liste / Detail. Mobil: eine Spalte, Liste oder Vollbild-Fall.
+ * **Posteingang — Layout (Punkt 1 Zweck):** Rahmen für die **Einsendungs-/Fall-Liste** links und
+ * **Fall-Detail** rechts (Desktop). „Tracker“ bezeichnet hier nur das **UI-Muster** (Liste ↔ Detail),
+ * nicht ein separates CRM-/Analytics-Produkt. Mobil: eine Spalte — Liste oder Vollbild-Fall.
+ *
+ * **Pilot (Punkt 2 — Status):** Die linke **Sidebar** lädt die **volle** Einsendungsliste (ohne `q`),
+ * damit Zähler und schneller Zugriff auf jeden Fall stabil bleiben. **Filter `q`** steuert auf der
+ * **Index-Route** die gefilterte Abfrage (Desktop: erster Treffer, Leerzustände). Das ist eine
+ * bewusste Scope-Entscheidung — keine technische Regression; ein späteres „Liste = Filter“ wäre
+ * ein eigenes Produkt-/Architekturthema.
+ *
+ * **Punkt 4 — Aktionen:** Suche (`InboxSearchFigma`), Fallzeilen (`SubmissionListItemFigma` →
+ * `/inbox/[id]`), mobil „Zurück zur Liste“ im Detail (`InboxMobileBack`), Arzt: Plus → `/create-case`.
+ * **Punkt 5 — Tot/Fake:** Keine künstliche Listen-„Lebendigkeit“; Zeilen nutzen echte Felder,
+ * neutrale Fallbacks („Ohne Kurztext“), keine Abblendung gelesener Fälle als Schein-Hierarchie.
+ *
+ * **Punkt 6 — Loading:** Listen-Segment lädt im Layout; `loading.tsx` zeigt nur den rechten
+ * Seitenbereich — `ClinicalInboxSkeleton` ist bewusst reduziert (kein Puls, keine Chat-/CRM-Gerüste).
+ *
+ * **Punkt 7 — Empty:** Listen-Leerzustand und Fehler im linken Segment; Index-/Such-Leerzustände
+ * im rechten Segment (Desktop). Mobil: bei aktivem `q` unter der Liste sichtbar (`InboxTrackerShell`).
+ *
+ * **Punkt 8 — Error:** Listen-Abfragefehler = ruhige Statusmeldung (kein technisches Detail, kein
+ * Raw-DB-Text); Überschrift „Abruf derzeit nicht möglich“ statt alarmierender Formulierungen.
+ *
+ * **Punkt 9 — Mobile:** Shell mit `overflow-x-hidden` / `min-w-0`; Liste mit Touch-Scroll und
+ * Safe-Area unten; Fallzeilen mit Wortumbruch — keine neue Mobile-Architektur.
+ *
+ * **Punkt 10 — Security:** RLS + Session-Client; `dynamic = "force-dynamic"`; Such-Härtung in
+ * `getInboxSubmissions` (s. `lib/queries/inbox.ts`). Migration **030** für `current_workspace_id()`.
+ *
+ * **Punkt 11 — MVP/Pilot:** Fokus **Intake-Liste + Fallöffnung** (Desktop Auto-Select erster Fall),
+ * **einfache Suche** (`q`, Name/E-Mail), **ein Workspace** ohne Switch, **keine Pagination** auf
+ * der Liste, **kein** Analytics-/Priorisierungs-/Chat-Produkt. Sidebar = volle Liste bei Suche =
+ * bewusster Pilot (Punkt 2); für Praxis-Pilot **reif**, nicht als Plattform-Inbox positioniert.
+ *
+ * **Punkt 12 — Nice / Future / Non-MVP (Vertrag):**
+ * - **Nice:** E2E/Smoke für `/inbox` + `q`, Debounce-/Perf-Feinschliff, A11y-/Spacing-Polish, Runbooks
+ *   zu Migrationen/Logs, Monitoring auf `[inbox]`-Fehlercodes.
+ * - **Future:** Pagination bei großen Postfächern, Sidebar = gefilterte Liste (oder RPC-Suche),
+ *   Multi-Workspace-Wechsel, erweiterte Filter, Priorisierung/Analytics, Team-/Ops-Ansichten,
+ *   robustere Search-Infrastruktur (Index, serverseitiges `q` im Layout).
+ * - **Non-MVP (nicht bauen):** Chat/Messaging, CRM/Kanban, künstliche Aktivität, generische SaaS-Inbox-
+ *   Features, Operations-/Growth-Center-Optik, aggressive CTAs — würden den Intake-Vertrag verwässern.
+ *
+ * **Punkt 13 — Priorität (Produkt + Betrieb):** `/inbox` ist **P0** auf dem **klinischen Intake-Pfad**
+ * (Liste sichtbar, Fall öffnen, **keine falschen/fremden Falldaten**). **P0 bleibt gerechtfertigt**,
+ * solange Praxis-Pilot/Demo darauf zugreift: Tenant-/RLS-Fehler oder Listen-/Detail-Mismatch wären
+ * **produktkritisch**. Reihenfolge bei Änderungen: (1) **Risiko falscher/fremder Daten** + RLS/
+ * Session-Kohärenz, (2) **Workspace-/Membership-Korrektheit** (Migration **030**, `getCurrentWorkspace`),
+ * (3) **Intake-Liste** (`getInboxSubmissions`), (4) **Fallnavigation** (Links, Auto-Select Desktop),
+ * (5) **Such-/Routing-Stabilität** (`q`, Normalisierung), (6) **Mobile-Nutzbarkeit** (`InboxTrackerShell`),
+ * (7) **ruhiger professioneller UX**-Ton (Fehler/Empty). **Vor Pilot/Demo manuell:** Login mit
+ * echtem Workspace, Liste lädt, Fall öffnet (Desktop + Mobil), Suche mit Treffer/Leer/Fehler,
+ * kein Fremdfall nach Hard-Reload; Arzt: Plus → `/create-case` falls relevant. **Bewusst nicht mehr
+ * priorisiert:** neue Inbox-Features, Search-Plattform, Pagination/Filter (s. Punkt 12 Future).
+ * **QA/Monitoring/Doku statt Code:** Smoke/E2E, Log-Alerts auf Listen-/Index-Fehler, Runbook 030.
+ * **Route stabil halten** — nur gezielte Fixes/Security; kein aktives „Weiterbauen“ ohne Produktauftrag.
  */
 export default async function InboxLayout({ children }: InboxLayoutProps) {
   const workspace = await getCurrentWorkspace();
@@ -42,9 +103,9 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
       <div className="px-4 pt-6 pb-0 sm:px-6 md:px-10 md:pt-12">
         <div
           style={{ marginBottom: "24px" }}
-          className="flex items-start justify-between gap-4"
+          className="flex min-w-0 items-start justify-between gap-4"
         >
-          <div>
+          <div className="min-w-0 flex-1 pr-2">
             <h1
               className="text-[18px] md:text-[17px]"
               style={{
@@ -58,7 +119,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
             </h1>
             <p className="text-[15px] md:text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
               {listFailed
-                ? "Liste momentan nicht verfügbar"
+                ? "Abruf derzeit nicht möglich"
                 : `${openCaseCount} offene ${openCaseCount === 1 ? "Fall" : "Fälle"}`}
             </p>
           </div>
@@ -66,6 +127,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
             <Link
               href="/create-case"
               title="Neuer Fall"
+              aria-label="Neuer Fall anlegen"
               className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-[10px] text-white transition hover:opacity-95 md:h-10 md:w-10"
               style={{
                 background: "#2B6FE8",
@@ -78,17 +140,26 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
         </div>
 
         <Suspense fallback={<SearchFallback />}>
-          <InboxSearchFigma />
+          <div className="min-w-0">
+            <InboxSearchFigma listUnavailable={listFailed} />
+          </div>
         </Suspense>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-6 pt-6 [-webkit-overflow-scrolling:touch] md:px-3 md:pb-4 md:pt-8">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-[max(24px,env(safe-area-inset-bottom))] pt-6 [-webkit-overflow-scrolling:touch] md:px-3 md:pb-4 md:pt-8">
         {listFailed ? (
           <div
             className="mx-1 rounded-xl px-4 py-5 text-[14px] leading-relaxed"
             style={{ color: "#64748B", background: "rgba(255,255,255,0.85)" }}
+            role="status"
+            aria-live="polite"
           >
-            Die Einsendungen konnten nicht geladen werden. Bitte die Seite in Kürze erneut öffnen.
+            <p className="font-medium" style={{ color: "#0F172A" }}>
+              Einsendungen können momentan nicht geladen werden
+            </p>
+            <p className="mt-2">
+              Bitte die Seite in Kürze erneut öffnen. Wenn das Problem bleibt, die Seite neu laden.
+            </p>
           </div>
         ) : submissions.length === 0 ? (
           <div
@@ -99,7 +170,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
               Noch keine Einsendungen
             </p>
             <p className="mt-2">
-              Sobald Patienten Fotos einreichen, erscheinen die Fälle hier.
+              Neue Eingänge erscheinen in dieser Übersicht.
             </p>
           </div>
         ) : (
