@@ -24,8 +24,8 @@ export async function resolveAuthenticatedEntryPath(): Promise<string> {
     }
 
     return "/login?error=workspace_missing";
-  } catch (e) {
-    console.error("[resolveAuthenticatedEntryPath]", e);
+  } catch {
+    console.error("[resolveAuthenticatedEntryPath] unexpected failure");
     return "/login";
   }
 }

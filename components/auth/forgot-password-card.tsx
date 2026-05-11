@@ -40,7 +40,7 @@ function ForgotPasswordEmailFieldset({ children }: { children: ReactNode }) {
   return (
     <fieldset
       disabled={pending}
-      className="m-0 min-w-0 space-y-4 border-0 p-0 sm:space-y-5 disabled:pointer-events-none disabled:opacity-[0.58]"
+      className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
     >
       {children}
     </fieldset>
@@ -113,12 +113,12 @@ export function ForgotPasswordCard(props: {
 
   return (
     <div className={`${AUTH_CARD_SHELL_CLASS} min-w-0 w-full`} style={authCardShellShadowStyle}>
-      <header className="mb-5 text-center sm:mb-6">
+      <header className="mb-6 text-center sm:mb-8">
         <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-slate-900 sm:text-2xl">
           Passwort zurücksetzen
         </h1>
         {sent ? (
-          <div className="mx-auto mt-3 max-w-sm space-y-2 break-words" role="status" aria-live="polite">
+          <div className="mx-auto mt-4 max-w-sm space-y-2 break-words" role="status" aria-live="polite">
             <p className="text-[14px] font-normal leading-snug text-slate-800 sm:text-[15px]">
               Bitte prüfen Sie Ihren Posteingang.
             </p>
@@ -127,7 +127,7 @@ export function ForgotPasswordCard(props: {
             </p>
           </div>
         ) : (
-          <p className="mx-auto mt-2 max-w-sm break-words text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-2.5 sm:text-[14px]">
+          <p className="mx-auto mt-3 max-w-sm break-words text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-4 sm:text-[14px]">
             E-Mail-Adresse eingeben. Sie erhalten per E-Mail einen Link zum Zurücksetzen.
           </p>
         )}
@@ -135,17 +135,17 @@ export function ForgotPasswordCard(props: {
 
       {errorDisplay ? (
         <p
-          className="mb-5 break-words rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center text-[13px] font-normal leading-relaxed text-red-900 sm:mb-6 sm:text-sm"
+          className="mb-6 break-words rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center text-[13px] font-normal leading-relaxed text-red-900 sm:mb-8 sm:text-sm"
           role="alert"
         >
           {errorDisplay}
         </p>
       ) : null}
 
-      <form action={requestPasswordResetFromLogin} className="space-y-4 sm:space-y-5">
+      <form action={requestPasswordResetFromLogin} className="flex flex-col gap-8 sm:gap-10">
         {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
         <ForgotPasswordEmailFieldset>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="forgot-email" className="text-[13px] font-medium text-slate-700">
               E-Mail
             </Label>
@@ -165,7 +165,7 @@ export function ForgotPasswordCard(props: {
         <ForgotPasswordSubmitButton sent={sent} cooldownSec={cooldownSec} />
       </form>
 
-      <div className="mt-6 border-t border-slate-100 pt-5 text-center sm:mt-7 sm:pt-6">
+      <div className="mt-8 border-t border-slate-100 pt-6 text-center sm:mt-10 sm:pt-8">
         <p className="text-[11px] text-slate-400">
           <Link
             href="/impressum"
@@ -174,7 +174,7 @@ export function ForgotPasswordCard(props: {
             Anbieter & Kontakt
           </Link>
         </p>
-        <p className="mt-4 text-[13px] text-slate-600 sm:mt-5">
+        <p className="mt-3 text-[13px] text-slate-600 sm:mt-4">
           <Link
             prefetch
             href={loginHref}

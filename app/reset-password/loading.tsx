@@ -45,11 +45,11 @@ export default function ResetPasswordLoading() {
             <AuthLoadingSpinner />
           </div>
 
-          <p className="mt-8 border-t border-gray-100/90 pt-7 text-center text-[13px] text-slate-600 sm:mt-9 sm:pt-8 sm:text-sm">
+          <p className="mt-10 border-t border-gray-100/90 pt-8 text-center text-[13px] text-slate-600 sm:mt-11 sm:pt-9 sm:text-sm">
             <Link
               prefetch
               href="/login"
-              className="inline-flex min-h-[44px] items-center font-medium text-[#0284C7] underline-offset-2 transition-colors hover:text-[#0369A1] hover:underline max-md:py-2 md:min-h-0 md:py-0"
+              className="inline-flex min-h-[44px] touch-manipulation items-center font-medium text-[#0284C7] underline-offset-2 transition-colors hover:text-[#0369A1] hover:underline max-md:py-2 md:min-h-0 md:py-0"
             >
               Zurück zum Login
             </Link>

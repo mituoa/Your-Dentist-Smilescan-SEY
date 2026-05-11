@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -34,7 +34,11 @@ function userFacingPasswordRecoveryError(raw: string): string {
   if (/same password|password should be different|cannot reuse|reuse|previously used/i.test(m)) {
     return "Bitte wählen Sie ein neues Passwort, das sich vom bisherigen unterscheidet.";
   }
-  if (/session.*expir|not authenticated|jwt expired|invalid grant|refresh.*invalid|session not found/i.test(m)) {
+  if (
+    /session.*expir|not authenticated|jwt expired|invalid grant|refresh.*invalid|session not found|auth session missing|invalid_grant|token not found|invalid jwt|session revoked|access_denied|unauthorized request/i.test(
+      m
+    )
+  ) {
     return "Die Wiederherstellung ist abgelaufen oder ungültig. Bitte fordern Sie einen neuen Link an.";
   }
 
@@ -45,7 +49,32 @@ function userFacingPasswordRecoveryError(raw: string): string {
   if (/e-mail oder passwort ist ungültig/i.test(base)) {
     return "Das neue Passwort wurde nicht akzeptiert. Bitte prüfen Sie die Anforderungen und versuchen Sie es erneut.";
   }
+
+  if (/\b(supabase|postgres|invalid_grant|auth session|token_hash|refresh_token|jwt\b|https?:\/\/)\b/i.test(base)) {
+    return "Der Vorgang ist fehlgeschlagen. Bitte versuchen Sie es erneut oder fordern Sie einen neuen Link an.";
+  }
   return base;
+}
+
+/** Nur interne Ziele nach Server-Action — keine offenen Redirects aus fremden Strings. */
+function safePostAuthRedirectPath(path: string): string {
+  const fallback = "/login";
+  const t = path.trim();
+  if (!t.startsWith("/") || t.startsWith("//") || /[\r\n\0]/.test(t)) return fallback;
+  if (t === "/dashboard" || t.startsWith("/dashboard/") || t.startsWith("/dashboard?")) return t;
+  if (t === "/my-tasks" || t.startsWith("/my-tasks/") || t.startsWith("/my-tasks?")) return t;
+  if (t === "/login" || t.startsWith("/login?") || t.startsWith("/login#") || t.startsWith("/login/")) return t;
+  if (!t.startsWith("/accept-invite?")) return fallback;
+  try {
+    const u = new URL(t, "https://invalid.invalid");
+    const tok = u.searchParams.get("token");
+    if (tok && /^[a-f0-9]{64}$/i.test(tok)) {
+      return `/accept-invite?token=${encodeURIComponent(tok.toLowerCase())}`;
+    }
+  } catch {
+    /* ignore */
+  }
+  return fallback;
 }
 
 function parseHashParams(): {
@@ -99,6 +128,7 @@ export function ResetPasswordForm({
   const [inviteToken, setInviteToken] = useState<string | null>(() =>
     sanitizeTeamInvitationTokenForAuth(inviteTokenFromQuery) || null
   );
+  const submitInFlightRef = useRef(false);
 
   const runVerify = useCallback(async (token_hash: string, type: string, isCancelled: () => boolean) => {
     setVerifying(true);
@@ -196,10 +226,10 @@ export function ResetPasswordForm({
   }, [tokenHashFromQuery, typeFromQuery, inviteTokenFromQuery, runVerify]);
 
   const canSubmit = useMemo(() => {
-    if (!verified || submitting) return false;
+    if (!verified || submitting || navigatingAfterSave) return false;
     if (password.length < 8) return false;
     return password === confirm;
-  }, [verified, submitting, password, confirm]);
+  }, [verified, submitting, navigatingAfterSave, password, confirm]);
 
   const forgotPasswordHref = useMemo(
     () =>
@@ -211,7 +241,7 @@ export function ResetPasswordForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || navigatingAfterSave || submitInFlightRef.current) return;
     setSubmitError(null);
     if (password.length < 8) {
       setSubmitError("Passwort muss mindestens 8 Zeichen haben.");
@@ -221,6 +251,7 @@ export function ResetPasswordForm({
       setSubmitError("Passwörter stimmen nicht überein.");
       return;
     }
+    submitInFlightRef.current = true;
     setSubmitting(true);
     try {
       const supabase = createClient();
@@ -233,10 +264,10 @@ export function ResetPasswordForm({
       setNavigatingAfterSave(true);
       try {
         if (inviteToken) {
-          router.push(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
+          router.replace(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
         } else {
-          const nextPath = await getAuthenticatedEntryPath();
-          router.push(nextPath);
+          const nextPath = safePostAuthRedirectPath(await getAuthenticatedEntryPath());
+          router.replace(nextPath);
         }
         router.refresh();
       } catch {
@@ -251,17 +282,19 @@ export function ResetPasswordForm({
         "Das Passwort konnte nicht gespeichert werden. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
       );
       setSubmitting(false);
+    } finally {
+      submitInFlightRef.current = false;
     }
   }
 
   return (
-    <div className="space-y-0">
-      <header className="mb-7 text-center sm:mb-8">
+    <div className="min-w-0 space-y-0">
+      <header className="mb-8 text-center sm:mb-9">
         <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-gray-900 sm:text-2xl">
           Neues Passwort setzen
         </h1>
         {(verifying || verified || (!verifying && verifyError)) && (
-          <p className="mx-auto mt-3 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-3.5 sm:text-[14px]">
+          <p className="mx-auto mt-3 min-w-0 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-3.5 sm:text-[14px]">
             {verifying
               ? "Wir prüfen den Link aus Ihrer E-Mail. Bei schlechter Verbindung kann das etwas länger dauern."
               : verified
@@ -274,7 +307,7 @@ export function ResetPasswordForm({
       {verifying ? <VerifySpinner /> : null}
 
       {!verifying && verifyError ? (
-        <div className="space-y-4 rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center sm:text-left">
+        <div className="min-w-0 w-full space-y-4 rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center sm:text-left">
           <p className="max-w-full break-words text-[13px] font-normal leading-relaxed text-red-900 sm:text-sm">
             {verifyError}
           </p>
@@ -282,14 +315,14 @@ export function ResetPasswordForm({
             <Link
               href={forgotPasswordHref}
               prefetch
-              className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
+              className="inline-flex min-h-[44px] touch-manipulation items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
             >
               Neuen Link anfordern
             </Link>
             <Link
               href="/login"
               prefetch
-              className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
+              className="inline-flex min-h-[44px] touch-manipulation items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
             >
               Zum Login
             </Link>
@@ -300,14 +333,14 @@ export function ResetPasswordForm({
       {!verifying && verified ? (
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-5 sm:gap-6"
+          className="flex min-w-0 flex-col gap-8 sm:gap-10"
           aria-busy={submitting || navigatingAfterSave}
         >
           <fieldset
-            disabled={submitting}
-            className="m-0 flex min-w-0 flex-col gap-5 border-0 p-0 sm:gap-6 disabled:pointer-events-none disabled:opacity-[0.58]"
+            disabled={submitting || navigatingAfterSave}
+            className="m-0 flex min-w-0 flex-col gap-6 border-0 p-0 sm:gap-7 disabled:pointer-events-none disabled:opacity-[0.58]"
           >
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="new-password" className="text-[13px] font-medium text-slate-700">
                 Neues Passwort
               </Label>
@@ -316,6 +349,9 @@ export function ResetPasswordForm({
                 name="new_password"
                 type="password"
                 autoComplete="new-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 required
                 minLength={8}
                 value={password}
@@ -323,7 +359,7 @@ export function ResetPasswordForm({
                 className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
               />
             </div>
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               <Label htmlFor="confirm-password" className="text-[13px] font-medium text-slate-700">
                 Bestätigung
               </Label>
@@ -332,6 +368,9 @@ export function ResetPasswordForm({
                 name="new_password_confirm"
                 type="password"
                 autoComplete="new-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 required
                 minLength={8}
                 value={confirm}
@@ -340,7 +379,7 @@ export function ResetPasswordForm({
               />
             </div>
           </fieldset>
-          <div className="mt-2 flex flex-col gap-3 sm:mt-3 sm:gap-3.5">
+          <div className="flex scroll-mt-8 flex-col gap-4 sm:gap-5">
             {submitError ? (
               <p className="max-w-full break-words rounded-xl border border-red-200/80 bg-red-50/90 px-3 py-2 text-[13px] text-red-900 sm:text-sm">
                 {submitError}
@@ -349,7 +388,7 @@ export function ResetPasswordForm({
             <Button
               type="submit"
               variant="primary"
-              className="h-11 w-full rounded-lg text-[14px] font-semibold shadow-sm transition-shadow duration-200 hover:shadow-md sm:h-12 sm:rounded-xl sm:text-[15px]"
+              className="h-11 min-h-[48px] w-full touch-manipulation rounded-lg text-[14px] font-semibold shadow-sm transition-shadow duration-200 hover:shadow-md sm:h-12 sm:min-h-0 sm:rounded-xl sm:text-[15px]"
               disabled={!canSubmit}
               aria-busy={submitting || navigatingAfterSave}
             >
