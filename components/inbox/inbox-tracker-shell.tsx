@@ -15,8 +15,8 @@ type InboxTrackerShellProps = {
  * `/inbox` → mobil nur Liste; **Ausnahme:** aktive Suche (`q`) zeigt den Detail-Slot unter der Liste,
  * damit leere Such-/Index-Zustände (z. B. „Keine Treffer“) sichtbar bleiben (Punkt 7).
  * `/inbox/[id]` → mobil Vollbild-Fall.
- * **Punkt 9:** `min-w-0` / `overflow-x-hidden` gegen Flex-Overflow; Liste bei geteilter Ansicht mit
- * begrenzter Höhe und eigenem Scroll.
+ * **Punkt 9:** `min-w-0` / `overflow-x-hidden` gegen Flex-Overflow; **Detail-Slot** mit
+ * `overscroll-y-contain` (iOS); Liste bei geteilter Ansicht mit begrenzter Höhe und eigenem Scroll.
  */
 export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
   const pathname = usePathname() || "";
@@ -48,7 +48,7 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
 
       <section
         className={cn(
-          "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden bg-[#F7F9FC] md:min-h-0",
+          "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overscroll-y-contain bg-[#F7F9FC] md:min-h-0",
           isInboxIndex
             ? showMobileIndexDetail
               ? "flex max-md:min-h-0 max-md:flex-1 max-md:overflow-y-auto"

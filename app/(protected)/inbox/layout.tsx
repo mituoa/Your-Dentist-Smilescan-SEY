@@ -53,8 +53,9 @@ function SearchFallback() {
  * **Punkt 8 — Error:** Listen-Abfragefehler = ruhige Statusmeldung (kein technisches Detail, kein
  * Raw-DB-Text); Überschrift „Abruf derzeit nicht möglich“ statt alarmierender Formulierungen.
  *
- * **Punkt 9 — Mobile:** Shell mit `overflow-x-hidden` / `min-w-0`; Liste mit Touch-Scroll und
- * Safe-Area unten; Fallzeilen mit Wortumbruch — keine neue Mobile-Architektur.
+ * **Punkt 9 — Mobile:** Shell `overflow-x-hidden` / `min-w-0`; Liste mit Touch-Scroll + Safe-Area;
+ * **Detail** (`/inbox/[id]`): Sticky-Kopf, `break-words`, moderates Scroll-Padding, Hilfsspalte
+ * `overscroll-y-contain` — s. `page.tsx` / `InboxTrackerShell`.
  *
  * **Punkt 10 — Security:** RLS + Session-Client; `dynamic = "force-dynamic"`; Such-Härtung in
  * `getInboxSubmissions` (s. `lib/queries/inbox.ts`). Migration **030** für `current_workspace_id()`.

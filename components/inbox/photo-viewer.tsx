@@ -171,10 +171,10 @@ export function PhotoViewer({
           disabled={!selectedUrl}
           className="absolute flex cursor-pointer items-center justify-center transition duration-160 ease-out disabled:pointer-events-none disabled:opacity-0"
           style={{
-            top: "12px",
-            right: "12px",
-            width: "36px",
-            height: "36px",
+            top: "10px",
+            right: "10px",
+            width: "44px",
+            height: "44px",
             borderRadius: "8px",
             background: "rgba(255, 255, 255, 0.95)",
             opacity: hoverImage && selectedUrl ? 1 : 0,
@@ -204,7 +204,7 @@ export function PhotoViewer({
                 ? "ZIP-Export erneut versuchen"
                 : "Fotos dieses Falls als ZIP-Datei exportieren"
           }
-          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium transition hover:border-[#2B6FE8]/40 hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium transition hover:border-[#2B6FE8]/40 hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
           style={{ color: "#475569" }}
         >
           {isLoading ? (

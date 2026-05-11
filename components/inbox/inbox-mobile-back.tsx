@@ -17,7 +17,7 @@ export function InboxMobileBack({ fallbackHref = "/inbox" }: { fallbackHref?: st
   return (
     <Link
       href={href}
-      className="mb-1 inline-flex min-h-[44px] items-center gap-0.5 py-1 text-[15px] font-semibold text-[#2563EB] touch-manipulation md:hidden"
+      className="mb-1 inline-flex min-h-[44px] min-w-0 max-w-full items-center gap-0.5 py-1 text-[15px] font-semibold text-[#2563EB] touch-manipulation md:hidden"
     >
       <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2} aria-hidden />
       Einsendungen

@@ -32,6 +32,8 @@ const sectionPad = "px-4 py-5 sm:px-5 sm:py-6";
 /**
  * Rechte Spalte: **unterstützende Praxis-Kommunikation** (Entwürfe, Terminlink) — untergeordnet
  * zur Triage-Mitte. Kein Postfach, kein Chat-Verlauf, kein CRM-Case-Workspace.
+ * **Punkt 9 — Mobile:** Außenpadding enger auf kleinen Screens; inneres Scroll mit `overscroll-y-contain`,
+ * **`scroll-padding-bottom`** + Safe-Area-Inset unten — Tastatur/Entwurf weniger abgeschnitten.
  */
 export function SubmissionActions({
   submissionId,
@@ -51,12 +53,9 @@ export function SubmissionActions({
   appointmentUrl,
 }: SubmissionActionsProps) {
   return (
-    <div
-      className="flex min-h-0 flex-1 touch-manipulation flex-col gap-4"
-      style={{ padding: "16px 14px 20px" }}
-    >
+    <div className="flex min-h-0 flex-1 touch-manipulation flex-col gap-4 p-3 sm:px-[14px] sm:pb-5 sm:pt-4">
       <div className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden ${shell}`}>
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-[max(0.75rem,var(--safe-area-bottom))] max-lg:scroll-pb-28">
           <div id="tracker-korrespondenz" className={`scroll-mt-6 border-b border-slate-100 ${sectionPad}`}>
             <div className="mb-4 space-y-1.5">
               <h2 className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">

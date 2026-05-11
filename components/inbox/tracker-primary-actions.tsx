@@ -17,10 +17,11 @@ function scrollToId(id: string, focusDraft?: boolean) {
  * Schnellnavigation innerhalb des Falls (Punkt 4 — Aktionen): scrollt zu **Terminlink** bzw.
  * **Entwurf** — **kein** automatischer Versand, keine Hintergrundjobs. Dritter Eintrag: zurück
  * zum Block **Einordnung & Zeitraum** bei langem Scroll — keine passive „KI-Beobachtung“.
+ * **Punkt 9 — Mobile:** alle drei Flächen **44px** hoch (iOS-Touch-Ziel), `touch-manipulation` am Container.
  */
 export function TrackerPrimaryActions() {
   return (
-    <div className="tracker-mobile-touch-targets">
+    <div className="tracker-mobile-touch-targets touch-manipulation">
       <button
         type="button"
         onClick={() => scrollToId("tracker-termin")}
@@ -50,7 +51,7 @@ export function TrackerPrimaryActions() {
         className="flex w-full cursor-pointer items-center justify-center gap-2 transition duration-150 ease-out active:scale-[0.98]"
         style={{
           padding: "0 20px",
-          height: "42px",
+          height: "44px",
           background: "#FFFFFF",
           color: "#2B6FE8",
           border: "1px solid #CBD5E1",
@@ -72,7 +73,7 @@ export function TrackerPrimaryActions() {
         className="flex w-full cursor-pointer items-center justify-center gap-[7px] border-0 transition duration-150 ease-out hover:bg-[#F1F5F9] hover:text-[#64748B] hover:opacity-100 active:scale-[0.98]"
         style={{
           padding: "0 20px",
-          height: "40px",
+          height: "44px",
           background: "transparent",
           color: "#94A3B8",
           borderRadius: "9px",

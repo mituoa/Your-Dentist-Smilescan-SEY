@@ -74,6 +74,12 @@ import { markSubmissionSeen } from "./actions";
  * ZIP-/E-Mail-/Zeitraum-Schritt je **lokal** am jeweiligen Control mit sachlicher Meldung und
  * `aria-live` wo nötig — kein globaler Alarm. **Empty vs. Error:** Leere Listen/Texte = Punkt 7;
  * Fehler nur, wenn eine **konkrete Nutzeraktion** fehlschlägt.
+ *
+ * **Punkt 9 — Mobile (`/inbox/[id]`):** Vollbild-Detail in `InboxTrackerShell` — **eine Spalte**,
+ * **Sticky-Kopf** (`max-lg:`) mit **`min-w-0` / `break-words`**; **unteres Scroll-Padding** + **`scroll-padding`**
+ * (FAB/Safe-Area). **Touch:** Schnellnavigation & ZIP **≥44px**. Hilfsspalte: **`overscroll-y-contain`**,
+ * Safe-Area unten, **`scroll-padding`** im inneren Scroll. **Final:** Entwurf **16px** Schrift (kein iOS-Zoom),
+ * bei Fokus **`scrollIntoView`** (`FollowUpMessageDraft`).
  */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
@@ -197,10 +203,11 @@ export default async function InboxDetailPage({
   const issueTitle =
     concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
 
-  const headerPad = { padding: `clamp(28px, 5vw, 48px) ${padX} 0` };
   const scrollPadTop = urgencyLine ? "24px" : "32px";
   const scrollPad = {
-    padding: `${scrollPadTop} ${padX} clamp(72px, 18vw, 120px)`,
+    paddingTop: scrollPadTop,
+    paddingLeft: padX,
+    paddingRight: padX,
   };
 
   return (
@@ -218,16 +225,15 @@ export default async function InboxDetailPage({
       {/* Desktop: Triage-Hauptfläche + Hilfsspalte (Entwürfe/Terminlink). Mobil: eine Spalte, Fullscreen-Flow. */}
       <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-hidden lg:flex-row">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC]">
-          {/* Detail-Header — Desktop unverändert; Tablet/Phone: sticky für Kontext beim Scrollen */}
+          {/* Detail-Header — mobil: kompakteres Padding, Sticky; Desktop: Figma-Abstände */}
           <div
-            className="z-[6] shrink-0 bg-white max-lg:sticky max-lg:top-0 max-lg:shadow-[0_1px_0_rgba(15,23,42,0.06)] lg:static lg:shadow-none"
-            style={headerPad}
+            className="z-[6] shrink-0 bg-white px-[clamp(20px,4vw,56px)] pb-2 pt-4 max-lg:sticky max-lg:top-0 max-lg:border-b max-lg:border-[rgba(15,23,42,0.06)] max-lg:shadow-[0_1px_0_rgba(15,23,42,0.06)] sm:pt-5 sm:pb-3 lg:static lg:border-b-0 lg:pb-0 lg:pt-[clamp(28px,5vw,48px)] lg:shadow-none"
           >
             <Suspense fallback={null}>
               <InboxMobileBack />
             </Suspense>
             <h2
-              className="text-[22px] sm:text-[24px]"
+              className="min-w-0 break-words text-[22px] sm:text-[24px]"
               style={{
                 color: "#0F172A",
                 fontWeight: 600,
@@ -240,7 +246,7 @@ export default async function InboxDetailPage({
             </h2>
 
             <p
-              className="text-[14px]"
+              className="min-w-0 break-words text-[14px]"
               style={{
                 color: "#64748B",
                 fontWeight: 500,
@@ -257,7 +263,7 @@ export default async function InboxDetailPage({
 
             {patientMeta ? (
               <p
-                className="text-[13px]"
+                className="text-[13px] break-words"
                 style={{
                   color: "#94A3B8",
                   fontWeight: 400,
@@ -271,18 +277,22 @@ export default async function InboxDetailPage({
 
             {submission.patient_email || submission.patient_phone ? (
               <p
-                className="mt-3 text-[13px] leading-relaxed"
+                className="mt-3 min-w-0 break-words text-[13px] leading-relaxed"
                 style={{ color: "#64748B", fontWeight: 400 }}
               >
                 {submission.patient_email ? (
-                  <span className="mr-3 inline-block">{submission.patient_email}</span>
+                  <span className="block break-words md:mr-3 md:inline-block">
+                    {submission.patient_email}
+                  </span>
                 ) : null}
-                {submission.patient_phone ? <span>{submission.patient_phone}</span> : null}
+                {submission.patient_phone ? (
+                  <span className="block break-words max-md:mt-1 md:inline">{submission.patient_phone}</span>
+                ) : null}
               </p>
             ) : null}
 
             {urgencyLine ? (
-              <div style={{ marginTop: "24px", paddingBottom: "24px" }}>
+              <div className="mt-3 pb-3 lg:mt-6 lg:pb-6">
                 <p
                   className="text-[14px]"
                   style={{
@@ -300,10 +310,10 @@ export default async function InboxDetailPage({
 
           {/* Scrollbarer Inhalt — Figma: background #FFFFFF, padding 24|32 / 56 / 56 */}
           <div
-            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-white [-webkit-overflow-scrolling:touch] max-lg:scroll-pb-8"
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-white [-webkit-overflow-scrolling:touch] pb-10 max-md:pb-12 md:pb-24 max-lg:scroll-pb-[max(6.5rem,var(--safe-area-bottom))]"
             style={scrollPad}
           >
-            <div style={{ marginBottom: "32px" }}>
+            <div className="mb-6 md:mb-8">
               <PhotoViewer
                 submissionId={submission.id}
                 photos={submission.photos}
@@ -311,7 +321,7 @@ export default async function InboxDetailPage({
               />
             </div>
 
-            <div style={{ marginBottom: "40px", maxWidth: "600px" }}>
+            <div className="mb-8 min-w-0 max-w-[600px] md:mb-10">
               <p
                 className="text-[15px]"
                 style={{
@@ -326,7 +336,7 @@ export default async function InboxDetailPage({
               </p>
             </div>
 
-            <div id="tracker-empfehlung" className="scroll-mt-24" style={{ maxWidth: "520px" }}>
+            <div id="tracker-empfehlung" className="min-w-0 max-w-[520px] scroll-mt-16 md:scroll-mt-24">
               <div style={{ marginBottom: "16px" }}>
                 <p
                   className="text-[13px]"
@@ -370,7 +380,7 @@ export default async function InboxDetailPage({
 
         {/* Hilfsspalte (Entwürfe/Terminlink) — Figma: schmale sekundäre Spalte, gleiche Canvas-Farbe */}
         <aside
-          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] pb-[max(12px,env(safe-area-inset-bottom))] max-lg:min-h-0 lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0 lg:pb-0"
+          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-lg:min-h-0 lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0 lg:pb-0"
         >
           <SubmissionActions
             submissionId={submission.id}

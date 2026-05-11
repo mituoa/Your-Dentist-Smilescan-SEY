@@ -50,6 +50,20 @@ export function FollowUpMessageDraft({
   const [flash, setFlash] = useState(false);
   const [copied, setCopied] = useState(false);
   const prevSig = useRef<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /** iOS Safari: Tastatur öffnen — Feld kurz in den sichtbaren Bereich scrollen (ohne Layout-Umbau). */
+  const scrollDraftIntoView = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const run = () =>
+      el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    window.requestAnimationFrame(() => {
+      run();
+      window.setTimeout(run, 280);
+      window.setTimeout(run, 520);
+    });
+  }, []);
 
   useEffect(() => {
     if (prevSig.current === null) {
@@ -105,7 +119,7 @@ export function FollowUpMessageDraft({
         };
 
   return (
-    <div className="touch-manipulation space-y-8">
+    <div className="touch-manipulation space-y-5 lg:space-y-8">
       <div
         className="transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none"
         style={{
@@ -118,14 +132,16 @@ export function FollowUpMessageDraft({
         }}
       >
         <textarea
+          ref={textareaRef}
           value={body}
           onChange={(e) => {
             setBody(e.target.value);
             setActiveSnippetId("custom");
           }}
+          onFocus={scrollDraftIntoView}
           rows={11}
           spellCheck={false}
-          className="min-h-[200px] w-full resize-y border-0 bg-transparent px-5 py-5 outline-none max-lg:min-h-[220px] max-lg:px-4 max-lg:py-4 lg:min-h-[240px] lg:px-6 lg:py-6"
+          className="min-h-[200px] w-full scroll-mt-6 resize-y border-0 bg-transparent px-5 py-5 outline-none max-lg:min-h-[220px] max-lg:px-4 max-lg:py-4 lg:min-h-[240px] lg:px-6 lg:py-6"
           style={{
             fontSize: "16px",
             lineHeight: 1.75,
@@ -155,7 +171,7 @@ export function FollowUpMessageDraft({
               transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
               ...chip(activeSnippetId === null),
             }}
-            className="max-lg:min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+            className="min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
           >
             Standard
           </button>
@@ -175,7 +191,7 @@ export function FollowUpMessageDraft({
                   transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
                   ...chip(active),
                 }}
-                className="max-lg:min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+                className="min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
               >
                 {s.label}
               </button>
