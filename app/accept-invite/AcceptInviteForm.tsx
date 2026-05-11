@@ -82,12 +82,16 @@ export function AcceptInviteForm({
         }}
       />
 
-      <div className="pointer-events-none fixed left-3 top-3 z-50 md:left-4 md:top-4">
-        <YourDentistBrandLockup size="sm" priority />
-      </div>
-
       <div className="relative z-10 w-full max-w-[500px]">
         <div className={glassCardClass} style={glassCardShadow}>
+          <div className="mb-6 flex justify-center border-b border-slate-200/60 pb-5 sm:mb-7 sm:pb-6">
+            <YourDentistBrandLockup
+              size="sm"
+              tagline="Neutral Practice Platform"
+              centered
+              priority
+            />
+          </div>
           {scenario === "invalid" && (
             <div className="space-y-6">
               <div className="flex flex-col items-center space-y-4 text-center">

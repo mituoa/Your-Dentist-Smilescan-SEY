@@ -27,7 +27,12 @@ export default async function ResetPasswordPage({
     <div className={AUTH_SCREEN_CANVAS_CLASS} style={authScreenCanvasStyle}>
       <div className={`flex min-h-[100dvh] flex-col ${AUTH_NARROW_COLUMN_CLASS}`}>
         <div className={AUTH_LOGO_BLOCK_CLASS}>
-          <YourDentistBrandLockup size="md" centered priority />
+          <YourDentistBrandLockup
+            size="md"
+            tagline="Neutral Practice Platform"
+            centered
+            priority
+          />
         </div>
 
         <div className={AUTH_CARD_SHELL_CLASS} style={authCardShellShadowStyle}>

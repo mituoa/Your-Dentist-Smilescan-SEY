@@ -67,7 +67,7 @@ export function YourDentistBrandLockup({
   const taglineNode = tagline ? (
     <p
       className={cn(
-        "max-w-[min(100%,20rem)] text-[9px] font-semibold uppercase leading-tight tracking-[0.15em] text-slate-500",
+        "max-w-[min(100%,20rem)] text-[9px] font-medium uppercase leading-tight tracking-[0.12em] text-slate-500/90",
         centered ? "text-center" : TAGLINE_INDENT[lockupSize]
       )}
     >

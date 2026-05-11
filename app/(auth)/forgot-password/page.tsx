@@ -21,7 +21,12 @@ export default async function ForgotPasswordPage({ searchParams }: ForgotPasswor
     <div className={AUTH_SCREEN_CANVAS_CLASS} style={authScreenCanvasStyle}>
       <div className={`flex min-h-[100dvh] flex-col ${AUTH_NARROW_COLUMN_CLASS}`}>
         <div className="mb-7 flex shrink-0 justify-center sm:mb-8">
-          <YourDentistBrandLockup size="md" centered priority />
+          <YourDentistBrandLockup
+            size="md"
+            tagline="Neutral Practice Platform"
+            centered
+            priority
+          />
         </div>
 
         <ForgotPasswordCard
