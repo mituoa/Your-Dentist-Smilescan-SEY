@@ -6,12 +6,22 @@ import Link from "next/link";
 import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
 import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-button";
+import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirmation-submit-button";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import {
   clearReturnToPricingFlag,
   markReturnToPricingFlag,
   RETURN_PRICING_STORAGE_KEY,
 } from "@/lib/login-pricing-return";
+
+function safeDecodeQueryParam(value: string | undefined): string {
+  if (!value) return "";
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
 
 interface LoginPageClientProps {
   queryError?: string;
@@ -146,8 +156,10 @@ export function LoginPageClient({
 
   const [resendEmail, setResendEmail] = useState(prefilledEmail);
 
+  const normalizedQueryError = useMemo(() => safeDecodeQueryParam(queryError).trim(), [queryError]);
+
   const parsedError = useMemo(() => {
-    const raw = (queryError ? decodeURIComponent(queryError) : "").trim();
+    const raw = normalizedQueryError;
     if (!raw) return null;
 
     if (raw === "account_pending_approval") {
@@ -155,6 +167,14 @@ export function LoginPageClient({
         tone: "info" as const,
         title: "Account wartet auf Freischaltung",
         body: "Wir prüfen Ihre Registrierung. Sobald Ihr Account freigeschaltet ist, können Sie sich anmelden.",
+      };
+    }
+
+    if (raw === "workspace_missing") {
+      return {
+        tone: "info" as const,
+        title: "Kein Praxiszugang gefunden",
+        body: "Ihrem Benutzerkonto ist derzeit keine Praxis zugeordnet, oder eine Team-Einladung ist noch ausstehend. Bitte prüfen Sie Ihre E‑Mails auf eine Einladung oder wenden Sie sich an Ihre Praxis.",
       };
     }
 
@@ -182,15 +202,15 @@ export function LoginPageClient({
       };
     }
 
-    // fallback: show original error (already used before)
+    // Unbekannter Hinweis — keine technischen Rohstrings (z. B. Supabase) anzeigen
     return {
       tone: "danger" as const,
-      title: "Anmeldung fehlgeschlagen",
-      body: raw,
+      title: "Anmeldung nicht möglich",
+      body: "Es liegt ein Problem mit Ihrem Zugang vor. Bitte versuchen Sie es erneut. Wenn das weiterhin auftritt, wenden Sie sich an Ihre Praxis oder den technischen Support.",
     };
-  }, [queryError]);
+  }, [normalizedQueryError]);
 
-  const shouldShowResend = (queryError ? decodeURIComponent(queryError).trim() : "") === "email_not_confirmed";
+  const shouldShowResend = normalizedQueryError === "email_not_confirmed";
 
   return (
     <div className="overflow-x-hidden">
@@ -248,7 +268,7 @@ export function LoginPageClient({
                 <button
                   type="button"
                   onClick={closePlanSheet}
-                  className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 md:min-h-0 md:min-w-0"
                   aria-label="Schließen"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -310,7 +330,7 @@ export function LoginPageClient({
         ) : null}
         {/* LOGIN SECTION */}
         <div
-          className="flex min-h-screen items-center justify-center bg-[#F8F7F3] pb-[max(2rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] md:pb-0"
+          className="flex min-h-[100dvh] items-center justify-center bg-[#F8F7F3] pb-[max(2rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] pt-[max(0.75rem,env(safe-area-inset-top,0px))] md:min-h-screen md:pb-0 md:pt-0"
           style={{
             backgroundImage:
               "radial-gradient(ellipse at center, rgba(255,255,255,0.6) 0%, rgba(248,247,243,0) 60%, rgba(240,240,240,0.3) 100%)",
@@ -397,7 +417,7 @@ export function LoginPageClient({
 
             {/* RIGHT SECTION */}
             <div className="w-full min-w-0 lg:w-[360px]">
-              <div className="mb-6 flex justify-center lg:mb-12 lg:hidden">
+              <div className="mb-12 flex justify-center lg:hidden">
                 <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
               </div>
 
@@ -419,7 +439,7 @@ export function LoginPageClient({
 
                 {parsedError ? (
                   <div
-                    className={`mb-6 rounded-xl border px-4 py-3 text-[14px] ${
+                    className={`mb-6 min-w-0 break-words rounded-xl border px-4 py-3 text-[14px] ${
                       parsedError.tone === "danger"
                         ? "border-red-200/70 bg-red-50/70 text-danger"
                         : parsedError.tone === "warning"
@@ -465,7 +485,7 @@ export function LoginPageClient({
                             ? `/forgot-password?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
                             : "/forgot-password"
                         }
-                        className="text-[13px] font-medium text-[#0284C7] hover:text-[#0369A1] transition-colors duration-150"
+                        className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1] max-md:py-2 md:min-h-0 md:py-0"
                       >
                         Passwort vergessen?
                       </Link>
@@ -485,7 +505,7 @@ export function LoginPageClient({
                 </form>
 
                 {shouldShowResend ? (
-                  <div className="mt-4 rounded-xl border border-amber-200/70 bg-amber-50/70 px-4 py-3">
+                  <div className="mt-4 min-w-0 break-words rounded-xl border border-amber-200/70 bg-amber-50/70 px-4 py-3">
                     <p className="text-[13px] font-semibold text-amber-900">Keine Bestätigungs‑E‑Mail erhalten?</p>
                     <p className="mt-1 text-[13px] text-amber-900/80">
                       Wir senden Ihnen den Bestätigungs‑Link erneut an die oben eingegebene Adresse.
@@ -495,12 +515,7 @@ export function LoginPageClient({
                         <input type="hidden" name="invite_token" value={inviteToken} />
                       ) : null}
                       <input type="hidden" name="email" value={resendEmail} />
-                      <button
-                        type="submit"
-                        className="w-full h-[44px] rounded-xl border border-amber-200 bg-white text-[13px] font-semibold text-amber-900 transition-colors hover:bg-amber-100/50"
-                      >
-                        Bestätigungs‑E‑Mail erneut senden
-                      </button>
+                      <ResendConfirmationSubmitButton />
                     </form>
                   </div>
                 ) : null}
@@ -561,7 +576,7 @@ export function LoginPageClient({
                         clearReturnToPricingFlag();
                         setActiveCta("trial");
                       }}
-                      className={`inline-flex h-8 items-center justify-center rounded-full border px-3 text-[11px] font-semibold transition-colors lg:h-9 lg:px-4 lg:text-[12px] ${
+                      className={`inline-flex h-11 min-h-[44px] items-center justify-center rounded-full border px-3 text-[11px] font-semibold transition-colors lg:h-9 lg:min-h-0 lg:px-4 lg:text-[12px] ${
                         activeCta === "trial"
                           ? "border-[#0284C7]/40 bg-[#0284C7]/10 text-[#0284C7]"
                           : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
@@ -572,7 +587,7 @@ export function LoginPageClient({
                     <button
                       type="button"
                       onClick={openPlanSheet}
-                      className={`inline-flex h-8 items-center justify-center rounded-full border px-3 text-[11px] font-semibold transition-colors lg:h-9 lg:px-4 lg:text-[12px] ${
+                      className={`inline-flex h-11 min-h-[44px] items-center justify-center rounded-full border px-3 text-[11px] font-semibold transition-colors lg:h-9 lg:min-h-0 lg:px-4 lg:text-[12px] ${
                         activeCta === "plan"
                           ? "border-[#0284C7]/40 bg-[#0284C7]/10 text-[#0284C7]"
                           : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"

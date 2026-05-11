@@ -35,5 +35,6 @@ export function userFacingAuthError(raw: string): string {
     return "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.";
   }
 
-  return m;
+  // Keine unbekannten Server-/Provider-Rohstrings in Redirect-URLs (Adresszeile, History, Logs).
+  return "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.";
 }

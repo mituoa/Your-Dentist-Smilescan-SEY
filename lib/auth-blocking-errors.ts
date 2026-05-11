@@ -10,7 +10,16 @@ export const BLOCKING_AUTH_ERROR_CODES = [
 
 const BLOCKING_SET = new Set<string>(BLOCKING_AUTH_ERROR_CODES);
 
+/** Längster Code in {@link BLOCKING_AUTH_ERROR_CODES} — schützt Middleware vor extrem langen `error`-Parametern. */
+const MAX_BLOCKING_ERROR_KEY_LEN = 64;
+
 export function isBlockingAuthError(error: string | null | undefined): boolean {
   if (!error) return false;
-  return BLOCKING_SET.has(error);
+  const t = error.trim();
+  if (!t) return false;
+  const key =
+    t.length > MAX_BLOCKING_ERROR_KEY_LEN
+      ? t.slice(0, MAX_BLOCKING_ERROR_KEY_LEN).toLowerCase()
+      : t.toLowerCase();
+  return BLOCKING_SET.has(key);
 }

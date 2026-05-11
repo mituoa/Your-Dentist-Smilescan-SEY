@@ -18,11 +18,22 @@ interface LoginPageProps {
   }>;
 }
 
+const MAX_QUERY_ERROR_LEN = 512;
+const MAX_INVITE_QUERY_LEN = 2048;
+const MAX_EMAIL_QUERY_LEN = 320;
+
+function clipQueryString(value: string | undefined, maxLen: number): string {
+  if (!value) return "";
+  const t = value.trim();
+  if (!t) return "";
+  return t.length > maxLen ? t.slice(0, maxLen) : t;
+}
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const queryError = params.error;
-  const inviteToken = params.invite?.trim() || "";
-  const prefilledEmail = params.email?.trim() || "";
+  const queryError = clipQueryString(params.error, MAX_QUERY_ERROR_LEN);
+  const inviteToken = clipQueryString(params.invite, MAX_INVITE_QUERY_LEN);
+  const prefilledEmail = clipQueryString(params.email, MAX_EMAIL_QUERY_LEN);
   const resent = params.resent === "1";
   const signedOut = params.signed_out === "1";
   const year = new Date().getFullYear();

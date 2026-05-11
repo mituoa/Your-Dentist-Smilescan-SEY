@@ -4,12 +4,12 @@ import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lo
 export default function RootLoading() {
   return (
     <div
-      className="flex min-h-[100dvh] w-full max-w-full min-w-0 flex-col items-center justify-center gap-3 px-4"
+      className="flex min-h-[100dvh] w-full max-w-full min-w-0 flex-col items-center justify-center gap-3 px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
       style={{ background: "#F7F9FC" }}
     >
       <YourDentistBrandLockup size="md" centered />
       <svg
-        className="h-5 w-5 shrink-0 animate-spin text-[#0284C7]/50"
+        className="h-4 w-4 shrink-0 animate-spin text-slate-400/80 motion-reduce:animate-none motion-reduce:opacity-60"
         viewBox="0 0 24 24"
         aria-hidden="true"
       >
