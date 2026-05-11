@@ -1002,12 +1002,12 @@ export function RegisterClient(props: {
 
               <div className="mb-8">
                 <div className="mb-4">
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between gap-2">
                     <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                      Fortschritt
+                      Ablauf
                     </span>
-                    <span className="text-[11px] font-semibold text-[#0284C7]">
-                      {Math.round(((registrationStep - 1) / 3) * 100)}%
+                    <span className="shrink-0 text-right text-[11px] font-semibold tabular-nums text-[#0284C7]">
+                      Schritt {registrationStep} von 4 · {Math.round(((registrationStep - 1) / 3) * 100)}%
                     </span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
@@ -1075,7 +1075,10 @@ export function RegisterClient(props: {
                           Einladung.
                         </>
                       ) : (
-                        <>Registrierung für den geprüften Zahnarzt-Praxiszugang – abschließend per E‑Mail bestätigen.</>
+                        <>
+                          Konto für Ihre Praxis — abschließend per E‑Mail bestätigen. Die Freigabe erfolgt nach
+                          fachlicher Prüfung.
+                        </>
                       )}
                     </p>
                   </div>
@@ -1350,7 +1353,8 @@ export function RegisterClient(props: {
                       Verifizierung
                     </h3>
                     <p className="text-[13px] text-gray-500">
-                      Bitte laden Sie Ihre Zahnarzt-Zulassung hoch (Vorder- und Rückseite).
+                      Bitte laden Sie Ihre Zahnarzt-Zulassung hoch — idealerweise Vorder- und Rückseite; mindestens
+                      eine Seite als Bild oder PDF.
                     </p>
                     {props.licenseStepOptional ? (
                       <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-gray-500">
@@ -1583,34 +1587,37 @@ export function RegisterClient(props: {
 
               {registrationStep === 4 ? (
                 <div style={{ animation: "slideIn 0.4s ease-out" }}>
-                  <div className="mb-7 text-center">
-                    <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Zahlungsintervall wählen
+                  <header className="mb-8 text-center md:mb-10">
+                    <h3 className="text-[22px] font-semibold leading-snug tracking-tight text-slate-900 md:text-[23px]">
+                      Tarif, Zahlungsweg und Zustimmungen
                     </h3>
-                    <p className="text-[13px] text-gray-500">
-                      Wählen Sie Ihr bevorzugtes Abrechnungsintervall — die Registrierung ist unabhängig von der
-                      Zahlungserfassung möglich.
+                    <p className="mx-auto mt-3 max-w-md text-[13px] leading-relaxed text-slate-600">
+                      Abschluss der Registrierung: Sie legen das Abrechnungsintervall fest und erteilen die
+                      vertraglich erforderlichen Einwilligungen. Die fachliche Freigabe Ihrer Praxis erfolgt separat.
                     </p>
-                  </div>
+                  </header>
 
-                  <div className="mb-6 rounded-2xl border border-slate-200/70 bg-slate-50/45 px-4 py-3.5 text-left">
+                  <div className="mb-8 rounded-xl border border-slate-200/90 bg-slate-50/60 px-4 py-4 text-left md:mb-10 md:px-5 md:py-4">
                     {props.skipPaymentAtSignup ? (
                       <>
-                        <p className="text-[12px] font-semibold text-gray-800">Zahlung in dieser Konfiguration</p>
-                        <ul className="mt-2 list-none space-y-1.5 text-[11px] leading-relaxed text-gray-600">
-                          <li>Über diese Registrierung wird hier kein Betrag eingezogen.</li>
-                          <li>Leistungsumfang und ggf. spätere Zahlungsaktivierung ergeben sich aus AGB und Onboarding.</li>
+                        <p className="text-[12px] font-medium text-slate-800">Hinweis zu dieser Umgebung</p>
+                        <ul className="mt-2.5 list-none space-y-2 text-[12px] leading-relaxed text-slate-600">
+                          <li>Über dieses Formular wird kein Betrag eingezogen.</li>
+                          <li>
+                            Leistungsumfang und eine spätere Zahlungsaktivierung ergeben sich aus den verlinkten
+                            Dokumenten und dem Onboarding.
+                          </li>
                         </ul>
                       </>
                     ) : (
                       <>
-                        <p className="text-[12px] font-semibold text-gray-800">Testphase und Online-Zahlung</p>
-                        <ul className="mt-2 list-none space-y-1.5 text-[11px] leading-relaxed text-gray-600">
+                        <p className="text-[12px] font-medium text-slate-800">Hinweis zu Zahlung und Testphase</p>
+                        <ul className="mt-2.5 list-none space-y-2 text-[12px] leading-relaxed text-slate-600">
                           <li>
-                            Wenn Sie eine Online-Zahlung abschließen, ist in der Regel mit einer begrenzten Testphase zu
-                            rechnen — Details im Checkout und Vertrag.
+                            Wenn Sie eine Online-Zahlung wählen, folgt im nächsten Schritt ein sicherer
+                            Zahlungsdialog — in der Regel mit begrenzter Testphase; Einzelheiten im Vertrag und dort.
                           </li>
-                          <li>Zahlungsmethode kann später angepasst werden.</li>
+                          <li>Die gewählte Zahlungsweise können Sie später im Rahmen des Vertrags anpassen.</li>
                         </ul>
                       </>
                     )}
@@ -1618,7 +1625,7 @@ export function RegisterClient(props: {
 
                   <form
                     action={props.signUpAction}
-                    className="block min-w-0"
+                    className="block min-w-0 space-y-8 md:space-y-10"
                     onSubmit={(e) => {
                       const sub = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null | undefined;
                       registerStep4SubmitIntentRef.current =
@@ -1626,233 +1633,244 @@ export function RegisterClient(props: {
                     }}
                   >
                     <RegisterStep4LockableFieldset>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {(Object.keys(plans) as Plan[]).map((key) => {
-                      const p = plans[key];
-                      const active = selectedPlan === key;
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => setSelectedPlan(key)}
-                          className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
-                            active
-                              ? "border-[#0284C7] shadow-md"
-                              : "border-gray-200 hover:border-[#0284C7] hover:shadow-sm"
-                          }`}
+                      <section aria-labelledby="reg-step4-tarif-heading" className="min-w-0">
+                        <h4
+                          id="reg-step4-tarif-heading"
+                          className="mb-4 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500"
                         >
-                          <div className="mb-2 flex items-center justify-between">
-                            <p className="text-[15px] font-semibold text-gray-900">{p.label}</p>
-                            {p.save ? (
-                              <span className="rounded-full bg-[#0284C7] px-2 py-0.5 text-[10px] font-semibold text-white">
-                                −{p.save}
-                              </span>
-                            ) : null}
+                          Abrechnungsintervall
+                        </h4>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+                          {(Object.keys(plans) as Plan[]).map((key) => {
+                            const p = plans[key];
+                            const active = selectedPlan === key;
+                            return (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() => setSelectedPlan(key)}
+                                className={`max-md:min-h-[52px] rounded-xl border px-4 py-3.5 text-left transition-colors duration-150 md:py-4 ${
+                                  active
+                                    ? "border-slate-500 bg-white ring-1 ring-slate-300/60"
+                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80"
+                                }`}
+                              >
+                                <div className="mb-2 flex items-start justify-between gap-2">
+                                  <p className="text-[14px] font-medium text-slate-900">{p.label}</p>
+                                  {p.save ? (
+                                    <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                      −{p.save}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <p className="mb-3 text-[11px] leading-snug text-slate-500">{p.billing}</p>
+                                <div className="flex items-baseline gap-1.5">
+                                  <span className="text-[1.35rem] font-semibold tabular-nums tracking-tight text-slate-800 md:text-[1.5rem]">
+                                    €{p.price}
+                                  </span>
+                                  <span className="text-[12px] text-slate-500">pro Monat</span>
+                                </div>
+                                {key !== "monthly" ? (
+                                  <p className="mt-2 text-[11px] text-slate-500">Gesamt je Periode: €{p.total}</p>
+                                ) : (
+                                  <p className="mt-2 text-[11px] text-slate-500">&nbsp;</p>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </section>
+
+                      <section
+                        aria-labelledby="reg-step4-summary-heading"
+                        className="rounded-xl border border-slate-200/90 bg-white px-4 py-5 md:px-6 md:py-6"
+                      >
+                        <h4
+                          id="reg-step4-summary-heading"
+                          className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
+                        >
+                          Zusammenfassung
+                        </h4>
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <p className="text-[14px] font-medium text-slate-900">Plattformnutzung</p>
+                            <p className="text-[12px] leading-relaxed text-slate-600">
+                              Abrechnungsrhythmus:{" "}
+                              <span className="font-medium text-slate-800">{plans[selectedPlan].billing}</span>
+                            </p>
+                            <p className="text-[12px] leading-relaxed text-slate-600">
+                              Aktivierung des Zugangs:{" "}
+                              <span className="font-medium text-slate-800">nach fachlicher Prüfung Ihrer Praxis</span>
+                            </p>
                           </div>
-                          <p className="mb-3 text-[11px] text-gray-500">{p.billing}</p>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-[28px] font-semibold text-gray-900">€{p.price}</span>
-                            <span className="text-[12px] text-gray-500">/Monat</span>
+                          <div className="shrink-0 border-t border-slate-100 pt-3 text-left sm:border-t-0 sm:border-l sm:pl-6 sm:pt-0 sm:text-right">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                              Monatlicher Betrag
+                            </p>
+                            <p className="mt-1 text-xl font-semibold tabular-nums text-slate-800 md:text-2xl">
+                              €{plans[selectedPlan].price}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-slate-500">pro Monat</p>
                           </div>
-                          {key !== "monthly" ? (
-                            <p className="mt-2 text-[11px] text-gray-500">€{p.total} Gesamt</p>
-                          ) : (
-                            <p className="mt-2 text-[11px] text-gray-500">&nbsp;</p>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                        </div>
 
-                  <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50/60 p-5">
-                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-gray-600">
-                      Bestellübersicht
-                    </p>
-                    <div className="mb-4 flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[15px] font-semibold text-gray-900">Your Dentist (Plattform)</p>
-                        <p className="mt-0.5 text-[12px] text-gray-600">
-                          Abrechnung: <span className="font-medium text-gray-900">{plans[selectedPlan].billing}</span>
+                        <div className="my-6 h-px w-full bg-slate-100" />
+
+                        <h4 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                          Bevorzugte Zahlungsweise
+                        </h4>
+                        <p className="mb-3 text-[12px] leading-relaxed text-slate-600">
+                          Diese Auswahl dient der Vorbereitung Ihres Vertragskontos; technische Umsetzung erfolgt im
+                          nächsten Schritt bzw. nach Freischaltung, je nach Konfiguration.
                         </p>
-                        <p className="mt-0.5 text-[12px] text-gray-600">
-                          Start: <span className="font-medium text-gray-900">sofort nach Freischaltung</span>
+                        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("sepa_debit")}
+                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
+                              paymentMethod === "sepa_debit"
+                                ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
+                                : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
+                          >
+                            <p className="text-[13px] font-medium text-slate-900">SEPA‑Lastschrift</p>
+                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
+                              {props.skipPaymentAtSignup
+                                ? "Abbuchung erst nach vertraglicher Freischaltung und Einrichtung."
+                                : "Wiederkehrend gemäß gewähltem Intervall."}
+                            </p>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("card")}
+                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
+                              paymentMethod === "card"
+                                ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
+                                : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
+                          >
+                            <p className="text-[13px] font-medium text-slate-900">Karte</p>
+                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
+                              {props.skipPaymentAtSignup
+                                ? "Kartendaten können nach Freischaltung ergänzt werden."
+                                : "Sichere Erfassung im folgenden Schritt."}
+                            </p>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={selectedPlan === "monthly"}
+                            onClick={() => setPaymentMethod("invoice")}
+                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
+                              selectedPlan === "monthly"
+                                ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"
+                                : paymentMethod === "invoice"
+                                  ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
+                                  : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
+                          >
+                            <p className="text-[13px] font-medium text-slate-900">Rechnung</p>
+                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
+                              {selectedPlan === "monthly"
+                                ? "Nur bei Halbjahres- oder Jahresintervall."
+                                : props.skipPaymentAtSignup
+                                  ? "Abstimmung nach Vereinbarung."
+                                  : "Zahlung auf Rechnung (Praxen)."}
+                            </p>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("paypal")}
+                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
+                              paymentMethod === "paypal"
+                                ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
+                                : "border-slate-200 bg-white hover:border-slate-300"
+                            }`}
+                          >
+                            <p className="text-[13px] font-medium text-slate-900">PayPal</p>
+                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
+                              {props.skipPaymentAtSignup
+                                ? "Optional nach Freischaltung."
+                                : "Optional im folgenden Schritt."}
+                            </p>
+                          </button>
+                        </div>
+                        <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-500">
+                          Unterstützte Verfahren umfassen unter anderem SEPA‑Lastschrift, Kartenzahlung und PayPal —
+                          je nach Tarif und Freigabestatus.
                         </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[22px] font-semibold text-gray-900">€{plans[selectedPlan].price}</p>
-                        <p className="text-[11px] text-gray-500">pro Monat</p>
-                      </div>
-                    </div>
+                      </section>
 
-                    <div className="h-px w-full bg-gray-200/70" />
-
-                    <p className="mt-4 mb-3 text-[12px] font-semibold uppercase tracking-wide text-gray-600">
-                      Zahlungsmethode
-                    </p>
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("sepa_debit")}
-                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
-                          paymentMethod === "sepa_debit"
-                            ? "border-[#0284C7] bg-white"
-                            : "border-gray-200 bg-white hover:border-[#0284C7]"
-                        }`}
+                      <section
+                        aria-labelledby="reg-step4-legal-heading"
+                        className="rounded-xl border border-slate-200/90 bg-slate-50/40 px-4 py-5 md:px-6 md:py-6"
                       >
-                        <p className="text-[14px] font-semibold text-gray-900">SEPA‑Lastschrift</p>
-                        <p className="mt-1 text-[12px] text-gray-600">
-                          {props.skipPaymentAtSignup
-                            ? "Für später — Abbuchung erst nach vertraglicher Freischaltung und Setup."
-                            : "Abbuchung automatisch gemäß gewähltem Intervall."}
+                        <h4
+                          id="reg-step4-legal-heading"
+                          className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
+                        >
+                          Vertrag und Einwilligungen
+                        </h4>
+                        <div className="space-y-3 md:space-y-3.5">
+                          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent bg-white/70 px-3 py-3 text-[13px] leading-snug text-slate-700 transition-colors hover:border-slate-200/90 md:py-2.5">
+                            <input
+                              type="checkbox"
+                              checked={acceptedTos}
+                              onChange={(e) => setAcceptedTos(e.target.checked)}
+                              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30 md:mt-1 md:h-4 md:w-4"
+                            />
+                            <span>
+                              Ich akzeptiere die{" "}
+                              <Link
+                                href="/agb"
+                                className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
+                              >
+                                AGB
+                              </Link>
+                              . *
+                            </span>
+                          </label>
+                          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent bg-white/70 px-3 py-3 text-[13px] leading-snug text-slate-700 transition-colors hover:border-slate-200/90 md:py-2.5">
+                            <input
+                              type="checkbox"
+                              checked={acceptedPrivacy}
+                              onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30 md:mt-1 md:h-4 md:w-4"
+                            />
+                            <span>
+                              Ich habe die{" "}
+                              <Link
+                                href="/datenschutz"
+                                className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
+                              >
+                                Datenschutzerklärung
+                              </Link>{" "}
+                              zur Kenntnis genommen. *
+                            </span>
+                          </label>
+                          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent bg-white/70 px-3 py-3 text-[13px] leading-snug text-slate-700 transition-colors hover:border-slate-200/90 md:py-2.5">
+                            <input
+                              type="checkbox"
+                              checked={acceptedWithdrawal}
+                              onChange={(e) => setAcceptedWithdrawal(e.target.checked)}
+                              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30 md:mt-1 md:h-4 md:w-4"
+                            />
+                            <span>
+                              Ich verlange ausdrücklich, dass Your Dentist vor Ablauf der Widerrufsfrist mit der
+                              Leistung beginnt, und bestätige, dass ich dadurch mein Widerrufsrecht verlieren kann. *
+                            </span>
+                          </label>
+                        </div>
+                        <p className="mt-4 border-t border-slate-200/80 pt-4 text-[11px] leading-relaxed text-slate-500">
+                          * Pflichtangaben.{" "}
+                          <Link
+                            href="/widerruf"
+                            className="font-medium text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-slate-900"
+                          >
+                            Widerrufsbelehrung
+                          </Link>
+                          . Vertragsdokumentation: <span className="font-medium text-slate-700">Version v1</span>
                         </p>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("card")}
-                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
-                          paymentMethod === "card"
-                            ? "border-[#0284C7] bg-white"
-                            : "border-gray-200 bg-white hover:border-[#0284C7]"
-                        }`}
-                      >
-                        <p className="text-[14px] font-semibold text-gray-900">Kreditkarte</p>
-                        <p className="mt-1 text-[12px] text-gray-600">
-                          {props.skipPaymentAtSignup
-                            ? "Für später — Kartendaten können nach Freischaltung ergänzt werden."
-                            : "Sicher bezahlen per Karte (Setup im nächsten Schritt)."}
-                        </p>
-                      </button>
-                      <button
-                        type="button"
-                        disabled={selectedPlan === "monthly"}
-                        onClick={() => setPaymentMethod("invoice")}
-                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
-                          selectedPlan === "monthly"
-                            ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
-                            : paymentMethod === "invoice"
-                              ? "border-[#0284C7] bg-white"
-                              : "border-gray-200 bg-white hover:border-[#0284C7]"
-                        }`}
-                      >
-                        <p className="text-[14px] font-semibold">Rechnung</p>
-                        <p className="mt-1 text-[12px]">
-                          {selectedPlan === "monthly"
-                            ? "Verfügbar ab Halbjährlich/Jährlich."
-                            : props.skipPaymentAtSignup
-                              ? "Für Praxen — Abrechnung nach Vereinbarung."
-                              : "Für Praxen – Zahlung per Rechnung."}
-                        </p>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("paypal")}
-                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
-                          paymentMethod === "paypal"
-                            ? "border-[#0284C7] bg-white"
-                            : "border-gray-200 bg-white hover:border-[#0284C7]"
-                        }`}
-                      >
-                        <p className="text-[14px] font-semibold text-gray-900">PayPal</p>
-                        <p className="mt-1 text-[12px] text-gray-600">
-                          {props.skipPaymentAtSignup
-                            ? "Für später — optional nach Freischaltung."
-                            : "Optionale Alternative (Setup im nächsten Schritt)."}
-                        </p>
-                      </button>
-                    </div>
-
-                    <div
-                      className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-gray-200/80 pt-4 text-[10px] font-medium uppercase tracking-wide text-gray-400"
-                      aria-label="Gängige Zahlungsarten"
-                    >
-                      <span className="inline-flex items-center gap-1.5">
-                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0 opacity-80">
-                          <path
-                            fill="#003087"
-                            d="M7.4 19.3H4L6.1 4.7h3.4l-2.1 14.6zm12.6-10.5c0-1.1-.8-1.7-2.2-1.7-1.5 0-3.3.1-5.1.4L12 19.3h3.2l.5-3.2h2.2c2.5 0 4.1-1.2 4.6-3.5.2-1 .1-1.8-.5-2.4-.5-.5-1.4-.8-2.5-.8h-2.1l.2-1.1c1.2-.1 2.1-.2 2.7-.2 1 0 1.6.2 2 .6.3.3.4.8.3 1.4z"
-                          />
-                          <path fill="#009cde" d="M19.5 8.8c-.5 3.2-2.8 4.3-5.6 4.3h-1.4l-1 6.2h2.7c.6 0 1.1-.4 1.2-1l.9-5.7c.1-.6-.3-1.1-.9-1.1h-.8z" />
-                        </svg>
-                        PayPal
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <svg width="22" height="14" viewBox="0 0 32 20" aria-hidden="true" className="shrink-0 opacity-85">
-                          <rect width="32" height="20" rx="3" fill="#1A1F71" />
-                          <path d="M11 14h4l1-8h-4l-1 8z" fill="#F9A533" />
-                        </svg>
-                        Visa
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <svg width="22" height="14" viewBox="0 0 32 20" aria-hidden="true" className="shrink-0 opacity-85">
-                          <rect width="32" height="20" rx="3" fill="#000" />
-                          <circle cx="13" cy="10" r="6" fill="#EB001B" />
-                          <circle cx="19" cy="10" r="6" fill="#F79E1B" />
-                        </svg>
-                        Mastercard
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <svg width="20" height="14" viewBox="0 0 28 20" aria-hidden="true" className="shrink-0 opacity-80">
-                          <rect width="28" height="20" rx="2" fill="none" stroke="currentColor" strokeWidth="1.2" />
-                          <path d="M4 12h20" stroke="currentColor" strokeWidth="1" />
-                          <path d="M8 8v8M14 6v12M20 8v8" stroke="currentColor" strokeWidth="0.8" />
-                        </svg>
-                        SEPA
-                      </span>
-                    </div>
-
-                    <p className="mt-4 mb-3 text-[12px] font-semibold uppercase tracking-wide text-gray-600">
-                      Vertrag & Einwilligungen
-                    </p>
-                    <label className="flex min-h-[44px] cursor-pointer items-start gap-3 text-[13px] text-gray-700 max-md:py-1 md:min-h-0 md:py-0">
-                      <input
-                        type="checkbox"
-                        checked={acceptedTos}
-                        onChange={(e) => setAcceptedTos(e.target.checked)}
-                        className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-[#0284C7] focus:ring-[#0284C7]/25 md:h-4 md:w-4"
-                      />
-                      <span>
-                        Ich akzeptiere die{" "}
-                        <Link href="/agb" className="font-medium text-[#0284C7] hover:underline">
-                          AGB
-                        </Link>
-                        . *
-                      </span>
-                    </label>
-                    <label className="mt-3 flex min-h-[44px] cursor-pointer items-start gap-3 text-[13px] text-gray-700 max-md:py-1 md:min-h-0 md:py-0">
-                      <input
-                        type="checkbox"
-                        checked={acceptedPrivacy}
-                        onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                        className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-[#0284C7] focus:ring-[#0284C7]/25 md:h-4 md:w-4"
-                      />
-                      <span>
-                        Ich habe die{" "}
-                        <Link href="/datenschutz" className="font-medium text-[#0284C7] hover:underline">
-                          Datenschutzerklärung
-                        </Link>{" "}
-                        gelesen. *
-                      </span>
-                    </label>
-                    <label className="mt-3 flex min-h-[44px] cursor-pointer items-start gap-3 text-[13px] text-gray-700 max-md:py-1 md:min-h-0 md:py-0">
-                      <input
-                        type="checkbox"
-                        checked={acceptedWithdrawal}
-                        onChange={(e) => setAcceptedWithdrawal(e.target.checked)}
-                        className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-[#0284C7] focus:ring-[#0284C7]/25 md:h-4 md:w-4"
-                      />
-                      <span>
-                        Ich verlange ausdrücklich, dass Your Dentist vor Ablauf der Widerrufsfrist mit der Leistung
-                        beginnt, und bestätige, dass ich dadurch mein Widerrufsrecht verlieren kann. *
-                      </span>
-                    </label>
-                    <p className="mt-4 text-[11px] text-gray-500">
-                      * Pflichtfelder.{" "}
-                      <Link href="/widerruf" className="font-medium text-[#0284C7] hover:underline">
-                        Widerrufsbelehrung
-                      </Link>
-                      . Version: <span className="font-medium">v1</span>
-                    </p>
-                  </div>
+                      </section>
                     </RegisterStep4LockableFieldset>
                     <RegisterStep4PendingIntentSync intentRef={registerStep4SubmitIntentRef} />
 
@@ -1885,16 +1903,16 @@ export function RegisterClient(props: {
                     ) : null}
 
                     {props.skipPaymentAtSignup ? (
-                      <p className="text-center text-[11px] leading-relaxed text-gray-500">
-                        Ihr gewählter Plan wird mit dem Konto verknüpft. Online-Zahlung ist in dieser Konfiguration
-                        deaktiviert — es erfolgt kein Checkout über diese Seite.
+                      <p className="text-center text-[12px] leading-relaxed text-slate-600">
+                        Ihr gewähltes Intervall wird mit dem Praxis-Konto verknüpft. In dieser Konfiguration erfolgt
+                        kein Zahlungsdialog über diese Seite.
                       </p>
                     ) : null}
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
                       <RegisterFormBackButton
                         onBack={() => goToStep(3)}
-                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-[52px] min-h-[48px] flex-1 rounded-lg border border-slate-200 bg-white text-[14px] font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:h-[52px]"
                       >
                         Zurück
                       </RegisterFormBackButton>
@@ -1905,17 +1923,19 @@ export function RegisterClient(props: {
                         submitIntentValue="standard"
                         label={
                           props.skipPaymentAtSignup
-                            ? "Konto anlegen (ohne Checkout)"
-                            : "Vertrag wählen & fortfahren"
+                            ? "Registrierung abschließen"
+                            : "Weiter zur vertraglichen Freischaltung"
                         }
-                        pendingLabel="Konto wird vorbereitet…"
+                        pendingLabel="Wird übermittelt…"
                         disabled={
                           !acceptedTos ||
                           !acceptedPrivacy ||
                           !acceptedWithdrawal ||
                           !registrationDocsSatisfied
                         }
-                        className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-[52px] min-h-[48px] flex-1 rounded-lg text-[14px] font-medium text-white transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 sm:h-[52px]"
+                        style={{ backgroundColor: "#1e293b" }}
+                        pendingStyle={{ backgroundColor: "#334155" }}
                       />
                     </div>
                     </div>
@@ -1924,41 +1944,40 @@ export function RegisterClient(props: {
                   props.registrationDemoServer &&
                   !props.skipPaymentAtSignup ? (
                     <div
-                      className="mt-3 rounded-2xl border border-dashed border-amber-300/90 bg-amber-50/80 p-4"
+                      className="mt-4 rounded-xl border border-dashed border-amber-300/80 bg-amber-50/70 p-4"
                       role="region"
                       aria-label="Demo-Registrierung ohne Zahlung"
                     >
                       <p className="mb-3 text-[12px] leading-relaxed text-amber-950">
-                        Nur für Demonstrations- oder Testumgebungen: Registrierung ohne Online-Checkout abschließen
-                        (serverseitig freigegeben).
+                        Nur für Demonstrations- oder Testumgebungen: Registrierung ohne Online-Zahlungsdialog
+                        abschließen (serverseitig freigegeben).
                       </p>
                       <RegisterFormSubmitButton
                         name="register_submit"
                         value="demo"
                         submitIntentRef={registerStep4SubmitIntentRef}
                         submitIntentValue="demo"
-                        label="Demo: Konto ohne Zahlung anlegen"
-                        pendingLabel="Demo wird abgeschlossen…"
+                        label="Test: ohne Zahlungsdialog abschließen"
+                        pendingLabel="Wird übermittelt…"
                         disabled={
                           !acceptedTos ||
                           !acceptedPrivacy ||
                           !acceptedWithdrawal ||
                           !registrationDocsSatisfied
                         }
-                        className="h-[52px] w-full min-h-[52px] rounded-xl border-2 border-amber-400/80 bg-white text-[14px] font-semibold text-amber-950 shadow-sm transition-all duration-200 active:scale-[0.99] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        style={{ background: "linear-gradient(to bottom, #fffbeb 0%, #ffffff 100%)" }}
-                        pendingStyle={{
-                          background: "linear-gradient(to bottom, #fef9c3 0%, #fef3c7 100%)",
-                        }}
+                        className="h-[50px] w-full min-h-[48px] rounded-lg border border-amber-400/70 bg-white text-[13px] font-medium text-amber-950 transition-colors duration-150 hover:bg-amber-50/90 disabled:cursor-not-allowed disabled:opacity-50"
+                        style={{ backgroundColor: "#fffbeb" }}
+                        pendingStyle={{ backgroundColor: "#fef3c7" }}
                       />
                     </div>
                   ) : null}
 
                   </form>
 
-                  <p className="mt-3 text-center text-[11px] text-gray-500">
-                    Sie wählen: <span className="font-medium text-gray-900">{plans[selectedPlan].label}</span>{" "}
-                    · {plans[selectedPlan].billing}
+                  <p className="mt-6 text-center text-[11px] leading-relaxed text-slate-500">
+                    Auswahl: <span className="font-medium text-slate-700">{plans[selectedPlan].label}</span>
+                    {" · "}
+                    {plans[selectedPlan].billing}
                   </p>
                 </div>
               ) : null}
@@ -1973,6 +1992,9 @@ export function RegisterClient(props: {
               >
                 <YourDentistBrandLockup size="md" centered />
                 <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-[#0284C7]/70 motion-reduce:animate-none motion-reduce:opacity-80" />
+                <p className="max-w-xs text-center text-[13px] leading-relaxed text-gray-500">
+                  Bitte kurz warten …
+                </p>
               </div>
             ) : null}
             </div>
