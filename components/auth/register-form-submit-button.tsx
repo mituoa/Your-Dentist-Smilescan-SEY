@@ -26,10 +26,12 @@ export function RegisterFormSubmitButton(props: {
   const intentAware = Boolean(props.submitIntentRef && props.submitIntentValue);
   const intentMatches =
     !intentAware ||
-    (props.submitIntentRef &&
-      props.submitIntentValue &&
-      props.submitIntentRef.current === props.submitIntentValue);
-  const isActivePending = pending && intentMatches;
+    Boolean(
+      props.submitIntentRef &&
+        props.submitIntentValue &&
+        props.submitIntentRef.current === props.submitIntentValue
+    );
+  const isActivePending = Boolean(pending && intentMatches);
   const disabled = Boolean(props.disabled) || pending;
   const idleBg =
     props.style ??

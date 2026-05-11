@@ -291,16 +291,18 @@ export async function signUp(formData: FormData) {
 
     const admin = createAdminClient();
     const membership = await waitForWorkspaceMembership(admin, userId);
-    if (!membership?.workspace_id) {
+    const workspaceId = membership?.workspace_id ?? null;
+    if (workspaceId === null) {
       console.error("[signUp] workspace membership not available after retries");
       await registerFail(
         "Die Praxis-Zuordnung konnte nicht zeitnah abgeschlossen werden. Bitte prüfen Sie Ihre E-Mail oder melden Sie sich an. Wenn das Problem bleibt, kontaktieren Sie den Support."
       );
+      return;
     }
 
     const { error: billingUpsertErr } = await admin.from("workspace_billing").upsert(
       {
-        workspace_id: membership.workspace_id,
+        workspace_id: workspaceId,
         status: "pending",
         updated_at: new Date().toISOString(),
       },
@@ -315,7 +317,7 @@ export async function signUp(formData: FormData) {
 
     const { error: contractErr } = await admin.from("workspace_contracts").upsert(
       {
-        workspace_id: membership.workspace_id,
+        workspace_id: workspaceId,
         user_id: userId,
         billing_interval: billingInterval,
         contract_version: contractVersion,
@@ -375,12 +377,12 @@ export async function signUp(formData: FormData) {
           subscription_data: {
             trial_period_days: 14,
             metadata: {
-              workspace_id: membership.workspace_id,
+              workspace_id: workspaceId,
               user_id: userId,
             },
           },
           metadata: {
-            workspace_id: membership.workspace_id,
+            workspace_id: workspaceId,
             user_id: userId,
             billing_interval: interval,
             payment_method: pm,
@@ -391,7 +393,7 @@ export async function signUp(formData: FormData) {
 
         const { error: billingStripeErr } = await admin.from("workspace_billing").upsert(
           {
-            workspace_id: membership.workspace_id,
+            workspace_id: workspaceId,
             status: "pending",
             stripe_checkout_session_id: session.id,
             updated_at: new Date().toISOString(),
