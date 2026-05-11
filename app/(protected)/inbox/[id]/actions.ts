@@ -18,6 +18,8 @@ import JSZip from "jszip";
  * Server-Actions für `/inbox/[id]`. **Punkt 8 — Fehler:** Rückgaben mit `error` nutzen **nur**
  * feste deutsche Kurzmeldungen; niemals PostgREST-/Storage-Rohstrings in die UI. Technische
  * Details nur serverseitig über {@link logPostgrest}. ZIP-Meldungen: `lib/inbox/submission-photo-download-errors.ts`.
+ * **Punkt 10:** `submitInboxTaskForReview` bindet Task an `submission_id` + Workspace vor Mutation;
+ * Mail-Fehler in `createTask` ohne Exception-Details im Log.
  */
 const MAX_ZIP_BYTES = 50 * 1024 * 1024;
 
@@ -344,8 +346,8 @@ export async function createTask(formData: FormData) {
     if (receiptRows.length > 0) {
       await upsertTaskReceipts(newTaskId, receiptRows);
     }
-  } catch (err) {
-    console.error("[createTask mail]", err);
+  } catch {
+    console.error("[createTask mail] failed");
   }
 
   revalidatePath(`/inbox/${submissionId}`);
@@ -360,6 +362,32 @@ export async function submitInboxTaskForReview(
   taskId: string,
   submissionId: string
 ) {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { error: "Arbeitsbereich nicht gefunden." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Nicht angemeldet." };
+
+  const { data: boundTask, error: lookupError } = await supabase
+    .from("tasks")
+    .select("id")
+    .eq("id", taskId)
+    .eq("submission_id", submissionId)
+    .eq("workspace_id", workspace.workspace_id)
+    .maybeSingle();
+
+  if (lookupError) {
+    logPostgrest("submitInboxTaskForReview bind", lookupError);
+  }
+  if (!boundTask) {
+    return { error: "Aufgabe nicht gefunden." };
+  }
+
   const result = await submitTaskForReview(taskId);
   if (result.success) {
     revalidatePath(`/inbox/${submissionId}`);
@@ -399,7 +427,7 @@ export async function sendAppointmentLink(submissionId: string) {
     .single();
 
   if (submissionLookupError || !submission) {
-    return { error: "Fall nicht gefunden." };
+    return { error: "Fall nicht gefunden oder kein Zugriff." };
   }
   if (!submission.patient_email) {
     return { error: "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt." };

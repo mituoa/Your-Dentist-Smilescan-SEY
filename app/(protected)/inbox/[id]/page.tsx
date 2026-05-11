@@ -42,6 +42,7 @@ import { markSubmissionSeen } from "./actions";
  * `markSubmissionSeen` / `updateSubmissionUrgency` / `createTask` / `downloadSubmissionPhotos` /
  * `sendAppointmentLink` prüfen **Workspace** (und wo nötig **Rolle**); `createTask` verifiziert
  * zusätzlich, dass die **Submission** zum Workspace gehört (RLS-INSERT auf `tasks` allein reicht nicht).
+ * `submitInboxTaskForReview` prüft **Task + Submission + Workspace** vor dem Statuswechsel.
  * **Signed URLs** / Storage-ZIP: nur Pfade aus der zuvor workspace-gefilterten Abfrage; Admin-Client
  * nur für Sign/Download, nicht für breitere Reads. **UI:** keine rohen DB-Fehlertexte.
  *
@@ -80,6 +81,19 @@ import { markSubmissionSeen } from "./actions";
  * (FAB/Safe-Area). **Touch:** Schnellnavigation & ZIP **≥44px**. Hilfsspalte: **`overscroll-y-contain`**,
  * Safe-Area unten, **`scroll-padding`** im inneren Scroll. **Final:** Entwurf **16px** Schrift (kein iOS-Zoom),
  * bei Fokus **`scrollIntoView`** (`FollowUpMessageDraft`).
+ *
+ * **Punkt 10 — Security (`/inbox/[id]`):** **Workspace:** `getSubmissionById(id, workspace_id)` +
+ * `notFound` bei Fremdfall; `getProfileData(workspace_id)` nur aus Server-Workspace.
+ * **RLS** (u. a. `submission_photos` über Submission) ergänzt App-Queries. **Actions** (`./actions.ts`):
+ * `workspace_id`-Filter bzw. vorherige **Submission-Zugehörigkeit** (`createTask`, `sendAppointmentLink`,
+ * `downloadSubmissionPhotos`); `submitInboxTaskForReview` bindet **`taskId` + `submissionId`** +
+ * Workspace vor `submitTaskForReview`. **ZIP/Sign:** Pfade nur serverseitig nach workspace-geprüfter
+ * Submission; **Client** erhält Fotos ohne `storage_path` (nur `id`, `sort_order`, `signed_url`).
+ * **Fehlersemantik:** feste deutsche Kurzmeldungen, kein Roh-PostgREST in UI; Server-Logs ohne
+ * PostgREST-Message-Body in `getSubmissionById` / `getTasksForSubmission` (nur `code`). **Layout:**
+ * `dynamic = "force-dynamic"` im Inbox-Layout — kein statischer Cache der Shell über Mandanten.
+ * **Command:** `InboxAssistHydration` setzt Kontext bei Unmount zurück — kein Nachziehen fremder
+ * Fälle in die Leiste nach Navigation.
  */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
@@ -316,7 +330,11 @@ export default async function InboxDetailPage({
             <div className="mb-6 md:mb-8">
               <PhotoViewer
                 submissionId={submission.id}
-                photos={submission.photos}
+                photos={submission.photos.map(({ id, sort_order, signed_url }) => ({
+                  id,
+                  sort_order,
+                  signed_url,
+                }))}
                 patientName={submission.patient_name || "Patient"}
               />
             </div>

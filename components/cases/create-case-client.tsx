@@ -72,13 +72,22 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
     };
   }, []);
 
-  /** Vollflächiges Overlay: Hintergrund-Scroll/Bounce unter iOS vermeiden (global, nicht nur Seiteninhalt). */
+  /** Scroll-Lock nur Mobile (< md): Sheet über dem Shell-Canvas; Desktop scrollt normal im `main`. */
   useEffect(() => {
     const html = document.documentElement;
-    const prev = html.style.overflow;
-    html.style.overflow = "hidden";
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => {
+      if (mq.matches) {
+        html.style.overflow = "hidden";
+      } else {
+        html.style.overflow = "";
+      }
+    };
+    apply();
+    mq.addEventListener("change", apply);
     return () => {
-      html.style.overflow = prev;
+      mq.removeEventListener("change", apply);
+      html.style.overflow = "";
     };
   }, []);
 
@@ -214,26 +223,58 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
 
   const busy = isPending || pendingKind !== null;
 
+  const actionFooter = (
+    <footer className="shrink-0 border-t border-slate-200/60 bg-white px-4 pt-4 pb-[max(1rem,var(--safe-area-bottom))] max-md:mt-2 max-md:border-t-0 max-md:bg-gradient-to-t max-md:from-[#FAFBFC] max-md:to-white max-md:pt-6 max-md:pb-[max(1.25rem,var(--safe-area-bottom))] md:border-[#E8EDF4] md:bg-white md:px-8 md:pt-6 md:pb-0 md:shadow-none">
+      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-end md:gap-3">
+        <button
+          type="button"
+          disabled={busy}
+          className="h-11 min-h-[44px] w-full rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] transition hover:bg-white/80 hover:text-[#64748B] disabled:pointer-events-none disabled:opacity-45 md:w-auto md:hover:bg-[#F8FAFC]"
+          onClick={() => submit(true)}
+        >
+          {pendingKind === "draft" ? "Entwurf wird gespeichert…" : "Speichern als Entwurf"}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          className="h-11 min-h-[44px] w-full rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] transition hover:bg-white/80 hover:text-[#0F172A] disabled:pointer-events-none disabled:opacity-45 md:w-auto md:hover:bg-[#F8FAFC]"
+          onClick={close}
+        >
+          Abbrechen
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          className="h-11 min-h-[44px] w-full rounded-[11px] px-8 text-[15px] font-semibold text-white shadow-[0_2px_10px_rgba(47,128,237,0.28)] transition-[box-shadow,transform,opacity] duration-150 hover:shadow-[0_4px_16px_rgba(47,128,237,0.38)] active:scale-[0.99] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-55 md:min-w-[200px] md:w-auto md:shadow-[0_4px_14px_rgba(47,128,237,0.35),0_1px_2px_rgba(15,23,42,0.06)] md:hover:shadow-[0_6px_20px_rgba(47,128,237,0.4)]"
+          style={{ background: "#2F80ED" }}
+          onClick={() => submit(false)}
+        >
+          {pendingKind === "publish" ? "Fall wird erstellt…" : "Fall erstellen"}
+        </button>
+      </div>
+    </footer>
+  );
+
   return (
     <>
-      {/* Wie Register/Login: Dim + Blur als eigene Fläche — wirkt ruhiger als flacher Layer-Button */}
+      {/* Nur Mobile: Dim + Tap außerhalb schließt — Desktop nutzt Shell-Hintergrund (#F7F9FC), kein Modal-Canvas */}
       <div
-        className="create-case-backdrop fixed inset-0 z-[998] bg-slate-900/55 backdrop-blur-md motion-reduce:backdrop-blur-sm pointer-events-none"
+        className="create-case-backdrop pointer-events-none fixed inset-0 z-[998] hidden bg-slate-900/55 backdrop-blur-md motion-reduce:backdrop-blur-sm max-md:block"
         aria-hidden
       />
       <button
         type="button"
         aria-label="Schließen"
-        className="fixed inset-0 z-[999] cursor-default border-0 bg-transparent p-0"
+        className="fixed inset-0 z-[999] hidden cursor-default border-0 bg-transparent p-0 max-md:block"
         onClick={close}
       />
 
-      <div className="pointer-events-none fixed inset-0 z-[1000] flex min-h-0 flex-col overflow-x-hidden overflow-y-hidden overscroll-y-contain max-md:justify-end max-md:px-[max(0.75rem,var(--safe-area-left))] max-md:pr-[max(0.75rem,var(--safe-area-right))] max-md:pb-[max(0.35rem,var(--safe-area-bottom))] max-md:pt-[max(0.35rem,var(--safe-area-top))] md:items-center md:justify-center md:overflow-y-auto md:p-6">
+      <div className="pointer-events-none max-md:fixed max-md:inset-0 max-md:z-[1000] max-md:flex max-md:min-h-0 max-md:flex-col max-md:overflow-x-hidden max-md:overflow-y-hidden max-md:overscroll-y-contain max-md:justify-end max-md:px-[max(0.75rem,var(--safe-area-left))] max-md:pr-[max(0.75rem,var(--safe-area-right))] max-md:pb-[max(0.35rem,var(--safe-area-bottom))] max-md:pt-[max(0.35rem,var(--safe-area-top))] md:pointer-events-auto md:relative md:z-0 md:mx-auto md:flex md:min-h-0 md:w-full md:max-w-[760px] md:flex-1 md:flex-col md:overflow-visible md:px-6 md:py-8 lg:px-10 lg:py-10">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-case-title"
-          className="create-case-modal pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden bg-white max-md:max-h-[min(90dvh,50rem)] max-md:flex-none max-md:rounded-[22px] max-md:border max-md:border-slate-200/65 max-md:shadow-[0_20px_60px_-18px_rgba(15,23,42,0.22),0_0_0_1px_rgba(15,23,42,0.04)] md:max-h-[min(100dvh-3rem,920px)] md:max-w-[680px] md:flex-none md:rounded-2xl md:shadow-[0_28px_80px_-12px_rgba(15,23,42,0.18),0_12px_32px_rgba(15,23,42,0.1),0_0_0_1px_rgba(15,23,42,0.04)]"
+          className="create-case-modal pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden bg-white max-md:max-h-[min(90dvh,50rem)] max-md:flex-none max-md:rounded-[22px] max-md:border max-md:border-slate-200/65 max-md:shadow-[0_20px_60px_-18px_rgba(15,23,42,0.22),0_0_0_1px_rgba(15,23,42,0.04)] md:max-h-none md:overflow-visible md:rounded-2xl md:border md:border-slate-200/70 md:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_40px_-12px_rgba(15,23,42,0.08)]"
           onClick={(e) => e.stopPropagation()}
         >
           <h1 id="create-case-title" className="sr-only">
@@ -269,8 +310,8 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             </div>
           </div>
 
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-white max-md:bg-[#FAFBFC]">
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-5 pt-4 [-webkit-overflow-scrolling:touch] max-md:scroll-pb-[max(9.5rem,var(--safe-area-bottom))] md:px-8 md:pb-6 md:pt-8 md:scroll-pb-28">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-white max-md:min-h-0 max-md:bg-[#FAFBFC] md:min-h-0">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 [-webkit-overflow-scrolling:touch] max-md:min-h-0 max-md:flex-1 max-md:px-4 max-md:pb-2 max-md:pt-4 md:flex-none md:overflow-visible md:px-8 md:pb-10 md:pt-8">
               {/* Desktop: unverändert ruhiger Einstieg */}
               <header className="mb-6 hidden md:mb-8 md:block">
                 <p
@@ -524,37 +565,8 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
               )}
             </section>
           </div>
+          {actionFooter}
           </div>
-
-          <footer className="shrink-0 border-t border-slate-200/60 bg-white px-4 pt-4 pb-[max(1rem,var(--safe-area-bottom))] max-md:bg-gradient-to-t max-md:from-[#FAFBFC] max-md:to-white max-md:shadow-[0_-10px_40px_-16px_rgba(15,23,42,0.06)] md:border-[#E8EDF4] md:bg-white md:px-8 md:pt-5 md:pb-[max(1.25rem,var(--safe-area-bottom))] md:shadow-[0_-12px_32px_-12px_rgba(15,23,42,0.07)]">
-            <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-end md:gap-3">
-            <button
-              type="button"
-              disabled={busy}
-              className="h-11 min-h-[44px] w-full rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] transition hover:bg-white/80 hover:text-[#64748B] disabled:pointer-events-none disabled:opacity-45 md:w-auto md:hover:bg-[#F8FAFC]"
-              onClick={() => submit(true)}
-            >
-              {pendingKind === "draft" ? "Entwurf wird gespeichert…" : "Speichern als Entwurf"}
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              className="h-11 min-h-[44px] w-full rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] transition hover:bg-white/80 hover:text-[#0F172A] disabled:pointer-events-none disabled:opacity-45 md:w-auto md:hover:bg-[#F8FAFC]"
-              onClick={close}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              className="h-11 min-h-[44px] w-full rounded-[11px] px-8 text-[15px] font-semibold text-white shadow-[0_2px_10px_rgba(47,128,237,0.28)] transition-[box-shadow,transform,opacity] duration-150 hover:shadow-[0_4px_16px_rgba(47,128,237,0.38)] active:scale-[0.99] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-55 md:min-w-[200px] md:w-auto md:shadow-[0_4px_14px_rgba(47,128,237,0.35),0_1px_2px_rgba(15,23,42,0.06)] md:hover:shadow-[0_6px_20px_rgba(47,128,237,0.4)]"
-              style={{ background: "#2F80ED" }}
-              onClick={() => submit(false)}
-            >
-              {pendingKind === "publish" ? "Fall wird erstellt…" : "Fall erstellen"}
-            </button>
-            </div>
-          </footer>
         </div>
       </div>
       </div>

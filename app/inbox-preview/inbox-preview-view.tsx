@@ -175,7 +175,6 @@ export function InboxPreviewView() {
       ? [
           {
             id: "demo-1",
-            storage_path: "demo/preview.jpg",
             sort_order: 0,
             signed_url: selected.photoUrl,
           },

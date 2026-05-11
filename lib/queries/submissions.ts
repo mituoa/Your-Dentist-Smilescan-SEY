@@ -98,8 +98,7 @@ async function getSubmissionByIdInner(
     const row = error as { code?: string; message?: string } | undefined;
     const code =
       typeof row?.code === "string" && row.code.trim() !== "" ? row.code : "unknown";
-    const message = typeof row?.message === "string" ? row.message : "";
-    console.error("[submissions] getSubmissionById failed", `code=${code}`, message || undefined);
+    console.error("[submissions] getSubmissionById failed", `code=${code}`);
     return null;
   }
 
@@ -183,8 +182,7 @@ export async function getTasksForSubmission(
     const row = error as { code?: string; message?: string };
     const code =
       typeof row?.code === "string" && row.code.trim() !== "" ? row.code : "unknown";
-    const message = typeof row?.message === "string" ? row.message : "";
-    console.error("[submissions] getTasksForSubmission failed", `code=${code}`, message || undefined);
+    console.error("[submissions] getTasksForSubmission failed", `code=${code}`);
     return [];
   }
 

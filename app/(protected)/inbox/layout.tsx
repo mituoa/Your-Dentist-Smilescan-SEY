@@ -59,6 +59,8 @@ function SearchFallback() {
  *
  * **Punkt 10 — Security:** RLS + Session-Client; `dynamic = "force-dynamic"`; Such-Härtung in
  * `getInboxSubmissions` (s. `lib/queries/inbox.ts`). Migration **030** für `current_workspace_id()`.
+ * **Detail** (`/inbox/[id]`): `getSubmissionById(id, workspace_id)`, Actions in `[id]/actions.ts`,
+ * Fotos an den Client ohne Storage-Pfad — s. `page.tsx` Punkt 10.
  *
  * **Punkt 11 — MVP/Pilot:** Fokus **Intake-Liste + Fallöffnung** (Desktop Auto-Select erster Fall),
  * **einfache Suche** (`q`, Name/E-Mail), **ein Workspace** ohne Switch, **keine Pagination** auf

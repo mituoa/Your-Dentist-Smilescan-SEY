@@ -18,7 +18,6 @@ import {
 
 interface Photo {
   id: string;
-  storage_path: string;
   sort_order: number;
   signed_url: string | null;
 }
@@ -46,7 +45,8 @@ function base64ToBytes(base64: string): Uint8Array {
 /**
  * Bildbereich — Figma: maxHeight 220px. **Leerzustände (Punkt 7):** keine Fotos = sachlicher Hinweis
  * (kein Fehler); fehlende signierte URL = keine Vorschau, nicht „defekt“. **Punkt 8:** ZIP-Fehler
- * nur über `safeSubmissionPhotoDownloadErrorMessage` (gleiche Texte wie Server-Aktion).
+ * nur über `safeSubmissionPhotoDownloadErrorMessage` (gleiche Texte wie Server-Aktion). **Punkt 10:**
+ * an den Client nur `id` / `sort_order` / `signed_url` — kein Storage-Pfad im Props-Bundle.
  */
 export function PhotoViewer({
   submissionId,
@@ -115,7 +115,6 @@ export function PhotoViewer({
         setDownloadStatus("idle");
       }, 1800);
     } catch {
-      console.error("[PhotoViewer] ZIP download failed");
       setDownloadStatus("error");
       setDownloadError(submissionPhotoDownloadErrors.generic);
     }
