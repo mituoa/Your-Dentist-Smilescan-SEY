@@ -1,4 +1,4 @@
-import { signOut } from "@/app/(auth)/actions";
+import { AUTH_SIGN_OUT_PATH } from "@/lib/auth/sign-out-constants";
 import { LogOut } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -53,7 +53,7 @@ export function UserMenu({
           </div>
         )}
       </div>
-      <form action={signOut}>
+      <form action={AUTH_SIGN_OUT_PATH} method="post">
         <button
           type="submit"
           className="flex h-9 w-9 items-center justify-center rounded border border-white/70 bg-white/75 text-text-secondary shadow-[0px_6px_14px_rgba(15,23,42,0.08)] transition-colors hover:bg-white hover:text-text-primary"

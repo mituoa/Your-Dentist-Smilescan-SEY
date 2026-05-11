@@ -19,6 +19,7 @@ import {
   removeLogo,
 } from "@/app/(protected)/settings/actions";
 import { setThemePreference } from "@/app/actions/theme";
+import { signOutWithFullPageRedirect } from "@/lib/auth/sign-out-client";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 import {
   clinicalFormColumnMax,
@@ -305,10 +306,8 @@ export function SettingsFigmaView({
 
   const handleLogout = () => {
     void (async () => {
-      const supabase = createClient();
-      await supabase.auth.signOut();
       clearReturnToPricingFlag();
-      router.push("/login?signed_out=1");
+      await signOutWithFullPageRedirect();
     })();
   };
 

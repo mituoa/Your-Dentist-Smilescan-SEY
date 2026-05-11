@@ -18,14 +18,6 @@ import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 import { getStripePriceIdForInterval, getStripeServer } from "@/lib/stripe/server";
 
-function sanitizeReturnTo(value: string | null | undefined): string | null {
-  if (!value || typeof value !== "string") return null;
-  const v = value.trim();
-  if (!v.startsWith("/") || v.startsWith("//")) return null;
-  if (v.startsWith("/accept-invite") || v.startsWith("/login")) return v;
-  return null;
-}
-
 export async function signInWithGoogle(formData: FormData) {
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
 
@@ -389,19 +381,6 @@ export async function signUp(formData: FormData) {
     redirect("/dashboard");
   }
   redirect(`/register?success=1&email=${encodeURIComponent(email)}`);
-}
-
-export async function signOut(formData?: FormData) {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  revalidatePath("/", "layout");
-  const raw = formData?.get("return_to");
-  const to = sanitizeReturnTo(typeof raw === "string" ? raw : null);
-  // Always land on plain login after logout (top of page, no pricing hash). Accept-invite may opt back into its flow.
-  if (to && to.startsWith("/accept-invite")) {
-    redirect(to);
-  }
-  redirect("/login?signed_out=1");
 }
 
 export async function requestPasswordResetFromLogin(formData: FormData) {

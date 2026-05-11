@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 import { AlertCircle, ArrowRight, CheckCircle2, LogOut } from "lucide-react";
 import { acceptInvitation } from "@/app/(protected)/settings/actions";
-import { signOut } from "@/app/(auth)/actions";
+import { AUTH_SIGN_OUT_PATH } from "@/lib/auth/sign-out-constants";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { Button } from "@/components/ui/button";
 
@@ -205,7 +205,7 @@ export function AcceptInviteForm({
                   melden Sie sich ab.
                 </p>
               </div>
-              <form action={signOut} className="w-full">
+              <form action={AUTH_SIGN_OUT_PATH} method="post" className="w-full">
                 <input type="hidden" name="return_to" value={returnToAccept} />
                 <Button
                   type="submit"
@@ -237,7 +237,7 @@ export function AcceptInviteForm({
                   abmelden.
                 </p>
               </div>
-              <form action={signOut} className="w-full">
+              <form action={AUTH_SIGN_OUT_PATH} method="post" className="w-full">
                 <input type="hidden" name="return_to" value={returnToAccept} />
                 <Button
                   type="submit"

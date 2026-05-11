@@ -1,23 +1,19 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
-import { useRouter } from "next/navigation";
+import { signOutWithFullPageRedirect } from "@/lib/auth/sign-out-client";
 import { useTransition } from "react";
 import { SectionHeader } from "./section-header";
 
 export function DangerZone() {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
     if (!confirm("Wirklich abmelden?")) return;
     startTransition(async () => {
-      const supabase = createClient();
-      await supabase.auth.signOut();
       clearReturnToPricingFlag();
-      router.push("/login?signed_out=1");
+      await signOutWithFullPageRedirect();
     });
   };
 
