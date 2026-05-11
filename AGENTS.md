@@ -22,6 +22,26 @@ Implementierungen sind **nicht nur bei expliziten Audits**, sondern **standardm�
 - **Keine rohen technischen Fehler** in der UI: nutzerorientierte, ruhige deutsche Texte (z. B. `userFacingAuthError` oder gleichwertige zentrale Mapper); unbekannte kurze Strings nicht willkürlich verwischen, wenn sie bereits verifizierte Produktcopy sind (siehe bestehende Auth-Error-Helfer).
 - **Stabile Pending-/Race-/Retry-Flows:** während Mutationen konkurrierende Aktionen sperren; Submit-Intent nach Fehler zurücksetzen; Back/Forward und Multi-Tab berücksichtigen (`aria-busy`, Redirect-Keys, Session-Flags wo sinnvoll).
 
+### Premium UX, Trust & Recovery (**streng** — nicht nur „technisch OK“)
+
+Technisch funktionierende UI **reicht nicht**. Jede **wichtige Oberfläche** (u. a. Login, Register, Forgot/Reset-Passwort, Uploads sensibler Nachweise, kritische Schritte in Dashboard/Case/Billing) muss **zusätzlich** gegen folgende Wahrnehmungskriterien geprüft und ausgerichtet werden:
+
+- Wirkt die Oberfläche **ruhig**? **vertrauenswürdig**? **hochwertig**? **medizinisch-professionell**? **kontrolliert**? Wie **echte Enterprise-Software**?
+- Fühlt sich der Flow **stabil und bewusst gestaltet** an (Leseführung, Rhythmus, keine hektischen Sprünge)?
+
+**Besonders prüfen:** Error-, Success- und **Recovery**-Zustände; **Resend**-Flows; **leere** Zustände; **Invite**-Flows; **langsames Netz**; **Mobile Safari** / kleine Geräte; **Browser Back/Forward**; **Multi-Tab**; **Session-Wechsel**; **abgelaufene Links/Tokens**; **Loading/Pending** (konsistente Disabled-Zustände, keine widersprüchlichen Spinner).
+
+**Visuell & inhaltlich vermeiden:** generische **Template-SaaS**-Muster; **zu laute** Preis-/Commerce-Optik wo kein Shop-Kontext; **aggressive** CTAs; **unstabile** Übergänge; **billige** Wizard-/Auth-Momente; **visuelle Unruhe** und schwache **vertikale Rhythmik**; **unkontrollierte** Scroll-Erfahrung (abgeschnittene CTAs, doppelte Scroll-Ketten).
+
+**Security- und Datenschutz-Kommunikation in der UI** (nicht die technische Implementierung — die bleibt serverseitig streng):
+
+- **Ruhig, professionell, präzise, vertrauenswürdig** formulieren.
+- **Keine** unnötig **technischen** Security-Hinweise und **kein** StackOverflow-/Developer-Jargon für Endnutzerinnen.
+- **Keine Fake-Trust-Claims** (siehe auch Zertifizierungs-Regel oben).
+- Enumeration und andere Schutzmechanismen **elegant** kommunizieren (Recovery-Hinweise, Posteingang/Spam, neutrale Formulierungen) — nicht als kalter „Security-Disclaimer“.
+
+**Orientierung:** etablierte **Medical-/Health-/Enterprise**-Produkte — **Enterprise-glatte UX**, nicht nur funktional korrekte UX.
+
 ### Security, Datenschutz & Registrierung (Medical / Health SaaS)
 
 Alle Security-, Datenschutz- und Registrierungs-Flows so bewerten und gestalten, dass sie diesen Standard erfüllen — **ab jetzt standardmäßig** bei jeder relevanten Änderung mitdenken.
@@ -72,6 +92,7 @@ Bei **neuen** kritischen Aktionen diesen Standard prüfen und analog umsetzen.
 
 ### Checkliste vor Merge (Selbstprüfung)
 
+- [ ] **Premium UX / Trust / Recovery:** Für alle berührten **kritischen Oberflächen** die Kriterien im Abschnitt *„Premium UX, Trust & Recovery“* erfüllt (nicht nur „baut ohne Fehler“)?
 - [ ] Leere / halbe / verwirrende Zustände vermieden (inkl. schlechte Query-Params, Back/Forward)?
 - [ ] Fehler verständlich, recoverbar, ohne Schuldzuweisung am Nutzer?
 - [ ] Mobile: Touch-Ziele, Scroll, Safe Area, keine doppelte Scroll-Hölle?

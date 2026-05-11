@@ -44,10 +44,12 @@ function ForgotPasswordSubmitButton({
   return (
     <Button
       type="submit"
-      variant="primary"
+      variant={sent ? "secondary" : "primary"}
       disabled={disabled}
       aria-busy={pending}
-      className="h-11 w-full rounded-lg text-[14px] font-medium shadow-none transition-colors duration-150 hover:shadow-sm disabled:opacity-[0.55] sm:h-12 sm:rounded-xl sm:text-[15px]"
+      className={`h-11 w-full rounded-lg text-[14px] font-medium shadow-none transition-colors duration-150 sm:h-12 sm:rounded-xl sm:text-[15px] ${
+        sent ? "border-slate-200 text-slate-800 hover:bg-slate-50 disabled:opacity-50" : "hover:shadow-sm disabled:opacity-[0.55]"
+      }`}
     >
       {pending ? "Wird gesendet …" : label}
     </Button>
@@ -92,30 +94,21 @@ export function ForgotPasswordCard(props: {
         <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-slate-900 sm:text-2xl">
           Passwort zurücksetzen
         </h1>
-        <p className="mx-auto mt-2 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-2.5 sm:text-[14px]">
-          Geben Sie die E-Mail-Adresse Ihrer Praxis ein. Wir senden Ihnen einen persönlichen, zeitlich begrenzten Link
-          zum Zurücksetzen — nur an diese Adresse.
-        </p>
-      </header>
-
-      {sent ? (
-        <div
-          className="mb-5 rounded-xl border border-slate-200/90 bg-slate-50/40 px-4 py-4 sm:mb-6 sm:px-5 sm:py-4"
-          role="status"
-          aria-live="polite"
-        >
-          <p className="text-[12px] font-semibold uppercase tracking-widest text-slate-500">Nächste Schritte</p>
-          <p className="mt-2.5 text-left text-[13px] leading-relaxed text-slate-700 sm:text-sm">
-            Falls ein Konto mit dieser Adresse bei uns hinterlegt ist, erhalten Sie in den nächsten Minuten eine E-Mail
-            mit einem sicheren Link. Bitte prüfen Sie auch den Spam- oder Werbeordner.
+        {sent ? (
+          <div className="mx-auto mt-3 max-w-sm space-y-2" role="status" aria-live="polite">
+            <p className="text-[14px] font-normal leading-snug text-slate-800 sm:text-[15px]">
+              Bitte prüfen Sie Ihren Posteingang.
+            </p>
+            <p className="text-[13px] font-normal leading-relaxed text-slate-600 sm:text-[14px]">
+              Falls ein Konto gefunden wurde, erhalten Sie in wenigen Minuten eine E-Mail.
+            </p>
+          </div>
+        ) : (
+          <p className="mx-auto mt-2 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-2.5 sm:text-[14px]">
+            E-Mail-Adresse eingeben. Sie erhalten einen sicheren Link zum Zurücksetzen.
           </p>
-          <ul className="mt-3 list-none space-y-1.5 border-t border-slate-200/70 pt-3 text-left text-[12px] leading-relaxed text-slate-600">
-            <li>Posteingang prüfen</li>
-            <li>Spam / Werbung prüfen</li>
-            <li>Absender als vertrauenswürdig markieren (falls nötig)</li>
-          </ul>
-        </div>
-      ) : null}
+        )}
+      </header>
 
       {errorDisplay ? (
         <p
@@ -147,30 +140,19 @@ export function ForgotPasswordCard(props: {
         <ForgotPasswordSubmitButton sent={sent} cooldownSec={cooldownSec} />
       </form>
 
-      {sent ? (
-        <div className="mt-5 rounded-lg border border-dashed border-slate-200/90 bg-slate-50/30 px-3 py-3 sm:mt-6 sm:px-4">
-          <p className="text-center text-[12px] font-medium text-slate-700">Keine E-Mail erhalten?</p>
-          <p className="mx-auto mt-1.5 max-w-sm text-center text-[11px] leading-relaxed text-slate-500">
-            Adresse prüfen, Spam-Ordner leeren oder nach Ablauf des Kurzintervalls erneut senden. Bei anhaltenden
-            Problemen erreichen Sie uns über die Anbieterangaben.
-          </p>
-        </div>
-      ) : null}
-
       <div className="mt-6 border-t border-slate-100 pt-5 text-center sm:mt-7 sm:pt-6">
-        <p className="text-[12px] leading-relaxed text-slate-500">
-          Probleme beim Zugriff?{" "}
+        <p className="text-[11px] text-slate-400">
           <Link
             href="/impressum"
-            className="font-medium text-slate-700 underline decoration-slate-300 underline-offset-2 transition-colors hover:text-slate-900 hover:decoration-slate-500"
+            className="text-slate-500 underline decoration-slate-200/80 underline-offset-2 transition-colors hover:text-slate-700 hover:decoration-slate-400"
           >
             Anbieter & Kontakt
           </Link>
         </p>
-        <p className="mt-5 text-[13px] text-slate-600 sm:mt-6">
+        <p className="mt-4 text-[13px] text-slate-600 sm:mt-5">
           <Link
             href={loginHref}
-            className="font-medium text-[#0284C7] underline-offset-2 transition-colors hover:text-[#0369A1] hover:underline"
+            className="font-medium text-slate-700 underline-offset-2 transition-colors hover:text-slate-900 hover:underline"
           >
             Zurück zum Login
           </Link>
