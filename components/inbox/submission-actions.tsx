@@ -30,7 +30,8 @@ const shell = "rounded-lg border border-[#E5E7EB] bg-white shadow-none";
 const sectionPad = "px-4 py-5 sm:px-5 sm:py-6";
 
 /**
- * Rechte Spalte: kompakter Kommunikations-Workspace (untergeordnet zur medizinischen Mitte).
+ * Rechte Spalte: **unterstützende Praxis-Kommunikation** (Entwürfe, Terminlink) — untergeordnet
+ * zur Triage-Mitte. Kein Postfach, kein Chat-Verlauf, kein CRM-Case-Workspace.
  */
 export function SubmissionActions({
   submissionId,
@@ -62,10 +63,11 @@ export function SubmissionActions({
                 Korrespondenz
               </h2>
               <p className="text-[13px] font-semibold leading-snug tracking-tight text-slate-800">
-                Patientenkommunikation
+                Rückmeldung an den Patienten
               </p>
               <p className="text-[12px] leading-relaxed text-slate-600">
-                Vorlagen, Entwurf prüfen, manuell versenden. Kein automatischer Versand.
+                Vorlagen und Entwurf — in Ihrem Kanal (Telefon, Praxis-SMS, E-Mail) manuell nutzen.
+                Kein automatischer Versand aus SmileScan.
               </p>
             </div>
             <FollowUpMessageDraft
@@ -78,10 +80,10 @@ export function SubmissionActions({
 
           <div id="tracker-termin" className={`scroll-mt-6 border-b border-slate-100 ${sectionPad}`}>
             <h2 className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-              Terminlogik
+              Terminlink
             </h2>
             <p className="mb-3 text-[12px] leading-relaxed text-slate-600">
-              Link teilen oder E-Mail mit Terminoption — je nach Ablauf in der Praxis.
+              Terminlink per E-Mail an die hinterlegte Adresse — nur nach Klick, nicht im Hintergrund.
             </p>
             <AppointmentLinkButton
               submissionId={submissionId}

@@ -133,7 +133,7 @@ export function FollowUpMessageDraft({
             color: "#0F172A",
             fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
           }}
-          aria-label="Nachrichtentwurf"
+          aria-label="Entwurf zur Patienten-Rückmeldung — wird nicht automatisch versendet"
           data-tracker-draft
         />
       </div>

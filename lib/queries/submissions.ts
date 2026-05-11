@@ -2,6 +2,7 @@ import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
+import { getCurrentWorkspace } from "@/lib/auth-helpers";
 
 const SIGNED_PHOTO_URL_TTL_SEC = 3600;
 
@@ -48,6 +49,7 @@ async function signSubmissionPhotos(
     sort_order: number;
   }>
 ) {
+  // Admin nur für Sign — storage_path stammt aus workspace-gefilterter Submission-Abfrage.
   const admin = createAdminClient();
   return Promise.all(
     sortedPhotos.map(async (photo) => {
@@ -93,7 +95,11 @@ async function getSubmissionByIdInner(
 
   const { data, error } = res;
   if (error || !data) {
-    console.error("[submissions] getSubmissionById failed:", error);
+    const row = error as { code?: string; message?: string } | undefined;
+    const code =
+      typeof row?.code === "string" && row.code.trim() !== "" ? row.code : "unknown";
+    const message = typeof row?.message === "string" ? row.message : "";
+    console.error("[submissions] getSubmissionById failed", `code=${code}`, message || undefined);
     return null;
   }
 
@@ -130,6 +136,8 @@ async function getSubmissionByIdInner(
 /**
  * Lädt eine Submission für den **bekannten Workspace** (PostgREST + RLS).
  * `workspace_id` explizit im Query: konsistent mit App-Shell und kein Vertrauen nur auf URL-ID.
+ * Gibt `null` bei „nicht gefunden“, RLS-Verweigerung oder technischem Fehler — Aufrufer nutzen das
+ * meist als `notFound()` (s. `/inbox/[id]` Punkt 2).
  */
 export const getSubmissionById = cache(
   async (submissionId: string, workspaceId: string): Promise<SubmissionDetail | null> => {
@@ -150,9 +158,16 @@ export interface TaskItem {
   status: "open" | "pending_review" | "done";
 }
 
+/**
+ * Aufgaben zu einer Submission, **zusätzlich** nach `workspace_id` des aktuellen Kontexts gefiltert
+ * (Defense in Depth neben RLS).
+ */
 export async function getTasksForSubmission(
   submissionId: string
 ): Promise<TaskItem[]> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return [];
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -161,10 +176,15 @@ export async function getTasksForSubmission(
       "id, content, recipient_type, specific_recipient_id, created_by, created_at, done_at, done_by, status, task_assignees(user_id)"
     )
     .eq("submission_id", submissionId)
+    .eq("workspace_id", workspace.workspace_id)
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[submissions] getTasksForSubmission failed:", error);
+    const row = error as { code?: string; message?: string };
+    const code =
+      typeof row?.code === "string" && row.code.trim() !== "" ? row.code : "unknown";
+    const message = typeof row?.message === "string" ? row.message : "";
+    console.error("[submissions] getTasksForSubmission failed", `code=${code}`, message || undefined);
     return [];
   }
 

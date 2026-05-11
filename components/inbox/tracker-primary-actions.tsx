@@ -14,7 +14,9 @@ function scrollToId(id: string, focusDraft?: boolean) {
 }
 
 /**
- * Primäre Aktionen — Figma-Referenz: vertikaler Stack, feste Höhen, 9px Radius, 15px/14px Typo.
+ * Schnellnavigation innerhalb des Falls (Punkt 4 — Aktionen): scrollt zu **Terminlink** bzw.
+ * **Entwurf** — **kein** automatischer Versand, keine Hintergrundjobs. Dritter Eintrag: zurück
+ * zum Block **Einordnung & Zeitraum** bei langem Scroll — keine passive „KI-Beobachtung“.
  */
 export function TrackerPrimaryActions() {
   return (
@@ -22,6 +24,7 @@ export function TrackerPrimaryActions() {
       <button
         type="button"
         onClick={() => scrollToId("tracker-termin")}
+        aria-label="Zum Bereich Terminlink und E-Mail scrollen"
         className="flex w-full cursor-pointer items-center justify-center gap-2 border-0 transition duration-150 ease-out hover:opacity-[0.98] active:scale-[0.98]"
         style={{
           padding: "0 20px",
@@ -37,12 +40,13 @@ export function TrackerPrimaryActions() {
         }}
       >
         <Calendar className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-        Termin vorschlagen
+        Zu Terminlink & E-Mail
       </button>
 
       <button
         type="button"
         onClick={() => scrollToId("tracker-korrespondenz", true)}
+        aria-label="Zum Entwurf für die Patienten-Rückmeldung scrollen"
         className="flex w-full cursor-pointer items-center justify-center gap-2 transition duration-150 ease-out active:scale-[0.98]"
         style={{
           padding: "0 20px",
@@ -58,12 +62,13 @@ export function TrackerPrimaryActions() {
         }}
       >
         <MessageSquare className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-        Rückfrage an Patient
+        Rückmeldung (Entwurf)
       </button>
 
       <button
         type="button"
         onClick={() => scrollToId("tracker-empfehlung")}
+        aria-label="Zurück zum Bereich Einordnung und Zeitraum scrollen"
         className="flex w-full cursor-pointer items-center justify-center gap-[7px] border-0 transition duration-150 ease-out hover:bg-[#F1F5F9] hover:text-[#64748B] hover:opacity-100 active:scale-[0.98]"
         style={{
           padding: "0 20px",
@@ -79,7 +84,7 @@ export function TrackerPrimaryActions() {
         }}
       >
         <Clock className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-        Zunächst beobachten
+        Zu Einordnung & Zeitraum
       </button>
     </div>
   );

@@ -20,7 +20,8 @@ interface TrackerUrgencyChipsProps {
 }
 
 /**
- * Zeitraum-Chips — Figma: Label „Zeitraum wählen“, gap 8px, Chip 6px 12px / 6px radius / 13px.
+ * Zeitraum-Chips — **persistente Einordnung** (`updateSubmissionUrgency`), kein reines Styling.
+ * Figma: gap 8px, Chip 6px 12px / 6px radius / 13px.
  */
 export function TrackerUrgencyChips({
   submissionId,
@@ -49,8 +50,9 @@ export function TrackerUrgencyChips({
   };
 
   return (
-    <div className="tracker-mobile-chip-targets">
+    <div className="tracker-mobile-chip-targets" aria-busy={pending}>
       <p
+        id="tracker-urgency-label"
         className="text-[12px]"
         style={{
           color: "#94A3B8",
@@ -59,9 +61,13 @@ export function TrackerUrgencyChips({
           letterSpacing: "0.01em",
         }}
       >
-        Zeitraum wählen
+        Zeitraum setzen
       </p>
-      <div className="flex flex-wrap gap-2">
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-labelledby="tracker-urgency-label"
+      >
         {OPTIONS.map((opt) => {
           const active = urgency === opt.id;
           return (
@@ -69,6 +75,7 @@ export function TrackerUrgencyChips({
               key={opt.id}
               type="button"
               disabled={pending}
+              aria-pressed={active}
               onClick={() => select(opt.id)}
               className="cursor-pointer text-[13px] font-medium transition duration-150 ease-out disabled:opacity-50"
               style={{
@@ -86,7 +93,9 @@ export function TrackerUrgencyChips({
         })}
       </div>
       {error ? (
-        <p className="mt-2 text-[13px] leading-snug text-red-700">{error}</p>
+        <p className="mt-2 text-[13px] leading-snug text-red-700" role="status">
+          {error}
+        </p>
       ) : null}
     </div>
   );

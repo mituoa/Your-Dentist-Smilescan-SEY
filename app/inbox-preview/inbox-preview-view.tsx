@@ -316,7 +316,12 @@ export function InboxPreviewView() {
                       background: "#FFFFFF",
                     }}
                   >
-                    <PhotoViewer photos={photos} patientName={patientLabel} />
+                    <PhotoViewer
+                      submissionId={selected.id}
+                      photos={photos}
+                      patientName={patientLabel}
+                      enableZipDownload={false}
+                    />
                   </div>
                 </div>
 

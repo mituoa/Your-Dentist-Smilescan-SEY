@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Command, Mic, Sparkles } from "lucide-react";
+import { Command, Mic, ChevronRight } from "lucide-react";
 
 import {
   buildAssistQuickDraft,
@@ -25,7 +25,7 @@ function suggestRoutes(text: string): { label: string; href: string }[] {
     out.push({ label: "Neuer Fall", href: "/create-case" });
   }
   if (/inbox|tracker|einsendung|posteingang/.test(t)) {
-    out.push({ label: "Tracker", href: "/inbox" });
+    out.push({ label: "Posteingang", href: "/inbox" });
   }
   if (/relay|aufgabe|task|empfang/.test(t)) {
     out.push({ label: "Relay", href: "/relay" });
@@ -51,22 +51,22 @@ function suggestInboxDeepLinks(
   const base = `/inbox/${submissionId}`;
   const out: { label: string; href: string }[] = [];
   if (/(rückfrage|nachricht|korrespondenz|schreiben|entwurf)/.test(t)) {
-    out.push({ label: "Nachrichtentwurf", href: `${base}#tracker-korrespondenz` });
+    out.push({ label: "Rückmeldung (Entwurf)", href: `${base}#tracker-korrespondenz` });
   }
   if (/(termin|einladen|einbestellen|link)/.test(t)) {
     out.push({ label: "Terminlink", href: `${base}#tracker-termin` });
   }
   if (/(dringlich|einschätzung|empfehlung)/.test(t)) {
-    out.push({ label: "Empfohlene Aktion", href: `${base}#tracker-empfehlung` });
+    out.push({ label: "Einordnung & Schritte", href: `${base}#tracker-empfehlung` });
   }
   return out.slice(0, 3);
 }
 
 const INBOX_QUICK: { id: AssistQuickActionId; label: string }[] = [
-  { id: "invite_today", label: "Heute einbestellen" },
-  { id: "pain_followup", label: "Rückfrage Schmerzen" },
+  { id: "invite_today", label: "Einladung heute (Entwurf)" },
+  { id: "pain_followup", label: "Rückfrage Schmerzen (Entwurf)" },
   { id: "appointment_link_text", label: "Terminlink-Text" },
-  { id: "polish_placeholder", label: "Formulierung prüfen" },
+  { id: "polish_placeholder", label: "Wortlaut anpassen" },
 ];
 
 /** Sheet — schwebend, klinisch ruhig, iOS-nah. */
@@ -138,7 +138,7 @@ function placeholderForZone(
   zone: ReturnType<typeof detectAssistZone>,
   hasInboxCase: boolean
 ): string {
-  if (hasInboxCase) return "Befehl oder Diktat — z. B. Rückfrage, Terminlogik …";
+  if (hasInboxCase) return "Befehl oder Diktat — z. B. Rückfrage-Entwurf, Terminlink …";
   switch (zone) {
     case "dashboard":
       return "Befehl — z. B. Überblick, Aufgabe, neuer Fall …";
@@ -151,7 +151,7 @@ function placeholderForZone(
     case "inbox":
       return "Befehl — z. B. Triage, Terminvorbereitung …";
     default:
-      return "Befehl — Tracker, Relay, Journals …";
+      return "Befehl — Posteingang, Relay, Journals …";
   }
 }
 
@@ -322,8 +322,9 @@ export function CommandAssist() {
               </span>
             </div>
             <p className="mt-1.5 text-[13px] leading-relaxed text-[#64748B] dark:text-slate-400">
-              Klinische Kommandoebene — Entwürfe, Navigation, Diktat. Nur zur Prüfung,{" "}
-              <span className="font-medium text-[#475569] dark:text-slate-300">kein automatischer Versand</span>.
+              Entwurfshilfe, Navigation, Diktat — ausschließlich unter Ihrer Kontrolle, ohne autonome
+              Aktionen.{" "}
+              <span className="font-medium text-[#475569] dark:text-slate-300">Kein automatischer Versand</span>.
             </p>
           </div>
         </div>
@@ -369,7 +370,7 @@ export function CommandAssist() {
 
           {!inboxCase && contextQuick.length > 0 ? (
             <div className="rounded-xl border border-black/[0.06] bg-[#FAFBFF] px-3.5 py-3.5 dark:border-white/[0.08] dark:bg-[rgba(43,111,232,0.06)]">
-              <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Schnellaktionen</p>
+              <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Entwurfsbausteine</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {contextQuick.map((q) => (
                   <button
@@ -403,7 +404,7 @@ export function CommandAssist() {
           {hints.length > 0 ? (
             <div className="space-y-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.08]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] dark:text-slate-500">
-                {deepHints.length > 0 ? "Aktion & Navigation" : "Navigation"}
+                {deepHints.length > 0 ? "Springen" : "Navigation"}
               </p>
               {hints.map((h) => (
                 <button
@@ -416,7 +417,7 @@ export function CommandAssist() {
                   className={HINT_ROW}
                 >
                   <span className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 shrink-0 text-[#2563EB]" strokeWidth={1.75} />
+                    <ChevronRight className="h-4 w-4 shrink-0 text-[#64748B]" strokeWidth={2} aria-hidden />
                     {h.label}
                   </span>
                   <span className="shrink-0 text-[#94A3B8]">→</span>

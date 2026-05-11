@@ -50,9 +50,9 @@ export function assistContextQuickActions(zone: AssistZone): AssistContextQuick[
         },
         {
           id: "inbox_open",
-          label: "Fall öffnen",
+          label: "Fall im Posteingang öffnen",
           template:
-            "Bitte im Tracker einen konkreten Fall öffnen — dort stehen patientenbezogene Schnellaktionen (Einladung, Rückfrage, Terminlink) bereit.",
+            "Bitte im **Posteingang** einen konkreten Fall öffnen — dort finden Sie **Entwürfe** zur Patienten-Rückmeldung und den **Terminlink** (alles nur nach Ihrer Prüfung, kein automatischer Versand).",
         },
       ];
     case "dashboard":
@@ -78,12 +78,12 @@ export function assistContextQuickActions(zone: AssistZone): AssistContextQuick[
         },
         {
           id: "dash_inbox",
-          label: "Zum Tracker",
+          label: "Zum Posteingang",
           template:
-            "Kurzüberblick für den Tracker:\n\n" +
+            "Kurzüberblick für den Posteingang:\n\n" +
             "• Ungelesene Einsendungen zuerst bearbeiten.\n" +
-            "• Dringlichkeit setzen, dann Kommunikation vorbereiten.\n\n" +
-            "→ Tracker öffnen und Fall auswählen.",
+            "• Zeitraum setzen, dann Entwurf oder Terminlink vorbereiten.\n\n" +
+            "→ Posteingang öffnen und Fall auswählen.",
         },
       ];
     case "relay":
@@ -154,7 +154,7 @@ export function assistContextQuickActions(zone: AssistZone): AssistContextQuick[
           label: "Rollen",
           template:
             "Rollen in der Praxis — Kurzüberblick:\n\n" +
-            "• Arzt: voller Zugriff inkl. Atlas, Tracker, Relay, Admin.\n" +
+            "• Arzt: voller Zugriff inkl. Atlas, Posteingang, Relay, Admin.\n" +
             "• Team: Relay & zugewiesene Bereiche.\n\n" +
             "Details unter Einstellungen → Benutzer / Admin.",
         },
@@ -180,9 +180,9 @@ export function assistContextQuickActions(zone: AssistZone): AssistContextQuick[
       return [
         {
           id: "gen_tracker",
-          label: "Zum Tracker",
+          label: "Zum Posteingang",
           template:
-            "Für klinische Einsendungen und Triage bitte den Tracker öffnen — dort stehen Vorlagen für Patientenkommunikation und Terminlogik bereit.",
+            "Für klinische Einsendungen und Triage bitte den **Posteingang** öffnen — dort liegen **Entwürfe** zur Patienten-Rückmeldung und der Terminlink (kein automatischer Versand).",
         },
         {
           id: "gen_relay",

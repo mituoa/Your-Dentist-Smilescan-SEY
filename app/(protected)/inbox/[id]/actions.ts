@@ -15,6 +15,15 @@ import JSZip from "jszip";
 
 const MAX_ZIP_BYTES = 50 * 1024 * 1024;
 
+/** Server-Logs: PostgREST-Code + Message, kein vollständiges Error-Objekt / keine Roh-SQL-Dumps. */
+function logPostgrest(scope: string, err: unknown) {
+  const row = err as { code?: string; message?: string };
+  const code =
+    typeof row?.code === "string" && row.code.trim() !== "" ? row.code : "unknown";
+  const message = typeof row?.message === "string" ? row.message : "";
+  console.error(`[${scope}] code=${code}`, message || undefined);
+}
+
 function formatSubmissionDate(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -64,7 +73,7 @@ function toBase64(buffer: Buffer): string {
   return buffer.toString("base64");
 }
 
-/** Markiert „gelesen“ nur für Submissions des **aktuellen App-Workspaces** (wie `updateSubmissionUrgency`). */
+/** Markiert „gelesen“ nur für Submissions des **aktuellen App-Workspaces** (wie `updateSubmissionUrgency`). Idempotent bei wiederholtem Aufruf (`.is("seen_at", null)`). */
 export async function markSubmissionSeen(submissionId: string) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
@@ -89,7 +98,7 @@ export async function markSubmissionSeen(submissionId: string) {
     .is("seen_at", null);
 
   if (error) {
-    console.error("[markSubmissionSeen]", error);
+    logPostgrest("markSubmissionSeen", error);
     return { error: "Status konnte nicht aktualisiert werden." };
   }
 
@@ -129,7 +138,7 @@ export async function updateSubmissionUrgency(
     .eq("workspace_id", workspace.workspace_id);
 
   if (error) {
-    console.error("[updateSubmissionUrgency]", error);
+    logPostgrest("updateSubmissionUrgency", error);
     return { error: "Zeitraum konnte nicht gespeichert werden." };
   }
 
@@ -171,6 +180,18 @@ export async function createTask(formData: FormData) {
 
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Workspace nicht gefunden." };
+
+  const { data: ownedSubmission, error: ownedSubmissionError } = await supabase
+    .from("submissions")
+    .select("id")
+    .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id)
+    .maybeSingle();
+
+  if (ownedSubmissionError || !ownedSubmission) {
+    return { error: "Fall nicht gefunden oder kein Zugriff." };
+  }
+
   const sortOrder = Date.now();
   if (assignAllTeam && specificRecipientIds.length > 0) {
     return { error: "Bitte wählen Sie entweder alle Mitarbeitenden oder konkrete Personen." };
@@ -230,7 +251,7 @@ export async function createTask(formData: FormData) {
     .single();
 
   if (error) {
-    console.error("[createTask]", error);
+    logPostgrest("createTask", error);
     return {
       error: "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen.",
     };
@@ -247,7 +268,7 @@ export async function createTask(formData: FormData) {
       .from("task_assignees")
       .insert(assigneeRows);
     if (assigneeError) {
-      console.error("[createTask assignees]", assigneeError);
+      logPostgrest("createTask assignees", assigneeError);
       await supabase.from("tasks").delete().eq("id", newTaskId);
       return { error: "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen." };
     }
@@ -466,7 +487,7 @@ export async function downloadSubmissionPhotos(
     .single();
 
   if (submissionError || !submission) {
-    console.error("[downloadSubmissionPhotos] submission lookup failed", submissionError);
+    logPostgrest("downloadSubmissionPhotos submission", submissionError);
     return { error: "Fall nicht gefunden." };
   }
 
@@ -477,7 +498,7 @@ export async function downloadSubmissionPhotos(
     .order("sort_order", { ascending: true });
 
   if (photosError) {
-    console.error("[downloadSubmissionPhotos] photo lookup failed", photosError);
+    logPostgrest("downloadSubmissionPhotos photos", photosError);
     return { error: "Download nicht möglich. Bitte erneut versuchen." };
   }
 
@@ -499,10 +520,7 @@ export async function downloadSubmissionPhotos(
       .download(photo.storage_path);
 
     if (error || !data) {
-      console.error("[downloadSubmissionPhotos] storage download failed", {
-        storagePath: photo.storage_path,
-        error,
-      });
+      logPostgrest("downloadSubmissionPhotos storage", error);
       return { error: "Download nicht möglich. Bitte erneut versuchen." };
     }
 

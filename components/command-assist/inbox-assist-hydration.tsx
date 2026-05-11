@@ -7,7 +7,8 @@ import { useAssistContextOptional, type InboxAssistCasePayload } from "./assist-
 type InboxAssistHydrationProps = Omit<InboxAssistCasePayload, "kind">;
 
 /**
- * Aktiver Fall für Command (systemweite Leiste) — Kontext ohne Layout-Einbettung.
+ * Aktiver Fall für **Command** (systemweite Leiste): liefert Kontext für Entwürfe/Navigation —
+ * **kein** automatischer Versand, keine eigene Nachrichten-Pipeline (s. `command-assist.tsx`).
  */
 export function InboxAssistHydration({
   submissionId,

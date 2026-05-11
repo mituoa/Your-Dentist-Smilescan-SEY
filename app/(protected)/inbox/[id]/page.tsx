@@ -12,8 +12,49 @@ import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
 import { markSubmissionSeen } from "./actions";
 
 /**
- * Fall-Detail im geschützten Bereich: Daten nur für `getCurrentWorkspace().workspace_id`
- * (`getSubmissionById` filtert explizit; RLS zusätzlich).
+ * **`/inbox/[id]` — Punkt 1 (Zweck):** **Fall-Detail** zur **Triage** einer Einsendung im aktuellen
+ * Workspace: Fotos, Patientennotiz, **Einordnung** (vom Team gesetzter Zeitraum) und **Arbeitsschritte**.
+ * **Kein** CRM, **kein** Chat, **keine** vollständige Patientenakte, **kein**
+ * Marketing-/Messaging-Center — nur das, was für die **Pilot-Intake-Kette** nötig ist
+ * (**Triage + kontrollierte Praxis-Kommunikation**).
+ *
+ * **Kommunikation:** Rechte Spalte = **Hilfsbereich** (Textentwürfe kopieren, Terminlink per expliziter
+ * Aktion) — **kein** Kanalpostfach, **kein** Auto-SMS; Versand nur dort, wo die UI eine **bewusste**
+ * Aktion auslöst (z. B. Terminlink-E-Mail durch Klick). **Command** (systemweite Leiste): Entwürfe
+ * und Navigation, **ohne** automatischen Versand — s. `components/command-assist/command-assist.tsx`.
+ *
+ * **Workspace:** Fremde oder nicht zugeordnete Submissions → `notFound()` (Filter in
+ * `getSubmissionById` + RLS).
+ *
+ * **Punkt 2 — Status (Stabilität / working → final):** Route ist **final nutzbar**, solange
+ * Submission zum Workspace gehört. **Server-Page** lädt Daten **atomar** pro Request (kein
+ * clientseitiges „Falschen Fall“ aus Cache-Konflikten mit der URL). **Loading:** `loading.tsx` zeigt
+ * `ClinicalInboxDetailSkeleton` für Streaming/Navigation. **Mobil:** Vollbild-Detail mit
+ * `InboxMobileBack` → Liste; `q` aus der Liste bleibt über normalisierte Query erhalten.
+ * **Leere Teilzustände:** keine Fotos = sachliche Leerfläche; fehlende `signed_url` = Hinweis im Viewer
+ * (kein harter Fehlerzustand); Notiz leer = neutraler Satz. **ZIP-Download** nutzt dieselbe
+ * `submissionId` wie die Page. Transiente DB-Fehler bei `getSubmissionById` sind aktuell wie
+ * „nicht gefunden“ behandelt (`notFound`) — bewusst simpel; Monitoring über Server-Logs.
+ *
+ * **Punkt 3 — Supabase/Auth:** Daten nur über **Session-Client** + explizite **`workspace_id`**-Filter
+ * (`getSubmissionById`, `getProfileData`). **RLS** ergänzt die App-Guards (Migration **030** für
+ * `current_workspace_id()` — s. `lib/auth-helpers.ts`). **Server-Actions** in `./actions.ts`:
+ * `markSubmissionSeen` / `updateSubmissionUrgency` / `createTask` / `downloadSubmissionPhotos` /
+ * `sendAppointmentLink` prüfen **Workspace** (und wo nötig **Rolle**); `createTask` verifiziert
+ * zusätzlich, dass die **Submission** zum Workspace gehört (RLS-INSERT auf `tasks` allein reicht nicht).
+ * **Signed URLs** / Storage-ZIP: nur Pfade aus der zuvor workspace-gefilterten Abfrage; Admin-Client
+ * nur für Sign/Download, nicht für breitere Reads. **UI:** keine rohen DB-Fehlertexte.
+ *
+ * **Punkt 4 — Aktionen:** **Echte** Schritte: Dringlichkeit speichern (`TrackerUrgencyChips`), Navigation
+ * zu Entwurf/Terminlink (`TrackerPrimaryActions`), ZIP-Export (`PhotoViewer`), Terminlink-E-Mail
+ * (`AppointmentLinkButton`, nur Arzt), Entwurf kopieren (`FollowUpMessageDraft`). **Command:** FAB +
+ * Schnelltexte = **Entwurfshilfe**, keine Autonomie (s. `command-assist.tsx`). Keine toten CTAs ohne
+ * Wirkung — Primärbuttons scrollen bewusst zu Zielankern; kein Auto-Versand.
+ *
+ * **Punkt 5 — Tot/Fake:** Keine **automatische** klinische Bewertung — Kopfzeilen-Texte zur Dringlichkeit
+ * beziehen sich auf die **von der Praxis gewählte Einstufung**, nicht auf KI-Diagnostik. Leere Notiz =
+ * sachlicher Hinweis, kein „Platzhalter-Inhalt“. Command: **Entwurfsbausteine** und Navigation, keine
+ * **Schnellaktions-/Ops-Center**-Sprache.
  */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
@@ -68,32 +109,33 @@ function formatBirthDe(value: string | null): string | null {
   });
 }
 
+/** Kopfzeile: bezieht sich auf die **vom Team gesetzte** Dringlichkeit — keine automatische KI-Bewertung. */
 function urgencyHeadline(urgency: string | null): {
   text: string;
 } | null {
   switch (urgency) {
     case "today":
-      return { text: "Hohe Wahrscheinlichkeit für akuten Behandlungsbedarf" };
+      return { text: "Praxis-Einstufung: zeitnah bearbeiten (Heute)" };
     case "this_week":
-      return { text: "Behandlung innerhalb dieser Woche sinnvoll" };
+      return { text: "Praxis-Einstufung: innerhalb weniger Tage" };
     case "not_urgent":
-      return { text: "Nicht dringend — routinemäßig planbar" };
+      return { text: "Praxis-Einstufung: nicht dringend" };
     default:
       return null;
   }
 }
 
-/** Kurz-Zeile unter „Empfohlene Aktion“ — analog Figma getUrgencyGuidance. */
+/** Kurz-Hinweis unter der Einordnung — Orientierung, ärztliche Entscheidung bleibt bei der Praxis. */
 function urgencyGuidanceShort(urgency: string | null): string {
   switch (urgency) {
     case "today":
-      return "Termin in den nächsten 24 Stunden sinnvoll";
+      return "Kurzfristiger Termin ist oft sinnvoll — bitte ärztlich entscheiden.";
     case "this_week":
-      return "Termin innerhalb von 2–3 Tagen empfohlen";
+      return "Termin in wenigen Tagen oft angemessen — individuell prüfen.";
     case "not_urgent":
-      return "Regulärer Termin ausreichend";
+      return "Regulärer Terminabstand meist ausreichend.";
     default:
-      return "Einschätzung ausstehend";
+      return "Zeitraum unten wählen — keine automatische Bewertung.";
   }
 }
 
@@ -154,7 +196,7 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Desktop: Canvas + Kommunikation nebeneinander. Mobil: alles untereinander (eine Spalte). */}
+      {/* Desktop: Triage-Hauptfläche + Hilfsspalte (Entwürfe/Terminlink). Mobil: eine Spalte, Fullscreen-Flow. */}
       <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-hidden lg:flex-row">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC]">
           {/* Detail-Header — Desktop unverändert; Tablet/Phone: sticky für Kontext beim Scrollen */}
@@ -244,6 +286,7 @@ export default async function InboxDetailPage({
           >
             <div style={{ marginBottom: "32px" }}>
               <PhotoViewer
+                submissionId={submission.id}
                 photos={submission.photos}
                 patientName={submission.patient_name || "Patient"}
               />
@@ -275,7 +318,7 @@ export default async function InboxDetailPage({
                     marginBottom: "4px",
                   }}
                 >
-                  Empfohlene Aktion
+                  Einordnung & nächste Schritte
                 </p>
                 <p
                   className="text-[14px]"
@@ -306,7 +349,7 @@ export default async function InboxDetailPage({
           </div>
         </div>
 
-        {/* Kommunikation — nicht im Figma-Snippet; schmale sekundäre Spalte, gleiche Canvas-Farbe */}
+        {/* Hilfsspalte (Entwürfe/Terminlink) — Figma: schmale sekundäre Spalte, gleiche Canvas-Farbe */}
         <aside
           className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] pb-[max(12px,env(safe-area-inset-bottom))] max-lg:min-h-0 lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0 lg:pb-0"
         >

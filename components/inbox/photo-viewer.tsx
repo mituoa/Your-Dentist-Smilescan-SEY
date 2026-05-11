@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImageIcon, Download, Loader2, Check, Maximize2 } from "lucide-react";
 import { saveAs } from "file-saver";
 import { downloadSubmissionPhotos } from "@/app/(protected)/inbox/[id]/actions";
-import { useParams } from "next/navigation";
 
 interface Photo {
   id: string;
@@ -14,8 +13,12 @@ interface Photo {
 }
 
 interface PhotoViewerProps {
+  /** Fall-ID aus der Server-Page — eine Quelle der Wahrheit für ZIP-Download (nicht nur URL-Param). */
+  submissionId: string;
   photos: Photo[];
   patientName: string;
+  /** Standard `true`. In Demo-Ansichten ohne echte Submission `false` (kein Server-ZIP). */
+  enableZipDownload?: boolean;
 }
 
 type ZipDownloadStatus = "idle" | "loading" | "success" | "error";
@@ -31,14 +34,28 @@ function base64ToBytes(base64: string): Uint8Array {
 
 /**
  * Bildbereich — Figma-Referenz: maxHeight 220px, radius 12px, Hover-Expand-Chrome.
+ * Bei Wechsel der Submission oder weniger Fotos wird der Index zurückgesetzt bzw. begrenzt (Punkt 2 — Stabilität).
  */
-export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
-  const params = useParams<{ id: string }>();
-  const submissionId = params?.id || "";
+export function PhotoViewer({
+  submissionId,
+  photos,
+  patientName,
+  enableZipDownload = true,
+}: PhotoViewerProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [downloadStatus, setDownloadStatus] = useState<ZipDownloadStatus>("idle");
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [hoverImage, setHoverImage] = useState(false);
+  const prevSubmissionIdRef = useRef(submissionId);
+
+  useEffect(() => {
+    setDownloadStatus("idle");
+    setDownloadError(null);
+    if (prevSubmissionIdRef.current !== submissionId) {
+      prevSubmissionIdRef.current = submissionId;
+      setSelectedIndex(0);
+    }
+  }, [submissionId]);
 
   if (photos.length === 0) {
     return (
@@ -55,12 +72,13 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
     );
   }
 
-  const selected = photos[selectedIndex];
+  const idx = Math.min(Math.max(0, selectedIndex), photos.length - 1);
+  const selected = photos[idx];
   const selectedUrl = selected?.signed_url;
   const isLoading = downloadStatus === "loading";
 
   async function handleDownloadAllPhotos() {
-    if (isLoading || photos.length === 0 || !submissionId) return;
+    if (!enableZipDownload || isLoading || photos.length === 0 || !submissionId.trim()) return;
     setDownloadStatus("loading");
     setDownloadError(null);
 
@@ -115,7 +133,7 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
             // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
             <img
               src={selectedUrl}
-              alt={`Klinisches Bild ${selectedIndex + 1} von ${photos.length}`}
+              alt={`Klinisches Bild ${idx + 1} von ${photos.length}`}
               className="block w-full object-cover"
               style={{
                 maxHeight: "220px",
@@ -123,8 +141,11 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
               }}
             />
           ) : (
-            <div className="flex min-h-[160px] items-center justify-center">
-              <ImageIcon className="h-14 w-14 text-[#94A3B8]/45" strokeWidth={1} />
+            <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 px-4">
+              <ImageIcon className="h-14 w-14 text-[#94A3B8]/45" strokeWidth={1} aria-hidden />
+              <p className="text-center text-[13px] font-medium" style={{ color: "#64748B" }}>
+                Bild derzeit nicht verfügbar
+              </p>
             </div>
           )}
         </div>
@@ -135,7 +156,8 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
             e.stopPropagation();
             openFullscreen();
           }}
-          className="absolute flex cursor-pointer items-center justify-center transition duration-160 ease-out"
+          disabled={!selectedUrl}
+          className="absolute flex cursor-pointer items-center justify-center transition duration-160 ease-out disabled:pointer-events-none disabled:opacity-0"
           style={{
             top: "12px",
             right: "12px",
@@ -143,7 +165,7 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
             height: "36px",
             borderRadius: "8px",
             background: "rgba(255, 255, 255, 0.95)",
-            opacity: hoverImage ? 1 : 0,
+            opacity: hoverImage && selectedUrl ? 1 : 0,
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
             backdropFilter: "blur(8px)",
           }}
@@ -155,12 +177,21 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[13px]" style={{ color: "#64748B" }}>
-          Bild {selectedIndex + 1} von {photos.length}
+          Bild {idx + 1} von {photos.length}
         </p>
+        {enableZipDownload ? (
         <button
           type="button"
           onClick={handleDownloadAllPhotos}
           disabled={isLoading}
+          aria-busy={isLoading}
+          aria-label={
+            isLoading
+              ? "ZIP-Export wird vorbereitet"
+              : downloadStatus === "error"
+                ? "ZIP-Export erneut versuchen"
+                : "Fotos dieses Falls als ZIP-Datei exportieren"
+          }
           className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium transition hover:border-[#2B6FE8]/40 hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
           style={{ color: "#475569" }}
         >
@@ -177,11 +208,12 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
               ? "Download gestartet"
               : downloadStatus === "error"
                 ? "Erneut versuchen"
-                : "Alle Fotos laden (ZIP)"}
+                : "Fotos als ZIP exportieren"}
         </button>
+        ) : null}
       </div>
 
-      {downloadStatus === "error" && (
+      {enableZipDownload && downloadStatus === "error" && (
         <p className="text-[14px] leading-relaxed text-red-700">
           {downloadError || "Download nicht möglich. Bitte erneut versuchen."}
         </p>
@@ -195,7 +227,7 @@ export function PhotoViewer({ photos, patientName }: PhotoViewerProps) {
               type="button"
               onClick={() => setSelectedIndex(i)}
               className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] ${
-                i === selectedIndex
+                i === idx
                   ? "border-[#2B6FE8] ring-1 ring-[#2B6FE8]/30"
                   : "border-transparent hover:border-[#E2E8F0]"
               }`}

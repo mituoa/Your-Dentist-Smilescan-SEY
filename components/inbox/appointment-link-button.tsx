@@ -40,7 +40,7 @@ export function AppointmentLinkButton({
   if (!hasPatientEmail) {
     return (
       <p className="text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-        Keine E-Mail-Adresse hinterlegt — Terminlink kann nicht automatisiert versendet werden.
+        Keine E-Mail-Adresse hinterlegt — ein Terminlink per E-Mail ist hier nicht möglich.
       </p>
     );
   }
@@ -51,6 +51,7 @@ export function AppointmentLinkButton({
         type="button"
         onClick={handleClick}
         disabled={!canSend || isPending}
+        aria-busy={isPending}
         title={
           !canSend
             ? "Nur Ärzte dürfen Terminlinks versenden."
