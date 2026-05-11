@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppBaseUrl } from "@/lib/env";
@@ -17,11 +18,14 @@ import {
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 import { getStripePriceIdForInterval, getStripeServer } from "@/lib/stripe/server";
+import { allowSlidingWindowRequest } from "@/lib/rate-limit/memory-sliding-window";
+import { getClientIpFromHeaders } from "@/lib/rate-limit/client-ip";
 import {
   collectRegisterLicenseStoragePaths,
   removePendingLicenseUploads,
   waitForWorkspaceMembership,
 } from "@/lib/register-signup-helpers";
+import { rollbackIncompleteRegistrationAfterFailure } from "@/lib/register-signup-rollback";
 
 export async function signInWithGoogle(formData: FormData) {
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
@@ -156,6 +160,20 @@ export async function resendSignupConfirmation(formData: FormData) {
     redirect(`/login?${loginParams.toString()}`);
   }
 
+  const hdrs = await headers();
+  const resendIp = getClientIpFromHeaders(hdrs);
+  if (!allowSlidingWindowRequest(`resend-signup-confirm:ip:${resendIp}`, 12, 3_600_000)) {
+    if (registerSuccessUx) {
+      registerParams.set(
+        "error",
+        "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut."
+      );
+      redirect(`/register?${registerParams.toString()}`);
+    }
+    loginParams.set("error", "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.");
+    redirect(`/login?${loginParams.toString()}`);
+  }
+
   const supabase = await createClient();
   const origin = getAppBaseUrl();
   const { error } = await supabase.auth.resend({
@@ -220,11 +238,37 @@ export async function signUp(formData: FormData) {
 
   const inviteQuerySuffix = inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : "";
 
-  const registerFail = async (msg: string, options?: { cleanupLicenses?: boolean }) => {
+  /** Nach erfolgreichem `auth.signUp` — für gezieltes deleteUser bei Abbruch vor persistiertem Vertrag. */
+  let registrationAuthUserId: string | null = null;
+
+  const registerFail = async (
+    msg: string,
+    options?: {
+      cleanupLicenses?: boolean;
+      deleteRegistrationAuthUser?: boolean;
+      workspaceIdHint?: string | null;
+    }
+  ) => {
     const cleanupLicenses = options?.cleanupLicenses !== false;
-    if (cleanupLicenses && licensePaths.length > 0) {
-      const cleanup = createAdminClient();
-      await removePendingLicenseUploads(cleanup, licensePaths);
+    const shouldDeleteUser =
+      options?.deleteRegistrationAuthUser === true &&
+      typeof registrationAuthUserId === "string" &&
+      registrationAuthUserId.length > 0;
+    try {
+      const admin = createAdminClient();
+      if (shouldDeleteUser) {
+        await rollbackIncompleteRegistrationAfterFailure({
+          admin,
+          authUserId: registrationAuthUserId!,
+          inviteFlow: Boolean(inviteToken?.trim()),
+          workspaceIdHint: options?.workspaceIdHint ?? null,
+          licensePaths: cleanupLicenses ? licensePaths : [],
+        });
+      } else if (cleanupLicenses && licensePaths.length > 0) {
+        await removePendingLicenseUploads(admin, licensePaths);
+      }
+    } catch (e) {
+      console.error("[signUp] registerFail cleanup", e);
     }
     redirect(
       `/register?error=${encodeURIComponent(msg)}&email=${encodeURIComponent(email)}${inviteQuerySuffix}`
@@ -237,6 +281,20 @@ export async function signUp(formData: FormData) {
 
   if (password.length < 8) {
     await registerFail("Passwort muss mindestens 8 Zeichen haben.");
+  }
+
+  const hdrs = await headers();
+  const registerIp = getClientIpFromHeaders(hdrs);
+  const emailKey = email.trim().toLowerCase();
+  if (!allowSlidingWindowRequest(`register-submit:ip:${registerIp}`, 25, 3_600_000)) {
+    await registerFail(
+      "Zu viele Registrierungsversuche von diesem Netzwerk. Bitte versuchen Sie es später erneut."
+    );
+  }
+  if (!allowSlidingWindowRequest(`register-submit:email:${emailKey}`, 8, 3_600_000)) {
+    await registerFail(
+      "Zu viele Registrierungsversuche für diese E-Mail-Adresse. Bitte versuchen Sie es später erneut."
+    );
   }
 
   const supabase = await createClient();
@@ -258,9 +316,13 @@ export async function signUp(formData: FormData) {
     },
   });
 
+  registrationAuthUserId = signData.user?.id ?? null;
+
   if (error) {
     console.error("[signUp]", error.message);
-    await registerFail(userFacingAuthError(error.message));
+    await registerFail(userFacingAuthError(error.message), {
+      deleteRegistrationAuthUser: Boolean(registrationAuthUserId),
+    });
   }
 
   if (inviteToken) {
@@ -270,23 +332,28 @@ export async function signUp(formData: FormData) {
       registeredUserId: signData.user?.id ?? null,
     });
     if (!inviteResult.ok) {
-      await registerFail(inviteResult.error);
+      await registerFail(inviteResult.error, { deleteRegistrationAuthUser: true });
     }
   }
 
   const userId = signData.user?.id || null;
-  if (userId && billingInterval) {
-    const allowed = new Set(["monthly", "halfyearly", "yearly"]);
-    if (!allowed.has(billingInterval)) {
-      await registerFail("Ungültiges Zahlungsintervall.");
+  const allowedBilling = new Set(["monthly", "halfyearly", "yearly"]);
+
+  if (userId) {
+    if (!billingInterval || !allowedBilling.has(billingInterval)) {
+      await registerFail("Ungültiges oder fehlendes Zahlungsintervall. Bitte schließen Sie den Schritt „Bestätigung“ erneut ab.", {
+        deleteRegistrationAuthUser: true,
+      });
     }
     if (!acceptedTos || !acceptedPrivacy || !acceptedWithdrawal) {
-      await registerFail("Bitte alle Pflichtfelder im Vertrag bestätigen.");
+      await registerFail("Bitte alle Pflichtfelder im Vertrag bestätigen.", {
+        deleteRegistrationAuthUser: true,
+      });
     }
 
     const acceptedAt = acceptedAtRaw ? new Date(acceptedAtRaw) : new Date();
     if (Number.isNaN(acceptedAt.getTime())) {
-      await registerFail("Ungültiges Vertragsdatum.");
+      await registerFail("Ungültiges Vertragsdatum.", { deleteRegistrationAuthUser: true });
     }
 
     const admin = createAdminClient();
@@ -295,9 +362,9 @@ export async function signUp(formData: FormData) {
     if (workspaceId === null) {
       console.error("[signUp] workspace membership not available after retries");
       await registerFail(
-        "Die Praxis-Zuordnung konnte nicht zeitnah abgeschlossen werden. Bitte prüfen Sie Ihre E-Mail oder melden Sie sich an. Wenn das Problem bleibt, kontaktieren Sie den Support."
+        "Die Praxis-Zuordnung konnte nicht zeitnah abgeschlossen werden. Bitte prüfen Sie Ihre E-Mail oder melden Sie sich an. Wenn das Problem bleibt, kontaktieren Sie den Support.",
+        { deleteRegistrationAuthUser: true }
       );
-      return;
     }
 
     const { error: billingUpsertErr } = await admin.from("workspace_billing").upsert(
@@ -311,7 +378,8 @@ export async function signUp(formData: FormData) {
     if (billingUpsertErr) {
       console.error("[signUp] workspace_billing upsert failed", billingUpsertErr);
       await registerFail(
-        "Die Abrechnungsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut."
+        "Die Abrechnungsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut.",
+        { deleteRegistrationAuthUser: true, workspaceIdHint: workspaceId }
       );
     }
 
@@ -336,7 +404,8 @@ export async function signUp(formData: FormData) {
     if (contractErr) {
       console.error("[signUp] contract save failed", contractErr);
       await registerFail(
-        "Die Vertragsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut."
+        "Die Vertragsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut.",
+        { deleteRegistrationAuthUser: true, workspaceIdHint: workspaceId }
       );
     }
 
@@ -404,7 +473,7 @@ export async function signUp(formData: FormData) {
           console.error("[signUp] workspace_billing stripe session save failed", billingStripeErr);
           await registerFail(
             "Die Zahlungssitzung konnte nicht mit Ihrer Praxis verknüpft werden. Bitte kontaktieren Sie den Support, bevor Sie erneut zahlen.",
-            { cleanupLicenses: false }
+            { cleanupLicenses: false, deleteRegistrationAuthUser: false }
           );
         }
 
@@ -413,12 +482,15 @@ export async function signUp(formData: FormData) {
         }
         await registerFail(
           "Die Zahlungsseite konnte nicht geöffnet werden. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support.",
-          { cleanupLicenses: false }
+          { cleanupLicenses: false, deleteRegistrationAuthUser: false }
         );
       } catch (stripeErr) {
         const raw = stripeErr instanceof Error ? stripeErr.message : String(stripeErr);
         console.error("[signUp] Stripe checkout", raw);
-        await registerFail(userFacingAuthError(raw), { cleanupLicenses: false });
+        await registerFail(
+          "Der Zahlungsschritt ist fehlgeschlagen. Bitte melden Sie sich mit Ihrer E-Mail-Adresse an oder kontaktieren Sie den Support, bevor Sie erneut zahlen.",
+          { cleanupLicenses: false, deleteRegistrationAuthUser: false }
+        );
       }
     }
   }

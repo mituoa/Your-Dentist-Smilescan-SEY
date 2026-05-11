@@ -159,7 +159,7 @@ export function RegisterClient(props: {
   React.useEffect(() => {
     if (props.success || wizardStepUrlInitDone.current) return;
     wizardStepUrlInitDone.current = true;
-    if (!searchParams.get("step")) {
+    if (!searchParams.get("step")?.trim()) {
       const p = new URLSearchParams(searchParams.toString());
       p.set("step", "1");
       pushRegisterUrl(p, "replace");
@@ -169,8 +169,23 @@ export function RegisterClient(props: {
   React.useEffect(() => {
     if (props.success) return;
     const raw = searchParams.get("step");
-    const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
-    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 4) return;
+    const trimmed = (raw ?? "").trim();
+    const strictStep: RegistrationStep | null =
+      trimmed === "1" || trimmed === "2" || trimmed === "3" || trimmed === "4"
+        ? (Number.parseInt(trimmed, 10) as RegistrationStep)
+        : null;
+
+    if (raw !== null && trimmed !== "" && strictStep === null) {
+      const p = new URLSearchParams(searchParams.toString());
+      p.set("step", "1");
+      pushRegisterUrl(p, "replace");
+      setRegistrationStep(1);
+      return;
+    }
+
+    if (strictStep === null) return;
+
+    const parsed = strictStep;
 
     let maxAllowed = 1;
     try {
@@ -216,7 +231,7 @@ export function RegisterClient(props: {
   >("sepa_debit");
 
   const [emailCheckStatus, setEmailCheckStatus] = React.useState<
-    "idle" | "checking" | "available" | "taken" | "invalid" | "error"
+    "idle" | "checking" | "ready" | "invalid" | "error"
   >("idle");
   const [emailCheckMessage, setEmailCheckMessage] = React.useState("");
   const [emailTypoSuggestion, setEmailTypoSuggestion] = React.useState<{
@@ -482,7 +497,7 @@ export function RegisterClient(props: {
     }
 
     setEmailCheckStatus("checking");
-    setEmailCheckMessage("Prüfe Verfügbarkeit…");
+    setEmailCheckMessage("Prüfe Eingabe…");
 
     const t = window.setTimeout(async () => {
       try {
@@ -492,25 +507,24 @@ export function RegisterClient(props: {
           body: JSON.stringify({ email }),
         });
         const json = (await res.json()) as
-          | { ok: true; available: boolean }
+          | { ok: true; checked?: boolean }
           | { ok: false; error: string };
 
         if (!res.ok || !("ok" in json) || json.ok !== true) {
           setEmailCheckStatus("error");
-          setEmailCheckMessage("Konnte Verfügbarkeit gerade nicht prüfen.");
+          setEmailCheckMessage(
+            res.status === 429
+              ? "Zu viele Anfragen. Bitte warten Sie einen Moment."
+              : "Serverprüfung gerade nicht möglich — Sie können trotzdem fortfahren."
+          );
           return;
         }
 
-        if (json.available) {
-          setEmailCheckStatus("available");
-          setEmailCheckMessage("E‑Mail ist verfügbar.");
-        } else {
-          setEmailCheckStatus("taken");
-          setEmailCheckMessage("Diese E‑Mail ist bereits registriert.");
-        }
+        setEmailCheckStatus("ready");
+        setEmailCheckMessage("Formal gültig — die endgültige Prüfung erfolgt beim Fortfahren.");
       } catch {
         setEmailCheckStatus("error");
-        setEmailCheckMessage("Konnte Verfügbarkeit gerade nicht prüfen.");
+        setEmailCheckMessage("Serverprüfung gerade nicht möglich — Sie können trotzdem fortfahren.");
       }
     }, 450);
 
@@ -692,7 +706,7 @@ export function RegisterClient(props: {
       setConfirmMismatchAfterContinueAttempt(true);
       return;
     }
-    if (emailCheckStatus === "taken" || emailCheckStatus === "checking") return;
+    if (emailCheckStatus === "checking") return;
     goToStep(2);
   };
 
@@ -711,7 +725,14 @@ export function RegisterClient(props: {
     });
     const json = (await res.json()) as { storagePath?: string; error?: string };
     if (!res.ok || !json.storagePath) {
-      throw new Error(json.error || "Upload fehlgeschlagen.");
+      if (res.status === 429) {
+        throw new Error("Zu viele Upload-Versuche. Bitte warten Sie einen Moment und versuchen Sie es erneut.");
+      }
+      const msg =
+        typeof json.error === "string" && json.error.trim().length > 0
+          ? json.error.trim()
+          : "Upload fehlgeschlagen.";
+      throw new Error(msg);
     }
     return json.storagePath;
   };
@@ -800,7 +821,7 @@ export function RegisterClient(props: {
       `}</style>
 
       <div
-        className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-y-contain max-md:[-webkit-overflow-scrolling:touch]"
+        className="fixed inset-0 z-50 flex min-h-0 flex-col overflow-x-hidden overscroll-y-contain max-md:overflow-hidden max-md:[-webkit-overflow-scrolling:touch] md:overflow-y-auto"
         style={{ animation: "fadeIn 0.2s ease-out" }}
       >
         <div
@@ -810,9 +831,9 @@ export function RegisterClient(props: {
         >
         </div>
 
-        <div className="relative z-10 flex w-full max-w-full min-w-0 flex-col items-stretch px-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-5 md:min-h-screen md:items-center md:justify-center md:px-8 md:py-12 md:pb-16">
+        <div className="relative z-10 flex w-full max-w-full min-w-0 flex-1 flex-col items-stretch px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(0.75rem,env(safe-area-inset-top,0px))] max-md:min-h-0 sm:px-5 md:min-h-screen md:flex-none md:items-center md:justify-center md:px-8 md:py-12 md:pb-16">
           <div
-            className="relative mx-auto flex w-full min-w-0 max-w-2xl flex-col overflow-x-hidden rounded-3xl bg-white max-md:max-h-[min(calc(100dvh-1.25rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)),920px)] max-md:min-h-0 max-md:overflow-y-auto max-md:overscroll-contain md:max-h-none md:overflow-visible"
+            className="relative mx-auto flex w-full min-w-0 max-w-2xl flex-1 flex-col overflow-x-hidden rounded-3xl bg-white max-md:min-h-0 max-md:max-h-[min(calc(100dvh-1.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)),920px)] max-md:touch-pan-y max-md:overflow-y-auto max-md:overscroll-y-contain md:max-h-none md:flex-none md:overflow-visible"
             style={{
               boxShadow:
                 "0 4px 6px rgba(0,0,0,0.05), 0 10px 20px rgba(0,0,0,0.10), 0 20px 40px rgba(0,0,0,0.15)",
@@ -823,7 +844,7 @@ export function RegisterClient(props: {
             type="button"
             onClick={handleRegistrationModalClose}
             aria-label="Schließen"
-            className="absolute right-3 top-3 z-10 flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-gray-200 md:right-5 md:top-5 md:h-9 md:w-9 md:min-h-0 md:min-w-0"
+            className="absolute z-10 flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-gray-200 max-md:right-[max(0.75rem,env(safe-area-inset-right,0px))] max-md:top-[max(0.75rem,env(safe-area-inset-top,0px))] md:right-5 md:top-5 md:h-9 md:w-9 md:min-h-0 md:min-w-0"
           >
             <svg
               className="h-4 w-4 text-gray-600 transition-all duration-200 group-hover:rotate-90"
@@ -856,7 +877,7 @@ export function RegisterClient(props: {
                     Bitte E‑Mail bestätigen
                   </h3>
                   {props.queryError ? (
-                    <p className="mx-auto mb-4 max-w-md rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-left text-[13px] text-amber-950">
+                    <p className="mx-auto mb-4 max-w-md scroll-mt-6 break-words rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-left text-[13px] leading-relaxed text-amber-950">
                       {userFacingAuthError(
                         (() => {
                           try {
@@ -869,7 +890,7 @@ export function RegisterClient(props: {
                     </p>
                   ) : null}
                   {props.resent ? (
-                    <p className="mx-auto mb-4 max-w-md rounded-xl border border-emerald-200/70 bg-emerald-50/60 px-4 py-3 text-left text-[13px] text-emerald-950">
+                    <p className="mx-auto mb-4 max-w-md scroll-mt-6 break-words rounded-xl border border-emerald-200/70 bg-emerald-50/60 px-4 py-3 text-left text-[13px] leading-relaxed text-emerald-950">
                       Sofern ein passendes Konto existiert, wurde die Bestätigungs-E-Mail erneut versendet. Bitte
                       prüfen Sie auch den Spam-Ordner.
                     </p>
@@ -966,7 +987,7 @@ export function RegisterClient(props: {
               {!props.success ? (
                 <>
               {props.queryError ? (
-                <p className="mb-6 rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-[14px] text-amber-950">
+                <p className="mb-6 scroll-mt-6 break-words rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-[14px] leading-relaxed text-amber-950">
                   {userFacingAuthError(
                     (() => {
                       try {
@@ -1000,13 +1021,13 @@ export function RegisterClient(props: {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center">
+                <div className="flex min-w-0 items-center justify-center px-0.5">
                   {[1, 2, 3, 4].map((step) => (
-                    <div key={step} className="flex items-center">
+                    <div key={step} className="flex min-w-0 shrink-0 items-center">
                       <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-500 ${
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 ${
                           registrationStep === step
-                            ? "bg-gradient-to-b from-[#0284C7] to-[#0369A1] text-white scale-110 shadow-md"
+                            ? "bg-gradient-to-b from-[#0284C7] to-[#0369A1] text-white shadow-md max-md:scale-105 md:scale-110"
                             : registrationStep > step
                               ? "bg-gradient-to-b from-green-500 to-green-600 text-white"
                               : "bg-gray-100 text-gray-400"
@@ -1023,7 +1044,7 @@ export function RegisterClient(props: {
                       </div>
                       {step < 4 ? (
                         <div
-                          className={`mx-2 h-[2px] w-12 rounded-full transition-all duration-500 ${
+                          className={`mx-1.5 h-[2px] w-8 shrink rounded-full transition-all duration-500 max-md:mx-1 max-md:w-6 ${
                             registrationStep > step
                               ? "bg-gradient-to-r from-green-500 to-green-600"
                               : "bg-gray-200"
@@ -1100,9 +1121,9 @@ export function RegisterClient(props: {
                         <div className="mt-2 flex items-center justify-between">
                           <p
                             className={`text-[12px] ${
-                              emailCheckStatus === "available"
+                              emailCheckStatus === "ready"
                                 ? "text-green-600"
-                                : emailCheckStatus === "taken" || emailCheckStatus === "invalid"
+                                : emailCheckStatus === "invalid"
                                   ? "text-amber-800"
                                   : "text-gray-500"
                             }`}
@@ -1233,7 +1254,6 @@ export function RegisterClient(props: {
                     <button
                       type="submit"
                       disabled={
-                        emailCheckStatus === "taken" ||
                         emailCheckStatus === "invalid" ||
                         emailCheckStatus === "checking" ||
                         !normalizeEmail(regEmailConfirm) ||
@@ -1364,7 +1384,10 @@ export function RegisterClient(props: {
                             onChange={handleFrontFileChange}
                             className="hidden"
                           />
-                          <label htmlFor="license-front" className="flex cursor-pointer flex-col px-5 py-6">
+                          <label
+                            htmlFor="license-front"
+                            className="flex min-h-[120px] cursor-pointer flex-col justify-center px-5 py-6 max-md:min-h-[132px]"
+                          >
                             <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
                               Vorderseite
                             </p>
@@ -1440,7 +1463,10 @@ export function RegisterClient(props: {
                             onChange={handleBackFileChange}
                             className="hidden"
                           />
-                          <label htmlFor="license-back" className="flex cursor-pointer flex-col px-5 py-6">
+                          <label
+                            htmlFor="license-back"
+                            className="flex min-h-[120px] cursor-pointer flex-col justify-center px-5 py-6 max-md:min-h-[132px]"
+                          >
                             <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
                               Rückseite
                             </p>
@@ -1497,7 +1523,7 @@ export function RegisterClient(props: {
                       </div>
                       {licenseUploadError ? (
                         <p
-                          className={`mt-3 rounded-lg border px-3 py-2 text-[12px] ${
+                          className={`mt-3 break-words rounded-lg border px-3 py-2 text-[12px] leading-relaxed ${
                             licenseUploadError.startsWith("Hinweis:")
                               ? "border-amber-200 bg-amber-50 text-amber-900"
                               : "border-red-200 bg-red-50 text-red-700"
@@ -1609,7 +1635,7 @@ export function RegisterClient(props: {
                           key={key}
                           type="button"
                           onClick={() => setSelectedPlan(key)}
-                          className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                          className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
                             active
                               ? "border-[#0284C7] shadow-md"
                               : "border-gray-200 hover:border-[#0284C7] hover:shadow-sm"
@@ -1667,7 +1693,7 @@ export function RegisterClient(props: {
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("sepa_debit")}
-                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
                           paymentMethod === "sepa_debit"
                             ? "border-[#0284C7] bg-white"
                             : "border-gray-200 bg-white hover:border-[#0284C7]"
@@ -1683,7 +1709,7 @@ export function RegisterClient(props: {
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("card")}
-                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
                           paymentMethod === "card"
                             ? "border-[#0284C7] bg-white"
                             : "border-gray-200 bg-white hover:border-[#0284C7]"
@@ -1700,7 +1726,7 @@ export function RegisterClient(props: {
                         type="button"
                         disabled={selectedPlan === "monthly"}
                         onClick={() => setPaymentMethod("invoice")}
-                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
                           selectedPlan === "monthly"
                             ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
                             : paymentMethod === "invoice"
@@ -1720,7 +1746,7 @@ export function RegisterClient(props: {
                       <button
                         type="button"
                         onClick={() => setPaymentMethod("paypal")}
-                        className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
+                        className={`max-md:min-h-[52px] rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
                           paymentMethod === "paypal"
                             ? "border-[#0284C7] bg-white"
                             : "border-gray-200 bg-white hover:border-[#0284C7]"
@@ -1919,7 +1945,7 @@ export function RegisterClient(props: {
                           !acceptedWithdrawal ||
                           !registrationDocsSatisfied
                         }
-                        className="h-[48px] w-full rounded-xl border-2 border-amber-400/80 bg-white text-[14px] font-semibold text-amber-950 shadow-sm transition-all duration-200 active:scale-[0.99] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-[52px] w-full min-h-[52px] rounded-xl border-2 border-amber-400/80 bg-white text-[14px] font-semibold text-amber-950 shadow-sm transition-all duration-200 active:scale-[0.99] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
                         style={{ background: "linear-gradient(to bottom, #fffbeb 0%, #ffffff 100%)" }}
                         pendingStyle={{
                           background: "linear-gradient(to bottom, #fef9c3 0%, #fef3c7 100%)",
@@ -1941,7 +1967,7 @@ export function RegisterClient(props: {
 
             {navBusy ? (
               <div
-                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-4 rounded-3xl bg-white/90 backdrop-blur-[2px]"
+                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-4 rounded-3xl bg-white/90 px-[max(1rem,env(safe-area-inset-left,0px))] py-6 backdrop-blur-[2px] max-md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] max-md:pt-[max(1rem,env(safe-area-inset-top,0px))] max-md:pr-[max(1rem,env(safe-area-inset-right,0px))] max-md:pl-[max(1rem,env(safe-area-inset-left,0px))]"
                 aria-live="polite"
                 aria-busy="true"
               >

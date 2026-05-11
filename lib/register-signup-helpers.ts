@@ -14,7 +14,7 @@ export async function sleep(ms: number): Promise<void> {
 
 /**
  * Sammelt Storage-Keys aus dem Registrierungsformular.
- * Nur Keys unter `registrations/licenses/` (kein Path-Traversal).
+ * Nur Keys unter `registrations/licenses/pending/` (kein Path-Traversal, keine finalen Pfade).
  */
 export function collectRegisterLicenseStoragePaths(
   main: string | null | undefined,
@@ -23,14 +23,21 @@ export function collectRegisterLicenseStoragePaths(
 ): string[] {
   const raw = [main, front, back].map((p) => p?.trim()).filter(Boolean) as string[];
   const safe = raw.filter(
-    (p) => p.startsWith("registrations/licenses/") && !p.includes("..") && p.length <= 512
+    (p) =>
+      p.startsWith("registrations/licenses/pending/") &&
+      !p.includes("..") &&
+      !/%2e%2e/i.test(p) &&
+      p.length <= 512
   );
   return [...new Set(safe)];
 }
 
 /**
  * Best effort: temporäre Berufsnachweise aus fehlgeschlagenem/abgebrochenem Signup entfernen.
- * Vollständiger TTL-/Batch-Cleanup: separater Job (s. Kommentar in register-license-upload).
+ *
+ * Zusätzlich: TTL-/Referenz-Cleanup serverseitig über
+ * `POST /api/internal/cleanup-register-license-pending` (Bearer-Geheimnis), siehe
+ * `docs/operations/register-production-hardening.md`.
  */
 export async function removePendingLicenseUploads(
   admin: SupabaseClient,

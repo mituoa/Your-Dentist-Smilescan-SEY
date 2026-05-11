@@ -64,3 +64,49 @@ export function validateLicenseFile(file: File): ValidationResult {
   return { valid: true };
 }
 
+/** Stichprobe des Dateiinhalts (Magic Bytes) — erschwert MIME-Spoofing bei Upload. */
+export function validateLicenseBufferMagic(buffer: Buffer, mime: string): ValidationResult {
+  if (buffer.length < 12) {
+    return { valid: false, error: "Datei zu klein oder beschädigt." };
+  }
+
+  const m = mime.toLowerCase();
+
+  if (m === "application/pdf") {
+    if (buffer.subarray(0, 4).toString("ascii") === "%PDF") return { valid: true };
+    return { valid: false, error: "PDF-Datei konnte nicht verifiziert werden." };
+  }
+
+  if (m === "image/jpeg" || m === "image/jpg") {
+    if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return { valid: true };
+    return { valid: false, error: "JPEG-Datei konnte nicht verifiziert werden." };
+  }
+
+  if (m === "image/png") {
+    const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    if (buffer.subarray(0, 8).equals(sig)) return { valid: true };
+    return { valid: false, error: "PNG-Datei konnte nicht verifiziert werden." };
+  }
+
+  if (m === "image/webp") {
+    if (
+      buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+      buffer.subarray(8, 12).toString("ascii") === "WEBP"
+    ) {
+      return { valid: true };
+    }
+    return { valid: false, error: "WebP-Datei konnte nicht verifiziert werden." };
+  }
+
+  if (m === "image/heic" || m === "image/heif") {
+    const ftyp = buffer.indexOf(Buffer.from("ftyp"));
+    if (ftyp >= 4 && ftyp < 64) {
+      const brand = buffer.subarray(ftyp + 4, Math.min(ftyp + 16, buffer.length)).toString("ascii");
+      if (/heic|mif1|msf1|heix|hevc|heis|hevm/i.test(brand)) return { valid: true };
+    }
+    return { valid: false, error: "HEIC/HEIF konnte nicht verifiziert werden." };
+  }
+
+  return { valid: false, error: "Dateiformat nicht unterstützt." };
+}
+

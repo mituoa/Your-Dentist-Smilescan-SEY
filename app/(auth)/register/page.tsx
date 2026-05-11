@@ -11,7 +11,7 @@ interface RegisterPageProps {
   searchParams: Promise<{
     invite?: string;
     email?: string;
-    error?: string;
+    error?: string | string[];
     plan?: string;
     success?: string;
     from?: string;
@@ -26,11 +26,24 @@ function parseWizardStep(raw: string | undefined): 1 | 2 | 3 | 4 {
   return 1;
 }
 
+const MAX_REGISTER_QUERY_ERROR_LEN = 512;
+
+function normalizeRegisterQueryError(
+  raw: string | string[] | undefined
+): string | undefined {
+  if (raw == null) return undefined;
+  const first = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof first !== "string") return undefined;
+  const t = first.trim();
+  if (!t) return undefined;
+  return t.length > MAX_REGISTER_QUERY_ERROR_LEN ? t.slice(0, MAX_REGISTER_QUERY_ERROR_LEN) : t;
+}
+
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
   const params = await searchParams;
   const inviteToken = params.invite?.trim() || "";
   const prefilledEmail = params.email?.trim() || "";
-  const queryError = params.error;
+  const queryError = normalizeRegisterQueryError(params.error);
   const success = params.success === "1";
   const fromPricing = params.from?.trim() === "pricing";
   const resent = params.resent === "1";
@@ -51,7 +64,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     : null;
 
   return (
-    <div className="w-full min-w-0 max-w-full overflow-x-hidden">
+    <div className="w-full min-w-0 max-w-full overflow-x-hidden pb-[max(0.5rem,env(safe-area-inset-bottom,0px)))]">
       <Suspense
         fallback={
           <div

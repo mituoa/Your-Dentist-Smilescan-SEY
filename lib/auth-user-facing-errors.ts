@@ -34,6 +34,21 @@ export function userFacingAuthError(raw: string): string {
     return "Der Zahlungsvorbereitungsschritt ist fehlgeschlagen. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Support.";
   }
 
+  // Bereits deutsch / produktseitig formulierte Meldungen aus Registrierung & Redirects — nicht durch den generischen Fallback ersetzen.
+  const looksTechnical =
+    /https?:\/\/|\b(?:supabase|postgres|typeerror|referenceerror|syntaxerror|econnrefused|jwt|jsonb?)\b|invalid_request|No such |undefined is not|Cannot read properties/i.test(
+      m
+    );
+  if (!looksTechnical && m.length <= 500) {
+    const t = m.trim();
+    if (
+      /^(Bitte|Die |Das |Der |Diese |E-Mail|Passwort|Ungültig|Einladung|Zahlung|Ihre |Sie |Beitritt|Nicht |Konnte |Zu |Verbindung)/i.test(t) ||
+      /^E-Mail\b/i.test(t)
+    ) {
+      return m;
+    }
+  }
+
   if (m.length > 160) {
     return "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.";
   }

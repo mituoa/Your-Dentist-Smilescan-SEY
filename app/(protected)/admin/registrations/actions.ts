@@ -34,9 +34,25 @@ export async function approveWorkspace(workspaceId: string) {
   revalidatePath("/admin/registrations");
 }
 
+function isAllowedAdminLicenseStoragePath(path: string): boolean {
+  const t = path.trim();
+  if (t.length > 512 || t.includes("..") || /%2e%2e/i.test(t)) return false;
+  const parts = t.split("/").filter(Boolean);
+  if (parts.length !== 4) return false;
+  if (parts[0] !== "registrations" || parts[1] !== "licenses") return false;
+  if (parts[2] !== "pending" && parts[2] !== "final") return false;
+  return /^[a-zA-Z0-9._-]+$/.test(parts[3]!);
+}
+
 export async function openSignedLicenseUrl(storagePath: string) {
   const user = await requireUser();
   requirePlatformAdmin(user);
+
+  const path = storagePath.trim();
+  if (!isAllowedAdminLicenseStoragePath(path)) {
+    console.error("[openSignedLicenseUrl] rejected path shape");
+    throw new Error("Invalid storage path");
+  }
 
   const admin = createAdminClient();
   const { data, error } = await admin.storage
