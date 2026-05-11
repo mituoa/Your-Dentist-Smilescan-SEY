@@ -11,6 +11,7 @@ import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effor
 import { buildTeamInvitationEmail } from "@/lib/mail/team-invitation-email";
 import { getAppBaseUrl } from "@/lib/env";
 import { findAuthUserIdByEmail } from "@/lib/team-invitations/get-invitation-by-token";
+import { isInviteTokenFormat } from "@/lib/team-invitations/invite-token-format";
 
 export async function saveAppointmentLink(
   url: string
@@ -187,7 +188,7 @@ export async function inviteTeamMember(
   });
 
   if (insertError) {
-    console.error("[inviteTeamMember]", insertError);
+    console.error("[inviteTeamMember] event=invite_insert_failed", insertError.code ?? "unknown");
     return { error: "Einladung konnte nicht erstellt werden." };
   }
 
@@ -382,39 +383,51 @@ export async function acceptInvitation(
   const admin = createAdminClient();
 
   const tokenNorm = (token ?? "").trim();
-  if (!tokenNorm || !/^[a-f0-9]{64}$/i.test(tokenNorm)) {
+  if (!tokenNorm || !isInviteTokenFormat(tokenNorm)) {
     return {
       ok: false,
-      error: "Einladung nicht gefunden oder ungültig.",
+      error: "Dieser Einladungslink ist ungültig.",
       code: "INVALID_TOKEN",
     };
   }
 
   const { data: invite, error: loadErr } = await admin
     .from("team_invitations")
-    .select("id, workspace_id, email, role, status, expires_at, token")
+    .select("id, workspace_id, email, role, status, expires_at")
     .eq("token", tokenNorm)
     .maybeSingle();
 
   if (loadErr) {
     console.error("[acceptInvitation] event=invite_load_failed");
-    return { ok: false, error: "Einladung konnte nicht geladen werden." };
+    return {
+      ok: false,
+      error: "Die Einladung konnte gerade nicht geladen werden. Bitte versuchen Sie es in einem Moment erneut.",
+      code: "INVITE_LOAD_FAILED",
+    };
   }
 
   if (!invite) {
     return {
       ok: false,
-      error: "Einladung nicht gefunden oder bereits angenommen.",
+      error: "Zu dieser Einladung liegen keine aktiven Daten vor.",
       code: "NOT_FOUND",
     };
   }
 
   if (invite.status !== "pending") {
-    return { ok: false, error: "Einladung ist nicht mehr gültig.", code: "INVALID_STATUS" };
+    return {
+      ok: false,
+      error: "Diese Einladung ist nicht mehr aktiv.",
+      code: "INVALID_STATUS",
+    };
   }
 
   if (new Date(invite.expires_at) < new Date()) {
-    return { ok: false, error: "Einladung ist abgelaufen.", code: "EXPIRED" };
+    return {
+      ok: false,
+      error: "Die Frist dieser Einladung ist abgelaufen.",
+      code: "EXPIRED",
+    };
   }
 
   let userId: string;
@@ -422,7 +435,7 @@ export async function acceptInvitation(
   if (!inviteEmail) {
     return {
       ok: false,
-      error: "Einladung ist ungültig.",
+      error: "Die Einladung ist unvollständig. Bitte wenden Sie sich an die einladende Praxis.",
       code: "INVALID_INVITE_EMAIL",
     };
   }
@@ -434,12 +447,27 @@ export async function acceptInvitation(
     if (!reg || reg !== inviteEmailLower) {
       return {
         ok: false,
-        error: "E-Mail passt nicht zur Einladung.",
+        error: "Die verwendete E-Mail-Adresse entspricht nicht der Einladung.",
         code: "EMAIL_MISMATCH",
       };
     }
     const fromSignup = options?.registeredUserId?.trim();
     if (fromSignup) {
+      const { data: authLookup, error: authLookupErr } = await admin.auth.admin.getUserById(fromSignup);
+      if (authLookupErr || !authLookup.user?.email) {
+        return {
+          ok: false,
+          error: "Die Registrierung konnte nicht zugeordnet werden. Bitte melden Sie sich an und öffnen Sie den Einladungslink erneut.",
+          code: "USER_LOOKUP_FAILED",
+        };
+      }
+      if (authLookup.user.email.trim().toLowerCase() !== inviteEmailLower) {
+        return {
+          ok: false,
+          error: "Die verwendete E-Mail-Adresse entspricht nicht der Einladung.",
+          code: "EMAIL_MISMATCH",
+        };
+      }
       userId = fromSignup;
     } else {
       const found = await findAuthUserIdByEmail(inviteEmail);
@@ -461,15 +489,23 @@ export async function acceptInvitation(
     } = await supabase.auth.getUser();
     if (userErr) {
       console.error("[acceptInvitation] event=get_user_failed");
-      return { ok: false, error: "Nicht angemeldet.", code: "NOT_AUTHENTICATED" };
+      return {
+        ok: false,
+        error: "Ihre Anmeldung konnte nicht bestätigt werden. Bitte melden Sie sich erneut an.",
+        code: "NOT_AUTHENTICATED",
+      };
     }
     if (!user?.id || !user.email) {
-      return { ok: false, error: "Nicht angemeldet.", code: "NOT_AUTHENTICATED" };
+      return {
+        ok: false,
+        error: "Sie sind nicht angemeldet. Bitte melden Sie sich an und öffnen Sie den Einladungslink erneut.",
+        code: "NOT_AUTHENTICATED",
+      };
     }
     if (user.email.trim().toLowerCase() !== inviteEmailLower) {
       return {
         ok: false,
-        error: "E-Mail stimmt nicht mit der Einladung überein.",
+        error: "Die E-Mail-Adresse dieses Kontos passt nicht zu der eingeladenen Adresse.",
         code: "EMAIL_MISMATCH",
       };
     }
@@ -507,7 +543,8 @@ export async function acceptInvitation(
   if (otherMembers && otherMembers.length > 0) {
     return {
       ok: false,
-      error: "Sie sind bereits einem anderen Workspace zugeordnet.",
+      error:
+        "Sie sind bereits einer anderen Praxis zugeordnet. Eine zweite gleichzeitige Mitgliedschaft ist derzeit nicht möglich.",
       code: "OTHER_WORKSPACE",
     };
   }
@@ -527,11 +564,20 @@ export async function acceptInvitation(
       .maybeSingle();
     if (!verifyMember) {
       console.error("[acceptInvitation] event=duplicate_insert_no_membership");
-      return { ok: false, error: "Beitritt fehlgeschlagen.", code: "JOIN_RACE" };
+      return {
+        ok: false,
+        error:
+          "Der Beitritt konnte nicht abgeschlossen werden. Bitte laden Sie die Seite neu — Sie sind möglicherweise bereits zugeordnet.",
+        code: "JOIN_RACE",
+      };
     }
   } else if (memberError) {
-    console.error("[acceptInvitation] event=member_insert_failed", memberError.code ?? "unknown");
-    return { ok: false, error: "Beitritt fehlgeschlagen." };
+    console.error("[acceptInvitation] event=member_insert_failed");
+    return {
+      ok: false,
+      error: "Der Beitritt konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut oder laden Sie die Seite neu.",
+      code: "MEMBER_INSERT_FAILED",
+    };
   }
 
   await admin

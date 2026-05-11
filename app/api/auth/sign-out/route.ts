@@ -65,8 +65,8 @@ export async function POST(request: Request) {
 
   try {
     await supabase.auth.signOut({ scope: "global" });
-  } catch (e) {
-    console.error("[api/auth/sign-out] signOut failed", e);
+  } catch {
+    console.error("[api/auth/sign-out] event=sign_out_failed");
   }
 
   return redirectResponse;

@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { workspaceRoleToHomePath } from "@/lib/auth-app-home";
@@ -7,12 +6,16 @@ import {
   getInvitationByToken,
 } from "@/lib/team-invitations/get-invitation-by-token";
 import {
+  clipInviteTokenQuery,
+  isInviteTokenFormat,
+} from "@/lib/team-invitations/invite-token-format";
+import {
   AcceptInviteForm,
   type AcceptInviteScenario,
 } from "./AcceptInviteForm";
 
 /**
- * Team-Einladung annehmen (Pilot-/Enterprise-Vertrag)
+ * Team-Einladung annehmen (MVP/Pilot — kontrollierter Zugang ohne separates Onboarding)
  *
  * **Zweck (nur Lesen + Szenario):** Einladung per Token aus `team_invitations` laden, fristig/Status prüfen,
  * Nutzerkontext (Session, E-Mail, bestehende Memberships) auswerten — dann **eine** passende Oberfläche
@@ -21,7 +24,7 @@ import {
  * (Szenario **C**).
  *
  * **Szenarien (Kurzcodes = stabile Props):**
- * - **invalid** — ungültiger Link, abgelaufen, oder nicht mehr `pending` (kein Join).
+ * - **invalid** — fehlender/beschädigter Link, nicht gefunden, abgelaufen, nicht mehr `pending` (kein Join); teils ruhiger Neutral-Ton.
  * - **A** — nicht eingeloggt, noch kein Auth-Konto zur Einladungs-E-Mail → Registrierung.
  * - **B** — nicht eingeloggt, Konto existiert → Login mit Invite-Kontext.
  * - **C** — eingeloggt, E-Mail passt, noch kein Mitglied dieser Praxis, sonst nirgends Mitglied → **einziger Join-Pfad**.
@@ -31,6 +34,25 @@ import {
  *
  * Bewusst **nicht** hier: Marketing, SSO/MFA, Onboarding-Wizard, freie Redirect-Ziele — nur kontrollierte Links
  * zu Login/Register mit Invite-Query.
+ *
+ * **Nice (später, klein):** E2E-/Smoke-Tests über Szenario-Matrix; feine Metriken (Öffnung vs. erfolgreicher Join);
+ * Runbook für Pilot; kleine Copy-/A11y-Polishs; Monitoring-Alerts ohne PII.
+ *
+ * **Future (eher app-/infra-weit, nicht nur diese Route):** Admin-Oberfläche für Invites, Reminder/Resend,
+ * erweiterte Rollen, Audit-Trails, SSO/Enterprise-Policies, Primary-Workspace-Regeln, Invite-Analytics.
+ *
+ * **Non-MVP (hier nicht einbauen):** mehrstufige Onboarding-Wizards, Marketing-Invite-Seiten, unkontrollierte
+ * Redirect-Ketten, Multi-Step-Einladungsdialoge, sichtbare „Security“-Banner, Gamification / „Team growth“-UX.
+ *
+ * **Priorität (Punkt 13):** Für Pilot/Demo mit Einladungslinks ist dieser Flow **P0** — ohne funktionierenden
+ * Join kein zuverlässiges **Team-Onboarding** und kein **Workspace-Zugang**. Reihenfolge bei Änderungen bewusst
+ * denken: (1) **falscher Workspace-Zugang verhindern** / **Invite-Sicherheit**, (2) **E-Mail-Mismatch** /
+ * **Join-Race**, (3) **Mobile/Mail-App-Erlebnis**, (4) **Medical-/Enterprise-Glaubwürdigkeit** (Copy, Ruhe).
+ * Produktkritische Regressionen: Join ohne passende Session, Einladung für falsche E-Mail einlösbar,
+ * `acceptInvitation`-Status-/Ablauf-Logik aushebelbar, `return_to`/Invite-Token-Redirects aufgelockert.
+ * **Vor Pilot manuell:** Szenarien A–F + invalid + abgelaufen + parallel zweiter Tab + Link aus In-App-Browser.
+ * **Abgeschlossen:** Kein weiteres Feature-Engineering nötig — nur noch **Bugfixes/Security** und **QA/Doku**.
+ * **Stabil halten:** Änderungen nur noch minimal und bewusst; große Refactors ohne Not vermeiden.
  */
 
 interface AcceptInvitePageProps {
@@ -54,9 +76,38 @@ export default async function AcceptInvitePage({
   searchParams,
 }: AcceptInvitePageProps) {
   const { token: rawToken } = await searchParams;
-  if (!rawToken?.trim()) redirect("/login");
+  const raw = clipInviteTokenQuery(rawToken);
 
-  const token = rawToken.trim();
+  if (!raw) {
+    return (
+      <AcceptInviteForm
+        token=""
+        scenario="invalid"
+        inviteEmail=""
+        practiceName=""
+        invalidTone="neutral"
+        invalidTitle="Einladung aus der E-Mail öffnen"
+        invalidReason="Diese Seite wird über den persönlichen Link in Ihrer Einladungs-E-Mail geöffnet. Ohne diesen Link können wir keine Einladung zuordnen."
+      />
+    );
+  }
+
+  const token = raw;
+
+  if (!isInviteTokenFormat(token)) {
+    return (
+      <AcceptInviteForm
+        token={token}
+        scenario="invalid"
+        inviteEmail=""
+        practiceName=""
+        invalidTone="neutral"
+        invalidTitle="Einladungslink unvollständig"
+        invalidReason="Der Link ist beschädigt oder unvollständig — bitte öffnen Sie ihn direkt aus der Einladungs-E-Mail. Ein manuelles Abtippen führt oft zu Fehlern."
+      />
+    );
+  }
+
   const invite = await getInvitationByToken(token);
 
   if (!invite) {
@@ -66,7 +117,20 @@ export default async function AcceptInvitePage({
         scenario="invalid"
         inviteEmail=""
         practiceName=""
-        invalidReason="Diese Einladung wurde nicht gefunden oder der Link ist ungültig."
+        invalidReason="Zu diesem Link finden wir keine aktive Einladung. Sie wurde möglicherweise bereits verwendet oder durch eine neue ersetzt."
+      />
+    );
+  }
+
+  const inviteEmail = invite.email.trim();
+  if (!inviteEmail) {
+    return (
+      <AcceptInviteForm
+        token={token}
+        scenario="invalid"
+        inviteEmail=""
+        practiceName={invite.workspaceName}
+        invalidReason="Die gespeicherten Einladungsdaten sind unvollständig. Bitte wenden Sie sich an die einladende Praxis."
       />
     );
   }
@@ -74,26 +138,39 @@ export default async function AcceptInvitePage({
   const expired = new Date(invite.expiresAt) < new Date();
   const pending = invite.status === "pending";
 
-  if (!pending) {
-    return (
-      <AcceptInviteForm
-        token={token}
-        scenario="invalid"
-        inviteEmail={invite.email}
-        practiceName={invite.workspaceName}
-        invalidReason="Diese Einladung wurde bereits angenommen oder widerrufen."
-      />
-    );
-  }
-
   if (expired) {
     return (
       <AcceptInviteForm
         token={token}
         scenario="invalid"
-        inviteEmail={invite.email}
+        inviteEmail={inviteEmail}
         practiceName={invite.workspaceName}
-        invalidReason="Die Einladung ist abgelaufen."
+        invalidReason="Die Frist dieser Einladung ist abgelaufen. Für einen neuen Zugang wenden Sie sich bitte an die einladende Praxis."
+      />
+    );
+  }
+
+  if (!pending) {
+    let invalidReason: string;
+    if (invite.status === "accepted") {
+      invalidReason =
+        "Diese Einladung wurde bereits angenommen. Melden Sie sich mit dem passenden Konto an, um fortzufahren.";
+    } else if (invite.status === "revoked") {
+      invalidReason =
+        "Diese Einladung wurde widerrufen. Bitte wenden Sie sich an die einladende Praxis, wenn Sie weiterhin Zugang benötigen.";
+    } else if (invite.status === "expired") {
+      invalidReason =
+        "Diese Einladung ist nicht mehr gültig (abgelaufen). Bitte fordern Sie bei Bedarf eine neue Einladung an.";
+    } else {
+      invalidReason = "Diese Einladung ist nicht mehr aktiv.";
+    }
+    return (
+      <AcceptInviteForm
+        token={token}
+        scenario="invalid"
+        inviteEmail={inviteEmail}
+        practiceName={invite.workspaceName}
+        invalidReason={invalidReason}
       />
     );
   }
@@ -103,7 +180,7 @@ export default async function AcceptInvitePage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const invitedUserId = await findAuthUserIdByEmail(invite.email);
+  const invitedUserId = await findAuthUserIdByEmail(inviteEmail);
 
   let scenario: AcceptInviteScenario;
   let sessionEmail: string | undefined;
@@ -113,7 +190,7 @@ export default async function AcceptInvitePage({
     scenario = invitedUserId ? "B" : "A";
   } else {
     sessionEmail = user.email ?? "";
-    if (!user.email || user.email.toLowerCase() !== invite.email.toLowerCase()) {
+    if (!user.email || user.email.toLowerCase() !== inviteEmail.toLowerCase()) {
       scenario = "D";
     } else {
       const admin = createAdminClient();
@@ -151,7 +228,7 @@ export default async function AcceptInvitePage({
     <AcceptInviteForm
       token={token}
       scenario={scenario}
-      inviteEmail={invite.email}
+      inviteEmail={inviteEmail}
       practiceName={invite.workspaceName}
       sessionEmail={sessionEmail}
       otherWorkspaceName={otherWorkspaceName}

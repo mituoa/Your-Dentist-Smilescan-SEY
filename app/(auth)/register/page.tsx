@@ -6,6 +6,10 @@ import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lo
 import { resendSignupConfirmation, signUp } from "../actions";
 import { isRegistrationDemoMode, skipPaymentAtSignup } from "@/lib/registration-demo";
 import { RegisterClient } from "./RegisterClient";
+import {
+  clipInviteTokenQuery,
+  isInviteTokenFormat,
+} from "@/lib/team-invitations/invite-token-format";
 
 interface RegisterPageProps {
   searchParams: Promise<{
@@ -41,7 +45,8 @@ function normalizeRegisterQueryError(
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
   const params = await searchParams;
-  const inviteToken = params.invite?.trim() || "";
+  const inviteRaw = clipInviteTokenQuery(params.invite);
+  const inviteToken = isInviteTokenFormat(inviteRaw) ? inviteRaw : "";
   const prefilledEmail = params.email?.trim() || "";
   const queryError = normalizeRegisterQueryError(params.error);
   const success = params.success === "1";

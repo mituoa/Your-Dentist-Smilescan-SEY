@@ -44,7 +44,7 @@ function SignOutWideSubmit() {
       disabled={pending}
       aria-busy={pending}
       variant="secondary"
-      className="flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] border-2 border-slate-200 bg-white text-[15px] font-medium text-slate-900 shadow-none hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex min-h-[48px] w-full touch-manipulation items-center justify-center gap-2 rounded-[10px] border-2 border-slate-200 bg-white text-[16px] font-medium leading-snug text-slate-900 shadow-none hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:text-[15px]"
     >
       {pending ? (
         <span className="flex items-center justify-center gap-3">

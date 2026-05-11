@@ -90,8 +90,8 @@ export async function proxy(request: NextRequest) {
       const nextPath = await resolveMiddlewareAuthenticatedHomeUrl(supabase, user);
       return NextResponse.redirect(new URL(nextPath, request.nextUrl.origin));
     }
-  } catch (error) {
-    console.error("[proxy] Auth check failed:", error);
+  } catch {
+    console.error("[proxy] event=auth_check_failed");
   }
 
   return supabaseResponse;

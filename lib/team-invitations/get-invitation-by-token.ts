@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isInviteTokenFormat } from "@/lib/team-invitations/invite-token-format";
 
 /** Einladung laden (nur lesen) für `/accept-invite` — kein Join, kein Statuswechsel. */
 
@@ -9,7 +10,6 @@ export type LoadedInvitation = {
   workspaceName: string;
   status: string;
   expiresAt: string;
-  token: string;
   role: "doctor" | "team";
 };
 
@@ -19,7 +19,6 @@ type InvitationRow = {
   workspace_id: string;
   status: string;
   expires_at: string;
-  token: string;
   role: string;
   workspaces: { name: string } | { name: string }[] | null;
 };
@@ -36,12 +35,12 @@ export async function getInvitationByToken(
   token: string
 ): Promise<LoadedInvitation | null> {
   const t = (token ?? "").trim();
-  if (!t || !/^[a-f0-9]{64}$/i.test(t)) return null;
+  if (!t || !isInviteTokenFormat(t)) return null;
 
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("team_invitations")
-    .select("id, email, workspace_id, status, expires_at, token, role, workspaces(name)")
+    .select("id, email, workspace_id, status, expires_at, role, workspaces(name)")
     .eq("token", t)
     .maybeSingle();
 
@@ -62,7 +61,6 @@ export async function getInvitationByToken(
     workspaceName: workspaceNameFromRow(row),
     status: row.status,
     expiresAt: row.expires_at,
-    token: row.token,
     role,
   };
 }

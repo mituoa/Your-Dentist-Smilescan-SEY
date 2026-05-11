@@ -21,7 +21,7 @@ export async function findPendingInviteTokenByEmail(
     .maybeSingle();
 
   if (error) {
-    console.error("[findPendingInviteTokenByEmail]", error);
+    console.error("[findPendingInviteTokenByEmail] event=query_failed");
     return null;
   }
 
