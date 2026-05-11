@@ -1,6 +1,59 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * Lesequeries für die **Arzt-Startseite** (`/dashboard`): Tagesüberblick, unbearbeitete Einsendungen,
+ * offene Aufgaben, kurze Aktivitäts-Chronik. Bewusst leichtgewichtig — keine Analytics-Schicht.
+ * `workspaceId` stammt wie überall aus `getCurrentWorkspace()` (Pilot: eine „aktive“ Mitgliedschaft,
+ * älteste Zeile bei mehreren — siehe `getWorkspaceMembershipForUserId`).
+ *
+ * **Supabase / Auth (Punkt 3):** Alle Aufrufe laufen mit dem **User-JWT** des Server-Clients (`createClient()`).
+ * Row-Level Security filtert nach `current_workspace_id()` / Rolle (z. B. `tasks`: Team sieht keine
+ * `doctor_only`-Zeilen). Die Route `/dashboard` leitet **Nicht-Ärzte** serverseitig um — diese Queries
+ * sind dennoch nur mit **explizitem `workspace_id`** formuliert, damit die Absicht im Code klar bleibt.
+ * Bei PostgREST-Fehlern wird `ok: false` zurückgegeben (keine „Null als echte 0“); Logging nur mit
+ * **Ereignis-Tag + Fehlercode**, keine vollständigen Fehlerobjekte in der Konsole.
+ *
+ * **Fehler / Recovery (Punkt 8):** Die Route mappt `ok: false` ausschließlich auf **ruhige,
+ * nicht-technische** UI-Texte; keine Codes oder SQL/RLS-Fragmente für Nutzer. Teilfehler (z. B. nur
+ * Chronik) bleiben auf der betroffenen Sektion sichtbar; der Seitenkopf fasst nur bei Bedarf zusammen.
+ *
+ * **Mobile (Punkt 9):** Darstellung und Abstände der `/dashboard`-Seite; dieses Modul liefert nur Daten,
+ * kein Layout — UI-Touch- und Overflow-Regeln liegen in `app/(protected)/dashboard/page.tsx`.
+ *
+ * **Security (Punkt 10):** Jede Funktion prüft `workspaceId` auf ein **UUID-Format**, bevor PostgREST
+ * aufgerufen wird (Fail-fast, keine Query mit leerem oder manipulierten String). Primäre Isolation
+ * bleibt **RLS + JWT**; die explizite `.eq("workspace_id", …)`-Filterung spiegelt die Absicht im Code.
+ * Chronik-Links zeigen nur IDs aus derselben gefilterten Antwort (`/inbox/…`, `/my-tasks/…` — keine
+ * Workspace-Slug-URLs). Server-Logging nur **Ereignis + PostgREST-Code**, keine Fehlermeldungen.
+ *
+ * **MVP / Pilot (Punkt 11):** Bewusst **keine** Trend- oder Benchmark-Queries, keine Reporting-Schicht —
+ * nur Counts, Listen und ein kurzer Aktivitätsauszug für den Tagesstart.
+ *
+ * **Nice / Future / Non-MVP (Punkt 12):** Entspricht dem UI-/Produktvertrag in
+ * `app/(protected)/dashboard/page.tsx`. **Nice:** Integrationstests pro Query-Funktion; kurze
+ * Entwickler-Notiz zur Semantik der Counts (24h-Fenster, `seen_at` / Lesestatus). **Future:** neue
+ * Kennzahlen zuerst an **Arbeitsorte** (Inbox, Tasks) oder an Reporting-Infrastruktur koppeln, nicht
+ * durch breitere `select()` / Joins „nur fürs Dashboard“. **Non-MVP:** Aggregates über lange Zeiträume,
+ * Materialized Views, Feed-Pagination oder Analytics-Schichten in diesem Modul.
+ *
+ * **Priorität (Punkt 13):** P1 begleitend zur Page-Doku — bei Query-Änderungen zuerst **Semantik und
+ * Vertrauen** (Counts vs. echte Fehler, RLS), nicht Feature-Fläche. Route **einfrieren** bis auf Bugfixes
+ * oder expliziten Produktauftrag (siehe `page.tsx` Punkt 13).
+ */
+
+const DASHBOARD_WORKSPACE_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isDashboardWorkspaceId(workspaceId: string): boolean {
+  return typeof workspaceId === "string" && DASHBOARD_WORKSPACE_ID_RE.test(workspaceId.trim());
+}
+
+export function logDashboardDbFailure(event: string, err: { code?: string } | null | undefined) {
+  const code = err && typeof err.code === "string" && err.code ? err.code : "unknown";
+  console.error(`[dashboard] event=${event} code=${code}`);
+}
+
 /** Count query: `ok: false` means DB/RLS error — UI must not show a fake zero. */
 export type SafeCount = { ok: true; count: number } | { ok: false };
 
@@ -18,6 +71,7 @@ export type ActivityEvent = {
   id: string;
   text: string;
   timestamp: string;
+  /** Ziel-URL; wenn fehlend, rendert die UI die Zeile nicht als Link (kein „falsch klickbar“). */
   link?: string;
 };
 
@@ -25,18 +79,22 @@ export type RecentActivityResult = { ok: true; events: ActivityEvent[] } | { ok:
 
 export const getNewSubmissionsCount = cache(
   async (workspaceId: string): Promise<SafeCount> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("new_submissions_count_invalid_workspace_id", null);
+      return { ok: false };
+    }
     const supabase = await createClient();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
     const { count, error } = await supabase
       .from("submissions")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("workspace_id", workspaceId)
       .gte("created_at", yesterday.toISOString());
 
     if (error) {
-      console.error("[dashboard] new submissions count failed:", error);
+      logDashboardDbFailure("new_submissions_count_failed", error);
       return { ok: false };
     }
 
@@ -46,16 +104,20 @@ export const getNewSubmissionsCount = cache(
 
 export const getTotalUnseenSubmissions = cache(
   async (workspaceId: string): Promise<SafeCount> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("unseen_submissions_count_invalid_workspace_id", null);
+      return { ok: false };
+    }
     const supabase = await createClient();
 
     const { count, error } = await supabase
       .from("submissions")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("workspace_id", workspaceId)
       .is("seen_at", null);
 
     if (error) {
-      console.error("[dashboard] unseen count failed:", error);
+      logDashboardDbFailure("unseen_submissions_count_failed", error);
       return { ok: false };
     }
 
@@ -64,6 +126,10 @@ export const getTotalUnseenSubmissions = cache(
 );
 
 export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasksResult> => {
+  if (!isDashboardWorkspaceId(workspaceId)) {
+    logDashboardDbFailure("open_tasks_invalid_workspace_id", null);
+    return { ok: false };
+  }
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -75,7 +141,7 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
     .limit(10);
 
   if (error) {
-    console.error("[dashboard] tasks failed:", error);
+    logDashboardDbFailure("open_tasks_select_failed", error);
     return { ok: false };
   }
 
@@ -89,8 +155,17 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
   return { ok: true, tasks };
 });
 
+/**
+ * Kurz-Chronik: bis zu drei neueste Zeilen je Quelle (Einsendungen, offene/erledigte Aufgaben),
+ * danach gemischt höchstens vier Einträge — nur **reale** DB-Zeilen, kein Aufpolstern. Kein Anspruch
+ * auf vollständige Praxishistorie.
+ */
 export const getRecentActivity = cache(
   async (workspaceId: string): Promise<RecentActivityResult> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("recent_activity_invalid_workspace_id", null);
+      return { ok: false };
+    }
     const supabase = await createClient();
 
     const [submissionsRes, tasksRes, doneTasksRes] = await Promise.all([
@@ -117,13 +192,13 @@ export const getRecentActivity = cache(
 
     if (submissionsRes.error || tasksRes.error || doneTasksRes.error) {
       if (submissionsRes.error) {
-        console.error("[dashboard] recent submissions failed:", submissionsRes.error);
+        logDashboardDbFailure("recent_activity_submissions_failed", submissionsRes.error);
       }
       if (tasksRes.error) {
-        console.error("[dashboard] recent tasks failed:", tasksRes.error);
+        logDashboardDbFailure("recent_activity_tasks_open_failed", tasksRes.error);
       }
       if (doneTasksRes.error) {
-        console.error("[dashboard] recent done tasks failed:", doneTasksRes.error);
+        logDashboardDbFailure("recent_activity_tasks_done_failed", doneTasksRes.error);
       }
       return { ok: false };
     }

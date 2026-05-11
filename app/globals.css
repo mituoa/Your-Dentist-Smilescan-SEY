@@ -84,6 +84,24 @@
   }
 }
 
+/** Nur Arzt-Home `/dashboard` — etwas langsamer und engerer Opazitätsbereich (ruhiger als generische Skeletons). */
+@keyframes clinicalSkeletonPulseDashboard {
+  0%,
+  100% {
+    opacity: 0.56;
+  }
+  50% {
+    opacity: 0.74;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinical-dashboard-skeleton [aria-hidden="true"] {
+    animation: none !important;
+    opacity: 0.66;
+  }
+}
+
 @keyframes workspaceEnter {
   from {
     opacity: 0.86;

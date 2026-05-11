@@ -5,9 +5,19 @@ import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/
  */
 const pulse = "animate-[clinicalSkeletonPulse_2s_ease-in-out_infinite]";
 
+const pulseDashboard =
+  "animate-[clinicalSkeletonPulseDashboard_3.2s_ease-in-out_infinite]";
+
 const bar = (className: string) => (
   <div
     className={`rounded-lg bg-[#E2E8F7]/45 ${pulse} dark:bg-slate-600/25 ${className}`}
+    aria-hidden
+  />
+);
+
+const barDashboard = (className: string) => (
+  <div
+    className={`rounded-lg bg-[#E2E8F7]/40 ${pulseDashboard} dark:bg-slate-600/25 ${className}`}
     aria-hidden
   />
 );
@@ -27,27 +37,110 @@ export function ClinicalMinimalSkeleton() {
   );
 }
 
+/**
+ * Ladegerüst ausschließlich für `/dashboard` — spiegelt **Rahmen und Abstände** der echten Seite
+ * (keine KPI-Ziffern, keine Chronik-Inhalte): reduziert Layout-Sprung und wirkt sachlich statt
+ * „Analytics-Dashboard-Platzhalter“. **Mobile:** gleiche `min-w-0`/`gap`-Staffel und Karten-Padding wie
+ * die fertige Route (enge Viewports, keine horizontalen Überläufe).
+ */
 export function ClinicalDashboardSkeleton() {
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: "#F7F9FC" }}>
-      <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} space-y-6`}>
-        <div className="space-y-3 border-b border-[rgba(15,23,42,0.06)] pb-6">
-          {bar("h-8 w-56")}
-          {bar("h-3.5 w-40")}
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            {bar("h-14 flex-1 rounded-xl")}
-            {bar("h-14 flex-1 rounded-xl")}
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#F7F9FC" }}>
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at top right, rgba(47,128,237,0.05), transparent 32%)",
+        }}
+      />
+      <section
+        className={`clinical-dashboard-skeleton relative min-w-0 touch-manipulation ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}
+        aria-busy="true"
+        aria-label="Übersicht wird geladen"
+      >
+        <div className="min-w-0 w-full max-w-full">
+          <div
+            className="mb-8 overflow-hidden pb-6"
+            style={{ borderBottom: "1px solid rgba(226,232,240,0.6)" }}
+          >
+            {barDashboard("mb-2 h-8 max-w-[min(100%,20rem)]")}
+            {barDashboard("mb-3 h-3.5 w-52 max-w-full")}
+            <div className="mb-6 max-w-2xl space-y-2">
+              {barDashboard("h-3.5 w-full")}
+              {barDashboard("h-3.5 w-[94%]")}
+              {barDashboard("h-3.5 w-[68%]")}
+            </div>
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                {barDashboard("h-11 w-11 shrink-0 rounded-lg")}
+                <div className="min-w-0 flex-1 space-y-2">
+                  {barDashboard("h-4 w-full max-w-[11rem]")}
+                  {barDashboard("h-3 w-full max-w-[9rem]")}
+                </div>
+              </div>
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                {barDashboard("h-11 w-11 shrink-0 rounded-lg")}
+                <div className="min-w-0 flex-1 space-y-2">
+                  {barDashboard("h-4 w-full max-w-[12rem]")}
+                  {barDashboard("h-3 w-full max-w-[8rem]")}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-10 grid min-w-0 grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
+            <div
+              className="col-span-12 flex min-h-[240px] min-w-0 flex-col rounded-2xl border border-[#D6E6FF] p-5 sm:p-6 md:px-8 md:py-7 lg:col-span-7"
+              style={{
+                background: "linear-gradient(135deg, #F0F7FF 0%, #F4F8FF 100%)",
+                boxShadow: "0 2px 12px rgba(15, 23, 42, 0.06)",
+              }}
+            >
+              {barDashboard("mb-4 h-2.5 w-44")}
+              <div className="mb-4 space-y-3">
+                {barDashboard("h-12 max-w-[5.5rem] rounded-lg")}
+                {barDashboard("h-3.5 w-full max-w-md")}
+                {barDashboard("h-3.5 w-40")}
+              </div>
+              {barDashboard("mt-5 h-4 w-36")}
+            </div>
+
+            <div className="col-span-12 flex min-h-0 min-w-0 flex-col gap-5 sm:gap-6 lg:col-span-5">
+              {[0, 1].map((i) => (
+                <div
+                  key={i}
+                  className="min-h-[132px] min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-5 pb-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6 sm:pb-5"
+                >
+                  {barDashboard("mb-4 h-3 w-36")}
+                  {barDashboard("h-9 w-14 rounded-lg")}
+                  {barDashboard("mt-3 h-3 w-40")}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="min-h-[200px] min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6 md:px-8 md:py-7">
+            <div className="mb-6 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+              <div className="min-w-0 space-y-2">
+                {barDashboard("h-5 w-44")}
+                {barDashboard("h-3 w-full max-w-lg")}
+              </div>
+              {barDashboard("h-11 w-[8.5rem] shrink-0 rounded-xl")}
+            </div>
+            <div className="space-y-4">
+              {[0, 1].map((row) => (
+                <div key={row} className="flex items-start gap-3 py-1 max-lg:py-2.5">
+                  {barDashboard("h-11 w-11 shrink-0 rounded-lg")}
+                  <div className="min-w-0 flex-1 space-y-2 pt-0.5">
+                    {barDashboard("h-3.5 w-full max-w-xl")}
+                    {barDashboard("h-2.5 w-32")}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-12 gap-6">
-          {bar("col-span-12 h-48 rounded-2xl lg:col-span-7")}
-          <div className="col-span-12 flex flex-col gap-5 lg:col-span-5">
-            {bar("h-36 rounded-2xl")}
-            {bar("h-36 rounded-2xl")}
-          </div>
-        </div>
-        {bar("h-56 rounded-2xl")}
-      </div>
+      </section>
     </div>
   );
 }

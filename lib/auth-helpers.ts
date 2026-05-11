@@ -76,6 +76,13 @@ export async function requireUser() {
  * Workspace-Zeile für eine bekannte User-ID (eine PostgREST-Runde, kein zweites getUser).
  * Für Root-Redirect und `getCurrentWorkspace` gemeinsam genutzt.
  * Optional `client`: gleiche Supabase-Instanz wie `getUser()` (z. B. Route-Handler-Client nach OAuth).
+ *
+ * **Pilot / MVP (Multi-Workspace):** Es gibt **kein** Workspace-Switching. Gibt es mehrere
+ * `workspace_members`-Zeilen für dieselbe User-ID, gilt die **älteste** Mitgliedschaft
+ * (`order("created_at", { ascending: true }).limit(1)`) als aktiver Kontext — dieselbe Regel wie
+ * `resolveAuthenticatedEntryPath` / `resolveMiddlewareAuthenticatedHomeUrl`. `/dashboard`, Posteingang,
+ * Aufgaben und Einstellungen lesen alle denselben `workspace_id` daraus; es gibt keinen stillen
+ * Wechsel zwischen Routen.
  */
 export async function getWorkspaceMembershipForUserId(userId: string, client?: SupabaseClient) {
   const supabase = client ?? (await createClient());
@@ -88,7 +95,11 @@ export async function getWorkspaceMembershipForUserId(userId: string, client?: S
     .maybeSingle();
 
   if (error) {
-    console.error("[getWorkspaceMembershipForUserId]", error);
+    const code =
+      typeof error.code === "string" && error.code.trim() !== ""
+        ? error.code
+        : "unknown";
+    console.error(`[getWorkspaceMembershipForUserId] code=${code}`);
     return null;
   }
 
@@ -96,6 +107,9 @@ export async function getWorkspaceMembershipForUserId(userId: string, client?: S
 }
 
 /**
+ * Aktueller Workspace-Kontext für geschützte App-Routen (inkl. `/dashboard`).
+ * Siehe {@link getWorkspaceMembershipForUserId} zur Pilot-Regel bei mehreren Mitgliedschaften.
+ *
  * Not wrapped in `react/cache`: `requireApprovedWorkspace` may call
  * `ensureRelaxBootstrapWorkspace` and then must see a fresh row — caching
  * would return stale `null` and break the protected app shell.
