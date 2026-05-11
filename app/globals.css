@@ -11,8 +11,9 @@
     --text-primary: 24 24 22;
     --text-secondary: 88 86 78;
     --text-tertiary: 140 137 126;
-    --brand-primary: 15 110 86;
-    --brand-glow: 29 158 117;
+    /* Medical blue (aligned with login / marketing accent) */
+    --brand-primary: 2 132 199;
+    --brand-glow: 3 105 161;
     --signal-danger: 226 75 74;
   }
 
@@ -25,8 +26,8 @@
     --text-primary: 248 247 243;
     --text-secondary: 186 188 192;
     --text-tertiary: 120 124 132;
-    --brand-primary: 45 168 128;
-    --brand-glow: 72 212 166;
+    --brand-primary: 56 189 248;
+    --brand-glow: 125 211 252;
     --signal-danger: 242 100 100;
   }
 

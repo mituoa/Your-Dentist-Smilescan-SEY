@@ -33,7 +33,8 @@ const config: Config = {
         ink: "#1A1A1A",
         "ink-soft": "#5F5E5A",
         "ink-faint": "#97958C",
-        teal: "#0F6E56",
+        /** Legacy name — use medical blue (replaces evergreen) */
+        teal: "#0284C7",
         warning: "#B45309",
       },
       fontFamily: {

@@ -2,6 +2,14 @@ import Link from "next/link";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { ResetPasswordForm } from "./ResetPasswordForm";
+import {
+  AUTH_CARD_SHELL_CLASS,
+  AUTH_LOGO_BLOCK_CLASS,
+  AUTH_NARROW_COLUMN_CLASS,
+  AUTH_SCREEN_CANVAS_CLASS,
+  authCardShellShadowStyle,
+  authScreenCanvasStyle,
+} from "@/lib/auth/auth-screen-shell";
 
 interface ResetPasswordPageProps {
   searchParams: Promise<{ token_hash?: string; type?: string; invite?: string }>;
@@ -16,21 +24,28 @@ export default async function ResetPasswordPage({
   const invite = params.invite?.trim() || null;
 
   return (
-    <div className="relative min-h-screen bg-cream flex items-center justify-center px-6">
-      <div className="pointer-events-none fixed left-3 top-3 z-50 md:left-4 md:top-4">
-        <YourDentistBrandLockup size="sm" priority />
-      </div>
-      <div className="w-full max-w-md">
-        <ResetPasswordForm
-          tokenHashFromQuery={tokenHash}
-          typeFromQuery={type}
-          inviteTokenFromQuery={invite}
-        />
-        <p className="mt-6 text-sm text-text-secondary text-center">
-          <Link href="/login" className="text-brand hover:underline">
-            Zurück zum Login
-          </Link>
-        </p>
+    <div className={AUTH_SCREEN_CANVAS_CLASS} style={authScreenCanvasStyle}>
+      <div className={`flex min-h-[100dvh] flex-col ${AUTH_NARROW_COLUMN_CLASS}`}>
+        <div className={AUTH_LOGO_BLOCK_CLASS}>
+          <YourDentistBrandLockup size="md" centered priority />
+        </div>
+
+        <div className={AUTH_CARD_SHELL_CLASS} style={authCardShellShadowStyle}>
+          <ResetPasswordForm
+            tokenHashFromQuery={tokenHash}
+            typeFromQuery={type}
+            inviteTokenFromQuery={invite}
+          />
+
+          <p className="mt-7 border-t border-gray-100/90 pt-6 text-center text-[13px] text-slate-600 sm:mt-8 sm:pt-7 sm:text-sm">
+            <Link
+              href="/login"
+              className="font-medium text-[#0284C7] underline-offset-2 transition-colors hover:text-[#0369A1] hover:underline"
+            >
+              Zurück zum Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

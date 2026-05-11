@@ -9,6 +9,10 @@ import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-butto
 import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirmation-submit-button";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import {
+  AUTH_CARD_SHELL_CLASS,
+  authCardShellShadowStyle,
+} from "@/lib/auth/auth-screen-shell";
+import {
   clearReturnToPricingFlag,
   markReturnToPricingFlag,
   RETURN_PRICING_STORAGE_KEY,
@@ -421,13 +425,7 @@ export function LoginPageClient({
                 <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
               </div>
 
-              <div
-                className="max-md:border-gray-200/55 max-md:p-4 rounded-2xl border border-gray-200/70 bg-white p-5 lg:rounded-[22px] lg:border-gray-100/80 lg:p-8"
-                style={{
-                  boxShadow:
-                    "0 1px 2px rgba(0,0,0,0.02), 0 4px 8px rgba(0,0,0,0.02), 0 16px 24px rgba(0,0,0,0.03)",
-                }}
-              >
+              <div className={AUTH_CARD_SHELL_CLASS} style={authCardShellShadowStyle}>
                 <div className="max-md:mb-5 mb-6 lg:mb-10">
                   <h2 className="max-md:text-[1.375rem] max-md:leading-[1.25] max-md:tracking-tight mb-1.5 text-2xl font-semibold leading-tight tracking-tight text-gray-900 sm:text-[28px] lg:mb-2 lg:text-[32px]">
                     Anmelden
