@@ -42,7 +42,7 @@ export default async function ResetPasswordPage({
             inviteTokenFromQuery={invite}
           />
 
-          <p className="mt-7 border-t border-gray-100/90 pt-6 text-center text-[13px] text-slate-600 sm:mt-8 sm:pt-7 sm:text-sm">
+          <p className="mt-8 border-t border-gray-100/90 pt-7 text-center text-[13px] text-slate-600 sm:mt-9 sm:pt-8 sm:text-sm">
             <Link
               href="/login"
               className="font-medium text-[#0284C7] underline-offset-2 transition-colors hover:text-[#0369A1] hover:underline"

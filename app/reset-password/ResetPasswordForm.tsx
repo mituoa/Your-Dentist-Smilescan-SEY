@@ -164,11 +164,11 @@ export function ResetPasswordForm({
 
   return (
     <div className="space-y-0">
-      <header className="mb-6 text-center sm:mb-7">
+      <header className="mb-7 text-center sm:mb-8">
         <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-gray-900 sm:text-2xl">
           Neues Passwort setzen
         </h1>
-        <p className="mx-auto mt-2.5 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:text-[14px]">
+        <p className="mx-auto mt-3 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-3.5 sm:text-[14px]">
           Your Dentist — sicheres Passwort für Ihr Konto.
         </p>
       </header>
@@ -188,8 +188,8 @@ export function ResetPasswordForm({
       ) : null}
 
       {!verifying && verified ? (
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-          <div className="space-y-1.5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
+          <div className="space-y-2">
             <Label htmlFor="new-password" className="text-[13px] font-medium text-slate-700">
               Neues Passwort
             </Label>
@@ -204,7 +204,7 @@ export function ResetPasswordForm({
               className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="confirm-password" className="text-[13px] font-medium text-slate-700">
               Bestätigung
             </Label>
@@ -219,19 +219,21 @@ export function ResetPasswordForm({
               className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
             />
           </div>
-          {submitError ? (
-            <p className="rounded-xl border border-red-200/80 bg-red-50/90 px-3 py-2 text-[13px] text-red-900 sm:text-sm">
-              {submitError}
-            </p>
-          ) : null}
-          <Button
-            type="submit"
-            variant="primary"
-            className="h-11 w-full rounded-lg text-[14px] font-semibold shadow-sm transition-shadow duration-200 hover:shadow-md sm:h-12 sm:rounded-xl sm:text-[15px]"
-            disabled={!canSubmit}
-          >
-            Passwort speichern
-          </Button>
+          <div className="mt-2 flex flex-col gap-3 sm:mt-3 sm:gap-3.5">
+            {submitError ? (
+              <p className="rounded-xl border border-red-200/80 bg-red-50/90 px-3 py-2 text-[13px] text-red-900 sm:text-sm">
+                {submitError}
+              </p>
+            ) : null}
+            <Button
+              type="submit"
+              variant="primary"
+              className="h-11 w-full rounded-lg text-[14px] font-semibold shadow-sm transition-shadow duration-200 hover:shadow-md sm:h-12 sm:rounded-xl sm:text-[15px]"
+              disabled={!canSubmit}
+            >
+              Passwort speichern
+            </Button>
+          </div>
         </form>
       ) : null}
     </div>

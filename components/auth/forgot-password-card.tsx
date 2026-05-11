@@ -112,13 +112,13 @@ export function ForgotPasswordCard(props: {
       : "/login";
 
   return (
-    <div className={AUTH_CARD_SHELL_CLASS} style={authCardShellShadowStyle}>
+    <div className={`${AUTH_CARD_SHELL_CLASS} min-w-0 w-full`} style={authCardShellShadowStyle}>
       <header className="mb-5 text-center sm:mb-6">
         <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-slate-900 sm:text-2xl">
           Passwort zurücksetzen
         </h1>
         {sent ? (
-          <div className="mx-auto mt-3 max-w-sm space-y-2" role="status" aria-live="polite">
+          <div className="mx-auto mt-3 max-w-sm space-y-2 break-words" role="status" aria-live="polite">
             <p className="text-[14px] font-normal leading-snug text-slate-800 sm:text-[15px]">
               Bitte prüfen Sie Ihren Posteingang.
             </p>
@@ -127,7 +127,7 @@ export function ForgotPasswordCard(props: {
             </p>
           </div>
         ) : (
-          <p className="mx-auto mt-2 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-2.5 sm:text-[14px]">
+          <p className="mx-auto mt-2 max-w-sm break-words text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-2.5 sm:text-[14px]">
             E-Mail-Adresse eingeben. Sie erhalten per E-Mail einen Link zum Zurücksetzen.
           </p>
         )}
@@ -135,7 +135,7 @@ export function ForgotPasswordCard(props: {
 
       {errorDisplay ? (
         <p
-          className="mb-5 rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center text-[13px] font-normal leading-relaxed text-red-900 sm:mb-6 sm:text-sm"
+          className="mb-5 break-words rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center text-[13px] font-normal leading-relaxed text-red-900 sm:mb-6 sm:text-sm"
           role="alert"
         >
           {errorDisplay}

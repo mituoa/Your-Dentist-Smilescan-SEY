@@ -513,6 +513,7 @@ export async function signUp(formData: FormData) {
  * - `NEXT_PUBLIC_APP_URL` = öffentliche Site-URL (ohne Slash), damit `redirectTo` in Mails stimmt
  * - Supabase Dashboard → Auth → URL configuration: Site URL + Redirect URLs müssen `…/reset-password` (und ggf. Query) erlauben
  * - E-Mail: Supabase SMTP/Custom SMTP oder eingebauter Versand; sonst schlägt der Aufruf mit providerseitigem Fehler fehl
+ * - Rate limits: Supabase-Projekt (E-Mail-Versand) + optional WAF; unten App-best-effort pro Instanz (IP + Zieladresse)
  */
 export async function requestPasswordResetFromLogin(formData: FormData) {
   const email = (formData.get("email") as string | null)?.trim().toLowerCase() || "";
@@ -528,6 +529,24 @@ export async function requestPasswordResetFromLogin(formData: FormData) {
     redirect(
       `/forgot-password?${params.toString()}`
     );
+  }
+
+  const hdrs = await headers();
+  const forgotIp = getClientIpFromHeaders(hdrs);
+  const rateLimitMsg = "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.";
+  if (!allowSlidingWindowRequest(`forgot-password:ip:${forgotIp}`, 20, 3_600_000)) {
+    const params = new URLSearchParams();
+    params.set("error", rateLimitMsg);
+    if (inviteToken) params.set("invite", inviteToken);
+    params.set("email", email);
+    redirect(`/forgot-password?${params.toString()}`);
+  }
+  if (!allowSlidingWindowRequest(`forgot-password:email:${email}`, 6, 3_600_000)) {
+    const params = new URLSearchParams();
+    params.set("error", rateLimitMsg);
+    if (inviteToken) params.set("invite", inviteToken);
+    params.set("email", email);
+    redirect(`/forgot-password?${params.toString()}`);
   }
 
   const resetUrl = new URL("/reset-password", getAppBaseUrl());
