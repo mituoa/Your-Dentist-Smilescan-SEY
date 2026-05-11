@@ -103,7 +103,7 @@ function SearchFallback() {
  * Fremdfall; zuvor Layout-Checks (Login, Liste, Suche, Plus Arzt). **Bewusst nicht mehr priorisiert**
  * (Feature-Code): Inbox-Plattform-Ausbau, Pagination/serverseitige Suche, neue Kommunikations-/Tracker-
  * Produkte — s. Punkt 12 **Future**. **QA/Monitoring/Doku statt Ausbau:** Smoke/E2E, Geräte-QA, Log-
- * Alerts auch für **Detail-Actions**, Runbook **030**/RLS (Punkt 10 bis echter Prod-QA **fast final**).
+ * Alerts auch für **Detail-Actions**, Runbook Migration 030 und RLS (Punkt 10 bis echter Prod-QA **fast final**).
  * **Kein Grund zur aktiven Weiterentwicklung** ohne Produktauftrag — **Route stabil halten**, nur
  * gezielte Fixes/Security. **Nicht versehentlich wieder einführen:** Auto-SMS/E-Mail, autonome KI,
  * künstliche Dringlichkeit, CRM-/Chat-Produkt, generische Ops-/AI-Optik, übertriebene Clinical-AI-
