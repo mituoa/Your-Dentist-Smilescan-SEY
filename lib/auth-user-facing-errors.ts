@@ -56,3 +56,31 @@ export function userFacingAuthError(raw: string): string {
   // Keine unbekannten Server-/Provider-Rohstrings in Redirect-URLs (Adresszeile, History, Logs).
   return "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.";
 }
+
+/**
+ * Passwort-Reset anfordern (`resetPasswordForEmail`): Rohfehler nur serverseitig loggen.
+ * Supabase meldet bei unbekannter E-Mail typischerweise keinen Fehler (Enumeration-Schutz).
+ * Tritt hier ein Fehler auf, liegt es meist an Infrastruktur (Rate Limit, Redirect-URL, Mail, Env).
+ */
+export function userFacingPasswordResetRequestError(raw: string): string {
+  const m = (raw || "").trim();
+  if (!m) {
+    return "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.";
+  }
+  if (/rate limit|too many requests|over_email_send_rate_limit/i.test(m)) {
+    return "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.";
+  }
+  if (/fetch failed|network|ECONNREFUSED/i.test(m)) {
+    return "Verbindung zum Server fehlgeschlagen. Bitte prüfen Sie Ihre Internetverbindung.";
+  }
+  if (/redirect|not allowed|invalid.*callback|email link is invalid/i.test(m)) {
+    return "Der Reset-Link ist für diese Website noch nicht freigegeben. Bitte wenden Sie sich an den Support.";
+  }
+  if (/smtp|sending recovery email|error sending|mail delivery|email provider/i.test(m)) {
+    return "Der Link konnte gerade nicht gesendet werden. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Support.";
+  }
+  if (/Missing NEXT_PUBLIC_SUPABASE|Invalid NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY/i.test(m)) {
+    return "Der Dienst ist vorübergehend nicht erreichbar. Bitte versuchen Sie es später erneut.";
+  }
+  return "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.";
+}

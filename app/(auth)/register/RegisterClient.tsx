@@ -315,7 +315,9 @@ export function RegisterClient(props: {
       p.delete("resent");
       p.delete("checkout");
       pushRegisterUrl(p, "push");
-      window.setTimeout(() => setNavBusy(false), 160);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => setNavBusy(false));
+      });
     },
     [pushRegisterUrl, searchParams]
   );
@@ -1986,15 +1988,13 @@ export function RegisterClient(props: {
 
             {navBusy ? (
               <div
-                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-4 rounded-3xl bg-white/90 px-[max(1rem,env(safe-area-inset-left,0px))] py-6 backdrop-blur-[2px] max-md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] max-md:pt-[max(1rem,env(safe-area-inset-top,0px))] max-md:pr-[max(1rem,env(safe-area-inset-right,0px))] max-md:pl-[max(1rem,env(safe-area-inset-left,0px))]"
+                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-3 rounded-3xl bg-white/90 px-[max(1rem,env(safe-area-inset-left,0px))] py-6 backdrop-blur-[2px] max-md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] max-md:pt-[max(1rem,env(safe-area-inset-top,0px))] max-md:pr-[max(1rem,env(safe-area-inset-right,0px))] max-md:pl-[max(1rem,env(safe-area-inset-left,0px))]"
                 aria-live="polite"
                 aria-busy="true"
               >
-                <YourDentistBrandLockup size="md" centered />
+                <YourDentistBrandLockup size="md" centered markOnly />
                 <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-[#0284C7]/70 motion-reduce:animate-none motion-reduce:opacity-80" />
-                <p className="max-w-xs text-center text-[13px] leading-relaxed text-gray-500">
-                  Bitte kurz warten …
-                </p>
+                <span className="sr-only">Bitte kurz warten …</span>
               </div>
             ) : null}
             </div>

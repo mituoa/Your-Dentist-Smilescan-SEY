@@ -5,6 +5,7 @@ import {
   AUTH_SCREEN_CANVAS_CLASS,
   authScreenCanvasStyle,
 } from "@/lib/auth/auth-screen-shell";
+import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
 
 interface ForgotPasswordPageProps {
   searchParams: Promise<{ sent?: string; error?: string; invite?: string; email?: string }>;
@@ -14,7 +15,7 @@ export default async function ForgotPasswordPage({ searchParams }: ForgotPasswor
   const params = await searchParams;
   const sent = params.sent === "1";
   const errorRaw = params.error?.trim() || "";
-  const inviteToken = params.invite?.trim() || "";
+  const inviteToken = sanitizeTeamInvitationTokenForAuth(params.invite);
   const prefilledEmail = params.email?.trim() || "";
 
   return (

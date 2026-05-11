@@ -517,6 +517,7 @@ export function LoginPageClient({
                     <div>
                       <div className="max-md:mb-1 mb-1.5 flex items-center justify-end lg:mb-2">
                         <Link
+                          prefetch
                           href={
                             inviteToken
                               ? `/forgot-password?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`

@@ -151,6 +151,7 @@ export function ForgotPasswordCard(props: {
         </p>
         <p className="mt-4 text-[13px] text-slate-600 sm:mt-5">
           <Link
+            prefetch
             href={loginHref}
             className="font-medium text-slate-700 underline-offset-2 transition-colors hover:text-slate-900 hover:underline"
           >

@@ -15,7 +15,10 @@ import {
   isRegistrationDemoMode,
   shouldEnforceStripeCheckoutAtSignup,
 } from "@/lib/registration-demo";
-import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
+import {
+  userFacingAuthError,
+  userFacingPasswordResetRequestError,
+} from "@/lib/auth-user-facing-errors";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 import { getStripePriceIdForInterval, getStripeServer } from "@/lib/stripe/server";
 import { allowSlidingWindowRequest } from "@/lib/rate-limit/memory-sliding-window";
@@ -26,6 +29,7 @@ import {
   waitForWorkspaceMembership,
 } from "@/lib/register-signup-helpers";
 import { rollbackIncompleteRegistrationAfterFailure } from "@/lib/register-signup-rollback";
+import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
 
 export async function signInWithGoogle(formData: FormData) {
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
@@ -503,9 +507,18 @@ export async function signUp(formData: FormData) {
   redirect(`/register?success=1&email=${encodeURIComponent(email)}${successInviteQ}`);
 }
 
+/**
+ * Passwort-Reset-Mail (Supabase). Pilot-/Netlify-Checkliste:
+ * - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+ * - `NEXT_PUBLIC_APP_URL` = öffentliche Site-URL (ohne Slash), damit `redirectTo` in Mails stimmt
+ * - Supabase Dashboard → Auth → URL configuration: Site URL + Redirect URLs müssen `…/reset-password` (und ggf. Query) erlauben
+ * - E-Mail: Supabase SMTP/Custom SMTP oder eingebauter Versand; sonst schlägt der Aufruf mit providerseitigem Fehler fehl
+ */
 export async function requestPasswordResetFromLogin(formData: FormData) {
   const email = (formData.get("email") as string | null)?.trim().toLowerCase() || "";
-  const inviteToken = (formData.get("invite_token") as string | null)?.trim();
+  const inviteToken = sanitizeTeamInvitationTokenForAuth(
+    formData.get("invite_token") as string | null | undefined
+  );
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     const params = new URLSearchParams();
@@ -517,16 +530,31 @@ export async function requestPasswordResetFromLogin(formData: FormData) {
     );
   }
 
-  const supabase = await createClient();
-  const resetUrl = inviteToken
-    ? `${getAppBaseUrl()}/reset-password?invite=${encodeURIComponent(inviteToken)}`
-    : `${getAppBaseUrl()}/reset-password`;
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: resetUrl,
-  });
+  const resetUrl = new URL("/reset-password", getAppBaseUrl());
+  if (inviteToken) resetUrl.searchParams.set("invite", inviteToken);
 
-  if (error) {
-    console.error("[requestPasswordResetFromLogin]", error);
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: resetUrl.toString(),
+    });
+
+    if (error) {
+      console.error("[requestPasswordResetFromLogin]", error.message);
+      const params = new URLSearchParams();
+      params.set("error", userFacingPasswordResetRequestError(error.message));
+      if (inviteToken) params.set("invite", inviteToken);
+      params.set("email", email);
+      redirect(`/forgot-password?${params.toString()}`);
+    }
+  } catch (e) {
+    const raw = e instanceof Error ? e.message : String(e);
+    console.error("[requestPasswordResetFromLogin]", raw);
+    const params = new URLSearchParams();
+    params.set("error", userFacingPasswordResetRequestError(raw));
+    if (inviteToken) params.set("invite", inviteToken);
+    params.set("email", email);
+    redirect(`/forgot-password?${params.toString()}`);
   }
 
   const params = new URLSearchParams();

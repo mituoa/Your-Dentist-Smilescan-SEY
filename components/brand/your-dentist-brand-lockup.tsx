@@ -25,6 +25,8 @@ export interface YourDentistBrandLockupProps {
   tagline?: string | null;
   /** Center stack (e.g. modal headers). Default: left-aligned block. */
   centered?: boolean;
+  /** Nur das Mark-Icon — für kurze Route-/Overlay-Loads (kein Wordmark, keine Subline). */
+  markOnly?: boolean;
   className?: string;
   priority?: boolean;
 }
@@ -37,10 +39,30 @@ export function YourDentistBrandLockup({
   size: lockupSize = "md",
   tagline = null,
   centered = false,
+  markOnly = false,
   className,
   priority = false,
 }: YourDentistBrandLockupProps) {
   const m = MARK[lockupSize];
+
+  if (markOnly) {
+    return (
+      <div
+        className={cn(centered ? "flex justify-center" : "flex", className)}
+        data-brand="your-dentist-mark"
+      >
+        <Image
+          src="/brand/your-dentist/logo-mark.svg"
+          alt=""
+          width={m.px}
+          height={m.px}
+          priority={priority}
+          className={cn(m.cls, "shrink-0 object-contain")}
+          aria-hidden
+        />
+      </div>
+    );
+  }
 
   const row = (
     <div className="flex items-center gap-2.5">
