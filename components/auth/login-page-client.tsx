@@ -6,6 +6,7 @@ import Link from "next/link";
 import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
 import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-button";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import {
   clearReturnToPricingFlag,
   markReturnToPricingFlag,
@@ -322,83 +323,14 @@ export function LoginPageClient({
               style={{ transform: "translateY(-36px)" }}
             >
               <div className="mb-16">
-                <div className="flex items-center gap-3 mb-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="256"
-                    height="256"
-                    viewBox="0 0 256 256"
-                    fill="none"
-                    className="w-11 h-11"
-                    aria-hidden="true"
-                  >
-                    <defs>
-                      <linearGradient
-                        id="logo-left"
-                        x1="50"
-                        y1="42"
-                        x2="210"
-                        y2="214"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop stopColor="#FFFFFF" />
-                        <stop offset="1" stopColor="#E0F2FE" />
-                      </linearGradient>
-                    </defs>
-                    <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#logo-left)" />
-                    <rect
-                      x="42.75"
-                      y="42.75"
-                      width="170.5"
-                      height="170.5"
-                      rx="47.25"
-                      stroke="#0284C7"
-                      strokeOpacity="0.18"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90"
-                      stroke="#0284C7"
-                      strokeOpacity="0.34"
-                      strokeWidth="9"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M99 103L128 131L157 103"
-                      stroke="#0284C7"
-                      strokeWidth="11"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M128 130V157"
-                      stroke="#0284C7"
-                      strokeWidth="11"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171"
-                      stroke="#0284C7"
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div>
-                    <h1 className="text-2xl font-medium text-gray-900 tracking-tight leading-none">
-                      <span className="italic font-light">Your</span> Dentist
-                    </h1>
-                  </div>
-                </div>
-                <p className="text-[10px] font-semibold text-[#0284C7] uppercase tracking-[0.15em] ml-14">
-                  Neutral Practice Platform
-                </p>
+                <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" />
               </div>
 
               {/* Headline */}
               <h2 className="w-[420px] text-[28px] font-medium text-gray-900 leading-[1.2] tracking-[-0.01em] mb-16">
-                Digitale Fallaufnahme
+                Digitale Patientenkommunikation
                 <br />
-                für Zahnärzte
+                für moderne Zahnarztpraxen
               </h2>
 
               {/* Trust points */}
@@ -418,8 +350,8 @@ export function LoginPageClient({
                       d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
                     />
                   </svg>
-                  <p className="text-[15px] text-gray-700 leading-relaxed whitespace-nowrap">
-                    DSGVO-konform &amp; medizinisch zertifiziert
+                  <p className="text-[15px] text-gray-700 leading-relaxed">
+                    DSGVO-orientierte Datenverarbeitung
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
@@ -437,8 +369,8 @@ export function LoginPageClient({
                       d="M13 10V3L4 14h7v7l9-11h-7z"
                     />
                   </svg>
-                  <p className="text-[15px] text-gray-700 leading-relaxed whitespace-nowrap">
-                    Echtzeit-Zugriff auf Patientendaten
+                  <p className="text-[15px] text-gray-700 leading-relaxed">
+                    Strukturierte Ablage für Praxisfälle im Team
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
@@ -456,8 +388,8 @@ export function LoginPageClient({
                       d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
                     />
                   </svg>
-                  <p className="text-[15px] text-gray-700 leading-relaxed whitespace-nowrap">
-                    Über 2.500 Zahnarztpraxen nutzen Your Dentist
+                  <p className="text-[15px] text-gray-700 leading-relaxed">
+                    Für Zahnarztpraxen und Praxisteams ausgelegt
                   </p>
                 </div>
               </div>
@@ -465,75 +397,8 @@ export function LoginPageClient({
 
             {/* RIGHT SECTION */}
             <div className="w-full min-w-0 lg:w-[360px]">
-              <div className="mb-6 flex items-center justify-center gap-3 lg:mb-12 lg:hidden">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="256"
-                  height="256"
-                  viewBox="0 0 256 256"
-                  fill="none"
-                  className="w-11 h-11"
-                  aria-hidden="true"
-                >
-                  <defs>
-                    <linearGradient
-                      id="logo-mobile"
-                      x1="50"
-                      y1="42"
-                      x2="210"
-                      y2="214"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stopColor="#FFFFFF" />
-                      <stop offset="1" stopColor="#E0F2FE" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#logo-mobile)" />
-                  <rect
-                    x="42.75"
-                    y="42.75"
-                    width="170.5"
-                    height="170.5"
-                    rx="47.25"
-                    stroke="#0284C7"
-                    strokeOpacity="0.18"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90"
-                    stroke="#0284C7"
-                    strokeOpacity="0.34"
-                    strokeWidth="9"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M99 103L128 131L157 103"
-                    stroke="#0284C7"
-                    strokeWidth="11"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M128 130V157"
-                    stroke="#0284C7"
-                    strokeWidth="11"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171"
-                    stroke="#0284C7"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div>
-                  <h1 className="text-xl font-medium text-gray-900 leading-none">
-                    <span className="italic font-light">Your</span> Dentist
-                  </h1>
-                  <p className="text-[9px] font-semibold text-[#0284C7] uppercase tracking-[0.15em]">
-                    Neutral Practice Platform
-                  </p>
-                </div>
+              <div className="mb-6 flex justify-center lg:mb-12 lg:hidden">
+                <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
               </div>
 
               <div
@@ -752,7 +617,7 @@ export function LoginPageClient({
                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                     />
                   </svg>
-                  <span>SSL</span>
+                  <span>TLS (HTTPS)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <svg
@@ -766,10 +631,10 @@ export function LoginPageClient({
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
                     />
                   </svg>
-                  <span>ISO 27001</span>
+                  <span>Teamrollen</span>
                 </div>
               </div>
 
@@ -832,7 +697,7 @@ export function LoginPageClient({
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>30 Tage Geld-zurück-Garantie</span>
+                <span>Preise zzgl. MwSt.</span>
               </div>
             </div>
 
@@ -867,7 +732,7 @@ export function LoginPageClient({
               >
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 md:-top-3">
                   <span className="rounded-full bg-[#F59E0B] px-2.5 py-0.5 text-[10px] font-semibold text-white md:px-3 md:py-1 md:text-[11px]">
-                    SPARE 10%
+                    Halbjahresabo
                   </span>
                 </div>
                 <div className="h-1.5 md:h-[20px]" />
@@ -895,7 +760,7 @@ export function LoginPageClient({
               >
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 md:-top-3">
                   <span className="rounded-full bg-[#0284C7] px-2.5 py-0.5 text-[10px] font-semibold text-white md:px-3 md:py-1 md:text-[11px]">
-                    AM BELIEBTESTEN
+                    Jahresabo
                   </span>
                 </div>
                 <div className="h-1.5 md:h-[20px]" />
@@ -942,8 +807,6 @@ export function LoginPageClient({
             </div>
           </div>
         </div>
-
-        {null}
       </div>
     </div>
   );

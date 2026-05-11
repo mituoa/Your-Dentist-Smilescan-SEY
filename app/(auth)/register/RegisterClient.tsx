@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
@@ -733,30 +734,9 @@ export function RegisterClient(props: {
                   "linear-gradient(to bottom, rgba(2, 132, 199, 0.03) 0%, rgba(255,255,255,0) 100%)",
               }}
             >
-              <div className="mb-1 flex items-center justify-center gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" className="h-9 w-9" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="logo-modal" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#FFFFFF" />
-                      <stop offset="1" stopColor="#E0F2FE" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#logo-modal)" />
-                  <rect x="42.75" y="42.75" width="170.5" height="170.5" rx="47.25" stroke="#0284C7" strokeOpacity="0.18" strokeWidth="1.5" />
-                  <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#0284C7" strokeOpacity="0.34" strokeWidth="9" strokeLinecap="round" />
-                  <path d="M99 103L128 131L157 103" stroke="#0284C7" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M128 130V157" stroke="#0284C7" strokeWidth="11" strokeLinecap="round" />
-                  <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#0284C7" strokeWidth="10" strokeLinecap="round" />
-                </svg>
-                <div>
-                  <h1 className="text-lg font-medium leading-none tracking-tight text-gray-900">
-                    <span className="font-light italic">Your</span> Dentist
-                  </h1>
-                </div>
+              <div className="mb-1 flex justify-center">
+                <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
               </div>
-              <p className="text-center text-[9px] font-semibold uppercase tracking-[0.15em] text-[#0284C7]">
-                Neutral Practice Platform
-              </p>
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col px-4 pb-[max(2.5rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] pt-0 sm:px-5 md:px-10 md:pb-10">
@@ -1796,57 +1776,7 @@ export function RegisterClient(props: {
                 aria-live="polite"
                 aria-busy="true"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="256"
-                  height="256"
-                  viewBox="0 0 256 256"
-                  fill="none"
-                  className="h-10 w-10"
-                  aria-hidden="true"
-                >
-                  <defs>
-                    <linearGradient id="reg-nav-logo" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#FFFFFF" />
-                      <stop offset="1" stopColor="#E0F2FE" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="42" y="42" width="172" height="172" rx="48" fill="url(#reg-nav-logo)" />
-                  <rect
-                    x="42.75"
-                    y="42.75"
-                    width="170.5"
-                    height="170.5"
-                    rx="47.25"
-                    stroke="#0284C7"
-                    strokeOpacity="0.18"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90"
-                    stroke="#0284C7"
-                    strokeOpacity="0.34"
-                    strokeWidth="9"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M99 103L128 131L157 103"
-                    stroke="#0284C7"
-                    strokeWidth="11"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path d="M128 130V157" stroke="#0284C7" strokeWidth="11" strokeLinecap="round" />
-                  <path
-                    d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171"
-                    stroke="#0284C7"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <p className="text-center text-[15px] font-medium tracking-tight text-gray-900">
-                  <span className="font-light italic">Your</span> Dentist
-                </p>
+                <YourDentistBrandLockup size="md" centered />
               </div>
             ) : null}
             </div>

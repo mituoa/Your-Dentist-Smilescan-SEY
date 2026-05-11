@@ -7,6 +7,15 @@ import {
   clinicalWorkspaceFrame,
   clinicalWorkspaceVerticalPadding,
 } from "@/lib/clinical-ui";
+import { getAppBaseUrl } from "@/lib/env";
+
+function publicProfileUrlLabel(baseUrl: string, path: string): string {
+  try {
+    return `${new URL(baseUrl).host}${path}`;
+  } catch {
+    return path;
+  }
+}
 
 export default async function ProfilePage() {
   const workspace = await getCurrentWorkspace();
@@ -27,6 +36,7 @@ export default async function ProfilePage() {
     .maybeSingle();
 
   const publicUrl = ws?.slug ? `/doc/${ws.slug}` : null;
+  const publicUrlLabel = publicUrl ? publicProfileUrlLabel(getAppBaseUrl(), publicUrl) : null;
 
   return (
     <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
@@ -63,7 +73,7 @@ export default async function ProfilePage() {
             >
               <ExternalLink className="w-5 h-5 text-brand mb-3" strokeWidth={1.75} />
               <h2 className="font-serif text-xl mb-1">Ansehen</h2>
-              <p className="text-xs text-text-tertiary">smilescan.io{publicUrl}</p>
+              <p className="text-xs text-text-tertiary">{publicUrlLabel}</p>
             </Link>
           )}
         </div>

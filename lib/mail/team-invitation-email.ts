@@ -22,13 +22,13 @@ export function buildTeamInvitationEmail(
 
   const text =
     `Guten Tag,\n\n` +
-    `${whoInvites} hat Sie zu einem Team-Account bei SmileScan eingeladen.\n\n` +
+    `${whoInvites} hat Sie in das Praxisteam auf der Plattform Your Dentist eingeladen.\n\n` +
     `Die Einladung ist persönlich für diese E-Mail-Adresse (${recipientEmail}) ausgestellt und gilt für 7 Tage.\n\n` +
     `Zum Annehmen der Einladung klicken Sie bitte auf folgenden Link:\n` +
     `${acceptUrl}\n\n` +
     `Falls Sie diese E-Mail unerwartet erhalten haben, können Sie sie ignorieren.\n\n` +
     `Mit freundlichen Grüßen\n` +
-    `SmileScan`;
+    `Your Dentist`;
 
   const safeInviter = escapeHtml(whoInvites);
   const safeEmail = escapeHtml(recipientEmail);
@@ -36,7 +36,7 @@ export function buildTeamInvitationEmail(
 
   const html =
     `<p>Guten Tag,</p>` +
-    `<p>${safeInviter} hat Sie zu einem Team-Account bei SmileScan eingeladen.</p>` +
+    `<p>${safeInviter} hat Sie in das Praxisteam auf der Plattform Your Dentist eingeladen.</p>` +
     `<p>Die Einladung ist persönlich für die E-Mail-Adresse <strong>${safeEmail}</strong> ausgestellt und gilt für 7 Tage.</p>` +
     `<table cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">` +
     `<tr>` +
@@ -47,7 +47,7 @@ export function buildTeamInvitationEmail(
     `</table>` +
     `<p style="color: #5F5E5A; font-size: 12px;">Oder öffnen Sie: ${safeUrl}</p>` +
     `<p style="color: #97958C; font-size: 12px;">Falls Sie diese E-Mail unerwartet erhalten haben, können Sie sie ignorieren.</p>` +
-    `<p>Mit freundlichen Grüßen<br>SmileScan</p>`;
+    `<p>Mit freundlichen Grüßen<br>Your Dentist</p>`;
 
   return { subject, text, html };
 }

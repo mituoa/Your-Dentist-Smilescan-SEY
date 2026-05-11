@@ -368,7 +368,7 @@ export function EditorialProfile({
             © 2026 {data.practice_name || workspaceName}
           </div>
           <div className="shrink-0">
-            Via <strong className="text-ink-soft">SmileScan</strong>
+            Via <strong className="text-ink-soft">Your Dentist</strong>
           </div>
         </footer>
       </div>

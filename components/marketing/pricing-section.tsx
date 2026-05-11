@@ -7,7 +7,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SALES_EMAIL =
-  process.env.NEXT_PUBLIC_SALES_EMAIL || "vertrieb@smilescan.app";
+  process.env.NEXT_PUBLIC_SALES_EMAIL || "vertrieb@deinedomain.de";
 
 type BillingPeriod = "monthly" | "annual";
 
@@ -118,7 +118,7 @@ const PLANS: Plan[] = [
     ],
     highlighted: true,
     ctaLabel: "Vertrieb kontaktieren",
-    ctaHref: `mailto:${SALES_EMAIL}?subject=SmileScan%20Enterprise`,
+    ctaHref: `mailto:${SALES_EMAIL}?subject=Your%20Dentist%20%E2%80%93%20Enterprise`,
     ctaExternal: true,
   },
 ];

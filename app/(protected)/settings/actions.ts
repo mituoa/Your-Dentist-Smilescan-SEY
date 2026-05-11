@@ -204,7 +204,7 @@ export async function inviteTeamMember(
     .single();
 
   const practiceName =
-    profile?.practice_name || ws?.name || "SmileScan Praxis";
+    profile?.practice_name || ws?.name || "Unbenannte Praxis";
   const inviterName = profile?.display_name || null;
   const acceptUrl = `${getAppBaseUrl()}/accept-invite?token=${token}`;
 

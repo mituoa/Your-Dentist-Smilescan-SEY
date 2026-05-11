@@ -71,7 +71,7 @@ export function openGraphBrandImageResponse() {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
-          padding: 56,
+          padding: 48,
           background: "linear-gradient(155deg, #FAFAFA 0%, #EEF2FF 38%, #F8F7F3 100%)",
           fontFamily:
             'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
@@ -82,11 +82,11 @@ export function openGraphBrandImageResponse() {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            gap: 48,
+            gap: 28,
             maxWidth: 1080,
           }}
         >
-          <BrandMarkCard size={200} />
+          <BrandMarkCard size={120} />
           <div
             style={{
               display: "flex",
@@ -98,7 +98,7 @@ export function openGraphBrandImageResponse() {
           >
             <div
               style={{
-                fontSize: 52,
+                fontSize: 42,
                 fontWeight: 600,
                 color: "#111827",
                 letterSpacing: "-0.03em",
@@ -109,10 +109,10 @@ export function openGraphBrandImageResponse() {
             </div>
             <div
               style={{
-                fontSize: 28,
+                fontSize: 22,
                 fontWeight: 500,
                 color: "#0284C7",
-                marginTop: 12,
+                marginTop: 10,
                 letterSpacing: "-0.02em",
               }}
             >
@@ -120,10 +120,10 @@ export function openGraphBrandImageResponse() {
             </div>
             <div
               style={{
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: 400,
                 color: "#4B5563",
-                marginTop: 28,
+                marginTop: 20,
                 lineHeight: 1.45,
                 maxWidth: 720,
               }}

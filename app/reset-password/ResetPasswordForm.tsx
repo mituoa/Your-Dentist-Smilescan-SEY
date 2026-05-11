@@ -147,7 +147,7 @@ export function ResetPasswordForm({
         Neues Passwort setzen
       </h2>
       <p className="text-sm text-text-secondary mb-6">
-        SmileScan — sichere Anmeldung.
+        Your Dentist — Passwort zurücksetzen.
       </p>
 
       {verifying && (

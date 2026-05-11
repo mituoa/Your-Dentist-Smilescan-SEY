@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { requestPasswordResetFromLogin } from "@/app/(auth)/actions";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +39,10 @@ export default async function ForgotPasswordPage({
           transform: "translate(25%, 25%)",
         }}
       />
+
+      <div className="pointer-events-none fixed left-3 top-3 z-50 md:left-4 md:top-4">
+        <YourDentistBrandLockup size="sm" priority />
+      </div>
 
       <div className="relative z-10 w-full max-w-[500px]">
         <div

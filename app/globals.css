@@ -43,7 +43,7 @@
   }
 }
 
-@keyframes smilescan-logo-pulse {
+@keyframes brand-mark-pulse {
   0% {
     opacity: 0.95;
   }
@@ -55,8 +55,8 @@
   }
 }
 
-.smilescan-logo-pulse {
-  animation: smilescan-logo-pulse 3.2s ease-in-out infinite;
+.brand-mark-pulse {
+  animation: brand-mark-pulse 3.2s ease-in-out infinite;
 }
 
 @keyframes login-pricing-badge-pulse {
@@ -110,7 +110,7 @@ nextjs-portal,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .smilescan-logo-pulse {
+  .brand-mark-pulse {
     animation: none;
     opacity: 1;
   }

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
+
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { ResetPasswordForm } from "./ResetPasswordForm";
-import smileScanLogo from "@/FIGMA DESIGN ALL/SMILESCAN LOGO/SmileScan.svg";
 
 interface ResetPasswordPageProps {
   searchParams: Promise<{ token_hash?: string; type?: string; invite?: string }>;
@@ -18,12 +18,7 @@ export default async function ResetPasswordPage({
   return (
     <div className="relative min-h-screen bg-cream flex items-center justify-center px-6">
       <div className="pointer-events-none fixed left-3 top-3 z-50 md:left-4 md:top-4">
-        <Image
-          src={smileScanLogo}
-          alt="SmileScan Logo"
-          priority
-          className="smilescan-logo-pulse h-auto w-[156px] max-w-full object-contain md:w-[186px]"
-        />
+        <YourDentistBrandLockup size="sm" priority />
       </div>
       <div className="w-full max-w-md">
         <ResetPasswordForm

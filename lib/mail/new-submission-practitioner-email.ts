@@ -34,7 +34,7 @@ export function buildNewSubmissionPractitionerEmail(
     `Die Einsendung steht in Ihrem Eingang zur Ansicht bereit:\n` +
     `${inboxUrl}\n\n` +
     `Mit freundlichen Grüßen\n` +
-    `SmileScan`;
+    `Your Dentist`;
 
   const html =
     `<p>Guten Tag,</p>` +
@@ -43,7 +43,7 @@ export function buildNewSubmissionPractitionerEmail(
     `<strong>Eingegangen am:</strong> ${formattedDate}</p>` +
     `<p>Die Einsendung steht in Ihrem Eingang zur Ansicht bereit:<br>` +
     `<a href="${safeUrl}">${safeUrl}</a></p>` +
-    `<p>Mit freundlichen Grüßen<br>SmileScan</p>`;
+    `<p>Mit freundlichen Grüßen<br>Your Dentist</p>`;
 
   return { subject, text, html };
 }

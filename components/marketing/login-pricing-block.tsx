@@ -22,13 +22,13 @@ const PLANS = {
 
 const FEATURES = [
   "Unbegrenzte Fallaufnahmen",
-  "DSGVO-konforme Datenspeicherung",
+  "Datenspeicherung mit Datenschutz-Fokus (DSGVO)",
   "Automatische Backups",
-  "Mobile App (iOS & Android)",
+  "Responsive Web-Oberfläche (Desktop & Mobil)",
   "Exportfunktion (PDF, CSV)",
   "Team-Verwaltung",
   "Kostenlose Updates",
-  "Sicheres Cloud-Hosting",
+  "Professionelles Cloud-Hosting",
 ] as const;
 
 const FAQ = [
@@ -110,7 +110,7 @@ export function LoginPricingBlock() {
                 clipRule="evenodd"
               />
             </svg>
-            <span>30 Tage Geld-zurück-Garantie</span>
+            <span>Preise zzgl. MwSt.</span>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ export function LoginPricingBlock() {
           <div className="relative flex flex-col rounded-2xl border-2 border-gray-200 bg-white p-6 transition-all duration-200 hover:border-[#0284C7] hover:shadow-lg">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
               <span className="rounded-full bg-[#F59E0B] px-3 py-1 text-[11px] font-semibold text-white">
-                SPARE 10%
+                Halbjahresabo
               </span>
             </div>
             <div className="h-[20px]" />
@@ -173,7 +173,7 @@ export function LoginPricingBlock() {
           <div className="relative flex flex-col rounded-2xl border-2 border-[#0284C7] bg-white p-6 shadow-lg">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
               <span className="login-pricing-badge-pulse rounded-full bg-gradient-to-r from-[#0284C7] to-[#0369A1] px-3 py-1 text-[11px] font-semibold text-white">
-                BELIEBTESTE WAHL
+                Jahresabo
               </span>
             </div>
             <div className="h-[20px]" />
@@ -229,29 +229,10 @@ export function LoginPricingBlock() {
         </div>
 
         <div className="mt-16 text-center">
-          <p className="mb-6 text-[13px] text-gray-500">
-            Vertrauen Sie der Nr. 1 Plattform für Zahnärzte
+          <p className="mx-auto max-w-lg text-[14px] leading-relaxed text-gray-600">
+            Für moderne Zahnarztpraxen: strukturierte Patientenkommunikation, gemeinsame Fallbearbeitung im Team und
+            datenschutzbewusste Abläufe.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-12">
-            <div>
-              <div className="text-[24px] font-semibold text-gray-900">
-                2.500+
-              </div>
-              <div className="text-[12px] text-gray-500">Zahnarztpraxen</div>
-            </div>
-            <div>
-              <div className="text-[24px] font-semibold text-gray-900">
-                99,9%
-              </div>
-              <div className="text-[12px] text-gray-500">Uptime</div>
-            </div>
-            <div>
-              <div className="text-[24px] font-semibold text-gray-900">
-                4,9/5
-              </div>
-              <div className="text-[12px] text-gray-500">★★★★★ Bewertung</div>
-            </div>
-          </div>
         </div>
 
         <div className="mx-auto mt-20 max-w-2xl">

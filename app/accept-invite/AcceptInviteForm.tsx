@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 import { AlertCircle, ArrowRight, CheckCircle2, LogOut } from "lucide-react";
 import { acceptInvitation } from "@/app/(protected)/settings/actions";
 import { signOut } from "@/app/(auth)/actions";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { Button } from "@/components/ui/button";
-import smileScanLogo from "@/FIGMA DESIGN ALL/SMILESCAN LOGO/SmileScan.svg";
 
 export type AcceptInviteScenario = "invalid" | "A" | "B" | "C" | "D" | "E" | "F";
 
@@ -84,12 +83,7 @@ export function AcceptInviteForm({
       />
 
       <div className="pointer-events-none fixed left-3 top-3 z-50 md:left-4 md:top-4">
-        <Image
-          src={smileScanLogo}
-          alt="SmileScan Logo"
-          priority
-          className="smilescan-logo-pulse h-auto w-[156px] max-w-full object-contain md:w-[186px]"
-        />
+        <YourDentistBrandLockup size="sm" priority />
       </div>
 
       <div className="relative z-10 w-full max-w-[500px]">
@@ -145,7 +139,7 @@ export function AcceptInviteForm({
                 </h1>
                 <p className="text-left text-sm leading-relaxed text-slate-600">
                   <strong className="font-semibold text-slate-900">{practiceName}</strong> hat Sie
-                  eingeladen. Ein Konto mit dieser E-Mail-Adresse existiert bereits bei SmileScan.
+                  eingeladen. Für diese E-Mail-Adresse existiert bereits ein Konto.
                   Melden Sie sich an, um die Einladung anzunehmen.
                 </p>
               </div>

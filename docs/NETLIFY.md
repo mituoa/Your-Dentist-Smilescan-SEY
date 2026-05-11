@@ -1,4 +1,4 @@
-# Netlify + Supabase (SmileScan)
+# Netlify + Supabase (Your Dentist)
 
 ## Environment variables (Site → Site configuration → Environment variables)
 
@@ -72,7 +72,7 @@ Die App hat bereits **„Mit GitHub anmelden“** (`signInWithOAuth` → `github
 ### 1) GitHub OAuth App anlegen
 
 1. Auf **GitHub** einloggen → **Settings** → **Developer settings** → **OAuth Apps** → **New OAuth App**.
-2. **Application name:** z. B. `SmileScan`  
+2. **Application name:** z. B. `Your Dentist`  
    **Homepage URL:** eure Netlify-URL, z. B. `https://<site>.netlify.app`
 3. **Authorization callback URL** (wichtig): **exakt** die Supabase-Callback-URL eures Projekts:
 
