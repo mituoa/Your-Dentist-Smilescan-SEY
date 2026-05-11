@@ -10,7 +10,7 @@ import {
   logDashboardDbFailure,
   type ActivityEvent,
 } from "@/lib/queries/dashboard";
-import { AlertCircle, Clock, FileText, CheckCircle2, ClipboardList } from "lucide-react";
+import { FileText, CheckCircle2, ClipboardList } from "lucide-react";
 
 import {
   clinicalWorkspaceFrame,
@@ -28,9 +28,9 @@ export const dynamic = "force-dynamic";
  * (`/inbox`); offene Aufgaben bearbeiten → **Aufgabenliste** (`/my-tasks`). Teammitglieder werden
  * serverseitig nach `/my-tasks` geleitet (kein paralleles „Doctor-Dashboard“ für `team`).
  *
- * **Hierarchie (oben → unten):** Begrüßung + Kurzmetriken → **Priorität unbearbeitete Fälle**
- * (Posteingang) → Karten **Aufgaben** / **Neueingänge 24h** + ggf. Top-3-Aufgaben → **Kurze Chronik**
- * (Auszug, keine vollständige Historie).
+ * **Hierarchie (oben → unten):** Begrüßung → **Zahl-first-Kurzmetriken** (Neu 24h · Posteingang) →
+ * **Priorität Posteingang** (große Kennzahl) → Karten **Aufgaben** / **Neu (24h)** + ggf. nächste
+ * Aufgaben → **Chronik** (Auszug).
  *
  * **Nicht-Ziele dieser Route:** tiefe Auswertungen, neue KPI-Familien, Marketing-Widgets,
  * freie Navigations-Bausteine — bewusst ruhig und fokussiert gehalten.
@@ -72,9 +72,9 @@ export const dynamic = "force-dynamic";
  * Profil allein vs. allgemeiner Hinweis bei KPI/Chronik; Recovery immer über **Posteingang** und
  * **Aufgabenliste** — ohne Alarm-Banner, ohne Retry-Theater.
  *
- * **Mobile (Punkt 9):** Enge Viewports: `min-w-0` / `break-words`, etwas **engeres Karten-Padding**,
- * **≥44px** für primäre Tippflächen (KPI-Icons, Chronik-CTA, Aktivitätszeilen, Aufgabenlinks), große
- * Kennziffern mit **fluidem `clamp`** statt Overflow; Loading-Skeleton nutzt dieselben Padding-Stufen.
+ * **Mobile (Punkt 9):** Enge Viewports: `min-w-0` / `break-words`, **kompaktere Karten**, große
+ * Kennziffern mit **fluidem `clamp`**, **≥44px** wo nötig (Links/CTA); Loading-Skeleton an diese Staffel
+ * angeglichen.
  *
  * **Security (Punkt 10):** `requireUser` + `requireApprovedWorkspace` + **Rollen-Gate** vor jeder
  * Dashboard-Query; Team erreicht weder KPIs noch Chronik (Redirect). `workspace_id` stammt ausschließlich
@@ -143,22 +143,22 @@ function ActivityRow({ event }: { event: ActivityEvent }) {
   const inner = (
     <>
       <div
-        className="flex h-[44px] w-[44px] flex-shrink-0 items-center justify-center"
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center sm:h-10 sm:w-10"
         style={{
           background: "#F8FAFC",
           borderRadius: "8px",
         }}
       >
-        <Icon className="h-[20px] w-[20px]" style={{ color: "#64748B" }} />
+        <Icon className="h-[18px] w-[18px] sm:h-[19px] sm:w-[19px]" style={{ color: "#64748B" }} />
       </div>
       <div className="min-w-0 flex-1">
         <p
-          className="mb-1 break-words text-[14px]"
-          style={{ color: "#0F172A", fontWeight: 600, lineHeight: "1.4" }}
+          className="mb-0.5 break-words text-[13px] leading-snug sm:text-[13.5px]"
+          style={{ color: "#0F172A", fontWeight: 600, lineHeight: "1.35" }}
         >
           {event.text}
         </p>
-        <p className="text-[11px]" style={{ color: "#94A3B8" }}>
+        <p className="text-[10px] tabular-nums" style={{ color: "#94A3B8" }}>
           {formatDeDateTime(event.timestamp)}
         </p>
       </div>
@@ -169,7 +169,7 @@ function ActivityRow({ event }: { event: ActivityEvent }) {
     return (
       <Link
         href={event.link}
-        className="flex min-h-[44px] min-w-0 items-start gap-3 rounded-lg py-2.5 transition-colors hover:bg-[#F8FAFC] max-lg:py-3"
+        className="flex min-h-[40px] min-w-0 items-start gap-2.5 rounded-lg py-2 transition-colors hover:bg-[#F8FAFC] sm:min-h-[44px] sm:gap-3 sm:py-2"
       >
         {inner}
       </Link>
@@ -177,7 +177,7 @@ function ActivityRow({ event }: { event: ActivityEvent }) {
   }
 
   return (
-    <div className="flex min-h-[44px] min-w-0 cursor-default items-start gap-3 rounded-lg py-2.5 max-lg:py-3">
+    <div className="flex min-h-[40px] min-w-0 cursor-default items-start gap-2.5 rounded-lg py-2 sm:min-h-[44px] sm:gap-3 sm:py-2">
       {inner}
     </div>
   );
@@ -271,11 +271,11 @@ export default async function DashboardPage() {
       <div className={`relative touch-manipulation ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
         <div className="min-w-0 w-full max-w-full">
           <div
-            className="mb-8 overflow-hidden pb-6"
+            className="mb-6 overflow-hidden pb-5"
             style={{ borderBottom: "1px solid rgba(226,232,240,0.6)" }}
           >
             <h1
-              className="mb-2 break-words text-[1.65rem] font-semibold sm:text-[28px]"
+              className="mb-1.5 break-words text-[1.65rem] font-semibold sm:text-[28px]"
               style={{
                 color: "#1E293B",
                 letterSpacing: "-0.01em",
@@ -288,60 +288,45 @@ export default async function DashboardPage() {
               {todayLabel}
             </p>
             {profileDisplayNameMissing ? (
-              <p className="mb-3 max-w-2xl text-[12px] leading-relaxed" style={{ color: "#94A3B8" }}>
-                Anzeigename noch nicht gesetzt — optional unter{" "}
+              <p className="mb-4 max-w-2xl text-[11px] leading-snug" style={{ color: "#94A3B8" }}>
                 <Link
                   href="/profile/editor"
                   className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
                 >
-                  Profil bearbeiten
-                </Link>
-                .
+                  Anzeigename im Profil
+                </Link>{" "}
+                ergänzen.
               </p>
             ) : null}
-            <p
-              className={`max-w-2xl break-words text-[14px] leading-relaxed ${
-                overviewQuietEmpty && !dashboardOverviewIncomplete ? "mb-4" : "mb-6"
-              }`}
-              style={{ color: "#64748B" }}
-            >
-              Orientierung für den Arbeitsalltag: was im Posteingang ansteht, welche Aufgaben offen sind
-              und was zuletzt passiert ist. Bearbeiten und Entscheiden erfolgen im Posteingang und in der
-              Aufgabenliste — dort arbeitet auch Ihr Team.
-            </p>
 
             {overviewQuietEmpty && !dashboardOverviewIncomplete ? (
               <p
-                className="mb-6 max-w-2xl break-words rounded-lg border border-slate-200/70 bg-white/70 px-3 py-2.5 text-[13px] leading-relaxed text-[#64748B]"
+                className="mb-5 max-w-xl break-words rounded-lg border border-slate-200/60 bg-white/80 px-3 py-2 text-[12px] leading-snug text-[#64748B]"
                 style={{ boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)" }}
               >
-                Für diese Startlage liegt gerade nichts Dringendes vor. Posteingang und Aufgabenliste
-                bleiben die festen Einstiege — dort arbeiten Sie wie gewohnt weiter.
+                Keine offenen Punkte in dieser Übersicht.
               </p>
             ) : null}
 
             {dashboardOverviewIncomplete ? (
               <p
-                className="mb-6 max-w-2xl break-words rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 text-[13px] leading-relaxed text-slate-600 shadow-sm"
+                className="mb-5 max-w-xl break-words rounded-lg border border-slate-200/80 bg-white/85 px-3 py-2 text-[12px] leading-snug text-slate-600 shadow-sm"
                 role="status"
                 aria-live="polite"
               >
                 {onlyProfileQueryFailed ? (
                   <>
-                    Der Anzeigename aus dem Praxisprofil konnte nicht geladen werden — die Begrüßung
-                    nutzt vorerst Ihre E-Mail-Adresse. Die Kennzahlen unten gelten, soweit sie
-                    angezeigt werden.
+                    Profilname nicht geladen — Begrüßung per E-Mail. Kennzahlen wie angezeigt.
                   </>
                 ) : (
                   <>
-                    Einige Angaben auf dieser Übersicht konnten nicht vollständig geladen werden. Für
-                    verlässliche Fall- und Aufgabendetails nutzen Sie bitte den{" "}
+                    Teilweise nicht geladen —{" "}
                     <Link href="/inbox" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
                       Posteingang
-                    </Link>{" "}
-                    und die{" "}
+                    </Link>
+                    ,{" "}
                     <Link href="/my-tasks" className="font-medium text-[#2F80ED] underline-offset-2 hover:underline">
-                      Aufgabenliste
+                      Aufgaben
                     </Link>
                     .
                   </>
@@ -349,166 +334,126 @@ export default async function DashboardPage() {
               </p>
             ) : null}
 
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
-              <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: "rgba(47,128,237,0.08)" }}
+            <div className="grid max-w-lg grid-cols-2 gap-4 sm:gap-8">
+              <div className="min-w-0">
+                <p
+                  className="tabular-nums text-[clamp(1.85rem,6.5vw,2.5rem)] leading-none tracking-tight"
+                  style={{ color: "#0F172A", fontWeight: 650, letterSpacing: "-0.03em" }}
                 >
-                  <Clock className="h-[18px] w-[18px]" style={{ color: "#2F80ED" }} />
-                </div>
-                <div className="min-w-0">
-                  {newCount === null ? (
-                    <p className="text-[13px] leading-relaxed" style={{ color: "#64748B" }}>
-                      <span className="mb-0.5 block font-semibold text-[#1E293B]">Neue Einsendungen (24h)</span>
-                      <span style={{ color: "#94A3B8" }}>Vorübergehend nicht verfügbar.</span>
-                    </p>
-                  ) : newCount === 0 ? (
-                    <>
-                      <p className="text-[15px] font-semibold" style={{ color: "#1E293B" }}>
-                        Keine neuen Einsendungen
-                      </p>
-                      <p className="text-[13px]" style={{ color: "#64748B" }}>
-                        in den letzten 24 Stunden
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[15px] font-semibold" style={{ color: "#1E293B" }}>
-                        {newCount} neue Einsendungen
-                      </p>
-                      <p className="text-[13px]" style={{ color: "#64748B" }}>
-                        in den letzten 24 Stunden
-                      </p>
-                    </>
-                  )}
-                </div>
+                  {newCount === null ? "—" : newCount}
+                </p>
+                <p
+                  className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]"
+                  style={{ lineHeight: 1.35 }}
+                >
+                  Neu (24h)
+                </p>
+                {newCount === null ? (
+                  <p className="mt-1 text-[11px]" style={{ color: "#94A3B8" }}>
+                    n. v.
+                  </p>
+                ) : null}
               </div>
-
-              <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: "rgba(47,128,237,0.08)" }}
+              <div className="min-w-0">
+                <p
+                  className="tabular-nums text-[clamp(1.85rem,6.5vw,2.5rem)] leading-none tracking-tight"
+                  style={{
+                    color: unseenCount !== null && unseenCount > 0 ? "#0B4EA3" : "#0F172A",
+                    fontWeight: 650,
+                    letterSpacing: "-0.03em",
+                  }}
                 >
-                  <AlertCircle className="h-[18px] w-[18px]" style={{ color: "#2F80ED" }} />
-                </div>
-                <div className="min-w-0">
-                  {unseenCount === null ? (
-                    <p className="text-[13px] leading-relaxed" style={{ color: "#64748B" }}>
-                      <span className="mb-0.5 block font-semibold text-[#1E293B]">
-                        Posteingang (Lesestatus)
-                      </span>
-                      <span style={{ color: "#94A3B8" }}>Vorübergehend nicht verfügbar.</span>
-                    </p>
-                  ) : unseenCount === 0 ? (
-                    <>
-                      <p className="text-[15px] font-semibold" style={{ color: "#1E293B" }}>
-                        Keine unbearbeiteten Fälle
-                      </p>
-                      <p className="text-[13px]" style={{ color: "#64748B" }}>
-                        Alle eingegangenen Fälle sind mindestens einmal geöffnet.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[15px] font-semibold" style={{ color: "#1E293B" }}>
-                        {unseenCount} {unseenCount === 1 ? "Fall" : "Fälle"} im Posteingang
-                      </p>
-                      <p className="text-[13px]" style={{ color: "#64748B" }}>
-                        noch nicht geöffnet
-                      </p>
-                    </>
-                  )}
-                </div>
+                  {unseenCount === null ? "—" : unseenCount}
+                </p>
+                <p
+                  className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]"
+                  style={{ lineHeight: 1.35 }}
+                >
+                  Posteingang
+                </p>
+                {unseenCount === null ? (
+                  <p className="mt-1 text-[11px]" style={{ color: "#94A3B8" }}>
+                    n. v.
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>
 
-          <div className="mb-10 grid min-w-0 grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
+          <div className="mb-8 grid min-w-0 grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
             <div
-              className="col-span-12 min-w-0 rounded-2xl border border-[#D6E6FF] p-5 sm:p-6 md:px-8 md:py-7 lg:col-span-7"
+              className="col-span-12 min-w-0 rounded-2xl border border-[#D6E6FF] p-5 sm:p-5 md:px-7 md:py-6 lg:col-span-7"
               style={{
                 background: "linear-gradient(135deg, #F0F7FF 0%, #F4F8FF 100%)",
                 boxShadow:
                   unseenCount !== null && unseenCount > 0
-                    ? "0 4px 18px rgba(15, 23, 42, 0.09)"
+                    ? "0 6px 22px rgba(47, 128, 237, 0.1)"
                     : "0 2px 12px rgba(15, 23, 42, 0.06)",
               }}
             >
               <p
-                className="mb-4 text-[11px] font-medium tracking-normal text-[#475569]"
-                style={{ lineHeight: 1.4 }}
+                className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]"
+                style={{ lineHeight: 1.35 }}
               >
-                Posteingang — zuerst prüfen
+                {unseenCount !== null && unseenCount > 0 ? "Noch zu öffnen" : "Posteingang"}
               </p>
               {unseenCount === null ? (
-                <p className="break-words text-[15px] leading-relaxed" style={{ color: "#64748B" }}>
-                  Diese Kennzahl lässt sich gerade nicht laden. Den Posteingang können Sie trotzdem öffnen:{" "}
+                <p className="break-words text-[14px] leading-snug" style={{ color: "#64748B" }}>
+                  Kennzahl nicht geladen.{" "}
                   <Link
                     href="/inbox"
                     className="inline-flex min-h-[44px] items-center font-medium text-[#2F80ED] underline-offset-2 hover:underline"
                   >
                     Posteingang
                   </Link>
-                  .
                 </p>
               ) : unseenCount === 0 ? (
                 <>
                   <p
-                    className="mb-3 text-[20px] font-semibold leading-snug tracking-tight"
-                    style={{ color: "#0B4EA3", letterSpacing: "-0.02em" }}
-                  >
-                    Keine unbearbeiteten Fälle
-                  </p>
-                  <p
-                    className="text-[13px]"
+                    className="min-w-0 tabular-nums text-[clamp(2.5rem,11vw,3.5rem)] leading-none tracking-tight lg:text-[56px]"
                     style={{
-                      color: "#475569",
-                      lineHeight: "1.55",
-                      fontWeight: 500,
+                      color: "#94A3B8",
+                      fontWeight: 650,
+                      letterSpacing: "-0.03em",
+                      marginBottom: "10px",
                     }}
                   >
-                    Alle Einsendungen wurden mindestens einmal geöffnet — es liegt nichts Ungelesenes
-                    vor.
+                    0
                   </p>
-                  <div className="mt-5">
+                  <p className="text-[13px] font-medium" style={{ color: "#475569", lineHeight: 1.45 }}>
+                    Alles mindestens einmal geöffnet.
+                  </p>
+                  <div className="mt-4">
                     <Link
                       href="/inbox"
-                      className="inline-flex min-h-[44px] items-center text-[14px] font-medium text-[#2F80ED] hover:underline"
+                      className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#2F80ED] hover:underline"
                     >
-                      Posteingang anzeigen
+                      Posteingang
                     </Link>
                   </div>
                 </>
               ) : (
                 <>
                   <p
-                    className="min-w-0 tabular-nums text-[clamp(2.75rem,12vw,4rem)] leading-none tracking-tight lg:text-[64px]"
+                    className="min-w-0 tabular-nums text-[clamp(3rem,14vw,4.5rem)] leading-none tracking-tight lg:text-[72px]"
                     style={{
                       color: "#0B4EA3",
                       fontWeight: 650,
                       letterSpacing: "-0.03em",
-                      marginBottom: "18px",
+                      marginBottom: "12px",
                     }}
                   >
                     {unseenCount}
                   </p>
-                  <p
-                    className="text-[13px]"
-                    style={{
-                      color: "#475569",
-                      lineHeight: "1.5",
-                      fontWeight: 500,
-                    }}
-                  >
+                  <p className="text-[13px] font-medium" style={{ color: "#475569", lineHeight: 1.45 }}>
                     {unseenCount === 1
-                      ? "1 Fall wartet auf erste Bearbeitung"
-                      : `${unseenCount} Fälle sind noch nicht geöffnet`}
+                      ? "1 Einsendung noch nicht geöffnet"
+                      : `${unseenCount} Einsendungen noch nicht geöffnet`}
                   </p>
-                  <div className="mt-5">
+                  <div className="mt-4">
                     <Link
                       href="/inbox"
-                      className="inline-flex min-h-[44px] items-center text-[14px] font-medium text-[#2F80ED] hover:underline"
+                      className="inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#2F80ED] hover:underline"
                     >
                       Zum Posteingang
                     </Link>
@@ -517,67 +462,64 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            <div className="col-span-12 grid min-w-0 grid-cols-1 gap-5 sm:gap-6 lg:col-span-5">
+            <div className="col-span-12 grid min-w-0 grid-cols-1 gap-4 sm:gap-5 lg:col-span-5">
               {openTasks === null ? (
                 <div className="block min-w-0 rounded-2xl">
-                  <div
-                    className="bg-white rounded-2xl border border-[#EEF2F6] p-5 pb-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6 sm:pb-5"
-                  >
-                    <div className="mb-4 flex items-start justify-between">
-                      <p className="text-[12px]" style={{ color: "#64748B", fontWeight: 500 }}>
-                        Offene Aufgaben
+                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
+                    <div className="mb-2">
+                      <p
+                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
+                        style={{ fontWeight: 600 }}
+                      >
+                        Aufgaben
                       </p>
                     </div>
-                    <p className="text-[13px] leading-relaxed" style={{ color: "#94A3B8" }}>
-                      Aufgabenliste vorübergehend nicht erreichbar.
+                    <p className="text-[13px]" style={{ color: "#94A3B8" }}>
+                      Nicht geladen.
                     </p>
-                    <p className="mt-4 text-[12px]" style={{ color: "#64748B" }}>
-                      <Link
-                        href="/my-tasks"
-                        className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                      >
-                        Zur Aufgabenliste
-                      </Link>{" "}
-                      <span className="text-[#94A3B8]">— dort arbeiten Sie unabhängig von dieser Übersicht.</span>
+                    <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
+                      <Link href="/my-tasks" className="hover:underline">
+                        Aufgabenliste
+                      </Link>
                     </p>
                   </div>
                 </div>
               ) : (
                 <Link href="/my-tasks" className="block min-w-0 rounded-2xl no-underline">
-                  <div
-                    className="bg-white rounded-2xl border border-[#EEF2F6] p-5 pb-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6 sm:pb-5"
-                  >
-                    <div className="mb-4 flex items-start justify-between">
-                      <p className="text-[12px]" style={{ color: "#64748B", fontWeight: 500 }}>
-                        Offene Aufgaben
+                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
+                    <div className="mb-2">
+                      <p
+                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
+                        style={{ fontWeight: 600 }}
+                      >
+                        Aufgaben
                       </p>
                     </div>
                     {openTaskCount > 0 ? (
                       <>
                         <p
-                          className="min-w-0 tabular-nums text-[clamp(1.75rem,9vw,2.5rem)] leading-none tracking-tight lg:text-[40px]"
-                          style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 600 }}
+                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,3rem)] leading-none tracking-tight lg:text-[48px]"
+                          style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 650 }}
                         >
                           {openTaskCount}
                         </p>
-                        <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Zur Aufgabenliste</span>
+                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
+                          <span className="hover:underline">Liste</span>
                         </p>
                       </>
                     ) : (
                       <>
                         <p
-                          className="text-[17px] font-semibold leading-snug"
-                          style={{ color: "#1E293B", letterSpacing: "-0.02em" }}
+                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,2.75rem)] leading-none tracking-tight text-[#94A3B8] lg:text-[44px]"
+                          style={{ letterSpacing: "-0.03em", fontWeight: 650 }}
                         >
-                          Keine offenen Aufgaben
+                          0
                         </p>
-                        <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "#64748B" }}>
-                          Gezählt werden Aufgaben mit Status „offen“ oder „in Prüfung“; die vollständige Liste
-                          steht in der Aufgabenliste.
+                        <p className="mt-1.5 text-[12px] font-medium" style={{ color: "#64748B" }}>
+                          Offen · in Prüfung
                         </p>
-                        <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Zur Aufgabenliste</span>
+                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
+                          <span className="hover:underline">Liste</span>
                         </p>
                       </>
                     )}
@@ -587,63 +529,61 @@ export default async function DashboardPage() {
 
               {newCount === null ? (
                 <div className="block min-w-0 rounded-2xl">
-                  <div
-                    className="bg-white rounded-2xl border border-[#EEF2F6] p-5 pb-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6 sm:pb-5"
-                  >
-                    <div className="mb-4 flex items-start justify-between">
-                      <p className="text-[12px]" style={{ color: "#64748B", fontWeight: 500 }}>
-                        Neue Einsendungen (24h)
+                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
+                    <div className="mb-2">
+                      <p
+                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
+                        style={{ fontWeight: 600 }}
+                      >
+                        Neu (24h)
                       </p>
                     </div>
-                    <p className="text-[13px] leading-relaxed" style={{ color: "#94A3B8" }}>
-                      Kennzahl vorübergehend nicht verfügbar.
+                    <p className="text-[13px]" style={{ color: "#94A3B8" }}>
+                      Nicht geladen.
                     </p>
-                    <p className="mt-4 text-[12px]" style={{ color: "#64748B" }}>
-                      <Link
-                        href="/inbox"
-                        className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                      >
-                        Zum Posteingang
-                      </Link>{" "}
-                      <span className="text-[#94A3B8]">— Einsendungen dort sind weiterhin verfügbar.</span>
+                    <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
+                      <Link href="/inbox" className="hover:underline">
+                        Posteingang
+                      </Link>
                     </p>
                   </div>
                 </div>
               ) : (
                 <Link href="/inbox" className="block min-w-0 rounded-2xl no-underline">
-                  <div
-                    className="bg-white rounded-2xl border border-[#EEF2F6] p-5 pb-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6 sm:pb-5"
-                  >
-                    <div className="mb-4 flex items-start justify-between">
-                      <p className="text-[12px]" style={{ color: "#64748B", fontWeight: 500 }}>
-                        Neue Einsendungen (24h)
+                  <div className="rounded-2xl border border-[#EEF2F6] bg-white p-4 pb-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 sm:pb-4">
+                    <div className="mb-2">
+                      <p
+                        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748B]"
+                        style={{ fontWeight: 600 }}
+                      >
+                        Neu (24h)
                       </p>
                     </div>
                     {newCount > 0 ? (
                       <>
                         <p
-                          className="min-w-0 tabular-nums text-[clamp(1.75rem,9vw,2.5rem)] leading-none tracking-tight lg:text-[40px]"
-                          style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 600 }}
+                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,3rem)] leading-none tracking-tight lg:text-[48px]"
+                          style={{ color: "#0F172A", letterSpacing: "-0.03em", fontWeight: 650 }}
                         >
                           {newCount}
                         </p>
-                        <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Zum Posteingang</span>
+                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
+                          <span className="hover:underline">Posteingang</span>
                         </p>
                       </>
                     ) : (
                       <>
                         <p
-                          className="text-[17px] font-semibold leading-snug"
-                          style={{ color: "#1E293B", letterSpacing: "-0.02em" }}
+                          className="min-w-0 tabular-nums text-[clamp(2rem,10vw,2.75rem)] leading-none tracking-tight text-[#94A3B8] lg:text-[44px]"
+                          style={{ letterSpacing: "-0.03em", fontWeight: 650 }}
                         >
-                          Keine neuen Einsendungen
+                          0
                         </p>
-                        <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "#64748B" }}>
-                          In den letzten 24 Stunden ist nichts eingegangen.
+                        <p className="mt-1.5 text-[12px] font-medium" style={{ color: "#64748B" }}>
+                          Letzte 24h
                         </p>
-                        <p className="mt-3 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
-                          <span className="hover:underline">Zum Posteingang</span>
+                        <p className="mt-2 text-[12px] font-medium text-[#2F80ED] underline-offset-2">
+                          <span className="hover:underline">Posteingang</span>
                         </p>
                       </>
                     )}
@@ -652,19 +592,19 @@ export default async function DashboardPage() {
               )}
 
               {openTasks && topTasks.length > 0 ? (
-                <div className="min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6">
+                <div className="min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5">
                   <p
-                    className="mb-3 text-[11px] font-medium tracking-normal text-[#64748B]"
-                    style={{ lineHeight: 1.4 }}
+                    className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#64748B]"
+                    style={{ lineHeight: 1.35 }}
                   >
-                    Auszug aus der Aufgabenliste
+                    Nächste Aufgaben
                   </p>
-                  <ul className="space-y-1 sm:space-y-2">
+                  <ul className="space-y-0.5">
                     {topTasks.map((t) => (
                       <li key={t.id} className="min-w-0">
                         <Link
                           href={`/my-tasks/${t.id}`}
-                          className="block min-h-[44px] break-words py-2.5 text-[14px] font-medium leading-snug text-[#1E293B] hover:text-[#2F80ED] sm:py-3"
+                          className="block min-h-[40px] break-words py-2 text-[13px] font-medium leading-snug text-[#1E293B] hover:text-[#2F80ED] sm:min-h-[44px] sm:py-2.5"
                         >
                           {t.content.length > 72 ? `${t.content.slice(0, 72)}…` : t.content}
                         </Link>
@@ -677,71 +617,74 @@ export default async function DashboardPage() {
           </div>
 
           <div
-            className="min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-6 md:px-8 md:py-7"
+            className="min-w-0 rounded-2xl border border-[#EEF2F6] bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] sm:p-5 md:px-6 md:py-5"
             role="region"
-            aria-label="Kurze Chronik"
+            aria-label="Chronik"
           >
-            <div className="mb-6 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <div className="min-w-0">
                 <h2
-                  className="mb-1 text-[18px] font-semibold"
+                  className="mb-0.5 text-[17px] font-semibold"
                   style={{ color: "#1E293B", letterSpacing: "-0.01em" }}
                 >
-                  Kurze Chronik
+                  Chronik
                 </h2>
-                <p className="break-words text-[13px]" style={{ color: "#64748B" }}>
-                  Letzte Einsendungen und Aufgaben — Kurzauszug, kein Archiv.
+                <p className="break-words text-[11px] font-medium uppercase tracking-[0.1em] text-[#94A3B8]">
+                  Kurzauszug
                 </p>
               </div>
               {activity !== null ? (
                 <Link
                   href="/inbox"
-                  className="inline-flex min-h-[44px] w-full min-w-0 shrink-0 items-center justify-center rounded-xl px-4 py-2 text-center text-[14px] font-medium transition-colors hover:opacity-90 sm:w-auto"
+                  className="inline-flex min-h-[40px] w-full min-w-0 shrink-0 items-center justify-center rounded-lg px-3 py-2 text-center text-[13px] font-medium transition-colors hover:opacity-90 sm:min-h-[44px] sm:w-auto"
                   style={{ color: "#2F80ED", background: "rgba(47,128,237,0.08)" }}
                 >
-                  Zum Posteingang
+                  Posteingang
                 </Link>
               ) : null}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2">
               {activity === null ? (
                 <div role="status" aria-live="polite">
-                  <p className="text-[13px] leading-relaxed" style={{ color: "#64748B" }}>
-                    Der Chronik-Auszug lässt sich gerade nicht laden. Posteingang und Aufgabenliste sind
-                    davon unabhängig erreichbar.
+                  <p className="text-[12px] leading-snug" style={{ color: "#64748B" }}>
+                    Auszug nicht geladen.
                   </p>
-                  <p className="mt-3 text-[13px]" style={{ color: "#64748B" }}>
+                  <p className="mt-2 text-[12px]" style={{ color: "#64748B" }}>
                     <Link
                       href="/inbox"
                       className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
                     >
-                      Zum Posteingang
+                      Posteingang
                     </Link>
-                    <span style={{ color: "#94A3B8" }}> — Einsendungen sind dort unabhängig von dieser Ansicht.</span>
-                  </p>
-                </div>
-              ) : activity.length === 0 ? (
-                <div>
-                  <p className="text-[13px] leading-relaxed" style={{ color: "#64748B" }}>
-                    In diesem Ausschnitt gibt es gerade keine Einträge — üblich bei wenig Volumen oder wenn
-                    die letzten Vorgänge außerhalb dieses Kurzauszugs liegen.
-                  </p>
-                  <p className="mt-3 text-[13px]" style={{ color: "#64748B" }}>
-                    <Link
-                      href="/inbox"
-                      className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
-                    >
-                      Zum Posteingang
-                    </Link>
-                    <span style={{ color: "#94A3B8" }}> für den vollständigen Posteingang.</span>{" "}
+                    <span style={{ color: "#94A3B8" }}> · </span>
                     <Link
                       href="/my-tasks"
                       className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
                     >
-                      Zur Aufgabenliste
+                      Aufgaben
                     </Link>
-                    <span style={{ color: "#94A3B8" }}> für Aufgaben.</span>
+                  </p>
+                </div>
+              ) : activity.length === 0 ? (
+                <div>
+                  <p className="text-[12px] leading-snug" style={{ color: "#64748B" }}>
+                    Keine Einträge in diesem Ausschnitt.
+                  </p>
+                  <p className="mt-2 text-[12px]" style={{ color: "#64748B" }}>
+                    <Link
+                      href="/inbox"
+                      className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
+                    >
+                      Posteingang
+                    </Link>
+                    <span style={{ color: "#94A3B8" }}> · </span>
+                    <Link
+                      href="/my-tasks"
+                      className="font-medium text-[#2F80ED] underline-offset-2 hover:underline"
+                    >
+                      Aufgaben
+                    </Link>
                   </p>
                 </div>
               ) : (
