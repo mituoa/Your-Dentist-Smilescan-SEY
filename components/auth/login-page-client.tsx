@@ -41,7 +41,7 @@ function LoginPasswordControlsFieldset({
   return (
     <fieldset
       disabled={pending || otherChannelActive}
-      className="min-w-0 border-0 p-0 m-0 disabled:pointer-events-none disabled:opacity-[0.58]"
+      className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0 sm:gap-3.5 disabled:pointer-events-none disabled:opacity-[0.58]"
     >
       {children}
     </fieldset>
@@ -492,7 +492,7 @@ export function LoginPageClient({
                 <form
                   action={signIn}
                   onSubmit={() => setLoginChannelLock("password")}
-                  className="max-md:space-y-2.5 space-y-3 lg:space-y-4"
+                  className="flex flex-col gap-7 sm:gap-8 lg:gap-9"
                   aria-busy={loginChannelLock === "password"}
                 >
                   {inviteToken ? (

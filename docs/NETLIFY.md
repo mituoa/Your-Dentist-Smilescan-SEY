@@ -8,6 +8,8 @@ Set **exact key names** (case-sensitive):
 |-----|--------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Settings → API / Connect → Project URL (`https://<ref>.supabase.co`) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → API Keys → **Publishable** (`sb_publishable_…`) **or** Legacy tab → **anon** (`eyJ…`) |
+
+**Pflicht für OAuth/Magic-Link:** Ohne `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_ANON_KEY` kann `/auth/callback` keine Session setzen — die Route leitet dann kontrolliert auf `/login` um (kein „still“ erfolgreicher OAuth-Flow).
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API Keys → **Secret** (`sb_secret_…`) **or** Legacy → **service_role** (`eyJ…`) |
 | `NEXT_PUBLIC_APP_URL` | Your live site, e.g. `https://<site>.netlify.app` (no trailing slash optional) |
 | `ADMIN_EMAILS` | Optional: comma-separated ops emails (bypass workspace approval for testing) |

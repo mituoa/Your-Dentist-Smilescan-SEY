@@ -41,3 +41,24 @@ export async function createClient() {
     }
   );
 }
+
+/**
+ * Nur für Route Handler (z. B. OAuth `/auth/callback`): Hier müssen Cookies nach
+ * `exchangeCodeForSession` zuverlässig geschrieben werden — kein still verschlucktes setAll
+ * (anders als bei Server Components; siehe Supabase SSR-Doku).
+ */
+export async function createRouteHandlerClient() {
+  const cookieStore = await cookies();
+  const { url, anonKey } = getSupabasePublicEnv();
+
+  return createServerClient(url, anonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+      },
+    },
+  });
+}
