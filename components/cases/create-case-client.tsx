@@ -219,65 +219,100 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
       <button
         type="button"
         aria-label="Schließen"
-        className="create-case-backdrop fixed inset-0 z-[999] border-0 p-0"
+        className="create-case-backdrop fixed inset-0 z-[999] border-0 p-0 max-md:bg-slate-950/40"
         onClick={close}
       />
 
-      <div className="pointer-events-none fixed inset-0 z-[1000] flex min-h-0 flex-col overflow-hidden md:items-center md:justify-center md:overflow-y-auto md:p-6">
+      <div className="pointer-events-none fixed inset-0 z-[1000] flex min-h-0 flex-col overflow-hidden max-md:justify-end md:items-center md:justify-center md:overflow-y-auto md:p-6">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-case-title"
-          className="create-case-modal pointer-events-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white max-sm:max-h-[100dvh] max-sm:rounded-none max-sm:shadow-none md:max-h-[min(100dvh-3rem,920px)] md:max-w-[680px] md:flex-none md:rounded-2xl md:shadow-[0_28px_80px_-12px_rgba(15,23,42,0.18),0_12px_32px_rgba(15,23,42,0.1),0_0_0_1px_rgba(15,23,42,0.04)]"
+          className="create-case-modal pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden bg-white max-md:max-h-[min(92dvh,52rem)] max-md:flex-none max-md:rounded-t-[20px] max-md:border-t max-md:border-slate-200/80 max-md:shadow-[0_-12px_48px_-8px_rgba(15,23,42,0.18)] md:max-h-[min(100dvh-3rem,920px)] md:max-w-[680px] md:flex-none md:rounded-2xl md:shadow-[0_28px_80px_-12px_rgba(15,23,42,0.18),0_12px_32px_rgba(15,23,42,0.1),0_0_0_1px_rgba(15,23,42,0.04)]"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-6 pt-[max(1rem,var(--safe-area-top))] [-webkit-overflow-scrolling:touch] sm:px-8 sm:pt-8">
-          <header className="mb-6 sm:mb-8">
-            <p
-              className="mb-2 text-[12px] font-semibold uppercase tracking-wider"
-              style={{ color: "#94A3B8" }}
-            >
-              Neuer Fall
-            </p>
-            <h1
-              id="create-case-title"
-              className="mb-2 break-words text-[clamp(1.375rem,4vw+0.35rem,1.75rem)] font-semibold tracking-tight"
-              style={{ color: "#0F172A", lineHeight: 1.2 }}
-            >
-              Fall erstellen
-            </h1>
-            <p className="text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-              Erfassen Sie einen neuen Patientenfall schnell und strukturiert.
-            </p>
-          </header>
+          <h1 id="create-case-title" className="sr-only">
+            Fall erstellen — neuer Patientenfall
+          </h1>
 
-          <div className="mb-6 min-h-[52px]">
-            {error ? (
-              <p
-                className="rounded-xl border border-red-100/90 bg-red-50/90 px-4 py-3 text-[14px] leading-snug text-red-900/90"
-                role="alert"
+          {/* Mobile: Sheet-Chrome (Griff + Titelzeile) — wirkt wie nativer Arbeits-Dialog, nicht wie lange Seite */}
+          <div className="shrink-0 border-b border-slate-200/70 bg-white pt-[max(0.35rem,var(--safe-area-top))] md:hidden">
+            <div className="flex justify-center pb-1.5 pt-0.5" aria-hidden>
+              <span className="h-1 w-10 rounded-full bg-slate-300/90" />
+            </div>
+            <div className="flex items-center gap-2 px-4 pb-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  Neuer Fall
+                </p>
+                <p
+                  className="truncate text-[17px] font-semibold leading-snug tracking-tight text-[#0F172A]"
+                  aria-hidden
+                >
+                  Fall erstellen
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={close}
+                disabled={busy}
+                aria-label="Schließen"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 transition active:bg-slate-100 disabled:opacity-40"
               >
-                {error}
-              </p>
-            ) : null}
+                <X className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-0">
-            <section className="pb-8">
-              <h2
-                className="mb-4 text-[11px] font-bold uppercase tracking-wider"
-                style={{ color: "#94A3B8" }}
-              >
-                Patient
-              </h2>
-              <div className="space-y-4">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-white max-md:bg-[#FAFBFC]">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-4 pt-3 [-webkit-overflow-scrolling:touch] max-md:scroll-pb-28 md:px-8 md:pb-6 md:pt-8">
+              {/* Desktop: unverändert ruhiger Einstieg */}
+              <header className="mb-6 hidden md:mb-8 md:block">
+                <p
+                  className="mb-2 text-[12px] font-semibold uppercase tracking-wider"
+                  style={{ color: "#94A3B8" }}
+                >
+                  Neuer Fall
+                </p>
+                <h2
+                  className="mb-2 break-words text-[clamp(1.375rem,4vw+0.35rem,1.75rem)] font-semibold tracking-tight"
+                  style={{ color: "#0F172A", lineHeight: 1.2 }}
+                >
+                  Fall erstellen
+                </h2>
+                <p className="text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
+                  Erfassen Sie einen neuen Patientenfall schnell und strukturiert.
+                </p>
+              </header>
+
+              <p className="mb-3 text-[12px] leading-snug text-slate-500 md:hidden">
+                Pflicht: Name. Übriges optional — wird mit dem Fall gespeichert.
+              </p>
+
+              <div className="mb-3 min-h-[44px] md:mb-6 md:min-h-[52px]">
+                {error ? (
+                  <p
+                    className="rounded-xl border border-red-100/90 bg-red-50/90 px-3 py-2.5 text-[13px] leading-snug text-red-900/90 md:px-4 md:py-3 md:text-[14px]"
+                    role="alert"
+                  >
+                    {error}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-0">
+                <section className="pb-5 md:pb-8">
+                  <h2 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] md:mb-4 md:text-[11px]">
+                    Patient
+                  </h2>
+                  <div className="space-y-3 md:space-y-4">
                 <Field label="Name des Patienten">
                   <input
                     type="text"
                     value={patientName}
                     onChange={(e) => setPatientName(e.target.value)}
                     placeholder="z.B. Anna Müller"
-                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.08)]"
+                    className="h-12 max-md:h-11 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.08)]"
                   />
                 </Field>
                 <Field label="Geburtsdatum (optional)">
@@ -294,7 +329,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                     value={externalId}
                     onChange={(e) => setExternalId(e.target.value)}
                     placeholder="z.B. 12345"
-                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
+                    className="h-12 max-md:h-11 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
                   />
                 </Field>
                 <Field label="E-Mail (optional)">
@@ -304,7 +339,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                     onChange={(e) => setPatientEmail(e.target.value)}
                     autoComplete="email"
                     placeholder="für Terminlink & Rückfragen"
-                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
+                    className="h-12 max-md:h-11 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
                   />
                 </Field>
                 <Field label="Telefon (optional)">
@@ -314,33 +349,27 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
                     onChange={(e) => setPatientPhone(e.target.value)}
                     autoComplete="tel"
                     placeholder="+49 …"
-                    className="h-12 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
+                    className="h-12 max-md:h-11 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
                   />
                 </Field>
               </div>
             </section>
 
-            <section className="border-t border-[#F1F5F9] pt-8">
-              <h2
-                className="mb-4 text-[11px] font-bold uppercase tracking-wider"
-                style={{ color: "#94A3B8" }}
-              >
+            <section className="border-t border-[#F1F5F9] pt-5 md:pt-8">
+              <h2 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] md:mb-4 md:text-[11px]">
                 Anliegen
               </h2>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                rows={5}
+                rows={4}
                 placeholder="Was ist passiert? Wo genau? Seit wann bestehen die Beschwerden?"
-                className="w-full resize-y rounded-[10px] border border-[#E2E8F0] px-4 py-3 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
+                className="min-h-[5.75rem] w-full resize-y rounded-[10px] border border-[#E2E8F0] px-4 py-2.5 text-[15px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)] md:min-h-[7.5rem] md:py-3"
               />
             </section>
 
-            <section className="border-t border-[#F1F5F9] pt-8">
-              <h2
-                className="mb-4 text-[11px] font-bold uppercase tracking-wider"
-                style={{ color: "#94A3B8" }}
-              >
+            <section className="border-t border-[#F1F5F9] pt-5 md:pt-8">
+              <h2 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] md:mb-4 md:text-[11px]">
                 Einschätzung der Dringlichkeit
               </h2>
               <div className="flex flex-wrap gap-2.5">
@@ -364,15 +393,12 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
               </div>
             </section>
 
-            <section className="border-t border-[#F1F5F9] pt-8">
-              <h2
-                className="mb-4 text-[11px] font-bold uppercase tracking-wider"
-                style={{ color: "#94A3B8" }}
-              >
+            <section className="border-t border-[#F1F5F9] pb-1 pt-5 md:pt-8">
+              <h2 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] md:mb-4 md:text-[11px]">
                 Bilder / Dokumente (optional)
               </h2>
               <div
-                className={`relative flex min-h-[168px] flex-col items-center justify-center overflow-hidden rounded-[12px] border border-dashed px-6 py-10 transition-[border-color,background-color,box-shadow] duration-200 ease-out ${
+                className={`relative flex min-h-[128px] flex-col items-center justify-center overflow-hidden rounded-[12px] border border-dashed px-4 py-6 transition-[border-color,background-color,box-shadow] duration-200 ease-out md:min-h-[168px] md:px-6 md:py-10 ${
                   dragActive
                     ? "border-[#2F80ED] bg-[rgba(47,128,237,0.07)] shadow-[0_0_0_3px_rgba(47,128,237,0.12)]"
                     : "border-[#E2E8F0] bg-[#F8FAFC] hover:border-[#CBD5E1]"
@@ -495,12 +521,12 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
           </div>
           </div>
 
-          <footer className="shrink-0 border-t border-[#E8EDF4] bg-white/95 px-4 pt-4 backdrop-blur-md shadow-[0_-12px_32px_-12px_rgba(15,23,42,0.07)] pb-[max(1.25rem,var(--safe-area-bottom))] sm:px-8 sm:pt-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <footer className="shrink-0 border-t border-slate-200/80 bg-[#FAFBFC]/95 px-4 pt-3 backdrop-blur-md max-md:shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] md:border-[#E8EDF4] md:bg-white/95 md:px-8 md:pt-5 md:shadow-[0_-12px_32px_-12px_rgba(15,23,42,0.07)] pb-[max(1rem,var(--safe-area-bottom))] md:pb-[max(1.25rem,var(--safe-area-bottom))]">
+            <div className="flex flex-col gap-2.5 md:flex-row md:flex-wrap md:items-center md:justify-end md:gap-3">
             <button
               type="button"
               disabled={busy}
-              className="h-11 min-h-[44px] w-full rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] transition hover:bg-[#F8FAFC] hover:text-[#64748B] disabled:pointer-events-none disabled:opacity-45 sm:w-auto"
+              className="h-11 min-h-[44px] w-full rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] transition hover:bg-white/80 hover:text-[#64748B] disabled:pointer-events-none disabled:opacity-45 md:w-auto md:hover:bg-[#F8FAFC]"
               onClick={() => submit(true)}
             >
               {pendingKind === "draft" ? "Entwurf wird gespeichert…" : "Speichern als Entwurf"}
@@ -508,7 +534,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             <button
               type="button"
               disabled={busy}
-              className="h-11 min-h-[44px] w-full rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] transition hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:pointer-events-none disabled:opacity-45 sm:w-auto"
+              className="h-11 min-h-[44px] w-full rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] transition hover:bg-white/80 hover:text-[#0F172A] disabled:pointer-events-none disabled:opacity-45 md:w-auto md:hover:bg-[#F8FAFC]"
               onClick={close}
             >
               Abbrechen
@@ -516,7 +542,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             <button
               type="button"
               disabled={busy}
-              className="h-11 min-h-[44px] w-full rounded-[11px] px-8 text-[15px] font-semibold text-white shadow-[0_4px_14px_rgba(47,128,237,0.35),0_1px_2px_rgba(15,23,42,0.06)] transition-[box-shadow,transform,opacity] duration-150 hover:shadow-[0_6px_20px_rgba(47,128,237,0.4)] active:scale-[0.99] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-55 sm:min-w-[200px] sm:w-auto"
+              className="h-11 min-h-[44px] w-full rounded-[11px] px-8 text-[15px] font-semibold text-white shadow-[0_2px_10px_rgba(47,128,237,0.28)] transition-[box-shadow,transform,opacity] duration-150 hover:shadow-[0_4px_16px_rgba(47,128,237,0.38)] active:scale-[0.99] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-55 md:min-w-[200px] md:w-auto md:shadow-[0_4px_14px_rgba(47,128,237,0.35),0_1px_2px_rgba(15,23,42,0.06)] md:hover:shadow-[0_6px_20px_rgba(47,128,237,0.4)]"
               style={{ background: "#2F80ED" }}
               onClick={() => submit(false)}
             >
@@ -525,6 +551,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             </div>
           </footer>
         </div>
+      </div>
       </div>
     </>
   );
@@ -539,7 +566,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-[13px] font-medium" style={{ color: "#64748B" }}>
+      <label className="mb-1.5 block text-[12px] font-medium text-[#64748B] md:mb-2 md:text-[13px]">
         {label}
       </label>
       {children}
