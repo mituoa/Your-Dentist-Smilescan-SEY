@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
 
@@ -22,6 +23,28 @@ function safeDecodeError(raw: string): string {
   } catch {
     return raw;
   }
+}
+
+/** Login-Fallback von `userFacingAuthError` für diesen Flow in neutrale Recovery-Sprache fassen. */
+function forgotPasswordErrorDisplay(decoded: string): string {
+  const msg = userFacingAuthError(decoded);
+  if (/Anmeldung ist fehlgeschlagen/i.test(msg)) {
+    return "Die Anfrage konnte nicht ausgeführt werden. Bitte versuchen Sie es erneut.";
+  }
+  return msg;
+}
+
+/** Eingabe während Server-Action sperren — verhindert parallele Änderung / Doppel-Interaktion. */
+function ForgotPasswordEmailFieldset({ children }: { children: ReactNode }) {
+  const { pending } = useFormStatus();
+  return (
+    <fieldset
+      disabled={pending}
+      className="m-0 min-w-0 space-y-4 border-0 p-0 sm:space-y-5 disabled:pointer-events-none disabled:opacity-[0.58]"
+    >
+      {children}
+    </fieldset>
+  );
 }
 
 function ForgotPasswordSubmitButton({
@@ -51,7 +74,7 @@ function ForgotPasswordSubmitButton({
         sent ? "border-slate-200 text-slate-800 hover:bg-slate-50 disabled:opacity-50" : "hover:shadow-sm disabled:opacity-[0.55]"
       }`}
     >
-      {pending ? "Wird gesendet …" : label}
+      {pending ? "Wird übermittelt …" : label}
     </Button>
   );
 }
@@ -64,7 +87,7 @@ export function ForgotPasswordCard(props: {
 }) {
   const { sent, errorRaw, inviteToken, prefilledEmail } = props;
   const errorDecoded = errorRaw ? safeDecodeError(errorRaw) : "";
-  const errorDisplay = errorDecoded ? userFacingAuthError(errorDecoded) : "";
+  const errorDisplay = errorDecoded ? forgotPasswordErrorDisplay(errorDecoded) : "";
 
   const [cooldownSec, setCooldownSec] = React.useState(() => (sent ? RESEND_COOLDOWN_SEC : 0));
 
@@ -105,7 +128,7 @@ export function ForgotPasswordCard(props: {
           </div>
         ) : (
           <p className="mx-auto mt-2 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-2.5 sm:text-[14px]">
-            E-Mail-Adresse eingeben. Sie erhalten einen sicheren Link zum Zurücksetzen.
+            E-Mail-Adresse eingeben. Sie erhalten per E-Mail einen Link zum Zurücksetzen.
           </p>
         )}
       </header>
@@ -121,21 +144,23 @@ export function ForgotPasswordCard(props: {
 
       <form action={requestPasswordResetFromLogin} className="space-y-4 sm:space-y-5">
         {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
-        <div className="space-y-1.5">
-          <Label htmlFor="forgot-email" className="text-[13px] font-medium text-slate-700">
-            E-Mail
-          </Label>
-          <Input
-            id="forgot-email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            placeholder="doc@praxis.de"
-            defaultValue={prefilledEmail}
-            className="h-11 rounded-lg border border-slate-200/90 bg-white px-3.5 text-[16px] text-slate-900 placeholder:text-slate-400 transition-colors focus-visible:border-slate-400 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-slate-300/40 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
-          />
-        </div>
+        <ForgotPasswordEmailFieldset>
+          <div className="space-y-1.5">
+            <Label htmlFor="forgot-email" className="text-[13px] font-medium text-slate-700">
+              E-Mail
+            </Label>
+            <Input
+              id="forgot-email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="doc@praxis.de"
+              defaultValue={prefilledEmail}
+              className="h-11 rounded-lg border border-slate-200/90 bg-white px-3.5 text-[16px] text-slate-900 placeholder:text-slate-400 transition-colors focus-visible:border-slate-400 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-slate-300/40 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
+            />
+          </div>
+        </ForgotPasswordEmailFieldset>
 
         <ForgotPasswordSubmitButton sent={sent} cooldownSec={cooldownSec} />
       </form>
@@ -144,7 +169,7 @@ export function ForgotPasswordCard(props: {
         <p className="text-[11px] text-slate-400">
           <Link
             href="/impressum"
-            className="text-slate-500 underline decoration-slate-200/80 underline-offset-2 transition-colors hover:text-slate-700 hover:decoration-slate-400"
+            className="inline-flex min-h-[44px] items-center text-slate-500 underline decoration-slate-200/80 underline-offset-2 transition-colors hover:text-slate-700 hover:decoration-slate-400 max-md:py-2 md:min-h-0 md:py-0"
           >
             Anbieter & Kontakt
           </Link>
@@ -153,7 +178,7 @@ export function ForgotPasswordCard(props: {
           <Link
             prefetch
             href={loginHref}
-            className="font-medium text-slate-700 underline-offset-2 transition-colors hover:text-slate-900 hover:underline"
+            className="inline-flex min-h-[44px] items-center font-medium text-slate-700 underline-offset-2 transition-colors hover:text-slate-900 hover:underline max-md:py-2 md:min-h-0 md:py-0"
           >
             Zurück zum Login
           </Link>

@@ -11,12 +11,23 @@ interface ForgotPasswordPageProps {
   searchParams: Promise<{ sent?: string; error?: string; invite?: string; email?: string }>;
 }
 
+const MAX_QUERY_ERROR_LEN = 512;
+const MAX_EMAIL_QUERY_LEN = 320;
+
+function clipQueryString(value: string | undefined, maxLen: number): string {
+  if (!value) return "";
+  const t = value.trim();
+  if (!t) return "";
+  return t.length > maxLen ? t.slice(0, maxLen) : t;
+}
+
 export default async function ForgotPasswordPage({ searchParams }: ForgotPasswordPageProps) {
   const params = await searchParams;
-  const sent = params.sent === "1";
-  const errorRaw = params.error?.trim() || "";
+  const errorRaw = clipQueryString(params.error, MAX_QUERY_ERROR_LEN);
+  /** Nie gleichzeitig Success-Kopf und Fehler (z. B. manipulierte URL / History). */
+  const sent = params.sent === "1" && !errorRaw;
   const inviteToken = sanitizeTeamInvitationTokenForAuth(params.invite);
-  const prefilledEmail = params.email?.trim() || "";
+  const prefilledEmail = clipQueryString(params.email, MAX_EMAIL_QUERY_LEN);
 
   return (
     <div className={AUTH_SCREEN_CANVAS_CLASS} style={authScreenCanvasStyle}>
