@@ -3,15 +3,18 @@
 import * as React from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
+import { ResendSignupSubmitButton } from "@/components/auth/resend-signup-submit-button";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
 type Plan = "monthly" | "halfyearly" | "yearly";
 type RegistrationStep = 1 | 2 | 3 | 4;
+
+const REGISTER_WIZARD_MAX_STEP_KEY = "yd-reg-max-wizard-step";
 
 type SignUpAction = (formData: FormData) => void | Promise<void>;
 type ResendAction = (formData: FormData) => void | Promise<void>;
@@ -31,6 +34,10 @@ export function RegisterClient(props: {
   initialPlan?: string | null;
   queryError?: string;
   success?: boolean;
+  /** Nach erneutem Versand der Bestätigungsmail (enumeration-sichere Copy). */
+  resent?: boolean;
+  /** Aus URL `step` (1–4), nur wenn nicht `success`. */
+  initialWizardStep?: RegistrationStep;
   /** Plain /login (or invite login) — no #pricing. */
   loginHref: string;
   /** When registration started from pricing (`from=pricing`), used only to return to #pricing after closing step 4. */
@@ -46,9 +53,20 @@ export function RegisterClient(props: {
   licenseStepOptional?: boolean;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const loginBackHref = props.loginHref;
   const loginPricingReturnHref = props.loginHrefWithPricingHash ?? null;
   const fromPricingFlow = Boolean(props.fromPricing);
+
+  const pushRegisterUrl = React.useCallback(
+    (nextParams: URLSearchParams, mode: "push" | "replace") => {
+      const qs = nextParams.toString();
+      const href = qs ? `/register?${qs}` : "/register";
+      if (mode === "replace") router.replace(href, { scroll: false });
+      else router.push(href, { scroll: false });
+    },
+    [router]
+  );
 
   const handleRegistrationModalClose = () => {
     setNavBusy(false);
@@ -65,7 +83,11 @@ export function RegisterClient(props: {
       return;
     }
     if (registrationStep > 1) {
-      setRegistrationStep((s) => (s - 1) as RegistrationStep);
+      const prev = (registrationStep - 1) as RegistrationStep;
+      setRegistrationStep(prev);
+      const p = new URLSearchParams(searchParams.toString());
+      p.set("step", String(prev));
+      pushRegisterUrl(p, "push");
       return;
     }
     if (fromPricingFlow && loginPricingReturnHref) {
@@ -75,7 +97,10 @@ export function RegisterClient(props: {
     router.replace(loginBackHref);
   };
   const plan = coercePlan(props.initialPlan);
-  const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(1);
+  const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(
+    () => props.initialWizardStep ?? 1
+  );
+  const wizardStepUrlInitDone = React.useRef(false);
 
   const [regName, setRegName] = React.useState("");
   const [regPractice, setRegPractice] = React.useState("");
@@ -94,6 +119,50 @@ export function RegisterClient(props: {
   React.useEffect(() => {
     if (!fromPricingFlow) clearReturnToPricingFlag();
   }, [fromPricingFlow]);
+
+  React.useEffect(() => {
+    if (!props.success) return;
+    try {
+      sessionStorage.removeItem(REGISTER_WIZARD_MAX_STEP_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, [props.success]);
+
+  React.useEffect(() => {
+    if (props.success || wizardStepUrlInitDone.current) return;
+    wizardStepUrlInitDone.current = true;
+    if (!searchParams.get("step")) {
+      const p = new URLSearchParams(searchParams.toString());
+      p.set("step", "1");
+      pushRegisterUrl(p, "replace");
+    }
+  }, [props.success, pushRegisterUrl, searchParams]);
+
+  React.useEffect(() => {
+    if (props.success) return;
+    const raw = searchParams.get("step");
+    const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 4) return;
+
+    let maxAllowed = 1;
+    try {
+      maxAllowed = Math.min(
+        4,
+        Math.max(1, Number.parseInt(sessionStorage.getItem(REGISTER_WIZARD_MAX_STEP_KEY) || "1", 10) || 1)
+      );
+    } catch {
+      maxAllowed = 1;
+    }
+
+    const clamped = Math.min(parsed, maxAllowed) as RegistrationStep;
+    if (clamped !== parsed) {
+      const p = new URLSearchParams(searchParams.toString());
+      p.set("step", String(clamped));
+      pushRegisterUrl(p, "replace");
+    }
+    setRegistrationStep((prev) => (prev !== clamped ? clamped : prev));
+  }, [props.success, pushRegisterUrl, searchParams]);
 
   const [selectedPlan, setSelectedPlan] = React.useState<Plan>(plan);
   const [licenseFrontFile, setLicenseFrontFile] = React.useState<File | null>(null);
@@ -188,11 +257,26 @@ export function RegisterClient(props: {
     setConfirmMismatchAfterContinueAttempt(false);
   }, [regEmail]);
 
-  const goToStep = React.useCallback((next: RegistrationStep) => {
-    setNavBusy(true);
-    setRegistrationStep(next);
-    window.setTimeout(() => setNavBusy(false), 160);
-  }, []);
+  const goToStep = React.useCallback(
+    (next: RegistrationStep) => {
+      setNavBusy(true);
+      setRegistrationStep(next);
+      try {
+        const prev = Number.parseInt(sessionStorage.getItem(REGISTER_WIZARD_MAX_STEP_KEY) || "1", 10) || 1;
+        sessionStorage.setItem(REGISTER_WIZARD_MAX_STEP_KEY, String(Math.max(prev, next)));
+      } catch {
+        sessionStorage.setItem(REGISTER_WIZARD_MAX_STEP_KEY, String(next));
+      }
+      const p = new URLSearchParams(searchParams.toString());
+      p.set("step", String(next));
+      p.delete("success");
+      p.delete("resent");
+      p.delete("checkout");
+      pushRegisterUrl(p, "push");
+      window.setTimeout(() => setNavBusy(false), 160);
+    },
+    [pushRegisterUrl, searchParams]
+  );
 
   const registrationDocsSatisfied =
     props.licenseStepOptional === true ||
@@ -747,6 +831,25 @@ export function RegisterClient(props: {
                   <h3 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">
                     Bitte E‑Mail bestätigen
                   </h3>
+                  {props.queryError ? (
+                    <p className="mx-auto mb-4 max-w-md rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-left text-[13px] text-amber-950">
+                      {userFacingAuthError(
+                        (() => {
+                          try {
+                            return decodeURIComponent(props.queryError);
+                          } catch {
+                            return props.queryError;
+                          }
+                        })()
+                      )}
+                    </p>
+                  ) : null}
+                  {props.resent ? (
+                    <p className="mx-auto mb-4 max-w-md rounded-xl border border-emerald-200/70 bg-emerald-50/60 px-4 py-3 text-left text-[13px] text-emerald-950">
+                      Sofern ein passendes Konto existiert, wurde die Bestätigungs-E-Mail erneut versendet. Bitte
+                      prüfen Sie auch den Spam-Ordner.
+                    </p>
+                  ) : null}
                   <p className="mx-auto mb-5 max-w-md text-[14px] leading-relaxed text-gray-600">
                     Um den Zugang zu aktivieren, bestätigen Sie bitte Ihre E‑Mail-Adresse über den Link in der
                     Bestätigungs‑E‑Mail.
@@ -803,24 +906,25 @@ export function RegisterClient(props: {
                   </div>
 
                   <form action={props.resendConfirmationAction} className="mx-auto mb-4 max-w-md">
+                    <input type="hidden" name="resend_context" value="register_success" />
                     <input type="hidden" name="email" value={successEmail.trim()} />
                     {props.inviteToken ? (
                       <input type="hidden" name="invite_token" value={props.inviteToken} />
                     ) : null}
-                    <button
-                      type="submit"
+                    <ResendSignupSubmitButton
+                      idleLabel={
+                        resendCooldown > 0
+                          ? `E‑Mail erneut senden (${resendCooldown}s)`
+                          : "Bestätigungs‑E‑Mail erneut senden"
+                      }
                       disabled={resendCooldown > 0 || !successEmail.trim() || !isValidEmail(successEmail)}
-                      onClick={() => {
-                        if (resendCooldown === 0) setResendCooldown(30);
-                      }}
+                      pendingLabel="Wird gesendet…"
                       className="h-[52px] w-full rounded-xl border border-gray-200 bg-white text-[14px] font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {resendCooldown > 0 ? `E‑Mail erneut senden (${resendCooldown}s)` : "Bestätigungs‑E‑Mail erneut senden"}
-                    </button>
+                    />
                   </form>
 
                   <Link
-                    href="/register"
+                    href="/register?step=1"
                     className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
                   >
                     Falsche E‑Mail eingegeben?
@@ -1207,7 +1311,7 @@ export function RegisterClient(props: {
                     ) : null}
                   </div>
 
-                  <form onSubmit={onStep3Submit} className="space-y-5">
+                  <form onSubmit={onStep3Submit} className="space-y-5" aria-busy={licenseUploading}>
 
                     <div>
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -1546,11 +1650,8 @@ export function RegisterClient(props: {
                       </button>
                       <button
                         type="button"
-                        onClick={() => {
-                          if (selectedPlan === "monthly") return;
-                          setPaymentMethod("invoice");
-                        }}
-                        aria-disabled={selectedPlan === "monthly"}
+                        disabled={selectedPlan === "monthly"}
+                        onClick={() => setPaymentMethod("invoice")}
                         className={`rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
                           selectedPlan === "monthly"
                             ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
@@ -1728,7 +1829,7 @@ export function RegisterClient(props: {
                             ? "Konto anlegen (Testphase)"
                             : "Vertrag wählen & fortfahren"
                         }
-                        pendingLabel=""
+                        pendingLabel="Konto wird angelegt…"
                         disabled={
                           !acceptedTos ||
                           !acceptedPrivacy ||
@@ -1738,24 +1839,51 @@ export function RegisterClient(props: {
                         className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                       />
                     </div>
+                  </form>
 
-                    {props.registrationDemoUi &&
-                    props.registrationDemoServer &&
-                    !props.skipPaymentAtSignup ? (
-                      <div
-                        className="rounded-2xl border border-dashed border-amber-300/90 bg-amber-50/80 p-4"
-                        role="region"
-                        aria-label="Demo-Registrierung ohne Zahlung"
-                      >
-                        <p className="mb-3 text-[12px] leading-relaxed text-amber-950">
-                          Demo: Registrierung ohne Stripe-Checkout abschließen (nur wenn der Server den Demo-Modus
-                          erlaubt).
-                        </p>
+                  {props.registrationDemoUi &&
+                  props.registrationDemoServer &&
+                  !props.skipPaymentAtSignup ? (
+                    <div
+                      className="mt-3 rounded-2xl border border-dashed border-amber-300/90 bg-amber-50/80 p-4"
+                      role="region"
+                      aria-label="Demo-Registrierung ohne Zahlung"
+                    >
+                      <p className="mb-3 text-[12px] leading-relaxed text-amber-950">
+                        Demo: Registrierung ohne Stripe-Checkout abschließen (nur wenn der Server den Demo-Modus
+                        erlaubt).
+                      </p>
+                      <form action={props.signUpAction} className="space-y-3">
+                        <input type="hidden" name="email" value={normalizeEmail(regEmail)} />
+                        <input type="hidden" name="password" value={regPassword} />
+                        <input type="hidden" name="display_name" value={regName} />
+                        <input type="hidden" name="workspace_name" value={regPractice} />
+                        <input type="hidden" name="billing_interval" value={selectedPlan} />
+                        <input type="hidden" name="contract_version" value="v1" />
+                        <input type="hidden" name="accepted_at" value={new Date().toISOString()} />
+                        <input type="hidden" name="accepted_tos" value={acceptedTos ? "1" : "0"} />
+                        <input type="hidden" name="accepted_privacy" value={acceptedPrivacy ? "1" : "0"} />
+                        <input type="hidden" name="accepted_withdrawal" value={acceptedWithdrawal ? "1" : "0"} />
+                        <input type="hidden" name="payment_method" value={paymentMethod} />
+                        <input type="hidden" name="dentist_license_number" value={regLicense} />
+                        <input type="hidden" name="dentist_license_storage_path" value={licenseStoragePath} />
+                        <input
+                          type="hidden"
+                          name="dentist_license_storage_path_front"
+                          value={licenseFrontStoragePath || licenseStoragePath}
+                        />
+                        <input
+                          type="hidden"
+                          name="dentist_license_storage_path_back"
+                          value={licenseBackStoragePath}
+                        />
+                        <input type="hidden" name="registration_demo_skip" value="1" />
+                        {props.inviteToken ? (
+                          <input type="hidden" name="invite_token" value={props.inviteToken} />
+                        ) : null}
                         <RegisterFormSubmitButton
-                          name="registration_demo_skip"
-                          value="1"
                           label="Demo: Konto ohne Zahlung anlegen"
-                          pendingLabel=""
+                          pendingLabel="Demo wird verarbeitet…"
                           disabled={
                             !acceptedTos ||
                             !acceptedPrivacy ||
@@ -1768,14 +1896,14 @@ export function RegisterClient(props: {
                             background: "linear-gradient(to bottom, #fef9c3 0%, #fef3c7 100%)",
                           }}
                         />
-                      </div>
-                    ) : null}
+                      </form>
+                    </div>
+                  ) : null}
 
-                    <p className="text-center text-[11px] text-gray-500">
-                      Sie wählen: <span className="font-medium text-gray-900">{plans[selectedPlan].label}</span>{" "}
-                      · {plans[selectedPlan].billing}
-                    </p>
-                  </form>
+                  <p className="mt-3 text-center text-[11px] text-gray-500">
+                    Sie wählen: <span className="font-medium text-gray-900">{plans[selectedPlan].label}</span>{" "}
+                    · {plans[selectedPlan].billing}
+                  </p>
                 </div>
               ) : null}
                 </>

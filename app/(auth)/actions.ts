@@ -137,14 +137,23 @@ export async function signIn(formData: FormData) {
 export async function resendSignupConfirmation(formData: FormData) {
   const email = (formData.get("email") as string | null)?.trim().toLowerCase() || "";
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
+  const registerSuccessUx =
+    (formData.get("resend_context") as string | null)?.trim() === "register_success";
 
-  const params = new URLSearchParams();
-  if (inviteToken) params.set("invite", inviteToken);
-  if (email) params.set("email", email);
+  const loginParams = new URLSearchParams();
+  if (inviteToken) loginParams.set("invite", inviteToken);
+  if (email) loginParams.set("email", email);
+
+  const registerParams = new URLSearchParams(loginParams);
+  registerParams.set("success", "1");
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    params.set("error", "Bitte geben Sie eine gültige E-Mail-Adresse ein.");
-    redirect(`/login?${params.toString()}`);
+    if (registerSuccessUx) {
+      registerParams.set("error", "Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      redirect(`/register?${registerParams.toString()}`);
+    }
+    loginParams.set("error", "Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+    redirect(`/login?${loginParams.toString()}`);
   }
 
   const supabase = await createClient();
@@ -162,8 +171,14 @@ export async function resendSignupConfirmation(formData: FormData) {
     console.error("[resendSignupConfirmation]", error);
   }
 
-  params.set("resent", "1");
-  redirect(`/login?${params.toString()}`);
+  if (registerSuccessUx) {
+    registerParams.delete("step");
+    registerParams.set("resent", "1");
+    redirect(`/register?${registerParams.toString()}`);
+  }
+
+  loginParams.set("resent", "1");
+  redirect(`/login?${loginParams.toString()}`);
 }
 
 /** After password reset (client): same routing as post-login when no explicit invite in URL. */
