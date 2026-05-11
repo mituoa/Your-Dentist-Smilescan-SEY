@@ -102,6 +102,19 @@ import { markSubmissionSeen } from "./actions";
  * CRM-/Supportdesk-Postfach, Audit-Log-Produkt, automatisierte klinische Bewertung, Messaging-Pipeline,
  * KI-Autonomie — s. auch `layout.tsx` Punkt 12. **Pilot-Reife:** keine toten Kernpfade; leere Zustände
  * sachlich (Punkt 7); Erwartung „kein Auto-Versand“ mehrfach klar (Hilfsspalte + Entwurf-Bereich).
+ *
+ * **Punkt 12 — Nice / Future / Non-MVP (`/inbox/[id]`):** Deckungsgleich mit **`layout.tsx` Punkt 12**
+ * (Liste + Detail). **Nice** hier besonders: Geräte-QA auf Entwurf/Scroll, PhotoViewer-/ZIP-Polish,
+ * `aria-live`/Fokus-Feinschliff. **Future** hier besonders: Thread-Historie, Akte, KI-Einordnung,
+ * Versand-Pipeline — nur mit Roadmap. **Non-MVP** hier besonders: alles Postfach-/CRM-/Auto-KI-nahe;
+ * bei Zweifel **MVP-Grenze** (Punkt 11) schützen.
+ *
+ * **Punkt 13 — Priorität (`/inbox/[id]`):** Vollständiger **P0-/Stabilisierungs-Vertrag** s.
+ * **`layout.tsx` Punkt 13** — Detail ist **kein** separater niedrigerer Prio-Track, sondern **Teil
+ * desselben Intake-P0** wie die Liste. **Hier besonders schützen:** Workspace-Isolation (`notFound`,
+ * Actions), **Entwurf ≠ Versand**, keine UI, die Kanal/CRM vortäuscht, **ruhige** Fehler/Empty,
+ * Mobile-Kernpfade. **Kein aktives Feature-Weiterbauen** ohne Auftrag; Regressionen aus Punkt 13
+ * Layout gelten **1:1** für diese Route. Konflikt: **Stabilität vor Plattform** (s. Layout).
  */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;

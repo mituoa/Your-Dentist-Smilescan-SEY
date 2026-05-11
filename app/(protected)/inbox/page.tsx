@@ -19,7 +19,8 @@
  * Feature-Überbau).
  * **Punkt 12 — Nice/Future/Non-MVP:** Klassifizierung und langfristiger Inbox-„Vertrag“ s.
  * `inbox/layout.tsx` (Punkt 12).
- * **Punkt 13 — Priorität (P0, Stabilisierung):** vollständig s. `inbox/layout.tsx` (Punkt 13).
+ * **Punkt 13 — Priorität (P0, Stabilisierung, Liste + `/inbox/[id]`):** vollständig s.
+ * `inbox/layout.tsx` (Punkt 13).
  */
 import { redirect } from "next/navigation";
 

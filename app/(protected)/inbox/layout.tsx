@@ -68,28 +68,46 @@ function SearchFallback() {
  * bewusster Pilot (Punkt 2); für Praxis-Pilot **reif**, nicht als Plattform-Inbox positioniert.
  * **Detail** (`/inbox/[id]`): Triage + Entwurf/Kopie + Terminlink nach Klick — s. `page.tsx` Punkt 11.
  *
- * **Punkt 12 — Nice / Future / Non-MVP (Vertrag):**
- * - **Nice:** E2E/Smoke für `/inbox` + `q`, Debounce-/Perf-Feinschliff, A11y-/Spacing-Polish, Runbooks
- *   zu Migrationen/Logs, Monitoring auf `[inbox]`-Fehlercodes.
- * - **Future:** Pagination bei großen Postfächern, Sidebar = gefilterte Liste (oder RPC-Suche),
- *   Multi-Workspace-Wechsel, erweiterte Filter, Priorisierung/Analytics, Team-/Ops-Ansichten,
- *   robustere Search-Infrastruktur (Index, serverseitiges `q` im Layout).
- * - **Non-MVP (nicht bauen):** Chat/Messaging, CRM/Kanban, künstliche Aktivität, generische SaaS-Inbox-
- *   Features, Operations-/Growth-Center-Optik, aggressive CTAs — würden den Intake-Vertrag verwässern.
+ * **Punkt 12 — Nice / Future / Non-MVP (Vertrag, Liste + `/inbox/[id]`):** Langfristiger
+ * **Produktgrenz-Vertrag** — bei Konflikt mit „größer/intelligenter wirkender Plattform“ gilt immer:
+ * **ruhigeres, ehrlicheres MVP** (Punkt 11). Änderungen nur mit Produktauftrag; hier keine Features
+ * vorbauen.
+ * - **Nice (klein, ohne Architektur):** E2E/Smoke für `/inbox`, `/inbox/[id]` + `q`; echte Geräte-QA
+ *   (iOS Keyboard, Safe Area); A11y-/Spacing-Polish; Debounce-/Perf-Feinschliff; Monitoring/Alerts auf
+ *   bekannte Fehlercodes; kleine PhotoViewer-/ZIP-Polishs; interne Runbooks (Migrationen, RLS).
+ * - **Future (Roadmap/Infra, nicht Pilot):** Pagination / serverseitige Suche; Sidebar = gefilterte Liste
+ *   oder RPC-Suche; Multi-Workspace-/Ops-Ansichten; **Detail:** echte Versand-/Audit-Pipeline,
+ *   Kommunikations**historie**, strukturierte Patientenakte, erweiterte klinische Einordnung / Priorität,
+ *   echte KI-Assistenz (nur wenn klar getrennt vom MVP), robustere Search-Infrastruktur.
+ * - **Non-MVP (nicht bauen):** autonome KI-Kommunikation; Auto-SMS/E-Mail aus der Detailseite;
+ *   CRM-/Supportdesk-/Chat-Plattform; künstliche Dringlichkeit oder Aktivität; generische AI-/Operations-
+ *   Center-Optik; übertriebene Clinical-AI-Sprache; vollwertige Patientenverwaltung; alles, was den
+ *   Intake-Vertrag (Triage + kontrollierte Hilfe) verwässert — s. `page.tsx` Punkt 11.
  *
- * **Punkt 13 — Priorität (Produkt + Betrieb):** `/inbox` ist **P0** auf dem **klinischen Intake-Pfad**
- * (Liste sichtbar, Fall öffnen, **keine falschen/fremden Falldaten**). **P0 bleibt gerechtfertigt**,
- * solange Praxis-Pilot/Demo darauf zugreift: Tenant-/RLS-Fehler oder Listen-/Detail-Mismatch wären
- * **produktkritisch**. Reihenfolge bei Änderungen: (1) **Risiko falscher/fremder Daten** + RLS/
- * Session-Kohärenz, (2) **Workspace-/Membership-Korrektheit** (Migration **030**, `getCurrentWorkspace`),
- * (3) **Intake-Liste** (`getInboxSubmissions`), (4) **Fallnavigation** (Links, Auto-Select Desktop),
- * (5) **Such-/Routing-Stabilität** (`q`, Normalisierung), (6) **Mobile-Nutzbarkeit** (`InboxTrackerShell`),
- * (7) **ruhiger professioneller UX**-Ton (Fehler/Empty). **Vor Pilot/Demo manuell:** Login mit
- * echtem Workspace, Liste lädt, Fall öffnet (Desktop + Mobil), Suche mit Treffer/Leer/Fehler,
- * kein Fremdfall nach Hard-Reload; Arzt: Plus → `/create-case` falls relevant. **Bewusst nicht mehr
- * priorisiert:** neue Inbox-Features, Search-Plattform, Pagination/Filter (s. Punkt 12 Future).
- * **QA/Monitoring/Doku statt Code:** Smoke/E2E, Log-Alerts auf Listen-/Index-Fehler, Runbook 030.
- * **Route stabil halten** — nur gezielte Fixes/Security; kein aktives „Weiterbauen“ ohne Produktauftrag.
+ * **Punkt 13 — Priorität (Produkt + Betrieb, Liste + `/inbox/[id]`):** **`/inbox` inkl. Fall-Detail**
+ * ist **ein durchgängiger P0-Pfad** auf dem **klinischen Intake-MVP** — Triage endet nicht an der Liste:
+ * geöffneter Fall (Fotos, Notiz, Einordnung, **Hilfsspalte nur Entwurf/Kopie + bewusste Aktionen**)
+ * gehört **dasselbe Prioritätsniveau** wie Liste und Navigation. **P0 bleibt gerechtfertigt**, solange
+ * Pilot/Demo darauf arbeitet. **Produktkritische Regressionen:** Fremdfall sichtbar oder per ID
+ * erreichbar; Schreib-/Lesepfade ohne **Workspace-/RLS-Kohärenz**; UI suggeriert **Auto-Versand oder
+ * KI-Autonomie**; **Entwurf wird als versendet** dargestellt; Kernaktionen (Chips, ZIP, Terminlink,
+ * Kopie) **still** kaputt; **Listen-Detail-Mismatch** nach `q`/Navigation/Reload; Mobile: Kernpfade
+ * (Scroll, Keyboard, Zurück) blockiert. **Reihenfolge bei Änderungen:** (1) **falsche/fremde Daten**
+ * + RLS/Session, (2) **Workspace-/Membership**, (3) **klinische Triage-Nutzbarkeit** Liste **und**
+ * Detail, (4) Fallnavigation, (5) **`q`/Routing**, (6) **Mobile-Stabilität**, (7) **ruhiger UX-Ton**
+ * + **ehrliche Kommunikationsdarstellung** (Hilfe ≠ Kanal), (8) **keine Fake-KI**, **kein CRM-/Ops-
+ * Center-Drift**, **keine falsche klinische Autorität** (Einordnung = Praxiswahl). **Konfliktregel:**
+ * bei Zielkonflikt **Stabilität, Ruhe und Ehrlichkeit** vor „mehr Plattform“. **Vor Pilot/Demo manuell**
+ * (ergänzend): Detail — Fotos/Viewer, leere Notiz, Zeitraum-Chips, Entwurf kopieren, Arzt-Terminlink
+ * nur mit Erwartung „Klick löst Aktion“, ZIP, Command nur Hilfe; Hard-Reload auf `/inbox/[id]` ohne
+ * Fremdfall; zuvor Layout-Checks (Login, Liste, Suche, Plus Arzt). **Bewusst nicht mehr priorisiert**
+ * (Feature-Code): Inbox-Plattform-Ausbau, Pagination/serverseitige Suche, neue Kommunikations-/Tracker-
+ * Produkte — s. Punkt 12 **Future**. **QA/Monitoring/Doku statt Ausbau:** Smoke/E2E, Geräte-QA, Log-
+ * Alerts auch für **Detail-Actions**, Runbook **030**/RLS (Punkt 10 bis echter Prod-QA **fast final**).
+ * **Kein Grund zur aktiven Weiterentwicklung** ohne Produktauftrag — **Route stabil halten**, nur
+ * gezielte Fixes/Security. **Nicht versehentlich wieder einführen:** Auto-SMS/E-Mail, autonome KI,
+ * künstliche Dringlichkeit, CRM-/Chat-Produkt, generische Ops-/AI-Optik, übertriebene Clinical-AI-
+ * Sprache — s. Punkt 12 **Non-MVP** und Punkt 11 **MVP-Grenze**.
  */
 export default async function InboxLayout({ children }: InboxLayoutProps) {
   const workspace = await getCurrentWorkspace();
