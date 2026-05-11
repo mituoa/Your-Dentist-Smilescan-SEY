@@ -17,6 +17,11 @@ import {
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
 import { getStripePriceIdForInterval, getStripeServer } from "@/lib/stripe/server";
+import {
+  collectRegisterLicenseStoragePaths,
+  removePendingLicenseUploads,
+  waitForWorkspaceMembership,
+} from "@/lib/register-signup-helpers";
 
 export async function signInWithGoogle(formData: FormData) {
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
@@ -167,7 +172,7 @@ export async function getAuthenticatedEntryPath(): Promise<string> {
 }
 
 export async function signUp(formData: FormData) {
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string)?.trim() ?? "";
   const password = formData.get("password") as string;
   const workspaceName = formData.get("workspace_name") as string;
   const displayName = formData.get("display_name") as string;
@@ -190,16 +195,31 @@ export async function signUp(formData: FormData) {
   const registrationDemoSkip =
     (formData.get("registration_demo_skip") as string | null)?.trim() === "1";
 
-  if (!email || !password) {
+  const licensePaths = collectRegisterLicenseStoragePaths(
+    dentistLicenseStoragePath,
+    dentistLicenseStoragePathFront,
+    dentistLicenseStoragePathBack
+  );
+
+  const inviteQuerySuffix = inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : "";
+
+  const registerFail = async (msg: string, options?: { cleanupLicenses?: boolean }) => {
+    const cleanupLicenses = options?.cleanupLicenses !== false;
+    if (cleanupLicenses && licensePaths.length > 0) {
+      const cleanup = createAdminClient();
+      await removePendingLicenseUploads(cleanup, licensePaths);
+    }
     redirect(
-      `/register?error=${encodeURIComponent("E-Mail und Passwort erforderlich.")}`
+      `/register?error=${encodeURIComponent(msg)}&email=${encodeURIComponent(email)}${inviteQuerySuffix}`
     );
+  };
+
+  if (!email || !password) {
+    await registerFail("E-Mail und Passwort erforderlich.");
   }
 
   if (password.length < 8) {
-    redirect(
-      `/register?error=${encodeURIComponent("Passwort muss mindestens 8 Zeichen haben.")}`
-    );
+    await registerFail("Passwort muss mindestens 8 Zeichen haben.");
   }
 
   const supabase = await createClient();
@@ -223,12 +243,7 @@ export async function signUp(formData: FormData) {
 
   if (error) {
     console.error("[signUp]", error.message);
-    const inviteQ = inviteToken
-      ? `&invite=${encodeURIComponent(inviteToken)}`
-      : "";
-    redirect(
-      `/register?error=${encodeURIComponent(userFacingAuthError(error.message))}${inviteQ}`
-    );
+    await registerFail(userFacingAuthError(error.message));
   }
 
   if (inviteToken) {
@@ -238,140 +253,153 @@ export async function signUp(formData: FormData) {
       registeredUserId: signData.user?.id ?? null,
     });
     if (!inviteResult.ok) {
-      redirect(
-        `/dashboard?invite_notice=${encodeURIComponent(inviteResult.error)}`
-      );
+      await registerFail(inviteResult.error);
     }
   }
 
-  // Optional: Vertrag/Plan-Daten speichern (Service Role), damit es auch ohne Session klappt.
   const userId = signData.user?.id || null;
   if (userId && billingInterval) {
     const allowed = new Set(["monthly", "halfyearly", "yearly"]);
     if (!allowed.has(billingInterval)) {
-      redirect(`/register?error=${encodeURIComponent("Ungültiges Zahlungsintervall.")}`);
+      await registerFail("Ungültiges Zahlungsintervall.");
     }
     if (!acceptedTos || !acceptedPrivacy || !acceptedWithdrawal) {
-      redirect(`/register?error=${encodeURIComponent("Bitte alle Pflichtfelder im Vertrag bestätigen.")}`);
+      await registerFail("Bitte alle Pflichtfelder im Vertrag bestätigen.");
     }
 
     const acceptedAt = acceptedAtRaw ? new Date(acceptedAtRaw) : new Date();
     if (Number.isNaN(acceptedAt.getTime())) {
-      redirect(`/register?error=${encodeURIComponent("Ungültiges Vertragsdatum.")}`);
+      await registerFail("Ungültiges Vertragsdatum.");
     }
 
     const admin = createAdminClient();
-    const { data: membership, error: memberErr } = await admin
-      .from("workspace_members")
-      .select("workspace_id")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const membership = await waitForWorkspaceMembership(admin, userId);
+    if (!membership?.workspace_id) {
+      console.error("[signUp] workspace membership not available after retries");
+      await registerFail(
+        "Die Praxis-Zuordnung konnte nicht zeitnah abgeschlossen werden. Bitte prüfen Sie Ihre E-Mail oder melden Sie sich an. Wenn das Problem bleibt, kontaktieren Sie den Support."
+      );
+    }
 
-    if (memberErr || !membership?.workspace_id) {
-      console.error("[signUp] workspace lookup failed", memberErr);
+    const { error: billingUpsertErr } = await admin.from("workspace_billing").upsert(
+      {
+        workspace_id: membership.workspace_id,
+        status: "pending",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "workspace_id" }
+    );
+    if (billingUpsertErr) {
+      console.error("[signUp] workspace_billing upsert failed", billingUpsertErr);
+      await registerFail(
+        "Die Abrechnungsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut."
+      );
+    }
+
+    const { error: contractErr } = await admin.from("workspace_contracts").upsert(
+      {
+        workspace_id: membership.workspace_id,
+        user_id: userId,
+        billing_interval: billingInterval,
+        contract_version: contractVersion,
+        accepted_at: acceptedAt.toISOString(),
+        accepted_tos: acceptedTos,
+        accepted_privacy: acceptedPrivacy,
+        accepted_withdrawal: acceptedWithdrawal,
+        dentist_license_number: dentistLicenseNumber,
+        dentist_license_storage_path: dentistLicenseStoragePath,
+        dentist_license_storage_path_front: dentistLicenseStoragePathFront,
+        dentist_license_storage_path_back: dentistLicenseStoragePathBack,
+        payment_method: paymentMethod,
+      },
+      { onConflict: "workspace_id" }
+    );
+    if (contractErr) {
+      console.error("[signUp] contract save failed", contractErr);
+      await registerFail(
+        "Die Vertragsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut."
+      );
+    }
+
+    const interval = billingInterval as "monthly" | "halfyearly" | "yearly";
+    const pm = paymentMethod || "sepa_debit";
+
+    const skipStripeCheckout =
+      !shouldEnforceStripeCheckoutAtSignup() ||
+      (registrationDemoSkip && isRegistrationDemoMode());
+
+    const inviteReturnSuffix = inviteToken
+      ? `&invite=${encodeURIComponent(inviteToken)}`
+      : "";
+
+    if (pm === "invoice") {
+      // invoice flow handled manually later
+    } else if (skipStripeCheckout) {
+      // Registrierung ohne Checkout (Standard bis Stripe aktiv geschaltet ist).
     } else {
-      // Ensure billing row exists (pending)
-      await admin.from("workspace_billing").upsert(
-        {
-          workspace_id: membership.workspace_id,
-          status: "pending",
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "workspace_id" }
-      );
+      try {
+        const stripe = getStripeServer();
+        const priceId = getStripePriceIdForInterval(interval);
 
-      const { error: contractErr } = await admin.from("workspace_contracts").upsert(
-        {
-          workspace_id: membership.workspace_id,
-          user_id: userId,
-          billing_interval: billingInterval,
-          contract_version: contractVersion,
-          accepted_at: acceptedAt.toISOString(),
-          accepted_tos: acceptedTos,
-          accepted_privacy: acceptedPrivacy,
-          accepted_withdrawal: acceptedWithdrawal,
-          dentist_license_number: dentistLicenseNumber,
-          dentist_license_storage_path: dentistLicenseStoragePath,
-          dentist_license_storage_path_front: dentistLicenseStoragePathFront,
-          dentist_license_storage_path_back: dentistLicenseStoragePathBack,
-          payment_method: paymentMethod,
-        },
-        { onConflict: "workspace_id" }
-      );
-      if (contractErr) {
-        console.error("[signUp] contract save failed", contractErr);
-      }
+        const paymentMethodTypes: Array<"card" | "sepa_debit" | "paypal"> = [];
+        if (pm === "card") paymentMethodTypes.push("card");
+        if (pm === "sepa_debit") paymentMethodTypes.push("sepa_debit");
+        if (pm === "paypal") {
+          paymentMethodTypes.push("card", "paypal");
+        }
+        if (paymentMethodTypes.length === 0) paymentMethodTypes.push("card");
 
-      // Start Stripe checkout for supported payment methods (optional)
-      const interval = billingInterval as "monthly" | "halfyearly" | "yearly";
-      const pm = paymentMethod || "sepa_debit";
-
-      // Stripe Checkout nur wenn ENABLE_STRIPE_CHECKOUT_AT_SIGNUP + vollständige Stripe-Konfiguration (s. lib/registration-demo.ts).
-      const skipStripeCheckout =
-        !shouldEnforceStripeCheckoutAtSignup() ||
-        (registrationDemoSkip && isRegistrationDemoMode());
-
-      if (pm === "invoice") {
-        // invoice flow handled manually later
-      } else if (skipStripeCheckout) {
-        // Registrierung ohne Checkout (Standard bis Stripe aktiv geschaltet ist).
-      } else {
-        try {
-          const stripe = getStripeServer();
-          const priceId = getStripePriceIdForInterval(interval);
-
-          const paymentMethodTypes: Array<"card" | "sepa_debit" | "paypal"> = [];
-          if (pm === "card") paymentMethodTypes.push("card");
-          if (pm === "sepa_debit") paymentMethodTypes.push("sepa_debit");
-          if (pm === "paypal") {
-            paymentMethodTypes.push("card", "paypal");
-          }
-          if (paymentMethodTypes.length === 0) paymentMethodTypes.push("card");
-
-          const session = await stripe.checkout.sessions.create({
-            mode: "subscription",
-            customer_email: email,
-            line_items: [{ price: priceId, quantity: 1 }],
-            payment_method_types: paymentMethodTypes,
-            allow_promotion_codes: true,
-            subscription_data: {
-              trial_period_days: 14,
-              metadata: {
-                workspace_id: membership.workspace_id,
-                user_id: userId,
-              },
-            },
+        const session = await stripe.checkout.sessions.create({
+          mode: "subscription",
+          customer_email: email,
+          line_items: [{ price: priceId, quantity: 1 }],
+          payment_method_types: paymentMethodTypes,
+          allow_promotion_codes: true,
+          subscription_data: {
+            trial_period_days: 14,
             metadata: {
               workspace_id: membership.workspace_id,
               user_id: userId,
-              billing_interval: interval,
-              payment_method: pm,
             },
-            success_url: `${origin}/register?success=1&email=${encodeURIComponent(email)}&checkout=success`,
-            cancel_url: `${origin}/register?error=${encodeURIComponent("checkout_cancelled")}&email=${encodeURIComponent(email)}`,
-          });
+          },
+          metadata: {
+            workspace_id: membership.workspace_id,
+            user_id: userId,
+            billing_interval: interval,
+            payment_method: pm,
+          },
+          success_url: `${origin}/register?success=1&email=${encodeURIComponent(email)}&checkout=success${inviteReturnSuffix}`,
+          cancel_url: `${origin}/register?error=${encodeURIComponent("checkout_cancelled")}&email=${encodeURIComponent(email)}${inviteReturnSuffix}`,
+        });
 
-          await admin.from("workspace_billing").upsert(
-            {
-              workspace_id: membership.workspace_id,
-              status: "pending",
-              stripe_checkout_session_id: session.id,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "workspace_id" }
-          );
-
-          if (session.url) {
-            redirect(session.url);
-          }
-        } catch (stripeErr) {
-          const raw = stripeErr instanceof Error ? stripeErr.message : String(stripeErr);
-          console.error("[signUp] Stripe checkout", raw);
-          const inviteQ = inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : "";
-          redirect(
-            `/register?error=${encodeURIComponent(userFacingAuthError(raw))}&email=${encodeURIComponent(email)}${inviteQ}`
+        const { error: billingStripeErr } = await admin.from("workspace_billing").upsert(
+          {
+            workspace_id: membership.workspace_id,
+            status: "pending",
+            stripe_checkout_session_id: session.id,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "workspace_id" }
+        );
+        if (billingStripeErr) {
+          console.error("[signUp] workspace_billing stripe session save failed", billingStripeErr);
+          await registerFail(
+            "Die Zahlungssitzung konnte nicht mit Ihrer Praxis verknüpft werden. Bitte kontaktieren Sie den Support, bevor Sie erneut zahlen.",
+            { cleanupLicenses: false }
           );
         }
+
+        if (session.url) {
+          redirect(session.url);
+        }
+        await registerFail(
+          "Die Zahlungsseite konnte nicht geöffnet werden. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support.",
+          { cleanupLicenses: false }
+        );
+      } catch (stripeErr) {
+        const raw = stripeErr instanceof Error ? stripeErr.message : String(stripeErr);
+        console.error("[signUp] Stripe checkout", raw);
+        await registerFail(userFacingAuthError(raw), { cleanupLicenses: false });
       }
     }
   }
@@ -380,7 +408,8 @@ export async function signUp(formData: FormData) {
   if (signData.session) {
     redirect("/dashboard");
   }
-  redirect(`/register?success=1&email=${encodeURIComponent(email)}`);
+  const successInviteQ = inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : "";
+  redirect(`/register?success=1&email=${encodeURIComponent(email)}${successInviteQ}`);
 }
 
 export async function requestPasswordResetFromLogin(formData: FormData) {

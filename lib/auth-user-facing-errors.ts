@@ -27,6 +27,9 @@ export function userFacingAuthError(raw: string): string {
   if (/upload failed|upload exception|missing file/i.test(m)) {
     return "Der Upload ist fehlgeschlagen. Bitte versuchen Sie es erneut oder wählen Sie eine kleinere Datei.";
   }
+  if (/^checkout_cancelled$/i.test(m) || /zahlung.*abbruch|checkout.*abgebrochen/i.test(m)) {
+    return "Der Zahlungsvorgang wurde abgebrochen. Sie können die Registrierung erneut starten oder sich bei Rückfragen an den Support wenden.";
+  }
   if (/stripe|checkout session|no such price|invalid_request/i.test(m)) {
     return "Der Zahlungsvorbereitungsschritt ist fehlgeschlagen. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Support.";
   }

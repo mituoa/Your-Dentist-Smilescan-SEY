@@ -3,6 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveLicenseMimeForUpload, validateLicenseFile } from "@/lib/upload/license-validation";
 
+/**
+ * Temporäre Berufsnachweise: UUID pro Upload-Versuch unter `…/pending/…`.
+ * TODO(Betrieb): geplanter Storage-Cleanup / TTL (z. B. täglich Objekte älter als 24–72h unter
+ * `registrations/licenses/pending/` löschen, die nicht in workspace_contracts referenziert werden),
+ * falls Server-seitiges Löschen bei Fehler nicht greift (Tab schließen, Netzabbruch vor Submit).
+ */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -25,7 +31,7 @@ export async function POST(request: NextRequest) {
     const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
     const tempId = crypto.randomUUID();
     const suffix = side === "front" || side === "back" ? `-${side}` : "";
-    const storagePath = `registrations/licenses/${tempId}${suffix}.${ext}`;
+    const storagePath = `registrations/licenses/pending/${tempId}${suffix}.${ext}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
 

@@ -38,6 +38,8 @@ export function RegisterClient(props: {
   fromPricing?: boolean;
   /** Zeigt zweiten Submit „ohne Stripe“ (wirksam nur mit REGISTRATION_DEMO_MODE am Server). */
   registrationDemoUi?: boolean;
+  /** Server `REGISTRATION_DEMO_MODE` — ohne dieses Flag den Demo-Button nicht anzeigen (vermeidet falsche Erwartung). */
+  registrationDemoServer?: boolean;
   /** Server: Registrierung ohne Stripe-Redirect (Standard bis ENABLE_STRIPE_CHECKOUT_AT_SIGNUP). */
   skipPaymentAtSignup?: boolean;
   /** Server (REGISTRATION_DEMO_MODE): Lizenz-Upload-Schritt optional überspringbar. */
@@ -917,8 +919,15 @@ export function RegisterClient(props: {
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
                       Willkommen bei Your Dentist
                     </h3>
-                    <p className="text-[13px] text-gray-500">
-                      Legen Sie Ihr professionelles Konto an
+                    <p className="text-[13px] leading-relaxed text-gray-500">
+                      {props.inviteToken ? (
+                        <>
+                          Registrierung über Team-Einladung: Bitte dieselbe E‑Mail-Adresse verwenden wie in der
+                          Einladung.
+                        </>
+                      ) : (
+                        <>Registrierung für den geprüften Zahnarzt-Praxiszugang – abschließend per E‑Mail bestätigen.</>
+                      )}
                     </p>
                   </div>
 
@@ -1730,7 +1739,9 @@ export function RegisterClient(props: {
                       />
                     </div>
 
-                    {props.registrationDemoUi && !props.skipPaymentAtSignup ? (
+                    {props.registrationDemoUi &&
+                    props.registrationDemoServer &&
+                    !props.skipPaymentAtSignup ? (
                       <div
                         className="rounded-2xl border border-dashed border-amber-300/90 bg-amber-50/80 p-4"
                         role="region"

@@ -51,6 +51,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         loginHref={loginHrefPlain}
         loginHrefWithPricingHash={loginHrefWithPricingHash}
         registrationDemoUi={registrationDemoUi}
+        registrationDemoServer={isRegistrationDemoMode()}
         skipPaymentAtSignup={skipPaymentAtSignup()}
         licenseStepOptional={isRegistrationDemoMode()}
       />
