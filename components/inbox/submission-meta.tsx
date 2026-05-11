@@ -1,3 +1,7 @@
+/**
+ * Kompakte Fallmetadaten (Hilfsspalte). **Punkt 7 — Empty:** „Einordnung (Zeitraum)“ immer sichtbar
+ * mit **„Noch nicht gewählt“** wenn null; Kontakt **„Nicht hinterlegt“** wenn weder E-Mail noch Telefon.
+ */
 interface SubmissionMetaProps {
   patientName: string | null;
   patientEmail: string | null;
@@ -27,7 +31,7 @@ function formatDeDate(iso: string) {
 function urgencyLabel(u: string | null | undefined): string | null {
   switch (u) {
     case "today":
-      return "Heute / dringend";
+      return "Heute";
     case "this_week":
       return "Diese Woche";
     case "not_urgent":
@@ -110,14 +114,19 @@ export function SubmissionMeta({
         </div>
       ) : null}
 
-      {urg ? (
-        <div>
-          <div style={lab}>Dringlichkeit</div>
-          <div className="mt-1" style={val}>
-            {urg}
-          </div>
+      <div>
+        <div style={lab}>Einordnung (Zeitraum)</div>
+        <div
+          className="mt-1"
+          style={{
+            ...val,
+            fontWeight: urg ? 500 : 400,
+            color: urg ? val.color : "#64748B",
+          }}
+        >
+          {urg ?? "Noch nicht gewählt"}
         </div>
-      ) : null}
+      </div>
 
       {patientName && (
         <div>
@@ -143,6 +152,14 @@ export function SubmissionMeta({
           </div>
         </div>
       )}
+      {!patientEmail && !patientPhone ? (
+        <div>
+          <div style={lab}>Kontakt</div>
+          <div className="mt-1" style={{ ...val, fontWeight: 400, color: "#64748B" }}>
+            Nicht hinterlegt
+          </div>
+        </div>
+      ) : null}
       {birthDisplay ? (
         <div>
           <div style={lab}>Geburtsdatum</div>

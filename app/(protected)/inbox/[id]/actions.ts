@@ -11,8 +11,14 @@ import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { submitTaskForReview } from "@/app/(protected)/my-tasks/actions";
 import { upsertTaskReceipts } from "@/lib/tasks/receipts";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
+import { submissionPhotoDownloadErrors } from "@/lib/inbox/submission-photo-download-errors";
 import JSZip from "jszip";
 
+/**
+ * Server-Actions für `/inbox/[id]`. **Punkt 8 — Fehler:** Rückgaben mit `error` nutzen **nur**
+ * feste deutsche Kurzmeldungen; niemals PostgREST-/Storage-Rohstrings in die UI. Technische
+ * Details nur serverseitig über {@link logPostgrest}. ZIP-Meldungen: `lib/inbox/submission-photo-download-errors.ts`.
+ */
 const MAX_ZIP_BYTES = 50 * 1024 * 1024;
 
 /** Server-Logs: PostgREST-Code + Message, kein vollständiges Error-Objekt / keine Roh-SQL-Dumps. */
@@ -85,7 +91,7 @@ export async function markSubmissionSeen(submissionId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { error: "Nicht angemeldet" };
+  if (!user) return { error: "Nicht angemeldet." };
 
   const { error } = await supabase
     .from("submissions")
@@ -176,10 +182,10 @@ export async function createTask(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { error: "Nicht angemeldet" };
+  if (!user) return { error: "Nicht angemeldet." };
 
   const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Workspace nicht gefunden." };
+  if (!workspace) return { error: "Arbeitsbereich nicht gefunden." };
 
   const { data: ownedSubmission, error: ownedSubmissionError } = await supabase
     .from("submissions")
@@ -226,7 +232,9 @@ export async function createTask(formData: FormData) {
       .eq("workspace_id", workspace.workspace_id)
       .in("user_id", finalSpecificRecipientIds);
     if (memberError || !members || members.length !== finalSpecificRecipientIds.length) {
-      return { error: "Ausgewählter Mitarbeitender ist im Workspace nicht verfügbar." };
+      return {
+        error: "Ausgewählter Mitarbeitender ist in diesem Arbeitsbereich nicht verfügbar.",
+      };
     }
   }
 
@@ -362,7 +370,7 @@ export async function submitInboxTaskForReview(
 export async function sendAppointmentLink(submissionId: string) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
-    return { error: "Workspace nicht gefunden." };
+    return { error: "Arbeitsbereich nicht gefunden." };
   }
   if (workspace.role !== "doctor") {
     return { error: "Nur Ärzte dürfen Terminlinks versenden." };
@@ -381,7 +389,7 @@ export async function sendAppointmentLink(submissionId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { error: "Nicht angemeldet" };
+  if (!user) return { error: "Nicht angemeldet." };
 
   const { data: submission, error: submissionLookupError } = await supabase
     .from("submissions")
@@ -437,7 +445,7 @@ export async function sendAppointmentLink(submissionId: string) {
 
   if (!result.sent) {
     return {
-      error: "Terminlink konnte nicht gesendet werden. Bitte erneut versuchen.",
+      error: "Der Terminlink konnte nicht versendet werden. Bitte erneut versuchen.",
     };
   }
 
@@ -460,15 +468,20 @@ export async function sendAppointmentLink(submissionId: string) {
   return { success: true, message: "Terminlink wurde per E-Mail versendet." };
 }
 
+/**
+ * ZIP-Export für eine Submission im aktuellen Arbeitsbereich. **Punkt 8:** `error` ist immer eine
+ * feste deutsche Kurzmeldung (keine Roh-PostgREST-/Storage-Texte für die UI). Texte zentral in
+ * `lib/inbox/submission-photo-download-errors.ts` — dort bei neuen Fehlerfällen ergänzen.
+ */
 export async function downloadSubmissionPhotos(
   submissionId: string
 ): Promise<{ error?: string; zipBase64?: string; filename?: string }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
-    return { error: "Workspace nicht gefunden." };
+    return { error: submissionPhotoDownloadErrors.noWorkspace };
   }
   if (!["doctor", "team"].includes(workspace.role)) {
-    return { error: "Keine Berechtigung für den Download." };
+    return { error: submissionPhotoDownloadErrors.forbidden };
   }
 
   const supabase = await createClient();
@@ -476,7 +489,7 @@ export async function downloadSubmissionPhotos(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return { error: "Nicht angemeldet" };
+    return { error: submissionPhotoDownloadErrors.notSignedIn };
   }
 
   const { data: submission, error: submissionError } = await supabase
@@ -488,7 +501,7 @@ export async function downloadSubmissionPhotos(
 
   if (submissionError || !submission) {
     logPostgrest("downloadSubmissionPhotos submission", submissionError);
-    return { error: "Fall nicht gefunden." };
+    return { error: submissionPhotoDownloadErrors.submissionNotFound };
   }
 
   const { data: photos, error: photosError } = await supabase
@@ -499,11 +512,11 @@ export async function downloadSubmissionPhotos(
 
   if (photosError) {
     logPostgrest("downloadSubmissionPhotos photos", photosError);
-    return { error: "Download nicht möglich. Bitte erneut versuchen." };
+    return { error: submissionPhotoDownloadErrors.generic };
   }
 
   if (!photos || photos.length === 0) {
-    return { error: "Keine Fotos vorhanden." };
+    return { error: submissionPhotoDownloadErrors.noPhotos };
   }
 
   const datePart = formatSubmissionDate(submission.created_at);
@@ -521,14 +534,14 @@ export async function downloadSubmissionPhotos(
 
     if (error || !data) {
       logPostgrest("downloadSubmissionPhotos storage", error);
-      return { error: "Download nicht möglich. Bitte erneut versuchen." };
+      return { error: submissionPhotoDownloadErrors.generic };
     }
 
     const arrayBuffer = await data.arrayBuffer();
     const uint8 = new Uint8Array(arrayBuffer);
     cumulativeBytes += uint8.byteLength;
     if (cumulativeBytes > MAX_ZIP_BYTES) {
-      return { error: "Download zu groß. Bitte Admin kontaktieren." };
+      return { error: submissionPhotoDownloadErrors.tooLarge };
     }
 
     const fileIndex = String(index + 1).padStart(2, "0");
@@ -539,7 +552,7 @@ export async function downloadSubmissionPhotos(
 
   const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
   if (zipBuffer.byteLength > MAX_ZIP_BYTES) {
-    return { error: "Download zu groß. Bitte Admin kontaktieren." };
+    return { error: submissionPhotoDownloadErrors.tooLarge };
   }
 
   return {

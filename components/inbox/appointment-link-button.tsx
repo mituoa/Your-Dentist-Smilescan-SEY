@@ -65,6 +65,9 @@ export function AppointmentLinkButton({
 
       {result && (
         <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
           className={`flex items-start gap-2 rounded-[10px] px-3 py-2.5 text-[14px] leading-relaxed ${
             result.type === "success"
               ? "bg-[#ECFDF5] text-[#047857]"

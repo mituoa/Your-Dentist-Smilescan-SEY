@@ -1,9 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ImageIcon, Download, Loader2, Check, Maximize2 } from "lucide-react";
+import {
+  ImageIcon,
+  Download,
+  Loader2,
+  Check,
+  Maximize2,
+  AlertCircle,
+} from "lucide-react";
 import { saveAs } from "file-saver";
 import { downloadSubmissionPhotos } from "@/app/(protected)/inbox/[id]/actions";
+import {
+  safeSubmissionPhotoDownloadErrorMessage,
+  submissionPhotoDownloadErrors,
+} from "@/lib/inbox/submission-photo-download-errors";
 
 interface Photo {
   id: string;
@@ -33,8 +44,9 @@ function base64ToBytes(base64: string): Uint8Array {
 }
 
 /**
- * Bildbereich — Figma-Referenz: maxHeight 220px, radius 12px, Hover-Expand-Chrome.
- * Bei Wechsel der Submission oder weniger Fotos wird der Index zurückgesetzt bzw. begrenzt (Punkt 2 — Stabilität).
+ * Bildbereich — Figma: maxHeight 220px. **Leerzustände (Punkt 7):** keine Fotos = sachlicher Hinweis
+ * (kein Fehler); fehlende signierte URL = keine Vorschau, nicht „defekt“. **Punkt 8:** ZIP-Fehler
+ * nur über `safeSubmissionPhotoDownloadErrorMessage` (gleiche Texte wie Server-Aktion).
  */
 export function PhotoViewer({
   submissionId,
@@ -62,11 +74,13 @@ export function PhotoViewer({
       <div
         className="flex flex-col items-center justify-center rounded-[12px] bg-[#F1F5F9]"
         style={{ maxHeight: "220px", minHeight: "160px" }}
-        aria-label={`Fotos: ${patientName}`}
+        role="status"
+        aria-live="polite"
+        aria-label={`Keine Fotos bei dieser Einsendung — ${patientName}`}
       >
-        <ImageIcon className="h-12 w-12 text-[#94A3B8]/50" strokeWidth={1} />
-        <p className="mt-2 text-[14px] font-medium" style={{ color: "#64748B" }}>
-          Noch keine Fotos
+        <ImageIcon className="h-12 w-12 text-[#94A3B8]/50" strokeWidth={1} aria-hidden />
+        <p className="mt-2 text-center text-[14px] font-medium" style={{ color: "#64748B" }}>
+          Keine Fotos bei dieser Einsendung.
         </p>
       </div>
     );
@@ -86,9 +100,7 @@ export function PhotoViewer({
       const result = await downloadSubmissionPhotos(submissionId);
       if (result.error || !result.zipBase64 || !result.filename) {
         setDownloadStatus("error");
-        setDownloadError(
-          result.error || "Download nicht möglich. Bitte erneut versuchen."
-        );
+        setDownloadError(safeSubmissionPhotoDownloadErrorMessage(result.error));
         return;
       }
 
@@ -102,10 +114,10 @@ export function PhotoViewer({
       window.setTimeout(() => {
         setDownloadStatus("idle");
       }, 1800);
-    } catch (error) {
-      console.error("[PhotoViewer] ZIP download failed", error);
+    } catch {
+      console.error("[PhotoViewer] ZIP download failed");
       setDownloadStatus("error");
-      setDownloadError("Download nicht möglich. Bitte erneut versuchen.");
+      setDownloadError(submissionPhotoDownloadErrors.generic);
     }
   }
 
@@ -144,7 +156,7 @@ export function PhotoViewer({
             <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 px-4">
               <ImageIcon className="h-14 w-14 text-[#94A3B8]/45" strokeWidth={1} aria-hidden />
               <p className="text-center text-[13px] font-medium" style={{ color: "#64748B" }}>
-                Bild derzeit nicht verfügbar
+                Für dieses Bild liegt keine Vorschau vor.
               </p>
             </div>
           )}
@@ -214,9 +226,17 @@ export function PhotoViewer({
       </div>
 
       {enableZipDownload && downloadStatus === "error" && (
-        <p className="text-[14px] leading-relaxed text-red-700">
-          {downloadError || "Download nicht möglich. Bitte erneut versuchen."}
-        </p>
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="flex items-start gap-2 rounded-[10px] bg-[#FEF2F2] px-3 py-2.5 text-[14px] leading-relaxed text-[#B91C1C]"
+        >
+          <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} aria-hidden />
+          <span>
+            {downloadError || submissionPhotoDownloadErrors.generic}
+          </span>
+        </div>
       )}
 
       {photos.length > 1 ? (

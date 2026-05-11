@@ -31,8 +31,8 @@ import { markSubmissionSeen } from "./actions";
  * clientseitiges „Falschen Fall“ aus Cache-Konflikten mit der URL). **Loading:** `loading.tsx` zeigt
  * `ClinicalInboxDetailSkeleton` für Streaming/Navigation. **Mobil:** Vollbild-Detail mit
  * `InboxMobileBack` → Liste; `q` aus der Liste bleibt über normalisierte Query erhalten.
- * **Leere Teilzustände:** keine Fotos = sachliche Leerfläche; fehlende `signed_url` = Hinweis im Viewer
- * (kein harter Fehlerzustand); Notiz leer = neutraler Satz. **ZIP-Download** nutzt dieselbe
+ * **Leere Teilzustände:** keine Fotos = sachlicher Hinweis; fehlende `signed_url` = Hinweis im Viewer
+ * (kein harter Fehlerzustand); Notiz leer = **„Keine Patientennotiz.“** — s. Punkt 7. **ZIP-Download** nutzt dieselbe
  * `submissionId` wie die Page. Transiente DB-Fehler bei `getSubmissionById` sind aktuell wie
  * „nicht gefunden“ behandelt (`notFound`) — bewusst simpel; Monitoring über Server-Logs.
  *
@@ -55,6 +55,25 @@ import { markSubmissionSeen } from "./actions";
  * beziehen sich auf die **von der Praxis gewählte Einstufung**, nicht auf KI-Diagnostik. Leere Notiz =
  * sachlicher Hinweis, kein „Platzhalter-Inhalt“. Command: **Entwurfsbausteine** und Navigation, keine
  * **Schnellaktions-/Ops-Center**-Sprache.
+ *
+ * **Punkt 6 — Loading:** `loading.tsx` + `ClinicalInboxDetailSkeleton` — **statische** Balken, **kein**
+ * Puls, keine Chat-/CRM-Gerüste; Desktop **Hilfsspalte** als schmales Platzhalter-Segment gegen Layout-Sprung.
+ *
+ * **Punkt 7 — Empty:** Leer ist **normal**, nicht fehlerhaft: keine Fotos / keine Patientennotiz /
+ * fehlende Kontaktdaten / **Einordnung (Zeitraum) noch nicht gewählt** sind klar beschriftet (s.
+ * `PhotoViewer`, Haupttext, `SubmissionMeta`). **Kein** Chat-Verlauf — die Spalte rechts ist immer
+ * **Entwurf + Terminlink**, nie eine leere „Konversation“.
+ *
+ * **Punkt 8 — Error:** **Fremder oder nicht zugehöriger Fall** → `notFound()` (kein Leak fremder
+ * Daten). **Page-Load-DB-Fehler** werden bewusst wie „nicht gefunden“ behandelt (`notFound`) — ruhig,
+ * **ohne** rohe PostgREST-/SQL-Texte in der UI (Monitoring über Server-Logs). **Server-Actions**
+ * (`./actions.ts`) liefern nur **feste deutsche Kurzmeldungen**; technische Details nur serverseitig
+ * (`logPostgrest`). ZIP-Kurzmeldungen zusätzlich zentral in `lib/inbox/submission-photo-download-errors.ts`.
+ * **`markSubmissionSeen`:** stiller Best-Effort — bei Fehlern **kein** UI-Banner
+ * (Lesemarkierung ist unkritisch). **Teilfehler:** z. B. fehlende Foto-Vorschau oder fehlgeschlagener
+ * ZIP-/E-Mail-/Zeitraum-Schritt je **lokal** am jeweiligen Control mit sachlicher Meldung und
+ * `aria-live` wo nötig — kein globaler Alarm. **Empty vs. Error:** Leere Listen/Texte = Punkt 7;
+ * Fehler nur, wenn eine **konkrete Nutzeraktion** fehlschlägt.
  */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
@@ -303,7 +322,7 @@ export default async function InboxDetailPage({
               >
                 {submission.patient_notes?.trim()
                   ? submission.patient_notes
-                  : "Keine Beschreibung vorhanden."}
+                  : "Keine Patientennotiz."}
               </p>
             </div>
 

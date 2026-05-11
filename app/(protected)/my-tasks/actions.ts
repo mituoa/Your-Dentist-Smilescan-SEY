@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { getWorkspaceMembershipForUserId } from "@/lib/auth-helpers";
 import { getAppBaseUrl } from "@/lib/env";
 import {
   buildTaskAssigned,
@@ -15,6 +15,7 @@ import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effor
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { MyTask } from "@/lib/queries/my-tasks";
 import { createClient } from "@/lib/supabase/server";
+import type { User } from "@supabase/supabase-js";
 import { upsertTaskReceipts } from "@/lib/tasks/receipts";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
 import {
@@ -99,6 +100,28 @@ async function getTaskAudienceEmails(
   return emails;
 }
 
+type WorkspaceMembership = NonNullable<
+  Awaited<ReturnType<typeof getWorkspaceMembershipForUserId>>
+>;
+
+/**
+ * Session + Arbeitsbereich für Server-Actions (Punkt 8): zuerst Anmeldung, dann Mitgliedschaft —
+ * vermeidet „Nicht angemeldet“ bei fehlendem Workspace und hält die Semantik über alle Actions gleich.
+ */
+async function resolveActorWorkspace(): Promise<
+  | { ok: true; supabase: Awaited<ReturnType<typeof createClient>>; user: User; workspace: WorkspaceMembership }
+  | { ok: false; error: { error: string } }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: { error: "Nicht angemeldet." } };
+  const workspace = await getWorkspaceMembershipForUserId(user.id, supabase);
+  if (!workspace) return { ok: false, error: { error: "Arbeitsbereich nicht gefunden." } };
+  return { ok: true, supabase, user, workspace };
+}
+
 export async function createMyTask(formData: FormData): Promise<{
   error?: string;
   success?: boolean;
@@ -123,15 +146,11 @@ export async function createMyTask(formData: FormData): Promise<{
     return { error: "Bitte geben Sie eine Aufgabe ein." };
   }
 
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return actor.error;
+  const { workspace, user, supabase } = actor;
   const sortOrder = Date.now();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
   if (assignAllTeam && specificRecipientIds.length > 0) {
     return { error: "Bitte wählen Sie entweder alle Mitarbeitenden oder konkrete Personen." };
   }
@@ -165,7 +184,9 @@ export async function createMyTask(formData: FormData): Promise<{
       .eq("workspace_id", workspace.workspace_id)
       .in("user_id", finalSpecificRecipientIds);
     if (memberError || !members || members.length !== finalSpecificRecipientIds.length) {
-      return { error: "Ausgewählter Mitarbeitender ist im Workspace nicht verfügbar." };
+      return {
+        error: "Ausgewählter Mitarbeitender ist in diesem Arbeitsbereich nicht verfügbar.",
+      };
     }
   }
 
@@ -280,14 +301,9 @@ export async function createMyTask(formData: FormData): Promise<{
 export async function submitTaskForReview(
   taskId: string
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return actor.error;
+  const { supabase, user, workspace } = actor;
 
   const { data: task } = await supabase
     .from("tasks")
@@ -352,14 +368,9 @@ export async function moveTaskStatusByDrag(
   taskId: string,
   toColumn: BoardColumnId
 ): Promise<{ success?: boolean; error?: string; notAllowed?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return actor.error;
+  const { workspace, user, supabase } = actor;
 
   const { data: task } = await supabase
     .from("tasks")
@@ -442,14 +453,9 @@ export async function reorderTasksInColumn(
   column: BoardColumnId,
   orderedTaskIds: string[]
 ): Promise<{ success?: boolean; error?: string }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
-  if (orderedTaskIds.length === 0) return { success: true };
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return actor.error;
+  const { workspace, supabase } = actor;
 
   const status = columnToTaskStatus(column);
   const { data: existing, error: fetchError } = await supabase
@@ -483,15 +489,10 @@ export async function reorderTasksInColumn(
 export async function approveTask(
   taskId: string
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return actor.error;
+  const { workspace, user, supabase } = actor;
   if (workspace.role !== "doctor") return { error: "Nur Ärzte dürfen bestätigen." };
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
 
   const { data: task } = await supabase
     .from("tasks")
@@ -548,17 +549,12 @@ export async function rejectTask(
   taskId: string,
   reason: string
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return actor.error;
+  const { workspace, user, supabase } = actor;
   if (workspace.role !== "doctor") return { error: "Nur Ärzte dürfen zurückweisen." };
 
   if (!reason.trim()) return { error: "Bitte geben Sie eine Begründung ein." };
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
 
   const { data: task } = await supabase
     .from("tasks")
@@ -625,18 +621,13 @@ export async function addTaskComment(
   taskId: string,
   content: string
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return actor.error;
+  const { workspace, user, supabase } = actor;
 
   const trimmed = content.trim();
   if (!trimmed) return { error: "Bitte geben Sie einen Kommentar ein." };
   if (trimmed.length > 2000) return { error: "Der Kommentar darf maximal 2000 Zeichen enthalten." };
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Nicht angemeldet." };
 
   const { data: task } = await supabase
     .from("tasks")

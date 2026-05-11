@@ -72,6 +72,16 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
     };
   }, []);
 
+  /** Vollflächiges Overlay: Hintergrund-Scroll/Bounce unter iOS vermeiden (global, nicht nur Seiteninhalt). */
+  useEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prev;
+    };
+  }, []);
+
   const addPickedFiles = (list: FileList | null) => {
     if (!list?.length) return;
     setUploadZoneError(null);
@@ -213,20 +223,16 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
         onClick={close}
       />
 
-      <div className="pointer-events-none fixed inset-0 z-[1000] flex items-center justify-center overflow-y-auto p-6">
+      <div className="pointer-events-none fixed inset-0 z-[1000] flex min-h-0 flex-col overflow-hidden md:items-center md:justify-center md:overflow-y-auto md:p-6">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-case-title"
-          className="create-case-modal pointer-events-auto flex w-full max-w-[680px] max-h-[min(100vh-40px,920px)] flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
-          style={{
-            boxShadow:
-              "0 28px 80px -12px rgba(15, 23, 42, 0.18), 0 12px 32px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(15, 23, 42, 0.04)",
-          }}
+          className="create-case-modal pointer-events-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white max-sm:max-h-[100dvh] max-sm:rounded-none max-sm:shadow-none md:max-h-[min(100dvh-3rem,920px)] md:max-w-[680px] md:flex-none md:rounded-2xl md:shadow-[0_28px_80px_-12px_rgba(15,23,42,0.18),0_12px_32px_rgba(15,23,42,0.1),0_0_0_1px_rgba(15,23,42,0.04)]"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="min-h-0 flex-1 overflow-y-auto px-8 pb-6 pt-8">
-          <header className="mb-8">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-6 pt-[max(1rem,var(--safe-area-top))] [-webkit-overflow-scrolling:touch] sm:px-8 sm:pt-8">
+          <header className="mb-6 sm:mb-8">
             <p
               className="mb-2 text-[12px] font-semibold uppercase tracking-wider"
               style={{ color: "#94A3B8" }}
@@ -235,7 +241,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             </p>
             <h1
               id="create-case-title"
-              className="mb-2 text-[28px] font-semibold tracking-tight"
+              className="mb-2 break-words text-[clamp(1.375rem,4vw+0.35rem,1.75rem)] font-semibold tracking-tight"
               style={{ color: "#0F172A", lineHeight: 1.2 }}
             >
               Fall erstellen
@@ -489,12 +495,12 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
           </div>
           </div>
 
-          <footer className="shrink-0 border-t border-[#E8EDF4] bg-white/95 px-8 py-5 backdrop-blur-md shadow-[0_-12px_32px_-12px_rgba(15,23,42,0.07)]">
-            <div className="flex flex-wrap items-center justify-end gap-3">
+          <footer className="shrink-0 border-t border-[#E8EDF4] bg-white/95 px-4 pt-4 backdrop-blur-md shadow-[0_-12px_32px_-12px_rgba(15,23,42,0.07)] pb-[max(1.25rem,var(--safe-area-bottom))] sm:px-8 sm:pt-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <button
               type="button"
               disabled={busy}
-              className="h-11 min-h-[44px] rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] transition hover:bg-[#F8FAFC] hover:text-[#64748B] disabled:pointer-events-none disabled:opacity-45"
+              className="h-11 min-h-[44px] w-full rounded-[10px] px-5 text-[14px] font-medium text-[#94A3B8] transition hover:bg-[#F8FAFC] hover:text-[#64748B] disabled:pointer-events-none disabled:opacity-45 sm:w-auto"
               onClick={() => submit(true)}
             >
               {pendingKind === "draft" ? "Entwurf wird gespeichert…" : "Speichern als Entwurf"}
@@ -502,7 +508,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             <button
               type="button"
               disabled={busy}
-              className="h-11 min-h-[44px] rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] transition hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:pointer-events-none disabled:opacity-45"
+              className="h-11 min-h-[44px] w-full rounded-[10px] px-6 text-[15px] font-medium text-[#64748B] transition hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:pointer-events-none disabled:opacity-45 sm:w-auto"
               onClick={close}
             >
               Abbrechen
@@ -510,7 +516,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
             <button
               type="button"
               disabled={busy}
-              className="h-11 min-h-[44px] min-w-[200px] rounded-[11px] px-8 text-[15px] font-semibold text-white shadow-[0_4px_14px_rgba(47,128,237,0.35),0_1px_2px_rgba(15,23,42,0.06)] transition-[box-shadow,transform,opacity] duration-150 hover:shadow-[0_6px_20px_rgba(47,128,237,0.4)] active:scale-[0.99] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-55"
+              className="h-11 min-h-[44px] w-full rounded-[11px] px-8 text-[15px] font-semibold text-white shadow-[0_4px_14px_rgba(47,128,237,0.35),0_1px_2px_rgba(15,23,42,0.06)] transition-[box-shadow,transform,opacity] duration-150 hover:shadow-[0_6px_20px_rgba(47,128,237,0.4)] active:scale-[0.99] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-55 sm:min-w-[200px] sm:w-auto"
               style={{ background: "#2F80ED" }}
               onClick={() => submit(false)}
             >

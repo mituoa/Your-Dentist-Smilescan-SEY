@@ -164,7 +164,12 @@ export function TaskList({ tasks, canCheckOff, submissionId }: TaskListProps) {
                       )}
                     </p>
                     {errorById[task.id] && (
-                      <p className="mt-1.5 text-xs leading-5 text-danger">
+                      <p
+                        className="mt-1.5 text-xs leading-5 text-danger"
+                        role="status"
+                        aria-live="polite"
+                        aria-atomic="true"
+                      >
                         {errorById[task.id]}
                       </p>
                     )}

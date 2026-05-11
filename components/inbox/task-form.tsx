@@ -254,7 +254,16 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
         Als wichtig markieren
       </label>
 
-      {error && <p className="text-sm leading-5 text-danger">{error}</p>}
+      {error && (
+        <p
+          className="text-sm leading-5 text-danger"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {error}
+        </p>
+      )}
     </form>
   );
 }

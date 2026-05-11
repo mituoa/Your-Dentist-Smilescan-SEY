@@ -162,24 +162,67 @@ export function ClinicalInboxSkeleton() {
   );
 }
 
-/** Ladezustand `/inbox/[id]`: statische Gerüste, an Detail-Header/Canvas angelehnt (Punkt 6). */
+/** Ladezustand `/inbox/[id]`: statische Balken, an **Split-Layout** (Haupt + Hilfsspalte ab `lg`) und Foto-Höhe (~220px) angelehnt — Punkt 6. */
 export function ClinicalInboxDetailSkeleton() {
+  const padX = "clamp(20px, 4vw, 56px)";
+  const headerPad = { padding: `clamp(28px, 5vw, 48px) ${padX} 0` };
+
   return (
-    <section
-      className="flex h-full min-h-[280px] flex-col overflow-hidden"
+    <div
+      className="flex h-full min-h-0 w-full flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-hidden lg:flex-row"
       style={{ background: "#F7F9FC" }}
       aria-busy="true"
       aria-label="Fall wird geladen"
+      role="status"
     >
-      <div className="shrink-0 border-b border-[rgba(15,23,42,0.06)] bg-white/90 px-6 py-8 md:px-10">
-        {inboxBarStatic("mb-3 h-7 max-w-lg")}
-        {inboxBarStatic("h-2.5 w-40")}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC]">
+        <div
+          className="z-[6] shrink-0 bg-white max-lg:sticky max-lg:top-0 max-lg:shadow-[0_1px_0_rgba(15,23,42,0.06)] lg:static lg:shadow-none"
+          style={headerPad}
+        >
+          {inboxBarStatic("mb-2 h-6 max-w-[min(100%,20rem)] sm:h-7")}
+          {inboxBarStatic("h-2.5 w-44 max-w-[85%]")}
+        </div>
+        <div
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-white [-webkit-overflow-scrolling:touch] max-lg:scroll-pb-8"
+          style={{
+            padding: `24px ${padX} clamp(72px, 18vw, 120px)`,
+          }}
+        >
+          <div
+            className="max-w-xl rounded-xl bg-[#EEF2F6]"
+            style={{ height: "min(220px, 42vh)", minHeight: "160px" }}
+            aria-hidden
+          />
+          <div className="mt-8 max-w-xl space-y-2.5">
+            {inboxBarStatic("h-2.5 w-full")}
+            {inboxBarStatic("h-2.5 w-[94%]")}
+            {inboxBarStatic("h-2.5 w-[72%]")}
+          </div>
+          <div className="mt-10 max-w-[520px] rounded-xl bg-[#F8FAFC] p-5">
+            {inboxBarStatic("mb-1 h-3 w-44")}
+            {inboxBarStatic("mb-4 h-2.5 w-full max-w-sm")}
+            {inboxBarStatic("mb-3 h-11 w-full max-w-md rounded-[9px]")}
+            {inboxBarStatic("mb-3 h-10 w-full max-w-md rounded-[9px]")}
+            {inboxBarStatic("h-8 w-[200px] rounded-md")}
+          </div>
+        </div>
       </div>
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-white px-6 py-8 md:px-10">
-        {inboxBarStatic("h-44 max-w-xl rounded-xl")}
-        {inboxBarStatic("h-20 max-w-xl rounded-lg")}
-      </div>
-    </section>
+
+      <aside
+        className="hidden min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] pb-[max(12px,env(safe-area-inset-bottom))] lg:flex lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0 lg:pb-0"
+        aria-hidden
+      >
+        <div
+          className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#E5E7EB] bg-white"
+          style={{ margin: "16px 14px 20px", padding: "16px 14px" }}
+        >
+          {inboxBarStatic("mb-4 h-2 w-28")}
+          {inboxBarStatic("mb-4 h-32 w-full rounded-md")}
+          {inboxBarStatic("h-11 w-full rounded-[10px]")}
+        </div>
+      </aside>
+    </div>
   );
 }
 
