@@ -34,9 +34,11 @@ function toServerUrgency(ui: UrgencyUi | null): PracticeCaseUrgency {
 
 interface CreateCaseClientProps {
   workspaceId: string;
+  /** Ziel nach Abbrechen / Tap außerhalb (kommt von Server aus `?from=`). */
+  cancelHref: string;
 }
 
-export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
+export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientProps) {
   const router = useRouter();
   const birthRef = useRef<SmartDateInputHandle>(null);
   const [isPending, startTransition] = useTransition();
@@ -57,7 +59,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
   const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
 
   const close = () => {
-    router.push("/inbox");
+    router.push(cancelHref);
   };
 
   const fileKey = (f: File) => `${f.name}-${f.size}-${f.lastModified}`;
@@ -259,7 +261,7 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
     <>
       {/* Nur Mobile: Dim + Tap außerhalb schließt — Desktop nutzt Shell-Hintergrund (#F7F9FC), kein Modal-Canvas */}
       <div
-        className="create-case-backdrop pointer-events-none fixed inset-0 z-[998] hidden bg-slate-900/55 backdrop-blur-md motion-reduce:backdrop-blur-sm max-md:block"
+        className="create-case-backdrop pointer-events-none fixed inset-0 z-[998] hidden bg-slate-900/45 backdrop-blur-md motion-reduce:backdrop-blur-sm max-md:block"
         aria-hidden
       />
       <button
@@ -269,12 +271,12 @@ export function CreateCaseClient({ workspaceId }: CreateCaseClientProps) {
         onClick={close}
       />
 
-      <div className="pointer-events-none max-md:fixed max-md:inset-0 max-md:z-[1000] max-md:flex max-md:min-h-0 max-md:flex-col max-md:overflow-x-hidden max-md:overflow-y-hidden max-md:overscroll-y-contain max-md:justify-end max-md:px-[max(0.75rem,var(--safe-area-left))] max-md:pr-[max(0.75rem,var(--safe-area-right))] max-md:pb-[max(0.35rem,var(--safe-area-bottom))] max-md:pt-[max(0.35rem,var(--safe-area-top))] md:pointer-events-auto md:relative md:z-0 md:mx-auto md:flex md:min-h-0 md:w-full md:max-w-[760px] md:flex-1 md:flex-col md:overflow-visible md:px-6 md:py-8 lg:px-10 lg:py-10">
+      <div className="pointer-events-none max-md:fixed max-md:inset-0 max-md:z-[1000] max-md:flex max-md:min-h-0 max-md:flex-col max-md:overflow-x-hidden max-md:overflow-y-hidden max-md:overscroll-y-contain max-md:justify-end max-md:px-[max(0.75rem,var(--safe-area-left))] max-md:pr-[max(0.75rem,var(--safe-area-right))] max-md:pb-[max(0.5rem,var(--safe-area-bottom))] max-md:pt-[max(0.5rem,var(--safe-area-top))] md:pointer-events-auto md:relative md:z-0 md:mx-auto md:flex md:min-h-0 md:w-full md:max-w-[760px] md:flex-1 md:flex-col md:overflow-visible md:px-5 md:py-10 lg:px-8 lg:py-12">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-case-title"
-          className="create-case-modal pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden bg-white max-md:max-h-[min(90dvh,50rem)] max-md:flex-none max-md:rounded-[22px] max-md:border max-md:border-slate-200/65 max-md:shadow-[0_20px_60px_-18px_rgba(15,23,42,0.22),0_0_0_1px_rgba(15,23,42,0.04)] md:max-h-none md:overflow-visible md:rounded-2xl md:border md:border-slate-200/70 md:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_40px_-12px_rgba(15,23,42,0.08)]"
+          className="create-case-modal pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden bg-white max-md:max-h-[min(90dvh,50rem)] max-md:flex-none max-md:rounded-[24px] max-md:border max-md:border-slate-200/55 max-md:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.18),0_0_0_1px_rgba(15,23,42,0.035)] md:max-h-none md:overflow-visible md:rounded-[26px] md:border md:border-slate-200/45 md:bg-gradient-to-b md:from-white md:to-[#FAFBFC]/50 md:shadow-[0_8px_36px_-14px_rgba(15,23,42,0.07),0_0_0_1px_rgba(15,23,42,0.028)]"
           onClick={(e) => e.stopPropagation()}
         >
           <h1 id="create-case-title" className="sr-only">

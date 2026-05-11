@@ -94,6 +94,14 @@ import { markSubmissionSeen } from "./actions";
  * `dynamic = "force-dynamic"` im Inbox-Layout — kein statischer Cache der Shell über Mandanten.
  * **Command:** `InboxAssistHydration` setzt Kontext bei Unmount zurück — kein Nachziehen fremder
  * Fälle in die Leiste nach Navigation.
+ *
+ * **Punkt 11 — MVP / Pilot (`/inbox/[id]`):** **Im Scope:** Triage (Fotos, Notiz, **vom Team gewählter**
+ * Zeitraum), **interne** Arbeitsschritte, **Hilfe** zur Patienten-Rückmeldung (**nur Entwurf + Kopie**;
+ * Terminlink **nur** nach explizitem Klick durch Ärztin/Arzt). **Command:** Textbausteine & Navigation,
+ * **kein** Versand, **keine** KI-Einordnung. **Bewusst nicht im MVP:** vollständige Patientenakte,
+ * CRM-/Supportdesk-Postfach, Audit-Log-Produkt, automatisierte klinische Bewertung, Messaging-Pipeline,
+ * KI-Autonomie — s. auch `layout.tsx` Punkt 12. **Pilot-Reife:** keine toten Kernpfade; leere Zustände
+ * sachlich (Punkt 7); Erwartung „kein Auto-Versand“ mehrfach klar (Hilfsspalte + Entwurf-Bereich).
  */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;

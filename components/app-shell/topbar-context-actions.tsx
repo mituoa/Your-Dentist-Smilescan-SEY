@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 
+import { createCaseFromQuery } from "@/lib/create-case-return";
+
 type ActionVariant = "both" | "newCase" | "newTask" | "none";
 
 function resolveVariant(pathname: string): ActionVariant {
@@ -46,10 +48,11 @@ function NeueAufgabeLink() {
   );
 }
 
-function NeuerFallLink() {
+function NeuerFallLink({ pathname }: { pathname: string }) {
+  const from = createCaseFromQuery(pathname);
   return (
     <Link
-      href="/create-case"
+      href={`/create-case?from=${from}`}
       title="Neuer Fall"
       className="inline-flex h-10 items-center gap-2 rounded-xl px-3 text-[13px] font-medium text-white transition-all hover:opacity-95 sm:px-4 md:px-5 md:text-[14px]"
       style={{
@@ -74,7 +77,7 @@ export function TopbarContextActions() {
   return (
     <div className="flex h-10 shrink-0 items-center gap-2 md:gap-3">
       {(variant === "both" || variant === "newTask") && <NeueAufgabeLink />}
-      {(variant === "both" || variant === "newCase") && <NeuerFallLink />}
+      {(variant === "both" || variant === "newCase") && <NeuerFallLink pathname={pathname} />}
     </div>
   );
 }

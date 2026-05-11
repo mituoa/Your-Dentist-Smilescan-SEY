@@ -153,6 +153,9 @@ export function FollowUpMessageDraft({
           data-tracker-draft
         />
       </div>
+      <p className="mt-2 text-[11px] leading-snug text-slate-500 md:text-[12px]">
+        Nur zum Kopieren — SmileScan versendet nichts automatisch.
+      </p>
 
       <div>
         <p className="mb-3 text-[12px] font-medium" style={{ color: "#94A3B8", letterSpacing: "0.06em" }}>

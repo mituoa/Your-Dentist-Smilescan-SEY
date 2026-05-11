@@ -34,6 +34,8 @@ const sectionPad = "px-4 py-5 sm:px-5 sm:py-6";
  * zur Triage-Mitte. Kein Postfach, kein Chat-Verlauf, kein CRM-Case-Workspace.
  * **Punkt 9 — Mobile:** Außenpadding enger auf kleinen Screens; inneres Scroll mit `overscroll-y-contain`,
  * **`scroll-padding-bottom`** + Safe-Area-Inset unten — Tastatur/Entwurf weniger abgeschnitten.
+ * **Punkt 11 — MVP:** Überschriften nennen **Entwurf/Kopie** explizit; Stammdaten-Block ohne
+ * „Plattform-Kontext“-Wording.
  */
 export function SubmissionActions({
   submissionId,
@@ -59,14 +61,14 @@ export function SubmissionActions({
           <div id="tracker-korrespondenz" className={`scroll-mt-6 border-b border-slate-100 ${sectionPad}`}>
             <div className="mb-4 space-y-1.5">
               <h2 className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-                Korrespondenz
+                Text & Entwurf
               </h2>
               <p className="text-[13px] font-semibold leading-snug tracking-tight text-slate-800">
                 Rückmeldung an den Patienten
               </p>
               <p className="text-[12px] leading-relaxed text-slate-600">
-                Vorlagen und Entwurf — in Ihrem Kanal (Telefon, Praxis-SMS, E-Mail) manuell nutzen.
-                Kein automatischer Versand aus SmileScan.
+                Vorlagen und Entwurf hier kopieren — in Ihrem Kanal (Telefon, Praxis-SMS, E-Mail)
+                selbst versenden. SmileScan versendet nichts automatisch.
               </p>
             </div>
             <FollowUpMessageDraft
@@ -93,7 +95,7 @@ export function SubmissionActions({
 
           <div className={sectionPad}>
             <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-              Fallkontext
+              Stammdaten & Status
             </h2>
             <SubmissionMeta
               patientName={patientName}
@@ -109,11 +111,11 @@ export function SubmissionActions({
               photoCount={photoCount}
             />
             <p className="mt-6 text-[12px] leading-relaxed text-slate-500">
-              Teamaufgaben in{" "}
+              Zugewiesene Teamaufgaben:{" "}
               <Link href="/relay" className="font-medium text-[#2563EB] underline-offset-2 hover:underline">
                 Relay
-              </Link>
-              .
+              </Link>{" "}
+              (separater Arbeitsbereich, kein Patienten-Postfach).
             </p>
           </div>
         </div>

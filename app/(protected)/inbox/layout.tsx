@@ -66,6 +66,7 @@ function SearchFallback() {
  * **einfache Suche** (`q`, Name/E-Mail), **ein Workspace** ohne Switch, **keine Pagination** auf
  * der Liste, **kein** Analytics-/Priorisierungs-/Chat-Produkt. Sidebar = volle Liste bei Suche =
  * bewusster Pilot (Punkt 2); für Praxis-Pilot **reif**, nicht als Plattform-Inbox positioniert.
+ * **Detail** (`/inbox/[id]`): Triage + Entwurf/Kopie + Terminlink nach Klick — s. `page.tsx` Punkt 11.
  *
  * **Punkt 12 — Nice / Future / Non-MVP (Vertrag):**
  * - **Nice:** E2E/Smoke für `/inbox` + `q`, Debounce-/Perf-Feinschliff, A11y-/Spacing-Polish, Runbooks
@@ -128,7 +129,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
           </div>
           {role === "doctor" ? (
             <Link
-              href="/create-case"
+              href="/create-case?from=inbox"
               title="Neuer Fall"
               aria-label="Neuer Fall anlegen"
               className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-[10px] text-white transition hover:opacity-95 md:h-10 md:w-10"

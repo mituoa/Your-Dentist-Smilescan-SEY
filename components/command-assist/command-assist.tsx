@@ -8,6 +8,7 @@ import {
   buildAssistQuickDraft,
   type AssistQuickActionId,
 } from "@/lib/clinical/message-templates";
+import { createCaseFromQuery } from "@/lib/create-case-return";
 import {
   assistContextQuickActions,
   detectAssistZone,
@@ -18,11 +19,14 @@ import { cn } from "@/lib/utils";
 import { useAssistCaseOptional } from "./assist-shell";
 
 /** Navigation — nur Seiten öffnen, keine Serveraktion. */
-function suggestRoutes(text: string): { label: string; href: string }[] {
+function suggestRoutes(text: string, pathname: string): { label: string; href: string }[] {
   const t = text.toLowerCase();
   const out: { label: string; href: string }[] = [];
   if (/(neuer|neue)\s+fall|fall\s+anlegen|patient.*fall/.test(t)) {
-    out.push({ label: "Neuer Fall", href: "/create-case" });
+    out.push({
+      label: "Neuer Fall",
+      href: `/create-case?from=${createCaseFromQuery(pathname)}`,
+    });
   }
   if (/inbox|tracker|einsendung|posteingang/.test(t)) {
     out.push({ label: "Posteingang", href: "/inbox" });
@@ -66,7 +70,7 @@ const INBOX_QUICK: { id: AssistQuickActionId; label: string }[] = [
   { id: "invite_today", label: "Einladung heute (Entwurf)" },
   { id: "pain_followup", label: "Rückfrage Schmerzen (Entwurf)" },
   { id: "appointment_link_text", label: "Terminlink-Text" },
-  { id: "polish_placeholder", label: "Wortlaut anpassen" },
+  { id: "polish_placeholder", label: "Formulierung (Entwurf)" },
 ];
 
 /** Sheet — schwebend, klinisch ruhig, iOS-nah. */
@@ -115,12 +119,12 @@ function inboxCaseExtraDrafts(patientName: string, concernLine: string | null): 
   return [
     {
       id: "case_summary",
-      label: "Fall zusammenfassen",
+      label: "Interne Stichworte (Entwurf)",
       text:
         `Interne Kurzfassung (nicht zum Versand):\n\n` +
         `Patient: ${name}\n` +
         `Anliegen: ${concernLine?.trim() || "[kurz aus Einsendung]"}\n\n` +
-        `Kernpunkte:\n• \n• \n\nEmpfehlung / nächster Schritt:\n`,
+        `Kernpunkte:\n• \n• \n\nEinordnung / nächster Praxisschritt (intern):\n`,
     },
     {
       id: "patient_contact",
@@ -138,7 +142,9 @@ function placeholderForZone(
   zone: ReturnType<typeof detectAssistZone>,
   hasInboxCase: boolean
 ): string {
-  if (hasInboxCase) return "Befehl oder Diktat — z. B. Rückfrage-Entwurf, Terminlink …";
+  if (hasInboxCase) {
+    return "Notiz, Navigation oder Entwurf — nichts wird automatisch versendet";
+  }
   switch (zone) {
     case "dashboard":
       return "Befehl — z. B. Überblick, Aufgabe, neuer Fall …";
@@ -149,7 +155,7 @@ function placeholderForZone(
     case "settings":
       return "Befehl — z. B. Einstellung, Rollen …";
     case "inbox":
-      return "Befehl — z. B. Triage, Terminvorbereitung …";
+      return "Kurz eingeben — z. B. Triage, Terminvorbereitung (nur Hilfe, kein Versand) …";
     default:
       return "Befehl — Posteingang, Relay, Journals …";
   }
@@ -298,7 +304,7 @@ export function CommandAssist() {
 
   if (hidden) return null;
 
-  const routeHints = suggestRoutes(text);
+  const routeHints = suggestRoutes(text, pathname);
   const deepHints = suggestInboxDeepLinks(text, inboxCase?.submissionId ?? null);
   const hints = [...deepHints, ...routeHints].slice(0, 5);
 

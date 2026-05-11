@@ -9,6 +9,7 @@ type InboxAssistHydrationProps = Omit<InboxAssistCasePayload, "kind">;
 /**
  * Aktiver Fall für **Command** (systemweite Leiste): liefert Kontext für Entwürfe/Navigation —
  * **kein** automatischer Versand, keine eigene Nachrichten-Pipeline (s. `command-assist.tsx`).
+ * **Punkt 11 — MVP:** nur Hilfstexte/Links; keine KI- oder Postfach-Semantik.
  */
 export function InboxAssistHydration({
   submissionId,
