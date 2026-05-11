@@ -1,5 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
+/** Einladung laden (nur lesen) für `/accept-invite` — kein Join, kein Statuswechsel. */
+
 export type LoadedInvitation = {
   id: string;
   email: string;
@@ -29,19 +31,22 @@ function workspaceNameFromRow(row: InvitationRow): string {
   return w.name ?? "Unbekannt";
 }
 
-/** Lädt Einladung inkl. Praxisname (Admin). */
+/** Lädt Einladung inkl. Praxisname (Admin). Ungültiges Token-Format → kein DB-Roundtrip. */
 export async function getInvitationByToken(
   token: string
 ): Promise<LoadedInvitation | null> {
+  const t = (token ?? "").trim();
+  if (!t || !/^[a-f0-9]{64}$/i.test(t)) return null;
+
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("team_invitations")
     .select("id, email, workspace_id, status, expires_at, token, role, workspaces(name)")
-    .eq("token", token)
+    .eq("token", t)
     .maybeSingle();
 
   if (error) {
-    console.error("[getInvitationByToken]", error);
+    console.error("[getInvitationByToken] event=invite_query_failed");
     return null;
   }
 
@@ -52,7 +57,7 @@ export async function getInvitationByToken(
 
   return {
     id: row.id,
-    email: row.email,
+    email: String(row.email ?? "").trim(),
     workspaceId: row.workspace_id,
     workspaceName: workspaceNameFromRow(row),
     status: row.status,
@@ -64,10 +69,12 @@ export async function getInvitationByToken(
 
 /**
  * Prüft ob bereits ein Auth-User mit dieser E-Mail existiert (Admin listUsers, paginiert).
+ * Hinweis: O(n) über Seiten — bei sehr großen User-Basen ggf. durch DB-/RPC-Lookup ersetzen.
  */
 export async function findAuthUserIdByEmail(email: string): Promise<string | null> {
   const admin = createAdminClient();
   const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
   let page = 1;
   const perPage = 200;
   const maxPages = 25;
@@ -75,7 +82,7 @@ export async function findAuthUserIdByEmail(email: string): Promise<string | nul
   for (let i = 0; i < maxPages; i++) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
     if (error) {
-      console.error("[findAuthUserIdByEmail]", error);
+      console.error("[findAuthUserIdByEmail] event=list_users_failed");
       return null;
     }
     const users = data.users;

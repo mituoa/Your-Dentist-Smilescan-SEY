@@ -24,6 +24,7 @@ export async function resolveMiddlewareAuthenticatedHomeUrl(
     .from("workspace_members")
     .select("role")
     .eq("user_id", user.id)
+    .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 

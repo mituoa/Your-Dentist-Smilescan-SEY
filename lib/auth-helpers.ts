@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
   getAdminEmailsAllowlist,
@@ -75,13 +75,15 @@ export async function requireUser() {
 /**
  * Workspace-Zeile für eine bekannte User-ID (eine PostgREST-Runde, kein zweites getUser).
  * Für Root-Redirect und `getCurrentWorkspace` gemeinsam genutzt.
+ * Optional `client`: gleiche Supabase-Instanz wie `getUser()` (z. B. Route-Handler-Client nach OAuth).
  */
-export async function getWorkspaceMembershipForUserId(userId: string) {
-  const supabase = await createClient();
+export async function getWorkspaceMembershipForUserId(userId: string, client?: SupabaseClient) {
+  const supabase = client ?? (await createClient());
   const { data, error } = await supabase
     .from("workspace_members")
     .select("workspace_id, role, workspaces(id, name, slug, approved_at)")
     .eq("user_id", userId)
+    .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 

@@ -369,6 +369,11 @@ export type AcceptInvitationResult =
     }
   | { ok: false; error: string; code?: string };
 
+/**
+ * Team-Einladung einlösen: Mitgliedschaft anlegen, Invite auf `accepted` setzen.
+ * Idempotent, wenn der Nutzer bereits Mitglied ist. Bei parallelem Insert (23505) wird die
+ * Membership verifiziert, bevor der Invite geschlossen wird.
+ */
 export async function acceptInvitation(
   token: string,
   options?: AcceptInvitationOptions
@@ -376,14 +381,23 @@ export async function acceptInvitation(
   const mode = options?.mode ?? "accept_page";
   const admin = createAdminClient();
 
+  const tokenNorm = (token ?? "").trim();
+  if (!tokenNorm || !/^[a-f0-9]{64}$/i.test(tokenNorm)) {
+    return {
+      ok: false,
+      error: "Einladung nicht gefunden oder ungültig.",
+      code: "INVALID_TOKEN",
+    };
+  }
+
   const { data: invite, error: loadErr } = await admin
     .from("team_invitations")
     .select("id, workspace_id, email, role, status, expires_at, token")
-    .eq("token", token)
+    .eq("token", tokenNorm)
     .maybeSingle();
 
   if (loadErr) {
-    console.error("[acceptInvitation]", loadErr);
+    console.error("[acceptInvitation] event=invite_load_failed");
     return { ok: false, error: "Einladung konnte nicht geladen werden." };
   }
 
@@ -404,11 +418,20 @@ export async function acceptInvitation(
   }
 
   let userId: string;
-  const inviteEmail = invite.email as string;
+  const inviteEmail = String(invite.email ?? "").trim();
+  if (!inviteEmail) {
+    return {
+      ok: false,
+      error: "Einladung ist ungültig.",
+      code: "INVALID_INVITE_EMAIL",
+    };
+  }
+  const inviteEmailLower = inviteEmail.toLowerCase();
+  const normalizedRole: "doctor" | "team" = invite.role === "doctor" ? "doctor" : "team";
 
   if (mode === "post_signup") {
     const reg = options?.registeredEmail?.trim().toLowerCase();
-    if (!reg || reg !== inviteEmail.toLowerCase()) {
+    if (!reg || reg !== inviteEmailLower) {
       return {
         ok: false,
         error: "E-Mail passt nicht zur Einladung.",
@@ -434,11 +457,16 @@ export async function acceptInvitation(
     const supabase = await createClient();
     const {
       data: { user },
+      error: userErr,
     } = await supabase.auth.getUser();
+    if (userErr) {
+      console.error("[acceptInvitation] event=get_user_failed");
+      return { ok: false, error: "Nicht angemeldet.", code: "NOT_AUTHENTICATED" };
+    }
     if (!user?.id || !user.email) {
       return { ok: false, error: "Nicht angemeldet.", code: "NOT_AUTHENTICATED" };
     }
-    if (user.email.toLowerCase() !== inviteEmail.toLowerCase()) {
+    if (user.email.trim().toLowerCase() !== inviteEmailLower) {
       return {
         ok: false,
         error: "E-Mail stimmt nicht mit der Einladung überein.",
@@ -465,7 +493,7 @@ export async function acceptInvitation(
       success: true,
       alreadyMember: true,
       workspaceId: invite.workspace_id,
-      role: invite.role,
+      role: normalizedRole,
     };
   }
 
@@ -487,11 +515,22 @@ export async function acceptInvitation(
   const { error: memberError } = await admin.from("workspace_members").insert({
     workspace_id: invite.workspace_id,
     user_id: userId,
-    role: invite.role,
+    role: normalizedRole,
   });
 
-  if (memberError && memberError.code !== "23505") {
-    console.error("[acceptInvitation]", memberError);
+  if (memberError?.code === "23505") {
+    const { data: verifyMember } = await admin
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", invite.workspace_id)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!verifyMember) {
+      console.error("[acceptInvitation] event=duplicate_insert_no_membership");
+      return { ok: false, error: "Beitritt fehlgeschlagen.", code: "JOIN_RACE" };
+    }
+  } else if (memberError) {
+    console.error("[acceptInvitation] event=member_insert_failed", memberError.code ?? "unknown");
     return { ok: false, error: "Beitritt fehlgeschlagen." };
   }
 
@@ -504,6 +543,6 @@ export async function acceptInvitation(
     ok: true,
     success: true,
     workspaceId: invite.workspace_id,
-    role: invite.role,
+    role: normalizedRole,
   };
 }

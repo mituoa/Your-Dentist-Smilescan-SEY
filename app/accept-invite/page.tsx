@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { workspaceRoleToHomePath } from "@/lib/auth-app-home";
 import {
   findAuthUserIdByEmail,
   getInvitationByToken,
@@ -9,6 +10,28 @@ import {
   AcceptInviteForm,
   type AcceptInviteScenario,
 } from "./AcceptInviteForm";
+
+/**
+ * Team-Einladung annehmen (Pilot-/Enterprise-Vertrag)
+ *
+ * **Zweck (nur Lesen + Szenario):** Einladung per Token aus `team_invitations` laden, fristig/Status prüfen,
+ * Nutzerkontext (Session, E-Mail, bestehende Memberships) auswerten — dann **eine** passende Oberfläche
+ * (`AcceptInviteForm`). Es wird **kein** Workspace-Join und **kein** Invite-Verbrauch auf dieser Seite ausgeführt;
+ * das passiert ausschließlich serverseitig in {@link acceptInvitation} beim expliziten Klick „Einladung annehmen“
+ * (Szenario **C**).
+ *
+ * **Szenarien (Kurzcodes = stabile Props):**
+ * - **invalid** — ungültiger Link, abgelaufen, oder nicht mehr `pending` (kein Join).
+ * - **A** — nicht eingeloggt, noch kein Auth-Konto zur Einladungs-E-Mail → Registrierung.
+ * - **B** — nicht eingeloggt, Konto existiert → Login mit Invite-Kontext.
+ * - **C** — eingeloggt, E-Mail passt, noch kein Mitglied dieser Praxis, sonst nirgends Mitglied → **einziger Join-Pfad**.
+ * - **D** — eingeloggt, andere E-Mail → Abmelden, dann mit richtiger E-Mail erneut öffnen.
+ * - **E** — eingeloggt, E-Mail passt, aber bereits anderem Workspace zugeordnet (Single-Workspace-Politik).
+ * - **F** — bereits Mitglied dieses Workspaces → ruhiger Erfolg, **kein** erneutes `acceptInvitation`.
+ *
+ * Bewusst **nicht** hier: Marketing, SSO/MFA, Onboarding-Wizard, freie Redirect-Ziele — nur kontrollierte Links
+ * zu Login/Register mit Invite-Query.
+ */
 
 interface AcceptInvitePageProps {
   searchParams: Promise<{ token?: string }>;
@@ -43,7 +66,7 @@ export default async function AcceptInvitePage({
         scenario="invalid"
         inviteEmail=""
         practiceName=""
-        invalidReason="Einladung nicht gefunden oder Token ungültig."
+        invalidReason="Diese Einladung wurde nicht gefunden oder der Link ist ungültig."
       />
     );
   }
@@ -132,6 +155,7 @@ export default async function AcceptInvitePage({
       practiceName={invite.workspaceName}
       sessionEmail={sessionEmail}
       otherWorkspaceName={otherWorkspaceName}
+      inviteHomePath={scenario === "F" ? workspaceRoleToHomePath(invite.role) : undefined}
     />
   );
 }

@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Oberfläche für Team-Einladungen. Szenario-Logik und Invite-Lesen liegen in `app/accept-invite/page.tsx`;
+ * Workspace-Beitritt nur per Server-Action {@link acceptInvitation} in Szenario **C** (expliziter Klick).
+ *
+ * Szenario-Codes A–F sind bewusst kurz (Props-Stabilität); Bedeutung siehe Seiten-JSDoc.
+ */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
@@ -18,6 +24,8 @@ export type AcceptInviteFormProps = {
   practiceName: string;
   sessionEmail?: string;
   otherWorkspaceName?: string;
+  /** Nach „bereits Mitglied“: rollenkorrekter App-Einstieg (Doctor vs Team). */
+  inviteHomePath?: "/dashboard" | "/my-tasks";
   invalidReason?: string;
 };
 
@@ -38,6 +46,7 @@ export function AcceptInviteForm({
   practiceName,
   sessionEmail,
   otherWorkspaceName,
+  inviteHomePath,
   invalidReason,
 }: AcceptInviteFormProps) {
   const router = useRouter();
@@ -53,7 +62,17 @@ export function AcceptInviteForm({
     startTransition(async () => {
       const result = await acceptInvitation(token);
       if (!result.ok) {
-        setActionError(result.error);
+        if (
+          result.code === "INVALID_STATUS" ||
+          result.code === "NOT_FOUND" ||
+          result.code === "INVALID_TOKEN"
+        ) {
+          setActionError(
+            "Diese Einladung ist nicht mehr aktiv — vermutlich wurde sie bereits angenommen. Bitte die Seite neu laden oder in der App fortfahren."
+          );
+        } else {
+          setActionError(result.error);
+        }
         return;
       }
       router.push(result.role === "doctor" ? "/dashboard" : "/my-tasks");
@@ -245,11 +264,11 @@ export function AcceptInviteForm({
                   Bereits Mitglied
                 </h1>
                 <p className="text-sm leading-relaxed text-slate-600">
-                  Sie sind bereits Mitglied dieses Workspaces.
+                  Sie sind bereits Mitglied dieser Praxis und können die Einladung nicht erneut annehmen.
                 </p>
               </div>
-              <Link href="/dashboard" className={`group ${primaryCtaClass}`}>
-                Zum Dashboard
+              <Link href={inviteHomePath ?? "/dashboard"} className={`group ${primaryCtaClass}`}>
+                Weiter zur App
                 <ArrowRight
                   className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
                   aria-hidden
