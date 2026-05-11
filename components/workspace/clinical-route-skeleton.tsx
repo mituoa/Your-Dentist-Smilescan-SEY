@@ -38,6 +38,7 @@ export function ClinicalMinimalSkeleton() {
 }
 
 /**
+ * @deprecated Dashboard nutzt wieder das historische `loading.tsx`-Gerüst; Export kann entfernt werden, wenn ungenutzt.
  * Ladegerüst ausschließlich für `/dashboard` — spiegelt **Rahmen und Abstände** der echten Seite
  * (keine KPI-Ziffern, keine Chronik-Inhalte): reduziert Layout-Sprung und wirkt sachlich statt
  * „Analytics-Dashboard-Platzhalter“. **Mobile:** gleiche `min-w-0`/`gap`-Staffel und Karten-Padding wie
