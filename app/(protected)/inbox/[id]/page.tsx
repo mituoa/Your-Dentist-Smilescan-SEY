@@ -391,8 +391,8 @@ export default async function InboxDetailPage({
               <div
                 style={{
                   background: "#F8FAFC",
-                  padding: "20px",
-                  borderRadius: "12px",
+                  padding: "16px",
+                  borderRadius: "10px",
                 }}
               >
                 <TrackerPrimaryActions />
@@ -408,7 +408,7 @@ export default async function InboxDetailPage({
 
         {/* Hilfsspalte (Entwürfe/Terminlink) — Figma: schmale sekundäre Spalte, gleiche Canvas-Farbe */}
         <aside
-          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[#E5E7EB] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-lg:min-h-0 lg:w-[min(100%,380px)] lg:max-w-[400px] lg:border-l lg:border-t-0 lg:pb-0"
+          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-lg:min-h-0 lg:w-[min(100%,320px)] lg:max-w-[340px] lg:border-l lg:border-t-0 lg:pb-0"
         >
           <SubmissionActions
             submissionId={submission.id}

@@ -78,10 +78,10 @@ export function SubmissionMeta({
       : "Geöffnet";
 
   const lab = { color: "#94A3B8", fontSize: "12px", fontWeight: 500, letterSpacing: "0.02em" } as const;
-  const val = { color: "#1E293B", fontSize: "15px", lineHeight: 1.55, fontWeight: 500 } as const;
+  const val = { color: "#1E293B", fontSize: "14px", lineHeight: 1.5, fontWeight: 500 } as const;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div>
         <div style={lab}>Status</div>
         <div className="mt-1" style={val}>

@@ -34,7 +34,7 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
     >
       <div
         className={cn(
-          "flex min-h-0 min-w-0 shrink-0 flex-col overflow-x-hidden border-b border-[rgba(15,23,42,0.06)] md:max-h-none md:w-[40%] md:max-w-[480px] md:min-w-[380px] md:flex-none md:overflow-y-hidden md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]",
+          "flex min-h-0 min-w-0 shrink-0 flex-col overflow-x-hidden border-b border-[rgba(15,23,42,0.06)] md:max-h-none md:w-[min(40%,420px)] md:max-w-[440px] md:min-w-[300px] md:flex-none md:overflow-y-hidden md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]",
           !isInboxIndex && "max-md:hidden",
           isInboxIndex &&
             (showMobileIndexDetail

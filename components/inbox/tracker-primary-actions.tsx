@@ -36,7 +36,7 @@ export function TrackerPrimaryActions() {
           fontSize: "15px",
           fontWeight: 600,
           letterSpacing: "-0.01em",
-          marginBottom: "12px",
+          marginBottom: "10px",
           boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
         }}
       >
@@ -59,7 +59,7 @@ export function TrackerPrimaryActions() {
           fontSize: "15px",
           fontWeight: 500,
           letterSpacing: "-0.01em",
-          marginBottom: "8px",
+          marginBottom: "10px",
         }}
       >
         <MessageSquare className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
@@ -80,7 +80,7 @@ export function TrackerPrimaryActions() {
           fontSize: "14px",
           fontWeight: 400,
           letterSpacing: "-0.005em",
-          marginBottom: "16px",
+          marginBottom: "10px",
           opacity: 0.75,
         }}
       >

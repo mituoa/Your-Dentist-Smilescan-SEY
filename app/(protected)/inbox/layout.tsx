@@ -122,24 +122,24 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
 
   const list = (
     <>
-      <div className="px-4 pt-6 pb-0 sm:px-6 md:px-10 md:pt-12">
+      <div className="px-[clamp(16px,3vw,40px)] pt-5 pb-0 sm:pt-6 md:pt-10 md:pb-0">
         <div
-          style={{ marginBottom: "24px" }}
+          style={{ marginBottom: "20px" }}
           className="flex min-w-0 items-start justify-between gap-4"
         >
           <div className="min-w-0 flex-1 pr-2">
             <h1
-              className="text-[18px] md:text-[17px]"
+              className="text-[17px]"
               style={{
                 color: "#0F172A",
                 fontWeight: 600,
                 letterSpacing: "-0.015em",
-                marginBottom: "8px",
+                marginBottom: "6px",
               }}
             >
               Einsendungen
             </h1>
-            <p className="text-[15px] md:text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
+            <p className="text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
               {listFailed
                 ? "Abruf derzeit nicht möglich"
                 : `${openCaseCount} offene ${openCaseCount === 1 ? "Fall" : "Fälle"}`}
@@ -168,7 +168,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
         </Suspense>
       </div>
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-[max(24px,env(safe-area-inset-bottom))] pt-6 [-webkit-overflow-scrolling:touch] md:px-3 md:pb-4 md:pt-8">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-[clamp(12px,2vw,16px)] pb-[max(20px,env(safe-area-inset-bottom))] pt-5 [-webkit-overflow-scrolling:touch] md:px-[clamp(12px,2vw,20px)] md:pb-6 md:pt-6">
         {listFailed ? (
           <div
             className="mx-1 rounded-xl px-4 py-5 text-[14px] leading-relaxed"

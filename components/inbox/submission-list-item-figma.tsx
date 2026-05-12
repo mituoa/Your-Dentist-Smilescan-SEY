@@ -74,26 +74,42 @@ export function SubmissionListItemFigma({
 
   const urgencyShort =
     urgency === "today"
-      ? "Dringend"
+      ? "Zeitnah"
       : urgency === "this_week"
         ? "Diese Woche"
         : urgency === "not_urgent"
           ? "Routine"
           : null;
 
+  const timeLabel = createdAtDisplay?.trim()
+    ? createdAtDisplay.trim()
+    : formatRelativeTime(createdAt);
+
+  const statusLine = (() => {
+    if (isPreviewList) return null;
+    const parts: string[] = [];
+    if (isDraft) parts.push("Entwurf");
+    else {
+      parts.push(isUnseen ? "Neu" : "Gelesen");
+      if (urgencyShort) parts.push(urgencyShort);
+    }
+    parts.push(timeLabel);
+    return parts.join(" · ");
+  })();
+
   return (
     <Link
       href={href}
       aria-current={isActive ? "page" : undefined}
-      className={`block min-w-0 max-w-full touch-manipulation break-words transition-all duration-150 ease-out mb-2 md:mb-1.5 ${
+      className={`block min-w-0 max-w-full touch-manipulation break-words transition-colors duration-150 ease-out mb-1.5 md:mb-1 ${
         isActive
           ? ""
           : isPreviewList
             ? "hover:bg-white/50"
-            : "hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+            : "hover:bg-white/45"
       }`}
       style={{
-        padding: "18px 16px",
+        padding: "14px 14px",
         borderRadius: "8px",
         cursor: "pointer",
         background: isActive ? "#EEF6FF" : "transparent",
@@ -105,8 +121,8 @@ export function SubmissionListItemFigma({
         style={{
           color: isActive ? "#1E3A8A" : "#0F172A",
           fontWeight: 600,
-          lineHeight: 1.4,
-          marginBottom: "6px",
+          lineHeight: 1.35,
+          marginBottom: "4px",
           letterSpacing: "-0.015em",
         }}
       >
@@ -118,51 +134,33 @@ export function SubmissionListItemFigma({
         style={{
           color: "#64748B",
           fontWeight: 500,
-          marginBottom: "4px",
+          marginBottom: "2px",
           letterSpacing: "-0.005em",
         }}
       >
         {patientLabel}
       </p>
 
-      <p className="mb-1 flex flex-wrap gap-1.5 text-[11px] font-semibold">
-        {isDraft ? (
-          <span
-            className="rounded px-2 py-0.5"
-            style={{ background: "rgba(254, 243, 199, 0.9)", color: "#92400E" }}
-          >
-            Entwurf
-          </span>
-        ) : null}
-        {isPreviewList && !isDraft ? (
-          <span className="rounded px-2 py-0.5" style={{ background: "#F1F5F9", color: "#64748B" }}>
-            Beispiel-Eintrag
-          </span>
-        ) : null}
-        {!isPreviewList && !isDraft && isUnseen ? (
-          <span
-            className="rounded px-2 py-0.5"
-            style={{ background: "#EEF6FF", color: "#1C6FD8" }}
-          >
-            Neu
-          </span>
-        ) : null}
-        {!isPreviewList && !isDraft && !isUnseen ? (
-          <span className="rounded px-2 py-0.5" style={{ background: "#F1F5F9", color: "#64748B" }}>
-            Gelesen
-          </span>
-        ) : null}
-        {!isPreviewList && urgencyShort ? (
-          <span className="rounded px-2 py-0.5" style={{ background: "#F1F5F9", color: "#334155" }}>
-            {urgencyShort}
-          </span>
-        ) : null}
-      </p>
+      {isPreviewList ? (
+        <p className="mb-1 flex flex-wrap gap-1.5 text-[11px] font-semibold">
+          {isDraft ? (
+            <span
+              className="rounded px-2 py-0.5"
+              style={{ background: "rgba(254, 243, 199, 0.9)", color: "#92400E" }}
+            >
+              Entwurf
+            </span>
+          ) : null}
+          {!isDraft ? (
+            <span className="rounded px-2 py-0.5" style={{ background: "#F1F5F9", color: "#64748B" }}>
+              Beispiel-Eintrag
+            </span>
+          ) : null}
+        </p>
+      ) : null}
 
-      <p className="text-[13px]" style={{ color: "#94A3B8", fontWeight: 400 }}>
-        {createdAtDisplay?.trim()
-          ? createdAtDisplay.trim()
-          : formatRelativeTime(createdAt)}
+      <p className="text-[13px]" style={{ color: "#94A3B8", fontWeight: 400, lineHeight: 1.45 }}>
+        {isPreviewList ? timeLabel : statusLine}
       </p>
     </Link>
   );

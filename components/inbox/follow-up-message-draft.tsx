@@ -119,15 +119,15 @@ export function FollowUpMessageDraft({
         };
 
   return (
-    <div className="touch-manipulation space-y-5 lg:space-y-8">
+    <div className="touch-manipulation space-y-4">
       <div
         className="transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none"
         style={{
-          borderRadius: "12px",
-          background: "#FFFFFF",
+          borderRadius: "10px",
+          background: "#FAFBFC",
           boxShadow: flash
-            ? "inset 0 0 0 1px rgba(43,111,232,0.1)"
-            : "inset 0 0 0 1px rgba(226, 232, 240, 0.9)",
+            ? "inset 0 0 0 1px rgba(43,111,232,0.12)"
+            : "inset 0 0 0 1px rgba(226, 232, 240, 1)",
         }}
       >
         <textarea
@@ -138,12 +138,12 @@ export function FollowUpMessageDraft({
             setActiveSnippetId("custom");
           }}
           onFocus={scrollDraftIntoView}
-          rows={11}
+          rows={8}
           spellCheck={false}
-          className="min-h-[200px] w-full scroll-mt-6 resize-y border-0 bg-transparent px-5 py-5 outline-none max-lg:min-h-[220px] max-lg:px-4 max-lg:py-4 lg:min-h-[240px] lg:px-6 lg:py-6"
+          className="min-h-[168px] w-full scroll-mt-6 resize-y border-0 bg-transparent px-4 py-4 outline-none max-lg:min-h-[180px] lg:px-5 lg:py-4"
           style={{
             fontSize: "16px",
-            lineHeight: 1.75,
+            lineHeight: 1.6,
             letterSpacing: "-0.01em",
             color: "#0F172A",
             fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
@@ -155,23 +155,25 @@ export function FollowUpMessageDraft({
       <p className="sr-only">Nur zum Kopieren. Kein automatischer Versand.</p>
 
       <div>
-        <p className="mb-3 text-[12px] font-medium" style={{ color: "#94A3B8", letterSpacing: "0.06em" }}>
-          Vorlagen
+        <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-slate-500">
+          Textbausteine
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1.5">
           <button
             type="button"
             onClick={resetToStandard}
             style={{
-              padding: "7px 12px",
-              borderRadius: "6px",
+              padding: "10px 12px",
+              borderRadius: "8px",
               fontSize: "13px",
               fontWeight: 500,
               letterSpacing: "-0.005em",
               transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
+              textAlign: "left",
+              width: "100%",
               ...chip(activeSnippetId === null),
             }}
-            className="min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+            className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
           >
             Standard
           </button>
@@ -183,15 +185,17 @@ export function FollowUpMessageDraft({
                 type="button"
                 onClick={() => applySnippet(s.id)}
                 style={{
-                  padding: "7px 12px",
-                  borderRadius: "6px",
+                  padding: "10px 12px",
+                  borderRadius: "8px",
                   fontSize: "13px",
                   fontWeight: 500,
                   letterSpacing: "-0.005em",
                   transition: "background 120ms ease, border-color 120ms ease, color 120ms ease",
+                  textAlign: "left",
+                  width: "100%",
                   ...chip(active),
                 }}
-                className="min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+                className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
               >
                 {s.label}
               </button>
@@ -203,7 +207,7 @@ export function FollowUpMessageDraft({
       <button
         type="button"
         onClick={copy}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] px-5 text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+        className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[9px] px-4 text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
         style={{
           color: "#0F172A",
           background: "#FFFFFF",

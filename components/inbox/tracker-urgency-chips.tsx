@@ -21,7 +21,7 @@ interface TrackerUrgencyChipsProps {
 
 /**
  * Zeitraum-Chips — **persistente Einordnung** (`updateSubmissionUrgency`), kein reines Styling.
- * Figma: gap 8px, Chip 6px 12px / 6px radius / 13px.
+ * Gleich hohe Flächen: Desktop 3-Spalten-Raster, mobil gestapelt.
  */
 export function TrackerUrgencyChips({
   submissionId,
@@ -64,7 +64,7 @@ export function TrackerUrgencyChips({
         Zeitraum setzen
       </p>
       <div
-        className="flex flex-wrap gap-2"
+        className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-2"
         role="group"
         aria-labelledby="tracker-urgency-label"
       >
@@ -77,10 +77,10 @@ export function TrackerUrgencyChips({
               disabled={pending}
               aria-pressed={active}
               onClick={() => select(opt.id)}
-              className="cursor-pointer text-[13px] font-medium transition duration-150 ease-out disabled:opacity-50"
+              className="min-h-10 w-full cursor-pointer text-[13px] font-medium transition duration-150 ease-out disabled:opacity-50"
               style={{
-                padding: "6px 12px",
-                borderRadius: "6px",
+                padding: "0 10px",
+                borderRadius: "8px",
                 border: active ? "1px solid #2B6FE8" : "1px solid #E5E7EB",
                 background: active ? "#EEF6FF" : "#FFFFFF",
                 color: active ? "#2B6FE8" : "#64748B",
