@@ -48,9 +48,9 @@ export function SubmissionActions({
   appointmentUrl,
 }: SubmissionActionsProps) {
   return (
-    <div className="flex min-h-0 flex-1 touch-manipulation flex-col px-4 py-3 max-lg:flex-none lg:min-h-0 lg:px-3 lg:py-2">
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden max-lg:flex-none max-lg:overflow-visible lg:min-h-0">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-[max(0.75rem,var(--safe-area-bottom))] max-lg:h-auto max-lg:flex-none max-lg:overflow-visible max-lg:pb-[max(1rem,var(--safe-area-bottom))] max-lg:scroll-pb-28 lg:min-h-0 lg:overflow-y-auto">
+    <div className="flex min-h-0 max-lg:flex-none touch-manipulation flex-col px-4 py-3 lg:min-h-0 lg:flex-1 lg:px-3 lg:py-2">
+      <div className="flex min-h-0 min-w-0 max-lg:flex-none flex-col overflow-hidden max-lg:overflow-visible lg:min-h-0 lg:flex-1">
+        <div className="min-h-0 overscroll-y-contain pb-[max(0.75rem,var(--safe-area-bottom))] max-lg:h-auto max-lg:flex-none max-lg:overflow-visible max-lg:pb-[max(1rem,var(--safe-area-bottom))] max-lg:scroll-pb-28 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div id="tracker-korrespondenz" className={`scroll-mt-6 border-b border-[rgba(15,23,42,0.06)] ${sectionPad}`}>
             <p className="mb-4 text-[13px] font-semibold leading-snug tracking-tight text-slate-800">
               Entwurf für die Rückmeldung

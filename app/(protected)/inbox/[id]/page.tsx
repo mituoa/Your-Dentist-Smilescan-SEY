@@ -241,9 +241,9 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Desktop: zwei Spalten, je eigener Scroll. Mobil: eine Spalte, ein gemeinsamer Scroll (Hilfsspalte unten, nicht fixiert). */}
+      {/* Mobil: Triage + Hilfe eine Fläche, gemeinsamer Scroll. Desktop: zwei Spalten, je eigener Scroll. */}
       <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] max-lg:min-h-0 max-lg:bg-[#EDF1F7] lg:flex-row lg:overflow-y-hidden lg:bg-transparent">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-lg:mx-0 max-lg:flex-none max-lg:overflow-visible max-lg:rounded-b-2xl max-lg:shadow-[0_2px_12px_rgba(15,23,42,0.05)] lg:mx-0 lg:rounded-none lg:bg-[#F7F9FC] lg:shadow-none lg:min-h-0 lg:overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-lg:mx-0 max-lg:flex-none max-lg:overflow-visible max-lg:rounded-b-2xl max-lg:shadow-[0_2px_12px_rgba(15,23,42,0.05)] lg:mx-0 lg:rounded-none lg:bg-[#F7F9FC] lg:shadow-none lg:min-h-0 lg:overflow-hidden lg:flex-1">
           {/* Detail-Header — mobil: kompakteres Padding, Sticky; Desktop: Figma-Abstände */}
           <div
             className="z-[6] shrink-0 bg-white px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] max-lg:sticky max-lg:top-0 max-lg:border-b max-lg:border-[rgba(15,23,42,0.06)] max-lg:shadow-[0_1px_0_rgba(15,23,42,0.04)] sm:px-5 sm:pt-4 sm:pb-3 lg:static lg:border-b-0 lg:px-[clamp(20px,4vw,56px)] lg:pb-0 lg:pt-[clamp(28px,5vw,48px)] lg:shadow-none"
@@ -327,9 +327,11 @@ export default async function InboxDetailPage({
             ) : null}
           </div>
 
-          {/* Scrollbarer Inhalt — Figma: background #FFFFFF, padding 24|32 / 56 / 56 */}
+          {/* Mobil: Triage + Hilfe untereinander, gemeinsamer Scroll (äußerer Container). Desktop: zwei Spalten, je Scroll. */}
+          <div className="flex min-h-0 w-full min-w-0 flex-col max-lg:flex-none lg:flex-1 lg:min-h-0 lg:flex-row lg:overflow-hidden">
+          {/* Scrollbarer Hauptinhalt — Desktop: eigener Scroll; Mobil: natürliche Höhe (kein flex-1). */}
           <div
-            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-white [-webkit-overflow-scrolling:touch] px-4 pb-10 max-md:pb-12 max-lg:flex-none max-lg:overflow-visible max-lg:pb-8 max-lg:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 md:pb-24 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-[clamp(20px,4vw,56px)] lg:pb-24"
+            className="min-h-0 w-full min-w-0 max-lg:flex-none max-lg:overflow-visible bg-white px-4 pb-6 max-lg:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 max-lg:pb-8 lg:flex-1 lg:min-h-0 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch] lg:px-[clamp(20px,4vw,56px)] lg:pb-24"
             style={scrollPadStyle}
           >
             <div className="mb-6 md:mb-8">
@@ -396,30 +398,32 @@ export default async function InboxDetailPage({
               </div>
             </div>
           </div>
+
+          {/* Hilfsspalte: mobil unten in derselben weißen Fläche (Trennlinie); Desktop rechts mit eigenem Scroll. */}
+          <aside
+            className="flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-white pb-[max(12px,var(--safe-area-bottom))] max-lg:mx-0 max-lg:mt-0 max-lg:min-h-0 max-lg:flex-none max-lg:overflow-visible max-lg:border-l-0 max-lg:bg-white max-lg:px-0 max-lg:pb-[max(1rem,var(--safe-area-bottom))] lg:mx-0 lg:mt-0 lg:min-h-0 lg:w-[min(100%,320px)] lg:max-w-[340px] lg:shrink-0 lg:overflow-y-auto lg:overscroll-y-contain lg:border-l lg:border-t-0 lg:border-[rgba(15,23,42,0.06)] lg:bg-[#F7F9FC] lg:pb-0 lg:[-webkit-overflow-scrolling:touch]"
+          >
+            <SubmissionActions
+              submissionId={submission.id}
+              patientName={submission.patient_name}
+              patientEmail={submission.patient_email}
+              patientPhone={submission.patient_phone}
+              createdAt={submission.created_at}
+              patientBirthDate={submission.patient_birth_date}
+              patientExternalId={submission.patient_external_id}
+              urgency={submission.urgency}
+              isDraft={submission.is_draft}
+              seenAt={submission.seen_at}
+              updatedAt={submission.updated_at}
+              photoCount={submission.photos.length}
+              canSendAppointmentLink={isDoctor}
+              practicePhone={practicePhone}
+              appointmentUrl={appointmentUrl}
+            />
+          </aside>
+          </div>
         </div>
 
-        {/* Hilfsspalte (Entwürfe/Terminlink) — Figma: schmale sekundäre Spalte, gleiche Canvas-Farbe */}
-        <aside
-          className="flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-lg:mx-3 max-lg:mt-3 max-lg:mb-[max(1.25rem,env(safe-area-inset-bottom))] max-lg:min-h-0 max-lg:flex-none max-lg:overflow-hidden max-lg:rounded-xl max-lg:border max-lg:border-[rgba(15,23,42,0.1)] max-lg:bg-white max-lg:pb-4 max-lg:shadow-[0_2px_10px_rgba(15,23,42,0.06)] max-lg:border-t-transparent lg:mx-0 lg:mt-0 lg:mb-0 lg:min-h-0 lg:w-[min(100%,320px)] lg:max-w-[340px] lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-[rgba(15,23,42,0.06)] lg:bg-[#F7F9FC] lg:pb-0 lg:shadow-none lg:overflow-hidden"
-        >
-          <SubmissionActions
-            submissionId={submission.id}
-            patientName={submission.patient_name}
-            patientEmail={submission.patient_email}
-            patientPhone={submission.patient_phone}
-            createdAt={submission.created_at}
-            patientBirthDate={submission.patient_birth_date}
-            patientExternalId={submission.patient_external_id}
-            urgency={submission.urgency}
-            isDraft={submission.is_draft}
-            seenAt={submission.seen_at}
-            updatedAt={submission.updated_at}
-            photoCount={submission.photos.length}
-            canSendAppointmentLink={isDoctor}
-            practicePhone={practicePhone}
-            appointmentUrl={appointmentUrl}
-          />
-        </aside>
       </div>
     </>
   );

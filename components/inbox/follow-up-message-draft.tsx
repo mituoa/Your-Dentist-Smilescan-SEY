@@ -121,10 +121,9 @@ export function FollowUpMessageDraft({
   return (
     <div className="touch-manipulation space-y-3 lg:space-y-4">
       <div
-        className="transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none"
+        className="bg-[#FAFBFC] transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none max-lg:bg-white"
         style={{
           borderRadius: "10px",
-          background: "#FAFBFC",
           boxShadow: flash
             ? "inset 0 0 0 1px rgba(43,111,232,0.12)"
             : "inset 0 0 0 1px rgba(226, 232, 240, 1)",
