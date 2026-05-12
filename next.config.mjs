@@ -28,6 +28,19 @@ const nextConfig = {
     };
     return config;
   },
+  /** `/inbox-preview` (MVP-Vorschau): Crawler-Hinweis ergänzend zu `metadata.robots` in `app/inbox-preview/page.tsx`. */
+  async headers() {
+    return [
+      {
+        source: "/inbox-preview",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/inbox-preview/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

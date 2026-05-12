@@ -9,6 +9,7 @@ import { TrackerPrimaryActions } from "@/components/inbox/tracker-primary-action
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
 import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
+import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { markSubmissionSeen } from "./actions";
 
 /**
@@ -139,24 +140,6 @@ function formatRelativeTime(timestamp: string): string {
   return then.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
 }
 
-function deriveIssue(
-  patientNotes: string | null,
-  patientName: string | null
-): string {
-  const raw = (patientNotes || "").trim();
-  if (raw) {
-    const firstSentence = raw.split("\n")[0]?.split(".")[0]?.trim();
-    if (firstSentence) {
-      return firstSentence.length > 120
-        ? `${firstSentence.slice(0, 120).trim()}…`
-        : firstSentence;
-    }
-  }
-  const n = (patientName || "").trim();
-  if (n) return n.length > 120 ? `${n.slice(0, 120).trim()}…` : n;
-  return "Einsendung";
-}
-
 function formatBirthDe(value: string | null): string | null {
   if (!value) return null;
   const part = value.split("T")[0];
@@ -222,7 +205,11 @@ export default async function InboxDetailPage({
   }
 
   const isDoctor = workspace.role === "doctor";
-  const concernPreview = deriveIssue(submission.patient_notes, submission.patient_name);
+  const concernPreview = deriveSubmissionIssueShortLine(
+    submission.patient_notes,
+    submission.patient_name,
+    { maxLen: 120, emptyLabel: "Einsendung" }
+  );
   const patientLabel = submission.patient_name || "Unbekannter Patient";
   const birthStr = formatBirthDe(submission.patient_birth_date);
   const idStr = submission.patient_external_id?.trim() || null;

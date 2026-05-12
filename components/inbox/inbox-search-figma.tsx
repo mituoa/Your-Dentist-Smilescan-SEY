@@ -10,8 +10,12 @@ import {
 } from "@/lib/inbox-search-q";
 
 interface InboxSearchFigmaProps {
-  /** z. B. `/inbox-preview` für Demo ohne echte Inbox-Route */
+  /** z. B. `/inbox-preview` — öffentliche Mock-Vorschau ohne Session; sonst `/inbox` (geschützt). */
   routeBase?: string;
+  /** Eingabe-Platzhalter; Standard „Suchen…“. */
+  inputPlaceholder?: string;
+  /** `aria-label` für das Suchfeld; Standard „Einsendungen durchsuchen“. */
+  searchAriaLabel?: string;
   /**
    * Wenn die Einsendungsliste serverseitig fehlgeschlagen ist: Eingabe deaktivieren, damit keine
    * Such-/URL-Aktion suggeriert wird, die die Liste nicht wiederherstellen würde.
@@ -28,6 +32,8 @@ function buildReplaceTarget(routeBase: string, pathname: string): string {
 
 export function InboxSearchFigma({
   routeBase = "/inbox",
+  inputPlaceholder,
+  searchAriaLabel,
   listUnavailable = false,
 }: InboxSearchFigmaProps) {
   const router = useRouter();
@@ -36,7 +42,10 @@ export function InboxSearchFigma({
   const [, startTransition] = useTransition();
 
   const searchParamsSnapshotRef = useRef(searchParams.toString());
-  searchParamsSnapshotRef.current = searchParams.toString();
+
+  useEffect(() => {
+    searchParamsSnapshotRef.current = searchParams.toString();
+  }, [searchParams]);
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingValueRef = useRef("");
@@ -124,8 +133,12 @@ export function InboxSearchFigma({
         value={value}
         onChange={handleChange}
         disabled={listUnavailable}
-        placeholder={listUnavailable ? "Suche nicht verfügbar" : "Suchen..."}
-        aria-label="Einsendungen durchsuchen"
+        placeholder={
+          listUnavailable
+            ? "Suche nicht verfügbar"
+            : (inputPlaceholder?.trim() || "Suchen...")
+        }
+        aria-label={searchAriaLabel?.trim() || "Einsendungen durchsuchen"}
         title={listUnavailable ? "Liste derzeit nicht verfügbar — bitte Seite erneut öffnen." : undefined}
         className="h-11 w-full touch-manipulation bg-white text-[15px] focus:outline-none placeholder:text-gray-400 md:h-10 md:text-[14px]"
         style={{

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
+import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+
 function formatRelativeTime(iso: string): string {
   const now = new Date();
   const then = new Date(iso);
@@ -19,35 +21,24 @@ function formatRelativeTime(iso: string): string {
   return then.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
 }
 
-function deriveIssue(
-  patientNotes: string | null,
-  patientName: string | null
-): string {
-  const raw = (patientNotes || "").trim();
-  if (raw) {
-    const firstSentence = raw.split("\n")[0]?.split(".")[0]?.trim();
-    if (firstSentence) {
-      return firstSentence.length > 56
-        ? `${firstSentence.slice(0, 56).trim()}…`
-        : firstSentence;
-    }
-  }
-  const name = (patientName || "").trim();
-  if (name) return name.length > 56 ? `${name.slice(0, 56).trim()}…` : name;
-  /** Neutral: keine erfundene „Aktivität“ — es fehlen nur Kurzinfos in der Liste. */
-  return "Ohne Kurztext";
-}
-
 interface SubmissionListItemFigmaProps {
   id: string;
   patientName: string | null;
   patientNotes: string | null;
   createdAt: string;
+  /** Optional festes Datums-Label (z. B. UI-Vorschau ohne tagesabhängige Relativzeit). */
+  createdAtDisplay?: string;
   seenAt: string | null;
   isDraft: boolean;
   urgency?: string | null;
+  /** Ziel-URL der Zeile; für öffentliche Vorschau setzen, damit keine Links auf `/inbox/[id]` entstehen. */
   hrefOverride?: string;
   activeOverride?: boolean;
+  /**
+   * `preview`: keine Neu/Gelesen-/Dringlichkeits-Badges — ersetzt durch sachliche Beispiel-Kennzeichnung
+   * (keine Vortäuschung von Posteingangs- oder Triage-Status).
+   */
+  listPresentation?: "default" | "preview";
 }
 
 export function SubmissionListItemFigma({
@@ -55,11 +46,13 @@ export function SubmissionListItemFigma({
   patientName,
   patientNotes,
   createdAt,
+  createdAtDisplay,
   seenAt,
   isDraft,
   urgency,
   hrefOverride,
   activeOverride,
+  listPresentation = "default",
 }: SubmissionListItemFigmaProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -70,8 +63,12 @@ export function SubmissionListItemFigma({
     hrefOverride ??
     (q ? `/inbox/${id}?q=${encodeURIComponent(q)}` : `/inbox/${id}`);
   const isUnseen = !seenAt;
+  const isPreviewList = listPresentation === "preview";
 
-  const issueBase = deriveIssue(patientNotes, patientName);
+  const issueBase = deriveSubmissionIssueShortLine(patientNotes, patientName, {
+    maxLen: 56,
+    emptyLabel: "Ohne Kurztext",
+  });
   const issue = isDraft ? `Entwurf: ${issueBase}` : issueBase;
   const patientLabel = patientName?.trim() || "Unbekannter Patient";
 
@@ -89,7 +86,11 @@ export function SubmissionListItemFigma({
       href={href}
       aria-current={isActive ? "page" : undefined}
       className={`block min-w-0 max-w-full touch-manipulation break-words transition-all duration-150 ease-out mb-2 md:mb-1.5 ${
-        isActive ? "" : "hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+        isActive
+          ? ""
+          : isPreviewList
+            ? "hover:bg-white/50"
+            : "hover:bg-white/55 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
       }`}
       style={{
         padding: "18px 16px",
@@ -133,7 +134,12 @@ export function SubmissionListItemFigma({
             Entwurf
           </span>
         ) : null}
-        {!isDraft && isUnseen ? (
+        {isPreviewList && !isDraft ? (
+          <span className="rounded px-2 py-0.5" style={{ background: "#F1F5F9", color: "#64748B" }}>
+            Beispiel-Eintrag
+          </span>
+        ) : null}
+        {!isPreviewList && !isDraft && isUnseen ? (
           <span
             className="rounded px-2 py-0.5"
             style={{ background: "#EEF6FF", color: "#1C6FD8" }}
@@ -141,12 +147,12 @@ export function SubmissionListItemFigma({
             Neu
           </span>
         ) : null}
-        {!isDraft && !isUnseen ? (
+        {!isPreviewList && !isDraft && !isUnseen ? (
           <span className="rounded px-2 py-0.5" style={{ background: "#F1F5F9", color: "#64748B" }}>
             Gelesen
           </span>
         ) : null}
-        {urgencyShort ? (
+        {!isPreviewList && urgencyShort ? (
           <span className="rounded px-2 py-0.5" style={{ background: "#F1F5F9", color: "#334155" }}>
             {urgencyShort}
           </span>
@@ -154,7 +160,9 @@ export function SubmissionListItemFigma({
       </p>
 
       <p className="text-[13px]" style={{ color: "#94A3B8", fontWeight: 400 }}>
-        {formatRelativeTime(createdAt)}
+        {createdAtDisplay?.trim()
+          ? createdAtDisplay.trim()
+          : formatRelativeTime(createdAt)}
       </p>
     </Link>
   );

@@ -10,7 +10,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { saveAs } from "file-saver";
-import { downloadSubmissionPhotos } from "@/app/(protected)/inbox/[id]/actions";
 import {
   safeSubmissionPhotoDownloadErrorMessage,
   submissionPhotoDownloadErrors,
@@ -29,9 +28,72 @@ interface PhotoViewerProps {
   patientName: string;
   /** Standard `true`. In Demo-Ansichten ohne echte Submission `false` (kein Server-ZIP). */
   enableZipDownload?: boolean;
+  /** Optionales `alt` für das Hauptbild (z. B. Vorschau mit neutralem Beispielbild). */
+  primaryImageAlt?: string;
+  /** Leerzustand ohne Fotos — Standard produktbezogen; in der Vorschau sachlich überschreiben. */
+  noPhotosPrimaryText?: string;
+  /** `aria-label` im Leerzustand ohne Fotos; Standard inkl. Patientenname. */
+  noPhotosAriaLabel?: string;
+  /** Hinweis, wenn das Hauptbild nicht geladen werden kann (z. B. Vorschau). */
+  imageUnavailableText?: string;
 }
 
 type ZipDownloadStatus = "idle" | "loading" | "success" | "error";
+
+function PhotoViewerMainImage({
+  imageUrl,
+  altText,
+  unavailableText,
+}: {
+  imageUrl: string;
+  altText: string;
+  unavailableText: string;
+}) {
+  const [loadFailed, setLoadFailed] = useState(false);
+  if (loadFailed) {
+    return (
+      <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 px-4">
+        <ImageIcon className="h-14 w-14 text-[#94A3B8]/45" strokeWidth={1} aria-hidden />
+        <p className="text-center text-[13px] font-medium" style={{ color: "#64748B" }}>
+          {unavailableText}
+        </p>
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs / Demo-Assets
+    <img
+      src={imageUrl}
+      alt={altText}
+      className="block w-full object-cover"
+      style={{
+        maxHeight: "220px",
+        filter: "saturate(0.92) contrast(0.96)",
+      }}
+      onError={() => setLoadFailed(true)}
+    />
+  );
+}
+
+function PhotoViewerThumb({
+  imageUrl,
+}: {
+  imageUrl: string;
+}) {
+  const [loadFailed, setLoadFailed] = useState(false);
+  if (loadFailed || !imageUrl) {
+    return <ImageIcon className="m-auto h-5 w-5 text-[#94A3B8]/50" strokeWidth={1} />;
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={imageUrl}
+      alt=""
+      className="h-full w-full object-cover"
+      onError={() => setLoadFailed(true)}
+    />
+  );
+}
 
 function base64ToBytes(base64: string): Uint8Array {
   const binary = atob(base64);
@@ -43,16 +105,24 @@ function base64ToBytes(base64: string): Uint8Array {
 }
 
 /**
- * Bildbereich — Figma: maxHeight 220px. **Leerzustände (Punkt 7):** keine Fotos = sachlicher Hinweis
- * (kein Fehler); fehlende signierte URL = keine Vorschau, nicht „defekt“. **Punkt 8:** ZIP-Fehler
- * nur über `safeSubmissionPhotoDownloadErrorMessage` (gleiche Texte wie Server-Aktion). **Punkt 10:**
- * an den Client nur `id` / `sort_order` / `signed_url` — kein Storage-Pfad im Props-Bundle.
+ * Bildbereich — Figma: maxHeight 220px. **Leerzustände:** keine Fotos = sachlicher Hinweis (optional
+ * für Vorschau überschreibbar); fehlende URL am Hauptbild = derselbe Hinweis wie bei Ladefehler.
+ * **Ladefehler:** Hauptbild per `onError` wie fehlende URL.
+ * **ZIP:** `downloadSubmissionPhotos` nur per dynamischem Import beim Klick (geschützte Inbox);
+ * `enableZipDownload={false}` lädt das Modul nicht und blendet ZIP aus.
+ * **Vorschau:** ohne ZIP kein `cursor-pointer` auf der Bildfläche — Vergrößern nur über das Symbol oben rechts.
+ * **ZIP-Fehler** nur über `safeSubmissionPhotoDownloadErrorMessage`. **Daten:** an den Client nur
+ * `id` / `sort_order` / `signed_url` — kein Storage-Pfad im Props-Bundle.
  */
 export function PhotoViewer({
   submissionId,
   photos,
   patientName,
   enableZipDownload = true,
+  primaryImageAlt,
+  noPhotosPrimaryText,
+  noPhotosAriaLabel,
+  imageUnavailableText,
 }: PhotoViewerProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [downloadStatus, setDownloadStatus] = useState<ZipDownloadStatus>("idle");
@@ -60,6 +130,8 @@ export function PhotoViewer({
   const [hoverImage, setHoverImage] = useState(false);
   const prevSubmissionIdRef = useRef(submissionId);
 
+  /* ZIP-/Download-UI und Thumbnail-Auswahl bei Submission-Wechsel zurücksetzen. */
+  /* eslint-disable react-hooks/set-state-in-effect -- bewusst bei submissionId neu initialisieren */
   useEffect(() => {
     setDownloadStatus("idle");
     setDownloadError(null);
@@ -68,25 +140,37 @@ export function PhotoViewer({
       setSelectedIndex(0);
     }
   }, [submissionId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  if (photos.length === 0) {
+  const hasPhotos = photos.length > 0;
+  const idx = hasPhotos
+    ? Math.min(Math.max(0, selectedIndex), photos.length - 1)
+    : 0;
+  const selectedUrlForReset = hasPhotos ? photos[idx]?.signed_url ?? null : null;
+  const mainImageMountKey = `${submissionId}:${selectedUrlForReset ?? ""}`;
+
+  if (!hasPhotos) {
+    const emptyTitle =
+      noPhotosPrimaryText?.trim() || "Keine Fotos bei dieser Einsendung.";
+    const emptyAria =
+      noPhotosAriaLabel?.trim() ||
+      `Keine Fotos bei dieser Einsendung — ${patientName}`;
     return (
       <div
         className="flex flex-col items-center justify-center rounded-[12px] bg-[#F1F5F9]"
         style={{ maxHeight: "220px", minHeight: "160px" }}
         role="status"
         aria-live="polite"
-        aria-label={`Keine Fotos bei dieser Einsendung — ${patientName}`}
+        aria-label={emptyAria}
       >
         <ImageIcon className="h-12 w-12 text-[#94A3B8]/50" strokeWidth={1} aria-hidden />
         <p className="mt-2 text-center text-[14px] font-medium" style={{ color: "#64748B" }}>
-          Keine Fotos bei dieser Einsendung.
+          {emptyTitle}
         </p>
       </div>
     );
   }
 
-  const idx = Math.min(Math.max(0, selectedIndex), photos.length - 1);
   const selected = photos[idx];
   const selectedUrl = selected?.signed_url;
   const isLoading = downloadStatus === "loading";
@@ -97,6 +181,9 @@ export function PhotoViewer({
     setDownloadError(null);
 
     try {
+      const { downloadSubmissionPhotos } = await import(
+        "@/app/(protected)/inbox/[id]/actions"
+      );
       const result = await downloadSubmissionPhotos(submissionId);
       if (result.error || !result.zipBase64 || !result.filename) {
         setDownloadStatus("error");
@@ -126,10 +213,13 @@ export function PhotoViewer({
     }
   }
 
+  const mainUnavailable =
+    imageUnavailableText?.trim() || "Für dieses Bild liegt keine Vorschau vor.";
+
   return (
     <div className="space-y-4 overflow-x-hidden" aria-label={`Fotos: ${patientName}`}>
       <div
-        className="relative cursor-pointer"
+        className={enableZipDownload ? "relative cursor-pointer" : "relative cursor-default"}
         onMouseEnter={() => setHoverImage(true)}
         onMouseLeave={() => setHoverImage(false)}
       >
@@ -141,21 +231,20 @@ export function PhotoViewer({
           }}
         >
           {selectedUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- signed Supabase URLs
-            <img
-              src={selectedUrl}
-              alt={`Klinisches Bild ${idx + 1} von ${photos.length}`}
-              className="block w-full object-cover"
-              style={{
-                maxHeight: "220px",
-                filter: "saturate(0.92) contrast(0.96)",
-              }}
+            <PhotoViewerMainImage
+              key={mainImageMountKey}
+              imageUrl={selectedUrl}
+              altText={
+                primaryImageAlt?.trim() ||
+                `Klinisches Bild ${idx + 1} von ${photos.length}`
+              }
+              unavailableText={mainUnavailable}
             />
           ) : (
             <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 px-4">
               <ImageIcon className="h-14 w-14 text-[#94A3B8]/45" strokeWidth={1} aria-hidden />
               <p className="text-center text-[13px] font-medium" style={{ color: "#64748B" }}>
-                Für dieses Bild liegt keine Vorschau vor.
+                {mainUnavailable}
               </p>
             </div>
           )}
@@ -180,7 +269,11 @@ export function PhotoViewer({
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
             backdropFilter: "blur(8px)",
           }}
-          aria-label="Bild vergrößern"
+          aria-label={
+            enableZipDownload
+              ? "Bild vergrößern"
+              : "Beispielbild in neuem Tab (nur Darstellung, keine Bearbeitung)"
+          }
         >
           <Maximize2 className="h-[18px] w-[18px]" style={{ color: "#64748B" }} strokeWidth={1.75} />
         </button>
@@ -252,11 +345,9 @@ export function PhotoViewer({
               }`}
             >
               {photo.signed_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={photo.signed_url}
-                  alt=""
-                  className="h-full w-full object-cover"
+                <PhotoViewerThumb
+                  key={`${photo.id}:${photo.signed_url}`}
+                  imageUrl={photo.signed_url}
                 />
               ) : (
                 <ImageIcon className="m-auto h-5 w-5 text-[#94A3B8]/50" strokeWidth={1} />
