@@ -5,6 +5,9 @@
  * Layout-Sprung zur Kartenzeile.
  *
  * **Nicht** dasselbe wie Editor-Speichern (`/profile/editor`) — dort eigenes Pending.
+ *
+ * **Punkt 3 (Supabase/Auth):** Nur UI-Skeleton; **keine** Slug-/Workspace-Daten. Auth/Workspace wie `(protected)`-Layout
+ * und `page.tsx` — keine zusätzliche Exposition sensibler Zustände.
  */
 import {
   clinicalWorkspaceFrame,

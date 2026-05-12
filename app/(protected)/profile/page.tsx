@@ -9,6 +9,13 @@ import {
 } from "@/lib/clinical-ui";
 import { getAppBaseUrl } from "@/lib/env";
 
+/** Defense in depth: nur erlaubte `doc`-Pfadsegmente (kein `/`, `..`, Leerzeichen). DB liefert i. d. R. `[a-z0-9-]+`. */
+function isSafeDocPathSlug(slug: string): boolean {
+  const s = slug.trim();
+  if (s.length === 0 || s.length > 128) return false;
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s);
+}
+
 function publicProfileUrlLabel(baseUrl: string, path: string): string {
   try {
     return `${new URL(baseUrl).host}${path}`;
@@ -30,7 +37,16 @@ function publicProfileUrlLabel(baseUrl: string, path: string): string {
  * Client-„Live“-Status. Karten: **stabile Mindesthöhe**, gleiche Rasterzeile (`items-stretch`), Slug vorhanden =
  * Link-Karte, fehlend = **ruhige** gestrichelte Fläche (kein toter Link, kein Flackern). Team → `redirect`
  * (`/my-tasks`) vor Datenabfrage — klarer, nicht zweideutiger Zustand.
+ *
+ * **Punkt 3 (Supabase/Auth):** **Serverseitig** `getCurrentWorkspace` → fehlend → Login; **Rolle** `doctor` sonst
+ * `redirect("/my-tasks")` (kein UI-only-Schutz). Slug nur per `workspaces.id = workspace.workspace_id` (RLS:
+ * `current_workspace_id()` — mit Migration 030 deckungsgleich zur ältesten Mitgliedschaft); **kein** breiter Slug-Scan,
+ * **keine** fremden Workspaces. Öffentlicher Link nur bei **validiertem** Slug-Segment (`isSafeDocPathSlug`) — bei
+ * DB-Anomalie **fail-closed** (kein Link, kein Leak in URL). Lesefehler: **serverseitig** nur Postgres-/Supabase-`code`
+ * loggen, **ohne** Slug/PII. `dynamic = "force-dynamic"` mildert Slug-Drift nach Editor-`revalidatePath` vs. CDN-Cache.
  */
+export const dynamic = "force-dynamic";
+
 export default async function ProfilePage() {
   const workspace = await getCurrentWorkspace();
 
@@ -43,13 +59,22 @@ export default async function ProfilePage() {
   }
 
   const supabase = await createClient();
-  const { data: ws } = await supabase
+  const { data: ws, error: wsError } = await supabase
     .from("workspaces")
     .select("slug")
     .eq("id", workspace.workspace_id)
     .maybeSingle();
 
-  const publicUrl = ws?.slug ? `/doc/${ws.slug}` : null;
+  if (wsError) {
+    console.error(
+      "[profile/page] workspaces slug read",
+      (wsError as { code?: string }).code ?? "unknown",
+    );
+  }
+
+  const rawSlug = typeof ws?.slug === "string" ? ws.slug.trim() : "";
+  const publicUrl =
+    rawSlug.length > 0 && isSafeDocPathSlug(rawSlug) ? `/doc/${rawSlug}` : null;
   const publicUrlLabel = publicUrl ? publicProfileUrlLabel(getAppBaseUrl(), publicUrl) : null;
 
   return (

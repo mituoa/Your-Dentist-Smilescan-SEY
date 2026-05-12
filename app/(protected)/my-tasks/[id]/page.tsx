@@ -53,7 +53,7 @@ interface TaskDetailPageProps {
  * nach dem Laden — selten, akzeptiert.
  *
  * **Punkt 7 (Empty) — final:** Leerer Kommentar-Thread nur **eine** sachliche Zeile in `CommentThread` — Begriff
- * **Notizen**/Dokumentation, **kein** „Verlauf“/Activity-Log-/Ticket-Ton, **kein** Empty-CTA, **keine** dashed
+ * **Notizen** / Dokumentation, **kein** „Verlauf“/Activity-Log-/Ticket-Ton, **kein** Empty-CTA, **keine** dashed
  * „Hier starten“-Fläche, **keine** Motivations- oder Chat-Klischees. Kontext liefert die bestehende Überschrift +
  * Untertitelzeile im Panel (`TaskDetailView`) — **kein** dritter Warn-/Hinweisblock. Semantik: **geladen + 0 Zeilen**
  * ist valider Zustand (RSC liefert Daten erst nach Query); **nicht geladen** = Route noch nicht gerendert bzw.
@@ -89,7 +89,7 @@ interface TaskDetailPageProps {
  * `.eq("workspace_id", …)` (**inkl.** `approveTask` / `rejectTask`); Kommentar-Insert nur nach workspace-gefiltertem
  * Task-Select; `getTaskAudienceEmails` nur mit workspace-gebundener Task-Zeile (Admin-Client, Aufrufer-Grenze).
  * **Receipts:** `markTaskAsRead` nur nach Empfänger-Gate auf der Seite; RLS bleibt zweite Verteidigungslinie.
- * **Logs:** nur Fehler**codes**/kurze Tags, **keine** E-Mail-/Patientenstrings in `console.*`. **UI:** nutzerfreundliche
+ * **Logs:** nur Fehler-**codes** / kurze Tags, **keine** E-Mail-/Patientenstrings in `console.*`. **UI:** nutzerfreundliche
  * Meldungen ohne technische Rohfehler (s. Punkt 8). **Cache:** Next-`revalidatePath` auf workspace-relative Pfade;
  * Cross-Workspace-Cache-Risiko durch strikte `workspace_id`-Filter in Queries/Mutations begrenzt — RLS-Policies im
  * Betrieb mit `current_workspace_id()` verifizieren.
