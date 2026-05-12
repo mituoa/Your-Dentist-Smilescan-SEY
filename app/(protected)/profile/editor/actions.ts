@@ -3,8 +3,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
-import { generateSlug } from "@/lib/slug";
+import { generateSlug, isSafeDocPathSlug } from "@/lib/slug";
 import { revalidatePath } from "next/cache";
+
+const profileRoleError = "Dieser Schritt ist für Ihre Rolle nicht vorgesehen.";
 
 export interface SaveProfilePayload {
   first_name: string;
@@ -33,6 +35,7 @@ export async function saveProfileData(
 ): Promise<{ error?: string; success?: boolean }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: profileRoleError };
 
   const supabase = await createClient();
 
@@ -72,7 +75,7 @@ export async function saveProfileData(
     .upsert(row as never, { onConflict: "workspace_id" });
 
   if (error) {
-    console.error("[saveProfile]", error);
+    console.error("[saveProfile]", (error as { code?: string }).code ?? "unknown");
     return { error: "Speichern fehlgeschlagen." };
   }
 
@@ -94,8 +97,9 @@ export async function saveProfileData(
 
   revalidatePath("/profile/editor");
   revalidatePath("/profile");
-  if (wsRow?.slug) {
-    revalidatePath(`/doc/${wsRow.slug}`);
+  const slugAfter = typeof wsRow?.slug === "string" ? wsRow.slug.trim() : "";
+  if (slugAfter.length > 0 && isSafeDocPathSlug(slugAfter)) {
+    revalidatePath(`/doc/${slugAfter}`);
   }
 
   return { success: true };
@@ -106,6 +110,7 @@ export async function uploadPortraitPhoto(
 ): Promise<{ error?: string; url?: string }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: profileRoleError };
 
   const file = formData.get("file") as File;
   if (!file || file.size === 0) return { error: "Keine Datei ausgewählt." };
@@ -131,7 +136,7 @@ export async function uploadPortraitPhoto(
     .upload(path, buffer, { contentType: file.type, upsert: false });
 
   if (uploadError) {
-    console.error("[uploadPortrait]", uploadError);
+    console.error("[uploadPortrait]", (uploadError as { code?: string }).code ?? "unknown");
     return { error: "Upload fehlgeschlagen." };
   }
 
@@ -151,7 +156,10 @@ export async function uploadPortraitPhoto(
     .select("slug")
     .eq("id", workspace.workspace_id)
     .single();
-  if (wsRow?.slug) revalidatePath(`/doc/${wsRow.slug}`);
+  const slugAfter = typeof wsRow?.slug === "string" ? wsRow.slug.trim() : "";
+  if (slugAfter.length > 0 && isSafeDocPathSlug(slugAfter)) {
+    revalidatePath(`/doc/${slugAfter}`);
+  }
 
   return { url: publicUrl };
 }
@@ -162,6 +170,7 @@ export async function deletePortraitPhoto(): Promise<{
 }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: profileRoleError };
 
   const admin = createAdminClient();
   await admin
@@ -175,7 +184,10 @@ export async function deletePortraitPhoto(): Promise<{
     .select("slug")
     .eq("id", workspace.workspace_id)
     .single();
-  if (wsRow?.slug) revalidatePath(`/doc/${wsRow.slug}`);
+  const slugAfter = typeof wsRow?.slug === "string" ? wsRow.slug.trim() : "";
+  if (slugAfter.length > 0 && isSafeDocPathSlug(slugAfter)) {
+    revalidatePath(`/doc/${slugAfter}`);
+  }
 
   return { success: true };
 }

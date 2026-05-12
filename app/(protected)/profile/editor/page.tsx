@@ -5,9 +5,9 @@ import { ProfileEditorShell } from "@/components/profile-editor/profile-editor-s
 
 export default async function ProfileEditorPage() {
   const workspace = await getCurrentWorkspace();
-  if (!workspace) redirect("/login");
+  if (!workspace) redirect("/login?error=workspace_missing");
   if (workspace.role !== "doctor") {
-    redirect("/relay");
+    redirect("/my-tasks");
   }
 
   const data = await getProfileForEditor(workspace.workspace_id);
