@@ -89,7 +89,7 @@ export function RelayWorkspaceView({
 
   const toggleBtn = (active: boolean) =>
     cn(
-      "rounded-lg px-4 py-2.5 text-[13px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.14)]",
+      "inline-flex min-h-[44px] min-w-0 items-center justify-center rounded-lg px-4 py-2.5 text-[13px] font-medium touch-manipulation transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.14)]",
       active
         ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-[#E2E8F0]"
         : "bg-transparent text-[#64748B] hover:bg-[rgba(15,23,42,0.04)] hover:text-[#334155]"
@@ -111,7 +111,7 @@ export function RelayWorkspaceView({
             style={{ color: "#475569" }}
           >
             {isRelay
-              ? "Gemeinsame Aufgabenübersicht fürs Team: zuweisen, einordnen und den Bearbeitungsstand teilen. Kein Patientendossier, kein Ticket-System."
+              ? "Gemeinsame Aufgabenübersicht für das Team: zuweisen, einordnen und den Bearbeitungsstand teilen. Kein Patientendossier, kein Ticketsystem."
               : "Die Ihnen zugewiesenen und mit Ihnen geteilten Aufgaben — dieselbe Datengrundlage wie das Team-Board unter Relay."}
           </p>
         </div>

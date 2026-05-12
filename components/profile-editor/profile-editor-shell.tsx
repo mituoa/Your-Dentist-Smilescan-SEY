@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * **ProfileEditorShell — Zweck (Punkt 1):** Ruhige Pflege der **Praxisdarstellung**, die im **öffentlichen
+ * Patientenbereich** (`/doc/…`) erscheint — **kein** generisches Account-Center, **kein** CMS- oder Website-Builder,
+ * **keine** Branding-Spielwiese. Formular links, **Orientierungsansicht** rechts (Lesen, kein zweiter Bearbeitungsmodus).
+ * Auto-Speichern = Arbeitskomfort, **kein** „Publishing“-Ritual.
+ */
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Camera } from "lucide-react";
 
@@ -172,22 +178,23 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
       style={{ backgroundColor: "#F8FAFC" }}
     >
       <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.08), transparent)",
-        }}
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-15%,rgba(15,23,42,0.04),transparent)]"
+        aria-hidden
       />
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-row overflow-x-auto overflow-y-hidden">
-        {/* LEFT — 480px, Figma */}
+        {/* LEFT — Eingabe (feste Arbeitsbreite) */}
         <div className="flex min-h-0 w-[480px] shrink-0 flex-col overflow-y-auto border-r border-solid border-[#ECECEC] bg-[#FBFBFB]">
           <div style={{ padding: "56px 40px" }}>
             <div style={{ marginBottom: 56 }}>
-              <h1 className="text-[14px] font-medium" style={{ color: "#262626", marginBottom: 6 }}>
-                Profil bearbeiten
+              <p className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.08em]" style={{ color: "#A3A3A3" }}>
+                Praxisdarstellung
+              </p>
+              <h1 className="text-[15px] font-semibold tracking-[-0.02em]" style={{ color: "#171717", marginBottom: 8 }}>
+                Praxisangaben für den Patientenbereich
               </h1>
-              <p className="max-w-[280px] text-[12px]" style={{ color: "#999999", lineHeight: 1.5 }}>
-                Patienten sehen diese Angaben über QR-Code
+              <p className="max-w-[320px] text-[12px]" style={{ color: "#737373", lineHeight: 1.55 }}>
+                Diese Felder speisen die öffentliche Darstellung unter Ihrer Praxis-Kurzadresse. Änderungen gelten nach
+                dem Speichern für neue Aufrufe — keine getrennte Veröffentlichung.
               </p>
             </div>
 
@@ -233,11 +240,11 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                     </div>
                   </button>
                   <div>
-                    <p className="mb-0.5 text-[12px]" style={{ color: "#666666" }}>
-                      Professionelles Porträt
+                    <p className="mb-0.5 text-[12px]" style={{ color: "#525252" }}>
+                      Porträtfoto
                     </p>
-                    <p className="text-[11px]" style={{ color: "#999999" }}>
-                      Mind. 400×400px
+                    <p className="text-[11px]" style={{ color: "#737373", lineHeight: 1.45 }}>
+                      Sichtbar neben Name und Praxis; mindestens 400×400 Pixel (JPEG, PNG oder WebP).
                     </p>
                   </div>
                 </div>
@@ -299,8 +306,9 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                   <label className="mb-1 block text-[11px] font-medium" style={{ color: "#737373" }}>
                     Arbeitsweise
                   </label>
-                  <p className="text-[11px]" style={{ color: "#999999", lineHeight: 1.5 }}>
-                    Beschreiben Sie, wie Sie arbeiten – nicht, was Sie anbieten
+                  <p className="text-[11px]" style={{ color: "#737373", lineHeight: 1.5 }}>
+                    Bis zu drei kurze Zeilen, sachlich und für Patientinnen nachvollziehbar; erscheinen im Patientenbereich
+                    unter Ihrem Namen.
                   </p>
                 </div>
 
@@ -311,10 +319,10 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                       maxLength={400}
                       placeholder={
                         i === 0
-                          ? "z. B. Wir gehen das in Ihrem Tempo an."
+                          ? "z. B. Wir erklären den Ablauf verständlich."
                           : i === 1
-                            ? "z. B. Bevor wir beginnen, wissen Sie genau, was passiert."
-                            : "z. B. Ich behandle nur das, was wirklich notwendig ist."
+                            ? "z. B. Vor der Behandlung klären wir offene Fragen."
+                            : "z. B. Wir behandeln nur das, was medizinisch begründet ist."
                       }
                       value={displayLines[i]}
                       onChange={(e) => onWorkingLineChange(i, e.target.value)}
@@ -329,7 +337,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                     className="mt-3 text-[11px] font-medium"
                     style={{ color: "#999999", transition: "all 120ms ease" }}
                   >
-                    Weitere Aussagen anzeigen
+                    Formulierungsvorschläge
                   </button>
                 ) : null}
 
@@ -523,9 +531,13 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
           </div>
         </div>
 
-        {/* RIGHT — Live-Vorschau (kühles Clinical-Grau, Tracker-Rhythmus) */}
+        {/* RIGHT — Orientierungsansicht (nur Lesen; kein zweiter Editor) */}
         <div className="flex min-h-0 min-w-[min(100%,360px)] flex-1 flex-col overflow-y-auto bg-[#EEF2F8]">
-          <div className="flex min-h-full w-full flex-1 items-center justify-center">
+          <div
+            className="flex min-h-full w-full flex-1 items-center justify-center"
+            role="region"
+            aria-label="Orientierungsansicht der Praxisdarstellung im Patientenbereich"
+          >
             <ProfileFigmaLivePreview data={mergedProfile} />
           </div>
         </div>

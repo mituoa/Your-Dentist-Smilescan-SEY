@@ -44,7 +44,7 @@ export function RelayQuickCreate({
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const avatarMap = buildMemberAvatarMap(assignableMembers);
-  const selfInitials = currentUserEmail ? emailInitials(currentUserEmail) : "?";
+  const selfInitials = currentUserEmail ? emailInitials(currentUserEmail) : "Ich";
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -96,7 +96,7 @@ export function RelayQuickCreate({
   const resolvedPlaceholder =
     inputPlaceholder != null && inputPlaceholder.trim().length > 0
       ? inputPlaceholder.trim()
-      : "Was steht als Nächstes an?";
+      : "Aufgabe in einem kurzen Satz …";
 
   const showOptions = focused || dropdownOpen;
 
@@ -128,7 +128,7 @@ export function RelayQuickCreate({
         }}
         disabled={isPending}
         placeholder={resolvedPlaceholder}
-        className="w-full border-0 bg-transparent p-0 text-[15px] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
+        className="w-full border-0 bg-transparent p-0 text-base text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
       />
 
       {showOptions ? (
@@ -137,7 +137,7 @@ export function RelayQuickCreate({
             <button
               type="button"
               onClick={() => setDropdownOpen((o) => !o)}
-              className="flex h-10 w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(15,23,42,0.12)] hover:bg-[#F8FAFC]"
+              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(15,23,42,0.12)] hover:bg-[#F8FAFC] touch-manipulation"
             >
               {assignAll ? (
                 <>
@@ -153,7 +153,7 @@ export function RelayQuickCreate({
                   >
                     {selfInitials.slice(0, 2)}
                   </div>
-                  <span className="truncate text-[13px] text-[#64748B]">Sich selbst zuweisen (Standard)</span>
+                  <span className="truncate text-[13px] text-[#64748B]">Selbst zuweisen (Standard)</span>
                 </>
               ) : (
                 <>
@@ -195,7 +195,7 @@ export function RelayQuickCreate({
                     }}
                     className="h-4 w-4"
                   />
-                  <span>Sich selbst zuweisen</span>
+                  <span>Selbst zuweisen</span>
                 </label>
                 <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F8FAFC]">
                   <input
@@ -245,7 +245,7 @@ export function RelayQuickCreate({
             type="button"
             onClick={() => setImportant((v) => !v)}
             className={cn(
-              "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 transition-colors sm:self-start",
+              "flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 transition-colors touch-manipulation sm:self-start",
               important ? "bg-[rgba(220,38,38,0.06)]" : "hover:border-[rgba(15,23,42,0.1)] hover:bg-[#F8FAFC]"
             )}
           >
@@ -261,9 +261,12 @@ export function RelayQuickCreate({
       ) : null}
 
       {error ? (
-        <p className="mt-3 text-sm text-danger" role="alert">
-          {error}
-        </p>
+        <div
+          className="mt-3 rounded-lg border border-[rgba(220,38,38,0.12)] bg-[rgba(254,242,242,0.45)] px-3 py-2.5"
+          role="alert"
+        >
+          <p className="text-sm leading-snug text-[#7F1D1D]">{error}</p>
+        </div>
       ) : null}
 
       {line.trim() && !showOptions ? (

@@ -42,8 +42,8 @@ export function AutoSaveIndicator({
           : `vor ${Math.floor(seconds / 60)}min`;
     return (
       <div className="flex items-center gap-2 text-xs text-text-tertiary">
-        <Check className="w-3 h-3" strokeWidth={2} />
-        Gespeichert {label}
+        <Check className="h-3 w-3" strokeWidth={2} aria-hidden />
+        <span>Zuletzt gespeichert {label}</span>
       </div>
     );
   }

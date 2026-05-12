@@ -57,8 +57,8 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   if (!listResult.ok) {
     return (
       <div
-        className="flex h-full min-h-[280px] flex-col items-center justify-center px-6"
-        style={{ padding: "32px 40px 40px" }}
+        className="flex h-full min-h-[240px] flex-col items-center justify-center px-6"
+        style={{ padding: "28px 32px 32px" }}
         role="status"
         aria-live="polite"
       >
@@ -66,11 +66,10 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
           Einsendungen können momentan nicht geladen werden
         </p>
         <p
-          className="mt-3 max-w-md text-center text-[14px] leading-relaxed"
+          className="mt-2 max-w-md text-center text-[14px] leading-relaxed"
           style={{ color: "#64748B" }}
         >
-          Bitte versuchen Sie es in einem Moment erneut. Wenn das Problem bleibt, laden Sie die Seite
-          neu.
+          Bitte später erneut versuchen oder die Seite neu laden.
         </p>
       </div>
     );
@@ -89,15 +88,14 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   if (qTrimmed) {
     return (
       <div
-        className="flex h-full min-h-[280px] flex-col items-center justify-center"
-        style={{ padding: "32px 40px 40px" }}
+        className="flex h-full min-h-[240px] flex-col items-center justify-center"
+        style={{ padding: "28px 32px 32px" }}
       >
         <p className="text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>
           Keine Treffer für diese Suche
         </p>
-        <p className="mt-3 max-w-md text-center text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-          Bitte einen anderen Suchbegriff versuchen oder die Suche leeren. Die Übersicht links zeigt
-          weiterhin alle Einsendungen; diese Meldung betrifft nur die aktuelle Suche.
+        <p className="mt-2 max-w-md text-center text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
+          Anderen Begriff versuchen oder Suche leeren.
         </p>
       </div>
     );
@@ -105,14 +103,14 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
 
   return (
     <div
-      className="flex h-full min-h-[280px] flex-col items-center justify-center"
-      style={{ padding: "32px 40px 40px" }}
+      className="flex h-full min-h-[240px] flex-col items-center justify-center"
+      style={{ padding: "28px 32px 32px" }}
     >
       <p className="text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>
         Keine Eingänge
       </p>
-      <p className="mt-3 max-w-md text-center text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-        Hier erscheint die Bearbeitungsansicht, sobald Einsendungen vorliegen.
+      <p className="mt-2 max-w-md text-center text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
+        Sobald Einsendungen vorliegen, erscheinen sie in der Liste.
       </p>
     </div>
   );

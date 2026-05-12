@@ -19,8 +19,8 @@
  * Drop-Ring **dezent** (neutral, kein PM-Tool-„Glow“); Quick-Create siehe `RelayQuickCreate`. Smoke vor Staging
  * siehe `relay/page.tsx` (Punkt 4).
  *
- * **Punkt 5 (Tot/Fake) — final:** Sticky-Spaltenkopf mit **dezentem** Blur; Spaltenköpfe **ohne** unnötige
- * Uppercase-„Ticketboard“-Typo. `ReceiptMark` nutzt **sachliche** Aria-Texte (Empfang/Lesen),
+ * **Punkt 5 (Tot/Fake) — final:** Spaltenköpfe **ohne** unnötige Uppercase-„Ticketboard“-Typo; Sticky-Kopf **ohne**
+ * Glaseffekt-Blur (kein Dashboard-„Live“-Anstrich). `ReceiptMark` nutzt **sachliche** Aria-Texte (Empfang/Lesen),
  * keine Chat-Ops-Sprache („Alle …“). Leer-/Footer-Copy entspricht Query (`getMyTasks`, 90 Tage bei Erledigt).
  *
  * **Punkt 6 (Loading) — final:** Kein zweites Skeleton bei Mutationen — nur `aria-busy` + leichte Deckkraft/
@@ -33,16 +33,17 @@
  * Serverfehler-Rollback. Persistenz und Endzustand bleiben korrekt; **keine** neue DnD-Architektur nötig.
  *
  * **Punkt 7 (Empty) — final:** Spalten-Leerzustände **ohne** PM-Floskeln und **ohne** vorgebliche Team-Leere bei
- * Filter „Meine Beteiligung“ / „Meine Aufgaben“ (`columnEmptyContext`); sachliche Copy, **leichte** Fläche
- * (dezenter dashed-Rand, kein schwerer Vollkarten-Block). Erledigt-Text an **90-Tage**-Query gekoppelt.
+ * Filter „Meine Beteiligung“ / „Meine Aufgaben“ (`columnEmptyContext`); sachliche Copy, dezente Fläche
+ * (`min-h`, fester feiner Rand — kein Dashed-„Demo-Board“); Erledigt-Text an **90-Tage**-Query gekoppelt.
  *
  * **Punkt 8 (Error) — final:** Mutationen ohne **rohe** Technikstrings in der UI; bei fehlgeschlagenem Speichern
  * **Rollback** + ruhige, zeitlich begrenzte Hinweiszeile (`boardPersistHint`, `aria-live="polite"`) — kein Banner,
  * kein Toast; `notAllowed` eigener kurzer Hinweis. Server-Copy für Move/Reorder in `my-tasks/actions.ts`.
  *
- * **Punkt 9 (Mobile) — final:** Bewusst **horizontales** Kanban (`min-w-[980px]`); Board-Streifen mit horizontalem
- * Scroll; Spaltenhöhe `max-h-[72vh]` mit vertikalem Scroll in der Spalte; DnD-**Aktivierungsweg** moderat.
- * Kein alternatives Mobile-Board.
+ * **Punkt 9 (Mobile) — final:** Bewusst **horizontales** Kanban (`min-w-[980px]`); Streifen mit
+ * `overscroll-behavior-x: contain`, Momentum-Scroll, **Safe-Area** unten; Spaltenhöhe `min(72vh, 100dvh−…)` auf
+ * kleinen Viewports; DnD-**Aktivierungsweg** leicht erhöht; Filter/Quick-Create **44px**-Tippflächen / **16px**-Input
+ * (iOS). Kein alternatives Mobile-Board.
  *
  * **Punkt 10 (Security) — final:** DnD nur mit `canMoveTask` (Import aus `workflow-rules`, identisch zur Server-Action);
  * Drop-Ring nur bei erlaubtem Zug; kein clientgewähltes `workspace_id` — Schreibwege nur Server Actions mit
@@ -171,7 +172,7 @@ export function CardBoard({
   const [boardPersistHint, setBoardPersistHint] = useState<string | null>(null);
   const dragStartBoardRef = useRef<BoardColumns | null>(null);
   const persistHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const clearBoardPersistHint = useCallback(() => {
     if (persistHintTimerRef.current != null) {
@@ -365,7 +366,12 @@ export function CardBoard({
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
     >
-      <div className="overflow-x-auto pb-2" role="region" aria-label="Aufgaben-Board" aria-busy={isPending}>
+      <div
+        className="overflow-x-auto overscroll-x-contain pb-[max(0.5rem,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]"
+        role="region"
+        aria-label="Aufgaben-Board, auf schmalen Bildschirmen seitwärts scrollen"
+        aria-busy={isPending}
+      >
         <div className="grid min-w-[980px] grid-cols-3 gap-6">
           <BoardColumn
             id="open"
@@ -414,7 +420,11 @@ export function CardBoard({
           />
         </div>
         {boardPersistHint ? (
-          <p className="mt-3 max-w-[980px] text-sm leading-relaxed text-[#64748B]" role="status" aria-live="polite">
+          <p
+            className="mt-4 max-w-[980px] text-sm leading-relaxed text-[#475569]"
+            role="status"
+            aria-live="polite"
+          >
             {boardPersistHint}
           </p>
         ) : null}
@@ -470,21 +480,21 @@ function BoardColumn({
     <section
       id={id}
       ref={setNodeRef}
-      className={`max-h-[72vh] overflow-y-auto rounded-xl border border-[rgba(15,23,42,0.06)] p-4 sm:p-5 ${surfaceClassName ?? ""} ${
+      className={`max-h-[min(72vh,calc(100dvh-15rem))] overflow-y-auto rounded-xl border border-[rgba(15,23,42,0.06)] p-4 sm:max-h-[72vh] sm:p-5 ${surfaceClassName ?? ""} ${
         clinicalCorePanel
       } ${isOver && canDropActiveTask ? "ring-2 ring-[rgba(15,23,42,0.12)]" : ""}`}
     >
-      <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] bg-white/95 pb-3 backdrop-blur-sm">
-        <h2 className="text-[13px] font-semibold uppercase tracking-[0.05em] text-[#64748B]">{title}</h2>
+      <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] bg-[#FAFBFC] pb-3">
+        <h2 className="text-[13px] font-semibold tracking-[-0.01em] text-[#64748B]">{title}</h2>
         <span className="inline-flex min-w-[24px] items-center justify-center rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[12px] font-medium tabular-nums text-[#475569]">
           {count > 99 ? "99+" : count}
         </span>
       </header>
 
       {tasks.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#F8FAFC] px-3 py-8 text-center">
-          <p className="text-sm font-medium text-[#0F172A]">{emptyTitle}</p>
-          <p className="mt-1 text-xs text-[#64748B]">{emptyText}</p>
+        <div className="flex min-h-[128px] flex-col justify-center rounded-lg border border-[rgba(15,23,42,0.07)] bg-[#F9FAFB] px-3 py-6 text-center sm:min-h-[140px] sm:py-7">
+          <p className="text-sm font-medium text-[#334155]">{emptyTitle}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-[#64748B]">{emptyText}</p>
         </div>
       ) : (
         <SortableContext items={tasks.map((task) => `card-${task.id}`)} strategy={verticalListSortingStrategy}>
