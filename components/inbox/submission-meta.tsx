@@ -128,14 +128,6 @@ export function SubmissionMeta({
         </div>
       </div>
 
-      {patientName && (
-        <div>
-          <div style={lab}>Name</div>
-          <div className="mt-1" style={val}>
-            {patientName}
-          </div>
-        </div>
-      )}
       {patientEmail && (
         <div>
           <div style={lab}>E-Mail</div>

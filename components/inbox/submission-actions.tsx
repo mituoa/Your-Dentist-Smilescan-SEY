@@ -25,17 +25,10 @@ interface SubmissionActionsProps {
   appointmentUrl?: string | null;
 }
 
-/** Sekundäre Spalte — Figma-Canvas #F7F9FC, Panel weiß / dezent. */
-const shell = "rounded-lg border border-[#E5E7EB] bg-white shadow-none";
-const sectionPad = "px-4 py-5 sm:px-5 sm:py-6";
+const sectionPad = "px-4 py-5 sm:px-5 sm:py-5";
 
 /**
- * Rechte Spalte: **unterstützende Praxis-Kommunikation** (Entwürfe, Terminlink) — untergeordnet
- * zur Triage-Mitte. Kein Postfach, kein Chat-Verlauf, kein CRM-Case-Workspace.
- * **Punkt 9 — Mobile:** Außenpadding enger auf kleinen Screens; inneres Scroll mit `overscroll-y-contain`,
- * **`scroll-padding-bottom`** + Safe-Area-Inset unten — Tastatur/Entwurf weniger abgeschnitten.
- * **Punkt 11 — MVP:** Überschriften nennen **Entwurf/Kopie** explizit; Stammdaten-Block ohne
- * „Plattform-Kontext“-Wording.
+ * Rechte Spalte: Entwurf kopieren + Terminlink — flach auf Canvas #F7F9FC (kein verschachteltes Karten-Instrument).
  */
 export function SubmissionActions({
   submissionId,
@@ -55,22 +48,13 @@ export function SubmissionActions({
   appointmentUrl,
 }: SubmissionActionsProps) {
   return (
-    <div className="flex min-h-0 flex-1 touch-manipulation flex-col gap-4 p-3 sm:px-[14px] sm:pb-5 sm:pt-4">
-      <div className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden ${shell}`}>
+    <div className="flex min-h-0 flex-1 touch-manipulation flex-col p-3 sm:px-3 sm:pb-4 sm:pt-3">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-[max(0.75rem,var(--safe-area-bottom))] max-lg:scroll-pb-28">
-          <div id="tracker-korrespondenz" className={`scroll-mt-6 border-b border-slate-100 ${sectionPad}`}>
-            <div className="mb-4 space-y-1.5">
-              <h2 className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-                Text & Entwurf
-              </h2>
-              <p className="text-[13px] font-semibold leading-snug tracking-tight text-slate-800">
-                Rückmeldung an den Patienten
-              </p>
-              <p className="text-[12px] leading-relaxed text-slate-600">
-                Vorlagen und Entwurf hier kopieren — in Ihrem Kanal (Telefon, Praxis-SMS, E-Mail)
-                selbst versenden. SmileScan versendet nichts automatisch.
-              </p>
-            </div>
+          <div id="tracker-korrespondenz" className={`scroll-mt-6 border-b border-[rgba(15,23,42,0.06)] ${sectionPad}`}>
+            <p className="mb-4 text-[13px] font-semibold leading-snug tracking-tight text-slate-800">
+              Entwurf für die Rückmeldung
+            </p>
             <FollowUpMessageDraft
               patientName={patientName}
               urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
@@ -79,13 +63,8 @@ export function SubmissionActions({
             />
           </div>
 
-          <div id="tracker-termin" className={`scroll-mt-6 border-b border-slate-100 ${sectionPad}`}>
-            <h2 className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-              Terminlink
-            </h2>
-            <p className="mb-3 text-[12px] leading-relaxed text-slate-600">
-              Terminlink per E-Mail an die hinterlegte Adresse — nur nach Klick, nicht im Hintergrund.
-            </p>
+          <div id="tracker-termin" className={`scroll-mt-6 border-b border-[rgba(15,23,42,0.06)] ${sectionPad}`}>
+            <p className="mb-3 text-[13px] font-semibold text-slate-800">Terminlink</p>
             <AppointmentLinkButton
               submissionId={submissionId}
               hasPatientEmail={!!patientEmail}
@@ -94,9 +73,7 @@ export function SubmissionActions({
           </div>
 
           <div className={sectionPad}>
-            <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
-              Stammdaten & Status
-            </h2>
+            <p className="mb-3 text-[13px] font-semibold text-slate-800">Fallangaben</p>
             <SubmissionMeta
               patientName={patientName}
               patientEmail={patientEmail}
@@ -110,12 +87,11 @@ export function SubmissionActions({
               updatedAt={updatedAt}
               photoCount={photoCount}
             />
-            <p className="mt-6 text-[12px] leading-relaxed text-slate-500">
-              Zugewiesene Teamaufgaben:{" "}
+            <p className="mt-5 text-[12px] text-slate-500">
+              Teamaufgaben:{" "}
               <Link href="/relay" className="font-medium text-[#2563EB] underline-offset-2 hover:underline">
-                Relay
-              </Link>{" "}
-              (separater Arbeitsbereich, kein Patienten-Postfach).
+                Relay öffnen
+              </Link>
             </p>
           </div>
         </div>

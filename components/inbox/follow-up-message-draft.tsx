@@ -123,12 +123,11 @@ export function FollowUpMessageDraft({
       <div
         className="transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none"
         style={{
-          borderRadius: "14px",
-          background: "#FDFEFE",
+          borderRadius: "12px",
+          background: "#FFFFFF",
           boxShadow: flash
-            ? "inset 0 0 0 1px rgba(43,111,232,0.12), 0 2px 12px rgba(15,23,42,0.05)"
-            : "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 3px rgba(15,23,42,0.04)",
-          border: "1px solid rgba(226, 232, 240, 0.75)",
+            ? "inset 0 0 0 1px rgba(43,111,232,0.1)"
+            : "inset 0 0 0 1px rgba(226, 232, 240, 0.9)",
         }}
       >
         <textarea
@@ -153,9 +152,7 @@ export function FollowUpMessageDraft({
           data-tracker-draft
         />
       </div>
-      <p className="mt-2 text-[11px] leading-snug text-slate-500 md:text-[12px]">
-        Nur zum Kopieren — SmileScan versendet nichts automatisch.
-      </p>
+      <p className="sr-only">Nur zum Kopieren. Kein automatischer Versand.</p>
 
       <div>
         <p className="mb-3 text-[12px] font-medium" style={{ color: "#94A3B8", letterSpacing: "0.06em" }}>

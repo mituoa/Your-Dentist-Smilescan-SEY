@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { AlertCircle } from "lucide-react";
 
 import {
   updateSubmissionUrgency,
@@ -94,15 +93,13 @@ export function TrackerUrgencyChips({
         })}
       </div>
       {error ? (
-        <div
+        <p
           role="status"
           aria-live="polite"
-          aria-atomic="true"
-          className="mt-2 flex items-start gap-2 rounded-[10px] bg-[#FEF2F2] px-3 py-2.5 text-[13px] leading-relaxed text-[#B91C1C]"
+          className="mt-2 border-l-2 border-slate-300 pl-2 text-[12px] leading-relaxed text-slate-600"
         >
-          <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} aria-hidden />
-          <span>{error}</span>
-        </div>
+          {error}
+        </p>
       ) : null}
     </div>
   );

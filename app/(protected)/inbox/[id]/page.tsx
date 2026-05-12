@@ -375,15 +375,17 @@ export default async function InboxDetailPage({
                 >
                   Einordnung & nächste Schritte
                 </p>
-                <p
-                  className="text-[14px]"
-                  style={{
-                    color: "#64748B",
-                    letterSpacing: "-0.005em",
-                  }}
-                >
-                  {guidanceShort}
-                </p>
+                {!submission.urgency ? (
+                  <p
+                    className="text-[14px]"
+                    style={{
+                      color: "#64748B",
+                      letterSpacing: "-0.005em",
+                    }}
+                  >
+                    {guidanceShort}
+                  </p>
+                ) : null}
               </div>
 
               <div
