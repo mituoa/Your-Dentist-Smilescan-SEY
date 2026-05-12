@@ -1,32 +1,7 @@
 "use client";
 
-/**
- * Relay-Workspace: Kanban für **Team-Aufgaben** (`/relay`) bzw. persönliche Relay-Ansicht (`/my-tasks`).
- * Zweck und Abgrenzung (nicht CRM/Ticket/PM): siehe **`app/(protected)/relay/page.tsx`**. Datenlader:
- * `loadRelayWorkspaceData`. Board und DnD: `CardBoard` + `workflow-rules` / Server Actions — **Punkt 2** und
- * **Punkt 3** (Workspace, Auth, Actions) in `page.tsx` sowie `relay-server-data`, `my-tasks/actions`, Queries dokumentiert.
- * **Punkt 4 (Aktionen) — final:** ruhige Interaktionen in `RelayQuickCreate` und `CardBoard`; Vertrag in
- * `relay/page.tsx`. Manuelle Smoke vor Staging = Regression, nicht Vertragslücke.
- * **Punkt 5 (Tot/Fake) — final:** Zähler unter dem Titel = **sichtbare** Karten pro Spalte (Filter wirkt auf Zahlen);
- * keine separate Zähl-API; Daten beim Laden/Revalidierung — siehe `relay-server-data`, `relay/page.tsx`.
- * **Punkt 6 (Loading) — final:** initiales Gerüst s. `relay/loading.tsx` + `ClinicalRelayBoardSkeleton`; Board-Pending
- * bei Mutationen in `CardBoard` (`aria-busy`, keine Skeleton-Überlagerung).
- * **Punkt 7 (Empty) — final:** Spalten-Leerzustände in `CardBoard` mit `columnEmptyContext` (Filter „Meine …“ =
- * ehrliche Filter-Leere, keine vorgebliche Team-Leere); s. `relay/page.tsx`.
- * **Punkt 8 (Error) — final:** `RelayQuickCreate` + `CardBoard`/`my-tasks/actions` — ruhige Fehler- und Rollback-Kommunikation; s. `relay/page.tsx`.
- * **Punkt 9 (Mobile) — final:** Filter **44px**-Tippflächen, `touch-manipulation`; Board: s. `CardBoard` / `relay/page.tsx`.
- *
- * **Punkt 11 (MVP) — final:** Gleiche Board-Komponenten wie `/my-tasks`, andere Kopie/Filter-Labels — kein zweites
- * Produkt; Scope und Non-Goals s. `relay/page.tsx` (Punkt 11).
- *
- * **Punkt 12 (Nice / Future / Non-MVP) — final:** Erweiterungsklassen und Anti-Drift — **kanonisch** `relay/page.tsx`
- * (Punkt 12).
- *
- * **Punkt 13 (Priorität) — final:** Stabilität vor Feature-Ausbau — **kanonisch** `relay/page.tsx` (Punkt 13).
- */
-
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import { CardBoard } from "@/components/my-tasks/card-board";
 import { RelayQuickCreate } from "@/components/my-tasks/relay-quick-create";
@@ -36,6 +11,13 @@ import type { RelayScope } from "@/lib/tasks/relay-helpers";
 import { buildMemberAvatarMap, emailInitials, filterColumnTasks } from "@/lib/tasks/relay-helpers";
 import { cn } from "@/lib/utils";
 import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/clinical-ui";
+
+/** Mirrors `TaskCounts` from task-counts (client-safe). */
+export interface RelayTaskCounts {
+  open: number;
+  pending: number;
+  done: number;
+}
 
 type BoardColumns = {
   open: MyTask[];
@@ -49,6 +31,7 @@ interface RelayWorkspaceViewProps {
   userEmail: string | null;
   isDoctor: boolean;
   columns: BoardColumns;
+  counts: RelayTaskCounts;
   assignableMembers: AssignableMember[];
 }
 
@@ -58,12 +41,18 @@ export function RelayWorkspaceView({
   userEmail,
   isDoctor,
   columns,
+  counts,
   assignableMembers,
 }: RelayWorkspaceViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRelay = basePath === "/relay";
-  const scope: RelayScope = searchParams.get("scope") === "mine" ? "mine" : "all";
+  const urlScope = searchParams.get("scope") === "mine" ? "mine" : "all";
+  const [scope, setScope] = useState<RelayScope>(urlScope);
+
+  useEffect(() => {
+    setScope(urlScope);
+  }, [urlScope]);
 
   const filtered = useMemo(
     () => ({
@@ -77,7 +66,7 @@ export function RelayWorkspaceView({
   const avatarByUserId = useMemo(() => {
     const m = buildMemberAvatarMap(assignableMembers);
     if (userEmail) {
-      m[userId] = { initials: emailInitials(userEmail), color: "#64748B" };
+      m[userId] = { initials: emailInitials(userEmail), color: "#2F80ED" };
     }
     return m;
   }, [assignableMembers, userEmail, userId]);
@@ -85,14 +74,15 @@ export function RelayWorkspaceView({
   const setScopeNav = (next: RelayScope) => {
     const path = next === "mine" ? `${basePath}?scope=mine` : basePath;
     router.replace(path, { scroll: false });
+    setScope(next);
   };
 
   const toggleBtn = (active: boolean) =>
     cn(
-      "inline-flex min-h-[44px] min-w-0 items-center justify-center rounded-lg px-4 py-2.5 text-[13px] font-medium touch-manipulation transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.14)]",
+      "rounded-lg px-4 py-2.5 text-[13px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.28)]",
       active
-        ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-[#E2E8F0]"
-        : "bg-transparent text-[#64748B] hover:bg-[rgba(15,23,42,0.04)] hover:text-[#334155]"
+        ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(43,111,232,0.12)] ring-1 ring-[rgba(43,111,232,0.14)]"
+        : "bg-transparent text-[#64748B] hover:bg-[rgba(43,111,232,0.05)] hover:text-[#334155]"
     );
 
   return (
@@ -106,43 +96,48 @@ export function RelayWorkspaceView({
           >
             {isRelay ? "Relay" : "Meine Aufgaben"}
           </h1>
-          <p
-            className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed"
-            style={{ color: "#475569" }}
-          >
-            {isRelay
-              ? "Gemeinsame Aufgabenübersicht für das Team: zuweisen, einordnen und den Bearbeitungsstand teilen. Kein Patientendossier, kein Ticketsystem."
-              : "Die Ihnen zugewiesenen und mit Ihnen geteilten Aufgaben — dieselbe Datengrundlage wie das Team-Board unter Relay."}
-          </p>
+          {isRelay ? (
+            <p className="mt-2 text-[14px] font-medium" style={{ color: "#2563EB" }}>
+              Praxisorganisation &amp; Aufgaben
+            </p>
+          ) : (
+            <p
+              className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed"
+              style={{ color: "#475569" }}
+            >
+              Ihre zugewiesenen und geteilten Aufgaben — dieselbe Datengrundlage wie unter Relay.
+            </p>
+          )}
         </div>
 
         <div
-          className="inline-flex rounded-[10px] p-1 ring-1 ring-[#E2E8F0] bg-[#F8FAFC]"
+          className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"
+          style={{ background: "rgba(43, 111, 232, 0.06)" }}
           role="group"
           aria-label="Aufgaben filtern"
         >
           <button type="button" className={toggleBtn(scope === "all")} onClick={() => setScopeNav("all")}>
-            {isRelay ? "Gesamtes Team" : "Alle Aufgaben"}
+            Alle Aufgaben
           </button>
           <button type="button" className={toggleBtn(scope === "mine")} onClick={() => setScopeNav("mine")}>
-            {isRelay ? "Meine Beteiligung" : "Meine Aufgaben"}
+            Meine Aufgaben
           </button>
         </div>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2 text-[11px] font-medium">
-        <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5 text-[#64748B]">
-          Offen: <strong className="tabular-nums text-[#0F172A]">{filtered.open.length}</strong>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          Offen: <strong className="tabular-nums text-[#0F172A]">{counts.open}</strong>
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5 text-[#64748B]">
-          In Bearbeitung: <strong className="tabular-nums text-[#0F172A]">{filtered.pending.length}</strong>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          In Bearbeitung: <strong className="tabular-nums text-[#0F172A]">{counts.pending}</strong>
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5 text-[#64748B]">
-          Erledigt: <strong className="tabular-nums text-[#0F172A]">{filtered.done.length}</strong>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+          Erledigt: <strong className="tabular-nums text-[#0F172A]">{counts.done}</strong>
         </span>
         {scope === "mine" ? (
-          <span className="inline-flex items-center rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-[#475569]">
-            Nur Aufgaben mit Ihrer Beteiligung
+          <span className="inline-flex items-center rounded-md border border-[rgba(43,111,232,0.22)] bg-[#EEF6FF] px-3 py-1.5 text-[#1E3A8A]">
+            Gefiltert: nur Einträge, an denen du beteiligt bist
           </span>
         ) : null}
       </div>
@@ -151,9 +146,6 @@ export function RelayWorkspaceView({
         assignableMembers={assignableMembers}
         currentUserId={userId}
         currentUserEmail={userEmail}
-        inputPlaceholder={
-          isRelay ? "Kurz beschreiben, was zu erledigen ist …" : undefined
-        }
       />
 
       <CardBoard
@@ -161,7 +153,6 @@ export function RelayWorkspaceView({
         currentUserId={userId}
         isDoctor={isDoctor}
         avatarByUserId={avatarByUserId}
-        columnEmptyContext={scope}
         columnTitles={{
           open: "Offen",
           pending: "In Bearbeitung",
@@ -169,7 +160,7 @@ export function RelayWorkspaceView({
         }}
         columnSurfaceClass={{
           open: "bg-white/[0.98]",
-          pending: "bg-[rgba(15,23,42,0.025)]",
+          pending: "bg-[rgba(43,111,232,0.045)]",
           done: "bg-[rgba(71,85,105,0.04)]",
         }}
       />

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getMyTasks } from "@/lib/queries/my-tasks";
+import { getMyTaskCounts } from "@/lib/queries/task-counts";
 import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,15 +15,13 @@ import { createClient } from "@/lib/supabase/server";
  * (s. `my-tasks/actions.ts`).
  *
  * **Punkt 5 (Tot/Fake):** Kein eigener Realtime-Kanal — Datenstand entspricht dem **Seitenladen** und
- * **Revalidierung** nach Mutationen (`revalidatePath` in Actions), nicht „Live-Board“-Semantik. Zähler in der UI
- * leiten sich aus den **sichtbaren** Spalten ab (`RelayWorkspaceView`), keine parallele Zähl-API, die vom Filter
- * abweicht.
+ * **Revalidierung** nach Mutationen (`revalidatePath` in Actions), nicht „Live-Board“-Semantik. Zähler oberhalb
+ * des Boards: **Team-Gesamtzahlen** (`getMyTaskCounts`); gefilterte Karten in den Spalten bei „Meine …“.
  *
  * **Punkt 6 (Loading):** Initiales UI-Gerüst über Route-`loading.tsx` + `ClinicalRelayBoardSkeleton` (statisch,
  * strukturgleich Board); dieser Loader ersetzt **nicht** das Board-Pending bei Mutationen (`CardBoard`).
  *
- * **Punkt 7 (Empty):** Leere Spalten-Copy und -Darstellung in `CardBoard` / `columnEmptyContext` — siehe
- * `relay/page.tsx` und Komponente.
+ * **Punkt 7 (Empty):** Leere Spalten-Copy und -Darstellung in `CardBoard` — siehe `relay/page.tsx` und Komponente.
  *
  * **Punkt 8 (Error):** Nutzer-Meldungen aus Server Actions (`my-tasks/actions`); Board-Hinweis bei fehlgeschlagener
  * Persistenz in `CardBoard` — siehe `relay/page.tsx`.
@@ -55,10 +54,11 @@ export async function loadRelayWorkspaceData(searchParams: Promise<Record<string
 
   const isDoctor = workspace.role === "doctor";
 
-  const [openTasks, pendingTasks, doneTasks, assignableMembers] = await Promise.all([
+  const [openTasks, pendingTasks, doneTasks, counts, assignableMembers] = await Promise.all([
     getMyTasks(user.id, workspace.workspace_id, isDoctor, "open"),
     getMyTasks(user.id, workspace.workspace_id, isDoctor, "pending_review"),
     getMyTasks(user.id, workspace.workspace_id, isDoctor, "done"),
+    getMyTaskCounts(user.id, workspace.workspace_id, isDoctor),
     getAssignableWorkspaceMembers(workspace.workspace_id, user.id),
   ]);
 
@@ -67,6 +67,7 @@ export async function loadRelayWorkspaceData(searchParams: Promise<Record<string
     userEmail: user.email ?? null,
     isDoctor,
     columns: { open: openTasks, pending: pendingTasks, done: doneTasks },
+    counts,
     assignableMembers,
   };
 }
