@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { BrandMark } from "./brand-mark";
 import { NavItem } from "./nav-item";
 import { JournalNavGroup } from "./journal-nav-group";
+import { SignOutSidebarForm } from "./sign-out-form";
 import { useMobileNavOptional } from "./mobile-nav";
 
 export interface SidebarProps {
@@ -31,19 +32,15 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className={`flex h-full min-h-0 ${RAIL} shrink-0 flex-col border-r bg-white/95 backdrop-blur-xl md:min-h-[100dvh]`}
-      style={{ borderColor: "#EEF2F6" }}
+      className={`flex h-full min-h-0 ${RAIL} shrink-0 flex-col border-r border-[rgba(15,23,42,0.06)] bg-white/95 backdrop-blur-xl md:min-h-[100dvh]`}
     >
-      <div
-        className="flex shrink-0 flex-col border-b md:block"
-        style={{ borderColor: "#EEF2F6" }}
-      >
-        <div className="flex items-center justify-between gap-2 px-3 py-3 md:hidden">
+      <div className="shrink-0 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 md:px-4 md:pb-3 md:pt-4">
+        <div className="flex items-center justify-between gap-2 md:hidden">
           <BrandMark compact />
           <button
             type="button"
             onClick={() => mobileNav?.close()}
-            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-xl text-[#64748B] transition hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-lg text-[#64748B] transition hover:bg-[rgba(15,23,42,0.04)] hover:text-[#0F172A]"
             aria-label="Menü schließen"
           >
             <X className="h-5 w-5" strokeWidth={2} />
@@ -54,7 +51,10 @@ export function Sidebar({
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-2 pt-3 pb-4 min-[420px]:md:space-y-2 min-[420px]:md:px-4 min-[420px]:md:pt-4">
+      <nav
+        className="min-h-0 flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden px-2 py-1 min-[420px]:md:space-y-1 min-[420px]:md:px-3 min-[420px]:md:py-2"
+        aria-label="Hauptnavigation"
+      >
         {role === "doctor" && (
           <NavItem
             href="/dashboard"
@@ -100,18 +100,13 @@ export function Sidebar({
         )}
       </nav>
 
-      <div
-        className="shrink-0 space-y-2 border-t px-2 py-4 min-[420px]:md:px-4"
-        style={{
-          borderColor: "#EEF2F6",
-          paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
-        }}
-      >
-        <div className="mx-2 hidden text-[11px] font-medium text-[#94A3B8] md:block">
-          Hilfe &amp; Support
-        </div>
-        <div className="mx-2 font-mono text-[10px] uppercase tracking-wider text-[#94A3B8] max-md:mx-1 md:mx-2">
-          v 0.1 · Alpha
+      <div className="shrink-0 space-y-4 px-2 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6 min-[420px]:md:px-3">
+        <SignOutSidebarForm />
+        <div className="px-1">
+          <p className="text-[11px] font-medium leading-snug text-[#94A3B8]">Hilfe &amp; Support</p>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[#94A3B8]">
+            v 0.1 · Alpha
+          </p>
         </div>
       </div>
     </aside>

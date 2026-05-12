@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { createCaseFromQuery } from "@/lib/create-case-return";
+import { NewTaskModalTrigger } from "@/components/my-tasks/new-task-modal";
 
 type ActionVariant = "both" | "newCase" | "newTask" | "none";
 
@@ -32,20 +33,6 @@ function resolveVariant(pathname: string): ActionVariant {
     return "none";
   }
   return "none";
-}
-
-function NeueAufgabeLink() {
-  return (
-    <Link
-      href="/relay#relay-quick-create"
-      title="Neue Aufgabe"
-      className="inline-flex h-10 items-center gap-2 rounded-xl border border-[rgba(15,23,42,0.1)] px-3 text-[13px] font-medium text-[#0F172A] transition-colors hover:border-[rgba(43,111,232,0.18)] hover:bg-[#F4F7FB] md:px-4 md:text-[14px]"
-      style={{ borderRadius: "12px" }}
-    >
-      <Plus className="h-4 w-4 shrink-0 text-[#2F80ED]" />
-      <span className="hidden sm:inline">Neue Aufgabe</span>
-    </Link>
-  );
 }
 
 function NeuerFallLink({ pathname }: { pathname: string }) {
@@ -76,7 +63,7 @@ export function TopbarContextActions() {
 
   return (
     <div className="flex h-10 shrink-0 items-center gap-2 md:gap-3">
-      {(variant === "both" || variant === "newTask") && <NeueAufgabeLink />}
+      {(variant === "both" || variant === "newTask") && <NewTaskModalTrigger />}
       {(variant === "both" || variant === "newCase") && <NeuerFallLink pathname={pathname} />}
     </div>
   );

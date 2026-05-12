@@ -27,6 +27,36 @@ function SignOutIconSubmit() {
   );
 }
 
+function SignOutSidebarSubmit() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-busy={pending}
+      className="flex w-full min-h-[44px] touch-manipulation items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[13px] font-medium text-[#64748B] transition-colors hover:bg-[rgba(15,23,42,0.04)] hover:text-[#334155] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.12)] disabled:cursor-not-allowed disabled:opacity-60 md:min-h-0 md:py-2"
+    >
+      {pending ? (
+        <span className="text-[#94A3B8]">Wird abgemeldet…</span>
+      ) : (
+        <>
+          <LogOut className="h-4 w-4 shrink-0 opacity-70" strokeWidth={1.75} aria-hidden />
+          <span>Abmelden</span>
+        </>
+      )}
+    </button>
+  );
+}
+
+/** Ruhiger Logout unten in der Sidebar (Desktop & Mobile-Drawer). */
+export function SignOutSidebarForm() {
+  return (
+    <form action={AUTH_SIGN_OUT_PATH} method="post" className="w-full">
+      <SignOutSidebarSubmit />
+    </form>
+  );
+}
+
 /** Kompakter Logout in der Topbar — kein Doppel-POST, Pending sichtbar. */
 export function SignOutIconForm() {
   return (

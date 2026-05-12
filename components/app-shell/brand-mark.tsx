@@ -14,16 +14,9 @@ export function BrandMark({ compact = false }: BrandMarkProps) {
     <Link
       href="/dashboard"
       className={cn(
-        "flex min-w-0 items-center",
-        compact ? "min-h-10 gap-2" : "h-20 border-b px-6"
+        "flex min-w-0 items-center rounded-lg transition-colors hover:bg-[rgba(15,23,42,0.03)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.1)]",
+        compact ? "min-h-10 gap-2 py-1" : "py-4 md:py-5"
       )}
-      style={
-        compact
-          ? undefined
-          : {
-              borderColor: "#EEF2F6",
-            }
-      }
     >
       <YourDentistBrandLockup
         size={compact ? "sm" : "md"}

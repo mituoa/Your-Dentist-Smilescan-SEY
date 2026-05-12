@@ -1,5 +1,14 @@
 /**
- * **`/profile` — Routen-QA (`loading.tsx`, Punkte 2–10): final** (MVP P2).
+ * **`/profile` — Routen-QA (`loading.tsx`, Punkte 2–13): final** (MVP/Drift: `page.tsx` 11–12; Priorität/Stabilität: `page.tsx` Punkt 13).
+ *
+ * **Punkt 11 (MVP) — final:** Skeleton spiegelt **nur** die schlanke Übersicht (Kopf + zwei Karten) — **kein**
+ * Publishing-Dashboard, **kein** KPI-/Activity-Theater, **kein** Vorschau-Canvas. Team: Redirect vor diesem Segment.
+ *
+ * **Punkt 12 (Nice / Future / Non-MVP) — final (Kurz):** Kein Skeleton-**Feature-Creep** (keine Extra-Karten,
+ * kein Fake-Preview, kein Analytics-/SEO-Platzhalter); nur statisches Layout — Details s. `page.tsx` Punkt 12.
+ *
+ * **Punkt 13 (Priorität) — final (Kurz):** Skeleton bleibt **statisch und dünn** — keine Aufwertung zu „Produkt-Priorität
+ * durch mehr UI“; Route **P2 stabil** halten, s. `page.tsx` Punkt 13.
  *
  * **`/profile` — Punkt 2 (Status — final):** Segment-`loading` während **Workspace/Rolle** und **Slug-Lesung** —
  * **statisch**, kein Puls/Shimmer (kein „Realtime“- oder CMS-Busy-Signal). Gleicher Außenrahmen wie `page.tsx`
@@ -33,7 +42,7 @@
  * `p-5 sm:p-6`); **`min-w-0`** auf Container und Raster — **kein** horizontales Scrollen durch Skeleton-Breiten.
  *
  * **Punkt 10 (Security) — final:** Kein Client-Trust im Skeleton; Zielseite: Doctor-Gate, Workspace-Scope, RLS, s.
- * `page.tsx`.
+ * `page.tsx`. MVP-, Drift- und Prioritäts-Grenzen: Punkte 11–13 in `page.tsx`.
  */
 import {
   clinicalWorkspaceFrame,
@@ -48,21 +57,21 @@ export default function ProfileLoading() {
       aria-labelledby="profile-loading-label"
     >
       <div className="mx-auto w-full min-w-0 max-w-4xl space-y-8 overflow-x-hidden">
-        <div className="min-h-[12.5rem] md:min-h-[14rem]">
-          <div className="mb-3 h-3 w-28 rounded-sm bg-border/80" aria-hidden />
+        <div className="min-h-[10.5rem] md:min-h-[11.5rem]">
+          <div className="mb-2 h-2.5 w-24 rounded-sm bg-border/80" aria-hidden />
           <div
-            className="mb-4 min-h-[2.35rem] max-w-xl rounded-sm bg-border/55 md:min-h-[2.85rem]"
+            className="mb-3 min-h-[2rem] max-w-md rounded-sm bg-border/55 md:min-h-[2.25rem]"
             aria-hidden
           />
-          <div className="mb-2 h-3 max-w-xl rounded-sm bg-border/40" aria-hidden />
-          <div className="mb-5 h-3 max-w-md rounded-sm bg-border/35" aria-hidden />
+          <div className="mb-2 h-2.5 max-w-xl rounded-sm bg-border/40" aria-hidden />
+          <div className="mb-4 h-2.5 max-w-lg rounded-sm bg-border/35" aria-hidden />
           <p
             id="profile-loading-label"
             role="status"
             aria-live="polite"
             className="max-w-xl text-sm font-normal leading-relaxed text-text-secondary"
           >
-            Praxis- und Dokumentbereich wird geladen …
+            Praxisübersicht wird geladen …
           </p>
         </div>
         <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch md:gap-4">

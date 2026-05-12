@@ -14,6 +14,8 @@ import {
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { MyTask } from "@/lib/queries/my-tasks";
+import type { AssignableMember } from "@/lib/queries/team-members";
+import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { createClient } from "@/lib/supabase/server";
 import type { User } from "@supabase/supabase-js";
 import { upsertTaskReceipts } from "@/lib/tasks/receipts";
@@ -128,13 +130,64 @@ async function resolveActorWorkspace(): Promise<
   return { ok: true, supabase, user, workspace };
 }
 
+/** Mitgliederliste für das Modal „Neue Aufgabe“ (geschützter Arbeitsbereich). */
+export async function fetchAssignableMembersForTaskCreate(): Promise<
+  { ok: true; members: AssignableMember[] } | { ok: false; error: string }
+> {
+  const actor = await resolveActorWorkspace();
+  if (!actor.ok) return { ok: false, error: actor.error.error };
+  const members = await getAssignableWorkspaceMembers(
+    actor.workspace.workspace_id,
+    actor.user.id
+  );
+  return { ok: true, members };
+}
+
 export async function createMyTask(formData: FormData): Promise<{
   error?: string;
   success?: boolean;
 }> {
-  const title = ((formData.get("title") as string) || "").trim();
-  const content = (formData.get("content") as string) || "";
-  const priority = formData.get("is_important") === "true" ? "important" : "normal";
+  const taskFormVariant = ((formData.get("task_form") as string) || "").trim();
+  const isModalForm = taskFormVariant === "modal";
+
+  const titleTrim = ((formData.get("title") as string) || "").trim();
+  const contentField = ((formData.get("content") as string) || "").trim();
+  const descriptionBody = ((formData.get("description") as string) || "").trim();
+  const tagsRaw = ((formData.get("tags") as string) || "").trim();
+  const dueDateRaw = ((formData.get("due_date") as string) || "").trim();
+  const priorityLevel = ((formData.get("priority_level") as string) || "").toLowerCase();
+
+  const tagParts = tagsRaw
+    .split(/[,;]+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+  let descriptionForRow: string | null = descriptionBody || null;
+  if (tagParts.length > 0) {
+    const tagLine = `Tags: ${tagParts.join(", ")}`;
+    descriptionForRow = descriptionForRow ? `${descriptionForRow}\n\n${tagLine}` : tagLine;
+  }
+
+  let dueDateIso: string | null = null;
+  if (dueDateRaw.length > 0) {
+    const parsed = new Date(`${dueDateRaw}T12:00:00`);
+    if (Number.isNaN(parsed.getTime())) {
+      return { error: "Bitte prüfen Sie das Fälligkeitsdatum." };
+    }
+    dueDateIso = parsed.toISOString();
+  }
+
+  const legacyImportant = formData.get("is_important") === "true";
+  const priority: "normal" | "important" =
+    legacyImportant || priorityLevel === "high" ? "important" : "normal";
+
+  const content =
+    contentField.length > 0
+      ? contentField
+      : titleTrim.length > 0
+        ? descriptionBody
+          ? `${titleTrim}\n\n${descriptionBody}`
+          : titleTrim
+        : "";
   const assignAllTeam = formData.get("assign_all_team") === "true";
   const assignToMe = formData.get("assign_to_me") === "true";
   const specificRecipientId =
@@ -147,6 +200,10 @@ export async function createMyTask(formData: FormData): Promise<{
         .filter(Boolean)
     )
   );
+
+  if (isModalForm && titleTrim.length === 0) {
+    return { error: "Bitte geben Sie einen Titel ein." };
+  }
 
   if (!content.trim()) {
     return { error: "Bitte geben Sie eine Aufgabe ein." };
@@ -165,6 +222,7 @@ export async function createMyTask(formData: FormData): Promise<{
 
   if (
     !assignAllTeam &&
+    !assignToMe &&
     specificRecipientIds.length === 0 &&
     (!specificRecipientId || specificRecipientId.trim().length === 0)
   ) {
@@ -196,13 +254,22 @@ export async function createMyTask(formData: FormData): Promise<{
     }
   }
 
+  const titleForInsert =
+    titleTrim.length > 0
+      ? titleTrim
+      : content.trim().length > 120
+        ? content.trim().slice(0, 120)
+        : null;
+
   const { data: inserted, error } = await supabase
     .from("tasks")
     .insert({
       workspace_id: workspace.workspace_id,
       submission_id: null,
-      title: title.length > 0 ? title : null,
+      title: titleForInsert,
       content: content.trim(),
+      description: descriptionForRow,
+      due_date: dueDateIso,
       priority,
       recipient_type: recipientType,
       specific_recipient_id:
@@ -266,7 +333,7 @@ export async function createMyTask(formData: FormData): Promise<{
     if (dedupedRecipients.length > 0) {
       const taskUrl = `${getAppBaseUrl()}/my-tasks/${inserted.id}`;
       const mail = buildTaskAssigned({
-        taskTitle: resolveTaskDisplayTitle(title, content.trim()),
+        taskTitle: resolveTaskDisplayTitle(titleForInsert, content.trim()),
         taskUrl,
         actorName: user.email || "Team-Mitglied",
         recipientEmail: dedupedRecipients[0]?.email || "",

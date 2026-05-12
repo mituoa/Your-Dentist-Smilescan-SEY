@@ -304,49 +304,29 @@ export function ClinicalRelayBoardSkeleton() {
       role="status"
     >
       <div className={`min-h-[56vh] ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-3">
             {inboxBarStatic("h-8 w-36 rounded-lg sm:h-9 sm:w-40")}
             {inboxBarStatic("h-3.5 w-full max-w-[640px]")}
             {inboxBarStatic("h-3.5 w-[min(100%,520px)]")}
           </div>
-          <div
-            className="inline-flex shrink-0 gap-1 self-start rounded-[10px] p-1 ring-1 ring-[#E2E8F0] bg-[#F8FAFC] sm:self-auto"
-            aria-hidden
-          >
-            {inboxBarStatic("h-10 w-[8.5rem] rounded-lg")}
-            {inboxBarStatic("h-10 w-[9.5rem] rounded-lg")}
+          <div className="inline-flex shrink-0 gap-1 self-start rounded-[10px] p-1 ring-1 ring-[#E2E8F0]" aria-hidden>
+            {inboxBarStatic("h-8 w-[7.5rem] rounded-md")}
+            {inboxBarStatic("h-8 w-[9rem] rounded-md")}
           </div>
         </div>
 
-        <div className="mb-6 flex flex-wrap gap-2" aria-hidden>
-          {inboxBarStatic("h-8 w-[5.5rem] rounded-md")}
-          {inboxBarStatic("h-8 w-[7.5rem] rounded-md")}
-          {inboxBarStatic("h-8 w-[4.75rem] rounded-md")}
-        </div>
-
-        <div
-          className="mb-8 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-          aria-hidden
-        >
-          {inboxBarStatic("h-[15px] w-full max-w-2xl rounded")}
-          {inboxBarStatic("mt-4 h-10 w-full max-w-xl rounded-lg")}
-        </div>
-
-        <div className="overflow-x-auto overscroll-x-contain pb-[max(0.5rem,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]">
+        <div className="overflow-x-auto pb-2">
           <div className="grid min-w-[980px] grid-cols-3 gap-6">
             {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="flex max-h-[min(72vh,calc(100dvh-15rem))] min-h-[min(52vh,520px)] flex-col rounded-xl border border-[rgba(15,23,42,0.06)] bg-white/[0.98] p-4 sm:max-h-[72vh] sm:p-5"
-              >
-                <div className="mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] pb-3">
+              <div key={i} className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
                   {inboxBarStatic("h-3.5 w-28 rounded")}
                   {inboxBarStatic("h-5 w-7 shrink-0 !rounded-full")}
                 </div>
                 <div className="space-y-3">
-                  {inboxBarStatic("min-h-[88px] w-full rounded-lg")}
-                  {inboxBarStatic("min-h-[88px] w-full rounded-lg")}
+                  {inboxBarStatic("h-20 w-full rounded-lg")}
+                  {inboxBarStatic("h-20 w-full rounded-lg")}
                 </div>
               </div>
             ))}

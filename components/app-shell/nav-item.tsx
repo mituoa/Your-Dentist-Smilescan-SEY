@@ -55,26 +55,26 @@ export function NavItem({
     <Link
       href={href}
       className={cn(
-        "relative mx-1 flex min-h-[52px] touch-manipulation items-center gap-3.5 rounded-xl px-3 py-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 md:mx-2 md:min-h-[3.25rem] md:py-2.5",
-        isActive ? "bg-[#EEF6FF]" : "hover:bg-[#F8FAFC]"
+        "relative flex min-h-[48px] touch-manipulation items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.1)] md:min-h-[44px] md:py-2",
+        isActive ? "bg-[rgba(47,128,237,0.06)]" : "hover:bg-[rgba(15,23,42,0.03)]"
       )}
     >
       {isActive ? (
-        <span className="absolute left-[6px] top-1/2 h-5 w-0.5 -translate-y-1/2 rounded bg-[#2F80ED]" />
+        <span className="absolute left-1 top-1/2 h-[22px] w-0.5 -translate-y-1/2 rounded-full bg-[#2F80ED]/90" />
       ) : null}
       <img
         src={brandMark.src}
         alt={brandMark.alt}
         className={cn(
-          "h-8 w-8 shrink-0 object-contain opacity-80",
+          "h-7 w-7 shrink-0 object-contain opacity-75",
           isActive && "opacity-100"
         )}
       />
       <div className="min-w-0 flex-1 text-left">
         <span
           className={cn(
-            "block truncate text-[15px] font-medium leading-snug",
-            isActive ? "text-[#1E293B]" : "text-[#64748B]"
+            "block truncate text-[14px] font-medium leading-snug tracking-[-0.01em]",
+            isActive ? "text-[#0F172A]" : "text-[#475569]"
           )}
         >
           {label}
@@ -82,7 +82,7 @@ export function NavItem({
         {description ? (
           <span
             className={cn(
-              "mt-0.5 block line-clamp-2 text-left text-[11px] font-medium leading-snug",
+              "mt-0.5 block line-clamp-2 text-left text-[12px] font-normal leading-snug",
               isActive ? "text-[#64748B]" : "text-[#94A3B8]"
             )}
           >

@@ -106,7 +106,7 @@ export default async function ProtectedLayout({
               className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden ${SIDEBAR_MAIN_PAD}`}
             >
               {/* Topbar — immer sichtbar, Inhalt scrollt darunter */}
-              <header className="sticky top-0 z-30 flex shrink-0 flex-col border-b border-[rgba(15,23,42,0.06)] bg-white/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur-xl">
+              <header className="sticky top-0 z-30 flex shrink-0 flex-col border-b border-[rgba(15,23,42,0.06)] bg-white/95 pt-[env(safe-area-inset-top,0px)] backdrop-blur-md">
                 <div className="flex h-16 w-full items-center gap-2 px-4 md:gap-3 md:px-10">
                   <MobileMenuButton />
                   <div className="flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">

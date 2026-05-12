@@ -1,5 +1,3 @@
-import { SignOutIconForm } from "@/components/app-shell/sign-out-form";
-
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -52,7 +50,6 @@ export function UserMenu({
           </div>
         )}
       </div>
-      <SignOutIconForm />
     </div>
   );
 }

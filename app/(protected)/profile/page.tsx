@@ -19,7 +19,7 @@ function publicProfileUrlLabel(baseUrl: string, path: string): string {
 }
 
 /**
- * **`/profile` — Routen-QA (Punkte 1–10): final** (MVP P2).
+ * **`/profile` — Routen-QA (Punkte 1–13): final** (MVP-Hub Punkt 11; Nice/Future/Non-MVP Punkt 12; Priorität/Stabilität Punkt 13).
  *
  * **`/profile` — Punkt 1 (Zweck) — final:** Ruhige **Verwaltung der Praxisangaben** und des **verknüpften, freigegebenen
  * Patientenbereichs** unter `/doc/{slug}` — **kein** Social-/Creator-Profil, **kein** generisches Account-Center,
@@ -47,7 +47,7 @@ function publicProfileUrlLabel(baseUrl: string, path: string): string {
  * **Editor** (Praxisangaben) und optional **Patientenbereich** nur bei gültiger Kurzadresse — **kein** toter
  * „Ansehen“-Link, **keine** Vorschau- oder Live-Publish-Vortäuschung. Copy **fachlich** (Dokumentation, Einsendung),
  * **kein** Slug- oder URL-Pfad-Jargon in der Einleitung; technische Adresse nur **klein** unter der Patientenkarte.
- * Neuer Tab nur für den **operativen** Weitergabe-Link; Hover **dezent** (`border-brand/25`). **Nicht:** Site-Builder-,
+ * Neuer Tab nur für den **operativen** Weitergabe-Link; Hover **dezent** (leichte Randbetonung). **Nicht:** Site-Builder-,
  * CMS-Hub- oder Creator-„Präsenz“-Semantik.
  *
  * **Punkt 5 (Tot/Fake) — final:** **Ehrlicher Datenmoment:** keine Schein-Vorschau, kein Publish-/Go-Live-Ticker,
@@ -82,6 +82,79 @@ function publicProfileUrlLabel(baseUrl: string, path: string): string {
  * **referrerPolicy no-referrer** (kein Referer-Leak aus dem geschützten Kontext). **force-dynamic** gegen Slug- und
  * Cache-Drift. Client **keine** Rohfehler; Logs nur Fehlercode (s. Punkt 3). **Kein** Slug-Scan; Team-Redirect **vor**
  * Datenabfrage. Server-Actions im Editor: gleiche Rollen- und Slug-Validierung bei `revalidatePath`.
+ *
+ * **Punkt 11 (MVP) — final:** Diese Route ist **bewusst klein**: zwei Einstiege (Editor + optionaler Patientenbereich
+ * unter `/doc/{slug}`) — **kein** Profil-Netzwerk, **kein** CMS-Hub, **kein** Website-Builder, **kein** Publishing-Dashboard.
+ * **Ausreichend** für den Pilot: Praxisangaben pflegen und den freigegebenen Einsendepfad sachlich erreichbar halten.
+ * **Bewusst nicht Teil dieses MVP-Hubs** (keine UI-Vortäuschung auf `/profile`): eingebettete Live-Vorschau,
+ * Analytics, SEO-/Go-Live-Steuerung, Social-/Creator-Funktionen, Mehrfach-Öffentlichkeitsprofile, komplexe
+ * „Präsenz“-Verwaltung. Bei Zielkonflikt gilt: **ruhigere**, fokussiertere Praxis-/Dokumentverwaltung vor
+ * plattformartiger Breite — Details und P2-Ideen **Punkt 12**; Prioritäts-Disziplin und „nicht mehr ausbauen“ **Punkt 13**.
+ *
+ * **Punkt 12 (Nice / Future / Non-MVP) — final (Doku/Strategie):** Abgrenzung zum Schutz vor **Scope-Creep** und
+ * **CMS-/Creator-/Publishing-/Marketing-Drift**. Diese Route bleibt ein **Wegeiser**, nicht ein Bedienfeld für die
+ * öffentliche Fläche oder für Wachstum/KPIs.
+ *
+ * **Nice (klein; P2/P3; ohne neue Produktlogik auf `/profile`):** feine Spacing-/Typo-/Karten-Rhythmus-Polish;
+ * echte Geräte-QA (z. B. sehr lange Host-Zeilen, Touch-Ziele); kleine **Accessibility**-Verbesserungen (Landmarks,
+ * konsistente `aria-*` bei Copy-Änderungen); diskrete Loading-/Slug-Edge-Copy — **ohne** zusätzliche Karten,
+ * **ohne** iframe/Vorschau, **ohne** Dashboard-Kacheln.
+ *
+ * **Future (eigene Epics; nicht durch Erweiterung dieser Übersicht „lösen“):** optionaler **Vorschau-Embed** oder
+ * strukturierte **Sandbox-/Staged-Preview** von `/doc`-Inhalten (technisch und juristisch separat zu klären);
+ * komfortablere **Kurzlink-/Slug-Verwaltung** (Konflikte, Sperrlisten, Reservierung) **serverseitig** mit klarer Policy;
+ * **Audit-/Änderungsverlauf** für Praxisangaben; ggf. **Freigabe-/Vier-Augen-Workflows** — alles **nicht** als
+ * Feature-Sammlung auf `/profile` starten (sonst Hub-Inflation und CMS-Anmutung).
+ *
+ * **Non-MVP (bewusst nicht bauen / nicht als leichtes „Nice“ verkaufen):** Social-/Follower-**Profilplattform**,
+ * öffentliche **Multi-Presence** jenseits des einen Einsendepfads, **Analytics-/SEO-/Traffic-Dashboards**, KPI- und
+ * **Aktivitäts-Theater**, Branding-/Campaign-Editoren, **CMS-/Website-Builder-Logik** (Seitenmodule, Template-Märkte),
+ * **Realtime-/Publishing-Showcases** („Live“, Schein-Publish), **AI-/Automation-Showcases** als Produktlayer auf
+ * dieser Shell, Growth-/A/B-Experimente **auf `/profile`**, personalisierte Marketing-Landing statt sachlicher Hub.
+ *
+ * **Drift-Risiken (explizit vermeiden):** alles, was `/profile` **plattformartig**, **startupig** oder
+ * **marketingzentriert** wirken lässt; künstliche „Aktivität“ ohne fachlichen Mehrwert; SEO-Scores oder
+ * Einbindung von Drittanalytics **auf dieser Route**; jede öffentliche Profillogik, die über **einen** validierten
+ * `workspaces.slug` + `/doc/*` hinausgeht.
+ *
+ * **Nicht erweitern:** `/profile` zu einem **Navigations-CMS**, **Creator-Home**, **Go-Live-Kontrollzentrum** oder
+ * **Marketing-Automation-Hub** — öffentlicher Inhalt bleibt unter **`/doc/{slug}`**, Bearbeitung im **Editor**,
+ * diese Seite nur der **ruhige, kontrollierte Einstieg**.
+ *
+ * **Punkt 13 (Priorität) — final (Doku/Strategie):** **Realistische Einordnung:** `/profile` ist ein **randständiger,
+ * verlässlicher Hub** zwischen geschütztem **Editor** und dem **öffentlichen Einsendepfad** `/doc/{slug}` — nicht
+ * Teil des klinischen Kern-Workflows (Inbox, Relay, Case). **P2 bleibt korrekt:** unterhalb von P0/P1-Kritikalität;
+ * hier lohnen **Bugfixes**, **Sicherheitskorrekturen**, kleine **A11y-/Copy-/Layout-Fixes**, **kein** Feature-Ausbau
+ * als Ziel an sich.
+ *
+ * **Prioritätsregel:** Kollidieren **„mächtigere“ Profil-/Public-Inszenierung** mit **ruhiger, glaubwürdiger** medizinischer
+ * Dokumentverwaltung → **Stabilität, Ruhe, Fokus** bevorzugen; diese Route **absichtlich stabil** halten.
+ *
+ * **Produktkritische Regressionen (relativ zu dieser Route sofort eskalieren):** Team sieht die Seite; falscher oder
+ * fremder Workspace-Kontext im Slug-Link; **öffentlicher href** ohne `isSafeDocPathSlug`; täuschender oder toter
+ * Patienten-Link; Slug/Workspace-IDs in Nutzer-Copy; Doctor-Gate nur clientseitig; Referer-Leak aus dem geschützten
+ * Tab; sichtbare Rohfehler statt ruhiger Meldungen.
+ *
+ * **Vor Demo/Pilot/Praxisbetrieb manuell prüfen:** Arzt vs. Team-Redirect; rechte Karte in allen drei Zuständen
+ * (gültiger Slug / kein Slug / Lesefehler); lange Host-Zeilen mobil; neuer Tab + `noopener`/`noreferrer`; nach Editor-
+ * Speichern konsistenter Slug (`revalidatePath`).
+ *
+ * **Bewusst nicht mehr „feature-anfassen“:** Zwei-Karten-Hub, Doctor-Gate, Slug-Leselogik, fail-closed Public-Link —
+ * nur bei **Bug**, **Security**, **A11y** oder **klar sachlicher** Copy-Korrektur ändern, **nicht** als Einstieg in
+ * CMS-/Dashboard-Erweiterungen.
+ *
+ * **QA / Link-Hygiene / Monitoring / reale Nutzung (Betrieb, keine Produkt-Roadmap):** Support-Fälle zur Kurzadresse,
+ * 404/410 auf `/doc`, Log-Codes serverseitig — **keine** Begründung, auf `/profile` KPI-Kacheln oder Analytics zu
+ * setzen.
+ *
+ * **Funktional weiter ausbauen?** **Nein** als Default — Hub ist **fertig im MVP-Sinn**; sinnvolle Arbeit liegt in
+ * **Editor** und **`/doc/*`**, nicht in zusätzlichen Aktionen auf dieser Übersicht.
+ *
+ * **Sofort CMS-/Creator-/Marketing-/Startup-Anmutung:** weitere Karten/„Module“, eingebettete Vorschau, Traffic- oder
+ * SEO-Zahlen, künstliche Status-Badges, „Boost“-/Growth-Sprache, Realtime-„Live“-Labels, Creator-Landing-Stil.
+ *
+ * **Besonders geschützte Grenzen:** genau **ein** validierter `workspaces.slug` → `/doc/*`; keine zweite öffentliche
+ * Profil-Logik hier; keine Analytics-/SEO-Schicht; keine AI-/Automation-Showcase-Fläche — vgl. **Punkt 12**.
  */
 export const dynamic = "force-dynamic";
 
@@ -120,30 +193,31 @@ export default async function ProfilePage() {
     <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
       <div className="mx-auto w-full min-w-0 max-w-4xl space-y-8 overflow-x-hidden">
         <div className="min-w-0">
-          <p className="mb-3 text-xs font-semibold tracking-normal text-text-tertiary">
-            Praxis & Dokumentation
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748B]">
+            Praxis · Patientenunterlagen
           </p>
-          <h1 className="mb-4 text-balance font-serif text-4xl font-light tracking-tight text-text-primary md:text-5xl">
-            Praxisangaben und Patientendokumentation
+          <h1 className="mb-3 text-balance text-[1.625rem] font-semibold leading-snug tracking-[-0.02em] text-[#0F172A] md:text-[1.875rem]">
+            Praxisangaben und freigegebener Patientenbereich
           </h1>
-          <p className="max-w-xl text-[15px] leading-relaxed text-text-secondary md:text-base">
-            Hier bearbeiten Sie die Angaben zu Ihrer Praxis. Der mit dem Editor verknüpfte Bereich für Patientinnen
-            dient ausschließlich der strukturierten Einsendung von Unterlagen — nicht einer persönlichen oder
-            werblichen Online-Präsenz. Gespeicherte Angaben werden dort für Patientinnen sichtbar; es gibt keine
-            getrennte „Vorschau“ vor dem Speichern.
+          <p className="max-w-xl text-[14px] leading-relaxed text-[#475569] md:text-[15px]">
+            Bearbeiten Sie Praxisangaben im geschützten Editor. Der öffentliche Bereich unter Ihrer Kurzadresse dient
+            ausschließlich der dokumentierten Einsendung von Unterlagen — nicht einer allgemeinen Webpräsenz. Nach dem
+            Speichern sind die Angaben dort sichtbar; eine getrennte Vorschau gibt es in diesem MVP nicht.
           </p>
         </div>
 
         <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch md:gap-4">
           <Link
             href="/profile/editor"
-            className="flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-border bg-surface-card p-5 transition-colors hover:border-brand/25 sm:p-6 md:min-h-[220px]"
+            className="flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-5 transition-colors hover:border-[rgba(15,23,42,0.12)] sm:p-6 md:min-h-[220px]"
           >
-            <PencilLine className="mb-3 h-5 w-5 text-brand" strokeWidth={1.75} aria-hidden />
-            <h2 className="mb-1 font-serif text-xl text-text-primary">Praxisangaben bearbeiten</h2>
-            <p className="text-xs leading-snug text-text-tertiary">
-              Stammdaten, Schwerpunkte und Texte im geschützten Editor; nach dem Speichern wirksam für den
-              Patientenbereich.
+            <PencilLine className="mb-3 h-5 w-5 text-[#2F80ED]" strokeWidth={1.75} aria-hidden />
+            <h2 className="mb-1 text-[17px] font-semibold tracking-[-0.01em] text-[#0F172A]">
+              Praxisangaben bearbeiten
+            </h2>
+            <p className="text-[12px] leading-snug text-[#64748B]">
+              Geschützter Editor für Stammdaten und Texte. Änderungen gelten für den Patientenbereich erst nach dem
+              Speichern.
             </p>
           </Link>
 
@@ -154,51 +228,49 @@ export default async function ProfilePage() {
               rel="noopener noreferrer"
               referrerPolicy="no-referrer"
               aria-label="Patientenbereich für dokumentierte Einsendungen in neuem Fenster öffnen"
-              className="flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-border bg-surface-card p-5 transition-colors hover:border-brand/25 sm:p-6 md:min-h-[220px]"
+              className="flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-5 transition-colors hover:border-[rgba(15,23,42,0.12)] sm:p-6 md:min-h-[220px]"
             >
-              <ExternalLink className="mb-3 h-5 w-5 text-brand" strokeWidth={1.75} aria-hidden />
-              <h2 className="mb-1 font-serif text-xl text-text-primary">Patientenbereich prüfen</h2>
-              <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
-                Adresse zum Weitergeben
-              </p>
-              <p className="break-words [overflow-wrap:anywhere] font-mono text-[11px] leading-snug text-text-tertiary">
+              <ExternalLink className="mb-3 h-5 w-5 text-[#2F80ED]" strokeWidth={1.75} aria-hidden />
+              <h2 className="mb-1 text-[17px] font-semibold tracking-[-0.01em] text-[#0F172A]">
+                Patientenbereich öffnen
+              </h2>
+              <p className="mb-1.5 text-[12px] font-medium text-[#64748B]">Öffentliche Adresse (Weitergabe an Patientinnen)</p>
+              <p className="break-words [overflow-wrap:anywhere] font-mono text-[11px] leading-snug text-[#94A3B8]">
                 {publicUrlLabel}
               </p>
-              <p className="mt-3 text-xs leading-relaxed text-text-secondary">
-                Dient ausschließlich der dokumentierten Einsendung von Unterlagen — nicht einer allgemeinen
-                Webpräsenz.
+              <p className="mt-3 text-[12px] leading-relaxed text-[#475569]">
+                Nur für die strukturierte Einsendung vorgesehen — keine allgemeine Präsenz- oder Marketingseite.
               </p>
             </Link>
           ) : patientLinkLoadFailed ? (
             <div
-              className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-border bg-surface-card/60 p-5 sm:p-6 md:min-h-[220px]"
+              className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#FAFBFC] p-5 sm:p-6 md:min-h-[220px]"
               role="status"
               aria-live="polite"
               aria-atomic="true"
               aria-labelledby="profile-patient-empty-retry"
             >
-              <FileText className="mb-3 h-5 w-5 text-text-tertiary" strokeWidth={1.75} aria-hidden />
-              <h2 id="profile-patient-empty-retry" className="mb-1 font-serif text-xl text-text-primary">
+              <FileText className="mb-3 h-5 w-5 text-[#94A3B8]" strokeWidth={1.75} aria-hidden />
+              <h2 id="profile-patient-empty-retry" className="mb-1 text-[17px] font-semibold text-[#0F172A]">
                 Patientenbereich
               </h2>
-              <p className="text-xs leading-relaxed text-text-secondary">
-                Die Angaben zum Patientenbereich sind gerade nicht verfügbar. Bitte laden Sie die Seite neu oder
-                versuchen Sie es in Kürze erneut.
+              <p className="text-[12px] leading-relaxed text-[#475569]">
+                Die Verknüpfung ist gerade nicht erreichbar. Bitte Seite neu laden oder es später erneut versuchen.
               </p>
             </div>
           ) : (
             <div
-              className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-border bg-surface-card/60 p-5 sm:p-6 md:min-h-[220px]"
+              className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#FAFBFC] p-5 sm:p-6 md:min-h-[220px]"
               role="region"
               aria-labelledby="profile-patient-empty-setup"
             >
-              <FileText className="mb-3 h-5 w-5 text-text-tertiary" strokeWidth={1.75} aria-hidden />
-              <h2 id="profile-patient-empty-setup" className="mb-1 font-serif text-xl text-text-primary">
+              <FileText className="mb-3 h-5 w-5 text-[#94A3B8]" strokeWidth={1.75} aria-hidden />
+              <h2 id="profile-patient-empty-setup" className="mb-1 text-[17px] font-semibold text-[#0F172A]">
                 Patientenbereich
               </h2>
-              <p className="text-xs leading-relaxed text-text-secondary">
-                Die Kurzadresse für den Patientenbereich setzen Sie im Editor und speichern die Praxisangaben. Ohne
-                gespeicherte Kurzadresse steht kein Patientenlink bereit.
+              <p className="text-[12px] leading-relaxed text-[#475569]">
+                Legen Sie die Kurzadresse im Editor fest und speichern Sie die Praxisangaben. Ohne gültige, gespeicherte
+                Kurzadresse gibt es hier keinen Link — bewusst kein Platzhalter-Link.
               </p>
             </div>
           )}
