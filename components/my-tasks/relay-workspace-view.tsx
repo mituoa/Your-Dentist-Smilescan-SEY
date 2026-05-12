@@ -7,6 +7,22 @@
  * **Punkt 3** (Workspace, Auth, Actions) in `page.tsx` sowie `relay-server-data`, `my-tasks/actions`, Queries dokumentiert.
  * **Punkt 4 (Aktionen) — final:** ruhige Interaktionen in `RelayQuickCreate` und `CardBoard`; Vertrag in
  * `relay/page.tsx`. Manuelle Smoke vor Staging = Regression, nicht Vertragslücke.
+ * **Punkt 5 (Tot/Fake) — final:** Zähler unter dem Titel = **sichtbare** Karten pro Spalte (Filter wirkt auf Zahlen);
+ * keine separate Zähl-API; Daten beim Laden/Revalidierung — siehe `relay-server-data`, `relay/page.tsx`.
+ * **Punkt 6 (Loading) — final:** initiales Gerüst s. `relay/loading.tsx` + `ClinicalRelayBoardSkeleton`; Board-Pending
+ * bei Mutationen in `CardBoard` (`aria-busy`, keine Skeleton-Überlagerung).
+ * **Punkt 7 (Empty) — final:** Spalten-Leerzustände in `CardBoard` mit `columnEmptyContext` (Filter „Meine …“ =
+ * ehrliche Filter-Leere, keine vorgebliche Team-Leere); s. `relay/page.tsx`.
+ * **Punkt 8 (Error) — final:** `RelayQuickCreate` + `CardBoard`/`my-tasks/actions` — ruhige Fehler- und Rollback-Kommunikation; s. `relay/page.tsx`.
+ * **Punkt 9 (Mobile) — final:** Filter **44px**-Tippflächen, `touch-manipulation`; Board: s. `CardBoard` / `relay/page.tsx`.
+ *
+ * **Punkt 11 (MVP) — final:** Gleiche Board-Komponenten wie `/my-tasks`, andere Kopie/Filter-Labels — kein zweites
+ * Produkt; Scope und Non-Goals s. `relay/page.tsx` (Punkt 11).
+ *
+ * **Punkt 12 (Nice / Future / Non-MVP) — final:** Erweiterungsklassen und Anti-Drift — **kanonisch** `relay/page.tsx`
+ * (Punkt 12).
+ *
+ * **Punkt 13 (Priorität) — final:** Stabilität vor Feature-Ausbau — **kanonisch** `relay/page.tsx` (Punkt 13).
  */
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,13 +37,6 @@ import { buildMemberAvatarMap, emailInitials, filterColumnTasks } from "@/lib/ta
 import { cn } from "@/lib/utils";
 import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/clinical-ui";
 
-/** Mirrors `TaskCounts` from task-counts (client-safe). */
-export interface RelayTaskCounts {
-  open: number;
-  pending: number;
-  done: number;
-}
-
 type BoardColumns = {
   open: MyTask[];
   pending: MyTask[];
@@ -40,7 +49,6 @@ interface RelayWorkspaceViewProps {
   userEmail: string | null;
   isDoctor: boolean;
   columns: BoardColumns;
-  counts: RelayTaskCounts;
   assignableMembers: AssignableMember[];
 }
 
@@ -50,7 +58,6 @@ export function RelayWorkspaceView({
   userEmail,
   isDoctor,
   columns,
-  counts,
   assignableMembers,
 }: RelayWorkspaceViewProps) {
   const router = useRouter();
@@ -82,7 +89,7 @@ export function RelayWorkspaceView({
 
   const toggleBtn = (active: boolean) =>
     cn(
-      "rounded-lg px-4 py-2.5 text-[13px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.14)]",
+      "inline-flex min-h-[44px] min-w-0 items-center justify-center rounded-lg px-4 py-2.5 text-[13px] font-medium touch-manipulation transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.14)]",
       active
         ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-[#E2E8F0]"
         : "bg-transparent text-[#64748B] hover:bg-[rgba(15,23,42,0.04)] hover:text-[#334155]"
@@ -104,8 +111,8 @@ export function RelayWorkspaceView({
             style={{ color: "#475569" }}
           >
             {isRelay
-              ? "Gemeinsame Aufgabenübersicht fürs Team: zuweisen, einordnen und den Bearbeitungsstand teilen. Kein Patientendossier, kein Ticket-System."
-              : "Deine zugewiesenen und mit dir geteilten Aufgaben — dieselbe Datengrundlage wie das Team-Board unter Relay."}
+              ? "Gemeinsame Aufgabenübersicht für das Team: zuweisen, einordnen und den Bearbeitungsstand teilen. Kein Patientendossier, kein Ticketsystem."
+              : "Die Ihnen zugewiesenen und mit Ihnen geteilten Aufgaben — dieselbe Datengrundlage wie das Team-Board unter Relay."}
           </p>
         </div>
 
@@ -125,17 +132,17 @@ export function RelayWorkspaceView({
 
       <div className="mb-6 flex flex-wrap gap-2 text-[11px] font-medium">
         <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5 text-[#64748B]">
-          Offen: <strong className="tabular-nums text-[#0F172A]">{counts.open}</strong>
+          Offen: <strong className="tabular-nums text-[#0F172A]">{filtered.open.length}</strong>
         </span>
         <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5 text-[#64748B]">
-          In Bearbeitung: <strong className="tabular-nums text-[#0F172A]">{counts.pending}</strong>
+          In Bearbeitung: <strong className="tabular-nums text-[#0F172A]">{filtered.pending.length}</strong>
         </span>
         <span className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5 text-[#64748B]">
-          Erledigt: <strong className="tabular-nums text-[#0F172A]">{counts.done}</strong>
+          Erledigt: <strong className="tabular-nums text-[#0F172A]">{filtered.done.length}</strong>
         </span>
         {scope === "mine" ? (
           <span className="inline-flex items-center rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-[#475569]">
-            Nur Aufgaben mit deiner Beteiligung
+            Nur Aufgaben mit Ihrer Beteiligung
           </span>
         ) : null}
       </div>
@@ -154,6 +161,7 @@ export function RelayWorkspaceView({
         currentUserId={userId}
         isDoctor={isDoctor}
         avatarByUserId={avatarByUserId}
+        columnEmptyContext={scope}
         columnTitles={{
           open: "Offen",
           pending: "In Bearbeitung",

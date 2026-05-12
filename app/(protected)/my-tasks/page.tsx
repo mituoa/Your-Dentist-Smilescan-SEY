@@ -16,7 +16,6 @@ export default async function MyTasksPage({ searchParams }: MyTasksPageProps) {
       userEmail={data.userEmail}
       isDoctor={data.isDoctor}
       columns={data.columns}
-      counts={data.counts}
       assignableMembers={data.assignableMembers}
     />
   );

@@ -1,6 +1,15 @@
 "use client";
 
-/** Quick-Create für Relay / „Meine Aufgaben“ — **Punkt 4 (Aktionen) final** (`relay/page.tsx`). */
+/**
+ * Quick-Create — **Punkt 4–5** s. `relay/page.tsx`; **Punkt 8 (Error):** ruhige Fehlerfläche (`role="alert"`),
+ * Texte aus `createMyTask`. **Punkt 9 (Mobile):** `text-base`-Input, min. 44px-Steuerflächen, `touch-manipulation`.
+ * **Punkt 11 (MVP):** Ein Eingabefeld + Zuweisung/Priorität — **kein** Mehrzeilen-Editor, keine Vorlagen,
+ * keine Automatisierung; s. `relay/page.tsx` (Punkt 11).
+ * **Punkt 12:** Vorlagen/Makros/Smart-Defaults = **Future oder Non-MVP** — nicht still in Quick-Create ergänzen;
+ * s. `relay/page.tsx` (Punkt 12).
+ * **Punkt 13:** Quick-Create bewusst **einfach halten** — P0 liegt auf Zuverlässigkeit der Kernpfade, nicht auf
+ * mehr Eingabe-Features; s. `relay/page.tsx` (Punkt 13).
+ */
 
 import { ChevronDown, User } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -87,7 +96,7 @@ export function RelayQuickCreate({
   const resolvedPlaceholder =
     inputPlaceholder != null && inputPlaceholder.trim().length > 0
       ? inputPlaceholder.trim()
-      : "Was steht als Nächstes an?";
+      : "Aufgabe in einem kurzen Satz …";
 
   const showOptions = focused || dropdownOpen;
 
@@ -119,7 +128,7 @@ export function RelayQuickCreate({
         }}
         disabled={isPending}
         placeholder={resolvedPlaceholder}
-        className="w-full border-0 bg-transparent p-0 text-[15px] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
+        className="w-full border-0 bg-transparent p-0 text-base text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
       />
 
       {showOptions ? (
@@ -128,7 +137,7 @@ export function RelayQuickCreate({
             <button
               type="button"
               onClick={() => setDropdownOpen((o) => !o)}
-              className="flex h-10 w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(15,23,42,0.12)] hover:bg-[#F8FAFC]"
+              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(15,23,42,0.12)] hover:bg-[#F8FAFC] touch-manipulation"
             >
               {assignAll ? (
                 <>
@@ -140,11 +149,11 @@ export function RelayQuickCreate({
                   <div
                     className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
                     style={{ background: "#64748B" }}
-                    title="Dir zugewiesen"
+                    title="Ihnen zugewiesen"
                   >
                     {selfInitials.slice(0, 2)}
                   </div>
-                  <span className="truncate text-[13px] text-[#64748B]">Dir zuweisen (Standard)</span>
+                  <span className="truncate text-[13px] text-[#64748B]">Selbst zuweisen (Standard)</span>
                 </>
               ) : (
                 <>
@@ -186,7 +195,7 @@ export function RelayQuickCreate({
                     }}
                     className="h-4 w-4"
                   />
-                  <span>Mir zuweisen</span>
+                  <span>Selbst zuweisen</span>
                 </label>
                 <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F8FAFC]">
                   <input
@@ -236,7 +245,7 @@ export function RelayQuickCreate({
             type="button"
             onClick={() => setImportant((v) => !v)}
             className={cn(
-              "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 transition-colors sm:self-start",
+              "flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 transition-colors touch-manipulation sm:self-start",
               important ? "bg-[rgba(220,38,38,0.06)]" : "hover:border-[rgba(15,23,42,0.1)] hover:bg-[#F8FAFC]"
             )}
           >
@@ -251,11 +260,18 @@ export function RelayQuickCreate({
         </div>
       ) : null}
 
-      {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
+      {error ? (
+        <div
+          className="mt-3 rounded-lg border border-[rgba(220,38,38,0.12)] bg-[rgba(254,242,242,0.45)] px-3 py-2.5"
+          role="alert"
+        >
+          <p className="text-sm leading-snug text-[#7F1D1D]">{error}</p>
+        </div>
+      ) : null}
 
       {line.trim() && !showOptions ? (
         <p className="mt-2 text-[11px] text-[#94A3B8]">
-          Enter speichert · Feld erneut fokussieren für Zuweisung und Priorität
+          Eingabetaste speichert. Zum Ändern von Zuweisung und Priorität das Feld erneut fokussieren.
         </p>
       ) : null}
     </div>

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Praxis-Fall anlegen — **Punkt 1 (Zweck)** s. `app/(protected)/create-case/page.tsx`: ruhige medizinische
+ * Dokumentation, keine CRM-/Lead-/Ops-Sprache; Entwurf/Veröffentlichen als sachliche Speicherschritte.
+ */
+
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Check, Upload, X } from "lucide-react";
@@ -280,7 +285,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
           onClick={(e) => e.stopPropagation()}
         >
           <h1 id="create-case-title" className="sr-only">
-            Fall erstellen — neuer Patientenfall
+            Neuen Patientenfall für die Praxis anlegen
           </h1>
 
           {/* Mobile: Sheet-Chrome — weicher Übergang ins Formular (analog Register-Kopf mit leichtem Verlauf) */}
@@ -329,12 +334,13 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                   Fall erstellen
                 </h2>
                 <p className="text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-                  Erfassen Sie einen neuen Patientenfall schnell und strukturiert.
+                  Angaben für die fachliche Dokumentation; der Fall erscheint nach dem Speichern in der Inbox. Pflicht
+                  ist nur der Patientenname, alles Weitere optional.
                 </p>
               </header>
 
               <p className="mb-4 text-[12px] leading-relaxed text-slate-500 md:hidden">
-                Pflicht: Name. Übriges optional — wird mit dem Fall gespeichert.
+                Pflichtfeld: Name. Weitere Angaben optional — werden mit dem Fall gespeichert.
               </p>
 
               <div className="mb-4 min-h-[44px] md:mb-6 md:min-h-[52px]">
@@ -386,7 +392,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                     value={patientEmail}
                     onChange={(e) => setPatientEmail(e.target.value)}
                     autoComplete="email"
-                    placeholder="für Terminlink & Rückfragen"
+                    placeholder="optional, für Rückfragen der Praxis"
                     className="h-12 max-md:h-11 w-full rounded-[10px] border border-[#E2E8F0] px-4 text-[15px] max-md:text-[16px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)]"
                   />
                 </Field>
@@ -411,7 +417,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                placeholder="Was ist passiert? Wo genau? Seit wann bestehen die Beschwerden?"
+                placeholder="Kurze fachliche Einordnung: Anlass, Lokalisation, Verlauf (optional)"
                 className="min-h-[5.75rem] w-full resize-y rounded-[10px] border border-[#E2E8F0] px-4 py-2.5 text-[15px] max-md:text-[16px] text-[#0F172A] placeholder:text-gray-400 outline-none transition focus:border-[#2F80ED] focus:ring-[3px] focus:ring-[rgba(47,128,237,0.12)] md:min-h-[7.5rem] md:py-3"
               />
             </section>
@@ -509,8 +515,8 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                   </p>
                   <p className="max-w-[280px] text-center text-[12px] leading-snug" style={{ color: "#94A3B8" }}>
                     {attachments.length > 0
-                      ? "Weitere Dateien auswählen oder hierher ziehen · wird beim Speichern mit übermittelt"
-                      : "Klick zum Auswählen oder Dateien hierher ziehen · JPG, PNG, HEIC, WEBP"}
+                      ? "Weitere Dateien auswählen oder hierher ziehen — werden beim Speichern des Falls übernommen"
+                      : "Auswählen oder Dateien hierher ziehen — JPG, PNG, HEIC, WEBP"}
                   </p>
                 </div>
               </div>
@@ -546,7 +552,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                           {row.file.name || "Bild"}
                         </p>
                         <p className="text-[12px] text-emerald-700/90">
-                          Ausgewählt · wird mit dem Fall übertragen
+                          Ausgewählt — wird beim Speichern des Falls übernommen
                         </p>
                       </div>
                       <button
@@ -562,7 +568,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                 </ul>
               ) : (
                 <p className="mt-3 text-center text-[12px] leading-relaxed" style={{ color: "#94A3B8" }}>
-                  Noch keine Bilder — optional, empfohlen bei sichtbaren Veränderungen.
+                  Noch keine Bilder — optional; bei sichtbaren Befunden hilfreich für die Dokumentation.
                 </p>
               )}
             </section>

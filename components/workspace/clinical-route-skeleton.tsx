@@ -1,4 +1,5 @@
 import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/clinical-ui";
+import { clinicalCorePanel, clinicalDividerBorder } from "@/lib/pilot-surface";
 
 /**
  * Subtle blue-gray loading placeholders — aligned with Tracker / Figma (no warm paper blocks).
@@ -226,43 +227,131 @@ export function ClinicalInboxDetailSkeleton() {
   );
 }
 
-/** Relay board: three slim columns, same radii as real board. */
+/**
+ * Ladegerüst **Aufgabendetail** (`/my-tasks/[id]`) — **Punkt 6 (Loading):** nur `loading.tsx`; **statische**
+ * Balken (`inboxBarStatic`), **kein** Puls, **keine** Chat-/Ticket-Skeleton-Animation. Abstände und Panelflächen an
+ * `TaskDetailView` (`clinicalCorePanel`, `mb-8` / `mb-10`, Kommentar-`space-y-6`) — ruhige Koordination, kein
+ * Realtime-/Ops-Schein. Aktionspanel immer gezeigt: bei Task `done` entfällt es nach dem Laden (kleiner Sprung,
+ * selten — s. `page.tsx` Punkt 6). **Punkt 9:** äußerer Rahmen `min-w-0 overflow-x-hidden` wie `TaskDetailView`.
+ */
 export function ClinicalTaskDetailSkeleton() {
   return (
-    <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`} style={{ background: "#F7F9FC" }}>
-      <div className="mx-auto w-full max-w-4xl">
-      {bar("mb-6 h-4 w-40")}
-      <div className="space-y-4 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white/[0.97] p-5 shadow-sm">
-        {bar("h-8 max-w-md")}
-        {bar("mt-4 h-24 w-full")}
-        {bar("mt-6 h-10 w-full rounded-lg")}
-      </div>
+    <div
+      className="min-h-0 min-w-0 flex-1 overflow-x-hidden"
+      style={{ background: "#F7F9FC" }}
+      aria-busy="true"
+      aria-label="Aufgabe wird geladen"
+      role="status"
+    >
+      <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
+        <div className="mx-auto w-full min-w-0 max-w-4xl">
+          <div className="mb-6 inline-flex min-h-10 items-center sm:mb-8" aria-hidden>
+            {inboxBarStatic("h-4 w-48 rounded-lg")}
+          </div>
+
+          <div className={`mb-8 p-4 sm:p-5 ${clinicalCorePanel}`}>
+            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <div className="min-w-0 flex-1 space-y-2">
+                {inboxBarStatic("h-8 w-full max-w-2xl sm:h-9")}
+              </div>
+              {inboxBarStatic("h-8 w-[5.75rem] shrink-0 rounded-full")}
+            </div>
+            {inboxBarStatic("mb-4 h-[4.5rem] w-full max-w-3xl rounded-md")}
+            <div
+              className={`grid grid-cols-1 gap-2 border-t pt-4 sm:grid-cols-2 xl:grid-cols-3 ${clinicalDividerBorder}`}
+              aria-hidden
+            >
+              {inboxBarStatic("h-3.5 w-full max-w-xs")}
+              {inboxBarStatic("h-3.5 w-full max-w-[220px]")}
+              {inboxBarStatic("h-3.5 w-full max-w-[200px]")}
+            </div>
+            {inboxBarStatic("mt-3 h-2.5 w-full max-w-xl")}
+          </div>
+
+          <div className={`mb-10 p-4 sm:p-5 ${clinicalCorePanel}`} aria-hidden>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              {inboxBarStatic("h-10 w-[min(100%,11rem)] rounded-lg")}
+              {inboxBarStatic("h-10 w-[min(100%,10rem)] rounded-lg")}
+            </div>
+          </div>
+
+          <section className={`space-y-6 p-4 sm:p-5 ${clinicalCorePanel}`} aria-hidden>
+            <div className="space-y-1.5">
+              {inboxBarStatic("h-4 w-32")}
+              {inboxBarStatic("h-3 w-full max-w-lg")}
+            </div>
+            <div className="flex min-h-[3rem] flex-col justify-center">
+              {inboxBarStatic("h-2.5 w-[min(100%,28rem)]")}
+            </div>
+            <div className={`border-t pt-4 ${clinicalDividerBorder}`}>
+              {inboxBarStatic("h-10 w-full max-w-2xl rounded-lg")}
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
 }
 
+/** Relay / „Meine Aufgaben“-Board: **statische** Platzhalter (Punkt 6 — kein Puls), Layout an `RelayWorkspaceView` + `CardBoard` (`min-w-[980px]`). **Punkt 9:** horizontaler Streifen wie Board (`overscroll-x-contain`, Safe-Area). */
 export function ClinicalRelayBoardSkeleton() {
   return (
-    <div className={`min-h-[60vh] ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`} style={{ background: "#F7F9FC" }}>
-      <div className="mb-8 space-y-3">
-        {bar("h-9 w-40")}
-        {bar("h-3.5 w-64 max-w-full")}
-      </div>
-      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="flex min-h-[280px] flex-col rounded-xl border border-[rgba(15,23,42,0.06)] bg-white/[0.85] p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
-          >
-            {bar("mb-4 h-4 w-24")}
-            <div className="space-y-3">
-              {bar("h-20 w-full rounded-lg")}
-              {bar("h-20 w-full rounded-lg")}
-              {bar("h-16 w-full rounded-lg")}
-            </div>
+    <div
+      className="min-h-0 flex-1"
+      style={{ background: "#F7F9FC" }}
+      aria-busy="true"
+      aria-label="Aufgaben werden geladen"
+      role="status"
+    >
+      <div className={`min-h-[56vh] ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 space-y-3">
+            {inboxBarStatic("h-8 w-36 rounded-lg sm:h-9 sm:w-40")}
+            {inboxBarStatic("h-3.5 w-full max-w-[640px]")}
+            {inboxBarStatic("h-3.5 w-[min(100%,520px)]")}
           </div>
-        ))}
+          <div
+            className="inline-flex shrink-0 gap-1 self-start rounded-[10px] p-1 ring-1 ring-[#E2E8F0] bg-[#F8FAFC] sm:self-auto"
+            aria-hidden
+          >
+            {inboxBarStatic("h-10 w-[8.5rem] rounded-lg")}
+            {inboxBarStatic("h-10 w-[9.5rem] rounded-lg")}
+          </div>
+        </div>
+
+        <div className="mb-6 flex flex-wrap gap-2" aria-hidden>
+          {inboxBarStatic("h-8 w-[5.5rem] rounded-md")}
+          {inboxBarStatic("h-8 w-[7.5rem] rounded-md")}
+          {inboxBarStatic("h-8 w-[4.75rem] rounded-md")}
+        </div>
+
+        <div
+          className="mb-8 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+          aria-hidden
+        >
+          {inboxBarStatic("h-[15px] w-full max-w-2xl rounded")}
+          {inboxBarStatic("mt-4 h-10 w-full max-w-xl rounded-lg")}
+        </div>
+
+        <div className="overflow-x-auto overscroll-x-contain pb-[max(0.5rem,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]">
+          <div className="grid min-w-[980px] grid-cols-3 gap-6">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="flex max-h-[min(72vh,calc(100dvh-15rem))] min-h-[min(52vh,520px)] flex-col rounded-xl border border-[rgba(15,23,42,0.06)] bg-white/[0.98] p-4 sm:max-h-[72vh] sm:p-5"
+              >
+                <div className="mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] pb-3">
+                  {inboxBarStatic("h-3.5 w-28 rounded")}
+                  {inboxBarStatic("h-5 w-7 shrink-0 !rounded-full")}
+                </div>
+                <div className="space-y-3">
+                  {inboxBarStatic("min-h-[88px] w-full rounded-lg")}
+                  {inboxBarStatic("min-h-[88px] w-full rounded-lg")}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

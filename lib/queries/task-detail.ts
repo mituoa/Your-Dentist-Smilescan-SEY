@@ -48,6 +48,14 @@ export interface TaskComment {
   created_at: string;
 }
 
+/**
+ * Lädt eine Aufgabe mit Kommentaren **nur** innerhalb von `workspaceId` (Detailroute — s.
+ * `app/(protected)/my-tasks/[id]/page.tsx` Punkt 1 / **Punkt 3** / **Punkt 10**). Kein clientgewähltes Workspace.
+ * Kommentare: `tasks!inner` + `workspace_id`-Filter (**zusätzlich** zu RLS auf `task_comments`).
+ * **Submission:** `submissions.workspace_id` wird mit `workspaceId` abgeglichen — bei Abweichung kein Inbox-Link/
+ * kein Patientenname (Integritäts-/Scope-Schutz). **Punkt 5 (Tot/Fake):** Kein zweiter „Live“-Pfad — Datenstand =
+ * Server beim Rendern; s. `page.tsx` (Punkt 5).
+ */
 export async function getTaskWithComments(
   taskId: string,
   workspaceId: string
@@ -62,7 +70,7 @@ export async function getTaskWithComments(
       submission_id, created_at, created_by,
       submitted_for_review_at, submitted_by_user_id,
       reviewed_at, reviewed_by_user_id, rejection_reason, done_at, due_date,
-      submissions(patient_name),
+      submissions(patient_name, workspace_id),
       task_assignees(user_id),
       task_delivery_receipts(sent_at, delivered_at, read_at)
     `
@@ -75,6 +83,27 @@ export async function getTaskWithComments(
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const admin = createAdminClient();
+
+  const { data: commentRows, error: commentsError } = await supabase
+    .from("task_comments")
+    .select(
+      `
+      id,
+      task_id,
+      author_id,
+      content,
+      is_system,
+      created_at,
+      tasks!inner ( workspace_id )
+    `
+    )
+    .eq("task_id", taskId)
+    .eq("tasks.workspace_id", workspaceId)
+    .order("created_at", { ascending: true });
+
+  if (commentsError) {
+    console.error("[getTaskWithComments comments]", (commentsError as { code?: string }).code ?? "unknown");
+  }
 
   const taskAssignees =
     (taskRow.task_assignees as Array<{ user_id: string }> | null) || [];
@@ -108,9 +137,19 @@ export async function getTaskWithComments(
   }
 
   const submissions = taskRow.submissions as
-    | { patient_name?: string | null }
+    | { patient_name?: string | null; workspace_id?: string | null }
     | null
     | undefined;
+
+  const submissionWorkspaceMismatch =
+    submissions?.workspace_id != null && String(submissions.workspace_id) !== workspaceId;
+
+  const submissionIdForUi = submissionWorkspaceMismatch
+    ? null
+    : ((taskRow.submission_id as string | null) ?? null);
+  const submissionPatientForUi = submissionWorkspaceMismatch
+    ? null
+    : submissions?.patient_name || null;
 
   const task: TaskDetail = {
     id: taskRow.id,
@@ -129,8 +168,8 @@ export async function getTaskWithComments(
     assignee_emails: assigneeUserIds
       .map((id) => emailMap[id] || null)
       .filter((email): email is string => Boolean(email)),
-    submission_id: (taskRow.submission_id as string | null) ?? null,
-    submission_patient_name: submissions?.patient_name || null,
+    submission_id: submissionIdForUi,
+    submission_patient_name: submissionPatientForUi,
     created_at: taskRow.created_at,
     created_by: taskRow.created_by,
     created_by_email: emailMap[taskRow.created_by] || null,
@@ -154,26 +193,28 @@ export async function getTaskWithComments(
     },
   };
 
-  const { data: commentRows } = await supabase
-    .from("task_comments")
-    .select("*")
-    .eq("task_id", taskId)
-    .order("created_at", { ascending: true });
-
   const comments: TaskComment[] = [];
   for (const c of commentRows || []) {
-    if (!emailMap[c.author_id]) {
-      const { data } = await admin.auth.admin.getUserById(c.author_id);
-      emailMap[c.author_id] = data?.user?.email || "unbekannt";
+    const row = c as {
+      id: string;
+      task_id: string;
+      author_id: string;
+      content: string;
+      is_system: boolean;
+      created_at: string;
+    };
+    if (!emailMap[row.author_id]) {
+      const { data } = await admin.auth.admin.getUserById(row.author_id);
+      emailMap[row.author_id] = data?.user?.email || "unbekannt";
     }
     comments.push({
-      id: c.id,
-      task_id: c.task_id,
-      author_id: c.author_id,
-      author_email: emailMap[c.author_id] || null,
-      content: c.content,
-      is_system: c.is_system,
-      created_at: c.created_at,
+      id: row.id,
+      task_id: row.task_id,
+      author_id: row.author_id,
+      author_email: emailMap[row.author_id] || null,
+      content: row.content,
+      is_system: row.is_system,
+      created_at: row.created_at,
     });
   }
 

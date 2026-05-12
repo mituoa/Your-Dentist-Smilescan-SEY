@@ -47,8 +47,10 @@ async function getWorkspaceDoctorEmails(workspaceId: string): Promise<string[]> 
   return emails;
 }
 
+/** Admin-Client: Task **nur** mit `workspaceId` laden — keine Audience-Ermittlung über nackte `task_id`. */
 async function getTaskAudienceEmails(
   taskId: string,
+  workspaceId: string,
   excludeUserId?: string
 ): Promise<string[]> {
   const admin = createAdminClient();
@@ -58,6 +60,7 @@ async function getTaskAudienceEmails(
       "workspace_id, recipient_type, specific_recipient_id, created_by"
     )
     .eq("id", taskId)
+    .eq("workspace_id", workspaceId)
     .single();
 
   if (!task) return [];
@@ -107,7 +110,9 @@ type WorkspaceMembership = NonNullable<
 /**
  * Session + Arbeitsbereich für Server-Actions: zuerst Anmeldung, dann Mitgliedschaft — gleiche Semantik für
  * Relay-relevante Pfade (Quick-Create, DnD, Reihenfolge). **Punkt 3:** kein Schreibzugriff ohne `workspace_id`
- * aus dieser Mitgliedschaft.
+ * aus dieser Mitgliedschaft. **Punkt 10:** gleiche Workspace-Session wie `loadRelayWorkspaceData` / RSC — kein
+ * clientgewähltes `workspace_id` aus Formularen. **Detailroute:** `addTaskComment` / Audience-Ermittlung nur mit
+ * workspace-gebundener Task-Zeile (`getTaskAudienceEmails`).
  */
 async function resolveActorWorkspace(): Promise<
   | { ok: true; supabase: Awaited<ReturnType<typeof createClient>>; user: User; workspace: WorkspaceMembership }
@@ -317,7 +322,7 @@ export async function submitTaskForReview(
     .single();
 
   if (!task) return { error: "Aufgabe nicht gefunden." };
-  if (task.status !== "open") return { error: "Diese Aufgabe kann nicht eingereicht werden." };
+  if (task.status !== "open") return { error: "Einreichung ist für den aktuellen Aufgabenstand nicht möglich." };
 
   const isDoctorSelfAssignment =
     workspace.role === "doctor" && task.created_by === user.id;
@@ -343,7 +348,7 @@ export async function submitTaskForReview(
     .eq("id", taskId)
     .eq("workspace_id", workspace.workspace_id);
 
-  if (error) return { error: "Aktion fehlgeschlagen. Bitte erneut versuchen." };
+  if (error) return { error: "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen." };
 
   if (newStatus === "pending_review") {
     const actorEmail = user.email || "Team-Mitglied";
@@ -451,7 +456,7 @@ export async function moveTaskStatusByDrag(
     .eq("workspace_id", workspace.workspace_id);
   if (error) {
     console.error("[moveTaskStatusByDrag]", (error as { code?: string }).code ?? "unknown");
-    return { error: "Statuswechsel fehlgeschlagen." };
+    return { error: "Die Aufgabe konnte nicht verschoben werden. Bitte versuchen Sie es erneut." };
   }
 
   revalidatePath("/my-tasks");
@@ -477,7 +482,8 @@ export async function reorderTasksInColumn(
     .eq("status", status)
     .in("id", orderedTaskIds);
   if (fetchError) return { error: "Reihenfolge konnte nicht gespeichert werden." };
-  if ((existing || []).length !== orderedTaskIds.length) return { error: "Ungültige Reihenfolge." };
+  if ((existing || []).length !== orderedTaskIds.length)
+    return { error: "Die Reihenfolge konnte nicht übernommen werden." };
 
   const base = Date.now();
   for (let i = 0; i < orderedTaskIds.length; i += 1) {
@@ -504,7 +510,7 @@ export async function approveTask(
   const actor = await resolveActorWorkspace();
   if (!actor.ok) return actor.error;
   const { workspace, user, supabase } = actor;
-  if (workspace.role !== "doctor") return { error: "Nur Ärzte dürfen bestätigen." };
+  if (workspace.role !== "doctor") return { error: "Dieser Schritt ist für Ihre Rolle nicht vorgesehen." };
 
   const { data: task } = await supabase
     .from("tasks")
@@ -515,7 +521,7 @@ export async function approveTask(
 
   if (!task) return { error: "Aufgabe nicht gefunden." };
   if (task.status !== "pending_review") {
-    return { error: "Diese Aufgabe wartet aktuell nicht auf Bestätigung." };
+    return { error: "Die Aufgabe steht nicht zur ärztlichen Bestätigung aus." };
   }
 
   const now = new Date().toISOString();
@@ -528,9 +534,10 @@ export async function approveTask(
       reviewed_at: now,
       reviewed_by_user_id: user.id,
     })
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .eq("workspace_id", workspace.workspace_id);
 
-  if (error) return { error: "Bestätigung fehlgeschlagen. Bitte erneut versuchen." };
+  if (error) return { error: "Die Bestätigung konnte nicht gespeichert werden. Bitte erneut versuchen." };
 
   if (task.submitted_by_user_id) {
     const submitterEmail = await getUserEmail(task.submitted_by_user_id);
@@ -564,7 +571,7 @@ export async function rejectTask(
   const actor = await resolveActorWorkspace();
   if (!actor.ok) return actor.error;
   const { workspace, user, supabase } = actor;
-  if (workspace.role !== "doctor") return { error: "Nur Ärzte dürfen zurückweisen." };
+  if (workspace.role !== "doctor") return { error: "Dieser Schritt ist für Ihre Rolle nicht vorgesehen." };
 
   if (!reason.trim()) return { error: "Bitte geben Sie eine Begründung ein." };
 
@@ -577,7 +584,7 @@ export async function rejectTask(
 
   if (!task) return { error: "Aufgabe nicht gefunden." };
   if (task.status !== "pending_review") {
-    return { error: "Diese Aufgabe wartet aktuell nicht auf Bestätigung." };
+    return { error: "Die Aufgabe steht nicht zur ärztlichen Bestätigung aus." };
   }
 
   const { error } = await supabase
@@ -592,9 +599,10 @@ export async function rejectTask(
       done_at: null,
       done_by: null,
     })
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .eq("workspace_id", workspace.workspace_id);
 
-  if (error) return { error: "Zurückweisen fehlgeschlagen. Bitte erneut versuchen." };
+  if (error) return { error: "Die Rückmeldung konnte nicht übernommen werden. Bitte erneut versuchen." };
 
   await supabase.from("task_comments").insert({
     task_id: taskId,
@@ -629,6 +637,7 @@ export async function rejectTask(
   return { success: true };
 }
 
+/** Kommentar anlegen — Task muss im **aktuellen** Workspace liegen (Select + RLS); Audience nur workspace-gebunden (`getTaskAudienceEmails`). **Punkt 10:** kein clientgewähltes Workspace. */
 export async function addTaskComment(
   taskId: string,
   content: string
@@ -638,8 +647,8 @@ export async function addTaskComment(
   const { workspace, user, supabase } = actor;
 
   const trimmed = content.trim();
-  if (!trimmed) return { error: "Bitte geben Sie einen Kommentar ein." };
-  if (trimmed.length > 2000) return { error: "Der Kommentar darf maximal 2000 Zeichen enthalten." };
+  if (!trimmed) return { error: "Bitte geben Sie eine Notiz ein." };
+  if (trimmed.length > 2000) return { error: "Die Notiz darf maximal 2000 Zeichen umfassen." };
 
   const { data: task } = await supabase
     .from("tasks")
@@ -657,9 +666,9 @@ export async function addTaskComment(
     is_system: false,
   });
 
-  if (error) return { error: "Kommentar konnte nicht gespeichert werden. Bitte erneut versuchen." };
+  if (error) return { error: "Die Notiz konnte nicht gespeichert werden. Bitte erneut versuchen." };
 
-  const audience = await getTaskAudienceEmails(taskId, user.id);
+  const audience = await getTaskAudienceEmails(taskId, workspace.workspace_id, user.id);
   const taskUrl = `${getAppBaseUrl()}/my-tasks/${taskId}`;
   const mail = buildTaskComment({
     taskTitle: task.content,

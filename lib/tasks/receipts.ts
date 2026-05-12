@@ -58,7 +58,7 @@ export async function upsertTaskReceipts(
     .from("task_delivery_receipts")
     .upsert(rows, { onConflict: "task_id,recipient_user_id" });
   if (error) {
-    console.error("[upsertTaskReceipts]", error);
+    console.error("[upsertTaskReceipts]", (error as { code?: string }).code ?? "unknown");
   }
 }
 

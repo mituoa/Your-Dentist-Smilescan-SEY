@@ -39,6 +39,8 @@ export interface MyTask {
  * **Workspace:** Abfrage immer mit `.eq("workspace_id", workspaceId)`; zusätzlicher **Sichtbarkeitsfilter**
  * nach Rolle und Empfänger (ergänzend zu RLS). Server Actions prüfen dieselbe Workspace-Mitgliedschaft über
  * `resolveActorWorkspace` und `canMoveTask` (s. `workflow-rules`).
+ * **Punkt 10 (Security):** Kein Lesen ohne `workspace_id`; Sichtbarkeitsfilter ergänzt RLS — konsistent mit
+ * `resolveActorWorkspace` / Relay-Actions; Fremd-Workspace-Tasks werden hier nicht gemappt.
  */
 export async function getMyTasks(
   userId: string,

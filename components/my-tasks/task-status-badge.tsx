@@ -1,4 +1,4 @@
-import { AlertCircle, Check, Clock } from "lucide-react";
+import { CircleDot, Check, Clock } from "lucide-react";
 
 interface TaskStatusBadgeProps {
   status: "open" | "pending_review" | "done";
@@ -34,7 +34,7 @@ export function TaskStatusBadge({ status, size = "sm" }: TaskStatusBadgeProps) {
     <span
       className={`inline-flex items-center gap-1 rounded-md font-medium bg-[#F1F5F9] text-[#334155] ring-1 ring-[rgba(15,23,42,0.06)] ${cls}`}
     >
-      <AlertCircle className={iconCls} strokeWidth={2} />
+      <CircleDot className={iconCls} strokeWidth={2} />
       Offen
     </span>
   );

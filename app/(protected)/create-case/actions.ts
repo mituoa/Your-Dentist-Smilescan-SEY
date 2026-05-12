@@ -1,5 +1,11 @@
 "use server";
 
+/**
+ * Server Actions für `/create-case` — **Punkt 1 (Zweck)** s. `create-case/page.tsx`: Praxis-Fallerstellung, keine
+ * CRM-/Ticket-Semantik. **`createPracticeCase`:** nur mit **Arztrolle** und gültigem Workspace; Upload-Pfade strikt
+ * `workspaceId/temp/…`.
+ */
+
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -73,6 +79,12 @@ export async function createPracticeCase(input: {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
     return { error: "Workspace nicht gefunden." };
+  }
+
+  if (workspace.role !== "doctor") {
+    return {
+      error: "Dieser Schritt ist für Ihre Rolle nicht vorgesehen.",
+    };
   }
 
   const workspaceId = workspace.workspace_id;

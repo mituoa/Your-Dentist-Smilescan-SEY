@@ -8,6 +8,7 @@ export interface AssignableMember {
   role: "doctor" | "team";
 }
 
+/** Quick-Create auf `/relay`: nur Mitglieder des übergebenen `workspaceId` (Admin-Client; Grenze am Aufrufer). */
 export async function getAssignableWorkspaceMembers(
   workspaceId: string,
   excludeUserId?: string

@@ -19,10 +19,45 @@
  * Drop-Ring **dezent** (neutral, kein PM-Tool-„Glow“); Quick-Create siehe `RelayQuickCreate`. Smoke vor Staging
  * siehe `relay/page.tsx` (Punkt 4).
  *
- * **Randfall (akzeptiert, kein Blocker):** Während **eines** Zugs kann eine Karte optimistisch bereits in Spalte B
+ * **Punkt 5 (Tot/Fake) — final:** Spaltenköpfe **ohne** unnötige Uppercase-„Ticketboard“-Typo; Sticky-Kopf **ohne**
+ * Glaseffekt-Blur (kein Dashboard-„Live“-Anstrich). `ReceiptMark` nutzt **sachliche** Aria-Texte (Empfang/Lesen),
+ * keine Chat-Ops-Sprache („Alle …“). Leer-/Footer-Copy entspricht Query (`getMyTasks`, 90 Tage bei Erledigt).
+ *
+ * **Punkt 6 (Loading) — final:** Kein zweites Skeleton bei Mutationen — nur `aria-busy` + leichte Deckkraft/
+ * `pointer-events-none` während `useTransition`; initiales Seitenladen siehe `ClinicalRelayBoardSkeleton` /
+ * `relay/loading.tsx`.
+ *
+ * **Randfall DnD (akzeptiert, kein Blocker):** Während **eines** Zugs kann eine Karte optimistisch bereits in Spalte B
  * liegen; hovert man über Spalte A ohne **erlaubten** Wechsel laut `canMoveTask`, bleibt die **Vorschau** in B,
  * bis **Drop** auf ein gültiges Ziel oder **Abbruch** — dann greifen `dragStartBoardRef`-Rollback bzw.
  * Serverfehler-Rollback. Persistenz und Endzustand bleiben korrekt; **keine** neue DnD-Architektur nötig.
+ *
+ * **Punkt 7 (Empty) — final:** Spalten-Leerzustände **ohne** PM-Floskeln und **ohne** vorgebliche Team-Leere bei
+ * Filter „Meine Beteiligung“ / „Meine Aufgaben“ (`columnEmptyContext`); sachliche Copy, dezente Fläche
+ * (`min-h`, fester feiner Rand — kein Dashed-„Demo-Board“); Erledigt-Text an **90-Tage**-Query gekoppelt.
+ *
+ * **Punkt 8 (Error) — final:** Mutationen ohne **rohe** Technikstrings in der UI; bei fehlgeschlagenem Speichern
+ * **Rollback** + ruhige, zeitlich begrenzte Hinweiszeile (`boardPersistHint`, `aria-live="polite"`) — kein Banner,
+ * kein Toast; `notAllowed` eigener kurzer Hinweis. Server-Copy für Move/Reorder in `my-tasks/actions.ts`.
+ *
+ * **Punkt 9 (Mobile) — final:** Bewusst **horizontales** Kanban (`min-w-[980px]`); Streifen mit
+ * `overscroll-behavior-x: contain`, Momentum-Scroll, **Safe-Area** unten; Spaltenhöhe `min(72vh, 100dvh−…)` auf
+ * kleinen Viewports; DnD-**Aktivierungsweg** leicht erhöht; Filter/Quick-Create **44px**-Tippflächen / **16px**-Input
+ * (iOS). Kein alternatives Mobile-Board.
+ *
+ * **Punkt 10 (Security) — final:** DnD nur mit `canMoveTask` (Import aus `workflow-rules`, identisch zur Server-Action);
+ * Drop-Ring nur bei erlaubtem Zug; kein clientgewähltes `workspace_id` — Schreibwege nur Server Actions mit
+ * `resolveActorWorkspace`. Optimistische Vorschau kann kurz von der Server-Entscheidung abweichen; Persistenz und
+ * Rollback folgen dem Server (s. Randfall DnD oben).
+ *
+ * **Punkt 11 (MVP) — final:** Festes Kanban ohne Konfiguration, ohne KPI-Leisten, ohne „Live“-Inszenierung —
+ * Team-Koordination im begrenzten Umfang; Non-Goals s. `relay/page.tsx` (Punkt 11).
+ *
+ * **Punkt 12 (Nice / Future / Non-MVP) — final:** Nice = lokales Polish (Rhythmus, Karten, DnD) **ohne** neue
+ * Spalten/Semantik; Future/Non-MVP s. `relay/page.tsx` (Punkt 12) — bei Konflikt **ruhigeres** Board bevorzugen.
+ *
+ * **Punkt 13 (Priorität) — final:** DnD-/Board-Logik nur ändern bei Bugfix oder Vertragsupdate — Stabilität vor
+ * „Board-Upgrade“; s. `relay/page.tsx` (Punkt 13).
  */
 
 import {
@@ -46,7 +81,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Check, CheckCheck, CircleDot, Users } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import {
   moveTaskStatusByDrag,
@@ -59,12 +94,48 @@ import {
   taskStatusToColumn,
   type BoardColumnId,
 } from "@/lib/tasks/workflow-rules";
+import type { RelayScope } from "@/lib/tasks/relay-helpers";
 
 type BoardColumns = {
   open: MyTask[];
   pending: MyTask[];
   done: MyTask[];
 };
+
+/** Leer-Copy: `mine` = gefilterte Ansicht (kein Vortäuschen teamweiter Leere). */
+function columnEmptyCopy(
+  column: BoardColumnId,
+  context: RelayScope
+): { title: string; text: string } {
+  if (context === "mine") {
+    if (column === "done") {
+      return {
+        title: "Keine erledigten Aufgaben",
+        text: "Für die aktuelle Filterauswahl gibt es hier keine erledigten Einträge aus den letzten 90 Tagen.",
+      };
+    }
+    return {
+      title: column === "open" ? "Keine offenen Aufgaben" : "Keine Aufgaben in Bearbeitung",
+      text: "Für die aktuelle Filterauswahl gibt es in dieser Spalte keine Einträge.",
+    };
+  }
+  if (column === "open") {
+    return {
+      title: "Keine offenen Aufgaben",
+      text: "Es liegen hier derzeit keine Aufgaben in diesem Schritt.",
+    };
+  }
+  if (column === "pending") {
+    return {
+      title: "Keine Aufgaben in Bearbeitung",
+      text: "Es liegen hier derzeit keine Aufgaben in diesem Bearbeitungsschritt.",
+    };
+  }
+  return {
+    title: "Keine erledigten Aufgaben",
+    text: "In den letzten 90 Tagen wurde keine Aufgabe in dieser Spalte als erledigt geführt.",
+  };
+}
 
 function boardFingerprint(b: BoardColumns): string {
   return [
@@ -82,6 +153,8 @@ interface CardBoardProps {
   columnSurfaceClass?: Partial<Record<BoardColumnId, string>>;
   /** user_id → initials + color for assignee chips */
   avatarByUserId?: Record<string, { initials: string; color: string }>;
+  /** Steuert Leertext in leeren Spalten: `mine` = ehrliche Filter-Leere (nicht teamweite Leere vortäuschen). */
+  columnEmptyContext?: RelayScope;
 }
 
 export function CardBoard({
@@ -91,12 +164,37 @@ export function CardBoard({
   columnTitles,
   columnSurfaceClass,
   avatarByUserId,
+  columnEmptyContext = "all",
 }: CardBoardProps) {
   const [board, setBoard] = useState(columns);
   const [activeTask, setActiveTask] = useState<MyTask | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [boardPersistHint, setBoardPersistHint] = useState<string | null>(null);
   const dragStartBoardRef = useRef<BoardColumns | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const persistHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  const clearBoardPersistHint = useCallback(() => {
+    if (persistHintTimerRef.current != null) {
+      clearTimeout(persistHintTimerRef.current);
+      persistHintTimerRef.current = null;
+    }
+    setBoardPersistHint(null);
+  }, []);
+
+  const scheduleBoardPersistHint = useCallback(
+    (message: string) => {
+      clearBoardPersistHint();
+      setBoardPersistHint(message);
+      persistHintTimerRef.current = setTimeout(() => {
+        setBoardPersistHint(null);
+        persistHintTimerRef.current = null;
+      }, 8000);
+    },
+    [clearBoardPersistHint]
+  );
+
+  useEffect(() => () => clearBoardPersistHint(), [clearBoardPersistHint]);
 
   const columnsSyncKey = useMemo(() => boardFingerprint(columns), [columns]);
 
@@ -105,8 +203,12 @@ export function CardBoard({
   useEffect(() => {
     if (activeTask != null || isPending) return;
     if (columnsSyncKey === boardSyncKey) return;
-    // Synchronisation nach Server-Revalidierung (RSC-Props); kein paralleles Optimismus-Update hier.
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- bewusstes Abgleichen mit `columns` nach `revalidatePath`
+    if (persistHintTimerRef.current != null) {
+      clearTimeout(persistHintTimerRef.current);
+      persistHintTimerRef.current = null;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- RSC-Sync: Hinweis + Board mit Props abgleichen
+    setBoardPersistHint(null);
     setBoard(columns);
   }, [columnsSyncKey, boardSyncKey, columns, activeTask, isPending]);
 
@@ -135,6 +237,7 @@ export function CardBoard({
   };
 
   const onDragStart = (event: DragStartEvent) => {
+    clearBoardPersistHint();
     const id = String(event.active.id).replace("card-", "");
     dragStartBoardRef.current = board;
     setActiveTask(findTask(id));
@@ -210,6 +313,9 @@ export function CardBoard({
             );
             if (result.error) {
               setBoard(before);
+              scheduleBoardPersistHint(
+                "Die Reihenfolge konnte nicht gespeichert werden. Der vorherige Stand wurde wiederhergestellt."
+              );
             }
           });
         }
@@ -230,8 +336,16 @@ export function CardBoard({
 
     startTransition(async () => {
       const result = await moveTaskStatusByDrag(task.id, toColumn);
-      if (result.notAllowed || result.error) {
+      if (result.error) {
         setBoard(dragStartBoardRef.current || columns);
+        scheduleBoardPersistHint(
+          "Die Aufgabe konnte nicht verschoben werden. Der vorherige Stand wurde wiederhergestellt."
+        );
+      } else if (result.notAllowed) {
+        setBoard(dragStartBoardRef.current || columns);
+        scheduleBoardPersistHint(
+          "Diese Einordnung können Sie mit Ihrer aktuellen Rolle nicht vornehmen."
+        );
       }
       dragStartBoardRef.current = null;
     });
@@ -239,6 +353,10 @@ export function CardBoard({
 
   const activeVisualColumn =
     activeTask != null ? findColumnForTask(activeTask.id) : null;
+
+  const emptyOpen = columnEmptyCopy("open", columnEmptyContext);
+  const emptyPending = columnEmptyCopy("pending", columnEmptyContext);
+  const emptyDone = columnEmptyCopy("done", columnEmptyContext);
 
   return (
     <DndContext
@@ -249,9 +367,9 @@ export function CardBoard({
       onDragEnd={onDragEnd}
     >
       <div
-        className="overflow-x-auto pb-2"
+        className="overflow-x-auto overscroll-x-contain pb-[max(0.5rem,env(safe-area-inset-bottom))] [-webkit-overflow-scrolling:touch]"
         role="region"
-        aria-label="Aufgaben-Board"
+        aria-label="Aufgaben-Board, auf schmalen Bildschirmen seitwärts scrollen"
         aria-busy={isPending}
       >
         <div className="grid min-w-[980px] grid-cols-3 gap-6">
@@ -260,8 +378,8 @@ export function CardBoard({
             title={columnTitles?.open ?? "Offen"}
             surfaceClassName={columnSurfaceClass?.open}
             count={board.open.length}
-            emptyTitle="Keine offenen Aufgaben"
-            emptyText="Aktuell gibt es keine offenen Aufgaben in dieser Spalte."
+            emptyTitle={emptyOpen.title}
+            emptyText={emptyOpen.text}
             tasks={board.open}
             disabled={isPending}
             activeTask={activeTask}
@@ -275,8 +393,8 @@ export function CardBoard({
             title={columnTitles?.pending ?? "Zur Bestätigung"}
             surfaceClassName={columnSurfaceClass?.pending}
             count={board.pending.length}
-            emptyTitle="Keine Aufgaben in Bearbeitung"
-            emptyText="Aktuell keine Aufgaben in diesem Bearbeitungsstand."
+            emptyTitle={emptyPending.title}
+            emptyText={emptyPending.text}
             tasks={board.pending}
             disabled={isPending}
             activeTask={activeTask}
@@ -290,8 +408,8 @@ export function CardBoard({
             title={columnTitles?.done ?? "Erledigt"}
             surfaceClassName={columnSurfaceClass?.done}
             count={board.done.length}
-            emptyTitle="Keine erledigten Aufgaben"
-            emptyText="In den letzten 90 Tagen wurde hier keine Aufgabe als erledigt geführt."
+            emptyTitle={emptyDone.title}
+            emptyText={emptyDone.text}
             tasks={board.done}
             disabled={isPending}
             activeTask={activeTask}
@@ -301,6 +419,15 @@ export function CardBoard({
             avatarByUserId={avatarByUserId}
           />
         </div>
+        {boardPersistHint ? (
+          <p
+            className="mt-4 max-w-[980px] text-sm leading-relaxed text-[#475569]"
+            role="status"
+            aria-live="polite"
+          >
+            {boardPersistHint}
+          </p>
+        ) : null}
       </div>
       <DragOverlay>{activeTask ? <TaskOverlayCard task={activeTask} /> : null}</DragOverlay>
     </DndContext>
@@ -353,21 +480,21 @@ function BoardColumn({
     <section
       id={id}
       ref={setNodeRef}
-      className={`max-h-[72vh] overflow-y-auto rounded-xl border border-[rgba(15,23,42,0.06)] p-4 sm:p-5 ${surfaceClassName ?? ""} ${
+      className={`max-h-[min(72vh,calc(100dvh-15rem))] overflow-y-auto rounded-xl border border-[rgba(15,23,42,0.06)] p-4 sm:max-h-[72vh] sm:p-5 ${surfaceClassName ?? ""} ${
         clinicalCorePanel
       } ${isOver && canDropActiveTask ? "ring-2 ring-[rgba(15,23,42,0.12)]" : ""}`}
     >
-      <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] bg-white/95 pb-3 backdrop-blur-sm">
-        <h2 className="text-[13px] font-semibold uppercase tracking-[0.05em] text-[#64748B]">{title}</h2>
+      <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] bg-[#FAFBFC] pb-3">
+        <h2 className="text-[13px] font-semibold tracking-[-0.01em] text-[#64748B]">{title}</h2>
         <span className="inline-flex min-w-[24px] items-center justify-center rounded-full bg-[#F1F5F9] px-2 py-0.5 text-[12px] font-medium tabular-nums text-[#475569]">
           {count > 99 ? "99+" : count}
         </span>
       </header>
 
       {tasks.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#F8FAFC] px-3 py-8 text-center">
-          <p className="text-sm font-medium text-[#0F172A]">{emptyTitle}</p>
-          <p className="mt-1 text-xs text-[#64748B]">{emptyText}</p>
+        <div className="flex min-h-[128px] flex-col justify-center rounded-lg border border-[rgba(15,23,42,0.07)] bg-[#F9FAFB] px-3 py-6 text-center sm:min-h-[140px] sm:py-7">
+          <p className="text-sm font-medium text-[#334155]">{emptyTitle}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-[#64748B]">{emptyText}</p>
         </div>
       ) : (
         <SortableContext items={tasks.map((task) => `card-${task.id}`)} strategy={verticalListSortingStrategy}>
@@ -516,13 +643,33 @@ function TaskOverlayCard({ task }: { task: MyTask }) {
 
 function ReceiptMark({ task }: { task: MyTask }) {
   if (task.delivery_status === "read") {
-    return <CheckCheck className="h-4 w-4 text-emerald-600" strokeWidth={2.2} aria-label="Alle gelesen" />;
+    return (
+      <CheckCheck
+        className="h-4 w-4 text-emerald-600"
+        strokeWidth={2.2}
+        aria-label="Empfangsstatus: gelesen"
+      />
+    );
   }
   if (task.delivery_status === "delivered") {
-    return <CheckCheck className="h-4 w-4 text-text-secondary" strokeWidth={2.2} aria-label="Alle zugestellt" />;
+    return (
+      <CheckCheck
+        className="h-4 w-4 text-text-secondary"
+        strokeWidth={2.2}
+        aria-label="Empfangsstatus: zugestellt"
+      />
+    );
   }
   if (task.delivery_status === "sent") {
-    return <Check className="h-4 w-4 text-text-secondary" strokeWidth={2.2} aria-label="Alle gesendet" />;
+    return (
+      <Check className="h-4 w-4 text-text-secondary" strokeWidth={2.2} aria-label="Empfangsstatus: gesendet" />
+    );
   }
-  return <CircleDot className="h-4 w-4 text-text-tertiary" strokeWidth={2.2} aria-label="Teilweise oder offen" />;
+  return (
+    <CircleDot
+      className="h-4 w-4 text-text-tertiary"
+      strokeWidth={2.2}
+      aria-label="Empfangsstatus: offen oder teilweise"
+    />
+  );
 }
