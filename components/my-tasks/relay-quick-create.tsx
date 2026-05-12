@@ -1,5 +1,7 @@
 "use client";
 
+/** Quick-Create für Relay / „Meine Aufgaben“ — **Punkt 4 (Aktionen) final** (`relay/page.tsx`). */
+
 import { ChevronDown, User } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 
@@ -12,12 +14,15 @@ interface RelayQuickCreateProps {
   assignableMembers: AssignableMember[];
   currentUserId: string;
   currentUserEmail: string | null;
+  /** Optional; Standard siehe Implementierung. */
+  inputPlaceholder?: string;
 }
 
 export function RelayQuickCreate({
   assignableMembers,
   currentUserId,
   currentUserEmail,
+  inputPlaceholder,
 }: RelayQuickCreateProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -79,17 +84,23 @@ export function RelayQuickCreate({
     });
   };
 
+  const resolvedPlaceholder =
+    inputPlaceholder != null && inputPlaceholder.trim().length > 0
+      ? inputPlaceholder.trim()
+      : "Was steht als Nächstes an?";
+
   const showOptions = focused || dropdownOpen;
 
   return (
     <div
       ref={wrapRef}
       id="relay-quick-create"
+      aria-busy={isPending}
       className={cn(
-        "mb-8 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow",
+        "mb-8 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[border-color,box-shadow]",
         focused
-          ? "border-[#2B6FE8] shadow-[0_0_0_3px_rgba(43,111,232,0.08),0_4px_24px_-12px_rgba(43,111,232,0.1)]"
-          : "hover:border-[rgba(43,111,232,0.12)]"
+          ? "border-[rgba(15,23,42,0.14)] shadow-[0_0_0_2px_rgba(15,23,42,0.06)]"
+          : "hover:border-[rgba(15,23,42,0.1)]"
       )}
     >
       <input
@@ -107,7 +118,7 @@ export function RelayQuickCreate({
           setTimeout(() => setFocused(false), 180);
         }}
         disabled={isPending}
-        placeholder="Was steht als Nächstes an?"
+        placeholder={resolvedPlaceholder}
         className="w-full border-0 bg-transparent p-0 text-[15px] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
       />
 
@@ -117,7 +128,7 @@ export function RelayQuickCreate({
             <button
               type="button"
               onClick={() => setDropdownOpen((o) => !o)}
-              className="flex h-10 w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(43,111,232,0.15)] hover:bg-[#F4F7FB]"
+              className="flex h-10 w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(15,23,42,0.12)] hover:bg-[#F8FAFC]"
             >
               {assignAll ? (
                 <>
@@ -128,7 +139,7 @@ export function RelayQuickCreate({
                 <>
                   <div
                     className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                    style={{ background: "#2F80ED" }}
+                    style={{ background: "#64748B" }}
                     title="Dir zugewiesen"
                   >
                     {selfInitials.slice(0, 2)}
@@ -161,10 +172,10 @@ export function RelayQuickCreate({
 
             {dropdownOpen ? (
               <div
-                className="absolute left-0 right-0 z-50 mt-2 max-h-56 overflow-auto rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-2 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.15)]"
+                className="absolute left-0 right-0 z-50 mt-2 max-h-56 overflow-auto rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-2 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.1)]"
                 onMouseDown={(e) => e.preventDefault()}
               >
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F4F7FB]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F8FAFC]">
                   <input
                     type="radio"
                     name="relay-assign-mode"
@@ -177,7 +188,7 @@ export function RelayQuickCreate({
                   />
                   <span>Mir zuweisen</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F4F7FB]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F8FAFC]">
                   <input
                     type="radio"
                     name="relay-assign-mode"
@@ -204,7 +215,7 @@ export function RelayQuickCreate({
                           setAssignAll(false);
                           toggleMember(m.user_id);
                         }}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[13px] hover:bg-[#F4F7FB]"
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[13px] hover:bg-[#F8FAFC]"
                       >
                         <span
                           className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
@@ -213,7 +224,7 @@ export function RelayQuickCreate({
                           {a?.initials ?? "?"}
                         </span>
                         <span className="min-w-0 flex-1 truncate">{m.email}</span>
-                        {checked ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2F80ED]" /> : null}
+                        {checked ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#64748B]" /> : null}
                       </button>
                     );
                   })}
@@ -226,7 +237,7 @@ export function RelayQuickCreate({
             onClick={() => setImportant((v) => !v)}
             className={cn(
               "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 transition-colors sm:self-start",
-              important ? "bg-[rgba(220,38,38,0.06)]" : "hover:border-[rgba(43,111,232,0.12)] hover:bg-[#F4F7FB]"
+              important ? "bg-[rgba(220,38,38,0.06)]" : "hover:border-[rgba(15,23,42,0.1)] hover:bg-[#F8FAFC]"
             )}
           >
             <span
@@ -234,7 +245,7 @@ export function RelayQuickCreate({
               style={{ background: important ? "#DC2626" : "#CBD5E1" }}
             />
             <span className={cn("text-[13px]", important ? "font-medium text-[#DC2626]" : "text-[#64748B]")}>
-              Als wichtig markieren
+              Als wichtig einstufen
             </span>
           </button>
         </div>
@@ -244,7 +255,7 @@ export function RelayQuickCreate({
 
       {line.trim() && !showOptions ? (
         <p className="mt-2 text-[11px] text-[#94A3B8]">
-          Enter zum Speichern · in das Feld tippen für Zuweisung und Priorität
+          Enter speichert · Feld erneut fokussieren für Zuweisung und Priorität
         </p>
       ) : null}
     </div>

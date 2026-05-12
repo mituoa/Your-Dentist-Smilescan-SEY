@@ -20,7 +20,7 @@ export async function getAssignableWorkspaceMembers(
     .order("role", { ascending: true });
 
   if (error || !rows) {
-    console.error("[getAssignableWorkspaceMembers]", error);
+    console.error("[getAssignableWorkspaceMembers]", (error as { code?: string } | null)?.code ?? "unknown");
     return [];
   }
 

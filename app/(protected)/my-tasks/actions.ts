@@ -105,8 +105,9 @@ type WorkspaceMembership = NonNullable<
 >;
 
 /**
- * Session + Arbeitsbereich für Server-Actions (Punkt 8): zuerst Anmeldung, dann Mitgliedschaft —
- * vermeidet „Nicht angemeldet“ bei fehlendem Workspace und hält die Semantik über alle Actions gleich.
+ * Session + Arbeitsbereich für Server-Actions: zuerst Anmeldung, dann Mitgliedschaft — gleiche Semantik für
+ * Relay-relevante Pfade (Quick-Create, DnD, Reihenfolge). **Punkt 3:** kein Schreibzugriff ohne `workspace_id`
+ * aus dieser Mitgliedschaft.
  */
 async function resolveActorWorkspace(): Promise<
   | { ok: true; supabase: Awaited<ReturnType<typeof createClient>>; user: User; workspace: WorkspaceMembership }
@@ -211,7 +212,7 @@ export async function createMyTask(formData: FormData): Promise<{
     .single();
 
   if (error) {
-    console.error("[createMyTask]", error);
+    console.error("[createMyTask]", (error as { code?: string }).code ?? "unknown");
     return { error: "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen." };
   }
 
@@ -224,7 +225,7 @@ export async function createMyTask(formData: FormData): Promise<{
       .from("task_assignees")
       .insert(assigneeRows);
     if (assigneeError) {
-      console.error("[createMyTask assignees]", assigneeError);
+      console.error("[createMyTask assignees]", (assigneeError as { code?: string }).code ?? "unknown");
       await supabase.from("tasks").delete().eq("id", inserted.id);
       return { error: "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen." };
     }
@@ -289,7 +290,10 @@ export async function createMyTask(formData: FormData): Promise<{
       await upsertTaskReceipts(inserted.id, receiptRows);
     }
   } catch (mailError) {
-    console.error("[createMyTask mail]", mailError);
+    console.error(
+      "[createMyTask mail]",
+      mailError instanceof Error ? mailError.message : "unknown"
+    );
   }
 
   revalidatePath("/my-tasks");
@@ -333,7 +337,11 @@ export async function submitTaskForReview(
     updates.reviewed_at = now;
   }
 
-  const { error } = await supabase.from("tasks").update(updates).eq("id", taskId);
+  const { error } = await supabase
+    .from("tasks")
+    .update(updates)
+    .eq("id", taskId)
+    .eq("workspace_id", workspace.workspace_id);
 
   if (error) return { error: "Aktion fehlgeschlagen. Bitte erneut versuchen." };
 
@@ -436,9 +444,13 @@ export async function moveTaskStatusByDrag(
     }
   }
 
-  const { error } = await supabase.from("tasks").update(updates).eq("id", taskId);
+  const { error } = await supabase
+    .from("tasks")
+    .update(updates)
+    .eq("id", taskId)
+    .eq("workspace_id", workspace.workspace_id);
   if (error) {
-    console.error("[moveTaskStatusByDrag]", error);
+    console.error("[moveTaskStatusByDrag]", (error as { code?: string }).code ?? "unknown");
     return { error: "Statuswechsel fehlgeschlagen." };
   }
 
@@ -476,7 +488,7 @@ export async function reorderTasksInColumn(
       .eq("id", id)
       .eq("workspace_id", workspace.workspace_id);
     if (error) {
-      console.error("[reorderTasksInColumn]", error);
+      console.error("[reorderTasksInColumn]", (error as { code?: string }).code ?? "unknown");
       return { error: "Reihenfolge konnte nicht gespeichert werden." };
     }
   }

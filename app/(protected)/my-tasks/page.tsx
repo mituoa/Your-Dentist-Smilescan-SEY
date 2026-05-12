@@ -1,6 +1,7 @@
 import { loadRelayWorkspaceData } from "@/app/(protected)/my-tasks/relay-server-data";
 import { RelayWorkspaceView } from "@/components/my-tasks/relay-workspace-view";
 
+/** Persönliche Aufgaben- und Relay-Ansicht; Zweck des Team-Boards siehe `app/(protected)/relay/page.tsx`. */
 interface MyTasksPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }

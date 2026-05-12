@@ -34,6 +34,12 @@ export interface MyTask {
   };
 }
 
+/**
+ * Aufgabenliste für Relay / „Meine Aufgaben“.
+ * **Workspace:** Abfrage immer mit `.eq("workspace_id", workspaceId)`; zusätzlicher **Sichtbarkeitsfilter**
+ * nach Rolle und Empfänger (ergänzend zu RLS). Server Actions prüfen dieselbe Workspace-Mitgliedschaft über
+ * `resolveActorWorkspace` und `canMoveTask` (s. `workflow-rules`).
+ */
 export async function getMyTasks(
   userId: string,
   workspaceId: string,
@@ -74,7 +80,7 @@ export async function getMyTasks(
   const { data, error } = await query;
 
   if (error) {
-    console.error("[getMyTasks]", error);
+    console.error("[getMyTasks]", (error as { code?: string }).code ?? "unknown");
     return [];
   }
 

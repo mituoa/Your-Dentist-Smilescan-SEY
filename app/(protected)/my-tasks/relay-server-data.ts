@@ -8,6 +8,12 @@ import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { getMyTaskCounts } from "@/lib/queries/task-counts";
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * Gemeinsamer Datenlader für **`/relay`** (Team-Board) und **`/my-tasks`** (persönliche Relay-Ansicht).
+ * Liefert nur workspace-gehörige Aufgaben und Mitglieder — keine zweite Produktlogik, nur geteilte Abfragen.
+ * **Auth:** `getCurrentWorkspace` + Session; alle Mutationen laufen über Server Actions mit `resolveActorWorkspace`
+ * (s. `my-tasks/actions.ts`).
+ */
 export async function loadRelayWorkspaceData(searchParams: Promise<Record<string, string | string[] | undefined>>) {
   await searchParams;
 

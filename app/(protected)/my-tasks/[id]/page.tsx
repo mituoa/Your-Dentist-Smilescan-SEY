@@ -10,6 +10,11 @@ interface TaskDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Aufgabendetail — **nur** für Nutzerinnen, die laut Empfängerlogik **diese** Aufgabe sehen dürfen
+ * (`isMyTask`). Gleiche `workspace_id`-Filter wie in `getTaskWithComments`; kein Leak fremder Inhalte
+ * über die UUID in der URL (gleiches Muster wie Relay-Board: Workspace + Sichtbarkeit).
+ */
 export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   const { id } = await params;
   const workspace = await getCurrentWorkspace();
@@ -34,6 +39,10 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   const isMyTask =
     isTaskRecipient ||
     (isDoctor && task.created_by === user.id);
+
+  if (!isMyTask) {
+    notFound();
+  }
 
   if (isTaskRecipient) {
     await markTaskAsRead(task.id, user.id);
