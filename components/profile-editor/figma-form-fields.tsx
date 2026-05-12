@@ -13,7 +13,10 @@ export const FigmaTextInput = forwardRef<
     <input
       ref={ref}
       {...rest}
-      className={cn("w-full min-w-0 text-[13px] focus:outline-none", className)}
+      className={cn(
+        "w-full min-w-0 text-base focus:outline-none sm:text-[13px]",
+        className
+      )}
       style={{
         padding: "9px 12px",
         border: `1px solid ${focused ? "#2F80ED" : "#E8E8E8"}`,
@@ -46,7 +49,10 @@ export const FigmaTextarea = forwardRef<
       ref={ref}
       rows={rows}
       {...rest}
-      className={cn("w-full min-w-0 resize-none text-[13px] focus:outline-none", className)}
+      className={cn(
+        "w-full min-w-0 resize-none text-base focus:outline-none sm:text-[13px]",
+        className
+      )}
       style={{
         padding: "9px 12px",
         border: `1px solid ${focused ? "#2F80ED" : "#E8E8E8"}`,

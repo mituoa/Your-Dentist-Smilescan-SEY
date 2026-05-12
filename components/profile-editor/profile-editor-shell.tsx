@@ -1,11 +1,6 @@
 "use client";
 
-/**
- * **ProfileEditorShell — Zweck (Punkt 1):** Ruhige Pflege der **Praxisdarstellung**, die im **öffentlichen
- * Patientenbereich** (`/doc/…`) erscheint — **kein** generisches Account-Center, **kein** CMS- oder Website-Builder,
- * **keine** Branding-Spielwiese. Formular links, **Orientierungsansicht** rechts (Lesen, kein zweiter Bearbeitungsmodus).
- * Auto-Speichern = Arbeitskomfort, **kein** „Publishing“-Ritual.
- */
+/** Praxisdarstellung für den Patientenbereich: Formular links, ruhige Vorschau rechts (Lesen). */
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Camera } from "lucide-react";
 
@@ -49,6 +44,8 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Verhindert, dass ein abgeschlossener Speichern-Lauf den Status überschreibt, wenn inzwischen ein neuer Lauf gestartet wurde. */
+  const saveSeqRef = useRef(0);
   const latestDataRef = useRef(data);
   const mergedProfile = useMemo(
     () => ({
@@ -70,33 +67,46 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
   }, []);
 
   const performSave = useCallback(async () => {
+    const seq = ++saveSeqRef.current;
     setSaveStatus("saving");
     setErrorMessage(null);
     const d = latestDataRef.current;
 
-    const result = await saveProfileData({
-      first_name: d.first_name || "",
-      last_name: d.last_name || "",
-      title: d.title || "",
-      founding_year: d.founding_year,
-      vita_markdown: d.vita_markdown || "",
-      specializations: d.specializations,
-      services_structured: d.services_structured,
-      practice_name: d.practice_name || "",
-      practice_address: d.practice_address || "",
-      practice_employment_status: d.practice_employment_status || "",
-      practice_phone: d.practice_phone || "",
-      practice_email: d.practice_email || "",
-      practice_website: d.practice_website || "",
-      practice_hours: d.practice_hours || "",
-    });
+    try {
+      const result = await saveProfileData({
+        first_name: d.first_name || "",
+        last_name: d.last_name || "",
+        title: d.title || "",
+        founding_year: d.founding_year,
+        vita_markdown: d.vita_markdown || "",
+        specializations: d.specializations,
+        services_structured: d.services_structured,
+        practice_name: d.practice_name || "",
+        practice_address: d.practice_address || "",
+        practice_employment_status: d.practice_employment_status || "",
+        practice_phone: d.practice_phone || "",
+        practice_email: d.practice_email || "",
+        practice_website: d.practice_website || "",
+        practice_hours: d.practice_hours || "",
+      });
 
-    if (result.error) {
+      if (seq !== saveSeqRef.current) {
+        return;
+      }
+
+      if (result.error) {
+        setSaveStatus("error");
+        setErrorMessage(result.error);
+      } else {
+        setSaveStatus("saved");
+        setLastSavedAt(new Date());
+      }
+    } catch {
+      if (seq !== saveSeqRef.current) {
+        return;
+      }
       setSaveStatus("error");
-      setErrorMessage(result.error);
-    } else {
-      setSaveStatus("saved");
-      setLastSavedAt(new Date());
+      setErrorMessage("Speichern fehlgeschlagen.");
     }
   }, []);
 
@@ -164,52 +174,64 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
   const onPhotoPick = async (file: File) => {
     setPhotoUploading(true);
     setPhotoError(null);
-    const fd = new FormData();
-    fd.append("file", file);
-    const result = await uploadPortraitPhoto(fd);
-    setPhotoUploading(false);
-    if (result.error) setPhotoError(result.error);
-    else if (result.url) updateField("photo_url", result.url);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const result = await uploadPortraitPhoto(fd);
+      if (result.error) setPhotoError(result.error);
+      else if (result.url) updateField("photo_url", result.url);
+    } catch {
+      setPhotoError("Upload fehlgeschlagen.");
+    } finally {
+      setPhotoUploading(false);
+    }
   };
+
+  /** Keine parallelen Nebenaktionen während persistierendem Speichern oder Porträt-Upload. */
+  const interactionLocked = saveStatus === "saving" || photoUploading;
 
   return (
     <div
-      className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden"
+      className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden pb-[max(0px,env(safe-area-inset-bottom))]"
       style={{ backgroundColor: "#F8FAFC" }}
     >
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-15%,rgba(15,23,42,0.04),transparent)]"
         aria-hidden
       />
-      <div className="relative flex min-h-0 min-w-0 flex-1 flex-row overflow-x-auto overflow-y-hidden">
-        {/* LEFT — Eingabe (feste Arbeitsbreite) */}
-        <div className="flex min-h-0 w-[480px] shrink-0 flex-col overflow-y-auto border-r border-solid border-[#ECECEC] bg-[#FBFBFB]">
-          <div style={{ padding: "56px 40px" }}>
-            <div style={{ marginBottom: 56 }}>
+      <div className="relative flex min-h-0 min-w-0 flex-1 touch-pan-x flex-row overflow-x-auto overflow-y-hidden overscroll-x-contain">
+        {/* LEFT — Eingabe (Arbeitsbreite max. 480px; auf schmalen Viewports volle Breite, weniger horizontale Leere) */}
+        <div
+          className="flex min-h-0 w-[min(100%,480px)] shrink-0 flex-col overflow-y-auto scroll-pb-10 border-r border-solid border-[#F0F0F0] bg-[#FBFBFB]"
+          aria-busy={saveStatus === "saving" || photoUploading}
+        >
+          <div className="px-5 py-12 sm:px-8 sm:py-12 md:px-10 md:py-14">
+            <div className="mb-11 sm:mb-12 md:mb-14">
               <p className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.08em]" style={{ color: "#A3A3A3" }}>
                 Praxisdarstellung
               </p>
               <h1 className="text-[15px] font-semibold tracking-[-0.02em]" style={{ color: "#171717", marginBottom: 8 }}>
                 Praxisangaben für den Patientenbereich
               </h1>
-              <p className="max-w-[320px] text-[12px]" style={{ color: "#737373", lineHeight: 1.55 }}>
-                Diese Felder speisen die öffentliche Darstellung unter Ihrer Praxis-Kurzadresse. Änderungen gelten nach
-                dem Speichern für neue Aufrufe — keine getrennte Veröffentlichung.
+              <p className="max-w-full text-[12px] sm:max-w-[360px]" style={{ color: "#737373", lineHeight: 1.55 }}>
+                Dieser Bereich aktualisiert die zentralen Texte, das Porträt, Fachgebiete sowie Adresse und
+                Öffnungszeiten für Ihre Darstellung im Patientenbereich. Bereits hinterlegte Leistungen und Kontaktdaten
+                bleiben unverändert. Änderungen werden automatisch übernommen.
               </p>
             </div>
 
-            <div className="flex flex-col" style={{ gap: 48 }}>
+            <div className="flex flex-col gap-11 max-sm:gap-12 md:gap-12">
               {/* Foto */}
               <div>
-                <label className="mb-3 block text-[11px] font-medium" style={{ color: "#737373" }}>
+                <label className="mb-3.5 block text-[11px] font-medium sm:mb-3" style={{ color: "#737373" }}>
                   Foto
                 </label>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-5 sm:gap-4">
                   <button
                     type="button"
-                    disabled={photoUploading}
+                    disabled={interactionLocked}
                     onClick={() => fileRef.current?.click()}
-                    className="group relative cursor-pointer"
+                    className="group relative touch-manipulation disabled:cursor-not-allowed disabled:opacity-50"
                     style={{
                       width: 72,
                       height: 72,
@@ -265,7 +287,11 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                   </p>
                 ) : null}
                 {photoError ? (
-                  <p className="mt-2 text-[12px]" style={{ color: "#DC2626" }}>
+                  <p
+                    className="mt-2 border-l-2 border-text-tertiary/60 pl-2 text-[12px] leading-relaxed text-text-secondary"
+                    role="status"
+                    aria-live="polite"
+                  >
                     {photoError}
                   </p>
                 ) : null}
@@ -273,17 +299,17 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Name */}
               <div>
-                <label className="mb-3 block text-[11px] font-medium" style={{ color: "#737373" }}>
+                <label className="mb-3.5 block text-[11px] font-medium sm:mb-3" style={{ color: "#737373" }}>
                   Name
                 </label>
-                <div className="flex flex-col" style={{ gap: 8 }}>
+                <div className="flex flex-col gap-2.5 sm:gap-2">
                   <FigmaTextInput
                     placeholder="Titel"
                     maxLength={PROFILE_LIMITS.title}
                     value={data.title || ""}
                     onChange={(e) => updateField("title", e.target.value || null)}
                   />
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5 sm:gap-2">
                     <FigmaTextInput
                       placeholder="Vorname"
                       maxLength={PROFILE_LIMITS.first_name}
@@ -302,7 +328,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Arbeitsweise */}
               <div>
-                <div className="mb-3">
+                <div className="mb-3.5 sm:mb-3">
                   <label className="mb-1 block text-[11px] font-medium" style={{ color: "#737373" }}>
                     Arbeitsweise
                   </label>
@@ -312,7 +338,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                   </p>
                 </div>
 
-                <div className="flex flex-col" style={{ gap: 8 }}>
+                <div className="flex flex-col gap-2.5 sm:gap-2">
                   {([0, 1, 2] as const).map((i) => (
                     <FigmaTextInput
                       key={i}
@@ -333,8 +359,9 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                 {!showStatementLibrary ? (
                   <button
                     type="button"
+                    disabled={interactionLocked}
                     onClick={() => setShowStatementLibrary(true)}
-                    className="mt-3 text-[11px] font-medium"
+                    className="mt-3 inline-flex min-h-[44px] items-center text-[11px] font-medium touch-manipulation disabled:cursor-not-allowed disabled:opacity-50"
                     style={{ color: "#999999", transition: "all 120ms ease" }}
                   >
                     Formulierungsvorschläge
@@ -350,7 +377,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                       <button
                         type="button"
                         onClick={() => setShowStatementLibrary(false)}
-                        className="text-[11px] font-medium"
+                        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-[11px] font-medium touch-manipulation"
                         style={{ color: "#999999", transition: "all 120ms ease" }}
                       >
                         Schließen
@@ -369,7 +396,9 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                             {category.statements.map((statement) => {
                               const isSelected = working.statementIds.includes(statement.id);
                               const isDisabled =
-                                !isSelected && working.statementIds.length >= MAX_WORKING_STYLE_SELECTIONS;
+                                (!isSelected &&
+                                  working.statementIds.length >= MAX_WORKING_STYLE_SELECTIONS) ||
+                                interactionLocked;
                               return (
                                 <button
                                   key={statement.id}
@@ -401,7 +430,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Fachgebiete */}
               <div>
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-3.5 flex items-center justify-between sm:mb-3">
                   <label className="text-[11px] font-medium" style={{ color: "#737373" }}>
                     Fachgebiete
                   </label>
@@ -418,19 +447,20 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                   ).map((specialty) => {
                     const isSelected = data.specializations.includes(specialty.id);
                     const isDisabled = !isSelected && data.specializations.length >= MAX_FIGMA_SPECIALTY_SELECTIONS;
+                    const chipMuted = isDisabled || interactionLocked;
                     return (
                       <button
                         key={specialty.id}
                         type="button"
-                        disabled={isDisabled}
-                        onClick={() => !isDisabled && toggleSpecialty(specialty.id)}
+                        disabled={chipMuted}
+                        onClick={() => !chipMuted && toggleSpecialty(specialty.id)}
                         className="rounded-sm px-3 py-1.5 text-[11px] font-medium"
                         style={{
                           background: isSelected ? "#262626" : "#FFFFFF",
                           color: isSelected ? "#FFFFFF" : "#737373",
                           border: `1px solid ${isSelected ? "#262626" : "#E8E8E8"}`,
-                          opacity: isDisabled ? 0.3 : 1,
-                          cursor: isDisabled ? "not-allowed" : "pointer",
+                          opacity: chipMuted ? 0.3 : 1,
+                          cursor: chipMuted ? "not-allowed" : "pointer",
                           transition: "all 120ms ease",
                         }}
                       >
@@ -442,8 +472,9 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                 {!showAllSpecialties && FIGMA_SPECIALTY_OPTIONS.length > FIGMA_PRIMARY_SPECIALTY_IDS.length ? (
                   <button
                     type="button"
+                    disabled={interactionLocked}
                     onClick={() => setShowAllSpecialties(true)}
-                    className="mt-3 text-[11px] font-medium"
+                    className="mt-3 inline-flex min-h-[44px] items-center text-[11px] font-medium touch-manipulation disabled:cursor-not-allowed disabled:opacity-50"
                     style={{ color: "#999999", transition: "all 120ms ease" }}
                   >
                     Weitere Fachgebiete anzeigen
@@ -466,10 +497,10 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Praxis */}
               <div>
-                <label className="mb-3 block text-[11px] font-medium" style={{ color: "#737373" }}>
+                <label className="mb-3.5 block text-[11px] font-medium sm:mb-3" style={{ color: "#737373" }}>
                   Praxis
                 </label>
-                <div className="flex flex-col" style={{ gap: 8 }}>
+                <div className="flex flex-col gap-2.5 sm:gap-2">
                   <FigmaTextInput
                     placeholder="Praxisname (optional)"
                     maxLength={PROFILE_LIMITS.practice_name}
@@ -487,7 +518,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                       )
                     }
                   />
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2.5 sm:gap-2">
                     <FigmaTextInput
                       placeholder="PLZ"
                       type="text"
@@ -524,19 +555,19 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                 </div>
               </div>
 
-              <div className="mt-10 flex justify-end border-t border-[#F0F0F0] pt-6">
+              <div className="mt-12 flex min-h-[2.75rem] flex-col justify-end border-t border-[#F0F0F0] pt-7 sm:mt-10 sm:pt-6">
                 <AutoSaveIndicator status={saveStatus} lastSavedAt={lastSavedAt} errorMessage={errorMessage} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* RIGHT — Orientierungsansicht (nur Lesen; kein zweiter Editor) */}
+        {/* RIGHT — Vorschau (nur Lesen) */}
         <div className="flex min-h-0 min-w-[min(100%,360px)] flex-1 flex-col overflow-y-auto bg-[#EEF2F8]">
           <div
             className="flex min-h-full w-full flex-1 items-center justify-center"
             role="region"
-            aria-label="Orientierungsansicht der Praxisdarstellung im Patientenbereich"
+            aria-label="Vorschau der Praxisdarstellung im Patientenbereich"
           >
             <ProfileFigmaLivePreview data={mergedProfile} />
           </div>

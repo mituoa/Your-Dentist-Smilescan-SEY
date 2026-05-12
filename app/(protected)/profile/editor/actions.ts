@@ -4,9 +4,78 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { generateSlug, isSafeDocPathSlug } from "@/lib/slug";
+import { MAX_FIGMA_SPECIALTY_SELECTIONS } from "@/lib/profile/figma-specialties";
+import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { revalidatePath } from "next/cache";
 
 const profileRoleError = "Dieser Schritt ist für Ihre Rolle nicht vorgesehen.";
+
+/** Schutz vor übergroßen Payloads / Mass-Assignment über JSON-Felder (Server Action). */
+const MAX_SERVICES_STRUCTURED_ITEMS = 100;
+
+function clampStr(value: unknown, max: number): string {
+  const s = typeof value === "string" ? value : String(value ?? "");
+  return s.length <= max ? s : s.slice(0, max);
+}
+
+function sanitizeFoundingYear(value: number | null): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  const y = Math.round(value);
+  if (y < 1800 || y > 2100) return null;
+  return y;
+}
+
+function sanitizeSpecializations(raw: unknown): string[] {
+  const arr = Array.isArray(raw) ? raw : [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of arr.slice(0, MAX_FIGMA_SPECIALTY_SELECTIONS * 4)) {
+    const id = clampStr(item, PROFILE_LIMITS.specialization_custom);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+    if (out.length >= MAX_FIGMA_SPECIALTY_SELECTIONS) break;
+  }
+  return out;
+}
+
+function sanitizeServicesStructured(
+  raw: SaveProfilePayload["services_structured"]
+): SaveProfilePayload["services_structured"] {
+  const arr = Array.isArray(raw) ? raw : [];
+  return arr
+    .slice(0, MAX_SERVICES_STRUCTURED_ITEMS)
+    .map((s) => ({
+      id: clampStr(s?.id, 64),
+      name: clampStr(s?.name, PROFILE_LIMITS.service_name),
+      note: clampStr(s?.note, PROFILE_LIMITS.service_note),
+      custom: Boolean(s?.custom),
+    }))
+    .filter((s) => s.id.length > 0 && s.name.length > 0);
+}
+
+function sanitizeSavePayload(payload: SaveProfilePayload): SaveProfilePayload {
+  return {
+    first_name: clampStr(payload.first_name, PROFILE_LIMITS.first_name),
+    last_name: clampStr(payload.last_name, PROFILE_LIMITS.last_name),
+    title: clampStr(payload.title, PROFILE_LIMITS.title),
+    founding_year: sanitizeFoundingYear(payload.founding_year),
+    vita_markdown: clampStr(payload.vita_markdown, PROFILE_LIMITS.vita_markdown),
+    specializations: sanitizeSpecializations(payload.specializations),
+    services_structured: sanitizeServicesStructured(payload.services_structured),
+    practice_name: clampStr(payload.practice_name, PROFILE_LIMITS.practice_name),
+    practice_address: clampStr(payload.practice_address, PROFILE_LIMITS.practice_address),
+    practice_employment_status: clampStr(
+      payload.practice_employment_status,
+      PROFILE_LIMITS.practice_employment_status
+    ),
+    practice_phone: clampStr(payload.practice_phone, PROFILE_LIMITS.practice_phone),
+    practice_email: clampStr(payload.practice_email, PROFILE_LIMITS.practice_email),
+    practice_website: clampStr(payload.practice_website, PROFILE_LIMITS.practice_website),
+    practice_hours: clampStr(payload.practice_hours, PROFILE_LIMITS.practice_hours),
+  };
+}
 
 export interface SaveProfilePayload {
   first_name: string;
@@ -37,6 +106,8 @@ export async function saveProfileData(
   if (!workspace) return { error: "Nicht angemeldet." };
   if (workspace.role !== "doctor") return { error: profileRoleError };
 
+  const p = sanitizeSavePayload(payload);
+
   const supabase = await createClient();
 
   const { data: existingBranding } = await supabase
@@ -46,26 +117,25 @@ export async function saveProfileData(
     .maybeSingle();
 
   const display_name =
-    [payload.first_name, payload.last_name].filter(Boolean).join(" ").trim() ||
-    null;
+    [p.first_name, p.last_name].filter(Boolean).join(" ").trim() || null;
 
   const row = {
     workspace_id: workspace.workspace_id,
-    first_name: payload.first_name || null,
-    last_name: payload.last_name || null,
-    title: payload.title || null,
+    first_name: p.first_name || null,
+    last_name: p.last_name || null,
+    title: p.title || null,
     display_name,
-    founding_year: payload.founding_year,
-    vita_markdown: payload.vita_markdown || null,
-    specializations: payload.specializations,
-    services_structured: payload.services_structured,
-    practice_name: payload.practice_name || null,
-    practice_address: payload.practice_address || null,
-    practice_employment_status: payload.practice_employment_status || null,
-    practice_phone: payload.practice_phone || null,
-    practice_email: payload.practice_email || null,
-    practice_website: payload.practice_website || null,
-    practice_hours: payload.practice_hours || null,
+    founding_year: p.founding_year,
+    vita_markdown: p.vita_markdown || null,
+    specializations: p.specializations,
+    services_structured: p.services_structured,
+    practice_name: p.practice_name || null,
+    practice_address: p.practice_address || null,
+    practice_employment_status: p.practice_employment_status || null,
+    practice_phone: p.practice_phone || null,
+    practice_email: p.practice_email || null,
+    practice_website: p.practice_website || null,
+    practice_hours: p.practice_hours || null,
     logo_url: existingBranding?.logo_url ?? null,
     accent_color: existingBranding?.accent_color ?? null,
   };
@@ -82,10 +152,13 @@ export async function saveProfileData(
   if (display_name) {
     const newSlug = generateSlug(display_name);
     if (newSlug) {
-      await supabase
+      const { error: slugErr } = await supabase
         .from("workspaces")
         .update({ slug: newSlug })
         .eq("id", workspace.workspace_id);
+      if (slugErr) {
+        console.error("[saveProfileData] workspace slug update", slugErr.code ?? "unknown");
+      }
     }
   }
 
@@ -119,13 +192,14 @@ export async function uploadPortraitPhoto(
     return { error: "Datei zu groß. Maximum 10 MB." };
   }
 
-  const allowed = ["image/jpeg", "image/png", "image/webp"];
-  if (!allowed.includes(file.type)) {
+  const allowed = ["image/jpeg", "image/png", "image/webp"] as const;
+  if (!allowed.includes(file.type as (typeof allowed)[number])) {
     return { error: "Format nicht unterstützt. JPG, PNG oder WEBP." };
   }
 
   const admin = createAdminClient();
-  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const ext =
+    file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
   const path = `${workspace.workspace_id}/portrait-${Date.now()}.${ext}`;
 
   const arrayBuffer = await file.arrayBuffer();
@@ -145,10 +219,14 @@ export async function uploadPortraitPhoto(
     .getPublicUrl(path);
   const publicUrl = urlData.publicUrl;
 
-  await admin
+  const { error: linkErr } = await admin
     .from("profile_data")
     .update({ photo_url: publicUrl } as never)
     .eq("workspace_id", workspace.workspace_id);
+  if (linkErr) {
+    console.error("[uploadPortraitPhoto] profile_data update", linkErr.code ?? "unknown");
+    return { error: "Das Foto wurde hochgeladen, konnte aber nicht mit Ihrem Profil verknüpft werden. Bitte versuchen Sie es erneut." };
+  }
 
   revalidatePath("/profile/editor");
   const { data: wsRow } = await admin
@@ -173,10 +251,14 @@ export async function deletePortraitPhoto(): Promise<{
   if (workspace.role !== "doctor") return { error: profileRoleError };
 
   const admin = createAdminClient();
-  await admin
+  const { error: clearErr } = await admin
     .from("profile_data")
     .update({ photo_url: null } as never)
     .eq("workspace_id", workspace.workspace_id);
+  if (clearErr) {
+    console.error("[deletePortraitPhoto] profile_data update", clearErr.code ?? "unknown");
+    return { error: "Porträt konnte nicht entfernt werden. Bitte versuchen Sie es erneut." };
+  }
 
   revalidatePath("/profile/editor");
   const { data: wsRow } = await admin

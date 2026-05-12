@@ -18,16 +18,28 @@ export function AutoSaveIndicator({
   if (status === "saving") {
     return (
       <div className="flex items-center gap-2 text-xs text-text-tertiary">
-        <Loader2 className="w-3 h-3 animate-spin" strokeWidth={2} />
+        <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2} />
         Speichern…
       </div>
     );
   }
 
   if (status === "error") {
+    const raw = (errorMessage || "").trim();
+    const detail =
+      raw === "Nicht angemeldet."
+        ? "Bitte melden Sie sich erneut an, um fortzufahren."
+        : raw || undefined;
+    const isGenericSave = !detail || detail === "Speichern fehlgeschlagen.";
+
     return (
-      <div className="text-xs text-danger">
-        Fehler: {errorMessage || "Speichern fehlgeschlagen"}
+      <div className="max-w-md text-xs leading-relaxed" role="alert">
+        <p className="font-medium text-text-primary">Speichern derzeit nicht möglich.</p>
+        <p className="mt-1 text-text-secondary">
+          {isGenericSave
+            ? "Bitte prüfen Sie die Verbindung und versuchen Sie es in einem Moment erneut."
+            : detail}
+        </p>
       </div>
     );
   }

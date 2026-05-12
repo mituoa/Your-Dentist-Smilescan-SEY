@@ -13,7 +13,10 @@ export function ProfileFigmaLivePreview({ data }: ProfileFigmaLivePreviewProps) 
   const title = (data.title || "").trim();
   const first = (data.first_name || "").trim();
   const last = (data.last_name || "").trim();
-  const fullName = [title, first, last].filter(Boolean).join(" ").trim() || (data.display_name || "").trim() || "Name";
+  const fullName =
+    [title, first, last].filter(Boolean).join(" ").trim() ||
+    (data.display_name || "").trim() ||
+    "Ihre Angaben";
   const practiceName = (data.practice_name || "").trim();
   const vitaBody = expandWorkingStyleVitaForDisplay(data.vita_markdown ?? null);
   const statements = vitaBody.split(/\n\n+/).map((p) => p.trim()).filter(Boolean).slice(0, 3);
@@ -26,8 +29,8 @@ export function ProfileFigmaLivePreview({ data }: ProfileFigmaLivePreviewProps) 
       className="flex flex-1 justify-center overflow-auto"
       style={{ background: "#FAFAFA" }}
     >
-      <div style={{ maxWidth: 560, width: "100%", padding: "140px 64px 100px" }}>
-        <div style={{ marginBottom: 88, textAlign: "center" }}>
+      <div style={{ maxWidth: 560, width: "100%", padding: "clamp(40px, 11vw, 140px) clamp(16px, 5vw, 64px) clamp(36px, 9vw, 100px)" }}>
+        <div style={{ marginBottom: "clamp(40px, 10vw, 88px)", textAlign: "center" }}>
           {data.photo_url ? (
             <div style={{ marginBottom: 24, display: "flex", justifyContent: "center" }}>
               <div style={{ width: 148, height: 148, borderRadius: 2, overflow: "hidden" }}>
@@ -39,7 +42,7 @@ export function ProfileFigmaLivePreview({ data }: ProfileFigmaLivePreviewProps) 
 
           <h1
             style={{
-              fontSize: 42,
+              fontSize: "clamp(24px, 6vw, 42px)",
               fontWeight: 600,
               color: "#1a1a1a",
               letterSpacing: "-0.022em",
@@ -130,6 +133,23 @@ export function ProfileFigmaLivePreview({ data }: ProfileFigmaLivePreviewProps) 
             {hours ? <div>{hours}</div> : null}
           </div>
         </div>
+
+        <p
+          style={{
+            marginTop: 48,
+            marginBottom: 0,
+            fontSize: 11,
+            color: "#a3a3a3",
+            textAlign: "center",
+            lineHeight: 1.55,
+            maxWidth: 420,
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          Vorschau der Darstellung im Patientenbereich. Leistungsliste und vollständiger Kontaktblock erscheinen dort
+          wie hinterlegt; hier nicht in voller Breite dargestellt.
+        </p>
       </div>
     </div>
   );

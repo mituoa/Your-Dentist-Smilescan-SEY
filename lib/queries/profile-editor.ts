@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+// Scope: ein aktueller profile_data-Satz je Workspace. Keine Versionierung/Änderungshistorie im MVP (bewusst out of scope).
 import {
   parseServicesStructured,
   parseSpecializations,
@@ -22,13 +23,22 @@ export async function getProfileForEditor(
     .eq("workspace_id", workspaceId)
     .single();
 
+  // PGRST116 = keine Zeile (.single) — erwartbar, dann Insert-Versuch. Andere Codes: nur serverseitig loggen.
+  if (error?.code && error.code !== "PGRST116") {
+    console.error("[getProfileForEditor] select", error.code);
+  }
+
   if (error || !data) {
     const { data: inserted, error: insertError } = await supabase
       .from("profile_data")
       .insert({ workspace_id: workspaceId } as never)
       .select()
       .single();
-    if (insertError || !inserted) return null;
+    if (insertError) {
+      console.error("[getProfileForEditor] insert", insertError.code ?? "unknown");
+      return null;
+    }
+    if (!inserted) return null;
     return mapToEditor(inserted as Record<string, unknown>);
   }
 
