@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ExternalLink, Edit3 } from "lucide-react";
+import { ExternalLink, FileText, PencilLine } from "lucide-react";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -17,6 +17,20 @@ function publicProfileUrlLabel(baseUrl: string, path: string): string {
   }
 }
 
+/**
+ * **`/profile` — Punkt 1 (Zweck):** Ruhige **Verwaltung der Praxisangaben** und des **verknüpften, freigegebenen
+ * Patientenbereichs** unter `/doc/{slug}` — **kein** Social-/Creator-Profil, **kein** generisches Account-Center,
+ * **keine** Marketing-„Präsenz“-Plattform. Arzt-only (`redirect` zu `/my-tasks` für Team); zwei sachliche
+ * Einstiege: **Editor** (Inhalt) und optional **Patientenansicht** (nur wenn `workspaces.slug` gesetzt).
+ *
+ * **Semantik:** „Profil“ hier = **fachliche Praxisdarstellung + Dokumentfreigabe** für strukturierte Patienteneinsendung,
+ * nicht öffentliche Persönlichkeits- oder Follower-Funktion.
+ *
+ * **Punkt 2 (Status — final):** **Server-first** nach Workspace/Slug (`loading.tsx` während Lesung); **kein**
+ * Client-„Live“-Status. Karten: **stabile Mindesthöhe**, gleiche Rasterzeile (`items-stretch`), Slug vorhanden =
+ * Link-Karte, fehlend = **ruhige** gestrichelte Fläche (kein toter Link, kein Flackern). Team → `redirect`
+ * (`/my-tasks`) vor Datenabfrage — klarer, nicht zweideutiger Zustand.
+ */
 export default async function ProfilePage() {
   const workspace = await getCurrentWorkspace();
 
@@ -42,39 +56,56 @@ export default async function ProfilePage() {
     <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
       <div className="mx-auto w-full max-w-4xl space-y-8">
         <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-text-tertiary mb-3">
-            Profil
+          <p className="mb-3 text-xs font-semibold tracking-normal text-text-tertiary">
+            Praxis & Dokumentation
           </p>
-          <h1 className="font-serif text-5xl font-light tracking-tight mb-4">
-            Öffentliches Profil
+          <h1 className="mb-4 font-serif text-4xl font-light tracking-tight text-text-primary md:text-5xl">
+            Praxisprofil & Patientendokumentation
           </h1>
-          <p className="text-text-secondary max-w-xl">
-            Verwalten Sie Ihre öffentliche Präsenz. Änderungen sind sofort live.
+          <p className="max-w-xl text-[15px] leading-relaxed text-text-secondary md:text-base">
+            Hier bearbeiten Sie die Angaben zu Ihrer Praxis. Der verknüpfte Bereich unter{" "}
+            <span className="whitespace-nowrap font-medium text-text-primary">/doc/…</span> dient Patientinnen
+            ausschließlich der strukturierten Einsendung von Unterlagen — nicht einer persönlichen oder
+            werblichen Online-Präsenz. Inhalte aus dem Editor erscheinen dort nach dem Speichern.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-stretch">
           <Link
             href="/profile/editor"
-            className="block bg-surface-card border border-border rounded-lg p-6 hover:border-brand/50 transition-colors"
+            className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-border bg-surface-card p-6 transition-colors hover:border-brand/40 md:min-h-[220px]"
           >
-            <Edit3 className="w-5 h-5 text-brand mb-3" strokeWidth={1.75} />
-            <h2 className="font-serif text-xl mb-1">Profil bearbeiten</h2>
-            <p className="text-xs text-text-tertiary">
-              Name, Vita, Leistungen, Praxis-Info
+            <PencilLine className="mb-3 h-5 w-5 text-brand" strokeWidth={1.75} aria-hidden />
+            <h2 className="mb-1 font-serif text-xl text-text-primary">Praxisangaben bearbeiten</h2>
+            <p className="text-xs leading-snug text-text-tertiary">
+              Stammdaten, Leistungsschwerpunkte und Praxisangaben — zentral im Editor.
             </p>
           </Link>
 
-          {publicUrl && (
+          {publicUrl ? (
             <Link
               href={publicUrl}
               target="_blank"
-              className="block bg-surface-card border border-border rounded-lg p-6 hover:border-brand/50 transition-colors"
+              rel="noopener noreferrer"
+              aria-label="Freigegebene Patientenansicht in neuem Tab öffnen"
+              className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-border bg-surface-card p-6 transition-colors hover:border-brand/40 md:min-h-[220px]"
             >
-              <ExternalLink className="w-5 h-5 text-brand mb-3" strokeWidth={1.75} />
-              <h2 className="font-serif text-xl mb-1">Ansehen</h2>
-              <p className="text-xs text-text-tertiary">{publicUrlLabel}</p>
+              <ExternalLink className="mb-3 h-5 w-5 text-brand" strokeWidth={1.75} aria-hidden />
+              <h2 className="mb-1 font-serif text-xl text-text-primary">Freigegebene Patientenansicht</h2>
+              <p className="break-words text-xs leading-snug text-text-tertiary">{publicUrlLabel}</p>
+              <p className="mt-3 text-xs leading-relaxed text-text-secondary">
+                Nur für die dokumentierte Einsendung durch Patientinnen — kein allgemeines Webprofil.
+              </p>
             </Link>
+          ) : (
+            <div className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-border bg-surface-card/60 p-6 md:min-h-[220px]">
+              <FileText className="mb-3 h-5 w-5 text-text-tertiary" strokeWidth={1.75} aria-hidden />
+              <h2 className="mb-1 font-serif text-xl text-text-primary">Patientenansicht</h2>
+              <p className="text-xs leading-relaxed text-text-secondary">
+                Sobald für Ihre Praxis ein kurzer Link (Slug) hinterlegt ist, erscheint hier der Zugang zur
+                strukturierten Dokumentation für Patientinnen.
+              </p>
+            </div>
           )}
         </div>
       </div>

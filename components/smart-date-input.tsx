@@ -406,7 +406,7 @@ export const SmartDateInput = forwardRef<SmartDateInputHandle, SmartDateInputPro
             aria-invalid={Boolean(hint)}
             aria-describedby={hint ? hintId : undefined}
             aria-label={ariaLabel ?? "Geburtsdatum"}
-            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-[15px] text-[#0F172A] outline-none ring-0 placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-[15px] text-[#0F172A] outline-none ring-0 placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 max-md:text-[16px]"
             placeholder="TT.MM.JJJJ"
           />
           <div className="my-2.5 w-px shrink-0 self-stretch bg-slate-200" aria-hidden />

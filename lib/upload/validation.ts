@@ -50,6 +50,25 @@ export function resolveImageMimeForUpload(file: File): string | null {
   return null;
 }
 
+/** Dateiendung für Storage-Pfade — nur aus **validiertem** MIME, nicht aus dem Original-Dateinamen (Spoofing). */
+export function storageExtForValidatedImage(mime: string): string {
+  const m = mime.toLowerCase().trim();
+  switch (m) {
+    case "image/jpeg":
+    case "image/jpg":
+      return "jpg";
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    case "image/heic":
+    case "image/heif":
+      return "heic";
+    default:
+      return "jpg";
+  }
+}
+
 export function validatePhoto(file: File): ValidationResult {
   const mime = resolveImageMimeForUpload(file);
   if (!mime) {

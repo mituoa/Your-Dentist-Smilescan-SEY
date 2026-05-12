@@ -1,6 +1,6 @@
 /**
  * Ruhige Nutzer-Copy, wenn eine Server Action im Client **wirft** (Netzwerk, Abbruch, unerwarteter Fehler).
- * Rohe `Error.message` / Next-Digests gehören **nicht** in die Task-Detail-UI (Punkt 8).
+ * Rohe `Error.message` / Next-Digests gehören **nicht** in die UI — u. a. `/create-case` (Punkt 8), Task-Detail.
  */
 export function taskMutationClientFailureMessage(error: unknown): string {
   const raw = error instanceof Error ? error.message : "";

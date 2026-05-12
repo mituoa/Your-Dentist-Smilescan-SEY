@@ -44,6 +44,7 @@ export function UploadForm({
           setUploadProgress(`Lade Foto ${i + 1} von ${files.length} hoch…`);
           const fileFormData = new FormData();
           fileFormData.append("file", files[i]);
+          fileFormData.append("doc_slug", slug);
           fileFormData.append("workspace_id", workspaceId);
 
           const res = await fetch("/api/upload", {
