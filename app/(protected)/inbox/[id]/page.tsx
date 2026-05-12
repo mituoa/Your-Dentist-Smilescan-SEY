@@ -121,8 +121,7 @@ interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-/** Horizontale Innenabstände — Figma: 56px Desktop, adaptiv kleiner. */
-const padX = "clamp(20px, 4vw, 56px)";
+/** Horizontales Padding Desktop — Figma: bis 56px; mobil getrennt per Tailwind (`px-4` / `sm:px-5`). */
 
 function formatRelativeTime(timestamp: string): string {
   const now = new Date();
@@ -226,10 +225,8 @@ export default async function InboxDetailPage({
     concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
 
   const scrollPadTop = urgencyLine ? "24px" : "32px";
-  const scrollPad = {
+  const scrollPadStyle = {
     paddingTop: scrollPadTop,
-    paddingLeft: padX,
-    paddingRight: padX,
   };
 
   return (
@@ -244,12 +241,12 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Desktop: Triage-Hauptfläche + Hilfsspalte (Entwürfe/Terminlink). Mobil: eine Spalte, Fullscreen-Flow. */}
-      <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-hidden lg:flex-row">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F9FC]">
+      {/* Desktop: zwei Spalten, je eigener Scroll. Mobil: eine Spalte, ein gemeinsamer Scroll (Hilfsspalte unten, nicht fixiert). */}
+      <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] max-lg:min-h-0 max-lg:bg-[#EDF1F7] lg:flex-row lg:overflow-y-hidden lg:bg-transparent">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-lg:mx-0 max-lg:flex-none max-lg:overflow-visible max-lg:rounded-b-2xl max-lg:shadow-[0_2px_12px_rgba(15,23,42,0.05)] lg:mx-0 lg:rounded-none lg:bg-[#F7F9FC] lg:shadow-none lg:min-h-0 lg:overflow-hidden">
           {/* Detail-Header — mobil: kompakteres Padding, Sticky; Desktop: Figma-Abstände */}
           <div
-            className="z-[6] shrink-0 bg-white px-[clamp(20px,4vw,56px)] pb-2 pt-4 max-lg:sticky max-lg:top-0 max-lg:border-b max-lg:border-[rgba(15,23,42,0.06)] max-lg:shadow-[0_1px_0_rgba(15,23,42,0.06)] sm:pt-5 sm:pb-3 lg:static lg:border-b-0 lg:pb-0 lg:pt-[clamp(28px,5vw,48px)] lg:shadow-none"
+            className="z-[6] shrink-0 bg-white px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] max-lg:sticky max-lg:top-0 max-lg:border-b max-lg:border-[rgba(15,23,42,0.06)] max-lg:shadow-[0_1px_0_rgba(15,23,42,0.04)] sm:px-5 sm:pt-4 sm:pb-3 lg:static lg:border-b-0 lg:px-[clamp(20px,4vw,56px)] lg:pb-0 lg:pt-[clamp(28px,5vw,48px)] lg:shadow-none"
           >
             <Suspense fallback={null}>
               <InboxMobileBack />
@@ -332,8 +329,8 @@ export default async function InboxDetailPage({
 
           {/* Scrollbarer Inhalt — Figma: background #FFFFFF, padding 24|32 / 56 / 56 */}
           <div
-            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-white [-webkit-overflow-scrolling:touch] pb-10 max-md:pb-12 md:pb-24 max-lg:scroll-pb-[max(6.5rem,var(--safe-area-bottom))]"
-            style={scrollPad}
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-white [-webkit-overflow-scrolling:touch] px-4 pb-10 max-md:pb-12 max-lg:flex-none max-lg:overflow-visible max-lg:pb-8 max-lg:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 md:pb-24 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-[clamp(20px,4vw,56px)] lg:pb-24"
+            style={scrollPadStyle}
           >
             <div className="mb-6 md:mb-8">
               <PhotoViewer
@@ -347,12 +344,11 @@ export default async function InboxDetailPage({
               />
             </div>
 
-            <div className="mb-8 min-w-0 max-w-[600px] md:mb-10">
+            <div className="mb-5 min-w-0 max-w-[600px] md:mb-8 lg:mb-10">
               <p
-                className="text-[15px]"
+                className="text-[15px] leading-normal max-lg:text-[16px] max-lg:leading-relaxed"
                 style={{
                   color: "#1E293B",
-                  lineHeight: 1.6,
                   letterSpacing: "-0.008em",
                 }}
               >
@@ -389,11 +385,7 @@ export default async function InboxDetailPage({
               </div>
 
               <div
-                style={{
-                  background: "#F8FAFC",
-                  padding: "16px",
-                  borderRadius: "10px",
-                }}
+                className="rounded-[10px] bg-[#F8FAFC] p-4 max-lg:p-5 max-lg:rounded-xl"
               >
                 <TrackerPrimaryActions />
 
@@ -408,7 +400,7 @@ export default async function InboxDetailPage({
 
         {/* Hilfsspalte (Entwürfe/Terminlink) — Figma: schmale sekundäre Spalte, gleiche Canvas-Farbe */}
         <aside
-          className="flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-lg:min-h-0 lg:w-[min(100%,320px)] lg:max-w-[340px] lg:border-l lg:border-t-0 lg:pb-0"
+          className="flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-lg:mx-3 max-lg:mt-3 max-lg:mb-[max(1.25rem,env(safe-area-inset-bottom))] max-lg:min-h-0 max-lg:flex-none max-lg:overflow-hidden max-lg:rounded-xl max-lg:border max-lg:border-[rgba(15,23,42,0.1)] max-lg:bg-white max-lg:pb-4 max-lg:shadow-[0_2px_10px_rgba(15,23,42,0.06)] max-lg:border-t-transparent lg:mx-0 lg:mt-0 lg:mb-0 lg:min-h-0 lg:w-[min(100%,320px)] lg:max-w-[340px] lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-[rgba(15,23,42,0.06)] lg:bg-[#F7F9FC] lg:pb-0 lg:shadow-none lg:overflow-hidden"
         >
           <SubmissionActions
             submissionId={submission.id}

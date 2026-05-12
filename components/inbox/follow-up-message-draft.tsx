@@ -119,7 +119,7 @@ export function FollowUpMessageDraft({
         };
 
   return (
-    <div className="touch-manipulation space-y-4">
+    <div className="touch-manipulation space-y-3 lg:space-y-4">
       <div
         className="transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none"
         style={{
