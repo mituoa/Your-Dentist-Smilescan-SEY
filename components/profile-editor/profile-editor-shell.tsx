@@ -1,6 +1,6 @@
 "use client";
 
-/** Öffentliche Präsenz: kuratierte Eingabe links, institutionelle Live-Vorschau rechts (Patientenbereich). */
+/** Öffentliche Präsenz: Bühne (Vorschau) dominant, Kuratieren in schmaler Nebenspur. */
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Camera } from "lucide-react";
 
@@ -199,42 +199,43 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_50%_at_50%_0%,rgba(255,255,255,0.5),transparent_50%)]"
         aria-hidden
       />
-      <div className="relative flex min-h-0 min-w-0 flex-1 touch-pan-x flex-col overflow-x-auto overflow-y-auto overscroll-y-contain max-lg:min-h-0 lg:flex-row lg:overflow-y-hidden">
-        {/* Links: kuratierte Eingabe — schmaler als die Bühne, weniger „Admin-Wand“ */}
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto overflow-y-auto overscroll-y-contain lg:flex-row lg:overflow-hidden">
+        {/* Bühne — zuerst im DOM: liest sich als Profil, nicht als Formular */}
         <div
-          className="flex min-h-0 w-full shrink-0 flex-col overflow-y-auto scroll-pb-10 border-slate-200/70 bg-[#FAFAF9] max-lg:border-b lg:h-full lg:w-[min(100%,400px)] lg:max-w-[440px] lg:border-b-0 lg:border-r xl:w-[min(100%,420px)]"
+          className="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain lg:order-1"
+          role="region"
+          aria-label="Öffentliche Profildarstellung"
+        >
+          <ProfileFigmaLivePreview data={mergedProfile} />
+        </div>
+
+        {/* Kuratieren — schmal, visuell zurückgenommen */}
+        <div
+          className="order-2 flex min-h-0 w-full shrink-0 flex-col overflow-y-auto scroll-pb-10 border-slate-300/20 bg-[#F4F3F0] max-lg:border-t lg:order-2 lg:w-[min(100%,320px)] lg:max-w-[360px] lg:border-l lg:border-t-0 xl:max-w-[380px]"
           aria-busy={saveStatus === "saving" || photoUploading}
         >
-          <div className="px-6 py-10 sm:px-8 sm:py-12 md:px-10 md:py-14">
-            <div className="mb-10 sm:mb-12">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Öffentliche Präsenz
-              </p>
-              <h1 className="text-[1.125rem] font-semibold leading-snug tracking-[-0.02em] text-slate-900 sm:text-[1.1875rem]">
-                Ihre Darstellung im Patientenbereich
+          <div className="px-5 py-8 sm:px-6 sm:py-9">
+            <header className="border-b border-slate-300/25 pb-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Öffentliche Präsenz</p>
+              <h1 className="mt-1.5 font-serif text-[1.25rem] font-light leading-snug tracking-[-0.02em] text-slate-900 sm:text-[1.35rem]">
+                Patientenbereich
               </h1>
-              <p className="mt-3 max-w-[40ch] text-[13px] leading-[1.65] text-slate-500 sm:max-w-[42ch]">
-                Texte, Porträt, Schwerpunkte sowie Praxisadresse und Zeiten — so, wie Patientinnen und Patienten Sie
-                später beim ersten Kontakt wahrnehmen. Änderungen werden automatisch gespeichert.
-              </p>
-            </div>
+              <p className="mt-2 text-[12px] leading-snug text-slate-500">Änderungen werden automatisch übernommen.</p>
+            </header>
 
-            <div className="flex flex-col gap-12 max-sm:gap-14 md:gap-14">
+            <div className="mt-8 flex flex-col gap-9 sm:gap-10">
               {/* Porträt */}
               <section aria-labelledby="pe-photo-label">
-                <h2 id="pe-photo-label" className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <h2 id="pe-photo-label" className="sr-only">
                   Porträt
                 </h2>
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                <div className="flex items-start gap-4">
                   <button
                     type="button"
                     disabled={interactionLocked}
                     onClick={() => fileRef.current?.click()}
-                    className="group relative shrink-0 touch-manipulation overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-                    style={{
-                      width: 112,
-                      height: 148,
-                    }}
+                    className="group relative shrink-0 touch-manipulation overflow-hidden rounded-xl border border-slate-300/30 bg-white/50 transition hover:border-slate-400/50 disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{ width: 72, height: 96 }}
                   >
                     {data.photo_url ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
@@ -252,12 +253,8 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                       <span className="mb-2 text-[11px] font-medium text-white">Ersetzen</span>
                     </div>
                   </button>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium text-slate-700">Porträt für den Patientenbereich</p>
-                    <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">
-                      Empfohlen mindestens 400×400 Pixel, JPEG, PNG oder WebP. Wirkt neben Ihrem Namen als
-                      vertrauensbildendes Erstbild.
-                    </p>
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <p className="text-[12px] text-slate-500">Porträt · mind. 400px · JPG, PNG oder WebP</p>
                   </div>
                 </div>
                 <input
@@ -287,24 +284,27 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Name */}
               <section aria-labelledby="pe-name-label">
-                <h2 id="pe-name-label" className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <h2 id="pe-name-label" className="sr-only">
                   Name
                 </h2>
-                <div className="flex flex-col gap-2.5 sm:gap-2">
+                <div className="flex flex-col gap-3">
                   <FigmaTextInput
+                    variant="quiet"
                     placeholder="Titel"
                     maxLength={PROFILE_LIMITS.title}
                     value={data.title || ""}
                     onChange={(e) => updateField("title", e.target.value || null)}
                   />
-                  <div className="grid grid-cols-2 gap-2.5 sm:gap-2">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-3">
                     <FigmaTextInput
+                      variant="quiet"
                       placeholder="Vorname"
                       maxLength={PROFILE_LIMITS.first_name}
                       value={data.first_name || ""}
                       onChange={(e) => updateField("first_name", e.target.value || null)}
                     />
                     <FigmaTextInput
+                      variant="quiet"
                       placeholder="Nachname"
                       maxLength={PROFILE_LIMITS.last_name}
                       value={data.last_name || ""}
@@ -316,27 +316,16 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Arbeitsweise */}
               <section aria-labelledby="pe-work-label">
-                <div className="mb-4">
-                  <h2 id="pe-work-label" className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Arbeitsweise
-                  </h2>
-                  <p className="mt-2 text-[12px] leading-relaxed text-slate-500">
-                    Bis zu drei kurze Sätze — sachlich, für Patientinnen gut lesbar; erscheinen unter Ihrem Namen.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2.5 sm:gap-2">
+                <h2 id="pe-work-label" className="sr-only">
+                  Arbeitsweise
+                </h2>
+                <div className="flex flex-col gap-3">
                   {([0, 1, 2] as const).map((i) => (
                     <FigmaTextInput
                       key={i}
+                      variant="quiet"
                       maxLength={400}
-                      placeholder={
-                        i === 0
-                          ? "z. B. Wir erklären den Ablauf verständlich."
-                          : i === 1
-                            ? "z. B. Vor der Behandlung klären wir offene Fragen."
-                            : "z. B. Wir behandeln nur das, was medizinisch begründet ist."
-                      }
+                      placeholder={i === 0 ? "Erster Satz" : i === 1 ? "Zweiter Satz" : "Dritter Satz"}
                       value={displayLines[i]}
                       onChange={(e) => onWorkingLineChange(i, e.target.value)}
                     />
@@ -410,15 +399,15 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Schwerpunkte */}
               <section aria-labelledby="pe-spec-label">
-                <div className="mb-4 flex items-baseline justify-between gap-3">
-                  <h2 id="pe-spec-label" className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <div className="mb-3 flex items-baseline justify-between gap-2">
+                  <h2 id="pe-spec-label" className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                     Schwerpunkte
                   </h2>
                   <span className="text-[10px] font-medium tabular-nums text-slate-400">
                     {data.specializations.length}/{MAX_FIGMA_SPECIALTY_SELECTIONS}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <ul className="max-h-[min(52vh,22rem)] divide-y divide-slate-300/25 overflow-y-auto overscroll-y-contain border-y border-slate-300/25 [-webkit-overflow-scrolling:touch]">
                   {FIGMA_SPECIALTY_OPTIONS.filter(
                     (s) =>
                       showAllSpecialties ||
@@ -427,28 +416,29 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                   ).map((specialty) => {
                     const isSelected = data.specializations.includes(specialty.id);
                     const isDisabled = !isSelected && data.specializations.length >= MAX_FIGMA_SPECIALTY_SELECTIONS;
-                    const chipMuted = isDisabled || interactionLocked;
+                    const rowMuted = isDisabled || interactionLocked;
                     return (
-                      <button
-                        key={specialty.id}
-                        type="button"
-                        disabled={chipMuted}
-                        onClick={() => !chipMuted && toggleSpecialty(specialty.id)}
-                        className="rounded-full px-3.5 py-2 text-left text-[12px] font-medium leading-snug tracking-[-0.01em] transition-colors disabled:cursor-not-allowed"
-                        style={{
-                          background: isSelected ? "#1e293b" : "rgba(255,255,255,0.85)",
-                          color: isSelected ? "#f8fafc" : "#475569",
-                          border: `1px solid ${isSelected ? "#1e293b" : "rgba(148,163,184,0.45)"}`,
-                          opacity: chipMuted ? 0.35 : 1,
-                          cursor: chipMuted ? "not-allowed" : "pointer",
-                          boxShadow: isSelected ? "0 1px 2px rgba(15,23,42,0.12)" : "0 1px 0 rgba(255,255,255,0.9) inset",
-                        }}
-                      >
-                        {specialty.label}
-                      </button>
+                      <li key={specialty.id}>
+                        <button
+                          type="button"
+                          disabled={rowMuted}
+                          aria-pressed={isSelected}
+                          onClick={() => !rowMuted && toggleSpecialty(specialty.id)}
+                          className="flex w-full items-center justify-between gap-3 py-3 pr-1 text-left text-[13px] font-normal leading-snug tracking-[-0.01em] text-slate-800 transition-colors disabled:cursor-not-allowed disabled:opacity-35 hover:bg-white/40"
+                        >
+                          <span className={isSelected ? "font-medium text-slate-950" : "text-slate-600"}>
+                            {specialty.label}
+                          </span>
+                          <span className="flex h-4 w-5 shrink-0 items-center justify-end" aria-hidden>
+                            {isSelected ? (
+                              <span className="h-1.5 w-1.5 rounded-full bg-slate-700/90" />
+                            ) : null}
+                          </span>
+                        </button>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
                 {!showAllSpecialties && FIGMA_SPECIALTY_OPTIONS.length > FIGMA_PRIMARY_SPECIALTY_IDS.length ? (
                   <button
                     type="button"
@@ -456,7 +446,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                     onClick={() => setShowAllSpecialties(true)}
                     className="mt-4 inline-flex min-h-[44px] items-center text-[12px] font-medium text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 touch-manipulation disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Weitere Fachgebiete anzeigen
+                    Weitere anzeigen
                   </button>
                 ) : null}
 
@@ -473,18 +463,20 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
               {/* Praxis */}
               <section aria-labelledby="pe-practice-label">
-                <h2 id="pe-practice-label" className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <h2 id="pe-practice-label" className="sr-only">
                   Praxis
                 </h2>
-                <div className="flex flex-col gap-2.5 sm:gap-2">
+                <div className="flex flex-col gap-3">
                   <FigmaTextInput
-                    placeholder="Praxisname (optional)"
+                    variant="quiet"
+                    placeholder="Praxisname"
                     maxLength={PROFILE_LIMITS.practice_name}
                     value={data.practice_name || ""}
                     onChange={(e) => updateField("practice_name", e.target.value || null)}
                   />
                   <FigmaTextInput
-                    placeholder="Straße und Hausnummer"
+                    variant="quiet"
+                    placeholder="Straße, Nr."
                     maxLength={120}
                     value={addr.street}
                     onChange={(e) =>
@@ -494,8 +486,9 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                       )
                     }
                   />
-                  <div className="grid grid-cols-3 gap-2.5 sm:gap-2">
+                  <div className="grid grid-cols-3 gap-x-3 gap-y-3">
                     <FigmaTextInput
+                      variant="quiet"
                       placeholder="PLZ"
                       type="text"
                       inputMode="numeric"
@@ -510,6 +503,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                       }
                     />
                     <FigmaTextInput
+                      variant="quiet"
                       placeholder="Stadt"
                       maxLength={80}
                       value={addr.city}
@@ -523,6 +517,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                     />
                   </div>
                   <FigmaTextInput
+                    variant="quiet"
                     placeholder="Öffnungszeiten"
                     maxLength={PROFILE_LIMITS.practice_hours}
                     value={data.practice_hours || ""}
@@ -531,20 +526,11 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                 </div>
               </section>
 
-              <div className="mt-12 flex min-h-[2.75rem] flex-col justify-end border-t border-slate-200/80 pt-7 sm:mt-10 sm:pt-6">
+              <div className="mt-10 flex min-h-[2.5rem] flex-col justify-end border-t border-slate-300/25 pt-6">
                 <AutoSaveIndicator status={saveStatus} lastSavedAt={lastSavedAt} errorMessage={errorMessage} />
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Rechts: Live-Bühne — volle Fläche, kein zentrierter „leerer Block“ */}
-        <div
-          className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-[#F2F0EC] lg:min-h-0"
-          role="region"
-          aria-label="Vorschau der öffentlichen Präsenz im Patientenbereich"
-        >
-          <ProfileFigmaLivePreview data={mergedProfile} />
         </div>
       </div>
     </div>
