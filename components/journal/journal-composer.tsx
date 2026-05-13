@@ -192,7 +192,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
         onUnpublish={handleUnpublish}
       />
 
-      <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-12">
+      <div className="mx-auto max-w-4xl px-4 pt-20 pb-8 md:px-6 md:pb-12">
         <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
           <div className="space-y-8">
           <TopicSelector value={topic} onChange={setTopic} required />

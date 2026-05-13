@@ -23,7 +23,7 @@ export default async function SettingsPage() {
 
   const data = await getSettingsData(workspace.workspace_id);
   if (!data.workspace) {
-    return <div className="p-12">Workspace nicht gefunden.</div>;
+    redirect("/login");
   }
 
   const cookieStore = await cookies();

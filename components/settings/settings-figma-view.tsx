@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, Copy, Eye, Upload } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import {
   changeSlug,
   changeWorkspaceName,
@@ -287,11 +286,17 @@ export function SettingsFigmaView({
   };
 
   const handlePassword = () => {
+    if (busy) return;
     setPasswordHint(null);
+    setBusy(true);
     void (async () => {
-      const r = await requestPasswordReset();
-      if (r.error) setFormError(r.error);
-      else setPasswordHint("Link zum Zurücksetzen wurde an Ihre E-Mail gesendet.");
+      try {
+        const r = await requestPasswordReset();
+        if (r.error) setFormError(r.error);
+        else setPasswordHint("Link zum Zurücksetzen wurde an Ihre E-Mail gesendet.");
+      } finally {
+        setBusy(false);
+      }
     })();
   };
 
@@ -400,7 +405,7 @@ export function SettingsFigmaView({
                     padding: "12px 14px",
                     background: "#F7F7F5",
                     borderRadius: 10,
-                    fontSize: 15,
+                    fontSize: 16,
                     color: "#1A1A1A",
                     transition: "background 140ms ease",
                   }}
@@ -594,14 +599,19 @@ export function SettingsFigmaView({
                     {row.invitationId ? (
                       <button
                         type="button"
-                        className="mt-1 text-[11px] text-[#CCCCCC] underline-offset-2 hover:text-[#999999] hover:underline"
+                        disabled={busy}
+                        className="mt-1 text-[11px] text-[#CCCCCC] underline-offset-2 hover:text-[#999999] hover:underline disabled:opacity-50"
                         onClick={() => {
                           if (!confirm("Einladung widerrufen?")) return;
                           void (async () => {
                             setBusy(true);
-                            await revokeInvitation(row.invitationId!);
-                            setBusy(false);
-                            router.refresh();
+                            try {
+                              const r = await revokeInvitation(row.invitationId!);
+                              if (r.error) setFormError(r.error);
+                              else router.refresh();
+                            } finally {
+                              setBusy(false);
+                            }
                           })();
                         }}
                       >
@@ -611,7 +621,8 @@ export function SettingsFigmaView({
                     {row.memberUserId && row.memberUserId !== currentUserId ? (
                       <button
                         type="button"
-                        className="mt-1 text-[11px] text-[#CCCCCC] underline-offset-2 hover:text-[#999999] hover:underline"
+                        disabled={busy}
+                        className="mt-1 text-[11px] text-[#CCCCCC] underline-offset-2 hover:text-[#999999] hover:underline disabled:opacity-50"
                         onClick={() => {
                           if (
                             !confirm(
@@ -621,9 +632,13 @@ export function SettingsFigmaView({
                             return;
                           void (async () => {
                             setBusy(true);
-                            await removeTeamMember(row.memberUserId!);
-                            setBusy(false);
-                            router.refresh();
+                            try {
+                              const r = await removeTeamMember(row.memberUserId!);
+                              if (r.error) setFormError(r.error);
+                              else router.refresh();
+                            } finally {
+                              setBusy(false);
+                            }
                           })();
                         }}
                       >
@@ -655,7 +670,7 @@ export function SettingsFigmaView({
                   padding: "12px 14px",
                   background: "#F7F7F5",
                   borderRadius: 10,
-                  fontSize: 15,
+                  fontSize: 16,
                   color: "#1A1A1A",
                   marginBottom: 16,
                   border: "none",
@@ -670,7 +685,7 @@ export function SettingsFigmaView({
                   padding: "12px 14px",
                   background: "#F7F7F5",
                   borderRadius: 10,
-                  fontSize: 15,
+                  fontSize: 16,
                   color: "#1A1A1A",
                   marginBottom: 16,
                   border: "none",
@@ -717,7 +732,7 @@ export function SettingsFigmaView({
                   padding: "12px 14px",
                   background: "#F7F7F5",
                   borderRadius: 10,
-                  fontSize: 15,
+                  fontSize: 16,
                   color: "#1A1A1A",
                   border: "none",
                 }}
@@ -752,7 +767,7 @@ export function SettingsFigmaView({
                     padding: "12px 14px",
                     background: "#F7F7F5",
                     borderRadius: 10,
-                    fontSize: 15,
+                    fontSize: 16,
                     color: "#1A1A1A",
                     border: "none",
                   }}
@@ -802,7 +817,7 @@ export function SettingsFigmaView({
                   padding: "12px 14px",
                   background: "#F7F7F5",
                   borderRadius: 10,
-                  fontSize: 15,
+                  fontSize: 16,
                   color: "#999999",
                   cursor: "not-allowed",
                   border: "none",
@@ -816,7 +831,8 @@ export function SettingsFigmaView({
               <button
                 type="button"
                 onClick={handlePassword}
-                className="transition-colors"
+                disabled={busy}
+                className="transition-colors disabled:opacity-50"
                 style={{ fontSize: 14, color: "#666666", padding: "6px 0", background: "none", border: "none" }}
               >
                 Passwort ändern

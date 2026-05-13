@@ -31,7 +31,7 @@ export default async function AdminRegistrationsPage() {
   const { data, error } = await admin
     .from("workspace_members")
     .select(
-      "workspace_id, user_id, created_at, role, workspaces(id, name, slug, created_at, approved_at, approved_by), workspace_contracts(billing_interval, payment_method, accepted_at, dentist_license_number, dentist_license_storage_path, dentist_license_storage_path_front, dentist_license_storage_path_back)"
+      "workspace_id, created_at, workspaces(id, name, created_at, approved_at), workspace_contracts(billing_interval, payment_method, accepted_at, dentist_license_number, dentist_license_storage_path, dentist_license_storage_path_front, dentist_license_storage_path_back)"
     )
     .eq("role", "doctor")
     .order("created_at", { ascending: false });
@@ -40,6 +40,7 @@ export default async function AdminRegistrationsPage() {
     console.error("[admin/registrations]", error);
   }
 
+  const queryFailed = !!error;
   const rows =
     data?.filter((r: any) => !r?.workspaces?.approved_at) ?? [];
 
@@ -59,7 +60,11 @@ export default async function AdminRegistrationsPage() {
           </Link>
         </div>
 
-        {rows.length === 0 ? (
+        {queryFailed ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">
+            Daten konnten nicht geladen werden. Bitte Seite neu laden.
+          </div>
+        ) : rows.length === 0 ? (
           <div className="rounded-2xl border border-border bg-white p-6 text-sm text-text-secondary">
             Keine offenen Registrierungen.
           </div>
@@ -70,7 +75,7 @@ export default async function AdminRegistrationsPage() {
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900">{r.workspaces?.name}</p>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 break-all text-xs text-gray-500">
                       Workspace: <span className="font-mono">{r.workspaces?.id}</span>
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
@@ -138,7 +143,7 @@ export default async function AdminRegistrationsPage() {
                         >
                           <button
                             type="submit"
-                            className="text-xs font-semibold text-[#0284C7] hover:underline"
+                            className="min-h-[44px] text-xs font-semibold text-[#0284C7] hover:underline md:min-h-0"
                           >
                             Vorderseite ansehen
                           </button>
@@ -153,7 +158,7 @@ export default async function AdminRegistrationsPage() {
                         >
                           <button
                             type="submit"
-                            className="text-xs font-semibold text-[#0284C7] hover:underline"
+                            className="min-h-[44px] text-xs font-semibold text-[#0284C7] hover:underline md:min-h-0"
                           >
                             Rückseite ansehen
                           </button>

@@ -321,7 +321,7 @@ export function EditorialProfile({
                     </div>
                     <a
                       href={`mailto:${data.practice_email}`}
-                      className="font-serif text-[15px] border-b border-ink/10 pb-0.5 hover:border-ink/40 transition-colors"
+                      className="font-serif text-[15px] break-all border-b border-ink/10 pb-0.5 hover:border-ink/40 transition-colors"
                     >
                       {data.practice_email}
                     </a>
@@ -336,7 +336,7 @@ export function EditorialProfile({
                       href={data.practice_website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-serif text-[15px] border-b border-ink/10 pb-0.5 hover:border-ink/40 transition-colors"
+                      className="font-serif text-[15px] break-all border-b border-ink/10 pb-0.5 hover:border-ink/40 transition-colors"
                     >
                       {data.practice_website}
                     </a>

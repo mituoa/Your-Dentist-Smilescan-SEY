@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { submitUpload } from "@/app/doc/[slug]/upload/actions";
 import { PhotoDropzone } from "./photo-dropzone";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,7 @@ export function UploadForm({
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<string>("");
+  const [consentChecked, setConsentChecked] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -128,7 +130,7 @@ export function UploadForm({
           name="patient_notes"
           rows={4}
           placeholder="Was möchten Sie uns mitteilen?"
-          className="w-full px-3 py-2 text-sm bg-surface-card border border-border rounded focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand resize-none"
+          className="w-full px-3 py-2 text-base sm:text-sm bg-surface-card border border-border rounded focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand resize-none"
         />
       </div>
 
@@ -150,13 +152,32 @@ export function UploadForm({
       )}
 
       <div className="pt-2 border-t border-border">
-        <p className="text-xs text-text-tertiary mb-4 leading-relaxed">
-          Mit dem Absenden stimmen Sie zu, dass Ihre Daten und Fotos zum Zweck
-          der Kontaktaufnahme an {practiceName} übermittelt werden.
-        </p>
+        <label className="flex items-start gap-3 cursor-pointer mb-4">
+          <input
+            type="checkbox"
+            name="consent"
+            checked={consentChecked}
+            onChange={(e) => setConsentChecked(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-brand"
+            required
+          />
+          <span className="text-xs leading-relaxed text-text-secondary">
+            Ich stimme zu, dass meine Daten und Fotos zum Zweck der
+            Kontaktaufnahme an {practiceName} übermittelt und verarbeitet
+            werden.{" "}
+            <Link
+              href="/datenschutz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-text-primary underline decoration-border underline-offset-2 hover:decoration-text-primary"
+            >
+              Datenschutzerklärung
+            </Link>
+          </span>
+        </label>
         <Button
           type="submit"
-          disabled={isPending || files.length === 0}
+          disabled={isPending || files.length === 0 || !consentChecked}
           className="w-full"
           size="lg"
         >

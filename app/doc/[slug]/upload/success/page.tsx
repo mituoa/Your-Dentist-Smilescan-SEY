@@ -28,7 +28,8 @@ export default async function UploadSuccessPage({ params }: SuccessPageProps) {
           Ihre Einsendung wurde bei {practiceName} registriert.
         </p>
         <p className="mb-8 text-[15px] leading-relaxed text-text-secondary sm:text-base">
-          Eine Bestätigung haben wir an Ihre E-Mail-Adresse gesendet.
+          Sie erhalten in Kürze eine Bestätigung per E-Mail, sofern Ihre
+          Adresse korrekt angegeben wurde.
         </p>
 
         {profile.slug && (

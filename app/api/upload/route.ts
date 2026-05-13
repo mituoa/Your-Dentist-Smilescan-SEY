@@ -31,6 +31,13 @@ export async function POST(request: NextRequest) {
     const docSlug =
       typeof docSlugRaw === "string" ? docSlugRaw.trim() : "";
 
+    if (docSlug.length > 0 && !/^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$/.test(docSlug)) {
+      return NextResponse.json(
+        { error: "Arbeitsbereich nicht gefunden." },
+        { status: 404 }
+      );
+    }
+
     const membership = await getCurrentWorkspace();
 
     let workspaceId: string;
@@ -41,6 +48,7 @@ export async function POST(request: NextRequest) {
         .from("workspaces")
         .select("id")
         .eq("slug", docSlug)
+        .not("approved_at", "is", null)
         .maybeSingle();
 
       if (!ws?.id) {

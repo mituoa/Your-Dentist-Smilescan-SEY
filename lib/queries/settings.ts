@@ -43,7 +43,7 @@ export async function getSettingsData(workspaceId: string) {
 
   const { data: invitations } = await supabase
     .from("team_invitations")
-    .select("*")
+    .select("id, email, role, status, expires_at, created_at")
     .eq("workspace_id", workspaceId)
     .eq("status", "pending")
     .gt("expires_at", new Date().toISOString())

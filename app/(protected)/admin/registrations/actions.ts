@@ -16,15 +16,22 @@ function requirePlatformAdmin(
   if (!isAdminAllowlistUser(user)) throw new Error("Not authorized");
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function approveWorkspace(workspaceId: string) {
   const user = await requireUser();
   requirePlatformAdmin(user);
+
+  if (!UUID_RE.test(workspaceId)) {
+    throw new Error("Invalid workspace ID");
+  }
 
   const admin = createAdminClient();
   const { error } = await admin
     .from("workspaces")
     .update({ approved_at: new Date().toISOString(), approved_by: user.id })
-    .eq("id", workspaceId);
+    .eq("id", workspaceId)
+    .is("approved_at", null);
 
   if (error) {
     console.error("[approveWorkspace]", error);

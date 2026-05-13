@@ -28,7 +28,10 @@ export async function getJournalEntry(id: string): Promise<JournalEntry | null> 
 }
 
 const PUBLIC_ARTICLE_FIELDS =
-  "id, title, slug, excerpt, content_markdown, cover_photo_url, topic, status, published_at, reading_time_minutes, word_count" as const;
+  "id, title, slug, excerpt, content_markdown, cover_photo_url, topic, published_at, reading_time_minutes" as const;
+
+const PUBLIC_LIST_FIELDS =
+  "id, title, slug, excerpt, topic, published_at, reading_time_minutes" as const;
 
 export async function getPublicJournalBySlug(
   workspaceId: string,
@@ -51,7 +54,7 @@ export async function listPublishedForWorkspace(
   const admin = createAdminClient();
   const { data } = await admin
     .from("journal_entries")
-    .select(PUBLIC_ARTICLE_FIELDS)
+    .select(PUBLIC_LIST_FIELDS)
     .eq("workspace_id", workspaceId)
     .eq("status", "published")
     .order("published_at", { ascending: false });

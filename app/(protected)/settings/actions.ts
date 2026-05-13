@@ -18,6 +18,7 @@ export async function saveAppointmentLink(
 ): Promise<{ error?: string; success?: boolean }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
 
   const trimmed = url.trim();
 
@@ -45,6 +46,7 @@ export async function changeSlug(
 ): Promise<{ error?: string; success?: boolean; slug?: string }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
 
   const normalized = newSlug.trim().toLowerCase();
   const validation = isValidSlug(normalized);
@@ -104,6 +106,7 @@ export async function changeWorkspaceName(
 ): Promise<{ error?: string; success?: boolean }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
 
   const trimmed = name.trim();
   if (!trimmed) return { error: "Name darf nicht leer sein." };
@@ -230,6 +233,7 @@ export async function revokeInvitation(
 ): Promise<{ error?: string; success?: boolean }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -282,6 +286,7 @@ export async function saveAccentColor(
 ): Promise<{ error?: string; success?: boolean }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
 
   if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
     return { error: "Ungültige Farbe. Format: #RRGGBB" };
@@ -304,6 +309,7 @@ export async function uploadLogo(
 ): Promise<{ error?: string; url?: string }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
 
   const file = formData.get("file") as File;
   if (!file || file.size === 0) return { error: "Keine Datei." };
@@ -341,6 +347,7 @@ export async function uploadLogo(
 export async function removeLogo(): Promise<{ error?: string; success?: boolean }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
 
   const admin = createAdminClient();
   await admin

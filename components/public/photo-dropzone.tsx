@@ -126,10 +126,10 @@ export function PhotoDropzone({ onFilesChange }: PhotoDropzoneProps) {
                   e.stopPropagation();
                   removeFile(i);
                 }}
-                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 w-7 h-7 sm:w-6 sm:h-6 rounded-full bg-black/60 text-white flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 aria-label="Foto entfernen"
               >
-                <X className="w-3.5 h-3.5" strokeWidth={2} />
+                <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" strokeWidth={2} />
               </button>
             </div>
           ))}

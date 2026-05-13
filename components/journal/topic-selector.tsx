@@ -22,7 +22,7 @@ export function TopicSelector({ value, onChange, required }: TopicSelectorProps)
               key={topic.id}
               type="button"
               onClick={() => onChange(selected ? null : topic.id)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
+              className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-all sm:py-1.5 ${
                 selected
                   ? "bg-slate-900 text-white dark:bg-slate-700"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"

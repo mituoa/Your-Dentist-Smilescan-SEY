@@ -122,6 +122,9 @@ function mapProfileRow(
   };
 }
 
+const PUBLIC_PROFILE_FIELDS =
+  "display_name, title, photo_url, vita_markdown, services, first_name, last_name, founding_year, specializations, services_structured, practice_name, practice_address, practice_employment_status, practice_phone, practice_email, practice_website, practice_hours, logo_url, accent_color" as const;
+
 export async function getPublicProfileBySlug(
   slug: string
 ): Promise<PublicProfile | null> {
@@ -131,6 +134,7 @@ export async function getPublicProfileBySlug(
     .from("workspaces")
     .select("id, name, slug")
     .eq("slug", slug)
+    .not("approved_at", "is", null)
     .single();
 
   if (wsError || !workspace) {
@@ -139,23 +143,9 @@ export async function getPublicProfileBySlug(
 
   const { data: profile } = await admin
     .from("profile_data")
-    .select("*")
+    .select(PUBLIC_PROFILE_FIELDS)
     .eq("workspace_id", workspace.id)
     .single();
 
   return mapProfileRow(workspace, profile as Record<string, unknown> | null);
-}
-
-export async function getRecentJournalEntries(workspaceId: string, limit = 3) {
-  const admin = createAdminClient();
-
-  const { data } = await admin
-    .from("journal_entries")
-    .select("id, title, slug, published_at")
-    .eq("workspace_id", workspaceId)
-    .eq("status", "published")
-    .order("published_at", { ascending: false })
-    .limit(limit);
-
-  return data || [];
 }

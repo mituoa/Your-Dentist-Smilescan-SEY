@@ -7,6 +7,11 @@ import { buildNewSubmissionPractitionerEmail } from "@/lib/mail/new-submission-p
 import { getAppBaseUrl } from "@/lib/env";
 import { MAX_PHOTOS } from "@/lib/upload/validation";
 
+const BASIC_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$/;
+const MAX_NAME_LENGTH = 200;
+const MAX_NOTES_LENGTH = 5000;
+
 const SAFE_TEMP_OBJECT_KEY =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp|heic)$/i;
 
@@ -35,10 +40,31 @@ export async function submitUpload(
     (formData.get("patient_phone") as string)?.trim() || null;
   const patientNotes =
     (formData.get("patient_notes") as string)?.trim() || null;
+  const consentRaw = formData.get("consent");
   const storagePathsJson = formData.get("storage_paths") as string | null;
 
   if (!slug || !patientName || !patientEmail) {
     return { error: "Bitte alle Pflichtfelder ausfüllen." };
+  }
+
+  if (consentRaw !== "on") {
+    return { error: "Bitte bestätigen Sie die Datenschutzhinweise." };
+  }
+
+  if (!SLUG_RE.test(slug)) {
+    return { error: "Arzt-Profil nicht gefunden." };
+  }
+
+  if (!BASIC_EMAIL_RE.test(patientEmail)) {
+    return { error: "Bitte eine gültige E-Mail-Adresse eingeben." };
+  }
+
+  if (patientName.length > MAX_NAME_LENGTH) {
+    return { error: "Name ist zu lang." };
+  }
+
+  if (patientNotes && patientNotes.length > MAX_NOTES_LENGTH) {
+    return { error: "Anliegen-Text ist zu lang." };
   }
 
   if (!storagePathsJson?.trim()) {
@@ -66,6 +92,7 @@ export async function submitUpload(
     .from("workspaces")
     .select("id, name")
     .eq("slug", slug)
+    .not("approved_at", "is", null)
     .single();
 
   if (wsError || !workspace) {
