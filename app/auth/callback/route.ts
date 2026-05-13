@@ -7,6 +7,16 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = sanitizeAuthNextPath(searchParams.get("next"), "/dashboard");
 
+  const oauthError = searchParams.get("error");
+  if (oauthError) {
+    const desc = searchParams.get("error_description") ?? oauthError;
+    console.warn("[auth/callback] oauth_error", oauthError, desc);
+    if (/access_denied|user_cancelled|consent_required/i.test(oauthError)) {
+      return NextResponse.redirect(`${origin}/login`);
+    }
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+  }
+
   try {
     if (code) {
       const supabase = await createRouteHandlerClient();

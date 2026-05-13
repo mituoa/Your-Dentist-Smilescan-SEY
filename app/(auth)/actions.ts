@@ -32,7 +32,10 @@ import { rollbackIncompleteRegistrationAfterFailure } from "@/lib/register-signu
 import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
 
 export async function signInWithGoogle(formData: FormData) {
-  const inviteToken = (formData.get("invite_token") as string | null)?.trim();
+  const rawToken = (formData.get("invite_token") as string | null)?.trim();
+  const inviteToken = rawToken
+    ? sanitizeTeamInvitationTokenForAuth(rawToken)
+    : "";
 
   const origin = getAppBaseUrl().replace(/\/$/, "");
   const nextPath = inviteToken
@@ -46,8 +49,7 @@ export async function signInWithGoogle(formData: FormData) {
     options: {
       redirectTo,
       queryParams: {
-        access_type: "offline",
-        prompt: "consent",
+        prompt: "select_account",
       },
     },
   });
@@ -57,34 +59,6 @@ export async function signInWithGoogle(formData: FormData) {
     p.set(
       "error",
       userFacingAuthError(error?.message || "Google-Anmeldung ist gerade nicht möglich.")
-    );
-    if (inviteToken) p.set("invite", inviteToken);
-    redirect(`/login?${p.toString()}`);
-  }
-
-  redirect(data.url);
-}
-
-export async function signInWithGitHub(formData: FormData) {
-  const inviteToken = (formData.get("invite_token") as string | null)?.trim();
-
-  const origin = getAppBaseUrl().replace(/\/$/, "");
-  const nextPath = inviteToken
-    ? `/accept-invite?token=${encodeURIComponent(inviteToken)}`
-    : "/auth/continue";
-  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
-
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "github",
-    options: { redirectTo },
-  });
-
-  if (error || !data.url) {
-    const p = new URLSearchParams();
-    p.set(
-      "error",
-      userFacingAuthError(error?.message || "GitHub-Anmeldung ist gerade nicht möglich.")
     );
     if (inviteToken) p.set("invite", inviteToken);
     redirect(`/login?${p.toString()}`);
