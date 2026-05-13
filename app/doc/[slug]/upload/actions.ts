@@ -5,6 +5,25 @@ import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effor
 import { buildUploadConfirmationEmail } from "@/lib/mail/upload-confirmation-patient-email";
 import { buildNewSubmissionPractitionerEmail } from "@/lib/mail/new-submission-practitioner-email";
 import { getAppBaseUrl } from "@/lib/env";
+import { MAX_PHOTOS } from "@/lib/upload/validation";
+
+const SAFE_TEMP_OBJECT_KEY =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp|heic)$/i;
+
+function filterSafeTempPaths(workspaceId: string, paths: unknown[]): string[] {
+  const prefix = `${workspaceId}/temp/`;
+  const safe: string[] = [];
+  for (const p of paths) {
+    if (typeof p !== "string" || !p.startsWith(prefix) || p.includes("..")) {
+      continue;
+    }
+    const rest = p.slice(prefix.length);
+    if (!rest || rest.includes("/")) continue;
+    if (!SAFE_TEMP_OBJECT_KEY.test(rest)) continue;
+    safe.push(p);
+  }
+  return safe;
+}
 
 export async function submitUpload(
   formData: FormData
@@ -37,6 +56,10 @@ export async function submitUpload(
     return { error: "Mindestens ein Foto erforderlich." };
   }
 
+  if (storagePaths.length > MAX_PHOTOS) {
+    return { error: `Maximal ${MAX_PHOTOS} Fotos erlaubt.` };
+  }
+
   const admin = createAdminClient();
 
   const { data: workspace, error: wsError } = await admin
@@ -47,6 +70,11 @@ export async function submitUpload(
 
   if (wsError || !workspace) {
     return { error: "Arzt-Profil nicht gefunden." };
+  }
+
+  const safePaths = filterSafeTempPaths(workspace.id, storagePaths);
+  if (safePaths.length === 0) {
+    return { error: "Fotos konnten nicht zugeordnet werden. Bitte erneut hochladen." };
   }
 
   const { data: profile } = await admin
@@ -78,8 +106,8 @@ export async function submitUpload(
   const submissionId = submission.id;
 
   const finalPaths: string[] = [];
-  for (let i = 0; i < storagePaths.length; i++) {
-    const tempPath = storagePaths[i];
+  for (let i = 0; i < safePaths.length; i++) {
+    const tempPath = safePaths[i];
     const fileName = tempPath.split("/").pop() || `photo-${i}.jpg`;
     const finalPath = `${workspace.id}/${submissionId}/${fileName}`;
 
@@ -88,7 +116,7 @@ export async function submitUpload(
       .move(tempPath, finalPath);
 
     if (moveError) {
-      console.error(`[upload] move failed for ${tempPath}:`, moveError);
+      console.error("[upload] move failed:", moveError);
       continue;
     }
     const sortOrder = finalPaths.length;

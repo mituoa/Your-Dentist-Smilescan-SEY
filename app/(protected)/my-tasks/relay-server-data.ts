@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getMyTasks } from "@/lib/queries/my-tasks";
-import { getMyTaskCounts } from "@/lib/queries/task-counts";
+import type { TaskCounts } from "@/lib/queries/task-counts";
 import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { createClient } from "@/lib/supabase/server";
 
@@ -54,13 +54,18 @@ export async function loadRelayWorkspaceData(searchParams: Promise<Record<string
 
   const isDoctor = workspace.role === "doctor";
 
-  const [openTasks, pendingTasks, doneTasks, counts, assignableMembers] = await Promise.all([
+  const [openTasks, pendingTasks, doneTasks, assignableMembers] = await Promise.all([
     getMyTasks(user.id, workspace.workspace_id, isDoctor, "open"),
     getMyTasks(user.id, workspace.workspace_id, isDoctor, "pending_review"),
     getMyTasks(user.id, workspace.workspace_id, isDoctor, "done"),
-    getMyTaskCounts(user.id, workspace.workspace_id, isDoctor),
     getAssignableWorkspaceMembers(workspace.workspace_id, user.id),
   ]);
+
+  const counts: TaskCounts = {
+    open: openTasks.length,
+    pending: pendingTasks.length,
+    done: doneTasks.length,
+  };
 
   return {
     userId: user.id,

@@ -56,7 +56,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
           heading: { levels: [2, 3] },
         }),
         (Placeholder as any).configure({
-          placeholder: "Schreiben Sie Ihre Geschichte…",
+          placeholder: "Schreiben Sie Ihre Erklärung…",
         }),
         (Link as any).configure({
           openOnClick: false,
@@ -87,7 +87,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRenderRef = useRef(true);
 
-  const performSave = useCallback(async () => {
+  const performSave = useCallback(async (): Promise<boolean> => {
     setSaveStatus("saving");
     setSaveError(null);
     const result = await saveArticle({
@@ -101,10 +101,11 @@ export function JournalComposer({ article }: JournalComposerProps) {
     if (result.error) {
       setSaveStatus("error");
       setSaveError(result.error);
-    } else {
-      setSaveStatus("saved");
-      setLastSavedAt(new Date());
+      return false;
     }
+    setSaveStatus("saved");
+    setLastSavedAt(new Date());
+    return true;
   }, [article.id, title, excerpt, contentMd, topic, coverUrl]);
 
   useEffect(() => {
@@ -123,7 +124,11 @@ export function JournalComposer({ article }: JournalComposerProps) {
 
   const handlePublish = async () => {
     setIsPending(true);
-    await performSave();
+    const saved = await performSave();
+    if (!saved) {
+      setIsPending(false);
+      return;
+    }
     const result = await publishArticle(article.id);
     setIsPending(false);
     if (result.error) {
@@ -138,7 +143,12 @@ export function JournalComposer({ article }: JournalComposerProps) {
     setIsPending(true);
     const result = await unpublishArticle(article.id);
     setIsPending(false);
-    if (!result.error) router.refresh();
+    if (result.error) {
+      setSaveError(result.error);
+      setSaveStatus("error");
+    } else {
+      router.refresh();
+    }
   };
 
   return (
@@ -180,7 +190,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
           <textarea
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
-            placeholder="Kurzbeschreibung (erscheint in Artikel-Vorschauen)"
+            placeholder="Kurzbeschreibung für die Übersicht"
             maxLength={JOURNAL_LIMITS.excerpt}
             rows={2}
             className="w-full resize-none border-none bg-transparent p-0 text-base leading-relaxed text-slate-600 outline-none placeholder:text-slate-300 dark:text-slate-400 dark:placeholder:text-slate-700"

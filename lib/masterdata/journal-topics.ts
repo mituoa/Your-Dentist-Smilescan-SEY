@@ -7,32 +7,32 @@ export interface JournalTopic {
 export const JOURNAL_TOPICS: JournalTopic[] = [
   {
     id: "diagnostics",
-    label: "Diagnostics & Symptoms",
+    label: "Diagnostik & Symptome",
     description: "Symptome, Untersuchungen, Diagnosestellung",
   },
   {
     id: "microbiome",
-    label: "Microbiome & Systemic Health",
+    label: "Mundflora & Systemische Gesundheit",
     description: "Mundflora, systemische Zusammenhänge",
   },
   {
     id: "prevention",
-    label: "Prevention & Everyday Behavior",
+    label: "Vorsorge & Alltag",
     description: "Vorbeugung, Alltag, Zahnpflege",
   },
   {
     id: "treatment",
-    label: "Treatment & Clinical Pathways",
+    label: "Behandlung & Therapie",
     description: "Behandlungsmethoden, klinische Pfade",
   },
   {
     id: "culture",
-    label: "Culture, Behavior & Patient Reality",
+    label: "Patientenerleben & Verhalten",
     description: "Patientenerleben, Kultur, Verhalten",
   },
   {
     id: "science",
-    label: "Science & Medical Knowledge",
+    label: "Medizinisches Wissen",
     description: "Wissenschaftliche Hintergründe",
   },
 ];

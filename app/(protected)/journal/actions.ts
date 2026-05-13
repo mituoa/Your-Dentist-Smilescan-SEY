@@ -62,12 +62,22 @@ export async function saveArticle(
 
   const supabase = await createClient();
 
-  const wordCount = countWords(payload.content_markdown);
+  const safeTitle = payload.title
+    ? payload.title.slice(0, JOURNAL_LIMITS.title)
+    : null;
+  const safeExcerpt = payload.excerpt
+    ? payload.excerpt.slice(0, JOURNAL_LIMITS.excerpt)
+    : null;
+  const safeContent = payload.content_markdown
+    ? payload.content_markdown.slice(0, JOURNAL_LIMITS.content_markdown)
+    : null;
+
+  const wordCount = countWords(safeContent || "");
   const readingTime = calculateReadingTime(wordCount);
 
   let slug: string | null = null;
-  if (payload.title.trim()) {
-    slug = generateSlug(payload.title);
+  if (safeTitle?.trim()) {
+    slug = generateSlug(safeTitle);
     if (slug.length > JOURNAL_LIMITS.slug) {
       slug = slug.substring(0, JOURNAL_LIMITS.slug);
     }
@@ -85,10 +95,10 @@ export async function saveArticle(
   const { error } = await supabase
     .from("journal_entries")
     .update({
-      title: payload.title || null,
+      title: safeTitle,
       slug,
-      excerpt: payload.excerpt || null,
-      content_markdown: payload.content_markdown || null,
+      excerpt: safeExcerpt,
+      content_markdown: safeContent,
       topic: payload.topic,
       cover_photo_url: payload.cover_photo_url,
       word_count: wordCount,
@@ -153,7 +163,8 @@ export async function publishArticle(
       status: "published",
       published_at: article.published_at || new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("workspace_id", workspace.workspace_id);
 
   if (error) {
     console.error("[publishArticle]", error);

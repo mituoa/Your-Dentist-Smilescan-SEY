@@ -55,6 +55,8 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
   const [hasCommittedSave, setHasCommittedSave] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [editTopic, setEditTopic] = useState<string | null>(DEFAULT_TOPIC);
+  const [editCoverUrl, setEditCoverUrl] = useState<string | null>(null);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -82,6 +84,8 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
     setHasCommittedSave(false);
     setNewTitle("");
     setNewContent("");
+    setEditTopic(DEFAULT_TOPIC);
+    setEditCoverUrl(null);
     setActionError(null);
   }, []);
 
@@ -119,13 +123,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
   }, []);
 
   const handleEdit = (entry: JournalEntry) => {
-    setActionError(null);
-    setArticleId(entry.id);
-    setWriterMode("edit");
-    setHasCommittedSave(true);
-    setNewTitle(entry.title || "");
-    setNewContent(entry.content_markdown || "");
-    setIsWriting(true);
+    router.push(`/journal/${entry.id}/edit`);
   };
 
   const handleSave = (publish: boolean) => {
@@ -140,8 +138,8 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
           title: newTitle.slice(0, JOURNAL_LIMITS.title),
           excerpt,
           content_markdown: newContent.slice(0, JOURNAL_LIMITS.content_markdown),
-          topic: DEFAULT_TOPIC,
-          cover_photo_url: null,
+          topic: editTopic,
+          cover_photo_url: editCoverUrl,
         });
         if (saved.error) {
           setActionError(saved.error);
@@ -192,7 +190,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
       case "create":
         return "Erklärungen erstellen";
       case "published":
-        return "Veröffentlichte Inhalte";
+        return "Veröffentlichte Erklärungen";
       case "drafts":
         return "Entwürfe";
       default:
@@ -513,7 +511,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
                       </div>
                       <div style={{ marginTop: 64, textAlign: "center" }}>
                         <p className="text-[13px]" style={{ color: "#B3B3B3", lineHeight: 1.6 }}>
-                          Diese Inhalte helfen Ihren Patienten, sich besser zu orientieren.
+                          Diese Erklärungen helfen Ihren Patienten, sich besser zu orientieren.
                         </p>
                       </div>
                     </>
