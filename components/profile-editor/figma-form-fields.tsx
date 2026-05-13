@@ -14,17 +14,16 @@ export const FigmaTextInput = forwardRef<
       ref={ref}
       {...rest}
       className={cn(
-        "w-full min-w-0 text-base focus:outline-none sm:text-[13px]",
+        "w-full min-w-0 rounded-xl text-base focus:outline-none sm:text-[14px]",
         className
       )}
       style={{
-        padding: "9px 12px",
-        border: `1px solid ${focused ? "#2F80ED" : "#E8E8E8"}`,
-        borderRadius: 3,
-        color: "#262626",
-        background: "#FFFFFF",
-        transition: "all 120ms ease",
-        boxShadow: focused ? "0 0 0 3px rgba(47,128,237,0.06)" : "none",
+        padding: "11px 14px",
+        border: `1px solid ${focused ? "rgba(51,65,85,0.55)" : "rgba(148,163,184,0.45)"}`,
+        color: "#0f172a",
+        background: "rgba(255,255,255,0.92)",
+        transition: "border-color 120ms ease, box-shadow 120ms ease, background 120ms ease",
+        boxShadow: focused ? "0 0 0 3px rgba(15,23,42,0.06)" : "0 1px 0 rgba(255,255,255,0.75) inset",
         ...style,
       }}
       onFocus={(e) => {
@@ -50,17 +49,16 @@ export const FigmaTextarea = forwardRef<
       rows={rows}
       {...rest}
       className={cn(
-        "w-full min-w-0 resize-none text-base focus:outline-none sm:text-[13px]",
+        "w-full min-w-0 resize-none rounded-xl text-base focus:outline-none sm:text-[14px]",
         className
       )}
       style={{
-        padding: "9px 12px",
-        border: `1px solid ${focused ? "#2F80ED" : "#E8E8E8"}`,
-        borderRadius: 3,
-        color: "#262626",
-        background: "#FFFFFF",
-        transition: "all 120ms ease",
-        boxShadow: focused ? "0 0 0 3px rgba(47,128,237,0.06)" : "none",
+        padding: "11px 14px",
+        border: `1px solid ${focused ? "rgba(51,65,85,0.55)" : "rgba(148,163,184,0.45)"}`,
+        color: "#0f172a",
+        background: "rgba(255,255,255,0.92)",
+        transition: "border-color 120ms ease, box-shadow 120ms ease, background 120ms ease",
+        boxShadow: focused ? "0 0 0 3px rgba(15,23,42,0.06)" : "0 1px 0 rgba(255,255,255,0.75) inset",
         lineHeight: 1.5,
         ...style,
       }}

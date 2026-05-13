@@ -11,7 +11,7 @@ export default function ProfileEditorLoading() {
   return (
     <div
       className="flex h-full min-h-0 flex-1 flex-col pb-[max(0px,env(safe-area-inset-bottom))]"
-      style={{ backgroundColor: "#F8FAFC" }}
+      style={{ backgroundColor: "#EDECE8" }}
     >
       <div
         className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} flex min-h-0 flex-1 flex-col`}
@@ -40,12 +40,12 @@ export default function ProfileEditorLoading() {
           </div>
           {/* Mobil: rechte Spalte — gleicher Hintergrundton wie im Editor, ohne Layout-Sprung */}
           <div
-            className="flex min-h-[140px] shrink-0 flex-col border-t border-border/40 bg-[#EEF2F8] p-4 md:hidden"
+            className="flex min-h-[140px] shrink-0 flex-col border-t border-border/40 bg-[#F2F0EC] p-4 md:hidden"
             aria-hidden
           >
             <div className="mx-auto h-full min-h-[100px] w-full max-w-sm rounded-md border border-border/45 bg-surface-card/30" />
           </div>
-          <div className="hidden min-h-[min(40vh,280px)] flex-1 bg-[#EEF2F8] md:flex" aria-hidden>
+          <div className="hidden min-h-[min(40vh,280px)] flex-1 bg-[#F2F0EC] md:flex" aria-hidden>
             <div className="flex h-full w-full items-center justify-center p-6">
               <div className="h-48 w-[min(100%,280px)] rounded-md border border-border/45 bg-surface-card/35" />
             </div>
