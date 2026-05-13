@@ -39,6 +39,19 @@ function getRelativeTime(timestamp: string): string {
   return date.toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
 }
 
+function getRelativeEditTime(timestamp: string): string {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Heute bearbeitet";
+  if (diffDays === 1) return "Gestern bearbeitet";
+  if (diffDays < 7) return `Vor ${diffDays} Tagen bearbeitet`;
+  if (diffDays < 30) return `Vor ${Math.floor(diffDays / 7)} Wochen bearbeitet`;
+  return `Bearbeitet am ${date.toLocaleDateString("de-DE", { day: "2-digit", month: "long" })}`;
+}
+
 export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWorkspaceViewProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -89,19 +102,6 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
     setActionError(null);
   }, []);
 
-  const handleShorter = () => {
-    if (!newContent.trim()) return;
-    const paragraphs = newContent.split("\n\n\n");
-    if (paragraphs.length > 2) {
-      setNewContent([paragraphs[0], paragraphs[paragraphs.length - 1]].join("\n\n\n"));
-    }
-  };
-
-  const handleSimpler = () => {
-    if (!newContent.trim()) return;
-    setNewContent(newContent.replace(/zunächst/g, "zuerst").replace(/etwa/g, "ungefähr"));
-  };
-
   const startNewArticle = useCallback(async (prefilledTitle: string) => {
     setActionError(null);
     setIsBusy(true);
@@ -117,6 +117,8 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
       setNewTitle(prefilledTitle);
       setNewContent(prefilledTitle ? generateGuidedDraftMarkdown(prefilledTitle) : "");
       setIsWriting(true);
+    } catch {
+      setActionError("Verbindungsfehler. Bitte versuchen Sie es erneut.");
     } finally {
       setIsBusy(false);
     }
@@ -157,6 +159,8 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
 
         resetWriter();
         router.refresh();
+      } catch {
+        setActionError("Verbindungsfehler. Bitte versuchen Sie es erneut.");
       } finally {
         setIsBusy(false);
       }
@@ -201,7 +205,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
   const getPageSubtitle = () => {
     switch (contentView) {
       case "create":
-        return "Geben Sie Ihren Patienten Klarheit – bevor sie fragen müssen";
+        return "Verständliche Erklärungen für Ihre Patienten erstellen";
       case "published":
         return "Ihre veröffentlichten Erklärungen für Patienten";
       case "drafts":
@@ -282,37 +286,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
                 />
               </div>
 
-              {newContent.trim() ? (
-                <div style={{ marginBottom: 64, paddingTop: 32, borderTop: "1px solid #F0F0F0" }}>
-                  <p
-                    className="mb-[18px] text-[11px] font-medium uppercase"
-                    style={{ color: "#B3B3B3", letterSpacing: "0.04em" }}
-                  >
-                    Text anpassen
-                  </p>
-                  <div className="flex items-center gap-5">
-                    <button
-                      type="button"
-                      onClick={handleShorter}
-                      className="text-[13px] font-medium text-[#737373] transition-colors hover:text-[#333333]"
-                      style={{ background: "transparent", border: "none", padding: 0 }}
-                    >
-                      Kürzer formulieren
-                    </button>
-                    <span style={{ color: "#E0E0E0" }}>•</span>
-                    <button
-                      type="button"
-                      onClick={handleSimpler}
-                      className="text-[13px] font-medium text-[#737373] transition-colors hover:text-[#333333]"
-                      style={{ background: "transparent", border: "none", padding: 0 }}
-                    >
-                      Einfacher erklären
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-
-              <div className="flex flex-wrap items-center gap-5" style={{ paddingTop: newContent.trim() ? 0 : 56 }}>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-5" style={{ paddingTop: 56 }}>
                 <button
                   type="button"
                   onClick={() => handleSave(true)}
@@ -332,12 +306,11 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
                   type="button"
                   onClick={() => handleSave(false)}
                   disabled={!newTitle.trim() || !newContent.trim() || isBusy}
-                  className="text-[14px] font-medium transition-colors disabled:cursor-not-allowed disabled:text-[#D4D4D4]"
+                  className="min-h-[44px] px-2 text-[14px] font-medium transition-colors disabled:cursor-not-allowed disabled:text-[#D4D4D4]"
                   style={{
                     background: "transparent",
                     color: !newTitle.trim() || !newContent.trim() ? "#D4D4D4" : "#737373",
                     border: "none",
-                    padding: 0,
                   }}
                 >
                   Als Entwurf speichern
@@ -346,8 +319,8 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
                   type="button"
                   onClick={handleCancel}
                   disabled={isBusy}
-                  className="text-[14px] font-medium text-[#999999] transition-colors hover:text-[#666666]"
-                  style={{ background: "transparent", border: "none", padding: 0 }}
+                  className="min-h-[44px] px-2 text-[14px] font-medium text-[#999999] transition-colors hover:text-[#666666]"
+                  style={{ background: "transparent", border: "none" }}
                 >
                   Abbrechen
                 </button>
@@ -377,7 +350,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
                       key={tab}
                       type="button"
                       onClick={() => setTab(tab)}
-                      className="rounded-full px-6 py-2.5 text-[14px] font-medium transition-all"
+                      className="rounded-full px-4 py-2.5 text-[13px] font-medium transition-all sm:px-6 sm:text-[14px]"
                       style={{
                         background: contentView === tab ? "#FFFFFF" : "transparent",
                         color: contentView === tab ? "#1a1a1a" : "#737373",
@@ -441,9 +414,6 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
                     >
                       Eigene Erklärung verfassen
                     </button>
-                    <p className="mt-7 text-[13px]" style={{ color: "#B3B3B3", lineHeight: 1.6 }}>
-                      Ihre Patienten sehen diese Erklärung sofort.
-                    </p>
                   </div>
                 </>
               ) : null}
@@ -566,7 +536,7 @@ export function JournalsWorkspaceView({ initialEntries, initialTab }: JournalsWo
                                 {listTitle(explanation)}
                               </h3>
                               <p className="text-[13px]" style={{ color: "#B3B3B3", lineHeight: 1.4 }}>
-                                Nicht veröffentlicht
+                                {getRelativeEditTime(explanation.updated_at)}
                               </p>
                             </div>
                             <span

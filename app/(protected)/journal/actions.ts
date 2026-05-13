@@ -10,10 +10,39 @@ import {
   countWords,
   JOURNAL_LIMITS,
 } from "@/lib/validation/journal-limits";
+import { JOURNAL_TOPICS } from "@/lib/masterdata/journal-topics";
+
+const VALID_TOPIC_IDS = new Set(JOURNAL_TOPICS.map((t) => t.id));
+
+function sanitizeTopic(topic: string | null | undefined): string | null {
+  if (!topic) return null;
+  return VALID_TOPIC_IDS.has(topic) ? topic : null;
+}
+
+function isAllowedCoverUrl(url: string | null | undefined): boolean {
+  if (!url) return true;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) return false;
+  try {
+    const parsed = new URL(url);
+    const expected = new URL(supabaseUrl);
+    return parsed.hostname === expected.hostname;
+  } catch {
+    return false;
+  }
+}
+
+async function requireDoctorWorkspace() {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." as const, workspace: null };
+  if (workspace.role !== "doctor")
+    return { error: "Keine Berechtigung." as const, workspace: null };
+  return { error: null, workspace };
+}
 
 export async function createDraftArticle(): Promise<{ id?: string; error?: string }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const { error: authErr, workspace } = await requireDoctorWorkspace();
+  if (authErr || !workspace) return { error: authErr || "Nicht angemeldet." };
 
   const supabase = await createClient();
   const {
@@ -57,8 +86,8 @@ export interface SaveArticlePayload {
 export async function saveArticle(
   payload: SaveArticlePayload
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const { error: authErr, workspace } = await requireDoctorWorkspace();
+  if (authErr || !workspace) return { error: authErr || "Nicht angemeldet." };
 
   const supabase = await createClient();
 
@@ -92,6 +121,11 @@ export async function saveArticle(
     }
   }
 
+  const safeTopic = sanitizeTopic(payload.topic);
+  const safeCoverUrl = isAllowedCoverUrl(payload.cover_photo_url)
+    ? payload.cover_photo_url
+    : null;
+
   const { error } = await supabase
     .from("journal_entries")
     .update({
@@ -99,8 +133,8 @@ export async function saveArticle(
       slug,
       excerpt: safeExcerpt,
       content_markdown: safeContent,
-      topic: payload.topic,
-      cover_photo_url: payload.cover_photo_url,
+      topic: safeTopic,
+      cover_photo_url: safeCoverUrl,
       word_count: wordCount,
       reading_time_minutes: readingTime,
     })
@@ -139,8 +173,8 @@ async function revalidatePublicJournalPaths(
 export async function publishArticle(
   id: string
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const { error: authErr, workspace } = await requireDoctorWorkspace();
+  if (authErr || !workspace) return { error: authErr || "Nicht angemeldet." };
 
   const supabase = await createClient();
   const { data: article } = await supabase
@@ -154,7 +188,8 @@ export async function publishArticle(
   if (!article.title) return { error: "Titel erforderlich zum Veröffentlichen." };
   if (!article.content_markdown)
     return { error: "Inhalt erforderlich zum Veröffentlichen." };
-  if (!article.topic) return { error: "Thema erforderlich zum Veröffentlichen." };
+  if (!article.topic || !VALID_TOPIC_IDS.has(article.topic))
+    return { error: "Gültiges Thema erforderlich zum Veröffentlichen." };
   if (!article.slug) return { error: "Slug fehlt. Bitte Titel speichern." };
 
   const { error } = await supabase
@@ -185,8 +220,8 @@ export async function publishArticle(
 export async function unpublishArticle(
   id: string
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const { error: authErr, workspace } = await requireDoctorWorkspace();
+  if (authErr || !workspace) return { error: authErr || "Nicht angemeldet." };
 
   const supabase = await createClient();
   const { data: article } = await supabase
@@ -218,8 +253,8 @@ export async function unpublishArticle(
 export async function deleteArticle(
   id: string
 ): Promise<{ error?: string; success?: boolean }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const { error: authErr, workspace } = await requireDoctorWorkspace();
+  if (authErr || !workspace) return { error: authErr || "Nicht angemeldet." };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -237,8 +272,8 @@ export async function deleteArticle(
 export async function uploadCoverPhoto(
   formData: FormData
 ): Promise<{ error?: string; url?: string }> {
-  const workspace = await getCurrentWorkspace();
-  if (!workspace) return { error: "Nicht angemeldet." };
+  const { error: authErr, workspace } = await requireDoctorWorkspace();
+  if (authErr || !workspace) return { error: authErr || "Nicht angemeldet." };
 
   const file = formData.get("file") as File;
   if (!file || file.size === 0) return { error: "Keine Datei ausgewählt." };

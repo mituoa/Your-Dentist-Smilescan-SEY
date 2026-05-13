@@ -6,6 +6,7 @@ import { getPublicJournalBySlug, getRelatedEntries } from "@/lib/queries/journal
 import { getTopicLabel } from "@/lib/masterdata/journal-topics";
 import { ShareButtons } from "@/components/journal/share-buttons";
 import { getAppBaseUrl } from "@/lib/env";
+import { sanitizeArticleHtml } from "@/lib/sanitize-article-html";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string; articleSlug: string }>;
@@ -47,9 +48,9 @@ export default async function PublicArticlePage({ params }: ArticlePageProps) {
   const related = await getRelatedEntries(profile.workspace_id, article.id, 3);
   const name = profile.display_name || profile.workspace_name;
   const topic = getTopicLabel(article.topic);
-  const contentHtml = marked.parse(article.content_markdown, {
-    async: false,
-  }) as string;
+  const contentHtml = sanitizeArticleHtml(
+    marked.parse(article.content_markdown, { async: false }) as string
+  );
   const canonicalSlug = profile.slug;
   const url = `${getAppBaseUrl()}/doc/${canonicalSlug}/journal/${articleSlug}`;
 

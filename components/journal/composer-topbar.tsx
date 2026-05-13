@@ -65,19 +65,19 @@ export function ComposerTopBar({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 md:px-6">
-        <div className="flex items-center gap-4">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-3 py-3 sm:px-4 md:px-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <button
             type="button"
             onClick={() => router.push("/journal")}
-            className="flex items-center gap-2 rounded-lg p-2 -m-2 text-sm text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg p-2 -m-2 text-sm text-slate-400 transition-colors hover:bg-slate-800 hover:text-white sm:gap-2"
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
-            Journal
+            <span className="hidden sm:inline">Journal</span>
           </button>
-          <span className="text-slate-600">·</span>
+          <span className="hidden text-slate-600 sm:inline">·</span>
           <span
-            className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium ${
+            className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[11px] font-medium sm:px-2.5 sm:py-1 sm:text-xs ${
               status === "published"
                 ? "border-green-500/20 bg-green-500/10 text-green-400"
                 : "border-slate-600 bg-slate-700 text-slate-300"
@@ -85,16 +85,18 @@ export function ComposerTopBar({
           >
             {status === "published" ? "Veröffentlicht" : "Entwurf"}
           </span>
-          {renderSaveStatus()}
+          <span className="hidden min-w-0 truncate sm:inline">
+            {renderSaveStatus()}
+          </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center">
           {status === "published" ? (
             <button
               type="button"
               onClick={onUnpublish}
               disabled={isPending}
-              className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600"
+              className="rounded-lg bg-slate-700 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-slate-600 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600 sm:px-4 sm:text-sm"
             >
               Zurück in Entwurf
             </button>
@@ -103,7 +105,7 @@ export function ComposerTopBar({
               type="button"
               onClick={onPublish}
               disabled={isPending || !canPublish}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500"
+              className="rounded-lg bg-green-600 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 sm:px-4 sm:text-sm"
               title={!canPublish ? "Titel, Inhalt und Thema erforderlich" : ""}
             >
               Veröffentlichen

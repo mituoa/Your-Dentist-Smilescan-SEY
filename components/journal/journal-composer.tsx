@@ -90,22 +90,28 @@ export function JournalComposer({ article }: JournalComposerProps) {
   const performSave = useCallback(async (): Promise<boolean> => {
     setSaveStatus("saving");
     setSaveError(null);
-    const result = await saveArticle({
-      id: article.id,
-      title,
-      excerpt,
-      content_markdown: contentMd,
-      topic,
-      cover_photo_url: coverUrl,
-    });
-    if (result.error) {
+    try {
+      const result = await saveArticle({
+        id: article.id,
+        title,
+        excerpt,
+        content_markdown: contentMd,
+        topic,
+        cover_photo_url: coverUrl,
+      });
+      if (result.error) {
+        setSaveStatus("error");
+        setSaveError(result.error);
+        return false;
+      }
+      setSaveStatus("saved");
+      setLastSavedAt(new Date());
+      return true;
+    } catch {
       setSaveStatus("error");
-      setSaveError(result.error);
+      setSaveError("Verbindungsfehler. Bitte versuchen Sie es erneut.");
       return false;
     }
-    setSaveStatus("saved");
-    setLastSavedAt(new Date());
-    return true;
   }, [article.id, title, excerpt, contentMd, topic, coverUrl]);
 
   useEffect(() => {
@@ -123,31 +129,53 @@ export function JournalComposer({ article }: JournalComposerProps) {
   const canPublish = Boolean(title.trim() && contentMd.trim() && topic);
 
   const handlePublish = async () => {
+    if (isPending) return;
     setIsPending(true);
-    const saved = await performSave();
-    if (!saved) {
-      setIsPending(false);
-      return;
+    if (saveTimeout.current) {
+      clearTimeout(saveTimeout.current);
+      saveTimeout.current = null;
     }
-    const result = await publishArticle(article.id);
-    setIsPending(false);
-    if (result.error) {
-      setSaveError(result.error);
+    try {
+      const saved = await performSave();
+      if (!saved) {
+        setIsPending(false);
+        return;
+      }
+      const result = await publishArticle(article.id);
+      setIsPending(false);
+      if (result.error) {
+        setSaveError(result.error);
+        setSaveStatus("error");
+      } else {
+        router.refresh();
+      }
+    } catch {
+      setIsPending(false);
+      setSaveError("Verbindungsfehler. Bitte versuchen Sie es erneut.");
       setSaveStatus("error");
-    } else {
-      router.refresh();
     }
   };
 
   const handleUnpublish = async () => {
+    if (isPending) return;
     setIsPending(true);
-    const result = await unpublishArticle(article.id);
-    setIsPending(false);
-    if (result.error) {
-      setSaveError(result.error);
+    if (saveTimeout.current) {
+      clearTimeout(saveTimeout.current);
+      saveTimeout.current = null;
+    }
+    try {
+      const result = await unpublishArticle(article.id);
+      setIsPending(false);
+      if (result.error) {
+        setSaveError(result.error);
+        setSaveStatus("error");
+      } else {
+        router.refresh();
+      }
+    } catch {
+      setIsPending(false);
+      setSaveError("Verbindungsfehler. Bitte versuchen Sie es erneut.");
       setSaveStatus("error");
-    } else {
-      router.refresh();
     }
   };
 
@@ -181,9 +209,11 @@ export function JournalComposer({ article }: JournalComposerProps) {
             maxLength={JOURNAL_LIMITS.title}
             className="w-full border-none bg-transparent p-0 font-serif text-4xl font-light leading-tight tracking-tight text-slate-900 outline-none placeholder:text-slate-300 md:text-5xl dark:text-white dark:placeholder:text-slate-700"
           />
-          <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
-            {title.length}/{JOURNAL_LIMITS.title}
-          </div>
+          {title.length > JOURNAL_LIMITS.title * 0.8 && (
+            <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
+              {title.length}/{JOURNAL_LIMITS.title}
+            </div>
+          )}
         </div>
 
         <div className="mb-12">
@@ -195,9 +225,11 @@ export function JournalComposer({ article }: JournalComposerProps) {
             rows={2}
             className="w-full resize-none border-none bg-transparent p-0 text-base leading-relaxed text-slate-600 outline-none placeholder:text-slate-300 dark:text-slate-400 dark:placeholder:text-slate-700"
           />
-          <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
-            {excerpt.length}/{JOURNAL_LIMITS.excerpt}
-          </div>
+          {excerpt.length > JOURNAL_LIMITS.excerpt * 0.8 && (
+            <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
+              {excerpt.length}/{JOURNAL_LIMITS.excerpt}
+            </div>
+          )}
         </div>
 
         <hr className="mb-8 border-slate-200 dark:border-slate-800" />
