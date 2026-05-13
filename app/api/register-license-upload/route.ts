@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   MAX_LICENSE_SIZE_BYTES,
   resolveLicenseMimeForUpload,
+  storageExtForValidatedLicense,
   validateLicenseBufferMagic,
   validateLicenseFile,
 } from "@/lib/upload/license-validation";
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
     const contentType = mime || file.type || "application/octet-stream";
 
     const admin = createAdminClient();
-    const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
+    const ext = storageExtForValidatedLicense(mime);
     const tempId = crypto.randomUUID();
     const suffix = side === "front" || side === "back" ? `-${side}` : "";
     const storagePath = `registrations/licenses/pending/${tempId}${suffix}.${ext}`;

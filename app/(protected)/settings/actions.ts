@@ -320,7 +320,11 @@ export async function uploadLogo(
   if (!allowed.includes(file.type)) return { error: "PNG, JPG, WEBP oder SVG." };
 
   const admin = createAdminClient();
-  const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+  const ext =
+    file.type === "image/png" ? "png"
+    : file.type === "image/webp" ? "webp"
+    : file.type === "image/svg+xml" ? "svg"
+    : "jpg";
   const path = `${workspace.workspace_id}/logo-${Date.now()}.${ext}`;
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -329,16 +333,20 @@ export async function uploadLogo(
     .upload(path, buffer, { contentType: file.type, upsert: false });
 
   if (upErr) {
-    console.error("[uploadLogo]", upErr);
+    console.error("[uploadLogo]", (upErr as { code?: string }).code ?? "unknown");
     return { error: "Upload fehlgeschlagen." };
   }
 
   const { data } = admin.storage.from("branding-assets").getPublicUrl(path);
 
-  await admin
+  const { error: linkErr } = await admin
     .from("profile_data")
     .update({ logo_url: data.publicUrl })
     .eq("workspace_id", workspace.workspace_id);
+  if (linkErr) {
+    console.error("[uploadLogo] profile_data update", (linkErr as { code?: string }).code ?? "unknown");
+    return { error: "Das Logo wurde hochgeladen, konnte aber nicht mit Ihrem Profil verknüpft werden." };
+  }
 
   revalidatePath("/settings");
   return { url: data.publicUrl };

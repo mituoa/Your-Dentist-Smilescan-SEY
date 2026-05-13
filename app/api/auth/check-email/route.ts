@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     /** Absichtlich neutral — keine User-Existenz preisgeben (Medical-/Enterprise-SaaS-Standard). */
     return NextResponse.json({ ok: true, checked: true });
   } catch (e) {
-    console.error("[api/auth/check-email]", e);
+    console.error("[api/auth/check-email]", e instanceof Error ? e.message : "unknown");
     return NextResponse.json({ ok: false, error: "server_error" }, { status: 500 });
   }
 }

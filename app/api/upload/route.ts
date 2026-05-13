@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { getClientIpFromNextRequest } from "@/lib/rate-limit/client-ip";
+import { allowSlidingWindowRequest } from "@/lib/rate-limit/memory-sliding-window";
 import {
   resolveImageMimeForUpload,
   storageExtForValidatedImage,
@@ -16,8 +18,24 @@ import {
  * **Praxis `/create-case`:** eingeloggter **Arzt** — `workspace_id` nur aus {@link getCurrentWorkspace()}; optional
  * `workspace_id` im Formular nur zur **Abweichungsprüfung** gegen die Session.
  */
+const UPLOAD_RATE_WINDOW_MS = 60_000;
+const UPLOAD_RATE_MAX = 20;
+
 export async function POST(request: NextRequest) {
   try {
+    if (
+      !allowSlidingWindowRequest(
+        `photo-upload:${getClientIpFromNextRequest(request)}`,
+        UPLOAD_RATE_MAX,
+        UPLOAD_RATE_WINDOW_MS
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Zu viele Upload-Versuche. Bitte kurz warten." },
+        { status: 429 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
     if (!file) {

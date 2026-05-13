@@ -48,12 +48,20 @@ export async function POST(request: Request) {
   const eventName = (payload.event || payload.type || "").toLowerCase();
   const messageId = payload.messageId || payload.message_id || "";
   const recipient = payload.recipient || payload.email || "";
-  const eventTimestamp =
-    typeof payload.timestamp === "number"
-      ? new Date(payload.timestamp * 1000).toISOString()
-      : typeof payload.timestamp === "string"
-        ? new Date(payload.timestamp).toISOString()
-        : new Date().toISOString();
+
+  let eventTimestamp: string;
+  try {
+    const raw = payload.timestamp;
+    const d =
+      typeof raw === "number"
+        ? new Date(raw * 1000)
+        : typeof raw === "string"
+          ? new Date(raw)
+          : new Date();
+    eventTimestamp = Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  } catch {
+    eventTimestamp = new Date().toISOString();
+  }
 
   if (!messageId) {
     return NextResponse.json({ ok: true, ignored: "missing_message_id" });
@@ -68,10 +76,10 @@ export async function POST(request: Request) {
 
   const { data: matches, error: lookupError } = await admin
     .from("task_delivery_receipts")
-    .select("task_id, recipient_user_id, recipient_email, delivered_at")
+    .select("task_id, recipient_user_id, recipient_email, delivered_at, last_event_at")
     .eq("email_message_id", messageId);
   if (lookupError) {
-    console.error("[mail-webhook lookup]", lookupError);
+    console.error("[mail-webhook lookup]", (lookupError as { code?: string }).code ?? "unknown");
     return NextResponse.json({ error: "lookup_failed" }, { status: 500 });
   }
 
@@ -82,8 +90,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ignored: "unknown_message_id" });
   }
 
+  const eventTs = new Date(eventTimestamp).getTime();
+
   if (eventName === "delivered") {
     for (const row of scopedMatches) {
+      if (row.last_event_at && new Date(row.last_event_at).getTime() >= eventTs) continue;
       const updatePayload: Record<string, string> = {
         last_event: "delivered",
         last_event_at: eventTimestamp,
@@ -97,12 +108,13 @@ export async function POST(request: Request) {
         .eq("task_id", row.task_id)
         .eq("recipient_user_id", row.recipient_user_id);
       if (error) {
-        console.error("[mail-webhook delivered]", error);
+        console.error("[mail-webhook delivered]", (error as { code?: string }).code ?? "unknown");
       }
     }
   } else if (eventName === "bounce" || eventName === "deferred") {
     for (const row of scopedMatches) {
-      await admin
+      if (row.last_event_at && new Date(row.last_event_at).getTime() >= eventTs) continue;
+      const { error } = await admin
         .from("task_delivery_receipts")
         .update({
           last_event: eventName,
@@ -110,6 +122,9 @@ export async function POST(request: Request) {
         })
         .eq("task_id", row.task_id)
         .eq("recipient_user_id", row.recipient_user_id);
+      if (error) {
+        console.error("[mail-webhook event]", (error as { code?: string }).code ?? "unknown");
+      }
     }
   }
 

@@ -285,7 +285,8 @@ export async function uploadCoverPhoto(
   if (!allowed.includes(file.type)) return { error: "Format nicht unterstützt." };
 
   const admin = createAdminClient();
-  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const ext =
+    file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
   const path = `${workspace.workspace_id}/cover-${Date.now()}.${ext}`;
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -294,7 +295,7 @@ export async function uploadCoverPhoto(
     .upload(path, buffer, { contentType: file.type, upsert: false });
 
   if (upErr) {
-    console.error("[uploadCover]", upErr);
+    console.error("[uploadCover]", (upErr as { code?: string }).code ?? "unknown");
     return { error: "Upload fehlgeschlagen." };
   }
 

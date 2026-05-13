@@ -64,6 +64,27 @@ export function validateLicenseFile(file: File): ValidationResult {
   return { valid: true };
 }
 
+/** Dateiendung für Storage-Pfade — nur aus **validiertem** MIME, nicht aus dem Original-Dateinamen (Spoofing / Path-Traversal). */
+export function storageExtForValidatedLicense(mime: string): string {
+  const m = mime.toLowerCase().trim();
+  switch (m) {
+    case "image/jpeg":
+    case "image/jpg":
+      return "jpg";
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    case "image/heic":
+    case "image/heif":
+      return "heic";
+    case "application/pdf":
+      return "pdf";
+    default:
+      return "pdf";
+  }
+}
+
 /** Stichprobe des Dateiinhalts (Magic Bytes) — erschwert MIME-Spoofing bei Upload. */
 export function validateLicenseBufferMagic(buffer: Buffer, mime: string): ValidationResult {
   if (buffer.length < 12) {
