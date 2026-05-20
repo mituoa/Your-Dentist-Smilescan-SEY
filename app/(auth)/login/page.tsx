@@ -7,6 +7,7 @@ import { isAdminAllowlistUser } from "@/lib/auth-helpers";
 import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
 import { createClient } from "@/lib/supabase/server";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
+import { pathWithWorkspaceEnter } from "@/lib/design/yd-workspace-awakening";
 import {
   clipInviteTokenQuery,
   isInviteTokenFormat,
@@ -61,7 +62,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     }
     // Ops-Admin (ADMIN_EMAILS / ADMIN_GITHUB_USERNAMES) may enter despite pending workspace.
     if (isAuthRelaxMode() || isAdminAllowlistUser(user) || !isBlockingAuthError(queryError)) {
-      redirect(await resolveAuthenticatedEntryPath());
+      redirect(pathWithWorkspaceEnter(await resolveAuthenticatedEntryPath()));
     }
   }
 

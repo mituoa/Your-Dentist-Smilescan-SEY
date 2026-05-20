@@ -20,6 +20,7 @@ import {
   userFacingPasswordResetRequestError,
 } from "@/lib/auth-user-facing-errors";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
+import { pathWithWorkspaceEnter } from "@/lib/design/yd-workspace-awakening";
 import { getStripePriceIdForInterval, getStripeServer } from "@/lib/stripe/server";
 import { allowSlidingWindowRequest } from "@/lib/rate-limit/memory-sliding-window";
 import { getClientIpFromHeaders } from "@/lib/rate-limit/client-ip";
@@ -113,7 +114,7 @@ export async function signIn(formData: FormData) {
     redirect(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
   }
   const nextPath = await resolveAuthenticatedEntryPath();
-  redirect(nextPath);
+  redirect(pathWithWorkspaceEnter(nextPath));
 }
 
 export async function resendSignupConfirmation(formData: FormData) {

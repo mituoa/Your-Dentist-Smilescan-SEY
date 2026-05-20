@@ -1,7 +1,14 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
+import { YdAwakenBootstrap } from "@/components/ambient/yd-awaken-bootstrap";
+import { YdWorkspaceAwakening } from "@/components/ambient/yd-workspace-awakening";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
+import { buildNavAmbientPreviews } from "@/lib/ambient/build-nav-ambient-previews";
+import { getInboxSubmissions } from "@/lib/queries/inbox";
+import { getOpenTasks } from "@/lib/queries/dashboard";
+import { listJournalForWorkspace } from "@/lib/queries/journal";
 import { Sidebar } from "@/components/app-shell/sidebar";
 import {
   MobileNavProvider,
@@ -85,25 +92,55 @@ export default async function ProtectedLayout({
 
   const profileData = headerState.profileData;
 
+  let navAmbient = buildNavAmbientPreviews({
+    inboxItems: [],
+    openTasks: [],
+    tasksOverdue: myTasksOverdueCount,
+    journalEntries: [],
+    role,
+  });
+
+  if (workspace) {
+    const [inboxRes, tasksRes, journals] = await Promise.all([
+      getInboxSubmissions(workspace.workspace_id),
+      getOpenTasks(workspace.workspace_id),
+      role === "doctor" ? listJournalForWorkspace(workspace.workspace_id) : Promise.resolve([]),
+    ]);
+
+    navAmbient = buildNavAmbientPreviews({
+      inboxItems: inboxRes.ok ? inboxRes.items : [],
+      inboxUnseen: inboxCount,
+      openTasks: tasksRes.ok ? tasksRes.tasks : [],
+      tasksOverdue: myTasksOverdueCount,
+      journalEntries: journals,
+      role,
+    });
+  }
+
   return (
     <AssistShell>
-      <MobileNavProvider>
-        <div
-          className="yd-workspace relative flex h-[100dvh] flex-col overflow-hidden"
-          style={{ background: YD.atmosphere.pageGradient }}
-        >
-          <div className="relative flex min-h-0 flex-1 flex-row overflow-hidden">
-            <MobileSidebarFrame>
-              <Sidebar
-                role={role}
-                inboxCount={inboxCount}
-                myTasksCount={myTasksCount}
-                myTasksOverdueCount={myTasksOverdueCount}
-                avatarUrl={profileData?.photo_url ?? null}
-                displayName={profileData?.display_name ?? null}
-                email={user.email || ""}
-              />
-            </MobileSidebarFrame>
+      <YdWorkspaceAwakening>
+        <MobileNavProvider>
+          <Suspense fallback={null}>
+            <YdAwakenBootstrap />
+          </Suspense>
+          <div
+            className="yd-workspace yd-awaken-page relative flex h-[100dvh] flex-col overflow-hidden"
+            style={{ background: YD.atmosphere.pageGradient }}
+          >
+            <div className="relative flex min-h-0 flex-1 flex-row overflow-hidden">
+              <MobileSidebarFrame>
+                <Sidebar
+                  role={role}
+                  inboxCount={inboxCount}
+                  myTasksCount={myTasksCount}
+                  myTasksOverdueCount={myTasksOverdueCount}
+                  avatarUrl={profileData?.photo_url ?? null}
+                  displayName={profileData?.display_name ?? null}
+                  email={user.email || ""}
+                  navAmbient={navAmbient}
+                />
+              </MobileSidebarFrame>
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               <ProtectedTopbar
@@ -122,6 +159,7 @@ export default async function ProtectedLayout({
           </div>
         </div>
       </MobileNavProvider>
+      </YdWorkspaceAwakening>
     </AssistShell>
   );
 }

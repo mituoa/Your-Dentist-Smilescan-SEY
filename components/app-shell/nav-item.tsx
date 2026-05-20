@@ -12,7 +12,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { YdNavAmbientPanel } from "@/components/ambient/yd-nav-ambient-panel";
 import { YD } from "@/lib/design/yd-design-tokens";
+import type { YdNavAmbientPreview } from "@/lib/ambient/nav-preview-types";
 import { cn } from "@/lib/utils";
 import { NavBadge } from "./nav-badge";
 
@@ -33,6 +35,7 @@ interface NavItemProps {
   description?: string;
   badge?: number;
   badgeUrgent?: boolean;
+  ambientPreview?: YdNavAmbientPreview;
 }
 
 export function NavItem({
@@ -42,6 +45,7 @@ export function NavItem({
   description,
   badge,
   badgeUrgent,
+  ambientPreview,
 }: NavItemProps) {
   const pathname = usePathname();
   const Icon = ICON_BY_NAME[iconName] ?? Home;
@@ -63,8 +67,9 @@ export function NavItem({
     <Link
       href={href}
       title={label}
+      data-active={isActive ? "true" : "false"}
       className={cn(
-        "group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.3)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:px-0 md:py-0",
+        "yd-ambient-nav-link group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.3)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:px-0 md:py-0",
         !isActive && "hover:bg-white/35 md:hover:bg-transparent"
       )}
     >
@@ -83,7 +88,7 @@ export function NavItem({
 
       <span
         className={cn(
-          "relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-200 md:h-11 md:w-11",
+          "yd-nav-icon-shell relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
           isActive && "shadow-[0_6px_18px_rgba(30,91,189,0.4)]"
         )}
         style={
@@ -93,7 +98,7 @@ export function NavItem({
         }
       >
         <Icon
-          className="h-[22px] w-[22px]"
+          className="h-[22px] w-[22px] transition-colors duration-300"
           strokeWidth={isActive ? 2.25 : 1.65}
           style={{ color: isActive ? "#FFFFFF" : YD.sidebar.iconIdle }}
         />
@@ -117,6 +122,8 @@ export function NavItem({
           <NavBadge count={badge} variant={badgeUrgent ? "urgent" : "default"} />
         </span>
       ) : null}
+
+      {ambientPreview ? <YdNavAmbientPanel preview={ambientPreview} /> : null}
     </Link>
   );
 }

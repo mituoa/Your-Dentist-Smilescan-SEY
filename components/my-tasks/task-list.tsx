@@ -81,7 +81,7 @@ function TaskRow({
   return (
     <Link
       href={`/my-tasks/${task.id}`}
-      className={`grid grid-cols-1 gap-2 border-b border-[rgba(15,23,42,0.06)] px-3 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[rgba(43,111,232,0.25)] last:border-b-0 hover:bg-[#F4F7FB] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:px-4 sm:py-3.5 ${
+      className={`yd-inbox-row-ambient yd-ambient-surface group grid grid-cols-1 gap-2 border-b border-[rgba(15,23,42,0.06)] px-3 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[rgba(43,111,232,0.25)] last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:px-4 sm:py-3.5 ${
         urgency === "overdue" ? "bg-danger/5" : ""
       }`}
     >
@@ -111,6 +111,35 @@ function TaskRow({
           month: "2-digit",
           year: "numeric",
         })}
+      </div>
+      <div className="yd-ambient-preview col-span-full space-y-1 border-t border-[rgba(180,198,218,0.3)] pt-2 text-[11px] text-[#5E7389] sm:col-span-2">
+        <p>
+          <span className="font-medium text-[#3D5266]">Workflow: </span>
+          {task.status === "open" ? "Offen" : task.status === "pending_review" ? "Zur Bestätigung" : "Erledigt"}
+        </p>
+        {task.due_date ? (
+          <p>
+            <span className="font-medium text-[#3D5266]">Frist: </span>
+            {new Date(task.due_date).toLocaleDateString("de-DE", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+            })}
+          </p>
+        ) : (
+          <p>
+            <span className="font-medium text-[#3D5266]">Frist: </span>
+            Keine Frist gesetzt
+          </p>
+        )}
+        <p>
+          <span className="font-medium text-[#3D5266]">Empfänger: </span>
+          {task.recipient_type === "doctor_only"
+            ? "Arzt"
+            : task.recipient_type === "specific_person"
+              ? "Zugewiesene Person"
+              : "Praxis-Team"}
+        </p>
       </div>
     </Link>
   );

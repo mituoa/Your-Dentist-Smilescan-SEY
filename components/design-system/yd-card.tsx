@@ -10,13 +10,24 @@ type YdCardProps = {
   style?: CSSProperties;
   lift?: boolean;
   glow?: boolean;
+  ambient?: boolean;
+  hoverPreview?: ReactNode;
 };
 
-export function YdCard({ children, className, style, lift = false, glow = false }: YdCardProps) {
+export function YdCard({
+  children,
+  className,
+  style,
+  lift = false,
+  glow = false,
+  ambient = true,
+  hoverPreview,
+}: YdCardProps) {
   return (
     <div
       className={cn(
         "relative overflow-hidden",
+        ambient && "yd-ambient-card",
         lift && "yd-hover-lift",
         className
       )}
@@ -41,7 +52,14 @@ export function YdCard({ children, className, style, lift = false, glow = false 
         style={{ background: YD.accent.glowSoft }}
         aria-hidden
       />
-      <div className="relative">{children}</div>
+      <div className="relative flex min-h-0 flex-col">
+        {children}
+        {hoverPreview ? (
+          <div className="yd-ambient-preview border-t border-[rgba(180,198,218,0.35)] pt-3">
+            {hoverPreview}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

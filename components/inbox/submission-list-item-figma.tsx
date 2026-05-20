@@ -101,7 +101,7 @@ export function SubmissionListItemFigma({
     <Link
       href={href}
       aria-current={isActive ? "page" : undefined}
-      className={`block min-w-0 max-w-full touch-manipulation break-words transition-colors duration-150 ease-out mb-1.5 md:mb-1 ${
+      className={`yd-inbox-row-ambient yd-ambient-surface group block min-w-0 max-w-full touch-manipulation break-words mb-1.5 md:mb-1 ${
         isActive
           ? ""
           : isPreviewList
@@ -162,6 +162,25 @@ export function SubmissionListItemFigma({
       <p className="text-[13px]" style={{ color: "#94A3B8", fontWeight: 400, lineHeight: 1.45 }}>
         {isPreviewList ? timeLabel : statusLine}
       </p>
+
+      {!isPreviewList ? (
+        <div className="yd-ambient-preview mt-2 space-y-1 border-t border-[rgba(180,198,218,0.3)] pt-2 text-[11px] leading-snug text-[#5E7389]">
+          {urgencyShort ? (
+            <p>
+              <span className="font-medium text-[#3D5266]">Dringlichkeit: </span>
+              {urgencyShort}
+            </p>
+          ) : null}
+          <p>
+            <span className="font-medium text-[#3D5266]">Status: </span>
+            {isDraft ? "Entwurf" : isUnseen ? "Ungelesen — Aufmerksamkeit" : "Gelesen"}
+          </p>
+          <p>
+            <span className="font-medium text-[#3D5266]">Eingang: </span>
+            {timeLabel}
+          </p>
+        </div>
+      ) : null}
     </Link>
   );
 }

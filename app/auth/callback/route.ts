@@ -1,5 +1,6 @@
 import { createRouteHandlerClient } from "@/lib/supabase/server";
 import { sanitizeAuthNextPath } from "@/lib/auth/sanitize-auth-next";
+import { pathWithWorkspaceEnter } from "@/lib/design/yd-workspace-awakening";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
       const supabase = await createRouteHandlerClient();
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${pathWithWorkspaceEnter(next)}`);
       }
       console.error("[auth/callback] exchangeCodeForSession", error.message);
     }

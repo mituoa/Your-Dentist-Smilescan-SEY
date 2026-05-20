@@ -9,6 +9,7 @@ import { NavItem } from "./nav-item";
 import { JournalNavGroup } from "./journal-nav-group";
 import { SignOutSidebarForm } from "./sign-out-form";
 import { useMobileNavOptional } from "./mobile-nav";
+import type { YdNavAmbientMap } from "@/lib/ambient/nav-preview-types";
 
 export interface SidebarProps {
   role: "doctor" | "team";
@@ -18,6 +19,7 @@ export interface SidebarProps {
   avatarUrl?: string | null;
   displayName?: string | null;
   email?: string;
+  navAmbient?: YdNavAmbientMap;
 }
 
 export const SIDEBAR_MAIN_PAD = "pl-0 md:pl-0" as const;
@@ -30,6 +32,7 @@ export function Sidebar({
   avatarUrl,
   displayName,
   email = "",
+  navAmbient,
 }: SidebarProps) {
   const myTasksUrgent = myTasksOverdueCount > 0;
   const mobileNav = useMobileNavOptional();
@@ -37,7 +40,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] md:my-5 md:h-[calc(100dvh-2.5rem)] md:w-full md:rounded-[44px] md:border"
+      className="yd-awaken-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] md:my-5 md:h-[calc(100dvh-2.5rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,
@@ -91,6 +94,7 @@ export function Sidebar({
             iconName="dashboard"
             label="Atlas"
             description="Dashboard"
+            ambientPreview={navAmbient?.dashboard}
           />
         )}
 
@@ -100,6 +104,7 @@ export function Sidebar({
           label="Tracker"
           description="Einsendungen"
           badge={inboxCount}
+          ambientPreview={navAmbient?.inbox}
         />
 
         <NavItem
@@ -109,6 +114,7 @@ export function Sidebar({
           description="Aufgaben"
           badge={myTasksCount}
           badgeUrgent={myTasksUrgent}
+          ambientPreview={navAmbient?.relay}
         />
 
         {role === "doctor" && (
@@ -119,7 +125,7 @@ export function Sidebar({
               label="Profil"
               description="Benutzer"
             />
-            <JournalNavGroup />
+            <JournalNavGroup ambientPreview={navAmbient?.journal} />
             <NavItem
               href="/settings"
               iconName="settings"

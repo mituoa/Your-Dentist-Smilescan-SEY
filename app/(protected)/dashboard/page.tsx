@@ -2,6 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CalendarCheck, ClipboardList, Users } from "lucide-react";
 
+import {
+  DashboardAmbientCharts,
+  DashboardAmbientHeader,
+  DashboardAmbientKpis,
+  DashboardAmbientLower,
+} from "@/components/dashboard/hc/dashboard-ambient-sections";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
@@ -108,16 +114,18 @@ export default async function DashboardPage() {
       className="relative mx-auto w-full min-w-0 pb-8"
       style={{ maxWidth: YD.space.contentMax }}
     >
-      <DashboardHeader
-        greeting={greeting}
-        displayName={displayName}
-        subtitle={`Ihr Praxisüberblick für heute — ${todayLabel}`}
-        email={user.email || ""}
-        workspaceName={workspaceName}
-        avatarUrl={profileData?.photo_url ?? null}
-        profileDisplayName={profileData?.display_name ?? null}
-        inboxCount={inboxCount}
-      />
+      <DashboardAmbientHeader>
+        <DashboardHeader
+          greeting={greeting}
+          displayName={displayName}
+          subtitle={`Ihr Praxisüberblick für heute — ${todayLabel}`}
+          email={user.email || ""}
+          workspaceName={workspaceName}
+          avatarUrl={profileData?.photo_url ?? null}
+          profileDisplayName={profileData?.display_name ?? null}
+          inboxCount={inboxCount}
+        />
+      </DashboardAmbientHeader>
 
       {dashboardOverviewIncomplete ? (
         <p
@@ -136,6 +144,7 @@ export default async function DashboardPage() {
         </p>
       ) : null}
 
+      <DashboardAmbientKpis>
       <div className="mb-8 grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
         <div className="min-w-0 sm:col-span-1 lg:col-span-4">
         <HcStatCard
@@ -198,7 +207,9 @@ export default async function DashboardPage() {
         />
         </div>
       </div>
+      </DashboardAmbientKpis>
 
+      <DashboardAmbientCharts>
       <div className="mb-8 grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="min-w-0 lg:col-span-8 lg:pr-1">
           <HcAnalyticsBars
@@ -214,7 +225,9 @@ export default async function DashboardPage() {
           />
         </div>
       </div>
+      </DashboardAmbientCharts>
 
+      <DashboardAmbientLower>
       <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="min-w-0 lg:col-span-4">
           <HcMonthCalendar />
@@ -223,6 +236,7 @@ export default async function DashboardPage() {
           <HcRecentTable rows={previewRows} />
         </div>
       </div>
+      </DashboardAmbientLower>
     </div>
   );
 }
