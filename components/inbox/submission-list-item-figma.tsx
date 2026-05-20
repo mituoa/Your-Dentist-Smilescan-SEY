@@ -101,7 +101,7 @@ export function SubmissionListItemFigma({
     <Link
       href={href}
       aria-current={isActive ? "page" : undefined}
-      className={`yd-inbox-row-ambient yd-ambient-surface group block min-w-0 max-w-full touch-manipulation break-words mb-1.5 md:mb-1 ${
+      className={`yd-spatial-surface yd-inbox-row-ambient group block min-w-0 max-w-full touch-manipulation break-words mb-1.5 md:mb-1 ${
         isActive
           ? ""
           : isPreviewList

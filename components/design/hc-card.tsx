@@ -10,7 +10,6 @@ type HcCardProps = {
   glow?: boolean;
   ambient?: boolean;
   tone?: YdCardTone;
-  hoverPreview?: ReactNode;
 };
 
 /** @deprecated Prefer YdCard — HC alias for workspace cards. */
@@ -22,7 +21,6 @@ export function HcCard({
   glow,
   ambient,
   tone,
-  hoverPreview,
 }: HcCardProps) {
   return (
     <YdCard
@@ -32,7 +30,6 @@ export function HcCard({
       glow={glow}
       ambient={ambient}
       tone={tone}
-      hoverPreview={hoverPreview}
     >
       {children}
     </YdCard>

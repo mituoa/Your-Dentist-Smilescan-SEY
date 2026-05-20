@@ -40,7 +40,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="yd-awaken-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] md:my-5 md:h-[calc(100dvh-2.5rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
+      className="yd-awaken-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] md:mt-3 md:mb-4 md:h-[calc(100dvh-1.75rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,

@@ -8,7 +8,10 @@ import {
   type ReactNode,
 } from "react";
 
-import { YD_AWAKEN_SESSION_KEY } from "@/lib/design/yd-workspace-awakening";
+import {
+  YD_AWAKEN_DURATION_MS,
+  YD_AWAKEN_SESSION_KEY,
+} from "@/lib/design/yd-workspace-awakening";
 
 type AwakeningContextValue = {
   isAwakening: boolean;
@@ -25,7 +28,7 @@ type YdWorkspaceAwakeningProps = {
 };
 
 /**
- * Enables one calm staged reveal after login (session flag from YdAwakenBootstrap).
+ * Post-login: workspace materializes in layers (spatial OS, not web transitions).
  */
 export function YdWorkspaceAwakening({ children }: YdWorkspaceAwakeningProps) {
   const [isAwakening, setIsAwakening] = useState(false);
@@ -55,16 +58,24 @@ export function YdWorkspaceAwakening({ children }: YdWorkspaceAwakeningProps) {
     if (!should) return;
 
     setIsAwakening(true);
-    const done = window.setTimeout(() => setIsAwakening(false), 3000);
+    const done = window.setTimeout(() => setIsAwakening(false), YD_AWAKEN_DURATION_MS);
     return () => window.clearTimeout(done);
   }, []);
 
   useEffect(() => {
     const root = document.querySelector(".yd-workspace");
     if (!root) return;
-    if (isAwakening) root.classList.add("yd-awakening-active");
-    else root.classList.remove("yd-awakening-active");
-    return () => root.classList.remove("yd-awakening-active");
+    if (isAwakening) {
+      root.classList.add("yd-awakening-active");
+      document.documentElement.classList.add("yd-os-entering");
+    } else {
+      root.classList.remove("yd-awakening-active");
+      document.documentElement.classList.remove("yd-os-entering");
+    }
+    return () => {
+      root.classList.remove("yd-awakening-active");
+      document.documentElement.classList.remove("yd-os-entering");
+    };
   }, [isAwakening]);
 
   return (

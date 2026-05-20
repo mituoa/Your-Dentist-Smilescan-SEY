@@ -1,25 +1,40 @@
 /**
- * Your Dentist — Motion (premium clinical, calm).
+ * Your Dentist — Spatial OS motion (ambient computing, not web microinteractions).
  */
 export const YD_MOTION = {
   duration: {
-    instant: 120,
-    fast: 200,
-    normal: 320,
-    slow: 480,
-    ambient: 640,
+    /** Barely perceptible state change */
+    breath: 180,
+    /** Spatial hover / lighting */
+    spatial: 720,
+    /** Preview emergence */
+    reveal: 880,
+    /** Layer materialization */
+    materialize: 1100,
+    /** Full workspace awakening */
+    awaken: 4200,
   },
   ease: {
-    soft: "cubic-bezier(0.22, 1, 0.36, 1)",
-    enter: "cubic-bezier(0.16, 1, 0.3, 1)",
-    exit: "cubic-bezier(0.4, 0, 0.2, 1)",
-    glow: "cubic-bezier(0.33, 0, 0.2, 1)",
+    /** Default spatial — soft deceleration */
+    spatial: "cubic-bezier(0.19, 1, 0.32, 1)",
+    /** Illumination / glow */
+    luminous: "cubic-bezier(0.25, 0.9, 0.35, 1)",
+    /** Opacity diffusion */
+    diffuse: "cubic-bezier(0.33, 0, 0.15, 1)",
   },
 } as const;
 
-export function ydTransition(
-  props = "opacity, transform, box-shadow, background-color, border-color",
-  durationMs: number = YD_MOTION.duration.normal
+export function ydSpatialTransition(
+  props = "opacity, box-shadow, filter, background",
+  durationMs: number = YD_MOTION.duration.spatial
 ): string {
-  return `${props} ${durationMs}ms ${YD_MOTION.ease.soft}`;
+  return `${props} ${durationMs}ms ${YD_MOTION.ease.spatial}`;
+}
+
+/** @deprecated Use ydSpatialTransition for cards */
+export function ydTransition(
+  props = "opacity, box-shadow, filter, background",
+  durationMs: number = YD_MOTION.duration.spatial
+): string {
+  return ydSpatialTransition(props, durationMs);
 }

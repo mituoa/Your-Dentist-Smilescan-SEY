@@ -81,7 +81,7 @@ function TaskRow({
   return (
     <Link
       href={`/my-tasks/${task.id}`}
-      className={`yd-inbox-row-ambient yd-ambient-surface group grid grid-cols-1 gap-2 border-b border-[rgba(15,23,42,0.06)] px-3 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[rgba(43,111,232,0.25)] last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:px-4 sm:py-3.5 ${
+      className={`yd-spatial-surface yd-inbox-row-ambient group grid grid-cols-1 gap-2 border-b border-[rgba(15,23,42,0.06)] px-3 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[rgba(43,111,232,0.25)] last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:px-4 sm:py-3.5 ${
         urgency === "overdue" ? "bg-danger/5" : ""
       }`}
     >

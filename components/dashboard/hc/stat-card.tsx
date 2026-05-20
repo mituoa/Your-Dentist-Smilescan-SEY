@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { TrendingUp, type LucideIcon } from "lucide-react";
 
+import { YdFloatingContext } from "@/components/ambient/yd-floating-context";
 import { HcCard } from "@/components/design/hc-card";
 import type { YdCardTone } from "@/components/design-system/yd-card";
 import { YD } from "@/lib/design/yd-design-tokens";
@@ -17,7 +18,8 @@ type StatCardProps = {
   glow?: boolean;
   tone?: YdCardTone;
   hero?: boolean;
-  hoverPreview?: ReactNode;
+  /** Floating OS context layer — does not resize card */
+  floatingPreview?: ReactNode;
 };
 
 export function HcStatCard({
@@ -32,15 +34,14 @@ export function HcStatCard({
   glow,
   tone = "default",
   hero = false,
-  hoverPreview,
+  floatingPreview,
 }: StatCardProps) {
-  return (
+  const card = (
     <HcCard
       lift={lift}
       glow={glow}
       tone={tone}
-      hoverPreview={hoverPreview}
-      className={`flex min-w-0 flex-col ${hero ? "min-h-[204px] p-6 md:min-h-[220px] md:p-7" : "min-h-[176px] p-5 md:min-h-[188px] md:p-6"}`}
+      className={`flex min-w-0 flex-col ${hero ? "min-h-[204px] p-6 md:min-h-[216px] md:p-7" : "min-h-[176px] p-5 md:min-h-[188px] md:p-6"}`}
     >
       <div className={`flex items-start justify-between gap-3 ${hero ? "mb-5" : "mb-4"}`}>
         <span
@@ -98,4 +99,8 @@ export function HcStatCard({
       ) : null}
     </HcCard>
   );
+
+  if (!floatingPreview) return card;
+
+  return <YdFloatingContext preview={floatingPreview}>{card}</YdFloatingContext>;
 }

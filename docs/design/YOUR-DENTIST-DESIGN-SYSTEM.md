@@ -108,18 +108,21 @@ Inspired by: iPadOS · Apple Health · medical device UI
 
 Respect `prefers-reduced-motion` (see `yd-workspace.css`).
 
-## Ambient interactions (YD v0.3)
+## Spatial OS motion (YD v0.4)
 
 | System | Path |
 |--------|------|
-| CSS | `app/yd-ambient.css` |
-| Post-login reveal | `components/ambient/yd-workspace-awakening.tsx`, `yd-awaken-bootstrap.tsx` |
-| Stagger | `components/ambient/yd-awaken-stagger.tsx` |
-| Nav hover intelligence | `yd-nav-ambient-panel.tsx` + `lib/ambient/build-nav-ambient-previews.ts` |
+| Motion tokens | `lib/design/yd-motion.ts` |
+| Spatial CSS | `app/yd-ambient.css` |
+| Entry | `yd-workspace-awakening.tsx`, `yd-awaken-bootstrap.tsx` |
 
-**After login:** URL `?yd_enter=1` → session flag → staged reveal (page → sidebar → canvas → staggered sections). No bounce, no scale gimmicks.
+**Principle:** illumination & materialization — **not** web microinteractions.
 
-**Hover:** Cards use `.yd-ambient-card`; inbox rows reveal metadata inline; sidebar shows contextual preview panel (desktop).
+**After login (~4.4s):** background illuminate → canvas emerge → sidebar materialize → cards stagger (80ms) → charts illuminate → ambient settle.
+
+**Hover:** depth via **light** (glow diffusion, brightness) — **no** translateY lift, **no** scale, **no** accordion previews. Card context uses `.yd-spatial-preview` overlay fade.
+
+**Forbidden:** Framer-style pop, fast hovers, scale on nav icons, max-height accordion tooltips.
 
 ---
 

@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
 import { YD } from "@/lib/design/yd-design-tokens";
-import { ydTransition } from "@/lib/design/yd-motion";
+import { ydSpatialTransition } from "@/lib/design/yd-motion";
 import { cn } from "@/lib/utils";
 
 export type YdCardTone = "default" | "primary" | "quiet";
@@ -14,7 +14,6 @@ type YdCardProps = {
   glow?: boolean;
   ambient?: boolean;
   tone?: YdCardTone;
-  hoverPreview?: ReactNode;
 };
 
 const TONE_STYLES: Record<
@@ -46,7 +45,6 @@ export function YdCard({
   glow = false,
   ambient = true,
   tone = "default",
-  hoverPreview,
 }: YdCardProps) {
   const toneStyle = TONE_STYLES[tone];
 
@@ -54,15 +52,16 @@ export function YdCard({
     <div
       className={cn(
         "relative overflow-hidden",
-        ambient && "yd-ambient-card",
+        ambient && "yd-spatial-surface yd-ambient-card",
         lift && "yd-hover-lift",
+        hoverPreview && "pb-0",
         className
       )}
       style={{
         background: toneStyle.background,
         borderRadius: toneStyle.radius,
         boxShadow: glow ? YD.shadow.glowFocus : toneStyle.boxShadow,
-        transition: ydTransition(),
+        transition: ydSpatialTransition(),
         ...style,
       }}
     >
@@ -75,27 +74,20 @@ export function YdCard({
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-35 blur-2xl"
+        className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-30 blur-2xl"
         style={{ background: YD.accent.glowSoft }}
         aria-hidden
       />
       {tone === "primary" ? (
         <div
-          className="pointer-events-none absolute bottom-0 left-1/2 h-[45%] w-[70%] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
+          className="pointer-events-none absolute bottom-0 left-1/2 h-[45%] w-[70%] -translate-x-1/2 rounded-full opacity-25 blur-3xl"
           style={{
-            background: "radial-gradient(ellipse, rgba(47,128,237,0.15) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse, rgba(47,128,237,0.12) 0%, transparent 70%)",
           }}
           aria-hidden
         />
       ) : null}
-      <div className="relative flex min-h-0 flex-col">
-        {children}
-        {hoverPreview ? (
-          <div className="yd-ambient-preview mt-1 border-t border-[rgba(180,198,218,0.28)] pt-3">
-            {hoverPreview}
-          </div>
-        ) : null}
-      </div>
+      <div className="relative flex min-h-0 flex-col">{children}</div>
     </div>
   );
 }

@@ -9,16 +9,16 @@ export function YdNavAmbientPanel({ preview }: YdNavAmbientPanelProps) {
   return (
     <div className="yd-nav-ambient-panel hidden md:block" role="presentation">
       <p
-        className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]"
-        style={{ color: YD.text.muted }}
+        className="yd-nav-preview-line mb-2.5 text-[10px] font-medium uppercase tracking-[0.1em]"
+        style={{ color: YD.text.faint }}
       >
         {preview.title}
       </p>
-      <ul className="space-y-1.5">
+      <ul className="space-y-2">
         {preview.lines.map((line, i) => (
           <li
             key={`${line.label ?? ""}-${line.value}-${i}`}
-            className="text-[12px] leading-snug"
+            className="yd-nav-preview-line text-[12px] leading-relaxed"
             style={{
               color:
                 line.tone === "urgent"

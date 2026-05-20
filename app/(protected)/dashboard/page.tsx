@@ -26,6 +26,11 @@ import {
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
+import {
+  NewSubmissionFloatingPreview,
+  UnreadCasesFloatingPreview,
+} from "@/components/dashboard/hc/dashboard-floating-preview";
+import { formatDoctorDisplayName } from "@/lib/format-doctor-display-name";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +63,7 @@ export default async function DashboardPage() {
 
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "Team";
+  const doctorDisplayName = formatDoctorDisplayName(displayName);
 
   const [
     newRes,
@@ -84,6 +90,9 @@ export default async function DashboardPage() {
   const openTaskCount = openTasks?.length ?? 0;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
+  const latestPreview = previewRows?.[0] ?? null;
+  const latestUnread =
+    previewRows?.find((r) => !r.seen_at) ?? latestPreview;
   const inboxCount =
     inboxBadgeRes.ok && inboxBadgeRes.count > 0 ? inboxBadgeRes.count : undefined;
 
@@ -120,7 +129,7 @@ export default async function DashboardPage() {
       <DashboardAmbientHeader>
         <DashboardHeader
           greeting={greeting}
-          displayName={displayName}
+          displayName={doctorDisplayName}
           subtitle={`Ruhiger Überblick für ${workspaceName} — ${todayLabel}`}
           email={user.email || ""}
           workspaceName={workspaceName}
@@ -148,8 +157,8 @@ export default async function DashboardPage() {
       ) : null}
 
       <DashboardAmbientKpis>
-        <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
-          <div className="min-w-0 lg:col-span-3 lg:pt-2">
+        <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
+          <div className="min-w-0 lg:col-span-3">
             <HcStatCard
               tone="quiet"
               title="Einsendungen gesamt"
@@ -160,10 +169,10 @@ export default async function DashboardPage() {
                   ? `${newCount} neu in 24 Stunden`
                   : "Aktueller Bestand"
               }
-              hoverPreview={
-                <p className="text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
-                  Gesamtbestand aller Fälle in der Praxis.
-                </p>
+              floatingPreview={
+                newCount !== null && newCount > 0 && latestPreview ? (
+                  <NewSubmissionFloatingPreview row={latestPreview} />
+                ) : undefined
               }
               metricA={{
                 label: "Neu (24h)",
@@ -175,7 +184,7 @@ export default async function DashboardPage() {
               }}
             />
           </div>
-          <div className="min-w-0 lg:col-span-5 lg:-mt-2">
+          <div className="min-w-0 lg:col-span-5">
             <HcStatCard
               tone="primary"
               hero
@@ -190,18 +199,13 @@ export default async function DashboardPage() {
                   : "Priorität für klinische Sichtung"
               }
               footnotePositive={unseenCount === 0}
-              hoverPreview={
-                <div className="space-y-1 text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
-                  <p>Offene Sichtung im Posteingang — ohne CRM-Druck, mit klarer Priorität.</p>
-                  {unseenCount !== null && unseenCount > 0 ? (
-                    <p>
-                      <span className="font-medium" style={{ color: YD.text.secondary }}>
-                        {unseenCount} Fälle
-                      </span>{" "}
-                      warten auf Erstprüfung.
-                    </p>
-                  ) : null}
-                </div>
+              floatingPreview={
+                unseenCount !== null && unseenCount > 0 ? (
+                  <UnreadCasesFloatingPreview
+                    count={unseenCount}
+                    latest={latestUnread}
+                  />
+                ) : undefined
               }
               metricA={{
                 label: "Gelesen",
@@ -213,7 +217,7 @@ export default async function DashboardPage() {
               }}
             />
           </div>
-          <div className="min-w-0 sm:col-span-2 lg:col-span-4 lg:pt-2">
+          <div className="min-w-0 sm:col-span-2 lg:col-span-4">
             <HcStatCard
               tone="quiet"
               title="Offene Aufgaben"
@@ -221,11 +225,6 @@ export default async function DashboardPage() {
               icon={CalendarCheck}
               footnote="Relay · Praxisworkflow"
               footnotePositive={false}
-              hoverPreview={
-                <p className="text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
-                  Koordination im Team — Aufgaben ohne Projektmanagement-Optik.
-                </p>
-              }
               metricA={{
                 label: "Relay",
                 value: openTaskCount,
