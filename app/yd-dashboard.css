@@ -1,0 +1,114 @@
+/**
+ * Your Dentist — Dashboard presentation layer
+ * Scoped under .yd-dashboard for Atlas / Praxisüberblick
+ */
+
+.yd-dashboard {
+  --yd-dash-title: #0c1929;
+  --yd-dash-body: #3d5266;
+  --yd-dash-label: #6b849c;
+  --yd-dash-faint: #8ba3b8;
+}
+
+.yd-dashboard .yd-dash-title {
+  color: var(--yd-dash-title);
+  font-weight: 500;
+  letter-spacing: -0.028em;
+  line-height: 1.14;
+}
+
+.yd-dashboard .yd-dash-subtitle {
+  color: var(--yd-dash-body);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.55;
+}
+
+.yd-dashboard .yd-dash-section {
+  color: var(--yd-dash-title);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.yd-dashboard .yd-dash-label {
+  color: var(--yd-dash-label);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+.yd-dashboard .yd-dash-meta {
+  color: var(--yd-dash-faint);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.45;
+}
+
+.yd-dashboard .yd-dash-kpi {
+  color: var(--yd-dash-title);
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.yd-dashboard .yd-dash-kpi-hero {
+  font-size: 2.125rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-kpi {
+    font-size: 1.875rem;
+  }
+
+  .yd-dashboard .yd-dash-kpi-hero {
+    font-size: 2.375rem;
+  }
+}
+
+.yd-dashboard .yd-dash-kpi-quiet {
+  font-size: 1.625rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: #1a3348;
+}
+
+.yd-dashboard .yd-dash-zone {
+  margin-bottom: 2.75rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-dashboard .yd-dash-zone {
+    margin-bottom: 3.25rem;
+  }
+}
+
+.yd-dashboard .yd-dash-ambient-orb {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+}
+
+.yd-dashboard .yd-dash-ambient-orb--a {
+  top: -8%;
+  right: 4%;
+  width: min(42vw, 420px);
+  height: min(42vw, 420px);
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.14) 0%, transparent 68%);
+}
+
+.yd-dashboard .yd-dash-ambient-orb--b {
+  bottom: 12%;
+  left: -4%;
+  width: min(36vw, 360px);
+  height: min(36vw, 360px);
+  background: radial-gradient(circle, rgba(47, 128, 237, 0.1) 0%, transparent 70%);
+}

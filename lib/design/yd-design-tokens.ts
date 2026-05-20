@@ -21,6 +21,10 @@ export const YD = {
     island: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,252,255,0.88) 100%)",
     card:
       "linear-gradient(165deg, #FFFFFF 0%, #F6FAFE 48%, #EDF4FA 100%)",
+    cardPrimary:
+      "linear-gradient(168deg, #FFFFFF 0%, #F9FCFF 38%, #E8F3FC 100%)",
+    cardQuiet:
+      "linear-gradient(165deg, #F9FBFD 0%, #F0F6FB 52%, #E8F0F8 100%)",
     cardHover:
       "linear-gradient(165deg, #FFFFFF 0%, #F8FBFE 55%, #F0F7FD 100%)",
     elevated:
@@ -76,6 +80,10 @@ export const YD = {
     sidebar:
       "0 14px 48px rgba(15, 35, 58, 0.16), 0 6px 20px rgba(47, 128, 237, 0.1), inset 0 1px 0 rgba(255,255,255,0.65)",
     glowFocus: "0 0 0 1px rgba(255,255,255,0.5), 0 0 28px rgba(47,128,237,0.2)",
+    cardPrimary:
+      "0 4px 6px rgba(15,35,58,0.03), 0 16px 44px rgba(47,128,237,0.12), inset 0 1px 0 rgba(255,255,255,0.95)",
+    cardQuiet:
+      "0 2px 4px rgba(15,35,58,0.03), 0 8px 24px rgba(30,91,189,0.06), inset 0 1px 0 rgba(255,255,255,0.7)",
   },
 
   /* —— Sidebar rail —— */

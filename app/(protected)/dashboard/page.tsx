@@ -111,14 +111,17 @@ export default async function DashboardPage() {
 
   return (
     <div
-      className="relative mx-auto w-full min-w-0 pb-8"
+      className="yd-dashboard relative mx-auto w-full min-w-0 pb-10"
       style={{ maxWidth: YD.space.contentMax }}
     >
+      <div className="yd-dash-ambient-orb yd-dash-ambient-orb--a" aria-hidden />
+      <div className="yd-dash-ambient-orb yd-dash-ambient-orb--b" aria-hidden />
+
       <DashboardAmbientHeader>
         <DashboardHeader
           greeting={greeting}
           displayName={displayName}
-          subtitle={`Ihr Praxisüberblick für heute — ${todayLabel}`}
+          subtitle={`Ruhiger Überblick für ${workspaceName} — ${todayLabel}`}
           email={user.email || ""}
           workspaceName={workspaceName}
           avatarUrl={profileData?.photo_url ?? null}
@@ -129,7 +132,7 @@ export default async function DashboardPage() {
 
       {dashboardOverviewIncomplete ? (
         <p
-          className="mb-6 max-w-2xl text-[12px] leading-snug"
+          className="yd-dash-meta mb-8 max-w-2xl normal-case tracking-normal"
           style={{ color: YD.text.secondary }}
           role="status"
         >
@@ -145,97 +148,124 @@ export default async function DashboardPage() {
       ) : null}
 
       <DashboardAmbientKpis>
-      <div className="mb-8 grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
-        <div className="min-w-0 sm:col-span-1 lg:col-span-4">
-        <HcStatCard
-          title="Einsendungen gesamt"
-          value={totalCount === null ? "—" : totalCount}
-          icon={Users}
-          footnote={
-            newCount !== null && newCount > 0
-              ? `${newCount} neu in den letzten 24 Stunden`
-              : "Aktueller Bestand"
-          }
-          metricA={{
-            label: "Neu (24h)",
-            value: newCount === null ? "—" : newCount,
-          }}
-          metricB={{
-            label: "Ungelesen",
-            value: unseenCount === null ? "—" : unseenCount,
-          }}
-        />
+        <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
+          <div className="min-w-0 lg:col-span-3 lg:pt-2">
+            <HcStatCard
+              tone="quiet"
+              title="Einsendungen gesamt"
+              value={totalCount === null ? "—" : totalCount}
+              icon={Users}
+              footnote={
+                newCount !== null && newCount > 0
+                  ? `${newCount} neu in 24 Stunden`
+                  : "Aktueller Bestand"
+              }
+              hoverPreview={
+                <p className="text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
+                  Gesamtbestand aller Fälle in der Praxis.
+                </p>
+              }
+              metricA={{
+                label: "Neu (24h)",
+                value: newCount === null ? "—" : newCount,
+              }}
+              metricB={{
+                label: "Ungelesen",
+                value: unseenCount === null ? "—" : unseenCount,
+              }}
+            />
+          </div>
+          <div className="min-w-0 lg:col-span-5 lg:-mt-2">
+            <HcStatCard
+              tone="primary"
+              hero
+              lift
+              glow
+              title="Ungelesene Fälle"
+              value={unseenCount === null ? "—" : unseenCount}
+              icon={ClipboardList}
+              footnote={
+                unseenCount === 0
+                  ? "Posteingang ist auf dem aktuellen Stand"
+                  : "Priorität für klinische Sichtung"
+              }
+              footnotePositive={unseenCount === 0}
+              hoverPreview={
+                <div className="space-y-1 text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
+                  <p>Offene Sichtung im Posteingang — ohne CRM-Druck, mit klarer Priorität.</p>
+                  {unseenCount !== null && unseenCount > 0 ? (
+                    <p>
+                      <span className="font-medium" style={{ color: YD.text.secondary }}>
+                        {unseenCount} Fälle
+                      </span>{" "}
+                      warten auf Erstprüfung.
+                    </p>
+                  ) : null}
+                </div>
+              }
+              metricA={{
+                label: "Gelesen",
+                value: seenCount === null ? "—" : seenCount,
+              }}
+              metricB={{
+                label: "Gesamt",
+                value: totalCount === null ? "—" : totalCount,
+              }}
+            />
+          </div>
+          <div className="min-w-0 sm:col-span-2 lg:col-span-4 lg:pt-2">
+            <HcStatCard
+              tone="quiet"
+              title="Offene Aufgaben"
+              value={openTasks === null ? "—" : openTaskCount}
+              icon={CalendarCheck}
+              footnote="Relay · Praxisworkflow"
+              footnotePositive={false}
+              hoverPreview={
+                <p className="text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
+                  Koordination im Team — Aufgaben ohne Projektmanagement-Optik.
+                </p>
+              }
+              metricA={{
+                label: "Relay",
+                value: openTaskCount,
+              }}
+              metricB={{
+                label: "Status",
+                value: openTasks === null ? "—" : "Offen",
+              }}
+            />
+          </div>
         </div>
-        <div className="min-w-0 sm:col-span-1 lg:col-span-4 lg:-mt-1">
-        <HcStatCard
-          title="Ungelesene Fälle"
-          lift
-          glow
-          value={unseenCount === null ? "—" : unseenCount}
-          icon={ClipboardList}
-          footnote={
-            unseenCount === 0
-              ? "Posteingang ist auf dem aktuellen Stand"
-              : "Benötigen Aufmerksamkeit"
-          }
-          footnotePositive={unseenCount === 0}
-          metricA={{
-            label: "Gelesen",
-            value: seenCount === null ? "—" : seenCount,
-          }}
-          metricB={{
-            label: "Gesamt",
-            value: totalCount === null ? "—" : totalCount,
-          }}
-        />
-        </div>
-        <div className="min-w-0 sm:col-span-2 lg:col-span-4">
-        <HcStatCard
-          title="Offene Aufgaben"
-          value={openTasks === null ? "—" : openTaskCount}
-          icon={CalendarCheck}
-          footnote="In Relay"
-          footnotePositive={false}
-          metricA={{
-            label: "Relay",
-            value: openTaskCount,
-          }}
-          metricB={{
-            label: "Status",
-            value: openTasks === null ? "—" : "Offen",
-          }}
-        />
-        </div>
-      </div>
       </DashboardAmbientKpis>
 
       <DashboardAmbientCharts>
-      <div className="mb-8 grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="min-w-0 lg:col-span-8 lg:pr-1">
-          <HcAnalyticsBars
-            counts={weeklyCounts}
-            totalLabel="Letzte 7 Tage — Einsendungen"
-          />
+        <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-7">
+          <div className="min-w-0 lg:col-span-8">
+            <HcAnalyticsBars
+              counts={weeklyCounts}
+              totalLabel="Letzte 7 Tage — Einsendungen"
+            />
+          </div>
+          <div className="min-w-0 lg:col-span-4 lg:pt-3">
+            <HcDistributionArc
+              unseen={unseenCount}
+              seen={seenCount}
+              total={totalCount}
+            />
+          </div>
         </div>
-        <div className="min-w-0 lg:col-span-4 lg:pl-1">
-          <HcDistributionArc
-            unseen={unseenCount}
-            seen={seenCount}
-            total={totalCount}
-          />
-        </div>
-      </div>
       </DashboardAmbientCharts>
 
       <DashboardAmbientLower>
-      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="min-w-0 lg:col-span-4">
-          <HcMonthCalendar />
+        <div className="grid min-w-0 grid-cols-1 gap-7 lg:grid-cols-12 lg:gap-8">
+          <div className="min-w-0 lg:col-span-8 lg:order-1">
+            <HcRecentTable rows={previewRows} />
+          </div>
+          <div className="min-w-0 lg:col-span-4 lg:order-2 lg:pt-4">
+            <HcMonthCalendar />
+          </div>
         </div>
-        <div className="min-w-0 lg:col-span-8">
-          <HcRecentTable rows={previewRows} />
-        </div>
-      </div>
       </DashboardAmbientLower>
     </div>
   );

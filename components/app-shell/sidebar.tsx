@@ -85,7 +85,7 @@ export function Sidebar({
       </div>
 
       <nav
-        className="relative flex min-h-0 flex-1 flex-col items-stretch gap-1 overflow-y-auto overflow-x-hidden px-3 py-2 md:items-center md:gap-3.5 md:px-2 md:py-4"
+        className="relative flex min-h-0 flex-1 flex-col items-stretch gap-1 overflow-y-auto overflow-x-hidden px-3 py-2 md:items-center md:gap-4 md:px-2 md:py-5"
         aria-label="Hauptnavigation"
       >
         {role === "doctor" && (

@@ -13,7 +13,7 @@ export function YdWorkspaceCanvas({ children, className }: YdWorkspaceCanvasProp
   return (
     <div
       className={cn(
-        "yd-awaken-canvas yd-awaken-glow-settle relative w-full min-w-0 overflow-hidden p-4 md:rounded-[48px] md:p-7 lg:p-8",
+        "yd-awaken-canvas yd-awaken-glow-settle relative w-full min-w-0 overflow-hidden p-4 md:rounded-[52px] md:p-8 lg:p-9",
         className
       )}
       style={{

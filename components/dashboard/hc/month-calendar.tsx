@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { HcCard } from "@/components/design/hc-card";
-import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+import { YD } from "@/lib/design/yd-design-tokens";
 
 const WEEKDAYS = ["SO", "MO", "DI", "MI", "DO", "FR", "SA"];
 
@@ -40,70 +40,60 @@ export function HcMonthCalendar() {
     view.getFullYear() === today.getFullYear();
 
   return (
-    <HcCard className="flex min-h-[320px] min-w-0 flex-col p-5 md:p-6">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[15px] font-semibold" style={{ color: HC.text }}>
-          Monatsübersicht
+    <HcCard tone="quiet" className="flex min-h-[300px] min-w-0 flex-col p-6">
+      <div className="mb-5">
+        <p className="yd-dash-section">Monatsübersicht</p>
+        <p className="yd-dash-meta mt-1.5 normal-case tracking-normal">
+          Termine & Einsendungen
         </p>
-        <div className="flex flex-wrap items-center gap-4 text-[11px] font-medium" style={{ color: HC.textMuted }}>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full" style={{ background: HC.primary }} />
-            Einsendung
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full" style={{ background: "#F472B6" }} />
-            Aufgabe
-          </span>
-        </div>
       </div>
 
-      <div className="mb-5 flex items-center justify-between rounded-2xl bg-white/50 px-1 py-1">
+      <div
+        className="mb-5 flex items-center justify-between rounded-[18px] px-1 py-1"
+        style={{ background: "rgba(255,255,255,0.45)" }}
+      >
         <button
           type="button"
           onClick={() => shiftMonth(-1)}
-          className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white"
+          className="flex h-9 w-9 items-center justify-center rounded-full transition duration-300 hover:bg-white/80"
           aria-label="Vorheriger Monat"
         >
-          <ChevronLeft className="h-4 w-4" style={{ color: HC.textSecondary }} />
+          <ChevronLeft className="h-4 w-4" style={{ color: YD.text.muted }} strokeWidth={1.65} />
         </button>
-        <p className="text-[14px] font-semibold capitalize" style={{ color: HC.text }}>
+        <p className="text-[13px] font-medium capitalize tracking-tight" style={{ color: YD.text.primary }}>
           {monthLabel}
         </p>
         <button
           type="button"
           onClick={() => shiftMonth(1)}
-          className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white"
+          className="flex h-9 w-9 items-center justify-center rounded-full transition duration-300 hover:bg-white/80"
           aria-label="Nächster Monat"
         >
-          <ChevronRight className="h-4 w-4" style={{ color: HC.textSecondary }} />
+          <ChevronRight className="h-4 w-4" style={{ color: YD.text.muted }} strokeWidth={1.65} />
         </button>
       </div>
 
-      <div className="grid flex-1 grid-cols-7 gap-y-2 text-center">
+      <div className="grid flex-1 grid-cols-7 gap-y-1.5 text-center">
         {WEEKDAYS.map((d) => (
-          <span
-            key={d}
-            className="py-1 text-[10px] font-semibold tracking-[0.08em]"
-            style={{ color: HC.textMuted }}
-          >
+          <span key={d} className="yd-dash-meta py-1">
             {d}
           </span>
         ))}
         {cells.map((day, i) =>
           day === null ? (
-            <span key={`e-${i}`} className="h-10" />
+            <span key={`e-${i}`} className="h-9" />
           ) : (
             <span
               key={`${day}-${i}`}
-              className="mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-medium transition"
+              className="mx-auto flex h-9 w-9 items-center justify-center rounded-full text-[12px] font-medium transition duration-300"
               style={
                 isToday(day)
                   ? {
-                      backgroundColor: HC.primary,
+                      background: YD.accent.iconGradient,
                       color: "#fff",
-                      boxShadow: "0 4px 12px rgba(30, 58, 138, 0.35)",
+                      boxShadow: "0 4px 14px rgba(47, 128, 237, 0.28)",
                     }
-                  : { color: HC.textSecondary }
+                  : { color: YD.text.muted }
               }
             >
               {day}

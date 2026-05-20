@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import { YdCard } from "@/components/design-system/yd-card";
+import { YdCard, type YdCardTone } from "@/components/design-system/yd-card";
 
 type HcCardProps = {
   children: ReactNode;
@@ -9,6 +9,7 @@ type HcCardProps = {
   lift?: boolean;
   glow?: boolean;
   ambient?: boolean;
+  tone?: YdCardTone;
   hoverPreview?: ReactNode;
 };
 
@@ -20,6 +21,7 @@ export function HcCard({
   lift,
   glow,
   ambient,
+  tone,
   hoverPreview,
 }: HcCardProps) {
   return (
@@ -29,6 +31,7 @@ export function HcCard({
       lift={lift}
       glow={glow}
       ambient={ambient}
+      tone={tone}
       hoverPreview={hoverPreview}
     >
       {children}

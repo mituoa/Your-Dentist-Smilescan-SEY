@@ -1,7 +1,9 @@
-import { MoreVertical, TrendingUp, type LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
+import { TrendingUp, type LucideIcon } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
-import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+import type { YdCardTone } from "@/components/design-system/yd-card";
+import { YD } from "@/lib/design/yd-design-tokens";
 
 type StatCardProps = {
   title: string;
@@ -13,6 +15,9 @@ type StatCardProps = {
   metricB?: { label: string; value: string | number };
   lift?: boolean;
   glow?: boolean;
+  tone?: YdCardTone;
+  hero?: boolean;
+  hoverPreview?: ReactNode;
 };
 
 export function HcStatCard({
@@ -25,76 +30,68 @@ export function HcStatCard({
   metricB,
   lift,
   glow,
+  tone = "default",
+  hero = false,
+  hoverPreview,
 }: StatCardProps) {
   return (
     <HcCard
       lift={lift}
       glow={glow}
-      className="flex min-h-[188px] min-w-0 flex-col p-5 md:min-h-[200px] md:p-[22px]"
+      tone={tone}
+      hoverPreview={hoverPreview}
+      className={`flex min-w-0 flex-col ${hero ? "min-h-[204px] p-6 md:min-h-[220px] md:p-7" : "min-h-[176px] p-5 md:min-h-[188px] md:p-6"}`}
     >
-      <div className="mb-4 flex items-start justify-between gap-2">
+      <div className={`flex items-start justify-between gap-3 ${hero ? "mb-5" : "mb-4"}`}>
         <span
-          className="flex h-10 w-10 items-center justify-center rounded-full shadow-sm"
+          className={`flex items-center justify-center rounded-full ${hero ? "h-11 w-11" : "h-10 w-10"}`}
           style={{
-            background: HC.primaryIconGradient,
-            boxShadow: "0 4px 12px rgba(30, 91, 189, 0.25)",
+            background: YD.accent.iconGradient,
+            boxShadow: hero
+              ? "0 6px 18px rgba(47, 128, 237, 0.28)"
+              : "0 4px 14px rgba(30, 91, 189, 0.2)",
           }}
         >
-          <Icon className="h-[18px] w-[18px] text-white" strokeWidth={1.75} />
+          <Icon
+            className={`text-white ${hero ? "h-[19px] w-[19px]" : "h-[17px] w-[17px]"}`}
+            strokeWidth={1.65}
+          />
         </span>
-        <button
-          type="button"
-          className="flex h-7 w-7 items-center justify-center text-[#C5D0DC]"
-          aria-hidden
-          tabIndex={-1}
-        >
-          <MoreVertical className="h-4 w-4" strokeWidth={1.5} />
-        </button>
       </div>
-      <p className="text-[12px] font-medium" style={{ color: HC.textSecondary }}>
-        {title}
-      </p>
-      <p
-        className="mt-1.5 text-[38px] font-bold leading-none tracking-[-0.04em] md:text-[42px]"
-        style={{ color: HC.text }}
-      >
+      <p className="yd-dash-label">{title}</p>
+      <p className={`mt-2 ${hero ? "yd-dash-kpi-hero" : tone === "quiet" ? "yd-dash-kpi-quiet" : "yd-dash-kpi"}`}>
         {value}
       </p>
       {footnote ? (
         <p
-          className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium"
-          style={{ color: footnotePositive ? HC.trendUp : HC.trendMuted }}
+          className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-medium leading-relaxed"
+          style={{ color: footnotePositive ? YD.trend.up : YD.text.faint }}
         >
           {footnotePositive ? (
-            <TrendingUp className="h-3 w-3 shrink-0" strokeWidth={2.5} />
+            <TrendingUp className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2} />
           ) : null}
           {footnote}
         </p>
       ) : null}
       {metricA || metricB ? (
         <div
-          className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-3.5 text-[11px]"
-          style={{ borderColor: HC.borderSoft }}
+          className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t pt-4 text-[11px] leading-relaxed"
+          style={{ borderColor: "rgba(180, 198, 218, 0.32)" }}
         >
           {metricA ? (
-            <span style={{ color: HC.textMuted }}>
+            <span className="yd-dash-meta">
               {metricA.label}{" "}
-              <strong className="font-semibold" style={{ color: HC.text }}>
+              <span className="font-medium" style={{ color: YD.text.secondary }}>
                 {metricA.value}
-              </strong>
-            </span>
-          ) : null}
-          {metricA && metricB ? (
-            <span className="font-light" style={{ color: "#CBD5E1" }}>
-              |
+              </span>
             </span>
           ) : null}
           {metricB ? (
-            <span style={{ color: HC.textMuted }}>
+            <span className="yd-dash-meta">
               {metricB.label}{" "}
-              <strong className="font-semibold" style={{ color: HC.text }}>
+              <span className="font-medium" style={{ color: YD.text.secondary }}>
                 {metricB.value}
-              </strong>
+              </span>
             </span>
           ) : null}
         </div>

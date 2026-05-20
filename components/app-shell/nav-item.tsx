@@ -99,7 +99,7 @@ export function NavItem({
       >
         <Icon
           className="h-[22px] w-[22px] transition-colors duration-300"
-          strokeWidth={isActive ? 2.25 : 1.65}
+          strokeWidth={isActive ? 2 : 1.5}
           style={{ color: isActive ? "#FFFFFF" : YD.sidebar.iconIdle }}
         />
       </span>
