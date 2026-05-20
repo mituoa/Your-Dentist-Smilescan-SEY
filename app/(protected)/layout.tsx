@@ -2,19 +2,19 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
-import { Sidebar, SIDEBAR_MAIN_PAD } from "@/components/app-shell/sidebar";
+import { Sidebar } from "@/components/app-shell/sidebar";
 import {
-  MobileMenuButton,
   MobileNavProvider,
   MobileSidebarFrame,
 } from "@/components/app-shell/mobile-nav";
-import { TopbarContextActions } from "@/components/app-shell/topbar-context-actions";
-import { UserMenu } from "@/components/app-shell/user-menu";
+import { ProtectedTopbar } from "@/components/app-shell/protected-topbar";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
 import { AssistShell } from "@/components/command-assist/assist-shell";
+import { HcAppCanvas } from "@/components/design/hc-app-canvas";
+import { HC } from "@/lib/design/healthcare-dashboard-tokens";
 
 export default async function ProtectedLayout({
   children,
@@ -89,43 +89,39 @@ export default async function ProtectedLayout({
     <AssistShell>
       <MobileNavProvider>
         <div
-          className="flex min-h-[100dvh] flex-col overflow-x-hidden"
-          style={{ background: "#F7F9FC" }}
+          className="relative flex h-[100dvh] flex-col overflow-hidden"
+          style={{ backgroundColor: HC.pageBg }}
         >
-          <div className="flex min-h-0 flex-1 flex-row">
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: HC.pageAmbient }}
+            aria-hidden
+          />
+          <div className="relative flex min-h-0 flex-1 flex-row overflow-hidden">
             <MobileSidebarFrame>
               <Sidebar
                 role={role}
                 inboxCount={inboxCount}
                 myTasksCount={myTasksCount}
                 myTasksOverdueCount={myTasksOverdueCount}
+                avatarUrl={profileData?.photo_url ?? null}
+                displayName={profileData?.display_name ?? null}
+                email={user.email || ""}
               />
             </MobileSidebarFrame>
 
-            <div
-              className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden ${SIDEBAR_MAIN_PAD}`}
-            >
-              {/* Topbar — immer sichtbar, Inhalt scrollt darunter */}
-              <header className="sticky top-0 z-30 flex shrink-0 flex-col border-b border-[rgba(15,23,42,0.06)] bg-white/95 pt-[env(safe-area-inset-top,0px)] backdrop-blur-md">
-                <div className="flex h-16 w-full items-center gap-2 px-4 md:gap-3 md:px-10">
-                  <MobileMenuButton />
-                  <div className="flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">
-                    <TopbarContextActions />
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              <ProtectedTopbar
+                email={user.email || ""}
+                workspaceName={workspaceName}
+                role={role}
+                initialTheme={theme}
+                avatarUrl={profileData?.photo_url ?? null}
+                displayName={profileData?.display_name ?? null}
+              />
 
-                    <UserMenu
-                      email={user.email || ""}
-                      workspaceName={workspaceName}
-                      role={role}
-                      initialTheme={theme}
-                      avatarUrl={profileData?.photo_url ?? null}
-                      displayName={profileData?.display_name ?? null}
-                    />
-                  </div>
-                </div>
-              </header>
-
-              <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[max(4.25rem,env(safe-area-inset-bottom)+3.25rem)] [-webkit-overflow-scrolling:touch] md:pb-0">
-                {children}
+              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(4.25rem,env(safe-area-inset-bottom)+3.25rem)] md:p-4 md:pb-5">
+                <HcAppCanvas>{children}</HcAppCanvas>
               </main>
             </div>
           </div>

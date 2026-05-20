@@ -144,14 +144,14 @@ export function InboxSearchFigma({
         style={{
           paddingLeft: "36px",
           paddingRight: "12px",
-          borderRadius: "8px",
-          border: "1px solid #E5E7EB",
+          borderRadius: "9999px",
+          border: "1px solid #E2E8F0",
           color: "#0F172A",
           transition: "all 150ms ease",
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = "#2B6FE8";
-          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(43,111,232,0.06)";
+          e.currentTarget.style.borderColor = "#2563EB";
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.1)";
         }}
         onBlur={(e) => {
           e.currentTarget.style.borderColor = "#E5E7EB";

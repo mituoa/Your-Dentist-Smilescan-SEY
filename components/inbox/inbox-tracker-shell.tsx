@@ -3,6 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { inboxSearchQueryFromParam } from "@/lib/inbox-search-q";
+import { HC } from "@/lib/design/healthcare-dashboard-tokens";
 import { cn } from "@/lib/utils";
 
 type InboxTrackerShellProps = {
@@ -30,7 +31,7 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
   return (
     <div
       className="relative flex h-full min-h-0 flex-1 flex-col overflow-x-hidden md:flex-row"
-      style={{ background: "#F7F9FC" }}
+      style={{ backgroundColor: "transparent" }}
     >
       <div
         className={cn(
@@ -41,14 +42,14 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
               ? "max-md:max-h-[min(46vh,320px)] max-md:flex-none max-md:overflow-y-auto"
               : "max-md:min-h-0 max-md:flex-1 max-md:overflow-y-hidden")
         )}
-        style={{ background: "#F8FAFC" }}
+        style={{ backgroundColor: HC.surface }}
       >
         {list}
       </div>
 
       <section
         className={cn(
-          "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overscroll-y-contain bg-[#F7F9FC] md:min-h-0",
+          "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overscroll-y-contain md:min-h-0",
           isInboxIndex
             ? showMobileIndexDetail
               ? "flex max-md:min-h-0 max-md:flex-1 max-md:overflow-y-auto"

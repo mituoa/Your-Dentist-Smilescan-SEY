@@ -7,7 +7,9 @@ import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { InboxSearchFigma } from "@/components/inbox/inbox-search-figma";
 import { SubmissionListItemFigma } from "@/components/inbox/submission-list-item-figma";
+import { HcCard } from "@/components/design/hc-card";
 import { InboxTrackerShell } from "@/components/inbox/inbox-tracker-shell";
+import { HC } from "@/lib/design/healthcare-dashboard-tokens";
 
 interface InboxLayoutProps {
   children: React.ReactNode;
@@ -121,25 +123,17 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   const openCaseCount = submissions.filter((s) => !s.is_draft).length;
 
   const list = (
-    <>
-      <div className="px-[clamp(16px,3vw,40px)] pt-5 pb-0 sm:pt-6 md:pt-10 md:pb-0">
-        <div
-          style={{ marginBottom: "20px" }}
-          className="flex min-w-0 items-start justify-between gap-4"
-        >
+    <HcCard className="flex h-full min-h-0 flex-col overflow-hidden md:mx-2 md:my-2">
+      <div className="shrink-0 px-5 pb-4 pt-5 md:px-6 md:pt-6">
+        <div className="mb-5 flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0 flex-1 pr-2">
             <h1
-              className="text-[17px]"
-              style={{
-                color: "#0F172A",
-                fontWeight: 600,
-                letterSpacing: "-0.015em",
-                marginBottom: "6px",
-              }}
+              className="text-[22px] font-bold tracking-tight md:text-[26px]"
+              style={{ color: HC.text, marginBottom: "4px" }}
             >
               Einsendungen
             </h1>
-            <p className="text-[14px]" style={{ color: "#2B6FE8", fontWeight: 600 }}>
+            <p className="text-[14px] font-medium" style={{ color: HC.primary }}>
               {listFailed
                 ? "Abruf derzeit nicht möglich"
                 : `${openCaseCount} offene ${openCaseCount === 1 ? "Fall" : "Fälle"}`}
@@ -150,10 +144,10 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
               href="/create-case?from=inbox"
               title="Neuer Fall"
               aria-label="Neuer Fall anlegen"
-              className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-[10px] text-white transition hover:opacity-95 md:h-10 md:w-10"
+              className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-xl text-white transition hover:opacity-95 md:h-10 md:w-10"
               style={{
-                background: "#2B6FE8",
-                boxShadow: "0 2px 4px rgba(43,111,232,0.2)",
+                background: HC.primary,
+                boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
               }}
             >
               <Plus className="h-5 w-5" strokeWidth={2} />
@@ -168,7 +162,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
         </Suspense>
       </div>
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-[clamp(12px,2vw,16px)] pb-[max(20px,env(safe-area-inset-bottom))] pt-5 [-webkit-overflow-scrolling:touch] md:px-[clamp(12px,2vw,20px)] md:pb-6 md:pt-6">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 [-webkit-overflow-scrolling:touch] md:px-5 md:pb-6 md:pt-2">
         {listFailed ? (
           <div
             className="mx-1 rounded-xl px-4 py-5 text-[14px] leading-relaxed"
@@ -210,7 +204,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
           ))
         )}
       </div>
-    </>
+    </HcCard>
   );
 
   return (

@@ -77,6 +77,113 @@ export type ActivityEvent = {
 
 export type RecentActivityResult = { ok: true; events: ActivityEvent[] } | { ok: false };
 
+export type SubmissionPreviewRow = {
+  id: string;
+  patient_name: string | null;
+  patient_email: string | null;
+  created_at: string;
+  seen_at: string | null;
+};
+
+export type SubmissionPreviewResult =
+  | { ok: true; rows: SubmissionPreviewRow[] }
+  | { ok: false };
+
+export type WeeklyCountsResult =
+  | { ok: true; counts: number[] }
+  | { ok: false };
+
+export const getTotalSubmissionsCount = cache(
+  async (workspaceId: string): Promise<SafeCount> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("total_submissions_count_invalid_workspace_id", null);
+      return { ok: false };
+    }
+    const supabase = await createClient();
+    const { count, error } = await supabase
+      .from("submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspaceId);
+
+    if (error) {
+      logDashboardDbFailure("total_submissions_count_failed", error);
+      return { ok: false };
+    }
+    return { ok: true, count: count || 0 };
+  }
+);
+
+export const getWeeklySubmissionCounts = cache(
+  async (workspaceId: string): Promise<WeeklyCountsResult> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("weekly_submissions_invalid_workspace_id", null);
+      return { ok: false };
+    }
+    const supabase = await createClient();
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - 6);
+
+    const { data, error } = await supabase
+      .from("submissions")
+      .select("created_at")
+      .eq("workspace_id", workspaceId)
+      .gte("created_at", start.toISOString());
+
+    if (error) {
+      logDashboardDbFailure("weekly_submissions_failed", error);
+      return { ok: false };
+    }
+
+    const counts = Array.from({ length: 7 }, () => 0);
+    const dayIndex = (d: Date) => {
+      const diff = Math.floor(
+        (d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)
+      );
+      return Math.min(6, Math.max(0, diff));
+    };
+
+    (data || []).forEach((row) => {
+      const created = new Date(row.created_at as string);
+      counts[dayIndex(created)] += 1;
+    });
+
+    return { ok: true, counts };
+  }
+);
+
+export const getRecentSubmissionsPreview = cache(
+  async (workspaceId: string): Promise<SubmissionPreviewResult> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("submission_preview_invalid_workspace_id", null);
+      return { ok: false };
+    }
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("submissions")
+      .select("id, patient_name, patient_email, created_at, seen_at")
+      .eq("workspace_id", workspaceId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      logDashboardDbFailure("submission_preview_failed", error);
+      return { ok: false };
+    }
+
+    return {
+      ok: true,
+      rows: (data || []).map((row) => ({
+        id: row.id as string,
+        patient_name: (row.patient_name as string | null) ?? null,
+        patient_email: (row.patient_email as string | null) ?? null,
+        created_at: row.created_at as string,
+        seen_at: (row.seen_at as string | null) ?? null,
+      })),
+    };
+  }
+);
+
 export const getNewSubmissionsCount = cache(
   async (workspaceId: string): Promise<SafeCount> => {
     if (!isDashboardWorkspaceId(workspaceId)) {

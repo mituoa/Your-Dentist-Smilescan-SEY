@@ -48,11 +48,40 @@ function SignOutSidebarSubmit() {
   );
 }
 
-/** Ruhiger Logout unten in der Sidebar (Desktop & Mobile-Drawer). */
-export function SignOutSidebarForm() {
+function SignOutRailSubmit() {
+  const { pending } = useFormStatus();
   return (
-    <form action={AUTH_SIGN_OUT_PATH} method="post" className="w-full">
-      <SignOutSidebarSubmit />
+    <button
+      type="submit"
+      disabled={pending}
+      aria-busy={pending}
+      aria-label={pending ? "Abmeldung läuft" : "Abmelden"}
+      title="Abmelden"
+      className="flex h-10 w-10 items-center justify-center rounded-full text-[#8BA3C7] transition hover:bg-white/50 hover:text-[#5C6F82] disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? (
+        <AuthLoadingSpinner className="h-4 w-4 shrink-0 animate-spin motion-reduce:animate-none" />
+      ) : (
+        <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
+      )}
+    </button>
+  );
+}
+
+type SignOutSidebarFormProps = {
+  /** Schmale Icon-Rail (Referenz-Dashboard). */
+  variant?: "drawer" | "rail";
+};
+
+/** Ruhiger Logout unten in der Sidebar (Desktop & Mobile-Drawer). */
+export function SignOutSidebarForm({ variant = "drawer" }: SignOutSidebarFormProps) {
+  return (
+    <form
+      action={AUTH_SIGN_OUT_PATH}
+      method="post"
+      className={variant === "rail" ? "flex justify-center" : "w-full"}
+    >
+      {variant === "rail" ? <SignOutRailSubmit /> : <SignOutSidebarSubmit />}
     </form>
   );
 }

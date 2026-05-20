@@ -2,18 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  BookOpen,
+  CalendarDays,
+  Home,
+  MessageSquare,
+  Settings,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+
+import { HC } from "@/lib/design/healthcare-dashboard-tokens";
 import { cn } from "@/lib/utils";
 import { NavBadge } from "./nav-badge";
 
-const BRAND_MARK_BY_ROUTE: Record<string, { src: string; alt: string }> = {
-  "/dashboard": { src: "/brand/atlas/logo-mark.svg", alt: "Atlas mark" },
-  "/inbox": { src: "/brand/your-dentist/logo-mark.svg", alt: "Inbox" },
-  "/create-case": { src: "/brand/your-dentist/logo-mark.svg", alt: "Neuer Fall" },
-  "/my-tasks": { src: "/brand/relay/logo-mark.svg", alt: "Relay mark" },
-  "/relay": { src: "/brand/relay/logo-mark.svg", alt: "Relay mark" },
-  "/profile/editor": { src: "/brand/portrait/logo-mark.svg", alt: "Portrait mark" },
-  "/journal": { src: "/brand/journals/logo-mark.svg", alt: "Journals mark" },
-  "/settings": { src: "/brand/your-dentist/logo-mark.svg", alt: "Settings mark" },
+const ICON_BY_NAME: Record<string, LucideIcon> = {
+  dashboard: Home,
+  inbox: Users,
+  tasks: CalendarDays,
+  relay: CalendarDays,
+  profile: MessageSquare,
+  settings: Settings,
+  journal: BookOpen,
 };
 
 interface NavItemProps {
@@ -27,12 +37,14 @@ interface NavItemProps {
 
 export function NavItem({
   href,
+  iconName,
   label,
   description,
   badge,
   badgeUrgent,
 }: NavItemProps) {
   const pathname = usePathname();
+  const Icon = ICON_BY_NAME[iconName] ?? Home;
   const isRelayNav = href === "/relay";
   const isSettingsNav = href === "/settings";
   const isCreateCaseNav = href === "/create-case";
@@ -46,56 +58,67 @@ export function NavItem({
       : isCreateCaseNav
         ? pathname === "/create-case"
         : pathname === href || pathname.startsWith(href + "/");
-  const brandMark = BRAND_MARK_BY_ROUTE[href] || {
-    src: "/brand/your-dentist/logo-mark.svg",
-    alt: `${label} mark`,
-  };
 
   return (
     <Link
       href={href}
+      title={label}
       className={cn(
-        "relative flex min-h-[48px] touch-manipulation items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(15,23,42,0.1)] md:min-h-[44px] md:py-2",
-        isActive ? "bg-[rgba(47,128,237,0.06)]" : "hover:bg-[rgba(15,23,42,0.03)]"
+        "group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.3)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:px-0 md:py-0",
+        !isActive && "hover:bg-white/35 md:hover:bg-transparent"
       )}
     >
       {isActive ? (
-        <span className="absolute left-1 top-1/2 h-[22px] w-0.5 -translate-y-1/2 rounded-full bg-[#2F80ED]/90" />
+        <span
+          className="pointer-events-none absolute left-1/2 top-[calc(100%-4px)] hidden h-10 w-9 -translate-x-1/2 md:block"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(47,128,237,0.35) 0%, rgba(47,128,237,0.08) 55%, transparent 100%)",
+            borderRadius: "50%",
+            filter: "blur(6px)",
+          }}
+          aria-hidden
+        />
       ) : null}
-      <img
-        src={brandMark.src}
-        alt={brandMark.alt}
+
+      <span
         className={cn(
-          "h-7 w-7 shrink-0 object-contain opacity-75",
-          isActive && "opacity-100"
+          "relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-200 md:h-11 md:w-11",
+          isActive && "shadow-[0_6px_18px_rgba(30,91,189,0.4)]"
         )}
-      />
-      <div className="min-w-0 flex-1 text-left">
+        style={
+          isActive
+            ? {
+                background: "linear-gradient(180deg, #3B8EEF 0%, #2F80ED 50%, #1E5BB8 100%)",
+              }
+            : { backgroundColor: "transparent" }
+        }
+      >
+        <Icon
+          className="h-[22px] w-[22px]"
+          strokeWidth={isActive ? 2.25 : 1.65}
+          style={{ color: isActive ? "#FFFFFF" : HC.iconMuted }}
+        />
+      </span>
+
+      <div className="min-w-0 flex-1 text-left md:hidden">
         <span
           className={cn(
-            "block truncate text-[14px] font-medium leading-snug tracking-[-0.01em]",
+            "block truncate text-[14px] font-medium leading-snug",
             isActive ? "text-[#0F172A]" : "text-[#475569]"
           )}
         >
           {label}
         </span>
         {description ? (
-          <span
-            className={cn(
-              "mt-0.5 block line-clamp-2 text-left text-[12px] font-normal leading-snug",
-              isActive ? "text-[#64748B]" : "text-[#94A3B8]"
-            )}
-          >
-            {description}
-          </span>
+          <span className="mt-0.5 block text-[12px] text-[#94A3B8]">{description}</span>
         ) : null}
       </div>
-      {badge !== undefined && badge > 0 && (
-        <NavBadge
-          count={badge}
-          variant={badgeUrgent ? "urgent" : "default"}
-        />
-      )}
+      {badge !== undefined && badge > 0 ? (
+        <span className="z-[2] md:absolute md:-right-1 md:-top-0.5">
+          <NavBadge count={badge} variant={badgeUrgent ? "urgent" : "default"} />
+        </span>
+      ) : null}
     </Link>
   );
 }

@@ -92,7 +92,7 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
           "fixed inset-y-0 left-0 z-30 flex max-md:h-[100dvh] max-md:w-[min(88vw,320px)] max-md:max-w-[320px] max-md:pt-[env(safe-area-inset-top,0px)] max-md:pb-[env(safe-area-inset-bottom,0px)]",
           "max-md:transition-transform max-md:duration-200 max-md:ease-[cubic-bezier(0.22,1,0.36,1)]",
           open ? "max-md:translate-x-0" : "max-md:-translate-x-full",
-          "md:static md:z-20 md:h-auto md:min-h-[100dvh] md:w-auto md:max-w-none md:translate-x-0"
+          "md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2 md:translate-x-0"
         )}
       >
         {children}
