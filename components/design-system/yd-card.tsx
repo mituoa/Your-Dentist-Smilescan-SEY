@@ -54,7 +54,6 @@ export function YdCard({
         "relative overflow-hidden",
         ambient && "yd-spatial-surface yd-ambient-card",
         lift && "yd-hover-lift",
-        hoverPreview && "pb-0",
         className
       )}
       style={{
