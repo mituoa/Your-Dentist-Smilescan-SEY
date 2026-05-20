@@ -3,7 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { inboxSearchQueryFromParam } from "@/lib/inbox-search-q";
-import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 
 type InboxTrackerShellProps = {
@@ -35,14 +35,17 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
     >
       <div
         className={cn(
-          "flex min-h-0 min-w-0 shrink-0 flex-col overflow-x-hidden border-b border-[rgba(15,23,42,0.06)] md:max-h-none md:w-[min(40%,420px)] md:max-w-[440px] md:min-w-[300px] md:flex-none md:overflow-y-hidden md:border-b-0 md:border-r md:border-[rgba(15,23,42,0.06)]",
+          "flex min-h-0 min-w-0 shrink-0 flex-col overflow-x-hidden border-b md:max-h-none md:w-[min(40%,420px)] md:max-w-[440px] md:min-w-[300px] md:flex-none md:overflow-y-hidden md:border-b-0 md:border-r",
           !isInboxIndex && "max-md:hidden",
           isInboxIndex &&
             (showMobileIndexDetail
               ? "max-md:max-h-[min(46vh,320px)] max-md:flex-none max-md:overflow-y-auto"
               : "max-md:min-h-0 max-md:flex-1 max-md:overflow-y-hidden")
         )}
-        style={{ backgroundColor: HC.surface }}
+        style={{
+          backgroundColor: "transparent",
+          borderColor: YD.border.soft,
+        }}
       >
         {list}
       </div>

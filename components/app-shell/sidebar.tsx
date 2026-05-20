@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
 import { HcSidebarProfile } from "./hc-sidebar-profile";
-import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+import { YD } from "@/lib/design/yd-design-tokens";
 import { NavItem } from "./nav-item";
 import { JournalNavGroup } from "./journal-nav-group";
 import { SignOutSidebarForm } from "./sign-out-form";
@@ -37,40 +37,40 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:w-full md:rounded-[40px] md:border md:backdrop-blur-[18px]"
+      className="relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] md:my-5 md:h-[calc(100dvh-2.5rem)] md:w-full md:rounded-[44px] md:border"
       style={{
-        backgroundColor: HC.sidebarGlass,
-        borderColor: HC.sidebarBorder,
-        boxShadow: HC.sidebarShadow,
+        backgroundColor: YD.sidebar.glass,
+        borderColor: YD.border.whisper,
+        boxShadow: YD.shadow.sidebar,
       }}
     >
-      {/* Verlauf nach unten — Referenz-Flow */}
       <div
         className="pointer-events-none absolute inset-0 rounded-[inherit]"
-        style={{ background: HC.sidebarFlowGradient }}
+        style={{ background: YD.sidebar.flow }}
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute bottom-0 left-1/2 top-[18%] w-[72%] -translate-x-1/2 rounded-full opacity-70 blur-2xl"
+        className="yd-glow-pulse pointer-events-none absolute bottom-2 left-1/2 h-[55%] w-[85%] -translate-x-1/2 rounded-full blur-3xl"
         style={{
           background:
-            "radial-gradient(ellipse at center bottom, rgba(30,91,189,0.22) 0%, transparent 68%)",
+            "radial-gradient(ellipse at center bottom, rgba(47,128,237,0.28) 0%, transparent 72%)",
         }}
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-y-6 right-0 w-[2px] rounded-full opacity-50"
-        style={{ background: HC.sidebarEdgeGlow }}
+        className="pointer-events-none absolute inset-y-8 right-0 w-[2px] rounded-full"
+        style={{ background: YD.sidebar.edgeGlow }}
         aria-hidden
       />
 
-      <div className="relative shrink-0 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 md:px-0 md:pt-6 md:pb-2">
+      <div className="relative shrink-0 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 md:px-0 md:pt-7 md:pb-3">
         <div className="flex items-center justify-between gap-2 md:hidden">
           <BrandMark compact />
           <button
             type="button"
             onClick={() => mobileNav?.close()}
-            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-lg text-[#64748B] transition hover:bg-white/50"
+            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-lg transition hover:bg-white/50"
+            style={{ color: YD.text.muted }}
             aria-label="Menü schließen"
           >
             <X className="h-5 w-5" strokeWidth={2} />
@@ -82,7 +82,7 @@ export function Sidebar({
       </div>
 
       <nav
-        className="relative flex min-h-0 flex-1 flex-col items-stretch gap-1 overflow-y-auto overflow-x-hidden px-3 py-2 md:items-center md:gap-3 md:px-1.5 md:py-3"
+        className="relative flex min-h-0 flex-1 flex-col items-stretch gap-1 overflow-y-auto overflow-x-hidden px-3 py-2 md:items-center md:gap-3.5 md:px-2 md:py-4"
         aria-label="Hauptnavigation"
       >
         {role === "doctor" && (
@@ -130,7 +130,7 @@ export function Sidebar({
         )}
       </nav>
 
-      <div className="relative hidden shrink-0 flex-col items-center gap-3 px-2 pb-6 pt-1 md:flex">
+      <div className="relative hidden shrink-0 flex-col items-center gap-3.5 px-2 pb-7 pt-2 md:flex">
         <SignOutSidebarForm variant="rail" />
         <HcSidebarProfile
           avatarUrl={avatarUrl}

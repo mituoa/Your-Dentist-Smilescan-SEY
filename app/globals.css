@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
+@import "./yd-workspace.css";
 
 @layer base {
   :root {

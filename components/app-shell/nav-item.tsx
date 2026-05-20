@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 import { NavBadge } from "./nav-badge";
 
@@ -88,16 +88,14 @@ export function NavItem({
         )}
         style={
           isActive
-            ? {
-                background: "linear-gradient(180deg, #3B8EEF 0%, #2F80ED 50%, #1E5BB8 100%)",
-              }
+            ? { background: YD.accent.navActive }
             : { backgroundColor: "transparent" }
         }
       >
         <Icon
           className="h-[22px] w-[22px]"
           strokeWidth={isActive ? 2.25 : 1.65}
-          style={{ color: isActive ? "#FFFFFF" : HC.iconMuted }}
+          style={{ color: isActive ? "#FFFFFF" : YD.sidebar.iconIdle }}
         />
       </span>
 

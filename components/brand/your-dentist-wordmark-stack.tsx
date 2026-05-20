@@ -20,7 +20,7 @@ export function YourDentistWordmarkStack({
     >
       <span
         className={cn(
-          "font-serif font-medium tracking-tight text-[#1E293B]",
+          "yd-font-brand font-medium tracking-tight text-[#0C1929]",
           compact ? "text-[10px]" : "text-[11px]"
         )}
       >

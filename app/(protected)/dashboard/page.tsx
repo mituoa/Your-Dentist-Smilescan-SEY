@@ -20,7 +20,7 @@ import {
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
-import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
 
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
   return (
     <div
       className="relative mx-auto w-full min-w-0 pb-8"
-      style={{ maxWidth: HC.contentMaxWidth }}
+      style={{ maxWidth: YD.space.contentMax }}
     >
       <DashboardHeader
         greeting={greeting}
@@ -122,21 +122,22 @@ export default async function DashboardPage() {
       {dashboardOverviewIncomplete ? (
         <p
           className="mb-6 max-w-2xl text-[12px] leading-snug"
-          style={{ color: HC.textSecondary }}
+          style={{ color: YD.text.secondary }}
           role="status"
         >
           Einige Kennzahlen konnten nicht geladen werden —{" "}
-          <Link href="/inbox" className="font-medium hover:underline" style={{ color: HC.primary }}>
+          <Link href="/inbox" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
             Posteingang
           </Link>
           {" · "}
-          <Link href="/my-tasks" className="font-medium hover:underline" style={{ color: HC.primary }}>
+          <Link href="/my-tasks" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
             Aufgaben
           </Link>
         </p>
       ) : null}
 
-      <div className="mb-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5">
+      <div className="mb-8 grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
+        <div className="min-w-0 sm:col-span-1 lg:col-span-4">
         <HcStatCard
           title="Einsendungen gesamt"
           value={totalCount === null ? "—" : totalCount}
@@ -155,8 +156,12 @@ export default async function DashboardPage() {
             value: unseenCount === null ? "—" : unseenCount,
           }}
         />
+        </div>
+        <div className="min-w-0 sm:col-span-1 lg:col-span-4 lg:-mt-1">
         <HcStatCard
           title="Ungelesene Fälle"
+          lift
+          glow
           value={unseenCount === null ? "—" : unseenCount}
           icon={ClipboardList}
           footnote={
@@ -174,6 +179,8 @@ export default async function DashboardPage() {
             value: totalCount === null ? "—" : totalCount,
           }}
         />
+        </div>
+        <div className="min-w-0 sm:col-span-2 lg:col-span-4">
         <HcStatCard
           title="Offene Aufgaben"
           value={openTasks === null ? "—" : openTaskCount}
@@ -189,16 +196,17 @@ export default async function DashboardPage() {
             value: openTasks === null ? "—" : "Offen",
           }}
         />
+        </div>
       </div>
 
-      <div className="mb-6 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
-        <div className="min-w-0 lg:col-span-7">
+      <div className="mb-8 grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="min-w-0 lg:col-span-8 lg:pr-1">
           <HcAnalyticsBars
             counts={weeklyCounts}
             totalLabel="Letzte 7 Tage — Einsendungen"
           />
         </div>
-        <div className="min-w-0 lg:col-span-5">
+        <div className="min-w-0 lg:col-span-4 lg:pl-1">
           <HcDistributionArc
             unseen={unseenCount}
             seen={seenCount}
@@ -207,11 +215,11 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
-        <div className="min-w-0 lg:col-span-5">
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="min-w-0 lg:col-span-4">
           <HcMonthCalendar />
         </div>
-        <div className="min-w-0 lg:col-span-7">
+        <div className="min-w-0 lg:col-span-8">
           <HcRecentTable rows={previewRows} />
         </div>
       </div>

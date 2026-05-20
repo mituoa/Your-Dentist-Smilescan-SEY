@@ -14,7 +14,7 @@ import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
 import { AssistShell } from "@/components/command-assist/assist-shell";
 import { HcAppCanvas } from "@/components/design/hc-app-canvas";
-import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+import { YD } from "@/lib/design/yd-design-tokens";
 
 export default async function ProtectedLayout({
   children,
@@ -89,14 +89,9 @@ export default async function ProtectedLayout({
     <AssistShell>
       <MobileNavProvider>
         <div
-          className="relative flex h-[100dvh] flex-col overflow-hidden"
-          style={{ backgroundColor: HC.pageBg }}
+          className="yd-workspace relative flex h-[100dvh] flex-col overflow-hidden"
+          style={{ background: YD.atmosphere.pageGradient }}
         >
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{ background: HC.pageAmbient }}
-            aria-hidden
-          />
           <div className="relative flex min-h-0 flex-1 flex-row overflow-hidden">
             <MobileSidebarFrame>
               <Sidebar
@@ -120,7 +115,7 @@ export default async function ProtectedLayout({
                 displayName={profileData?.display_name ?? null}
               />
 
-              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(4.25rem,env(safe-area-inset-bottom)+3.25rem)] md:p-4 md:pb-5">
+              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(4.25rem,env(safe-area-inset-bottom)+3.25rem)] md:p-5 md:pb-6">
                 <HcAppCanvas>{children}</HcAppCanvas>
               </main>
             </div>

@@ -11,6 +11,8 @@ type StatCardProps = {
   footnotePositive?: boolean;
   metricA?: { label: string; value: string | number };
   metricB?: { label: string; value: string | number };
+  lift?: boolean;
+  glow?: boolean;
 };
 
 export function HcStatCard({
@@ -21,9 +23,15 @@ export function HcStatCard({
   footnotePositive = true,
   metricA,
   metricB,
+  lift,
+  glow,
 }: StatCardProps) {
   return (
-    <HcCard className="flex min-h-[188px] min-w-0 flex-col p-5 md:min-h-[200px] md:p-[22px]">
+    <HcCard
+      lift={lift}
+      glow={glow}
+      className="flex min-h-[188px] min-w-0 flex-col p-5 md:min-h-[200px] md:p-[22px]"
+    >
       <div className="mb-4 flex items-start justify-between gap-2">
         <span
           className="flex h-10 w-10 items-center justify-center rounded-full shadow-sm"
