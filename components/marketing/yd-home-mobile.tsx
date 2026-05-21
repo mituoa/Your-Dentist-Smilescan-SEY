@@ -30,14 +30,17 @@ export function YdHomeMobile({
       <main className="yd-entry-mobile-main">
         <YdPublicSiteHero showSignIn={false} />
 
-        <div className="yd-entry-mobile-actions yd-clinical-hero-cta-stack px-4">
-          <Link href="/register" className="yd-clinical-cta-primary">
+        <div className="yd-entry-mobile-actions yd-clinical-hero-cta-stack yd-public-site-hero-cta-stack px-4">
+          <Link prefetch href="/register" className="yd-clinical-cta-primary yd-public-site-cta-primary">
             {PUBLIC_SITE_HERO.primaryCta}
           </Link>
-          <a href={`/#${PUBLIC_SITE_SECTIONS.demo}`} className="yd-clinical-cta-secondary">
+          <a
+            href={`/#${PUBLIC_SITE_SECTIONS.demo}`}
+            className="yd-clinical-cta-secondary yd-public-site-cta-secondary"
+          >
             {PUBLIC_SITE_HERO.secondaryCta}
           </a>
-          <p className="yd-clinical-cta-signin">
+          <p className="yd-clinical-cta-signin yd-public-site-cta-signin">
             {PUBLIC_SITE_HERO.signInPrefix}{" "}
             <Link prefetch href="/login">
               {PUBLIC_SITE_HERO.signInLabel}

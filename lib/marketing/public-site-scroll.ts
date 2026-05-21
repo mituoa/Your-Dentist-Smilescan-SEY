@@ -1,0 +1,78 @@
+/** Desktop breakpoint — matches .yd-clinical-desktop-only visibility. */
+export const PUBLIC_SITE_DESKTOP_MQ = "(min-width: 900px)";
+
+function isDesktopPublicSite(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(PUBLIC_SITE_DESKTOP_MQ).matches;
+}
+
+function getPublicSiteScope(): ParentNode {
+  if (typeof document === "undefined") return document;
+  const homeSelector = isDesktopPublicSite()
+    ? ".yd-clinical-desktop-only"
+    : ".yd-public-site-mobile-page";
+  const homeScope = document.querySelector(homeSelector);
+  if (homeScope) return homeScope;
+  const clinicalPage = document.querySelector(".yd-clinical-page");
+  if (clinicalPage) return clinicalPage;
+  return document;
+}
+
+function getScrollRoot(): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  const osScroll = document.querySelector<HTMLElement>(".yd-public-os--scroll");
+  if (osScroll) return osScroll;
+  return (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
+}
+
+function getHeaderOffset(): number {
+  if (typeof document === "undefined") return 68;
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--yd-public-header-h");
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : 68;
+}
+
+export function resolvePublicSectionElement(sectionId: string): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  const scope = getPublicSiteScope();
+  if (scope === document) {
+    return document.getElementById(sectionId);
+  }
+  return scope.querySelector<HTMLElement>(`#${CSS.escape(sectionId)}`);
+}
+
+export function scrollToPublicSection(sectionId: string, onDone?: () => void): boolean {
+  const el = resolvePublicSectionElement(sectionId);
+  if (!el) return false;
+
+  const scrollRoot = getScrollRoot();
+  const headerOffset = getHeaderOffset();
+  const extraGap = 12;
+
+  if (
+    !scrollRoot ||
+    scrollRoot === document.documentElement ||
+    scrollRoot === document.body
+  ) {
+    const top = el.getBoundingClientRect().top + window.scrollY - headerOffset - extraGap;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  } else {
+    const rootRect = scrollRoot.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const top =
+      scrollRoot.scrollTop + (elRect.top - rootRect.top) - headerOffset - extraGap;
+    scrollRoot.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+
+  onDone?.();
+  return true;
+}
+
+/** Initial load: /#nutzen etc. */
+export function scrollToPublicSectionFromHash(hash?: string): boolean {
+  const id = (hash ?? (typeof window !== "undefined" ? window.location.hash : ""))
+    .replace(/^#/, "")
+    .trim();
+  if (!id) return false;
+  return scrollToPublicSection(id);
+}

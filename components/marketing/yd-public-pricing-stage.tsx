@@ -10,7 +10,6 @@ type YdPublicPricingStageProps = {
   initialPlan?: string | null;
   inviteToken?: string;
   prefilledEmail?: string;
-  loginHref?: string;
   fieldIndex?: number;
   showHomeLink?: boolean;
 };
@@ -20,7 +19,6 @@ export function YdPublicPricingStage({
   initialPlan,
   inviteToken = "",
   prefilledEmail = "",
-  loginHref = "/login",
   fieldIndex = 6,
   showHomeLink = false,
 }: YdPublicPricingStageProps) {
@@ -46,12 +44,6 @@ export function YdPublicPricingStage({
           </Link>
         </p>
       ) : null}
-      <p className="yd-clinical-whisper">
-        Bereits freigeschaltet?{" "}
-        <Link prefetch href={loginHref} className="yd-clinical-cta-ghost">
-          Anmelden
-        </Link>
-      </p>
       <div
         id={PUBLIC_SITE_SECTIONS.pricing}
         className="yd-clinical-pricing-stage yd-clinical-pricing-stage--access yd-public-site-pricing-anchor"

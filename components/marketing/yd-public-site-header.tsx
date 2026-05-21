@@ -11,21 +11,8 @@ import {
   PUBLIC_SITE_NAV_MOBILE,
   PUBLIC_SITE_SECTIONS,
 } from "@/lib/marketing/public-site-ia";
+import { scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
 import { cn } from "@/lib/utils";
-
-function scrollToSection(sectionId: string, onDone?: () => void) {
-  const el = document.getElementById(sectionId);
-  if (!el) return;
-
-  const headerVar = getComputedStyle(document.documentElement).getPropertyValue(
-    "--yd-public-header-h"
-  );
-  const headerOffset = Number.parseFloat(headerVar) || 68;
-  const top = el.getBoundingClientRect().top + window.scrollY - headerOffset - 12;
-
-  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  onDone?.();
-}
 
 type YdPublicSiteHeaderProps = {
   className?: string;
@@ -59,7 +46,7 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
   }, [menuOpen]);
 
   const go = useCallback((sectionId: string) => {
-    scrollToSection(sectionId, () => setMenuOpen(false));
+    scrollToPublicSection(sectionId, () => setMenuOpen(false));
   }, []);
 
   return (
@@ -98,7 +85,7 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
             >
               Demo buchen
             </button>
-            <Link prefetch href="/login" className="yd-public-site-cta-login">
+            <Link prefetch href="/login" className="yd-public-site-cta-login hidden lg:inline-flex">
               Anmelden
             </Link>
             <button
@@ -158,16 +145,8 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
               className="yd-public-site-mobile-link"
               onClick={() => go(PUBLIC_SITE_SECTIONS.demo)}
             >
-              Demo buchen
+              {PUBLIC_SITE_HERO.secondaryCta}
             </button>
-            <Link
-              prefetch
-              href="/login"
-              className="yd-public-site-mobile-link yd-public-site-mobile-link--login"
-              onClick={() => setMenuOpen(false)}
-            >
-              Anmelden
-            </Link>
           </nav>
         </div>
       </div>

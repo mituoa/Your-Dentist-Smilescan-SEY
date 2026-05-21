@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { REGISTER_PLANS, type RegisterPlanId } from "@/lib/auth/register-plans";
+import { AUTH_ACCESS_COPY } from "@/lib/marketing/auth-access-copy";
 import { cn } from "@/lib/utils";
 
 const PLAN_ORDER: RegisterPlanId[] = ["monthly", "halfyearly", "yearly"];
@@ -86,7 +87,7 @@ export function YdEntryPricingCompact({
         className="yd-clinical-cta-primary yd-entry-pricing-cta"
         onClick={() => router.push(buildRegisterHref(plan, inviteToken, prefilledEmail))}
       >
-        Mit diesem Zugang starten
+        {AUTH_ACCESS_COPY.pricingPlanCtaActive}
       </button>
 
       <p className="yd-entry-pricing-foot">

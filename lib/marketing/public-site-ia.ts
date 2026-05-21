@@ -30,7 +30,7 @@ export const PUBLIC_SITE_HERO = {
   titleLine2: "Geordnet statt verstreut.",
   lead:
     "Patient:innen senden Fotos und Anliegen sicher ein. Ihr Team sichtet, bespricht und organisiert alles direkt im geschützten Praxisbereich.",
-  primaryCta: "Praxisbereich starten",
+  primaryCta: "Praxis registrieren",
   secondaryCta: "Live-Einblick ansehen",
   signInPrefix: "Bereits registriert?",
   signInLabel: "Anmelden",
@@ -127,8 +127,8 @@ export const PUBLIC_SITE_EINFUEHRUNG = {
 
 export const PUBLIC_SITE_PRICING = {
   eyebrow: "Praxiszugang",
-  title: "Zugangsmodell",
-  lead: "Wählen Sie den Abrechnungsrhythmus. Alle Modelle öffnen denselben geschützten Praxisbereich.",
+  title: "Zugang für Ihre Praxis anfordern",
+  lead: "Wählen Sie den Abrechnungsrhythmus. Nach Prüfung öffnet sich Ihr geschützter Praxisbereich.",
 } as const;
 
 export const PUBLIC_SITE_DEMO = {
@@ -147,7 +147,6 @@ export const PUBLIC_SITE_FOOTER = {
   links: [
     { label: "Datenschutz", href: "/datenschutz" },
     { label: "Impressum", href: "/impressum" },
-    { label: "Anmelden", href: "/login" },
     { label: "Demo buchen", href: `/#${PUBLIC_SITE_SECTIONS.demo}` },
   ],
 } as const;

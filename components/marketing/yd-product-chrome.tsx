@@ -20,7 +20,7 @@ type YdProductChromeProps = {
 export function YdProductChrome({
   loginHref = "/login",
   setupHref = "/#pricing",
-  setupLabel = "Praxisbereich starten",
+  setupLabel = "Praxis registrieren",
   showSetupInHeader = true,
   variant = "marketing",
 }: YdProductChromeProps) {

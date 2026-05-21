@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { REGISTER_PLANS, type RegisterPlanId } from "@/lib/auth/register-plans";
+import { AUTH_ACCESS_COPY } from "@/lib/marketing/auth-access-copy";
 import { cn } from "@/lib/utils";
 
 const PLAN_ORDER: RegisterPlanId[] = ["monthly", "halfyearly", "yearly"];
@@ -129,8 +130,8 @@ export function YdRegisterPricing({
                 >
                   {access
                     ? active
-                      ? "Mit diesem Zugang starten"
-                      : "Zugang wählen"
+                      ? AUTH_ACCESS_COPY.pricingPlanCtaActive
+                      : AUTH_ACCESS_COPY.pricingPlanCtaSelect
                     : active
                       ? "Mit diesem Plan registrieren"
                       : "Plan wählen"}

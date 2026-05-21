@@ -5,24 +5,18 @@ import Link from "next/link";
 
 import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
-import { clearReturnToPricingFlag, markReturnToPricingFlag } from "@/lib/login-pricing-return";
+import {
+  AUTH_ACCESS_COPY,
+  buildPricingEntryHref,
+} from "@/lib/marketing/auth-access-copy";
 
 type LoginRegisterCtaProps = {
   inviteToken?: string;
   prefilledEmail?: string;
 };
 
-function buildHomePricingHref(inviteToken: string, prefilledEmail: string) {
-  const params = new URLSearchParams();
-  if (inviteToken) params.set("invite", inviteToken);
-  if (prefilledEmail) params.set("email", prefilledEmail);
-  const q = params.toString();
-  return q ? `/?${q}#pricing` : "/#pricing";
-}
-
 /**
- * Login → Registrierung: Desktop zur Startseiten-Preissektion;
- * Mobile ein ruhiges Sheet im Entry-Stil (kein zweites Desktop-Pricing).
+ * Login → Zugang: Desktop /pricing; Mobile ruhiges Sheet mit Rhythmuswahl.
  */
 export function LoginRegisterCta({
   inviteToken = "",
@@ -31,8 +25,8 @@ export function LoginRegisterCta({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const homePricingHref = useMemo(
-    () => buildHomePricingHref(inviteToken, prefilledEmail),
+  const pricingHref = useMemo(
+    () => buildPricingEntryHref(inviteToken, prefilledEmail),
     [inviteToken, prefilledEmail]
   );
 
@@ -68,17 +62,13 @@ export function LoginRegisterCta({
 
   if (!isMobile) {
     return (
-      <p className="yd-auth-register yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "5" }}>
-        Noch keine Praxis?{" "}
-        <Link
-          href={homePricingHref}
-          onClick={() => {
-            clearReturnToPricingFlag();
-            markReturnToPricingFlag();
-          }}
-          className="yd-os-link"
-        >
-          Praxis einrichten
+      <p
+        className="yd-auth-register yd-auth-register--subtle yd-auth-awaken-field"
+        style={{ ["--yd-auth-field-i" as string]: "5" }}
+      >
+        {AUTH_ACCESS_COPY.loginRegisterLead}{" "}
+        <Link prefetch href={pricingHref} className="yd-auth-access-link">
+          {AUTH_ACCESS_COPY.loginRegisterLink}
         </Link>
       </p>
     );
@@ -86,17 +76,17 @@ export function LoginRegisterCta({
 
   return (
     <>
-      <p className="yd-auth-register yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "5" }}>
-        Noch keine Praxis?{" "}
+      <p
+        className="yd-auth-register yd-auth-register--subtle yd-auth-awaken-field"
+        style={{ ["--yd-auth-field-i" as string]: "5" }}
+      >
+        {AUTH_ACCESS_COPY.loginRegisterLead}{" "}
         <button
           type="button"
-          className="yd-os-link yd-login-register-trigger"
-          onClick={() => {
-            markReturnToPricingFlag();
-            setSheetOpen(true);
-          }}
+          className="yd-auth-access-link yd-login-register-trigger"
+          onClick={() => setSheetOpen(true)}
         >
-          Praxis einrichten
+          {AUTH_ACCESS_COPY.loginRegisterLink}
         </button>
       </p>
 
@@ -117,10 +107,10 @@ export function LoginRegisterCta({
             <div className="yd-login-pricing-sheet-handle" aria-hidden />
             <div className="yd-login-pricing-sheet-head">
               <h2 id="yd-login-pricing-sheet-title" className="yd-public-entry-title text-[1.125rem]">
-                Praxiszugang
+                {AUTH_ACCESS_COPY.pricingPageTitle}
               </h2>
               <p className="yd-public-entry-lead mt-1 text-[0.875rem]">
-                Abrechnungsrhythmus wählen — danach startet die Registrierung in Ruhe.
+                {AUTH_ACCESS_COPY.pricingPageLead}
               </p>
             </div>
             <YdEntryPricingCompact

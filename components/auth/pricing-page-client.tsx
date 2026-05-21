@@ -6,6 +6,8 @@ import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compac
 import { YdPublicPricingStage } from "@/components/marketing/yd-public-pricing-stage";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
+import { AUTH_ACCESS_COPY } from "@/lib/marketing/auth-access-copy";
+import { scrollToPublicSectionFromHash } from "@/lib/marketing/public-site-scroll";
 
 type PricingPageClientProps = {
   initialPlan?: string | null;
@@ -23,15 +25,8 @@ export function PricingPageClient({
   const selectedPlan = coerceRegisterPlan(initialPlan) as RegisterPlanId;
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const hash = window.location.hash.replace("#", "");
-    const id = hash === "pricing" ? "plans" : hash;
-    if (!id) return;
-    const el = document.getElementById(id);
-    if (!el) return;
-    requestAnimationFrame(() => {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    if (!window.location.hash) return;
+    requestAnimationFrame(() => scrollToPublicSectionFromHash());
   }, []);
 
   return (
@@ -42,7 +37,6 @@ export function PricingPageClient({
           initialPlan={initialPlan}
           inviteToken={inviteToken}
           prefilledEmail={prefilledEmail}
-          loginHref={loginHref}
           showHomeLink
           fieldIndex={1}
         />
@@ -50,11 +44,8 @@ export function PricingPageClient({
       <div className="yd-entry-pricing-mobile-page yd-clinical-mobile-only">
         <YdProductChrome variant="entry" />
         <div className="yd-entry-pricing-mobile-inner">
-          <h1 className="yd-public-entry-title">Praxis einrichten</h1>
-          <p className="yd-public-entry-lead">
-            Rhythmus wählen und Registrierung starten — nach Prüfung öffnet sich Ihr geschützter
-            Bereich.
-          </p>
+          <h1 className="yd-public-entry-title">{AUTH_ACCESS_COPY.pricingPageTitle}</h1>
+          <p className="yd-public-entry-lead">{AUTH_ACCESS_COPY.pricingPageLead}</p>
           <YdEntryPricingCompact
             initialPlan={selectedPlan}
             inviteToken={inviteToken}

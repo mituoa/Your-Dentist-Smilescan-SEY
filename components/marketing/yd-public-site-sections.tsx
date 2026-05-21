@@ -59,15 +59,18 @@ export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
                 <li key={line}>{line}</li>
               ))}
             </ul>
-            <div className="yd-clinical-hero-cta-stack">
-              <Link href={`/#${PUBLIC_SITE_SECTIONS.pricing}`} className="yd-clinical-cta-primary">
+            <div className="yd-clinical-hero-cta-stack yd-public-site-hero-cta-stack">
+              <Link prefetch href="/register" className="yd-clinical-cta-primary yd-public-site-cta-primary">
                 {PUBLIC_SITE_HERO.primaryCta}
               </Link>
-              <a href={`/#${PUBLIC_SITE_SECTIONS.demo}`} className="yd-clinical-cta-secondary">
+              <a
+                href={`/#${PUBLIC_SITE_SECTIONS.demo}`}
+                className="yd-clinical-cta-secondary yd-public-site-cta-secondary"
+              >
                 {PUBLIC_SITE_HERO.secondaryCta}
               </a>
               {showSignIn ? (
-                <p className="yd-clinical-cta-signin">
+                <p className="yd-clinical-cta-signin yd-public-site-cta-signin">
                   {PUBLIC_SITE_HERO.signInPrefix}{" "}
                   <Link prefetch href="/login">
                     {PUBLIC_SITE_HERO.signInLabel}

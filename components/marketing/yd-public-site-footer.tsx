@@ -20,7 +20,7 @@ export function YdPublicSiteFooter() {
               <Link
                 key={link.href}
                 href={link.href}
-                prefetch={link.href === "/login"}
+                prefetch={!link.href.startsWith("/#")}
                 className="yd-public-site-footer-link"
               >
                 {link.label}
