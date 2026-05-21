@@ -53,7 +53,7 @@ export function YdHomeMobile({
           />
         </div>
 
-        <YdPublicSiteNutzen />
+        <YdPublicSiteNutzen compact />
 
         <YdPublicSiteDemo />
       </main>

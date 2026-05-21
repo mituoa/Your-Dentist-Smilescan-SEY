@@ -28,7 +28,7 @@ export function YdPracticeWorld() {
           <div className="yd-practice-world-stage-head">
             <div className="min-w-0 flex-1">
               <span className="yd-practice-world-label">Tracker · Einsendung</span>
-              <p className="yd-practice-world-stage-title">M. K. — Schmerz Unterkiefer</p>
+              <p className="yd-practice-world-stage-title">S. M. — Schmerz Unterkiefer</p>
             </div>
             <span className="yd-practice-world-pill">Zu sichten</span>
           </div>

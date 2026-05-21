@@ -26,6 +26,8 @@ type YdRegisterPricingProps = {
   /** compact = calmer, lower height (entry + desktop pricing stage) */
   /** access = Praxiszugang (no discount badges, infrastructure tone) */
   variant?: "full" | "compact" | "access";
+  /** Inside YdPublicPricingStage — no duplicate intro, no outer section id. */
+  embedded?: boolean;
 };
 
 function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledEmail: string, step?: string) {
@@ -44,40 +46,46 @@ export function YdRegisterPricing({
   prefilledEmail = "",
   sectionId = "pricing",
   variant = "full",
+  embedded = false,
 }: YdRegisterPricingProps) {
   const router = useRouter();
   const compact = variant === "compact";
   const access = variant === "access";
+  const Wrapper = embedded ? "div" : "section";
 
   return (
-    <section
-      id={sectionId}
+    <Wrapper
+      {...(!embedded ? { id: sectionId } : {})}
       className={cn(
-        "yd-register-pricing yd-auth-awaken-field scroll-mt-6",
+        "yd-register-pricing yd-auth-awaken-field",
+        !embedded && "scroll-mt-6",
         compact && "yd-register-pricing--compact",
-        access && "yd-register-pricing--access"
+        access && "yd-register-pricing--access",
+        embedded && "yd-register-pricing--embedded"
       )}
-      aria-labelledby="yd-register-pricing-title"
+      {...(!embedded ? { "aria-labelledby": "yd-register-pricing-title" } : {})}
     >
-      <div className="yd-register-pricing-intro">
-        <p className="yd-register-pricing-eyebrow">
-          {access ? "Zugangsmodell" : "Praxislizenz"}
-        </p>
-        <h2 id="yd-register-pricing-title" className="yd-register-pricing-title">
-          {access
-            ? "Abrechnungsrhythmus"
-            : compact
-              ? "Rhythmus wählen"
-              : "Abrechnungsrhythmus für Ihren Praxisbereich"}
-        </h2>
-        <p className="yd-register-pricing-subtitle">
-          {access
-            ? "Derselbe geschützte Praxisbereich — Monatlich, halbjährlich oder jährlich. Fokus auf planbare Infrastruktur, nicht auf Tarifvergleich."
-            : compact
-              ? "Derselbe geschützte Praxisbereich — nur der Abrechnungsrhythmus unterscheidet sich."
-              : "Alle Optionen öffnen denselben geschützten Praxisbereich — ruhig, vollständig, ohne versteckte Stufen. Nur der Abrechnungsrhythmus unterscheidet sich."}
-        </p>
-      </div>
+      {!embedded ? (
+        <div className="yd-register-pricing-intro">
+          <p className="yd-register-pricing-eyebrow">
+            {access ? "Zugangsmodell" : "Praxislizenz"}
+          </p>
+          <h2 id="yd-register-pricing-title" className="yd-register-pricing-title">
+            {access
+              ? "Abrechnungsrhythmus"
+              : compact
+                ? "Rhythmus wählen"
+                : "Abrechnungsrhythmus für Ihren Praxisbereich"}
+          </h2>
+          <p className="yd-register-pricing-subtitle">
+            {access
+              ? "Derselbe geschützte Praxisbereich — Monatlich, halbjährlich oder jährlich. Fokus auf planbare Infrastruktur, nicht auf Tarifvergleich."
+              : compact
+                ? "Derselbe geschützte Praxisbereich — nur der Abrechnungsrhythmus unterscheidet sich."
+                : "Alle Optionen öffnen denselben geschützten Praxisbereich — ruhig, vollständig, ohne versteckte Stufen. Nur der Abrechnungsrhythmus unterscheidet sich."}
+          </p>
+        </div>
+      ) : null}
 
       <div className="yd-register-pricing-grid" role="list">
         {PLAN_ORDER.map((id) => {
@@ -157,6 +165,6 @@ export function YdRegisterPricing({
           Kontakt aufnehmen
         </Link>
       </p>
-    </section>
+    </Wrapper>
   );
 }

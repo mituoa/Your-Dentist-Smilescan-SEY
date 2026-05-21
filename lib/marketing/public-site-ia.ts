@@ -6,6 +6,7 @@ export const PUBLIC_SITE_SECTIONS = {
   nutzen: "nutzen",
   fuerWen: "fuer-wen",
   einfuehrung: "einfuehrung",
+  /** Scroll target: pricing cards island (desktop) / compact block (mobile). */
   pricing: "pricing",
   demo: "demo",
 } as const;

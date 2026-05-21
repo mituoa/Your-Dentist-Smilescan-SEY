@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import {
   Bell,
   Inbox,
@@ -84,11 +85,22 @@ export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
   );
 }
 
-export function YdPublicSiteNutzen() {
+type YdPublicSiteNutzenProps = {
+  compact?: boolean;
+};
+
+export function YdPublicSiteNutzen({ compact = false }: YdPublicSiteNutzenProps) {
+  const cards = compact
+    ? PUBLIC_SITE_NUTZEN.cards.slice(0, 2)
+    : PUBLIC_SITE_NUTZEN.cards;
+
   return (
     <section
       id={PUBLIC_SITE_SECTIONS.nutzen}
-      className="yd-public-site-section yd-public-site-section--nutzen yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      className={cn(
+        "yd-public-site-section yd-public-site-section--nutzen yd-public-os-awaken-field yd-public-site-scroll-anchor",
+        compact && "yd-public-site-section--nutzen-compact"
+      )}
       style={{ ["--yd-public-field-i" as string]: "2" }}
       aria-labelledby="yd-public-nutzen-title"
     >
@@ -100,7 +112,7 @@ export function YdPublicSiteNutzen() {
         <p className="yd-public-site-section-lead">{PUBLIC_SITE_NUTZEN.lead}</p>
       </header>
       <ul className="yd-public-site-card-grid yd-public-site-card-grid--2">
-        {PUBLIC_SITE_NUTZEN.cards.map((card) => {
+        {cards.map((card) => {
           const Icon = NUTZEN_ICONS[card.id as keyof typeof NUTZEN_ICONS];
           return (
             <li key={card.id} className="yd-public-site-card">
@@ -122,7 +134,7 @@ export function YdPublicSiteFuerWen() {
   return (
     <section
       id={PUBLIC_SITE_SECTIONS.fuerWen}
-      className="yd-public-site-section yd-public-site-section--audience yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      className="yd-public-site-section yd-public-site-section--audience yd-public-os-awaken-field yd-public-site-scroll-anchor"
       style={{ ["--yd-public-field-i" as string]: "3" }}
       aria-labelledby="yd-public-fuer-wen-title"
     >
@@ -154,7 +166,7 @@ export function YdPublicSiteEinfuehrung() {
   return (
     <section
       id={PUBLIC_SITE_SECTIONS.einfuehrung}
-      className="yd-public-site-section yd-public-site-section--intro yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      className="yd-public-site-section yd-public-site-section--intro yd-public-os-awaken-field yd-public-site-scroll-anchor"
       style={{ ["--yd-public-field-i" as string]: "4" }}
       aria-labelledby="yd-public-einfuehrung-title"
     >
@@ -189,7 +201,7 @@ export function YdPublicSiteDemo() {
   return (
     <section
       id={PUBLIC_SITE_SECTIONS.demo}
-      className="yd-public-site-section yd-public-site-section--demo yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      className="yd-public-site-section yd-public-site-section--demo yd-public-os-awaken-field yd-public-site-scroll-anchor"
       style={{ ["--yd-public-field-i" as string]: "6" }}
       aria-labelledby="yd-public-demo-title"
     >

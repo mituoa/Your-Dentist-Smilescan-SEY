@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { YdRegisterPricing } from "@/components/auth/yd-register-pricing";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
-import { PUBLIC_SITE_PRICING } from "@/lib/marketing/public-site-ia";
+import { PUBLIC_SITE_PRICING, PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
 
 type YdPublicPricingStageProps = {
   initialPlan?: string | null;
@@ -28,8 +28,7 @@ export function YdPublicPricingStage({
 
   return (
     <section
-      id="pricing"
-      className="yd-clinical-pricing-act yd-clinical-access-act yd-public-site-section yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      className="yd-clinical-pricing-act yd-clinical-access-act yd-public-site-section yd-public-os-awaken-field"
       style={{ ["--yd-public-field-i" as string]: String(fieldIndex) }}
       aria-labelledby="yd-clinical-access-title"
     >
@@ -53,13 +52,16 @@ export function YdPublicPricingStage({
           Anmelden
         </Link>
       </p>
-      <div className="yd-clinical-pricing-stage yd-clinical-pricing-stage--access">
+      <div
+        id={PUBLIC_SITE_SECTIONS.pricing}
+        className="yd-clinical-pricing-stage yd-clinical-pricing-stage--access yd-public-site-pricing-anchor"
+      >
         <YdRegisterPricing
           selectedPlan={selectedPlan}
           inviteToken={inviteToken}
           prefilledEmail={prefilledEmail}
-          sectionId="plans"
           variant="access"
+          embedded
         />
       </div>
     </section>

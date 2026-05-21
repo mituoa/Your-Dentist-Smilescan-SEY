@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import {
+  PUBLIC_SITE_HERO,
   PUBLIC_SITE_NAV,
   PUBLIC_SITE_NAV_MOBILE,
   PUBLIC_SITE_SECTIONS,
@@ -15,7 +16,14 @@ import { cn } from "@/lib/utils";
 function scrollToSection(sectionId: string, onDone?: () => void) {
   const el = document.getElementById(sectionId);
   if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const headerVar = getComputedStyle(document.documentElement).getPropertyValue(
+    "--yd-public-header-h"
+  );
+  const headerOffset = Number.parseFloat(headerVar) || 68;
+  const top = el.getBoundingClientRect().top + window.scrollY - headerOffset - 12;
+
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   onDone?.();
 }
 
@@ -85,7 +93,7 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
           <div className="yd-public-site-header-actions">
             <button
               type="button"
-              className="yd-public-site-cta-ghost hidden sm:inline-flex"
+              className="yd-public-site-cta-ghost hidden lg:inline-flex"
               onClick={() => go(PUBLIC_SITE_SECTIONS.demo)}
             >
               Demo buchen
@@ -138,6 +146,13 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
                 {item.label}
               </button>
             ))}
+            <Link
+              href="/register"
+              className="yd-public-site-mobile-link"
+              onClick={() => setMenuOpen(false)}
+            >
+              {PUBLIC_SITE_HERO.primaryCta}
+            </Link>
             <button
               type="button"
               className="yd-public-site-mobile-link"
@@ -145,6 +160,14 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
             >
               Demo buchen
             </button>
+            <Link
+              prefetch
+              href="/login"
+              className="yd-public-site-mobile-link yd-public-site-mobile-link--login"
+              onClick={() => setMenuOpen(false)}
+            >
+              Anmelden
+            </Link>
           </nav>
         </div>
       </div>
