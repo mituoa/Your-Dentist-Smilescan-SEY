@@ -3,10 +3,11 @@
 import Link from "next/link";
 
 import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
-import { YdPracticeDemo } from "@/components/marketing/yd-practice-demo";
-import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
-import { PUBLIC_ENTRY_COPY } from "@/lib/marketing/public-entry-copy";
+import { PUBLIC_SITE_HERO, PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
+import { YdPublicSiteFooter } from "@/components/marketing/yd-public-site-footer";
+import { YdPublicSiteHeader } from "@/components/marketing/yd-public-site-header";
+import { YdPublicSiteDemo, YdPublicSiteHero, YdPublicSiteNutzen } from "@/components/marketing/yd-public-site-sections";
 
 type YdHomeMobileProps = {
   initialPlan?: string | null;
@@ -14,6 +15,7 @@ type YdHomeMobileProps = {
   prefilledEmail?: string;
 };
 
+/** Mobile: kompakt — Hero, CTAs, Zugang, Nutzen, Demo, Footer. */
 export function YdHomeMobile({
   initialPlan,
   inviteToken = "",
@@ -22,51 +24,41 @@ export function YdHomeMobile({
   const selectedPlan = coerceRegisterPlan(initialPlan) as RegisterPlanId;
 
   return (
-    <div className="yd-entry-mobile yd-entry-mobile--native yd-clinical-mobile-only">
-      <header className="yd-entry-mobile-header">
-        <Link href="/" className="yd-auth-brand-link" aria-label="Startseite">
-          <YourDentistBrandLockup size="sm" tagline={null} />
-        </Link>
-        <Link prefetch href="/login" className="yd-entry-mobile-login">
-          Anmelden
-        </Link>
-      </header>
+    <div className="yd-entry-mobile yd-entry-mobile--native yd-public-site-mobile-page yd-clinical-mobile-only">
+      <YdPublicSiteHeader />
 
       <main className="yd-entry-mobile-main">
-        <div className="yd-entry-mobile-hero">
-          <p className="yd-clinical-eyebrow">{PUBLIC_ENTRY_COPY.eyebrow}</p>
-          <h1 className="yd-clinical-display yd-clinical-display--hero yd-entry-mobile-title">
-            <span className="yd-clinical-display-line">{PUBLIC_ENTRY_COPY.title}</span>
-            <span className="yd-clinical-display-line yd-clinical-display-line--sans">
-              {PUBLIC_ENTRY_COPY.titleLine2}
-            </span>
-          </h1>
-          <p className="yd-entry-mobile-value">{PUBLIC_ENTRY_COPY.mobileValue}</p>
-        </div>
+        <YdPublicSiteHero showSignIn={false} />
 
-        <div className="yd-entry-mobile-actions yd-clinical-hero-cta-stack">
+        <div className="yd-entry-mobile-actions yd-clinical-hero-cta-stack px-4">
           <Link href="/register" className="yd-clinical-cta-primary">
-            Praxisbereich starten
+            {PUBLIC_SITE_HERO.primaryCta}
           </Link>
-          <a href="#einblick-mobile" className="yd-clinical-cta-secondary">
-            Live-Einblick ansehen
+          <a href={`/#${PUBLIC_SITE_SECTIONS.demo}`} className="yd-clinical-cta-secondary">
+            {PUBLIC_SITE_HERO.secondaryCta}
           </a>
+          <p className="yd-clinical-cta-signin">
+            {PUBLIC_SITE_HERO.signInPrefix}{" "}
+            <Link prefetch href="/login">
+              {PUBLIC_SITE_HERO.signInLabel}
+            </Link>
+          </p>
         </div>
 
-        <YdPracticeDemo compact />
+        <div className="px-3">
+          <YdEntryPricingCompact
+            initialPlan={selectedPlan}
+            inviteToken={inviteToken}
+            prefilledEmail={prefilledEmail}
+          />
+        </div>
 
-        <YdEntryPricingCompact
-          initialPlan={selectedPlan}
-          inviteToken={inviteToken}
-          prefilledEmail={prefilledEmail}
-        />
+        <YdPublicSiteNutzen />
+
+        <YdPublicSiteDemo />
       </main>
 
-      <footer className="yd-entry-mobile-footer">
-        <Link href="/impressum">Impressum</Link>
-        <Link href="/datenschutz">Datenschutz</Link>
-        <Link href="/agb">AGB</Link>
-      </footer>
+      <YdPublicSiteFooter />
     </div>
   );
 }

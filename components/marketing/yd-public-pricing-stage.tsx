@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { YdRegisterPricing } from "@/components/auth/yd-register-pricing";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
+import { PUBLIC_SITE_PRICING } from "@/lib/marketing/public-site-ia";
 
 type YdPublicPricingStageProps = {
   initialPlan?: string | null;
@@ -28,18 +29,17 @@ export function YdPublicPricingStage({
   return (
     <section
       id="pricing"
-      className="yd-clinical-pricing-act yd-clinical-access-act yd-public-os-awaken-field"
+      className="yd-clinical-pricing-act yd-clinical-access-act yd-public-site-section yd-public-os-awaken-field scroll-mt-[5.5rem]"
       style={{ ["--yd-public-field-i" as string]: String(fieldIndex) }}
       aria-labelledby="yd-clinical-access-title"
     >
-      <p className="yd-clinical-eyebrow">Praxiszugang</p>
-      <h2 id="yd-clinical-access-title" className="yd-clinical-act-title">
-        Zugang &amp; Freischaltung
-      </h2>
-      <p className="yd-clinical-body">
-        Ein geschützter Praxisbereich für Eingang, Relay und leise Assistenz — nach Prüfung
-        freigeschaltet. Sie wählen nur den Abrechnungsrhythmus, nicht ein „Software-Paket“.
-      </p>
+      <header className="yd-public-site-section-head">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_PRICING.eyebrow}</p>
+        <h2 id="yd-clinical-access-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          {PUBLIC_SITE_PRICING.title}
+        </h2>
+        <p className="yd-public-site-section-lead">{PUBLIC_SITE_PRICING.lead}</p>
+      </header>
       {showHomeLink ? (
         <p className="yd-clinical-whisper">
           <Link href="/" className="yd-clinical-cta-ghost">

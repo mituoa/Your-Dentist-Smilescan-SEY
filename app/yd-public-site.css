@@ -1,0 +1,472 @@
+/**
+ * Public marketing site IA — header, sections, calm premium surfaces.
+ */
+
+html:has(.yd-public-site-page) {
+  scroll-behavior: smooth;
+}
+
+.yd-public-site-page {
+  --yd-public-header-h: 4.25rem;
+}
+
+/* —— Sticky header —— */
+.yd-public-site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  margin-bottom: 0.5rem;
+  padding: max(0.5rem, env(safe-area-inset-top, 0px)) 0 0.5rem;
+  transition:
+    background 420ms ease,
+    box-shadow 420ms ease,
+    backdrop-filter 420ms ease;
+}
+
+.yd-public-site-header--scrolled {
+  background: rgba(255, 253, 250, 0.72);
+  backdrop-filter: blur(18px) saturate(1.12);
+  -webkit-backdrop-filter: blur(18px) saturate(1.12);
+  box-shadow: 0 8px 32px rgba(47, 128, 237, 0.06);
+}
+
+.yd-public-site-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0.5rem clamp(1rem, 3vw, 1.75rem);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.yd-public-site-header--scrolled .yd-public-site-header-inner {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(180, 198, 218, 0.22);
+}
+
+.yd-public-site-header-brand {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.yd-public-site-header-brand [data-brand="your-dentist"] {
+  max-width: min(100%, 14rem);
+}
+
+.yd-public-site-header-nav {
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.yd-public-site-nav-link {
+  padding: 0.4375rem 0.75rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #3d5266;
+  cursor: pointer;
+  transition: background 280ms ease, color 280ms ease;
+}
+
+.yd-public-site-nav-link:hover {
+  background: rgba(255, 255, 255, 0.65);
+  color: #1a4f9c;
+}
+
+.yd-public-site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.yd-public-site-cta-ghost {
+  align-items: center;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(180, 198, 218, 0.35);
+  background: rgba(255, 255, 255, 0.45);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3d5266;
+  text-decoration: none;
+  transition: background 280ms ease, border-color 280ms ease;
+}
+
+.yd-public-site-cta-ghost:hover {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(47, 128, 237, 0.2);
+  color: #1a4f9c;
+}
+
+.yd-public-site-cta-login {
+  padding: 0.4375rem 0.875rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1a4f9c;
+  text-decoration: none;
+  transition: background 280ms ease;
+}
+
+.yd-public-site-cta-login:hover {
+  background: rgba(47, 128, 237, 0.06);
+}
+
+.yd-public-site-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  background: rgba(255, 255, 255, 0.55);
+  color: #64748b;
+}
+
+/* Mobile drawer */
+.yd-public-site-mobile-drawer {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.yd-public-site-mobile-drawer--open {
+  pointer-events: auto;
+}
+
+.yd-public-site-mobile-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(12, 25, 41, 0.12);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 360ms ease;
+}
+
+.yd-public-site-mobile-drawer--open .yd-public-site-mobile-backdrop {
+  opacity: 1;
+}
+
+.yd-public-site-mobile-panel {
+  position: absolute;
+  top: max(0.75rem, env(safe-area-inset-top));
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  width: min(18rem, 88vw);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(248, 252, 255, 0.94) 100%
+  );
+  box-shadow: 0 24px 64px rgba(15, 35, 58, 0.12);
+  transform: translateX(108%);
+  transition: transform 420ms cubic-bezier(0.25, 1, 0.35, 1);
+}
+
+.yd-public-site-mobile-drawer--open .yd-public-site-mobile-panel {
+  transform: translateX(0);
+}
+
+.yd-public-site-mobile-link {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.875rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #334a5e;
+}
+
+.yd-public-site-mobile-link:active {
+  background: rgba(47, 128, 237, 0.06);
+}
+
+/* —— Sections —— */
+.yd-public-site-section {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 4vw, 2.75rem) clamp(1rem, 3vw, 1.75rem);
+}
+
+.yd-public-site-section-head {
+  max-width: 36rem;
+  margin-bottom: 1.25rem;
+}
+
+.yd-public-site-section-lead {
+  margin-top: 0.625rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #3d5266;
+}
+
+.yd-public-site-card-grid {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.yd-public-site-card-grid--2 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .yd-public-site-card-grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.yd-public-site-card,
+.yd-public-site-audience-card,
+.yd-public-site-step {
+  padding: 1.125rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(180, 198, 218, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 6px 22px rgba(47, 128, 237, 0.05);
+}
+
+.yd-public-site-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  margin-bottom: 0.625rem;
+  border-radius: 10px;
+  background: rgba(47, 128, 237, 0.08);
+  color: #4a6278;
+}
+
+.yd-public-site-card-kicker {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b849c;
+  margin-bottom: 0.25rem;
+}
+
+.yd-public-site-card-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: #0c1929;
+  margin: 0 0 0.375rem;
+}
+
+.yd-public-site-card-body {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #3d5266;
+  margin: 0;
+}
+
+/* Für wen — horizontal calm cards */
+.yd-public-site-audience-grid {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .yd-public-site-audience-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-public-site-audience-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Einführung steps */
+.yd-public-site-steps {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .yd-public-site-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.yd-public-site-step {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+}
+
+.yd-public-site-step-num {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #8ba3b8;
+  padding-top: 0.125rem;
+}
+
+/* Demo panel */
+.yd-public-site-demo-panel {
+  max-width: 40rem;
+  padding: clamp(1.5rem, 3vw, 2rem);
+  border-radius: 20px;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 253, 250, 0.85) 0%,
+    rgba(248, 252, 255, 0.75) 55%,
+    rgba(236, 244, 252, 0.65) 100%
+  );
+  border: 1px solid rgba(180, 198, 218, 0.3);
+  box-shadow: 0 12px 40px rgba(47, 128, 237, 0.07);
+}
+
+.yd-public-site-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.yd-public-site-demo-note {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #6b849c;
+}
+
+/* Footer */
+.yd-public-site-footer {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 3vw, 1.75rem) max(2rem, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-public-site-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .yd-public-site-footer-inner {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.yd-public-site-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.yd-public-site-footer-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+}
+
+.yd-public-site-footer-link:hover {
+  color: #1a4f9c;
+}
+
+/* Mobile landing — native order */
+.yd-public-site-mobile-page .yd-public-site-hero {
+  padding-bottom: 1rem;
+}
+
+.yd-public-site-mobile-page .yd-clinical-hero-world {
+  display: none;
+}
+
+.yd-public-site-mobile-page .yd-clinical-hero-cta-stack {
+  display: none;
+}
+
+.yd-public-site-mobile-page .yd-entry-mobile-main {
+  padding-top: 0;
+}
+
+.yd-public-site-mobile-page .yd-public-site-section {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.yd-public-site-mobile-page .yd-public-site-section--audience,
+.yd-public-site-mobile-page .yd-public-site-section--intro {
+  display: none;
+}
+
+/* Hero — 3-Sekunden-Klarheit, kompakt */
+.yd-public-site-hero-points {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3125rem;
+  max-width: 30rem;
+}
+
+.yd-public-site-hero-points li {
+  position: relative;
+  padding-left: 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #3d5266;
+}
+
+.yd-public-site-hero-points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(47, 128, 237, 0.45);
+  transform: translateY(-50%);
+}
+
+.yd-public-site-mobile-page .yd-public-site-hero-points {
+  display: none;
+}
+
+.yd-entry-pricing-sublabel {
+  margin: 0.25rem 0 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #64748b;
+}

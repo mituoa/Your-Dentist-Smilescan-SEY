@@ -38,9 +38,16 @@ export function YdEntryPricingCompact({
   const active = REGISTER_PLANS[plan];
 
   return (
-    <section className="yd-entry-pricing-compact" aria-labelledby="yd-entry-pricing-title">
+    <section
+      id="pricing"
+      className="yd-entry-pricing-compact scroll-mt-[5.5rem]"
+      aria-labelledby="yd-entry-pricing-title"
+    >
       <p id="yd-entry-pricing-title" className="yd-entry-pricing-label">
-        Zugangsmodell
+        Praxiszugang
+      </p>
+      <p className="yd-entry-pricing-sublabel">
+        Wählen Sie den Abrechnungsrhythmus. Alle Modelle öffnen denselben geschützten Praxisbereich.
       </p>
 
       <div className="yd-entry-pricing-segments" role="tablist" aria-label="Abrechnungsrhythmus">
@@ -79,7 +86,7 @@ export function YdEntryPricingCompact({
         className="yd-clinical-cta-primary yd-entry-pricing-cta"
         onClick={() => router.push(buildRegisterHref(plan, inviteToken, prefilledEmail))}
       >
-        Zugang anfragen
+        Mit diesem Zugang starten
       </button>
 
       <p className="yd-entry-pricing-foot">

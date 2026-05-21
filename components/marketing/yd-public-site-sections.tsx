@@ -1,0 +1,214 @@
+import Link from "next/link";
+import {
+  Bell,
+  Inbox,
+  MessagesSquare,
+  Sparkles,
+  Building2,
+  Users,
+  ClipboardList,
+  Headphones,
+} from "lucide-react";
+
+import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
+import {
+  PUBLIC_SITE_DEMO,
+  PUBLIC_SITE_EINFUEHRUNG,
+  PUBLIC_SITE_FUER_WEN,
+  PUBLIC_SITE_HERO,
+  PUBLIC_SITE_NUTZEN,
+  PUBLIC_SITE_SECTIONS,
+} from "@/lib/marketing/public-site-ia";
+
+const NUTZEN_ICONS = {
+  eingang: Inbox,
+  kommunikation: MessagesSquare,
+  aufgaben: Bell,
+  command: Sparkles,
+} as const;
+
+const FUER_WEN_ICONS = [Building2, Users, ClipboardList, Headphones] as const;
+
+type YdPublicSiteHeroProps = {
+  showSignIn?: boolean;
+};
+
+export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
+  return (
+    <section
+      className="yd-public-site-hero yd-clinical-hero yd-clinical-hero--premium yd-clinical-hero--orchestrated yd-public-os-awaken-field"
+      style={{ ["--yd-public-field-i" as string]: "1" }}
+      aria-labelledby="yd-public-hero-title"
+    >
+      <div className="yd-clinical-hero-lights" aria-hidden />
+      <div className="yd-clinical-hero-vignette" aria-hidden />
+      <div className="yd-clinical-hero-stage">
+        <div className="yd-clinical-hero-grid">
+          <div className="yd-clinical-hero-copy">
+            <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
+            <h1 id="yd-public-hero-title" className="yd-clinical-display yd-clinical-display--hero">
+              <span className="yd-clinical-display-line">{PUBLIC_SITE_HERO.title}</span>
+              <span className="yd-clinical-display-line yd-clinical-display-line--sans">
+                {PUBLIC_SITE_HERO.titleLine2}
+              </span>
+            </h1>
+            <p className="yd-clinical-lead">{PUBLIC_SITE_HERO.lead}</p>
+            <ul className="yd-public-site-hero-points">
+              {PUBLIC_SITE_HERO.bullets.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+            <div className="yd-clinical-hero-cta-stack">
+              <Link href={`/#${PUBLIC_SITE_SECTIONS.pricing}`} className="yd-clinical-cta-primary">
+                {PUBLIC_SITE_HERO.primaryCta}
+              </Link>
+              <a href={`/#${PUBLIC_SITE_SECTIONS.demo}`} className="yd-clinical-cta-secondary">
+                {PUBLIC_SITE_HERO.secondaryCta}
+              </a>
+              {showSignIn ? (
+                <p className="yd-clinical-cta-signin">
+                  {PUBLIC_SITE_HERO.signInPrefix}{" "}
+                  <Link prefetch href="/login">
+                    {PUBLIC_SITE_HERO.signInLabel}
+                  </Link>
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <div className="yd-clinical-hero-world">
+            <YdPracticeWorld />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function YdPublicSiteNutzen() {
+  return (
+    <section
+      id={PUBLIC_SITE_SECTIONS.nutzen}
+      className="yd-public-site-section yd-public-site-section--nutzen yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      style={{ ["--yd-public-field-i" as string]: "2" }}
+      aria-labelledby="yd-public-nutzen-title"
+    >
+      <header className="yd-public-site-section-head">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_NUTZEN.eyebrow}</p>
+        <h2 id="yd-public-nutzen-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          {PUBLIC_SITE_NUTZEN.title}
+        </h2>
+        <p className="yd-public-site-section-lead">{PUBLIC_SITE_NUTZEN.lead}</p>
+      </header>
+      <ul className="yd-public-site-card-grid yd-public-site-card-grid--2">
+        {PUBLIC_SITE_NUTZEN.cards.map((card) => {
+          const Icon = NUTZEN_ICONS[card.id as keyof typeof NUTZEN_ICONS];
+          return (
+            <li key={card.id} className="yd-public-site-card">
+              <span className="yd-public-site-card-icon" aria-hidden>
+                <Icon className="h-4 w-4" strokeWidth={1.65} />
+              </span>
+              <p className="yd-public-site-card-kicker">{card.label}</p>
+              <h3 className="yd-public-site-card-title">{card.title}</h3>
+              <p className="yd-public-site-card-body">{card.body}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+export function YdPublicSiteFuerWen() {
+  return (
+    <section
+      id={PUBLIC_SITE_SECTIONS.fuerWen}
+      className="yd-public-site-section yd-public-site-section--audience yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      style={{ ["--yd-public-field-i" as string]: "3" }}
+      aria-labelledby="yd-public-fuer-wen-title"
+    >
+      <header className="yd-public-site-section-head">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_FUER_WEN.eyebrow}</p>
+        <h2 id="yd-public-fuer-wen-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          {PUBLIC_SITE_FUER_WEN.title}
+        </h2>
+      </header>
+      <ul className="yd-public-site-audience-grid">
+        {PUBLIC_SITE_FUER_WEN.cards.map((card, i) => {
+          const Icon = FUER_WEN_ICONS[i] ?? Building2;
+          return (
+            <li key={card.title} className="yd-public-site-audience-card">
+              <span className="yd-public-site-card-icon" aria-hidden>
+                <Icon className="h-4 w-4" strokeWidth={1.65} />
+              </span>
+              <h3 className="yd-public-site-card-title">{card.title}</h3>
+              <p className="yd-public-site-card-body">{card.body}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+export function YdPublicSiteEinfuehrung() {
+  return (
+    <section
+      id={PUBLIC_SITE_SECTIONS.einfuehrung}
+      className="yd-public-site-section yd-public-site-section--intro yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      style={{ ["--yd-public-field-i" as string]: "4" }}
+      aria-labelledby="yd-public-einfuehrung-title"
+    >
+      <header className="yd-public-site-section-head">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_EINFUEHRUNG.eyebrow}</p>
+        <h2
+          id="yd-public-einfuehrung-title"
+          className="yd-clinical-act-title yd-clinical-act-title--direct"
+        >
+          {PUBLIC_SITE_EINFUEHRUNG.title}
+        </h2>
+        <p className="yd-public-site-section-lead">{PUBLIC_SITE_EINFUEHRUNG.lead}</p>
+      </header>
+      <ol className="yd-public-site-steps">
+        {PUBLIC_SITE_EINFUEHRUNG.steps.map((step) => (
+          <li key={step.num} className="yd-public-site-step">
+            <span className="yd-public-site-step-num" aria-hidden>
+              {step.num}
+            </span>
+            <div className="min-w-0">
+              <h3 className="yd-public-site-card-title">{step.title}</h3>
+              <p className="yd-public-site-card-body">{step.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+export function YdPublicSiteDemo() {
+  return (
+    <section
+      id={PUBLIC_SITE_SECTIONS.demo}
+      className="yd-public-site-section yd-public-site-section--demo yd-public-os-awaken-field scroll-mt-[5.5rem]"
+      style={{ ["--yd-public-field-i" as string]: "6" }}
+      aria-labelledby="yd-public-demo-title"
+    >
+      <div className="yd-public-site-demo-panel">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_DEMO.eyebrow}</p>
+        <h2 id="yd-public-demo-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          {PUBLIC_SITE_DEMO.title}
+        </h2>
+        <p className="yd-public-site-section-lead">{PUBLIC_SITE_DEMO.lead}</p>
+        <div className="yd-public-site-demo-actions">
+          <a href={`mailto:info@your-dentist.de?subject=${encodeURIComponent("Demo-Anfrage Your Dentist")}`} className="yd-clinical-cta-primary">
+            {PUBLIC_SITE_DEMO.primaryCta}
+          </a>
+          <Link href={PUBLIC_SITE_DEMO.contactHref} className="yd-clinical-cta-secondary">
+            {PUBLIC_SITE_DEMO.secondaryCta}
+          </Link>
+        </div>
+        <p className="yd-public-site-demo-note">{PUBLIC_SITE_DEMO.note}</p>
+      </div>
+    </section>
+  );
+}

@@ -121,8 +121,8 @@ export function YdRegisterPricing({
                 >
                   {access
                     ? active
-                      ? "Mit diesem Rhythmus fortfahren"
-                      : "Rhythmus wählen"
+                      ? "Mit diesem Zugang starten"
+                      : "Zugang wählen"
                     : active
                       ? "Mit diesem Plan registrieren"
                       : "Plan wählen"}
