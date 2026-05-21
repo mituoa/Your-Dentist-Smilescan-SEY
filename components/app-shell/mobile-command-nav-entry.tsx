@@ -26,8 +26,8 @@ export function MobileCommandNavEntry() {
         <Command className="h-[17px] w-[17px]" strokeWidth={1.75} />
       </span>
       <span className="min-w-0 flex-1 text-left">
-        <span className="yd-mobile-sidebar-command-label">Command AI</span>
-        <span className="yd-mobile-sidebar-command-hint">Leise Assistenz im Arbeitsfluss</span>
+        <span className="yd-mobile-sidebar-command-label">Command</span>
+        <span className="yd-mobile-sidebar-command-hint">Assistenz im Arbeitsfluss</span>
       </span>
     </button>
   );

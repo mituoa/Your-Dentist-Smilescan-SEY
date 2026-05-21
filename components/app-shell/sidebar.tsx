@@ -3,7 +3,6 @@
 import { X } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
-import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { MobileCommandNavEntry } from "./mobile-command-nav-entry";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { NavItem } from "./nav-item";
@@ -61,23 +60,17 @@ export function Sidebar({
         aria-hidden
       />
 
-      {/* Mobile app bar — Safe Area oben, Logo vollständig */}
-      <header className="yd-mobile-sidebar-header relative shrink-0 md:hidden">
-        <div className="yd-mobile-sidebar-header-inner flex items-start justify-between gap-3">
-          <YourDentistBrandLockup
-            size="sm"
-            tagline="Neutral Practice Platform"
-            className="min-w-0 flex-1 pt-0.5"
-          />
-          <button
-            type="button"
-            onClick={() => mobileNav?.close()}
-            className="yd-mobile-sidebar-close mt-0.5 touch-manipulation"
-            aria-label="Navigation schließen"
-          >
-            <X className="h-[18px] w-[18px]" strokeWidth={1.85} />
-          </button>
-        </div>
+      {/* Mobile: schlanke Kopfzeile im Drawer (Marke bleibt in der Workspace-Topbar) */}
+      <header className="yd-mobile-sidebar-drawer-head relative shrink-0 md:hidden">
+        <p className="yd-mobile-sidebar-drawer-label">Navigation</p>
+        <button
+          type="button"
+          onClick={() => mobileNav?.close()}
+          className="yd-mobile-sidebar-close touch-manipulation"
+          aria-label="Navigation schließen"
+        >
+          <X className="h-[18px] w-[18px]" strokeWidth={1.85} />
+        </button>
       </header>
 
       <div className="relative hidden shrink-0 md:flex md:justify-center md:px-0 md:pb-3 md:pt-7">
@@ -95,7 +88,7 @@ export function Sidebar({
                 href="/dashboard"
                 iconName="dashboard"
                 label="Atlas"
-                description="Praxisüberblick"
+                description="Überblick"
                 ambientPreview={navAmbient?.dashboard}
                 tier="primary"
               />

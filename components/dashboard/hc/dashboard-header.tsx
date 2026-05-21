@@ -22,14 +22,16 @@ export function DashboardHeader({
 
   return (
     <header className="yd-dash-header-axis w-full min-w-0 max-w-full">
-      {/* Mobile: nur Begrüßung + Toolbar — kein zweiter Avatar, keine Top-Search */}
+      {/* Mobile: ein Workspace-Header — kein Band-Duplikat, kein zweiter Avatar */}
       <div className="md:hidden">
         <div className="yd-dash-mobile-greeting">
-          <p className="yd-dash-meta mb-0.5 normal-case tracking-normal">Praxisüberblick</p>
-          <h1 className="yd-dash-title text-[1.2rem] leading-tight">
+          <p className="yd-dash-workspace-label">Praxisbereich</p>
+          <h1 className="yd-dash-title text-[1.25rem] leading-tight tracking-[-0.024em]">
             {greeting}, {doctorLabel}
           </h1>
-          <p className="yd-dash-subtitle mt-1 text-[12px] leading-snug">{subtitle}</p>
+          <p className="yd-dash-subtitle mt-1.5 text-[13px] leading-snug text-[#5a6f84]">
+            {subtitle}
+          </p>
         </div>
         <DashboardMobileSearch inboxCount={inboxCount} />
       </div>

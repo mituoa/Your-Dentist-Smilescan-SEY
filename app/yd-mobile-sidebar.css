@@ -1,27 +1,37 @@
 /**
- * Mobile sidebar / drawer — iOS-native composition (safe areas, rhythm).
- * No color palette changes — layout and motion only.
+ * Mobile sidebar / drawer — below workspace topbar, premium medical workspace.
  */
 
 @media (max-width: 767px) {
-  /* —— Backdrop —— */
-  .yd-mobile-nav-backdrop {
-    background: rgba(12, 25, 41, 0.14) !important;
-    backdrop-filter: blur(20px) saturate(1.12);
-    -webkit-backdrop-filter: blur(20px) saturate(1.12);
+  :root {
+    --yd-mobile-topbar-h: 52px;
+    --yd-mobile-topbar-offset: calc(
+      var(--yd-mobile-topbar-h) + env(safe-area-inset-top, 0px)
+    );
   }
 
-  /* —— Drawer shell: safe insets, schmaler, mehr Luft rechts —— */
+  /* —— Backdrop: unterhalb der Topbar, Topbar bleibt bedienbar —— */
+  .yd-mobile-nav-backdrop {
+    top: var(--yd-mobile-topbar-offset) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    background: rgba(12, 25, 41, 0.1) !important;
+    backdrop-filter: blur(14px) saturate(1.08);
+    -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  }
+
+  /* —— Drawer shell: startet unter Navbar —— */
   .yd-mobile-nav-root {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: var(--yd-mobile-topbar-offset) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
     padding:
-      env(safe-area-inset-top, 0px)
-      max(1rem, env(safe-area-inset-right, 0px))
-      env(safe-area-inset-bottom, 0px)
-      max(0.625rem, env(safe-area-inset-left, 0px));
+      0.5rem
+      max(0.75rem, env(safe-area-inset-right, 0px))
+      max(0.5rem, env(safe-area-inset-bottom, 0px))
+      max(0.5rem, env(safe-area-inset-left, 0px));
     display: flex;
     align-items: stretch;
     justify-content: flex-start;
@@ -33,26 +43,25 @@
   }
 
   .yd-mobile-nav-panel {
-    width: min(88vw, 300px);
-    max-width: 300px;
+    width: min(88vw, 292px);
+    max-width: 292px;
     height: 100%;
     max-height: 100%;
     overflow: hidden;
     margin: 0;
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.82);
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
     background: linear-gradient(
       168deg,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(248, 252, 255, 0.9) 48%,
-      rgba(241, 248, 255, 0.88) 100%
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(250, 252, 255, 0.96) 100%
     );
     box-shadow:
-      0 32px 80px rgba(15, 35, 58, 0.14),
-      0 12px 36px rgba(47, 128, 237, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(28px) saturate(1.18);
-    -webkit-backdrop-filter: blur(28px) saturate(1.18);
+      0 20px 56px rgba(15, 35, 58, 0.12),
+      0 4px 16px rgba(47, 128, 237, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(1.1);
+    -webkit-backdrop-filter: blur(20px) saturate(1.1);
     will-change: transform, opacity;
   }
 
@@ -77,82 +86,77 @@
     display: none;
   }
 
-  /* —— Header: App-Bar mit Safe Area —— */
-  .yd-mobile-sidebar-header {
-    padding-top: max(0.625rem, env(safe-area-inset-top, 0px));
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid rgba(180, 198, 218, 0.2);
-  }
-
-  .yd-mobile-sidebar-header-inner {
-    min-height: 3rem;
+  /* —— Drawer head: kein zweites Logo —— */
+  .yd-mobile-sidebar-drawer-head {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem 0.5rem;
+    border-bottom: 1px solid rgba(180, 198, 218, 0.18);
   }
 
-  .yd-mobile-sidebar-header [data-brand="your-dentist"] {
-    max-width: calc(100% - 3rem);
-    overflow: visible;
-  }
-
-  .yd-mobile-sidebar-header [data-brand="your-dentist"] img {
-    flex-shrink: 0;
+  .yd-mobile-sidebar-drawer-label {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #8ba3b8;
   }
 
   .yd-mobile-sidebar-close {
     display: inline-flex;
-    height: 2.5rem;
-    width: 2.5rem;
+    height: 2.25rem;
+    width: 2.25rem;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
-    border: 1px solid rgba(180, 198, 218, 0.32);
-    background: rgba(255, 255, 255, 0.55);
+    border-radius: 11px;
+    border: 1px solid rgba(180, 198, 218, 0.28);
+    background: rgba(255, 255, 255, 0.72);
     color: #64748b;
-    transition: background 280ms ease;
+    transition: background 200ms ease;
   }
 
   .yd-mobile-sidebar-close:active {
     background: rgba(47, 128, 237, 0.06);
   }
 
-  /* —— Navigation scroll + Gruppen —— */
+  /* —— Navigation —— */
   .yd-mobile-sidebar-nav {
     flex: 1;
     min-height: 0;
   }
 
   .yd-mobile-sidebar-scroll {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding: 0.375rem 0.5rem 0.5rem;
     -webkit-overflow-scrolling: touch;
   }
 
   .yd-nav-primary-group::before {
     content: "Arbeitsbereich";
     display: block;
-    padding: 0.5rem 0.625rem 0.5rem;
+    padding: 0.375rem 0.625rem 0.375rem;
     font-size: 0.625rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: #8ba3b8;
+    color: #94a3b8;
   }
 
   .yd-nav-secondary-group {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(180, 198, 218, 0.22);
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid rgba(180, 198, 218, 0.18);
   }
 
   .yd-nav-secondary-group::before {
     content: "Verwaltung";
     display: block;
-    padding: 0 0.625rem 0.5rem;
+    padding: 0 0.625rem 0.375rem;
     font-size: 0.625rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     color: #94a3b8;
   }
@@ -160,7 +164,7 @@
   .yd-nav-primary-group {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.1875rem;
   }
 
   .yd-nav-secondary-group {
@@ -169,50 +173,51 @@
     gap: 0.125rem;
   }
 
-  /* Primary: größer, klarer */
   .yd-nav-primary-group .yd-ambient-nav-link {
-    min-height: 3.25rem;
-    padding: 0.5rem 0.625rem;
-    border-radius: 16px;
-    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.4375rem 0.625rem;
+    border-radius: 14px;
+    gap: 0.6875rem;
   }
 
   .yd-nav-primary-group .yd-nav-icon-shell {
-    height: 2.75rem;
-    width: 2.75rem;
+    height: 2.5rem;
+    width: 2.5rem;
   }
 
   .yd-nav-primary-group .yd-nav-icon-shell svg {
-    height: 1.25rem;
-    width: 1.25rem;
+    height: 1.125rem;
+    width: 1.125rem;
   }
 
   .yd-nav-primary-group .yd-nav-label {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 500;
     letter-spacing: -0.01em;
+    color: #0c1929;
   }
 
   .yd-nav-primary-group .yd-nav-desc {
-    font-size: 0.75rem;
-    margin-top: 0.125rem;
+    font-size: 0.6875rem;
+    margin-top: 0.0625rem;
+    color: #7a92a8;
   }
 
   .yd-nav-primary-group .yd-nav-link-active {
-    background: rgba(47, 128, 237, 0.06) !important;
+    background: rgba(47, 128, 237, 0.07) !important;
+    box-shadow: inset 0 0 0 1px rgba(47, 128, 237, 0.1);
   }
 
-  /* Secondary: ruhiger */
   .yd-nav-tier-secondary.yd-ambient-nav-link {
-    min-height: 2.75rem;
-    padding: 0.375rem 0.625rem;
-    border-radius: 14px;
+    min-height: 2.625rem;
+    padding: 0.3125rem 0.625rem;
+    border-radius: 12px;
   }
 
   .yd-nav-tier-secondary .yd-nav-label {
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #64748b;
+    color: #5a6f84;
   }
 
   .yd-nav-tier-secondary.yd-nav-link-active .yd-nav-label {
@@ -224,65 +229,66 @@
   }
 
   .yd-nav-tier-secondary .yd-nav-icon-shell {
-    height: 2.375rem;
-    width: 2.375rem;
+    height: 2.125rem;
+    width: 2.125rem;
   }
 
   .yd-nav-tier-secondary .yd-nav-icon-shell svg {
-    height: 1.0625rem;
-    width: 1.0625rem;
+    height: 1rem;
+    width: 1rem;
   }
 
-  /* —— Footer: Utility-Zone, kein leerer Raum —— */
+  /* —— Footer: Command + Abmelden —— */
   .yd-mobile-sidebar-footer {
     padding:
-      0.625rem 0.75rem
-      max(0.875rem, env(safe-area-inset-bottom, 0px));
-    border-top: 1px solid rgba(180, 198, 218, 0.22);
-    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.35) 100%);
+      0.5rem 0.625rem
+      max(0.75rem, env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(180, 198, 218, 0.18);
+    background: rgba(255, 255, 255, 0.4);
   }
 
   .yd-mobile-sidebar-command {
     display: flex;
     width: 100%;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.625rem;
-    padding: 0.625rem 0.75rem;
-    border: 1px solid rgba(180, 198, 218, 0.28);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.5);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
-    transition: background 280ms ease;
+    gap: 0.625rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    border: 1px solid rgba(180, 198, 218, 0.22);
+    border-radius: 12px;
+    background: rgba(248, 252, 255, 0.85);
+    box-shadow: none;
+    transition: background 200ms ease;
   }
 
   .yd-mobile-sidebar-command:active {
-    background: rgba(47, 128, 237, 0.05);
+    background: rgba(237, 244, 252, 0.95);
   }
 
   .yd-mobile-sidebar-command-icon {
     display: flex;
-    height: 2.375rem;
-    width: 2.375rem;
+    height: 2rem;
+    width: 2rem;
     shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
-    background: rgba(47, 128, 237, 0.08);
-    color: #3d5266;
+    border-radius: 10px;
+    background: rgba(47, 128, 237, 0.07);
+    color: #4a6278;
   }
 
   .yd-mobile-sidebar-command-label {
     display: block;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    color: #0c1929;
+    color: #334a5e;
+    line-height: 1.3;
   }
 
   .yd-mobile-sidebar-command-hint {
     display: block;
-    margin-top: 0.125rem;
-    font-size: 0.6875rem;
+    margin-top: 0.0625rem;
+    font-size: 0.625rem;
     color: #8ba3b8;
     line-height: 1.35;
   }
@@ -290,10 +296,9 @@
   .yd-mobile-sidebar-footer-logout {
     display: flex;
     justify-content: flex-start;
-    padding-left: 0.25rem;
+    padding-left: 0.125rem;
   }
 
-  /* Command FAB ausblenden — Einstieg in der Nav */
   .yd-command-assist-fab {
     display: none !important;
   }

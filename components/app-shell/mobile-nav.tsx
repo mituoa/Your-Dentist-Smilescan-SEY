@@ -87,7 +87,7 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
       <button
         type="button"
         className={cn(
-          "yd-mobile-nav-backdrop fixed inset-0 z-[25] border-0 md:hidden",
+          "yd-mobile-nav-backdrop fixed z-[34] border-0 md:hidden",
           "transition-[opacity,backdrop-filter] duration-[420ms] ease-[cubic-bezier(0.25,1,0.35,1)]",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
@@ -98,7 +98,7 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
       <div
         className={cn(
           "yd-mobile-nav-root md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
-          "max-md:fixed max-md:z-30 max-md:pointer-events-none",
+          "max-md:fixed max-md:z-[36] max-md:pointer-events-none",
           open && "yd-mobile-nav-root--open max-md:pointer-events-auto"
         )}
         style={

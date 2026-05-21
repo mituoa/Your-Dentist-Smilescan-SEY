@@ -26,13 +26,13 @@ export function MobileWorkspaceTopbar({
   displayName,
 }: MobileWorkspaceTopbarProps) {
   return (
-    <header className="yd-mobile-workspace-topbar sticky top-0 z-30 flex shrink-0 flex-col md:hidden">
+    <header className="yd-mobile-workspace-topbar sticky top-0 z-40 flex shrink-0 flex-col md:hidden">
       <div className="yd-mobile-workspace-topbar-inner flex h-[52px] items-center gap-2.5 px-3">
         <MobileMenuButton />
         <Link
           href="/dashboard"
           className="yd-mobile-workspace-topbar-brand min-w-0 flex-1"
-          aria-label="Atlas — Praxisüberblick"
+          aria-label="Your Dentist — Startseite"
         >
           <YourDentistBrandLockup size="sm" tagline={null} className="min-w-0" />
         </Link>

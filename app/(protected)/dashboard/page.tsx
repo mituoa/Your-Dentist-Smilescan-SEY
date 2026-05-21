@@ -187,14 +187,14 @@ export default async function DashboardPage() {
       <DashboardWorkzone
         rail="Überblick"
         title="Praxisüberblick"
-        hint={`${workspaceName} · ${todayLabel}`}
+        hint={`${todayLabel}`}
         className="yd-dash-band--overview"
       >
         <DashboardAmbientHeader>
           <DashboardHeader
             greeting={greeting}
             displayName={doctorDisplayName}
-            subtitle={`Eingang, Relay und Aufgaben — strukturiert im Team`}
+            subtitle="Eingänge, Relay und Aufgaben im Überblick"
             inboxCount={inboxCount}
           />
         </DashboardAmbientHeader>

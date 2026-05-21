@@ -32,8 +32,23 @@
     padding-top: 0.25rem !important;
   }
 
+  /* Overview-Band: kein doppeltes Rail/Title auf Mobile */
+  .yd-dashboard--structured .yd-dash-band--overview > .yd-dash-band__head {
+    display: none;
+  }
+
+  .yd-dash-workspace-label {
+    margin: 0 0 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8ba3b8;
+  }
+
   .yd-dash-mobile-greeting {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.875rem;
+    padding-top: 0.125rem;
   }
 
   .yd-dash-mobile-toolbar {
