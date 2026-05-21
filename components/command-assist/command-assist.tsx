@@ -161,14 +161,23 @@ function placeholderForZone(
   }
 }
 
-export function CommandAssist() {
+type CommandAssistProps = {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export function CommandAssist({ open: controlledOpen, onOpenChange }: CommandAssistProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const assistCtx = useAssistCaseOptional();
   const inboxCase =
     assistCtx?.casePayload?.kind === "inbox" ? assistCtx.casePayload : null;
 
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = isControlled ? onOpenChange! : setUncontrolledOpen;
+  const toggleOpen = useCallback(() => setOpen(!open), [open, setOpen]);
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
@@ -471,14 +480,15 @@ export function CommandAssist() {
 
       <div
         className={cn(
-          "fixed z-[46]",
+          "yd-command-assist-fab fixed z-[46]",
+          "max-md:hidden",
           "bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 md:bottom-8 md:right-8"
         )}
       >
         <button
           ref={fabRef}
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggleOpen}
           className={FAB}
           aria-expanded={open}
           aria-controls="command-assist-panel"

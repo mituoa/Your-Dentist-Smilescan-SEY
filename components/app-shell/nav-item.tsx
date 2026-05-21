@@ -75,6 +75,7 @@ export function NavItem({
         "yd-ambient-nav-link group relative flex w-full touch-manipulation items-center transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.18)]",
         "min-h-[44px] gap-2.5 rounded-[14px] px-2.5 py-1.5",
         "md:min-h-0 md:w-11 md:flex-col md:justify-center md:gap-0 md:rounded-none md:bg-transparent md:px-0 md:py-0",
+        tier === "primary" && "yd-nav-tier-primary",
         tier === "secondary" && "yd-nav-tier-secondary",
         isActive && "yd-nav-link-active"
       )}

@@ -35,16 +35,23 @@ export function MobileNavProvider({ children }: { children: ReactNode }) {
     const syncScrollLock = () => {
       if (mq.matches) {
         document.documentElement.style.overflow = "";
+        document.documentElement.removeAttribute("data-mobile-nav-open");
         setOpen(false);
         return;
       }
       document.documentElement.style.overflow = open ? "hidden" : "";
+      if (open) {
+        document.documentElement.setAttribute("data-mobile-nav-open", "");
+      } else {
+        document.documentElement.removeAttribute("data-mobile-nav-open");
+      }
     };
     syncScrollLock();
     mq.addEventListener("change", syncScrollLock);
     return () => {
       mq.removeEventListener("change", syncScrollLock);
       document.documentElement.style.overflow = "";
+      document.documentElement.removeAttribute("data-mobile-nav-open");
     };
   }, [open]);
 
@@ -71,7 +78,7 @@ export function useMobileNavOptional(): MobileNavContextValue | null {
   return useContext(MobileNavContext);
 }
 
-/** Native-feel floating drawer on mobile; static rail on desktop. */
+/** Premium iOS drawer on mobile; ambient rail on desktop. */
 export function MobileSidebarFrame({ children }: { children: ReactNode }) {
   const { open, close } = useMobileNav();
 
@@ -80,7 +87,8 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
       <button
         type="button"
         className={cn(
-          "yd-mobile-nav-backdrop fixed inset-0 z-[25] border-0 transition-opacity duration-300 ease-out md:hidden",
+          "yd-mobile-nav-backdrop fixed inset-0 z-[25] border-0 md:hidden",
+          "transition-[opacity,backdrop-filter] duration-[420ms] ease-[cubic-bezier(0.25,1,0.35,1)]",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
         aria-label="Navigation schließen"
@@ -89,25 +97,24 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
       />
       <div
         className={cn(
-          "yd-mobile-nav-root max-md:fixed max-md:inset-0 max-md:z-30 max-md:min-h-[100dvh] max-md:pointer-events-none md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
-          open && "max-md:pointer-events-auto"
+          "yd-mobile-nav-root md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
+          "max-md:fixed max-md:z-30 max-md:pointer-events-none",
+          open && "yd-mobile-nav-root--open max-md:pointer-events-auto"
         )}
+        style={
+          {
+            ["--yd-mobile-nav-open" as string]: open ? "1" : "0",
+          } as React.CSSProperties
+        }
       >
         <div
           className={cn(
             "yd-mobile-nav-panel relative flex min-h-0 flex-col overflow-hidden",
-            "max-md:mx-auto max-md:my-0 max-md:ml-[max(0.625rem,env(safe-area-inset-left))] max-md:mr-3",
-            "max-md:mt-[max(0.875rem,env(safe-area-inset-top))] max-md:mb-[max(0.875rem,env(safe-area-inset-bottom))]",
-            "max-md:h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.75rem)] max-md:max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.75rem)]",
-            "max-md:w-[min(88vw,328px)] max-md:max-w-[328px]",
-            "max-md:rounded-[26px] max-md:border max-md:border-white/75",
-            "max-md:shadow-[0_28px_80px_rgba(15,35,58,0.16),0_10px_32px_rgba(47,128,237,0.1)]",
-            "max-md:backdrop-blur-[24px] saturate-[1.15]",
-            "max-md:transition-[transform,opacity] max-md:duration-[340ms] max-md:ease-[cubic-bezier(0.22,1,0.36,1)]",
+            "max-md:transition-[transform,opacity,box-shadow] max-md:duration-[460ms] max-md:ease-[cubic-bezier(0.25,1,0.35,1)]",
             open
               ? "max-md:translate-x-0 max-md:opacity-100"
-              : "max-md:-translate-x-[calc(100%+1rem)] max-md:opacity-0",
-            "md:h-full md:w-full md:translate-x-0 md:opacity-100 md:rounded-none md:border-0 md:shadow-none md:backdrop-blur-none md:mx-0 md:my-0"
+              : "max-md:pointer-events-none max-md:-translate-x-[108%] max-md:opacity-0",
+            "md:h-full md:w-full md:translate-x-0 md:opacity-100"
           )}
         >
           <div className="yd-mobile-nav-panel-scroll flex min-h-0 flex-1 flex-col overflow-hidden">
