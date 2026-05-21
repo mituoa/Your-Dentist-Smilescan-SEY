@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,8 @@ export type YdAuthEnvironmentProps = {
   scroll?: boolean;
   /** Brand lockup above form content (default on). */
   showBrand?: boolean;
+  /** Link target for brand click; `false` = no link. Default: Startseite `/`. */
+  brandHref?: string | false;
   /** Full-stage content without floating panel (register modal overlay). */
   bare?: boolean;
 };
@@ -26,6 +29,7 @@ export function YdAuthEnvironment({
   wide = false,
   scroll = false,
   showBrand = true,
+  brandHref = "/",
   bare = false,
 }: YdAuthEnvironmentProps) {
   return (
@@ -65,11 +69,25 @@ export function YdAuthEnvironment({
               <div className="yd-auth-panel-inner">
                 {showBrand ? (
                   <div className="yd-auth-brand">
-                    <YourDentistBrandLockup
-                      size="md"
-                      tagline="Neutral Practice Platform"
-                      centered
-                    />
+                    {brandHref === false ? (
+                      <YourDentistBrandLockup
+                        size="md"
+                        tagline="Neutral Practice Platform"
+                        centered
+                      />
+                    ) : (
+                      <Link
+                        href={brandHref}
+                        className="yd-auth-brand-link"
+                        aria-label="Zur Startseite"
+                      >
+                        <YourDentistBrandLockup
+                          size="md"
+                          tagline="Neutral Practice Platform"
+                          centered
+                        />
+                      </Link>
+                    )}
                   </div>
                 ) : null}
                 {children}

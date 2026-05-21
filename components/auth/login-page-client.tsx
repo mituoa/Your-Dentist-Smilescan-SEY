@@ -357,6 +357,10 @@ export function LoginPageClient({
 
         <div className="yd-auth-legal">
           <div className="yd-auth-legal-links">
+            <Link prefetch href="/" className="yd-auth-link">
+              Startseite
+            </Link>
+            <span aria-hidden>·</span>
             <Link href="/datenschutz" className="yd-auth-link">
               Datenschutz
             </Link>

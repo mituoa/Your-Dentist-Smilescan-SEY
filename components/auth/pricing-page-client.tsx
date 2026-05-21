@@ -52,7 +52,9 @@ export function PricingPageClient({
   return (
     <div className="yd-register-page yd-pricing-page">
       <header className="yd-register-page-header yd-auth-awaken-field">
-        <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
+        <Link href="/" className="yd-auth-brand-link" aria-label="Zur Startseite">
+          <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
+        </Link>
         <p className="yd-pricing-page-eyebrow">Lizenz & Onboarding</p>
         <h1 className="yd-register-page-title">Praxisbereich einrichten</h1>
         <p className="yd-register-page-lead">
@@ -96,6 +98,10 @@ export function PricingPageClient({
 
       <footer className="yd-pricing-page-footer yd-auth-awaken-field">
         <p>
+          <Link prefetch href="/" className="yd-auth-link">
+            Startseite
+          </Link>
+          <span aria-hidden> · </span>
           Bereits freigeschaltet?{" "}
           <Link prefetch href={loginHref} className="yd-auth-link">
             Anmelden

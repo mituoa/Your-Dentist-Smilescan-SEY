@@ -5,6 +5,7 @@
 @import "./yd-dashboard.css";
 @import "./yd-sidebar.css";
 @import "./yd-auth.css";
+@import "./yd-home.css";
 
 @layer base {
   :root {

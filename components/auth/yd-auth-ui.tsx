@@ -128,9 +128,14 @@ export function YdAuthLegalFooter(props: {
   return (
     <div className={cn("yd-auth-legal", props.className)}>
       <div className="yd-auth-legal-links">
+        <Link prefetch href="/" className="yd-auth-link">
+          Startseite
+        </Link>
+        <span aria-hidden>·</span>
         <Link href="/datenschutz" className="yd-auth-link">
           Datenschutz
         </Link>
+        <span aria-hidden>·</span>
         <Link href="/impressum" className="yd-auth-link">
           Impressum
         </Link>
