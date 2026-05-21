@@ -188,10 +188,6 @@ export default async function DashboardPage() {
           greeting={greeting}
           displayName={doctorDisplayName}
           subtitle={`Praxisbetrieb für ${workspaceName} — ${todayLabel}`}
-          email={user.email || ""}
-          workspaceName={workspaceName}
-          avatarUrl={profileData?.photo_url ?? null}
-          profileDisplayName={profileData?.display_name ?? null}
           inboxCount={inboxCount}
         />
       </DashboardAmbientHeader>

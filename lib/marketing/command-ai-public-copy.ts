@@ -4,7 +4,7 @@
 
 export const COMMAND_AI_PUBLIC = {
   heroLine:
-    "Command AI: Prioritäten einordnen, Übergaben vorbereiten, Routinen im Blick — leise zwischen den Behandlungen.",
+    "Command AI: Prioritäten, Übergaben und Entwürfe vorbereiten — leise zwischen den Behandlungen.",
   moduleRole: "Ruhige Assistenz im Praxisalltag",
   moduleBody:
     "Offene Übergaben sichtbar halten, Erinnerungen strukturieren, Entwürfe und Aufgaben vorbereiten — Sie geben frei, nichts läuft an Patient:innen vorbei.",

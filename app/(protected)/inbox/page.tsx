@@ -57,7 +57,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   if (!listResult.ok) {
     return (
       <div
-        className="flex h-full min-h-[240px] flex-col items-center justify-center px-6"
+        className="yd-inbox-detail-root flex h-full min-h-0 flex-col items-center justify-center px-6"
         style={{ padding: "28px 32px 32px" }}
         role="status"
         aria-live="polite"
@@ -88,7 +88,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   if (qTrimmed) {
     return (
       <div
-        className="flex h-full min-h-[240px] flex-col items-center justify-center"
+        className="yd-inbox-detail-root flex h-full min-h-0 flex-col items-center justify-center"
         style={{ padding: "28px 32px 32px" }}
       >
         <p className="text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>
@@ -103,7 +103,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
 
   return (
     <div
-      className="flex h-full min-h-[240px] flex-col items-center justify-center"
+      className="yd-inbox-detail-root flex h-full min-h-0 flex-col items-center justify-center"
       style={{ padding: "28px 32px 32px" }}
     >
       <p className="text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>

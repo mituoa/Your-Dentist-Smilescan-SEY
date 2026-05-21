@@ -1,0 +1,87 @@
+/**
+ * Einsendungen — getrennte Arbeitskontexte (Liste ↔ Detail).
+ * Desktop: kein gemeinsamer main-Scroll; je Pane eigene overflow-Area.
+ */
+
+@media (min-width: 768px) {
+  .yd-workspace main:has(.yd-inbox-workspace) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    padding: 0.5rem 1rem 0.75rem;
+    border-radius: 40px;
+  }
+
+  .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas > .relative {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .yd-inbox-workspace {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .yd-inbox-tracker {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .yd-inbox-tracker-list {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .yd-inbox-tracker-list > * {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .yd-inbox-tracker-detail {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .yd-inbox-tracker-detail > .yd-inbox-detail-root {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+}

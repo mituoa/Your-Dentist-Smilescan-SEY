@@ -6,7 +6,7 @@ import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compac
 import { YdPracticeDemo } from "@/components/marketing/yd-practice-demo";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
-import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
+import { PUBLIC_ENTRY_COPY } from "@/lib/marketing/public-entry-copy";
 
 type YdHomeMobileProps = {
   initialPlan?: string | null;
@@ -37,14 +37,11 @@ export function YdHomeMobile({
 
       <main className="yd-entry-mobile-main">
         <div className="yd-entry-mobile-hero">
-          <p className="yd-clinical-eyebrow">Geschützter Praxisbereich</p>
+          <p className="yd-clinical-eyebrow">{PUBLIC_ENTRY_COPY.eyebrow}</p>
           <h1 className="yd-clinical-display yd-clinical-display--direct yd-entry-mobile-title">
-            Weniger Chaos. Mehr Ruhe im Team.
+            {PUBLIC_ENTRY_COPY.title}
           </h1>
-          <p className="yd-entry-mobile-value">
-            Eingang, Relay, Routinen — und Command AI mit Diktat und Entwürfen, auch zwischen
-            Behandlungen.
-          </p>
+          <p className="yd-entry-mobile-value">{PUBLIC_ENTRY_COPY.mobileValue}</p>
         </div>
 
         <div className="yd-entry-mobile-actions yd-clinical-hero-cta-stack">

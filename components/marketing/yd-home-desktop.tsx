@@ -9,26 +9,21 @@ import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
 import { YdPublicPricingStage } from "@/components/marketing/yd-public-pricing-stage";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
-
-const HERO_LINES = [
-  "Patient:innen senden Fotos und Anliegen strukturiert in Ihren Praxisbereich.",
-  "Interne Nachrichten, Gruppen, Übergaben und Aufgaben — ruhig in Relay, nicht in WhatsApp.",
-  COMMAND_AI_PUBLIC.heroLine,
-] as const;
+import { PUBLIC_ENTRY_COPY } from "@/lib/marketing/public-entry-copy";
 
 const WORKFLOW = [
-  { label: "Eingang", detail: "Patientin · strukturierter Weg", product: "Tracker" },
-  { label: "Sichtung", detail: "Priorität im Praxisbereich", product: "Tracker" },
-  { label: "Intern", detail: "Nachrichten · Gruppen · Übergaben", product: "Relay" },
-  { label: "Routinen", detail: "Mo Laborkontrolle · tägl. Steri", product: "Relay" },
-  { label: "Assistenz", detail: "Diktat · Entwürfe · zwischen Terminen", product: "Command AI" },
+  { label: "Eingang", detail: "Fotos & Anliegen · direkt vom Patienten", product: "Tracker" },
+  { label: "Einschätzung", detail: "Priorität · schneller Überblick", product: "Tracker" },
+  { label: "Team", detail: "Nachricht · Übergabe · am Fall", product: "Relay" },
+  { label: "Aufgaben", detail: "Erinnerungen · Routinen · Zuständig", product: "Relay" },
+  { label: "Assistenz", detail: "Entwürfe · zwischen Terminen", product: "Command AI" },
 ] as const;
 
 const MODULES = [
   {
     name: "Relay",
     role: "Interne Kommunikation",
-    body: "Nachrichten, Gruppen, Aufgaben, wiederkehrende Routinen, Erinnerungen, klare Verantwortung — kein Nebenkanal.",
+    body: "Interne Kommunikation, Übergaben, Aufgaben und Erinnerungen — am Fall, nicht in WhatsApp.",
     accent: false,
     featured: true,
   },
@@ -39,8 +34,20 @@ const MODULES = [
     accent: true,
     featured: false,
   },
-  { name: "Tracker", role: "Einsendungen", body: "Strukturierter Eingang für Patientenfälle.", accent: false, featured: false },
-  { name: "Atlas", role: "Überblick", body: "Operationaler Blick auf den Praxisalltag.", accent: false, featured: false },
+  {
+    name: "Tracker",
+    role: "Patienteneingänge",
+    body: "Fotos, Anliegen und Ersteinschätzung — strukturiert statt Telefon und E-Mail.",
+    accent: false,
+    featured: false,
+  },
+  {
+    name: "Atlas",
+    role: "Praxisüberblick",
+    body: "Offene Eingänge, Aufgaben und Prioritäten auf einen Blick.",
+    accent: false,
+    featured: false,
+  },
   { name: "Profil", role: "Praxisseite", body: "Nach außen klar, nach innen kontrolliert.", accent: false, featured: false },
   { name: "Workspace", role: "Team", body: "Rollen, Zugänge, geschützter Bereich.", accent: false, featured: false },
 ] as const;
@@ -70,16 +77,13 @@ export function YdHomeDesktop({
         <div className="yd-clinical-hero-stage">
           <div className="yd-clinical-hero-grid">
           <div className="yd-clinical-hero-copy">
-            <p className="yd-clinical-eyebrow">Geschützter Praxisbereich</p>
+            <p className="yd-clinical-eyebrow">{PUBLIC_ENTRY_COPY.eyebrow}</p>
             <h1 id="yd-clinical-hero-title" className="yd-clinical-display yd-clinical-display--direct">
-              Weniger Chaos. Mehr Ruhe im Team.
+              {PUBLIC_ENTRY_COPY.title}
             </h1>
-            <p className="yd-clinical-lead">
-              Ein geschützter Raum für Eingang, interne Kommunikation, Aufgaben, Routinen und leise
-              Unterstützung — damit Ihr Team den Tag ruhiger erlebt.
-            </p>
+            <p className="yd-clinical-lead">{PUBLIC_ENTRY_COPY.lead}</p>
             <ul className="yd-clinical-hero-benefits">
-              {HERO_LINES.map((b) => (
+              {PUBLIC_ENTRY_COPY.benefits.map((b) => (
                 <li key={b}>{b}</li>
               ))}
             </ul>
@@ -97,9 +101,7 @@ export function YdHomeDesktop({
                 </Link>
               </p>
             </div>
-            <p className="yd-clinical-whisper">
-              Weniger Chaos im Kopf — mehr Ordnung im Praxisalltag. Modern, menschlich, sicher.
-            </p>
+            <p className="yd-clinical-whisper">{PUBLIC_ENTRY_COPY.whisper}</p>
           </div>
           <div className="yd-clinical-hero-world">
             <YdPracticeWorld />
@@ -125,12 +127,9 @@ export function YdHomeDesktop({
         aria-labelledby="yd-clinical-flow-title"
       >
         <h2 id="yd-clinical-flow-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
-          Ein geschützter Fluss — Eingang bis Team bis Erinnerung
+          {PUBLIC_ENTRY_COPY.flow.title}
         </h2>
-        <p className="yd-clinical-body">
-          Patientenanfrage, interne Abstimmung, verlässliche Routinen — Command AI unterstützt leise
-          dazwischen.
-        </p>
+        <p className="yd-clinical-body">{PUBLIC_ENTRY_COPY.flow.body}</p>
         <div className="yd-clinical-flow">
           {WORKFLOW.map((step, i) => (
             <div key={step.label} className="yd-clinical-flow-step">
@@ -151,12 +150,9 @@ export function YdHomeDesktop({
         aria-labelledby="yd-clinical-modules-title"
       >
         <h2 id="yd-clinical-modules-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
-          Ein Raum — nicht ein Modulkatalog
+          {PUBLIC_ENTRY_COPY.modules.title}
         </h2>
-        <p className="yd-clinical-body">
-          Relay ist die ruhige Kommunikationsschicht Ihrer Praxis. Command AI arbeitet zurückhaltend
-          mit — für Orientierung statt Lautstärke.
-        </p>
+        <p className="yd-clinical-body">{PUBLIC_ENTRY_COPY.modules.body}</p>
         <div className="yd-clinical-modules">
           {MODULES.map((m) => (
             <div
@@ -193,9 +189,7 @@ export function YdHomeDesktop({
           <Link href="/datenschutz">Datenschutz</Link>
           <Link href="/agb">AGB</Link>
         </div>
-        <p>
-          Interne Kommunikation · Routinen · Command AI — ein geschützter Praxisbereich
-        </p>
+        <p>{PUBLIC_ENTRY_COPY.footer}</p>
       </footer>
     </article>
   );

@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
-import { HcSidebarProfile } from "./hc-sidebar-profile";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { MobileCommandNavEntry } from "./mobile-command-nav-entry";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { NavItem } from "./nav-item";
@@ -17,9 +17,6 @@ export interface SidebarProps {
   inboxCount?: number;
   myTasksCount: number;
   myTasksOverdueCount: number;
-  avatarUrl?: string | null;
-  displayName?: string | null;
-  email?: string;
   navAmbient?: YdNavAmbientMap;
 }
 
@@ -30,9 +27,6 @@ export function Sidebar({
   inboxCount,
   myTasksCount,
   myTasksOverdueCount,
-  avatarUrl,
-  displayName,
-  email = "",
   navAmbient,
 }: SidebarProps) {
   const myTasksUrgent = myTasksOverdueCount > 0;
@@ -69,18 +63,21 @@ export function Sidebar({
 
       {/* Mobile app bar — Safe Area oben, Logo vollständig */}
       <header className="yd-mobile-sidebar-header relative shrink-0 md:hidden">
-        <div className="yd-mobile-sidebar-header-inner flex items-center justify-between gap-3">
-          <BrandMark compact />
+        <div className="yd-mobile-sidebar-header-inner flex items-start justify-between gap-3">
+          <YourDentistBrandLockup
+            size="sm"
+            tagline="Neutral Practice Platform"
+            className="min-w-0 flex-1 pt-0.5"
+          />
           <button
             type="button"
             onClick={() => mobileNav?.close()}
-            className="yd-mobile-sidebar-close touch-manipulation"
+            className="yd-mobile-sidebar-close mt-0.5 touch-manipulation"
             aria-label="Navigation schließen"
           >
             <X className="h-[18px] w-[18px]" strokeWidth={1.85} />
           </button>
         </div>
-        <p className="yd-mobile-sidebar-tagline">Geschützter Praxisbereich</p>
       </header>
 
       <div className="relative hidden shrink-0 md:flex md:justify-center md:px-0 md:pb-3 md:pt-7">
@@ -148,24 +145,14 @@ export function Sidebar({
         </div>
       </nav>
 
-      <div className="relative hidden shrink-0 flex-col items-center gap-3.5 px-2 pb-7 pt-2 md:flex">
+      <div className="yd-sidebar-rail-footer relative hidden shrink-0 px-2 pb-7 pt-2 md:flex md:justify-center">
         <SignOutSidebarForm variant="rail" />
-        <HcSidebarProfile
-          avatarUrl={avatarUrl}
-          displayName={displayName}
-          email={email}
-        />
       </div>
 
       <footer className="yd-mobile-sidebar-footer relative mt-auto shrink-0 md:hidden">
         <MobileCommandNavEntry />
-        <div className="yd-mobile-sidebar-footer-actions">
-          <SignOutSidebarForm />
-          <HcSidebarProfile
-            avatarUrl={avatarUrl}
-            displayName={displayName}
-            email={email}
-          />
+        <div className="yd-mobile-sidebar-footer-logout">
+          <SignOutSidebarForm variant="rail" />
         </div>
       </footer>
     </aside>

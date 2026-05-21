@@ -241,9 +241,9 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Mobil: Triage + Hilfe eine Fläche, gemeinsamer Scroll. Desktop: zwei Spalten, je eigener Scroll. */}
-      <div className="flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] max-lg:min-h-0 max-lg:bg-[#EDF1F7] lg:flex-row lg:overflow-y-hidden lg:bg-transparent">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-lg:mx-0 max-lg:flex-none max-lg:overflow-visible max-lg:rounded-b-2xl max-lg:shadow-[0_2px_12px_rgba(15,23,42,0.05)] lg:mx-0 lg:rounded-none lg:bg-[#F7F9FC] lg:shadow-none lg:min-h-0 lg:overflow-hidden lg:flex-1">
+      {/* Mobil: eine Fläche. Desktop: Pane füllt Tracker-Detail, je Spalte eigener Scroll. */}
+      <div className="yd-inbox-detail-root flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden max-lg:overflow-y-auto max-lg:overscroll-y-contain max-lg:[-webkit-overflow-scrolling:touch] max-lg:min-h-0 max-lg:bg-[#EDF1F7] lg:flex-row lg:overflow-hidden lg:bg-transparent">
+        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-lg:mx-0 max-lg:flex-none max-lg:overflow-visible max-lg:rounded-b-2xl max-lg:shadow-[0_2px_12px_rgba(15,23,42,0.05)] lg:mx-0 lg:h-full lg:max-h-full lg:rounded-none lg:bg-[#F7F9FC] lg:shadow-none lg:overflow-hidden">
           {/* Detail-Header — mobil: kompakteres Padding, Sticky; Desktop: Figma-Abstände */}
           <div
             className="z-[6] shrink-0 bg-white px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] max-lg:sticky max-lg:top-0 max-lg:border-b max-lg:border-[rgba(15,23,42,0.06)] max-lg:shadow-[0_1px_0_rgba(15,23,42,0.04)] sm:px-5 sm:pt-4 sm:pb-3 lg:static lg:border-b-0 lg:px-[clamp(20px,4vw,56px)] lg:pb-0 lg:pt-[clamp(28px,5vw,48px)] lg:shadow-none"

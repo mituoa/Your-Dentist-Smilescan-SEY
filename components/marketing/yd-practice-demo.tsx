@@ -98,7 +98,7 @@ export function YdPracticeDemo({ compact = false }: YdPracticeDemoProps) {
 
       {!compact ? (
         <p className="yd-clinical-whisper yd-practice-demo-close">
-          Das reduziert Chaos im Kopf — Struktur im Team, ohne laut zu werden.
+          So entsteht ein klarerer Praxisalltag — und am Ende weniger Stress im Team.
         </p>
       ) : null}
     </section>

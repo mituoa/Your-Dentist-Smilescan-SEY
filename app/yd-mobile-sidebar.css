@@ -90,13 +90,8 @@
     align-items: center;
   }
 
-  .yd-mobile-sidebar-tagline {
-    margin: 0.375rem 0 0;
-    padding-left: 0.125rem;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    color: #8ba3b8;
+  .yd-mobile-sidebar-header [data-brand="your-dentist"] {
+    max-width: 100%;
   }
 
   .yd-mobile-sidebar-close {
@@ -286,10 +281,10 @@
     line-height: 1.35;
   }
 
-  .yd-mobile-sidebar-footer-actions {
+  .yd-mobile-sidebar-footer-logout {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    justify-content: flex-start;
+    padding-left: 0.25rem;
   }
 
   /* Command FAB ausblenden — Einstieg in der Nav */

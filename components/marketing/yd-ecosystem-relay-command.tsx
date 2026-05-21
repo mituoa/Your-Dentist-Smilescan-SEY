@@ -1,6 +1,7 @@
 "use client";
 
 import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
+import { PUBLIC_ENTRY_COPY } from "@/lib/marketing/public-entry-copy";
 
 const REPLACES = [
   "WhatsApp-Chaos",
@@ -32,24 +33,20 @@ export function YdEcosystemRelayCommand() {
   return (
     <section className="yd-ecosystem" aria-labelledby="yd-ecosystem-title">
       <header className="yd-ecosystem-head">
-        <p className="yd-clinical-eyebrow">Ein Raum für den Praxisalltag</p>
+        <p className="yd-clinical-eyebrow">{PUBLIC_ENTRY_COPY.ecosystem.eyebrow}</p>
         <h2 id="yd-ecosystem-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
-          Ihre Praxis arbeitet endlich ruhig zusammen
+          {PUBLIC_ENTRY_COPY.ecosystem.title}
         </h2>
-        <p className="yd-clinical-body yd-ecosystem-lead">
-          Patient:innen senden Fotos und Anliegen strukturiert ein. Ihr Team koordiniert intern —
-          mit Nachrichten, Gruppen, Übergaben und verlässlichen Erinnerungen. Command AI unterstützt
-          im Hintergrund, ohne Lautstärke.
-        </p>
+        <p className="yd-clinical-body yd-ecosystem-lead">{PUBLIC_ENTRY_COPY.ecosystem.lead}</p>
       </header>
 
       <div className="yd-ecosystem-grid">
         <article className="yd-ecosystem-panel yd-ecosystem-panel--relay">
           <div className="yd-ecosystem-panel-badge">Relay</div>
-          <h3 className="yd-ecosystem-panel-title">Ruhige interne Organisation</h3>
+          <h3 className="yd-ecosystem-panel-title">Interne Kommunikation am Fall</h3>
           <p className="yd-ecosystem-panel-intro">
-            Kein Slack-Gefühl — Kommunikation, Übergaben und Routinen in einem geschützten
-            Praxisbereich. Alles am Fall, nichts verstreut.
+            Nachrichten, Gruppen, Übergaben und Aufgaben — strukturiert in Relay statt WhatsApp,
+            Telefon und verstreuten E-Mails. Alles am Patientenfall, nichts geht unter.
           </p>
 
           <p className="yd-ecosystem-replaces-label">Statt …</p>

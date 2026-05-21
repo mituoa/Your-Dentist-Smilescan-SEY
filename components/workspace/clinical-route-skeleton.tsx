@@ -147,7 +147,10 @@ export function ClinicalInboxSkeleton() {
 
 export function ClinicalInboxDetailSkeleton() {
   return (
-    <div className="flex h-full min-h-[320px] flex-col overflow-hidden" style={{ background: "#F7F9FC" }}>
+    <div
+      className="yd-inbox-detail-root flex h-full min-h-0 flex-col overflow-hidden"
+      style={{ background: "#F7F9FC" }}
+    >
       <div className="border-b border-[rgba(15,23,42,0.06)] bg-white/90 px-6 py-8 md:px-10">
         {bar("mb-3 h-8 max-w-lg")}
         {bar("h-3.5 w-44")}

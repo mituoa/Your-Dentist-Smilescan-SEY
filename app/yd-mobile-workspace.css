@@ -5,6 +5,57 @@
 
 /* Mobile drawer: see yd-mobile-sidebar.css */
 
+/* —— Mobile workspace topbar (ein Fokus: Menü · Marke · Avatar) —— */
+@media (max-width: 767px) {
+  .yd-mobile-workspace-topbar {
+    border-bottom: 1px solid rgba(180, 198, 218, 0.2);
+    background: rgba(255, 253, 250, 0.82);
+    backdrop-filter: blur(16px) saturate(1.1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.1);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .yd-mobile-workspace-topbar-inner {
+    padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  }
+
+  .yd-mobile-workspace-topbar-brand [data-brand="your-dentist"] {
+    overflow: hidden;
+  }
+
+  .yd-protected-topbar {
+    display: none !important;
+  }
+
+  main:has(.yd-dashboard) {
+    padding-top: 0.25rem !important;
+  }
+
+  .yd-dash-mobile-greeting {
+    margin-bottom: 0.75rem;
+  }
+
+  .yd-dash-mobile-toolbar {
+    margin-bottom: 1rem;
+  }
+
+  .yd-dash-mobile-toolbar-btn {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(180, 198, 218, 0.32);
+    color: #3d5266;
+  }
+
+  .yd-dash-mobile-icon-btn {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(180, 198, 218, 0.28);
+  }
+
+  .yd-dash-mobile-search-panel {
+    margin-top: 0.5rem;
+  }
+}
+
 /* —— Dashboard mobile density —— */
 @media (max-width: 767px) {
   .yd-dashboard {
@@ -151,21 +202,7 @@
   }
 }
 
-/* —— Calmer mobile topbar —— */
 @media (max-width: 767px) {
-  .yd-protected-topbar {
-    background: rgba(255, 255, 255, 0.78) !important;
-    border-bottom-color: rgba(180, 198, 218, 0.2) !important;
-    backdrop-filter: blur(16px) saturate(1.1);
-    -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  }
-
-  .yd-protected-topbar > div {
-    min-height: 52px;
-    padding-left: max(0.875rem, env(safe-area-inset-left)) !important;
-    padding-right: max(0.875rem, env(safe-area-inset-right)) !important;
-  }
-
   .yd-mobile-menu-trigger {
     border-color: rgba(180, 198, 218, 0.35) !important;
     background: rgba(255, 255, 255, 0.65) !important;

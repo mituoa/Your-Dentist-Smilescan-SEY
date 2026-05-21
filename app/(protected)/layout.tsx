@@ -135,9 +135,6 @@ export default async function ProtectedLayout({
                   inboxCount={inboxCount}
                   myTasksCount={myTasksCount}
                   myTasksOverdueCount={myTasksOverdueCount}
-                  avatarUrl={profileData?.photo_url ?? null}
-                  displayName={profileData?.display_name ?? null}
-                  email={user.email || ""}
                   navAmbient={navAmbient}
                 />
               </MobileSidebarFrame>
