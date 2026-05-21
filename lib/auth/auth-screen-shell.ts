@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 
 /**
- * Einheitliche Auth-Oberfläche: gleicher Canvas + Card-Rhythmus wie `/login`
- * (bewusst verankert — solide Fläche, weiches Schichten-Shadow, kein „schwebendes“ Glass).
+ * @deprecated Legacy warm-canvas shell — neue Auth-Seiten nutzen `YdAuthEnvironment` + `app/yd-auth.css`.
+ * Bestehende Imports bleiben für schrittweise Migration erhalten.
  */
 export const AUTH_SCREEN_CANVAS_CLASS =
   "relative min-h-[100dvh] w-full overflow-x-hidden bg-[#F8F7F3]" as const;

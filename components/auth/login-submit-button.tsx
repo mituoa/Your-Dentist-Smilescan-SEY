@@ -11,8 +11,8 @@ export function LoginSubmitButton(props: { disabledExternal?: boolean }) {
       type="submit"
       disabled={disabled}
       aria-busy={pending}
-      className="yd-login-btn-primary yd-login-awaken-field mt-5 lg:mt-6"
-      style={{ ["--yd-login-field-i" as string]: "2" }}
+      className="yd-auth-btn-primary yd-auth-awaken-field"
+      style={{ ["--yd-auth-field-i" as string]: "2" }}
     >
       {pending ? (
         <span className="flex items-center justify-center gap-2">

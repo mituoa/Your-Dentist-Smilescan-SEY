@@ -6,14 +6,15 @@ import Link from "next/link";
 import { useFormStatus } from "react-dom";
 
 import { requestPasswordResetFromLogin } from "@/app/(auth)/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import {
-  AUTH_CARD_SHELL_CLASS,
-  authCardShellShadowStyle,
-} from "@/lib/auth/auth-screen-shell";
+  YdAuthAlert,
+  YdAuthFieldStack,
+  YdAuthIntro,
+  YdAuthLabel,
+  YdAuthLegalFooter,
+  YdAuthSuccess,
+} from "@/components/auth/yd-auth-ui";
+import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 
 const RESEND_COOLDOWN_SEC = 60;
 
@@ -25,7 +26,6 @@ function safeDecodeError(raw: string): string {
   }
 }
 
-/** Login-Fallback von `userFacingAuthError` für diesen Flow in neutrale Recovery-Sprache fassen. */
 function forgotPasswordErrorDisplay(decoded: string): string {
   const msg = userFacingAuthError(decoded);
   if (/Anmeldung ist fehlgeschlagen/i.test(msg)) {
@@ -34,7 +34,6 @@ function forgotPasswordErrorDisplay(decoded: string): string {
   return msg;
 }
 
-/** Eingabe während Server-Action sperren — verhindert parallele Änderung / Doppel-Interaktion. */
 function ForgotPasswordEmailFieldset({ children }: { children: ReactNode }) {
   const { pending } = useFormStatus();
   return (
@@ -65,17 +64,14 @@ function ForgotPasswordSubmitButton({
       : "E-Mail erneut senden";
 
   return (
-    <Button
+    <button
       type="submit"
-      variant={sent ? "secondary" : "primary"}
       disabled={disabled}
       aria-busy={pending}
-      className={`h-11 w-full rounded-lg text-[14px] font-medium shadow-none transition-colors duration-150 sm:h-12 sm:rounded-xl sm:text-[15px] ${
-        sent ? "border-slate-200 text-slate-800 hover:bg-slate-50 disabled:opacity-50" : "hover:shadow-sm disabled:opacity-[0.55]"
-      }`}
+      className={sent ? "yd-auth-btn-secondary mt-1" : "yd-auth-btn-primary"}
     >
       {pending ? "Wird übermittelt …" : label}
-    </Button>
+    </button>
   );
 }
 
@@ -112,44 +108,43 @@ export function ForgotPasswordCard(props: {
       : "/login";
 
   return (
-    <div className={`${AUTH_CARD_SHELL_CLASS} min-w-0 w-full`} style={authCardShellShadowStyle}>
-      <header className="mb-6 text-center sm:mb-8">
-        <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-slate-900 sm:text-2xl">
-          Passwort zurücksetzen
-        </h1>
-        {sent ? (
-          <div className="mx-auto mt-4 max-w-sm space-y-2 break-words" role="status" aria-live="polite">
-            <p className="text-[14px] font-normal leading-snug text-slate-800 sm:text-[15px]">
-              Bitte prüfen Sie Ihren Posteingang.
-            </p>
-            <p className="text-[13px] font-normal leading-relaxed text-slate-600 sm:text-[14px]">
-              Falls ein Konto gefunden wurde, erhalten Sie in wenigen Minuten eine E-Mail.
-            </p>
-          </div>
-        ) : (
-          <p className="mx-auto mt-3 max-w-sm break-words text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-4 sm:text-[14px]">
-            E-Mail-Adresse eingeben. Sie erhalten per E-Mail einen Link zum Zurücksetzen.
-          </p>
-        )}
-      </header>
+    <>
+      <YdAuthIntro
+        title="Passwort sicher zurücksetzen"
+        subtitle={
+          sent ? (
+            <>
+              Bitte prüfen Sie Ihren Posteingang. Falls ein Konto gefunden wurde, erhalten Sie in wenigen
+              Minuten eine E-Mail mit dem Link zum Zurücksetzen.
+            </>
+          ) : (
+            <>Geben Sie Ihre E-Mail-Adresse ein. Sie erhalten einen geschützten Link zum Zurücksetzen.</>
+          )
+        }
+        fieldIndex={0}
+      />
 
-      {errorDisplay ? (
-        <p
-          className="mb-6 break-words rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center text-[13px] font-normal leading-relaxed text-red-900 sm:mb-8 sm:text-sm"
-          role="alert"
-        >
-          {errorDisplay}
-        </p>
+      {sent ? (
+        <YdAuthSuccess title="Anfrage übermittelt" className="mb-6">
+          <p>
+            Der Link ist nur begrenzt gültig. Prüfen Sie auch den Spam-Ordner, falls keine Nachricht
+            ankommt.
+          </p>
+        </YdAuthSuccess>
       ) : null}
 
-      <form action={requestPasswordResetFromLogin} className="flex flex-col gap-8 sm:gap-10">
+      {errorDisplay ? (
+        <YdAuthAlert tone="danger" className="mb-6" title="Anfrage nicht möglich">
+          {errorDisplay}
+        </YdAuthAlert>
+      ) : null}
+
+      <form action={requestPasswordResetFromLogin} className="yd-auth-form-stack">
         {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
         <ForgotPasswordEmailFieldset>
-          <div className="space-y-2">
-            <Label htmlFor="forgot-email" className="text-[13px] font-medium text-slate-700">
-              E-Mail
-            </Label>
-            <Input
+          <YdAuthFieldStack fieldIndex={1}>
+            <YdAuthLabel htmlFor="forgot-email">E-Mail</YdAuthLabel>
+            <input
               id="forgot-email"
               name="email"
               type="email"
@@ -157,33 +152,15 @@ export function ForgotPasswordCard(props: {
               autoComplete="email"
               placeholder="doc@praxis.de"
               defaultValue={prefilledEmail}
-              className="h-11 rounded-lg border border-slate-200/90 bg-white px-3.5 text-[16px] text-slate-900 placeholder:text-slate-400 transition-colors focus-visible:border-slate-400 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-slate-300/40 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
+              className="yd-auth-input"
             />
-          </div>
+          </YdAuthFieldStack>
         </ForgotPasswordEmailFieldset>
 
         <ForgotPasswordSubmitButton sent={sent} cooldownSec={cooldownSec} />
       </form>
 
-      <div className="mt-8 border-t border-slate-100 pt-6 text-center sm:mt-10 sm:pt-8">
-        <p className="text-[11px] text-slate-400">
-          <Link
-            href="/impressum"
-            className="inline-flex min-h-[44px] items-center text-slate-500 underline decoration-slate-200/80 underline-offset-2 transition-colors hover:text-slate-700 hover:decoration-slate-400 max-md:py-2 md:min-h-0 md:py-0"
-          >
-            Anbieter & Kontakt
-          </Link>
-        </p>
-        <p className="mt-3 text-[13px] text-slate-600 sm:mt-4">
-          <Link
-            prefetch
-            href={loginHref}
-            className="inline-flex min-h-[44px] items-center font-medium text-slate-700 underline-offset-2 transition-colors hover:text-slate-900 hover:underline max-md:py-2 md:min-h-0 md:py-0"
-          >
-            Zurück zum Login
-          </Link>
-        </p>
-      </div>
-    </div>
+      <YdAuthLegalFooter loginHref={loginHref} className="mt-8" />
+    </>
   );
 }

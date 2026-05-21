@@ -1,0 +1,1036 @@
+/**
+ * Your Dentist — Login / Auth (focused OS entrance)
+ */
+
+:root {
+  --yd-auth-ease-spatial: cubic-bezier(0.19, 1, 0.32, 1);
+  --yd-auth-ease-luminous: cubic-bezier(0.25, 0.9, 0.35, 1);
+  --yd-auth-ease-diffuse: cubic-bezier(0.33, 0, 0.15, 1);
+}
+
+.yd-auth,
+.yd-login {
+  position: relative;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: #0c1929;
+}
+
+.yd-auth-page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+      ellipse 88% 65% at 78% 4%,
+      rgba(47, 128, 237, 0.2) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 12% 88%,
+      rgba(125, 211, 252, 0.1) 0%,
+      transparent 48%
+    ),
+    linear-gradient(165deg, #a3b3c2 0%, #8e9eae 100%);
+}
+
+.yd-auth-ghost {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.yd-auth-ghost-sidebar {
+  position: absolute;
+  left: 1.25rem;
+  top: 1.25rem;
+  bottom: 1.25rem;
+  width: 108px;
+  border-radius: 44px;
+  opacity: 0.2;
+  filter: blur(32px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(200, 220, 240, 0.82) 100%);
+}
+
+.yd-auth-ghost-canvas {
+  position: absolute;
+  left: 7.5rem;
+  right: 1.5rem;
+  top: 1rem;
+  bottom: 1rem;
+  border-radius: 52px;
+  opacity: 0.12;
+  filter: blur(40px);
+  background: linear-gradient(168deg, #f2f7fc 0%, #dae8f4 100%);
+}
+
+@media (max-width: 767px) {
+  .yd-auth-ghost-sidebar {
+    display: none;
+  }
+
+  .yd-auth-ghost-canvas {
+    left: 0.75rem;
+    right: 0.75rem;
+    opacity: 0.09;
+  }
+}
+
+.yd-auth-orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  filter: blur(72px);
+}
+
+.yd-auth-orb--a {
+  top: -8%;
+  right: 4%;
+  width: min(44vw, 420px);
+  height: min(44vw, 420px);
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.18) 0%, transparent 68%);
+}
+
+.yd-auth-orb--b {
+  bottom: 6%;
+  left: -6%;
+  width: min(38vw, 360px);
+  height: min(38vw, 360px);
+  background: radial-gradient(circle, rgba(47, 128, 237, 0.14) 0%, transparent 70%);
+}
+
+.yd-auth-orb--c {
+  top: 42%;
+  left: 50%;
+  width: min(56vw, 520px);
+  height: min(32vw, 280px);
+  transform: translateX(-50%);
+  opacity: 0.55;
+  background: radial-gradient(ellipse, rgba(47, 128, 237, 0.12) 0%, transparent 72%);
+}
+
+/* —— Centered composition —— */
+.yd-auth-stage {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  padding: max(0.75rem, env(safe-area-inset-top)) 1rem max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.yd-auth-compose {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+}
+
+.yd-auth-panel-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: calc(100% + 48px);
+  height: calc(100% + 56px);
+  transform: translate(-50%, -50%);
+  border-radius: 40px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 85% 75% at 50% 42%,
+    rgba(125, 211, 252, 0.22) 0%,
+    rgba(47, 128, 237, 0.12) 42%,
+    transparent 72%
+  );
+  filter: blur(2px);
+}
+
+.yd-auth-panel {
+  position: relative;
+  z-index: 1;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(246, 250, 255, 0.92) 45%,
+    rgba(232, 243, 252, 0.9) 100%
+  );
+  box-shadow: 0 12px 40px rgba(15, 35, 58, 0.12), 0 4px 20px rgba(47, 128, 237, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-panel {
+    border-radius: 36px;
+  }
+}
+
+.yd-auth-panel-sheen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 42%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, transparent 100%);
+}
+
+.yd-auth-panel-inner {
+  position: relative;
+  padding: 1.5rem 1.375rem 1.375rem;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-panel-inner {
+    padding: 1.75rem 1.625rem 1.5rem;
+  }
+}
+
+.yd-auth-brand {
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-brand {
+    margin-bottom: 1.375rem;
+  }
+}
+
+/* —— Typography —— */
+.yd-auth-title {
+  color: #0c1929;
+  font-size: 1.375rem;
+  font-weight: 500;
+  letter-spacing: -0.032em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-title {
+    font-size: 1.5rem;
+  }
+}
+
+.yd-auth-subtitle {
+  color: #3d5266;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.yd-auth-intro {
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.yd-auth-intro .yd-auth-subtitle {
+  margin-top: 0.5rem;
+  max-width: 20rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* —— Inputs —— */
+.yd-auth-input {
+  height: 2.875rem;
+  width: 100%;
+  border-radius: 9999px;
+  border: 1px solid rgba(180, 198, 218, 0.42);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(241, 248, 255, 0.98) 100%);
+  padding: 0 1.0625rem;
+  font-size: 1rem;
+  color: #0c1929;
+  box-shadow: inset 0 1px 3px rgba(15, 35, 58, 0.04), inset 0 -1px 0 rgba(255, 255, 255, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+  transition: box-shadow 720ms var(--yd-auth-ease-spatial), border-color 720ms var(--yd-auth-ease-spatial);
+}
+
+.yd-auth-input::placeholder {
+  color: #6b849c;
+}
+
+.yd-auth-input:hover:not(:disabled) {
+  border-color: rgba(180, 198, 218, 0.55);
+  box-shadow: inset 0 1px 3px rgba(15, 35, 58, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.65),
+    0 4px 18px rgba(47, 128, 237, 0.07);
+}
+
+.yd-auth-input:focus {
+  outline: none;
+  border-color: rgba(47, 128, 237, 0.32);
+  box-shadow: inset 0 1px 2px rgba(15, 35, 58, 0.03), 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 0 0 4px rgba(47, 128, 237, 0.1), 0 8px 32px rgba(47, 128, 237, 0.12);
+}
+
+.yd-auth-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-input {
+    height: 3rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* —— Primary — premium medical, not marketing CTA —— */
+.yd-auth-btn-primary {
+  display: inline-flex;
+  height: 2.875rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(
+    168deg,
+    #5a9de8 0%,
+    #3d7fd4 38%,
+    #2a5f9e 72%,
+    #1e4a7a 100%
+  );
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 2px 4px rgba(30, 58, 95, 0.12), 0 8px 24px rgba(30, 74, 122, 0.28),
+    0 0 20px rgba(47, 128, 237, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: box-shadow 720ms var(--yd-auth-ease-spatial), filter 720ms var(--yd-auth-ease-spatial);
+}
+
+.yd-auth-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.03);
+  box-shadow: 0 4px 8px rgba(30, 58, 95, 0.14), 0 12px 32px rgba(30, 74, 122, 0.32),
+    0 0 28px rgba(47, 128, 237, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.yd-auth-btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-btn-primary {
+    height: 3rem;
+    font-size: 0.9375rem;
+  }
+}
+
+.yd-auth-btn-secondary {
+  display: inline-flex;
+  height: 2.875rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(180, 198, 218, 0.4);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(237, 246, 255, 0.88) 100%);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3d5266;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 2px 10px rgba(47, 128, 237, 0.05);
+  transition: box-shadow 720ms var(--yd-auth-ease-spatial), filter 720ms var(--yd-auth-ease-spatial);
+}
+
+.yd-auth-btn-secondary:hover:not(:disabled) {
+  filter: brightness(1.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 20px rgba(47, 128, 237, 0.09);
+}
+
+.yd-auth-btn-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.yd-auth-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #2f80ed;
+  transition: color 720ms var(--yd-auth-ease-spatial);
+}
+
+.yd-auth-link:hover {
+  color: #1a4f9c;
+}
+
+.yd-auth-register {
+  margin-top: 1.125rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: #5e7389;
+}
+
+.yd-auth-register .yd-auth-link {
+  font-weight: 500;
+}
+
+/* —— Alerts —— */
+.yd-auth-alert {
+  border-radius: 16px;
+  border: 1px solid;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.yd-auth-alert--danger {
+  border-color: rgba(239, 68, 68, 0.22);
+  background: rgba(254, 242, 242, 0.9);
+  color: #991b1b;
+}
+
+.yd-auth-alert--warning {
+  border-color: rgba(245, 158, 11, 0.24);
+  background: rgba(255, 251, 235, 0.92);
+  color: #92400e;
+}
+
+.yd-auth-alert--info {
+  border-color: rgba(47, 128, 237, 0.2);
+  background: rgba(224, 237, 254, 0.72);
+  color: #1e40af;
+}
+
+.yd-auth-alert--success {
+  border-color: rgba(34, 197, 94, 0.22);
+  background: rgba(220, 252, 231, 0.9);
+  color: #166534;
+}
+
+.yd-auth-alert-title {
+  font-weight: 500;
+}
+
+/* —— Divider —— */
+.yd-auth-divider {
+  position: relative;
+  margin: 1rem 0;
+}
+
+.yd-auth-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(180, 198, 218, 0.32);
+}
+
+.yd-auth-divider span {
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 0 0.625rem;
+  background: linear-gradient(168deg, #fafcfe 0%, #f0f7fd 100%);
+  font-size: 0.75rem;
+  color: #6b849c;
+}
+
+/* —— Trust + legal —— */
+.yd-auth-trust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin-top: 1.125rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(180, 198, 218, 0.22);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #6b849c;
+}
+
+.yd-auth-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.yd-auth-trust svg {
+  color: #7a94ab;
+  flex-shrink: 0;
+}
+
+.yd-auth-legal {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.6875rem;
+  color: #8ba3b8;
+}
+
+.yd-auth-legal-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+}
+
+.yd-auth-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* —— Awakening —— */
+.yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-bg {
+  animation: yd-auth-bg-in 1400ms var(--yd-auth-ease-diffuse) both;
+}
+
+.yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-ghost {
+  animation: yd-auth-ghost-in 1800ms var(--yd-auth-ease-diffuse) 200ms both;
+}
+
+.yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-island {
+  animation: yd-auth-island-in 1500ms var(--yd-auth-ease-spatial) 360ms both;
+}
+
+.yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-auth {
+  animation: yd-auth-auth-in 1100ms var(--yd-auth-ease-spatial) 680ms both;
+}
+
+.yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-field {
+  animation: yd-auth-field-in 900ms var(--yd-auth-ease-luminous) both;
+  animation-delay: calc(860ms + var(--yd-auth-field-i, 0) * 60ms);
+}
+
+.yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-settle {
+  animation: yd-auth-settle 2000ms var(--yd-auth-ease-diffuse) 1200ms both;
+}
+
+@keyframes yd-auth-bg-in {
+  from {
+    opacity: 0.72;
+    filter: saturate(0.9) brightness(0.96);
+  }
+  to {
+    opacity: 1;
+    filter: saturate(1) brightness(1);
+  }
+}
+
+@keyframes yd-auth-ghost-in {
+  from {
+    opacity: 0;
+    filter: blur(40px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(32px);
+  }
+}
+
+@keyframes yd-auth-island-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes yd-auth-auth-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes yd-auth-field-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes yd-auth-settle {
+  from {
+    opacity: 0.88;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-bg,
+  .yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-ghost,
+  .yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-island,
+  .yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-auth,
+  .yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-field,
+  .yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-settle {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  .yd-auth-input,
+  .yd-auth-btn-primary,
+  .yd-auth-btn-secondary {
+    transition: none;
+  }
+}
+
+/* Short viewports: allow minimal internal scroll inside panel only */
+@media (max-height: 640px) {
+  .yd-auth,
+  .yd-login {
+    overflow-y: auto;
+  }
+
+  .yd-auth-stage {
+    align-items: flex-start;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* —— Scroll + wide variants —— */
+.yd-auth--scroll {
+  height: auto;
+  min-height: 100dvh;
+  max-height: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.yd-auth--scroll .yd-auth-stage {
+  height: auto;
+  min-height: 100dvh;
+  align-items: flex-start;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.yd-auth-bare {
+  position: relative;
+  width: 100%;
+  max-width: min(48rem, calc(100vw - 2rem));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.yd-auth-compose--wide {
+  max-width: min(42rem, calc(100vw - 2rem));
+}
+
+.yd-auth-compose--wide .yd-auth-panel-halo {
+  width: calc(100% + 64px);
+  height: calc(100% + 72px);
+}
+
+/* —— Form labels —— */
+.yd-auth-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(12, 25, 41, 0.72);
+}
+
+/* —— Pending / success blocks —— */
+.yd-auth-pending {
+  margin-bottom: 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(125, 211, 252, 0.45);
+  background: linear-gradient(
+    165deg,
+    rgba(240, 249, 255, 0.95) 0%,
+    rgba(224, 242, 254, 0.88) 100%
+  );
+  padding: 1rem 1.125rem;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.yd-auth-pending-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0c4a6e;
+}
+
+.yd-auth-pending-body {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(12, 74, 110, 0.82);
+}
+
+.yd-auth-success {
+  margin-bottom: 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(134, 239, 172, 0.4);
+  background: linear-gradient(
+    165deg,
+    rgba(240, 253, 244, 0.95) 0%,
+    rgba(224, 242, 254, 0.75) 100%
+  );
+  padding: 1rem 1.125rem;
+  text-align: center;
+}
+
+.yd-auth-success-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #14532d;
+}
+
+.yd-auth-success-body {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(20, 83, 45, 0.78);
+}
+
+/* —— Ambient loading —— */
+.yd-auth-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.yd-auth-loading-pulse {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(125, 211, 252, 0.55) 0%,
+    rgba(47, 128, 237, 0.15) 55%,
+    transparent 72%
+  );
+  animation: yd-auth-pulse 2.4s var(--yd-auth-ease-diffuse) infinite;
+}
+
+.yd-auth-loading-label {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: rgba(12, 25, 41, 0.55);
+}
+
+@keyframes yd-auth-register-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes yd-auth-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+    filter: blur(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(1px);
+  }
+}
+
+/* —— Register overlay (modal on ambient canvas) —— */
+.yd-auth-register-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+.yd-auth-register-backdrop {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+      ellipse 80% 60% at 50% 20%,
+      rgba(47, 128, 237, 0.18) 0%,
+      transparent 55%
+    ),
+    rgba(12, 25, 41, 0.42);
+  backdrop-filter: blur(14px);
+}
+
+.yd-auth-register-stage {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  padding: max(0.75rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  .yd-auth-register-stage {
+    min-height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem 4rem;
+  }
+}
+
+.yd-auth-register-panel {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 42rem;
+  flex: 1;
+  flex-direction: column;
+  overflow-x: hidden;
+  animation: yd-auth-register-in 1100ms var(--yd-auth-ease-spatial) 200ms both;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(246, 250, 255, 0.94) 48%,
+    rgba(232, 243, 252, 0.92) 100%
+  );
+  box-shadow: 0 16px 48px rgba(15, 35, 58, 0.14), 0 6px 24px rgba(47, 128, 237, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+@media (max-width: 767px) {
+  .yd-auth-register-panel {
+    max-height: min(
+      calc(100dvh - 1.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)),
+      920px
+    );
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.yd-auth-register-header {
+  position: relative;
+  padding: 1.5rem 1.25rem 0.75rem;
+  background: linear-gradient(180deg, rgba(125, 211, 252, 0.08) 0%, transparent 100%);
+}
+
+@media (min-width: 768px) {
+  .yd-auth-register-header {
+    padding: 2rem 2.5rem 1rem;
+  }
+}
+
+.yd-auth-register-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 0 1.25rem max(2.5rem, calc(1.5rem + env(safe-area-inset-bottom)));
+}
+
+@media (min-width: 768px) {
+  .yd-auth-register-body {
+    padding: 0 2.5rem 2.5rem;
+  }
+}
+
+.yd-auth-close-btn {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(12, 25, 41, 0.65);
+  box-shadow: 0 4px 16px rgba(47, 128, 237, 0.08);
+  transition: box-shadow 720ms var(--yd-auth-ease-spatial), background 720ms var(--yd-auth-ease-spatial);
+}
+
+.yd-auth-close-btn:hover {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 20px rgba(47, 128, 237, 0.12);
+}
+
+.yd-auth-close-btn {
+  right: max(0.75rem, env(safe-area-inset-right));
+  top: max(0.75rem, env(safe-area-inset-top));
+}
+
+@media (min-width: 768px) {
+  .yd-auth-close-btn {
+    right: 1.25rem;
+    top: 1.25rem;
+    height: 2.25rem;
+    width: 2.25rem;
+    min-height: 0;
+    min-width: 0;
+  }
+}
+
+.yd-auth-step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.yd-auth-step-dot {
+  height: 0.375rem;
+  width: 0.375rem;
+  border-radius: 9999px;
+  background: rgba(12, 25, 41, 0.12);
+  transition: width 720ms var(--yd-auth-ease-spatial), background 720ms var(--yd-auth-ease-spatial);
+}
+
+.yd-auth-step-dot--active {
+  width: 1.5rem;
+  background: rgba(47, 128, 237, 0.55);
+}
+
+.yd-auth-checklist {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 28rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(186, 230, 253, 0.55);
+  background: rgba(255, 255, 255, 0.55);
+  padding: 1rem 1.125rem;
+  text-align: left;
+}
+
+.yd-auth-checklist-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(12, 25, 41, 0.5);
+}
+
+.yd-auth-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: inherit;
+  background: rgba(246, 250, 255, 0.88);
+  backdrop-filter: blur(4px);
+}
+
+.yd-auth-register-title {
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: #0c1929;
+}
+
+.yd-auth-register-subtitle {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 28rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(12, 25, 41, 0.58);
+}
+
+.yd-auth-register-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: rgba(12, 25, 41, 0.5);
+}
+
+.yd-auth-register-footer .yd-auth-link {
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-auth-loading-pulse {
+    animation: none;
+    opacity: 0.75;
+  }
+}

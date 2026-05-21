@@ -7,10 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getAuthenticatedEntryPath } from "@/app/(auth)/actions";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
-import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { YdAuthAlert, YdAuthLabel, YdAuthLoadingState } from "@/components/auth/yd-auth-ui";
 
 type Props = {
   tokenHashFromQuery: string | null;
@@ -97,17 +94,7 @@ function parseHashParams(): {
 
 /** Ein Spinner wie Route-/Auth-Loading — sichtbarer Status steht im Seitenkopf (kein doppelter Fließtext). */
 function VerifySpinner() {
-  return (
-    <div
-      className="flex flex-col items-center gap-3 py-2 text-center"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-      aria-label="Link wird geprüft"
-    >
-      <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-[#0284C7]/70 motion-reduce:animate-none motion-reduce:opacity-80" />
-    </div>
-  );
+  return <YdAuthLoadingState label="Link wird geprüft …" className="py-4" />;
 }
 
 export function ResetPasswordForm({
@@ -288,107 +275,87 @@ export function ResetPasswordForm({
   }
 
   return (
-    <div className="min-w-0 space-y-0">
-      <header className="mb-8 text-center sm:mb-9">
-        <h1 className="font-serif text-[1.375rem] font-semibold leading-snug tracking-tight text-gray-900 sm:text-2xl">
-          Neues Passwort setzen
-        </h1>
-        {(verifying || verified || (!verifying && verifyError)) && (
-          <p className="mx-auto mt-3 min-w-0 max-w-sm text-[13px] font-normal leading-relaxed text-slate-600 sm:mt-3.5 sm:text-[14px]">
-            {verifying
-              ? "Wir prüfen den Link aus Ihrer E-Mail. Bei schlechter Verbindung kann das etwas länger dauern."
-              : verified
-                ? "Geben Sie Ihr neues Passwort zweimal ein (mindestens 8 Zeichen). Nach dem Speichern leiten wir Sie weiter."
-                : "Nutzen Sie die Aktionen unter der Meldung, um fortzufahren."}
+    <div className="min-w-0">
+      {verifying ? (
+        <>
+          <p className="yd-auth-subtitle mb-4 text-center">
+            Wir prüfen den Link aus Ihrer E-Mail. Bei schlechter Verbindung kann das etwas länger dauern.
           </p>
-        )}
-      </header>
-
-      {verifying ? <VerifySpinner /> : null}
+          <VerifySpinner />
+        </>
+      ) : null}
 
       {!verifying && verifyError ? (
-        <div className="min-w-0 w-full space-y-4 rounded-xl border border-red-200/80 bg-red-50/90 px-4 py-3 text-center sm:text-left">
-          <p className="max-w-full break-words text-[13px] font-normal leading-relaxed text-red-900 sm:text-sm">
-            {verifyError}
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
-            <Link
-              href={forgotPasswordHref}
-              prefetch
-              className="inline-flex min-h-[44px] touch-manipulation items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
-            >
+        <YdAuthAlert tone="warning" title="Link nicht verwendbar" className="mb-6">
+          <p className="mb-4">{verifyError}</p>
+          <div className="flex flex-col gap-2 text-left">
+            <Link href={forgotPasswordHref} prefetch className="yd-auth-link inline-flex min-h-[44px] items-center">
               Neuen Link anfordern
             </Link>
-            <Link
-              href="/login"
-              prefetch
-              className="inline-flex min-h-[44px] touch-manipulation items-center text-[13px] font-medium text-[#0284C7] underline-offset-2 hover:text-[#0369A1] hover:underline max-md:py-2 sm:text-sm md:min-h-0 md:py-0"
-            >
+            <Link href="/login" prefetch className="yd-auth-link inline-flex min-h-[44px] items-center">
               Zum Login
             </Link>
           </div>
-        </div>
+        </YdAuthAlert>
       ) : null}
 
       {!verifying && verified ? (
-        <form
-          onSubmit={handleSubmit}
-          className="flex min-w-0 flex-col gap-8 sm:gap-10"
-          aria-busy={submitting || navigatingAfterSave}
-        >
-          <fieldset
-            disabled={submitting || navigatingAfterSave}
-            className="m-0 flex min-w-0 flex-col gap-6 border-0 p-0 sm:gap-7 disabled:pointer-events-none disabled:opacity-[0.58]"
+        <>
+          <p className="yd-auth-subtitle mb-6 text-center">
+            Mindestens 8 Zeichen. Nach dem Speichern leiten wir Sie in Ihren Praxisbereich weiter.
+          </p>
+          <form
+            onSubmit={handleSubmit}
+            className="yd-auth-form-stack"
+            aria-busy={submitting || navigatingAfterSave}
           >
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="new-password" className="text-[13px] font-medium text-slate-700">
-                Neues Passwort
-              </Label>
-              <Input
-                id="new-password"
-                name="new_password"
-                type="password"
-                autoComplete="new-password"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
-              />
-            </div>
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="confirm-password" className="text-[13px] font-medium text-slate-700">
-                Bestätigung
-              </Label>
-              <Input
-                id="confirm-password"
-                name="new_password_confirm"
-                type="password"
-                autoComplete="new-password"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                required
-                minLength={8}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className="h-11 rounded-lg border border-gray-200/90 bg-white px-3.5 text-[16px] text-gray-900 transition-colors focus-visible:border-[#0284C7] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#0284C7]/10 sm:h-[52px] sm:rounded-xl sm:text-[15px]"
-              />
-            </div>
-          </fieldset>
-          <div className="flex scroll-mt-8 flex-col gap-4 sm:gap-5">
+            <fieldset
+              disabled={submitting || navigatingAfterSave}
+              className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
+            >
+              <div className="min-w-0">
+                <YdAuthLabel htmlFor="new-password">Neues Passwort</YdAuthLabel>
+                <input
+                  id="new-password"
+                  name="new_password"
+                  type="password"
+                  autoComplete="new-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="yd-auth-input"
+                />
+              </div>
+              <div className="min-w-0">
+                <YdAuthLabel htmlFor="confirm-password">Bestätigung</YdAuthLabel>
+                <input
+                  id="confirm-password"
+                  name="new_password_confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  required
+                  minLength={8}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="yd-auth-input"
+                />
+              </div>
+            </fieldset>
             {submitError ? (
-              <p className="max-w-full break-words rounded-xl border border-red-200/80 bg-red-50/90 px-3 py-2 text-[13px] text-red-900 sm:text-sm">
+              <YdAuthAlert tone="danger" title="Speichern nicht möglich">
                 {submitError}
-              </p>
+              </YdAuthAlert>
             ) : null}
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              className="h-11 min-h-[48px] w-full touch-manipulation rounded-lg text-[14px] font-semibold shadow-sm transition-shadow duration-200 hover:shadow-md sm:h-12 sm:min-h-0 sm:rounded-xl sm:text-[15px]"
+              className="yd-auth-btn-primary"
               disabled={!canSubmit}
               aria-busy={submitting || navigatingAfterSave}
             >
@@ -397,9 +364,9 @@ export function ResetPasswordForm({
                 : submitting
                   ? "Wird gespeichert …"
                   : "Passwort speichern"}
-            </Button>
-          </div>
-        </form>
+            </button>
+          </form>
+        </>
       ) : null}
     </div>
   );

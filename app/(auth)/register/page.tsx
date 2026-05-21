@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
-import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
+import { YdAuthLoadingState } from "@/components/auth/yd-auth-ui";
 import { resendSignupConfirmation, signUp } from "../actions";
 import { isRegistrationDemoMode, skipPaymentAtSignup } from "@/lib/registration-demo";
 import { RegisterClient } from "./RegisterClient";
@@ -61,28 +61,18 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     ? `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
     : "/login";
 
-  /** Only for pricing-origin flow: return to pricing section after closing the plan/payment step. */
-  const loginHrefWithPricingHash = fromPricing
-    ? inviteToken
-      ? `${loginHrefPlain}#pricing`
-      : "/login#pricing"
-    : null;
+  const registerHrefPlain = inviteToken
+    ? `/register?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
+    : "/register";
+
+  const loginHrefWithPricingHash = fromPricing ? `${registerHrefPlain}#pricing` : null;
 
   return (
-    <div className="w-full min-w-0 max-w-full overflow-x-hidden pb-[max(0.5rem,env(safe-area-inset-bottom,0px)))]">
+    <YdAuthEnvironment scroll wide bare showBrand={false}>
       <Suspense
         fallback={
-          <div
-            className="mx-auto flex min-h-[min(480px,75dvh)] w-full max-w-2xl flex-col items-center justify-center rounded-3xl border border-gray-200/80 bg-white px-6 py-16 shadow-[0_4px_6px_rgba(0,0,0,0.05),0_10px_20px_rgba(0,0,0,0.08)]"
-            role="status"
-            aria-live="polite"
-            aria-label="Registrierung wird geladen"
-          >
-            <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
-            <div className="mt-8 flex flex-col items-center gap-3 text-center">
-              <AuthLoadingSpinner />
-              <p className="text-[13px] text-gray-500">Registrierung wird geladen…</p>
-            </div>
+          <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
+            <YdAuthLoadingState label="Registrierung wird geladen …" />
           </div>
         }
       >
@@ -105,15 +95,12 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           licenseStepOptional={isRegistrationDemoMode()}
         />
       </Suspense>
-      <div className="px-4 pb-10 pt-2 text-center text-[13px] text-gray-500 sm:px-5">
+      <p className="yd-auth-register-footer">
         Schon ein Konto?{" "}
-        <Link
-          href={loginHrefPlain}
-          className="font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
-        >
+        <Link prefetch href={loginHrefPlain} className="yd-auth-link">
           Anmelden
         </Link>
-      </div>
-    </div>
+      </p>
+    </YdAuthEnvironment>
   );
 }

@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 
-import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
 import { RegisterFormBackButton } from "@/components/auth/register-form-back-button";
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
 import { ResendSignupSubmitButton } from "@/components/auth/resend-signup-submit-button";
@@ -799,54 +798,16 @@ export function RegisterClient(props: {
 
   return (
     <>
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.4); }
-          50% { box-shadow: 0 0 0 8px rgba(2, 132, 199, 0); }
-        }
-        @keyframes checkmark {
-          from { opacity: 0; transform: scale(0); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes modalSlideIn {
-          from { opacity: 0; transform: scale(0.96) translateY(12px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-      `}</style>
+      <div className="yd-auth-register-overlay">
+        <div className="yd-auth-register-backdrop" aria-hidden />
 
-      <div
-        className="fixed inset-0 z-50 flex min-h-0 flex-col overflow-x-hidden overscroll-y-contain max-md:overflow-hidden max-md:[-webkit-overflow-scrolling:touch] md:overflow-y-auto"
-        style={{ animation: "fadeIn 0.2s ease-out" }}
-      >
-        <div
-          className="pointer-events-none fixed inset-0 z-0 bg-slate-900/60 backdrop-blur-md"
-          style={{ animation: "fadeIn 0.25s ease-out" }}
-          aria-hidden
-        >
-        </div>
-
-        <div className="relative z-10 flex w-full max-w-full min-w-0 flex-1 flex-col items-stretch px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(0.75rem,env(safe-area-inset-top,0px))] max-md:min-h-0 sm:px-5 md:min-h-screen md:flex-none md:items-center md:justify-center md:px-8 md:py-12 md:pb-16">
-          <div
-            className="relative mx-auto flex w-full min-w-0 max-w-2xl flex-1 flex-col overflow-x-hidden rounded-3xl bg-white max-md:min-h-0 max-md:max-h-[min(calc(100dvh-1.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)),920px)] max-md:touch-pan-y max-md:overflow-y-auto max-md:overscroll-y-contain md:max-h-none md:flex-none md:overflow-visible"
-            style={{
-              boxShadow:
-                "0 4px 6px rgba(0,0,0,0.05), 0 10px 20px rgba(0,0,0,0.10), 0 20px 40px rgba(0,0,0,0.15)",
-              animation: "modalSlideIn 0.25s ease-out",
-            }}
-          >
+        <div className="yd-auth-register-stage">
+          <div className="yd-auth-register-panel">
           <button
             type="button"
             onClick={handleRegistrationModalClose}
             aria-label="Schließen"
-            className="absolute z-10 flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gray-100 transition-all duration-200 active:scale-90 hover:bg-gray-200 max-md:right-[max(0.75rem,env(safe-area-inset-right,0px))] max-md:top-[max(0.75rem,env(safe-area-inset-top,0px))] md:right-5 md:top-5 md:h-9 md:w-9 md:min-h-0 md:min-w-0"
+            className="yd-auth-close-btn"
           >
             <svg
               className="h-4 w-4 text-gray-600 transition-all duration-200 group-hover:rotate-90"
@@ -860,26 +821,18 @@ export function RegisterClient(props: {
             </svg>
           </button>
 
-            <div
-              className="relative px-4 pb-5 pt-6 sm:px-5 md:px-10 md:pb-6 md:pt-8"
-              style={{
-                background:
-                  "linear-gradient(to bottom, rgba(2, 132, 199, 0.03) 0%, rgba(255,255,255,0) 100%)",
-              }}
-            >
+            <div className="yd-auth-register-header">
               <div className="mb-1 flex justify-center">
                 <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
               </div>
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col px-4 pb-[max(2.5rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] pt-0 sm:px-5 md:px-10 md:pb-10">
+            <div className="yd-auth-register-body">
               {props.success ? (
-                <div className="py-6 text-center" style={{ animation: "slideIn 0.4s ease-out" }}>
-                  <h3 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">
-                    Bitte E‑Mail bestätigen
-                  </h3>
+                <div className="py-6 text-center">
+                  <h3 className="yd-auth-register-title">Bitte E‑Mail bestätigen</h3>
                   {props.queryError ? (
-                    <p className="mx-auto mb-4 max-w-md scroll-mt-6 break-words rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-left text-[13px] leading-relaxed text-amber-950">
+                    <p className="yd-auth-alert yd-auth-alert--warning mx-auto mb-4 max-w-md scroll-mt-6 text-left">
                       {userFacingAuthError(
                         (() => {
                           try {
@@ -892,20 +845,18 @@ export function RegisterClient(props: {
                     </p>
                   ) : null}
                   {props.resent ? (
-                    <p className="mx-auto mb-4 max-w-md scroll-mt-6 break-words rounded-xl border border-emerald-200/70 bg-emerald-50/60 px-4 py-3 text-left text-[13px] leading-relaxed text-emerald-950">
+                    <p className="yd-auth-alert yd-auth-alert--success mx-auto mb-4 max-w-md scroll-mt-6 text-left">
                       Sofern ein passendes Konto existiert, wurde die Bestätigungs-E-Mail erneut versendet. Bitte
                       prüfen Sie auch den Spam-Ordner.
                     </p>
                   ) : null}
-                  <p className="mx-auto mb-5 max-w-md text-[14px] leading-relaxed text-gray-600">
+                  <p className="yd-auth-register-subtitle mb-5">
                     Um den Zugang zu aktivieren, bestätigen Sie bitte Ihre E‑Mail-Adresse über den Link in der
                     Bestätigungs‑E‑Mail.
                   </p>
 
-                  <div className="mx-auto mb-6 max-w-md rounded-2xl border border-gray-200 bg-gray-50/60 p-4 text-left">
-                    <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
-                      Checkliste
-                    </p>
+                  <div className="yd-auth-checklist mx-auto mb-6 max-w-md">
+                    <p className="yd-auth-checklist-title">Checkliste</p>
                     <ul className="mt-3 space-y-2 text-[13px] text-gray-700">
                       <li>1) Posteingang prüfen</li>
                       <li>2) Spam/Promotion prüfen</li>
@@ -920,7 +871,7 @@ export function RegisterClient(props: {
                         value={successEmail}
                         onChange={(e) => setSuccessEmail(e.target.value)}
                         placeholder="name@praxis.de"
-                        className="h-[48px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-3 text-[16px] text-gray-900 placeholder:text-gray-400 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[14px]"
+                        className="yd-auth-input h-[48px] scroll-mt-8"
                       />
                       {successEmail.trim() && !isValidEmail(successEmail) ? (
                         <p className="mt-2 text-[12px] text-amber-800">Bitte eine gültige E‑Mail-Adresse eingeben.</p>
@@ -936,7 +887,7 @@ export function RegisterClient(props: {
                             <button
                               type="button"
                               onClick={() => setSuccessEmail(suggestion.suggested)}
-                              className="font-medium text-[#0284C7] underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
+                              className="font-medium yd-auth-link underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                             >
                               {suggestion.suggested.includes("@")
                                 ? (suggestion.suggested.split("@")[1] ?? suggestion.suggested)
@@ -966,20 +917,20 @@ export function RegisterClient(props: {
                       }
                       disabled={resendCooldown > 0 || !successEmail.trim() || !isValidEmail(successEmail)}
                       pendingLabel="Wird gesendet…"
-                      className="h-[52px] w-full rounded-xl border border-gray-200 bg-white text-[14px] font-semibold text-gray-900 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="yd-auth-btn-secondary h-[52px]"
                     />
                   </form>
 
                   <Link
                     href="/register?step=1"
-                    className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
+                    className="inline-flex items-center gap-2 text-[13px] font-semibold yd-auth-link transition-colors duration-150 hover:text-[#0369A1]"
                   >
                     Falsche E‑Mail eingegeben?
                   </Link>
 
                   <Link
                     href={loginBackHref}
-                    className="mt-5 inline-flex items-center justify-center gap-2 text-[13px] font-medium text-[#0284C7] transition-colors duration-150 hover:text-[#0369A1]"
+                    className="mt-5 inline-flex items-center justify-center gap-2 text-[13px] font-medium yd-auth-link transition-colors duration-150 hover:text-[#0369A1]"
                   >
                     Zurück zur Login-Seite
                   </Link>
@@ -1008,7 +959,7 @@ export function RegisterClient(props: {
                     <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                       Ablauf
                     </span>
-                    <span className="shrink-0 text-right text-[11px] font-semibold tabular-nums text-[#0284C7]">
+                    <span className="shrink-0 text-right text-[11px] font-semibold tabular-nums yd-auth-link">
                       Schritt {registrationStep} von 4 · {Math.round(((registrationStep - 1) / 3) * 100)}%
                     </span>
                   </div>
@@ -1065,7 +1016,7 @@ export function RegisterClient(props: {
               </div>
 
               {registrationStep === 1 ? (
-                <div style={{ animation: "slideIn 0.4s ease-out" }}>
+                <div className="yd-auth-awaken-field">
                   <div className="mb-7 text-center">
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
                       Willkommen bei Your Dentist
@@ -1100,7 +1051,7 @@ export function RegisterClient(props: {
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
                         placeholder="Dr. med. dent. Max Mustermann"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
                     </div>
@@ -1119,7 +1070,7 @@ export function RegisterClient(props: {
                         }}
                         placeholder="max.mustermann@praxis.de"
                         autoComplete="email"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
                       {emailCheckStatus !== "idle" ? (
@@ -1158,7 +1109,7 @@ export function RegisterClient(props: {
                               setEmailPairError("");
                               setConfirmMismatchAfterContinueAttempt(false);
                             }}
-                            className="font-medium text-[#0284C7] underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
+                            className="font-medium yd-auth-link underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                           >
                             {emailTypoSuggestion.suggested.includes("@")
                               ? (emailTypoSuggestion.suggested.split("@")[1] ?? emailTypoSuggestion.suggested)
@@ -1181,7 +1132,7 @@ export function RegisterClient(props: {
                               setRegEmailConfirm(emailTypoUndo.prevConfirm);
                               setEmailTypoUndo(null);
                             }}
-                            className="text-[12px] font-semibold text-[#0284C7] hover:underline"
+                            className="text-[12px] font-semibold yd-auth-link hover:underline"
                           >
                             Rückgängig
                           </button>
@@ -1208,7 +1159,7 @@ export function RegisterClient(props: {
                         placeholder="E-Mail-Adresse erneut eingeben"
                         autoComplete="off"
                         name="email_confirm_register"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
                       {emailPairError ? (
@@ -1232,7 +1183,7 @@ export function RegisterClient(props: {
                         placeholder="Mindestens 8 Zeichen"
                         autoComplete="new-password"
                         minLength={8}
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
 
@@ -1264,10 +1215,7 @@ export function RegisterClient(props: {
                         !normalizeEmail(regEmailConfirm) ||
                         !emailsMatchNormalized
                       }
-                      className="mt-8 h-[56px] w-full rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
-                      style={{
-                        background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
-                      }}
+                      className="yd-auth-btn-primary mt-8 h-[56px]"
                     >
                       Weiter
                     </button>
@@ -1276,7 +1224,7 @@ export function RegisterClient(props: {
               ) : null}
 
               {registrationStep === 2 ? (
-                <div style={{ animation: "slideIn 0.4s ease-out" }}>
+                <div className="yd-auth-awaken-field">
                   <div className="mb-7 text-center">
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
                       Ihre Praxis
@@ -1297,7 +1245,7 @@ export function RegisterClient(props: {
                         value={regPractice}
                         onChange={(e) => setRegPractice(e.target.value)}
                         placeholder="Zahnarztpraxis Mustermann"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
                     </div>
@@ -1312,7 +1260,7 @@ export function RegisterClient(props: {
                         value={regLicense}
                         onChange={(e) => setRegLicense(e.target.value)}
                         placeholder="Z-12345678"
-                        className="h-[52px] w-full min-w-0 scroll-mt-8 rounded-xl border border-gray-200 bg-white px-4 text-[16px] text-gray-900 placeholder:text-gray-400 transition-all duration-200 focus:border-[#0284C7] focus:outline-none focus:ring-[3px] focus:ring-[#0284C7]/10 md:text-[15px]"
+                        className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
                       {licenseFormatHint ? (
@@ -1330,17 +1278,11 @@ export function RegisterClient(props: {
                       <button
                         type="button"
                         onClick={() => goToStep(1)}
-                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50"
+                        className="yd-auth-btn-secondary h-[56px] flex-1"
                       >
                         Zurück
                       </button>
-                      <button
-                        type="submit"
-                        className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
-                        style={{
-                          background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
-                        }}
-                      >
+                      <button type="submit" className="yd-auth-btn-primary h-[56px] flex-1">
                         Weiter
                       </button>
                     </div>
@@ -1349,7 +1291,7 @@ export function RegisterClient(props: {
               ) : null}
 
               {registrationStep === 3 ? (
-                <div style={{ animation: "slideIn 0.4s ease-out" }}>
+                <div className="yd-auth-awaken-field">
                   <div className="mb-7 text-center">
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
                       Verifizierung
@@ -1430,7 +1372,7 @@ export function RegisterClient(props: {
                                     setFrontQualityHint("");
                                     setLicenseFrontStoragePath("");
                                   }}
-                                  className="mt-3 text-[13px] font-medium text-[#0284C7] hover:text-[#0369A1]"
+                                  className="mt-3 text-[13px] font-medium yd-auth-link hover:text-[#0369A1]"
                                 >
                                   Erneut auswählen
                                 </button>
@@ -1509,7 +1451,7 @@ export function RegisterClient(props: {
                                     setBackQualityHint("");
                                     setLicenseBackStoragePath("");
                                   }}
-                                  className="mt-3 text-[13px] font-medium text-[#0284C7] hover:text-[#0369A1]"
+                                  className="mt-3 text-[13px] font-medium yd-auth-link hover:text-[#0369A1]"
                                 >
                                   Erneut auswählen
                                 </button>
@@ -1532,7 +1474,7 @@ export function RegisterClient(props: {
                           className={`mt-3 break-words rounded-lg border px-3 py-2 text-[12px] leading-relaxed ${
                             licenseUploadError.startsWith("Hinweis:")
                               ? "border-amber-200 bg-amber-50 text-amber-900"
-                              : "border-red-200 bg-red-50 text-red-700"
+                              : "yd-auth-alert yd-auth-alert--danger border-0"
                           }`}
                         >
                           {licenseUploadError}
@@ -1546,7 +1488,7 @@ export function RegisterClient(props: {
                           border: "1px solid rgba(2, 132, 199, 0.2)",
                         }}
                       >
-                        <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#0284C7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <svg className="mt-0.5 h-4 w-4 flex-shrink-0 yd-auth-link" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <p className="text-[12px] leading-relaxed text-gray-700">
@@ -1561,21 +1503,18 @@ export function RegisterClient(props: {
                         type="button"
                         onClick={() => goToStep(2)}
                         disabled={licenseUploading}
-                        className="h-[56px] flex-1 rounded-xl border-2 border-gray-200 bg-white text-[15px] font-semibold text-gray-700 transition-all duration-200 active:scale-[0.98] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="yd-auth-btn-secondary h-[56px] flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Zurück
                       </button>
                       <button
                         type="submit"
                         disabled={licenseUploading}
-                        className="h-[56px] flex-1 rounded-xl text-[15px] font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-90"
-                        style={{
-                          background: "linear-gradient(to bottom, #0284C7 0%, #0369A1 100%)",
-                        }}
+                        className="yd-auth-btn-primary h-[56px] flex-1 disabled:cursor-not-allowed disabled:opacity-90"
                       >
                         {licenseUploading ? (
                           <span className="inline-flex items-center justify-center gap-2">
-                            <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-white/90 motion-reduce:animate-none motion-reduce:opacity-90" />
+                            <span className="yd-auth-loading-pulse !h-4 !w-4" aria-hidden />
                             Wird hochgeladen…
                           </span>
                         ) : (
@@ -1588,7 +1527,7 @@ export function RegisterClient(props: {
               ) : null}
 
               {registrationStep === 4 ? (
-                <div style={{ animation: "slideIn 0.4s ease-out" }}>
+                <div className="yd-auth-awaken-field">
                   <header className="mb-8 text-center md:mb-10">
                     <h3 className="text-[22px] font-semibold leading-snug tracking-tight text-slate-900 md:text-[23px]">
                       Tarif, Zahlungsweg und Zustimmungen
@@ -1935,9 +1874,7 @@ export function RegisterClient(props: {
                           !acceptedWithdrawal ||
                           !registrationDocsSatisfied
                         }
-                        className="h-[52px] min-h-[48px] flex-1 rounded-lg text-[14px] font-medium text-white transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 sm:h-[52px]"
-                        style={{ backgroundColor: "#1e293b" }}
-                        pendingStyle={{ backgroundColor: "#334155" }}
+                        className="h-[52px] min-h-[48px] flex-1 sm:h-[52px]"
                       />
                     </div>
                     </div>
@@ -1987,14 +1924,10 @@ export function RegisterClient(props: {
               ) : null}
 
             {navBusy ? (
-              <div
-                className="absolute inset-0 z-[25] flex flex-col items-center justify-center gap-3 rounded-3xl bg-white/90 px-[max(1rem,env(safe-area-inset-left,0px))] py-6 backdrop-blur-[2px] max-md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] max-md:pt-[max(1rem,env(safe-area-inset-top,0px))] max-md:pr-[max(1rem,env(safe-area-inset-right,0px))] max-md:pl-[max(1rem,env(safe-area-inset-left,0px))]"
-                aria-live="polite"
-                aria-busy="true"
-              >
+              <div className="yd-auth-loading-overlay" aria-live="polite" aria-busy="true">
                 <YourDentistBrandLockup size="md" centered markOnly />
-                <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-[#0284C7]/70 motion-reduce:animate-none motion-reduce:opacity-80" />
-                <span className="sr-only">Bitte kurz warten …</span>
+                <div className="yd-auth-loading-pulse" aria-hidden />
+                <span className="yd-auth-loading-label">Bitte kurz warten …</span>
               </div>
             ) : null}
             </div>

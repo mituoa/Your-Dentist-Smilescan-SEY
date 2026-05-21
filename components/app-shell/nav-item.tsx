@@ -69,7 +69,7 @@ export function NavItem({
       title={label}
       data-active={isActive ? "true" : "false"}
       className={cn(
-        "yd-ambient-nav-link group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-[background,box-shadow] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.22)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:rounded-none md:px-0 md:py-0",
+        "yd-ambient-nav-link group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.22)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:rounded-none md:bg-transparent md:px-0 md:py-0",
         isActive && "yd-nav-link-active"
       )}
     >

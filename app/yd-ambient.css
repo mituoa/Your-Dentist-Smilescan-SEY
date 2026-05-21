@@ -298,41 +298,14 @@
     transform 600ms var(--yd-ease-spatial);
 }
 
+/* Nav preview panel: disabled on hover — rail must not expand into workspace */
 @media (hover: hover) {
-  .yd-ambient-nav-link:hover .yd-nav-ambient-panel {
-    opacity: 1;
-    filter: blur(0);
-    transform: translateY(-50%) translateX(0);
-  }
-
-  .yd-ambient-nav-link:hover .yd-nav-preview-line:nth-child(1) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 80ms;
-  }
-
-  .yd-ambient-nav-link:hover .yd-nav-preview-line:nth-child(2) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 140ms;
-  }
-
-  .yd-ambient-nav-link:hover .yd-nav-preview-line:nth-child(3) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 200ms;
-  }
-
-  .yd-ambient-nav-link:hover .yd-nav-preview-line:nth-child(4) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 260ms;
-  }
-
-  .yd-ambient-nav-link:hover .yd-nav-preview-line:nth-child(n + 5) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 300ms;
+  .yd-ambient-nav-link:hover .yd-nav-ambient-panel,
+  .yd-ambient-nav-link:hover .yd-nav-preview-line {
+    opacity: 0 !important;
+    filter: blur(8px) !important;
+    transform: translateY(-50%) translateX(-6px) !important;
+    pointer-events: none !important;
   }
 }
 
