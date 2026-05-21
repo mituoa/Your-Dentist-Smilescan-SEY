@@ -21,6 +21,8 @@ type YdRegisterPricingProps = {
   selectedPlan: RegisterPlanId;
   inviteToken?: string;
   prefilledEmail?: string;
+  /** Anchor id for scroll targets (pricing page vs register). */
+  sectionId?: string;
 };
 
 function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledEmail: string, step?: string) {
@@ -33,11 +35,20 @@ function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledE
   return `/register?${qs}`;
 }
 
-export function YdRegisterPricing({ selectedPlan, inviteToken = "", prefilledEmail = "" }: YdRegisterPricingProps) {
+export function YdRegisterPricing({
+  selectedPlan,
+  inviteToken = "",
+  prefilledEmail = "",
+  sectionId = "pricing",
+}: YdRegisterPricingProps) {
   const router = useRouter();
 
   return (
-    <section id="pricing" className="yd-register-pricing yd-auth-awaken-field scroll-mt-6" aria-labelledby="yd-register-pricing-title">
+    <section
+      id={sectionId}
+      className="yd-register-pricing yd-auth-awaken-field scroll-mt-6"
+      aria-labelledby="yd-register-pricing-title"
+    >
       <div className="yd-register-pricing-intro">
         <p className="yd-register-pricing-eyebrow">Lizenz & Praxiszugang</p>
         <h2 id="yd-register-pricing-title" className="yd-register-pricing-title">

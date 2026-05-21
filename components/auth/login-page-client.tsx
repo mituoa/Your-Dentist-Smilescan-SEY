@@ -72,13 +72,13 @@ export function LoginPageClient({
   const googleBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "google";
   const resendBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "resend";
 
-  const registerDefaultHref = useMemo(() => {
+  const pricingDefaultHref = useMemo(() => {
     const qs = new URLSearchParams();
     qs.set("plan", "yearly");
     if (inviteToken) qs.set("invite", inviteToken);
     if (prefilledEmail) qs.set("email", prefilledEmail);
     const q = qs.toString();
-    return q ? `/register?${q}` : "/register";
+    return q ? `/pricing?${q}` : "/pricing";
   }, [inviteToken, prefilledEmail]);
 
   useLayoutEffect(() => {
@@ -88,7 +88,7 @@ export function LoginPageClient({
       if (inviteToken) params.set("invite", inviteToken);
       if (prefilledEmail) params.set("email", prefilledEmail);
       const q = params.toString();
-      window.location.replace(`/register${q ? `?${q}` : ""}#pricing`);
+      window.location.replace(`/pricing${q ? `?${q}` : ""}`);
       return;
     }
     if (!signedOut) {
@@ -329,8 +329,8 @@ export function LoginPageClient({
 
         <p className="yd-auth-register yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "5" }}>
           Noch keine Praxis?{" "}
-          <Link href={registerDefaultHref} onClick={clearReturnToPricingFlag} className="yd-auth-link">
-            Jetzt registrieren
+          <Link href={pricingDefaultHref} onClick={clearReturnToPricingFlag} className="yd-auth-link">
+            Praxis einrichten
           </Link>
         </p>
 

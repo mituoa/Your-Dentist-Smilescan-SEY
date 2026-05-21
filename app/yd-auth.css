@@ -1276,6 +1276,119 @@
   color: rgba(12, 25, 41, 0.5);
 }
 
+/* —— Dedicated /pricing page —— */
+.yd-pricing-page .yd-register-page-header {
+  padding-top: 0.25rem;
+}
+
+.yd-pricing-page-eyebrow {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(12, 25, 41, 0.45);
+}
+
+.yd-pricing-page-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 1.5rem;
+  max-width: 20rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 480px) {
+  .yd-pricing-page-actions {
+    flex-direction: row;
+    justify-content: center;
+    max-width: none;
+  }
+
+  .yd-pricing-page-cta-primary,
+  .yd-pricing-page-cta-secondary {
+    min-width: 11rem;
+  }
+}
+
+.yd-pricing-onboarding-steps {
+  margin: 2rem 0 2.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.42);
+  padding: 1.25rem 1.125rem;
+  box-shadow: 0 6px 24px rgba(15, 35, 58, 0.06);
+}
+
+.yd-pricing-onboarding-steps-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0c1929;
+  margin-bottom: 1rem;
+}
+
+.yd-pricing-onboarding-steps-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.yd-pricing-onboarding-step {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+}
+
+.yd-pricing-onboarding-step-num {
+  flex-shrink: 0;
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #0c4a6e;
+  background: rgba(224, 242, 254, 0.9);
+  border: 1px solid rgba(125, 211, 252, 0.45);
+}
+
+.yd-pricing-onboarding-step-title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #0c1929;
+}
+
+.yd-pricing-onboarding-step-body {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(12, 25, 41, 0.55);
+}
+
+.yd-pricing-page-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(186, 230, 253, 0.35);
+  text-align: center;
+  font-size: 0.8125rem;
+  color: rgba(12, 25, 41, 0.55);
+}
+
+.yd-pricing-page-footer-note {
+  margin-top: 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(12, 25, 41, 0.45);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .yd-auth-loading-pulse {
     animation: none;

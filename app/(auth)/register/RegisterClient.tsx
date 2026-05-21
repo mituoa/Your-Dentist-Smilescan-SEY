@@ -61,10 +61,9 @@ export function RegisterClient(props: {
   resent?: boolean;
   /** Aus URL `step` (1–4), nur wenn nicht `success`. */
   initialWizardStep?: RegistrationStep;
-  /** Plain /login (or invite login) — no #pricing. */
   loginHref: string;
-  /** When registration started from pricing (`from=pricing`), used only to return to #pricing after closing step 4. */
-  loginHrefWithPricingHash?: string | null;
+  /** Separate pricing/onboarding page — close wizard returns here. */
+  pricingHref: string;
   fromPricing?: boolean;
   /** Zeigt zweiten Submit „ohne Stripe“ (wirksam nur mit REGISTRATION_DEMO_MODE am Server). */
   registrationDemoUi?: boolean;
@@ -80,7 +79,7 @@ export function RegisterClient(props: {
   const router = useRouter();
   const searchParams = useSearchParams();
   const loginBackHref = props.loginHref;
-  const loginPricingReturnHref = props.loginHrefWithPricingHash ?? null;
+  const pricingHref = props.pricingHref;
   const fromPricingFlow = Boolean(props.fromPricing);
 
   const pushRegisterUrl = React.useCallback(
@@ -99,10 +98,6 @@ export function RegisterClient(props: {
       router.replace(loginBackHref);
       return;
     }
-    if (registrationStep === 4 && loginPricingReturnHref) {
-      router.replace(loginPricingReturnHref);
-      return;
-    }
     if (registrationStep === 4) {
       router.replace(loginBackHref);
       return;
@@ -115,11 +110,7 @@ export function RegisterClient(props: {
       pushRegisterUrl(p, "push");
       return;
     }
-    const p = new URLSearchParams(searchParams.toString());
-    p.delete("step");
-    if (props.initialPlan) p.set("plan", props.initialPlan);
-    const qs = p.toString();
-    router.replace(qs ? `/register?${qs}#pricing` : "/register#pricing");
+    router.replace(pricingHref);
   };
   const plan = coerceRegisterPlan(props.initialPlan);
   const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(

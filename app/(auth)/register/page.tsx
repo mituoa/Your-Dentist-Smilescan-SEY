@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { RegisterPageClient } from "@/components/auth/register-page-client";
@@ -29,6 +30,28 @@ function parseWizardStep(raw: string | undefined): 1 | 2 | 3 | 4 {
   return 1;
 }
 
+function isWizardActive(params: {
+  success?: string;
+  step?: string;
+}): boolean {
+  if (params.success === "1") return true;
+  const s = params.step?.trim();
+  return s === "1" || s === "2" || s === "3" || s === "4";
+}
+
+function buildPricingHref(params: {
+  plan?: string;
+  invite?: string;
+  email?: string;
+}): string {
+  const p = new URLSearchParams();
+  if (params.plan?.trim()) p.set("plan", params.plan.trim());
+  if (params.invite?.trim()) p.set("invite", params.invite.trim());
+  if (params.email?.trim()) p.set("email", params.email.trim());
+  const qs = p.toString();
+  return qs ? `/pricing?${qs}` : "/pricing";
+}
+
 const MAX_REGISTER_QUERY_ERROR_LEN = 512;
 
 function normalizeRegisterQueryError(
@@ -44,6 +67,11 @@ function normalizeRegisterQueryError(
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
   const params = await searchParams;
+
+  if (!isWizardActive(params)) {
+    redirect(buildPricingHref(params));
+  }
+
   const inviteRaw = clipInviteTokenQuery(params.invite);
   const inviteToken = isInviteTokenFormat(inviteRaw) ? inviteRaw : "";
   const prefilledEmail = params.email?.trim() || "";
@@ -60,11 +88,11 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     ? `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
     : "/login";
 
-  const registerHrefPlain = inviteToken
-    ? `/register?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
-    : "/register";
-
-  const loginHrefWithPricingHash = fromPricing ? `${registerHrefPlain}#pricing` : null;
+  const pricingHref = buildPricingHref({
+    plan: params.plan,
+    invite: inviteToken,
+    email: prefilledEmail,
+  });
 
   return (
     <YdAuthEnvironment scroll bare showBrand={false}>
@@ -87,7 +115,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           initialWizardStep={initialWizardStep}
           fromPricing={fromPricing}
           loginHref={loginHrefPlain}
-          loginHrefWithPricingHash={loginHrefWithPricingHash}
+          pricingHref={pricingHref}
           registrationDemoUi={registrationDemoUi}
           registrationDemoServer={isRegistrationDemoMode()}
           skipPaymentAtSignup={skipPaymentAtSignup()}
