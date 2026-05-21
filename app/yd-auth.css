@@ -509,6 +509,13 @@
   animation: yd-auth-island-in 1500ms var(--yd-auth-ease-spatial) 360ms both;
 }
 
+/* Register / bare: opacity only — transform breaks position:fixed overlays */
+.yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-bare {
+  animation: yd-auth-bare-in 1100ms var(--yd-auth-ease-diffuse) 280ms both;
+}
+
 .yd-auth.yd-auth-awakening,
 .yd-login.yd-auth-awakening,
 .yd-login.yd-login-awakening .yd-auth-awaken-auth {
@@ -563,6 +570,17 @@
   }
 }
 
+@keyframes yd-auth-bare-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
 @keyframes yd-auth-auth-in {
   from {
     opacity: 0;
@@ -604,6 +622,9 @@
   .yd-auth.yd-auth-awakening,
 .yd-login.yd-auth-awakening,
 .yd-login.yd-login-awakening .yd-auth-awaken-island,
+  .yd-auth.yd-auth-awakening,
+.yd-login.yd-auth-awakening,
+.yd-login.yd-login-awakening .yd-auth-awaken-bare,
   .yd-auth.yd-auth-awakening,
 .yd-login.yd-auth-awakening,
 .yd-login.yd-login-awakening .yd-auth-awaken-auth,
@@ -660,9 +681,13 @@
 .yd-auth-bare {
   position: relative;
   width: 100%;
-  max-width: min(48rem, calc(100vw - 2rem));
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
+}
+
+.yd-auth--scroll .yd-auth-stage {
+  width: 100%;
 }
 
 .yd-auth-compose--wide {
@@ -800,7 +825,7 @@
 .yd-auth-register-overlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 40;
   display: flex;
   min-height: 0;
   flex-direction: column;
@@ -814,12 +839,12 @@
   inset: 0;
   z-index: 0;
   background: radial-gradient(
-      ellipse 80% 60% at 50% 20%,
-      rgba(47, 128, 237, 0.18) 0%,
-      transparent 55%
+      ellipse 70% 55% at 50% 30%,
+      rgba(47, 128, 237, 0.12) 0%,
+      transparent 58%
     ),
-    rgba(12, 25, 41, 0.42);
-  backdrop-filter: blur(14px);
+    rgba(12, 25, 41, 0.28);
+  backdrop-filter: blur(10px);
 }
 
 .yd-auth-register-stage {

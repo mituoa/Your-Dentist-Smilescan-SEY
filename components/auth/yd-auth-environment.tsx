@@ -37,17 +37,19 @@ export function YdAuthEnvironment({
       )}
     >
       <div className="yd-auth-page-bg yd-auth-awaken-bg" aria-hidden />
-      <div className="yd-auth-ghost yd-auth-awaken-ghost" aria-hidden>
-        <div className="yd-auth-ghost-sidebar" />
-        <div className="yd-auth-ghost-canvas" />
-      </div>
+      {!bare ? (
+        <div className="yd-auth-ghost yd-auth-awaken-ghost" aria-hidden>
+          <div className="yd-auth-ghost-sidebar" />
+          <div className="yd-auth-ghost-canvas" />
+        </div>
+      ) : null}
       <div className="yd-auth-orb yd-auth-orb--a" aria-hidden />
       <div className="yd-auth-orb yd-auth-orb--b" aria-hidden />
       <div className="yd-auth-orb yd-auth-orb--c" aria-hidden />
 
       <div className="yd-auth-stage">
         {bare ? (
-          <div className="yd-auth-bare yd-auth-awaken-island yd-auth-awaken-settle w-full min-w-0">
+          <div className="yd-auth-bare yd-auth-awaken-bare yd-auth-awaken-settle w-full min-w-0">
             {children}
           </div>
         ) : (
