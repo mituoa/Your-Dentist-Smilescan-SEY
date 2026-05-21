@@ -7,8 +7,15 @@ import {
   DashboardAmbientHeader,
   DashboardAmbientKpis,
   DashboardAmbientLower,
+  DashboardAmbientOps,
 } from "@/components/dashboard/hc/dashboard-ambient-sections";
+import { DashboardActivityStream } from "@/components/dashboard/hc/dashboard-activity-stream";
+import { DashboardCommandStrip } from "@/components/dashboard/hc/dashboard-command-strip";
+import { DashboardPracticeFlow } from "@/components/dashboard/hc/dashboard-practice-flow";
 import { DashboardProgressiveSection } from "@/components/dashboard/hc/dashboard-progressive-section";
+import { DashboardRelayCommsPanel } from "@/components/dashboard/hc/dashboard-relay-comms-panel";
+import { DashboardRelayOpsPanel } from "@/components/dashboard/hc/dashboard-relay-ops-panel";
+import { DashboardTeamPulse } from "@/components/dashboard/hc/dashboard-team-pulse";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
@@ -17,6 +24,7 @@ import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
+import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
 import {
   getNewSubmissionsCount,
   getTotalUnseenSubmissions,
@@ -24,8 +32,12 @@ import {
   getOpenTasks,
   getWeeklySubmissionCounts,
   getRecentSubmissionsPreview,
+  getRecentActivity,
+  getDashboardRoutineTasks,
+  getDashboardTeamPulse,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
+import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import {
   NewSubmissionFloatingPreview,
@@ -74,6 +86,10 @@ export default async function DashboardPage() {
     weeklyRes,
     previewRes,
     inboxBadgeRes,
+    activityRes,
+    routinesRes,
+    teamRes,
+    relayConversations,
   ] = await Promise.all([
     getNewSubmissionsCount(workspaceId),
     getTotalUnseenSubmissions(workspaceId),
@@ -82,6 +98,10 @@ export default async function DashboardPage() {
     getWeeklySubmissionCounts(workspaceId),
     getRecentSubmissionsPreview(workspaceId),
     countUnseenInboxSubmissions(workspaceId),
+    getRecentActivity(workspaceId),
+    getDashboardRoutineTasks(workspaceId),
+    getDashboardTeamPulse(workspaceId),
+    getRelayConversationsForUser(workspaceId, user.id).catch(() => []),
   ]);
 
   const newCount = newRes.ok ? newRes.count : null;
@@ -89,8 +109,44 @@ export default async function DashboardPage() {
   const totalCount = totalRes.ok ? totalRes.count : null;
   const openTasks = tasksRes.ok ? tasksRes.tasks : null;
   const openTaskCount = openTasks?.length ?? 0;
+  const routines = routinesRes.ok ? routinesRes.routines : null;
+  const routineCount = routines?.length ?? 0;
+  const activityEvents = activityRes.ok ? activityRes.events : null;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
+  const relayUnread = relayConversations.reduce((sum, c) => sum + c.unread_count, 0);
+
+  const now = Date.now();
+  const reminderCount =
+    openTasks?.filter((t) => {
+      if (!t.remind_at) return false;
+      const due = new Date(t.remind_at).getTime();
+      const week = 7 * 24 * 60 * 60 * 1000;
+      return due <= now + week;
+    }).length ?? 0;
+
+  const commandHints: string[] = [];
+  if (unseenCount !== null && unseenCount > 0) {
+    commandHints.push(
+      `Priorität im Eingang: ${unseenCount} ${unseenCount === 1 ? "Fall" : "Fälle"} warten auf Sichtung.`
+    );
+  }
+  if (relayUnread > 0) {
+    commandHints.push(
+      `${relayUnread} interne ${relayUnread === 1 ? "Nachricht" : "Nachrichten"} — Übergaben im Blick behalten.`
+    );
+  }
+  if (openTaskCount > 0) {
+    commandHints.push(
+      `${openTaskCount} offene ${openTaskCount === 1 ? "Aufgabe" : "Aufgaben"} — nächster Schritt in Relay.`
+    );
+  }
+  if (routineCount > 0) {
+    commandHints.push(
+      `${routineCount} ${routineCount === 1 ? "Routine" : "Routinen"} aktiv — Erinnerungen strukturiert.`
+    );
+  }
+  commandHints.push(COMMAND_AI_PUBLIC.showcaseAssist);
   const latestPreview = previewRows?.[0] ?? null;
   const latestUnread =
     previewRows?.find((r) => !r.seen_at) ?? latestPreview;
@@ -131,7 +187,7 @@ export default async function DashboardPage() {
         <DashboardHeader
           greeting={greeting}
           displayName={doctorDisplayName}
-          subtitle={`Ruhiger Überblick für ${workspaceName} — ${todayLabel}`}
+          subtitle={`Praxisbetrieb für ${workspaceName} — ${todayLabel}`}
           email={user.email || ""}
           workspaceName={workspaceName}
           avatarUrl={profileData?.photo_url ?? null}
@@ -241,10 +297,51 @@ export default async function DashboardPage() {
         </div>
       </DashboardAmbientKpis>
 
+      <DashboardAmbientOps>
+        <DashboardPracticeFlow
+          unseenCount={unseenCount}
+          openTaskCount={openTaskCount}
+          routineCount={routineCount}
+          relayUnread={relayUnread}
+          reminderCount={reminderCount}
+        />
+
+        <DashboardProgressiveSection
+          title="Praxisbetrieb"
+          hint="Relay, Team, Aktivität — Kern des Tages"
+          defaultOpen
+        >
+          <div className="yd-dash-zone yd-dash-ops-grid">
+            <div className="yd-dash-ops-grid__relay min-w-0 lg:col-span-7">
+              <DashboardRelayOpsPanel tasks={openTasks} routines={routines} />
+            </div>
+            <div className="yd-dash-ops-grid__comms min-w-0 lg:col-span-5">
+              <DashboardRelayCommsPanel conversations={relayConversations} />
+            </div>
+            <div className="yd-dash-ops-grid__activity min-w-0 lg:col-span-4">
+              <DashboardActivityStream events={activityEvents} />
+            </div>
+            <div className="yd-dash-ops-grid__command min-w-0 lg:col-span-8">
+              <DashboardCommandStrip hints={commandHints.slice(0, 4)} />
+            </div>
+            <div className="yd-dash-ops-grid__team min-w-0 lg:col-span-12">
+              <DashboardTeamPulse
+                workspaceName={workspaceName}
+                memberCount={teamRes.ok ? teamRes.memberCount : null}
+                teamCount={teamRes.ok ? teamRes.teamCount : null}
+                openTaskCount={openTaskCount}
+                unseenInbox={unseenCount}
+              />
+            </div>
+          </div>
+        </DashboardProgressiveSection>
+      </DashboardAmbientOps>
+
       <DashboardAmbientCharts>
         <DashboardProgressiveSection
           title="Verlauf & Verteilung"
           hint="Statistik — bei Bedarf öffnen"
+          defaultOpen={false}
         >
           <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-7">
             <div className="min-w-0 lg:col-span-8">
@@ -270,11 +367,7 @@ export default async function DashboardPage() {
             <HcRecentTable rows={previewRows} />
           </div>
           <div className="min-w-0 lg:col-span-4 lg:order-2 lg:pt-4">
-            <DashboardProgressiveSection
-              title="Kalender"
-              hint="Terminüberblick"
-              defaultOpen={false}
-            >
+            <DashboardProgressiveSection title="Kalender" hint="Terminüberblick" defaultOpen>
               <HcMonthCalendar />
             </DashboardProgressiveSection>
           </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
+import { YdPracticeDemo } from "@/components/marketing/yd-practice-demo";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
 import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
@@ -50,6 +51,9 @@ export function YdHomeMobile({
           <Link href="/register" className="yd-clinical-cta-primary">
             Praxisbereich starten
           </Link>
+          <a href="#einblick-mobile" className="yd-clinical-cta-secondary">
+            Praxisablauf ansehen
+          </a>
           <p className="yd-clinical-cta-signin">
             Bereits registriert?{" "}
             <Link prefetch href="/login">
@@ -57,6 +61,8 @@ export function YdHomeMobile({
             </Link>
           </p>
         </div>
+
+        <YdPracticeDemo compact />
 
         <YdEntryPricingCompact
           initialPlan={selectedPlan}

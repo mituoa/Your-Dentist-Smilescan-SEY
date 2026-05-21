@@ -14,7 +14,7 @@ type YdPublicPricingStageProps = {
   showHomeLink?: boolean;
 };
 
-/** Single dashboard-island pricing — professional licensing tone. */
+/** Praxiszugang — geschützter Bereich, kein SaaS-Pricing-Table. */
 export function YdPublicPricingStage({
   initialPlan,
   inviteToken = "",
@@ -28,18 +28,17 @@ export function YdPublicPricingStage({
   return (
     <section
       id="pricing"
-      className="yd-clinical-pricing-act yd-public-os-awaken-field"
+      className="yd-clinical-pricing-act yd-clinical-access-act yd-public-os-awaken-field"
       style={{ ["--yd-public-field-i" as string]: String(fieldIndex) }}
-      aria-labelledby="yd-clinical-pricing-title"
+      aria-labelledby="yd-clinical-access-title"
     >
-      <p className="yd-clinical-eyebrow">Wenn Sie bereit sind</p>
-      <h2 id="yd-clinical-pricing-title" className="yd-clinical-act-title">
-        Praxisbereich starten — nach Prüfung <em>freischalten</em>
+      <p className="yd-clinical-eyebrow">Praxiszugang</p>
+      <h2 id="yd-clinical-access-title" className="yd-clinical-act-title">
+        Zugang &amp; Freischaltung
       </h2>
       <p className="yd-clinical-body">
-        Ihr geschützter Bereich inkl. Relay (interne Kommunikation, Routinen, Erinnerungen) und
-        Relay, Routinen und Command AI (Diktat, Entwürfe, Orientierung) — Registrierung in Ruhe
-        durchlaufen.
+        Ein geschützter Praxisbereich für Eingang, Relay und leise Assistenz — nach Prüfung
+        freigeschaltet. Sie wählen nur den Abrechnungsrhythmus, nicht ein „Software-Paket“.
       </p>
       {showHomeLink ? (
         <p className="yd-clinical-whisper">
@@ -54,13 +53,13 @@ export function YdPublicPricingStage({
           Anmelden
         </Link>
       </p>
-      <div className="yd-clinical-pricing-stage yd-clinical-pricing-stage--compact">
+      <div className="yd-clinical-pricing-stage yd-clinical-pricing-stage--access">
         <YdRegisterPricing
           selectedPlan={selectedPlan}
           inviteToken={inviteToken}
           prefilledEmail={prefilledEmail}
           sectionId="plans"
-          variant="compact"
+          variant="access"
         />
       </div>
     </section>

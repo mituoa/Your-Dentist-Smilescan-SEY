@@ -40,7 +40,7 @@ export function YdEntryPricingCompact({
   return (
     <section className="yd-entry-pricing-compact" aria-labelledby="yd-entry-pricing-title">
       <p id="yd-entry-pricing-title" className="yd-entry-pricing-label">
-        Praxislizenz
+        Zugangsmodell
       </p>
 
       <div className="yd-entry-pricing-segments" role="tablist" aria-label="Abrechnungsrhythmus">
@@ -57,9 +57,6 @@ export function YdEntryPricingCompact({
               onClick={() => setPlan(id)}
             >
               <span className="yd-entry-pricing-segment-label">{p.label}</span>
-              {p.save ? (
-                <span className="yd-entry-pricing-segment-save">−{p.save}</span>
-              ) : null}
             </button>
           );
         })}
@@ -71,8 +68,9 @@ export function YdEntryPricingCompact({
           <span className="yd-entry-pricing-price-unit"> / Monat</span>
         </p>
         <p className="yd-entry-pricing-hint">
-          {plan !== "monthly" ? `€${active.total} pro Periode · ` : null}
-          Einsendungen, Relay, Team — nach Prüfung freigeschaltet
+          {active.billing}
+          {plan !== "monthly" ? ` · €${active.total} pro Periode` : null}
+          {" · "}nach Prüfung freigeschaltet
         </p>
       </div>
 
@@ -81,11 +79,11 @@ export function YdEntryPricingCompact({
         className="yd-clinical-cta-primary yd-entry-pricing-cta"
         onClick={() => router.push(buildRegisterHref(plan, inviteToken, prefilledEmail))}
       >
-        Weiter zur Registrierung
+        Zugang anfragen
       </button>
 
       <p className="yd-entry-pricing-foot">
-        Relay: Kommunikation &amp; Routinen · Command AI: Diktat &amp; Entwürfe im Alltag
+        Geschützter Praxisbereich · planbare Infrastruktur · keine Tarifstufen
       </p>
     </section>
   );

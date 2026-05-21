@@ -173,3 +173,77 @@ main:has(.yd-dashboard) {
   height: min(36vw, 360px);
   background: radial-gradient(circle, rgba(47, 128, 237, 0.1) 0%, transparent 70%);
 }
+
+/* —— Praxisbetrieb: volle Produkttiefe, mobile Neuorganisation (keine Farbänderung) —— */
+.yd-dashboard .yd-dash-zone--flow {
+  margin-bottom: 1.75rem;
+}
+
+.yd-dash-ops-snap {
+  display: flex;
+  gap: 0.625rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+  margin: 0 -0.125rem;
+}
+
+.yd-dash-ops-snap > * {
+  scroll-snap-align: start;
+  flex: 0 0 min(78vw, 260px);
+}
+
+@media (min-width: 640px) {
+  .yd-dash-ops-snap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .yd-dash-ops-snap > * {
+    flex: unset;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-dash-ops-snap {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+.yd-dash-ops-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-dash-ops-grid {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+  }
+
+  .yd-dash-ops-grid__relay {
+    grid-column: span 7;
+  }
+
+  .yd-dash-ops-grid__comms {
+    grid-column: span 5;
+  }
+
+  .yd-dash-ops-grid__activity {
+    grid-column: span 4;
+  }
+
+  .yd-dash-ops-grid__command {
+    grid-column: span 8;
+  }
+
+  .yd-dash-ops-grid__team {
+    grid-column: span 12;
+  }
+}

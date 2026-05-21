@@ -62,6 +62,21 @@ export type OpenTaskRow = {
   content: string;
   submission_id: string | null;
   created_at: string;
+  title?: string | null;
+  recurrence_type?: string;
+  remind_at?: string | null;
+  due_date?: string | null;
+  priority?: string;
+  recipient_type?: string;
+};
+
+export type DashboardRoutineRow = {
+  id: string;
+  title: string;
+  content: string;
+  recurrence_type: string;
+  due_date: string | null;
+  remind_at: string | null;
 };
 
 export type OpenTasksResult = { ok: true; tasks: OpenTaskRow[] } | { ok: false };
@@ -241,11 +256,15 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
 
   const { data, error } = await supabase
     .from("tasks")
-    .select("id, content, submission_id, created_at")
+    .select(
+      "id, content, title, submission_id, created_at, recurrence_type, remind_at, due_date, priority, recipient_type"
+    )
     .eq("workspace_id", workspaceId)
     .in("status", ["open", "pending_review"])
+    .order("priority", { ascending: false })
+    .order("due_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
-    .limit(10);
+    .limit(12);
 
   if (error) {
     logDashboardDbFailure("open_tasks_select_failed", error);
@@ -255,12 +274,97 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
   const tasks: OpenTaskRow[] = (data || []).map((row) => ({
     id: row.id as string,
     content: row.content as string,
+    title: (row.title as string | null) ?? null,
     submission_id: (row.submission_id as string | null) ?? null,
     created_at: row.created_at as string,
+    recurrence_type: (row.recurrence_type as string) ?? "once",
+    remind_at: (row.remind_at as string | null) ?? null,
+    due_date: (row.due_date as string | null) ?? null,
+    priority: (row.priority as string) ?? "normal",
+    recipient_type: (row.recipient_type as string) ?? "all_team",
   }));
 
   return { ok: true, tasks };
 });
+
+export type DashboardRoutinesResult =
+  | { ok: true; routines: DashboardRoutineRow[] }
+  | { ok: false };
+
+/** Wiederkehrende Praxisroutinen (Relay) — offen, für Dashboard-Überblick. */
+export const getDashboardRoutineTasks = cache(
+  async (workspaceId: string): Promise<DashboardRoutinesResult> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("dashboard_routines_invalid_workspace_id", null);
+      return { ok: false };
+    }
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("id, title, content, recurrence_type, due_date, remind_at")
+      .eq("workspace_id", workspaceId)
+      .in("status", ["open", "pending_review"])
+      .neq("recurrence_type", "once")
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .limit(6);
+
+    if (error) {
+      logDashboardDbFailure("dashboard_routines_failed", error);
+      return { ok: false };
+    }
+
+    return {
+      ok: true,
+      routines: (data || []).map((row) => ({
+        id: row.id as string,
+        title: ((row.title as string) || (row.content as string) || "Routine").trim(),
+        content: row.content as string,
+        recurrence_type: row.recurrence_type as string,
+        due_date: (row.due_date as string | null) ?? null,
+        remind_at: (row.remind_at as string | null) ?? null,
+      })),
+    };
+  }
+);
+
+export type TeamPulseResult =
+  | { ok: true; memberCount: number; teamCount: number }
+  | { ok: false };
+
+export const getDashboardTeamPulse = cache(
+  async (workspaceId: string): Promise<TeamPulseResult> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      return { ok: false };
+    }
+    const supabase = await createClient();
+    const { count, error } = await supabase
+      .from("workspace_members")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspaceId);
+
+    if (error) {
+      logDashboardDbFailure("dashboard_team_pulse_failed", error);
+      return { ok: false };
+    }
+
+    const { count: teamOnly, error: teamErr } = await supabase
+      .from("workspace_members")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspaceId)
+      .eq("role", "team");
+
+    if (teamErr) {
+      logDashboardDbFailure("dashboard_team_pulse_role_failed", teamErr);
+      return { ok: false };
+    }
+
+    return {
+      ok: true,
+      memberCount: count ?? 0,
+      teamCount: teamOnly ?? 0,
+    };
+  }
+);
 
 /**
  * Kurz-Chronik: bis zu drei neueste Zeilen je Quelle (Einsendungen, offene/erledigte Aufgaben),
@@ -347,6 +451,6 @@ export const getRecentActivity = cache(
     events.sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-    return { ok: true, events: events.slice(0, 4) };
+    return { ok: true, events: events.slice(0, 6) };
   }
 );

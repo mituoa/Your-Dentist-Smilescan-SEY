@@ -1,28 +1,26 @@
 /**
- * Öffentliche Command-AI-Formulierungen — ruhig, verkaufstauglich, ohne Autopilot-Versprechen.
- * Entspricht dem Produkt: Diktat, Entwürfe, Schnellaktionen, menschliche Freigabe.
+ * Öffentliche Command-AI-Formulierungen — ruhige Assistenz, keine AI-Marketing-Lautstärke.
  */
 
 export const COMMAND_AI_PUBLIC = {
-  /** Kurzzeile Hero / Bullets */
   heroLine:
-    "Command AI: sprechen statt tippen — Aufgaben und Schritte vorbereiten, auch zwischen Behandlungen.",
-  /** Modul / Pricing */
-  moduleRole: "Leise Assistenz im Arbeitsfluss",
+    "Command AI: Prioritäten einordnen, Übergaben vorbereiten, Routinen im Blick — leise zwischen den Behandlungen.",
+  moduleRole: "Ruhige Assistenz im Praxisalltag",
   moduleBody:
-    "Kurzansagen diktieren, Texte und Aufgaben als Entwurf vorbereiten, Prioritäten einordnen — in Lücken zwischen Behandlungen, immer mit Ihrer Freigabe.",
-  pricingIncluded: "Command AI: Diktat, Entwürfe & Orientierung im Alltag",
-  /** Ecosystem-Liste */
+    "Offene Übergaben sichtbar halten, Erinnerungen strukturieren, Entwürfe und Aufgaben vorbereiten — Sie geben frei, nichts läuft an Patient:innen vorbei.",
+  pricingIncluded: "Command AI: Orientierung, Entwürfe & strukturierte Erinnerungen",
   assists: [
-    "Sprechansagen diktieren — Rückfragen, Einladungen, Teaminfos als Entwurf",
-    "Aufgaben und Schritte im Kontext vorbereiten — Sie geben frei",
-    "Zwischen Behandlungen: Rückrufe, Freigaben, Routine ohne Kopfchaos",
-    "Prioritäten im Eingang und in Relay — nächster sinnvoller Schritt",
-    "Kein Chatbot — ruhige Assistenz, nur dort wo Sie gerade arbeiten",
+    "Prioritäten im Eingang erkennen — was zuerst Sichtung braucht",
+    "Offene Übergaben und Rückfragen im Team sichtbar halten",
+    "Routinen überwachen — Steri, Labor, Rückrufe ohne Zettelchaos",
+    "Erinnerungen strukturieren — Rezeption und ZFA im gleichen Rhythmus",
+    "Diktat und Entwürfe in Lücken zwischen Behandlungen — mit Ihrer Freigabe",
+    "Kein Chatbot — Assistenz nur dort, wo Sie gerade arbeiten",
   ] as const,
   whisper:
-    "„Zwischen zwei Terminen: Rückruf diktiert, Aufgabe in Relay vorbereitet — Freigabe mit einem Klick.“",
-  /** Showcase Assistenz-Zeile */
+    "„Vor 14:30: drei Eingänge sichten, Übergabe an ZFA vorbereitet — Rückruf als Entwurf, Freigabe mit einem Klick.“",
   showcaseAssist:
-    "Diktat: Rückruf-Entwurf · Aufgabe delegieren · Vor 14:30: Sichtung abschließen",
+    "3 Eingänge priorisiert · Übergabe ZFA vorbereitet · Rückruf-Entwurf zur Freigabe",
+  demoStep:
+    "Command · leise: „Nächster Schritt: Sichtung abschließen, dann Übergabe bestätigen.“",
 } as const;

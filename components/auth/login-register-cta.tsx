@@ -117,10 +117,10 @@ export function LoginRegisterCta({
             <div className="yd-login-pricing-sheet-handle" aria-hidden />
             <div className="yd-login-pricing-sheet-head">
               <h2 id="yd-login-pricing-sheet-title" className="yd-public-entry-title text-[1.125rem]">
-                Praxis einrichten
+                Praxiszugang
               </h2>
               <p className="yd-public-entry-lead mt-1 text-[0.875rem]">
-                Wählen Sie Ihre Lizenz — danach startet die Registrierung in Ruhe.
+                Abrechnungsrhythmus wählen — danach startet die Registrierung in Ruhe.
               </p>
             </div>
             <YdEntryPricingCompact

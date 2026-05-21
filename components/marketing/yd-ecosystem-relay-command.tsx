@@ -82,11 +82,10 @@ export function YdEcosystemRelayCommand() {
 
         <article className="yd-ecosystem-panel yd-ecosystem-panel--command">
           <div className="yd-ecosystem-panel-badge yd-ecosystem-panel-badge--ai">Command AI</div>
-          <h3 className="yd-ecosystem-panel-title">Leise Assistenz — auch zwischen Behandlungen</h3>
+          <h3 className="yd-ecosystem-panel-title">Ruhige Assistenz im Hintergrund</h3>
           <p className="yd-ecosystem-panel-intro">
-            Sprechen statt tippen: Command bereitet Texte und Aufgaben als Entwurf vor. In Lücken im
-            Tagesablauf bleiben Rückrufe, Freigaben und Routine übersichtlich — Sie entscheiden, nichts
-            läuft automatisch an Patient:innen.
+            Command AI hilft Prioritäten zu erkennen, offene Übergaben sichtbar zu halten und Routinen
+            zu überwachen — Entwürfe und Erinnerungen strukturiert, ohne futuristische Show.
           </p>
 
           <ul className="yd-ecosystem-command-list">

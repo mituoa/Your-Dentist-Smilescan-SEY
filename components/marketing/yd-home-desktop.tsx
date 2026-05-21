@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { YdEcosystemRelayCommand } from "@/components/marketing/yd-ecosystem-relay-command";
+import { YdPracticeDemo } from "@/components/marketing/yd-practice-demo";
 import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
 import { YdPublicPricingStage } from "@/components/marketing/yd-public-pricing-stage";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
@@ -86,6 +87,9 @@ export function YdHomeDesktop({
               <Link href="/#pricing" className="yd-clinical-cta-primary">
                 Praxisbereich starten
               </Link>
+              <Link href="/#einblick" className="yd-clinical-cta-secondary">
+                Live-Einblick ansehen
+              </Link>
               <p className="yd-clinical-cta-signin">
                 Bereits registriert?{" "}
                 <Link prefetch href="/login">
@@ -103,6 +107,8 @@ export function YdHomeDesktop({
           </div>
         </div>
       </section>
+
+      <YdPracticeDemo />
 
       <div
         id="ecosystem"

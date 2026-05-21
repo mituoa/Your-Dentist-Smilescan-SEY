@@ -18,7 +18,7 @@ export const REGISTER_PLANS: Record<RegisterPlanId, RegisterPlanDefinition> = {
     label: "Monatlich",
     save: null,
     billing: "Monatlich abgerechnet",
-    description: "Flexibel für den Einstieg in den Praxisbereich.",
+    description: "Flexibler Rhythmus — für den Einstieg in den geschützten Praxisbereich.",
   },
   halfyearly: {
     id: "halfyearly",
@@ -27,7 +27,7 @@ export const REGISTER_PLANS: Record<RegisterPlanId, RegisterPlanDefinition> = {
     label: "Halbjährlich",
     save: "10%",
     billing: "Alle 6 Monate abgerechnet",
-    description: "Planbare Kosten im Halbjahresrhythmus.",
+    description: "Planbare Infrastruktur im Halbjahresrhythmus — weniger Wechsel im Alltag.",
   },
   yearly: {
     id: "yearly",
@@ -36,7 +36,7 @@ export const REGISTER_PLANS: Record<RegisterPlanId, RegisterPlanDefinition> = {
     label: "Jährlich",
     save: "20%",
     billing: "Jährlich abgerechnet",
-    description: "Empfohlen für etablierte Praxen mit kontinuierlichem Betrieb.",
+    description: "Durchgängiger Praxisbetrieb — ruhige, planbare Team-Infrastruktur.",
   },
 };
 

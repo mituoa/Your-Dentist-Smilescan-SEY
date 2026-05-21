@@ -24,7 +24,8 @@ type YdRegisterPricingProps = {
   /** Anchor id for scroll targets (pricing page vs register). */
   sectionId?: string;
   /** compact = calmer, lower height (entry + desktop pricing stage) */
-  variant?: "full" | "compact";
+  /** access = Praxiszugang (no discount badges, infrastructure tone) */
+  variant?: "full" | "compact" | "access";
 };
 
 function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledEmail: string, step?: string) {
@@ -46,25 +47,35 @@ export function YdRegisterPricing({
 }: YdRegisterPricingProps) {
   const router = useRouter();
   const compact = variant === "compact";
+  const access = variant === "access";
 
   return (
     <section
       id={sectionId}
       className={cn(
         "yd-register-pricing yd-auth-awaken-field scroll-mt-6",
-        compact && "yd-register-pricing--compact"
+        compact && "yd-register-pricing--compact",
+        access && "yd-register-pricing--access"
       )}
       aria-labelledby="yd-register-pricing-title"
     >
       <div className="yd-register-pricing-intro">
-        <p className="yd-register-pricing-eyebrow">Praxislizenz</p>
+        <p className="yd-register-pricing-eyebrow">
+          {access ? "Zugangsmodell" : "Praxislizenz"}
+        </p>
         <h2 id="yd-register-pricing-title" className="yd-register-pricing-title">
-          {compact ? "Rhythmus wählen" : "Abrechnungsrhythmus für Ihren Praxisbereich"}
+          {access
+            ? "Abrechnungsrhythmus"
+            : compact
+              ? "Rhythmus wählen"
+              : "Abrechnungsrhythmus für Ihren Praxisbereich"}
         </h2>
         <p className="yd-register-pricing-subtitle">
-          {compact
-            ? "Derselbe geschützte Praxisbereich — nur der Abrechnungsrhythmus unterscheidet sich."
-            : "Alle Optionen öffnen denselben geschützten Praxisbereich — ruhig, vollständig, ohne versteckte Stufen. Nur der Abrechnungsrhythmus unterscheidet sich."}
+          {access
+            ? "Derselbe geschützte Praxisbereich — Monatlich, halbjährlich oder jährlich. Fokus auf planbare Infrastruktur, nicht auf Tarifvergleich."
+            : compact
+              ? "Derselbe geschützte Praxisbereich — nur der Abrechnungsrhythmus unterscheidet sich."
+              : "Alle Optionen öffnen denselben geschützten Praxisbereich — ruhig, vollständig, ohne versteckte Stufen. Nur der Abrechnungsrhythmus unterscheidet sich."}
         </p>
       </div>
 
@@ -84,7 +95,7 @@ export function YdRegisterPricing({
                     <h3 className="yd-register-plan-name">{plan.label}</h3>
                     <p className="yd-register-plan-billing">{plan.billing}</p>
                   </div>
-                  {plan.save ? (
+                  {plan.save && !access ? (
                     <span className="yd-register-plan-save" aria-label={`${plan.save} Ersparnis`}>
                       −{plan.save}
                     </span>
@@ -108,7 +119,13 @@ export function YdRegisterPricing({
                   )}
                   onClick={() => router.push(buildRegisterHref(id, inviteToken, prefilledEmail, "1"))}
                 >
-                  {active ? "Mit diesem Plan registrieren" : "Plan wählen"}
+                  {access
+                    ? active
+                      ? "Mit diesem Rhythmus fortfahren"
+                      : "Rhythmus wählen"
+                    : active
+                      ? "Mit diesem Plan registrieren"
+                      : "Plan wählen"}
                 </button>
               </div>
             </article>
