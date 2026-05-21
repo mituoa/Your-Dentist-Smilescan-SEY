@@ -15,7 +15,12 @@ import { findPendingInviteTokenByEmail } from "@/lib/team-invitations/find-pendi
 export const dynamic = "force-dynamic";
 
 /** Öffentliche Produktübersicht; eingeloggte Nutzer → Workspace. */
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams: Promise<{ plan?: string; invite?: string; email?: string }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
   const user = await getCurrentUser();
 
   if (user) {
@@ -66,8 +71,12 @@ export default async function HomePage() {
   }
 
   return (
-    <YdPublicOsEnvironment>
-      <YdHomePage />
+    <YdPublicOsEnvironment scroll>
+      <YdHomePage
+        initialPlan={params.plan}
+        inviteToken={params.invite}
+        prefilledEmail={params.email}
+      />
     </YdPublicOsEnvironment>
   );
 }

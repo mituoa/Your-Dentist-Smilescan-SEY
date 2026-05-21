@@ -55,8 +55,8 @@ export function YdRegisterPricing({
           Abrechnungsrhythmus für Ihren Praxisbereich
         </h2>
         <p className="yd-register-pricing-subtitle">
-          Alle Optionen umfassen dieselbe geschützte Infrastruktur — Einsendungen, Relay, Profil und
-          Team. Der Unterschied liegt nur in der Abrechnungsperiode.
+          Alle Optionen öffnen denselben geschützten Praxisbereich — ruhig, vollständig, ohne
+          versteckte Stufen. Nur der Abrechnungsrhythmus unterscheidet sich.
         </p>
       </div>
 

@@ -6,6 +6,7 @@
 @import "./yd-sidebar.css";
 @import "./yd-auth.css";
 @import "./yd-public-os.css";
+@import "./yd-public-clinical.css";
 
 @layer base {
   :root {

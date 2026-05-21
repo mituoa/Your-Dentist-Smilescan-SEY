@@ -177,8 +177,8 @@ export function LoginPageClient({
   return (
     <YdPublicOsEnvironment mode="focus">
       <YdProductChrome variant="entry" />
-      <div className="yd-product-entry">
-        <div className="yd-product-entry-card">
+      <div className="yd-clinical-entry">
+        <div className="yd-clinical-entry-panel">
       <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "0" }}>
         <h1 className="yd-public-entry-title">Willkommen zurück</h1>
         <p className="yd-public-entry-lead">

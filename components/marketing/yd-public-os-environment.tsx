@@ -6,15 +6,22 @@ import { cn } from "@/lib/utils";
 
 export type YdPublicOsEnvironmentProps = {
   children: ReactNode;
-  /** editorial = full narrative page; focus = login / narrow entry */
-  mode?: "editorial" | "focus";
+  /** editorial = landing; focus = login; register = wizard shell */
+  mode?: "editorial" | "focus" | "register";
+  /** Allow vertical scroll (pricing, register) */
+  scroll?: boolean;
   className?: string;
 };
 
 /**
  * Immersive public OS atmosphere — open, luminous, no sidebar or dashboard chrome.
  */
-export function YdPublicOsEnvironment({ children, mode = "editorial", className }: YdPublicOsEnvironmentProps) {
+export function YdPublicOsEnvironment({
+  children,
+  mode = "editorial",
+  scroll = false,
+  className,
+}: YdPublicOsEnvironmentProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,8 +37,10 @@ export function YdPublicOsEnvironment({ children, mode = "editorial", className 
     <div
       ref={rootRef}
       className={cn(
-        "yd-public-os yd-public-os-awakening",
+        "yd-public-os yd-public-os-awakening yd-clinical-world",
         mode === "focus" && "yd-public-os--focus",
+        mode === "register" && "yd-public-os--register",
+        scroll && "yd-public-os--scroll",
         className
       )}
     >

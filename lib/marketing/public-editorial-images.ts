@@ -11,6 +11,13 @@ export const PUBLIC_EDITORIAL_IMAGES = {
     width: 1600,
     height: 1067,
   },
+  /** Practice-World-Hintergrund — extrem reduziert, nur Atmosphäre */
+  practiceWorldAmbient: {
+    src: "https://images.unsplash.com/photo-1629909613654-28e377b93888?auto=format&fit=crop&w=1200&q=80",
+    alt: "",
+    width: 1200,
+    height: 800,
+  },
   /** Zurückhaltende klinische Nähe — Vertrauen ohne Werbe-Gestik */
   trustClinical: {
     src: "https://images.unsplash.com/photo-1588776814546-1ffca47267a5?auto=format&fit=crop&w=1200&q=85",

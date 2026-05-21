@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { RegisterPageClient } from "@/components/auth/register-page-client";
-import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
 import { YdAuthLoadingState } from "@/components/auth/yd-auth-ui";
+import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
+import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { resendSignupConfirmation, signUp } from "../actions";
 import { isRegistrationDemoMode, skipPaymentAtSignup } from "@/lib/registration-demo";
 import {
@@ -95,15 +96,17 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   });
 
   return (
-    <YdAuthEnvironment scroll bare showBrand={false}>
-      <Suspense
-        fallback={
-          <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
-            <YdAuthLoadingState label="Registrierung wird geladen …" />
-          </div>
-        }
-      >
-        <RegisterPageClient
+    <YdPublicOsEnvironment mode="register" scroll>
+      <YdProductChrome variant="entry" />
+      <div className="yd-clinical-register-stage">
+        <Suspense
+          fallback={
+            <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
+              <YdAuthLoadingState label="Registrierung wird geladen …" />
+            </div>
+          }
+        >
+          <RegisterPageClient
           signUpAction={signUp}
           resendConfirmationAction={resendSignupConfirmation}
           inviteToken={inviteToken}
@@ -120,8 +123,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           registrationDemoServer={isRegistrationDemoMode()}
           skipPaymentAtSignup={skipPaymentAtSignup()}
           licenseStepOptional={isRegistrationDemoMode()}
-        />
-      </Suspense>
-    </YdAuthEnvironment>
+          />
+        </Suspense>
+      </div>
+    </YdPublicOsEnvironment>
   );
 }

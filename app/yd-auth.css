@@ -24,14 +24,14 @@
   inset: 0;
   z-index: 0;
   background: radial-gradient(
-      ellipse 88% 65% at 78% 4%,
-      rgba(47, 128, 237, 0.2) 0%,
-      transparent 52%
+      ellipse 90% 70% at 82% 0%,
+      rgba(47, 128, 237, 0.18) 0%,
+      transparent 55%
     ),
     radial-gradient(
-      ellipse 50% 45% at 12% 88%,
-      rgba(125, 211, 252, 0.1) 0%,
-      transparent 48%
+      ellipse 55% 50% at 8% 92%,
+      rgba(125, 211, 252, 0.08) 0%,
+      transparent 50%
     ),
     linear-gradient(165deg, #a3b3c2 0%, #8e9eae 100%);
 }

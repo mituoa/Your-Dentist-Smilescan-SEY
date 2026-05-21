@@ -27,7 +27,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
     : "/login";
 
   return (
-    <YdPublicOsEnvironment>
+    <YdPublicOsEnvironment scroll>
       <Suspense
         fallback={
           <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
