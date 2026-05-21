@@ -11,7 +11,7 @@ type DashboardCommandStripProps = {
 /** Ruhige Command-AI-Orientierung — kein AI-Marketing. */
 export function DashboardCommandStrip({ hints }: DashboardCommandStripProps) {
   return (
-    <HcCard tone="quiet" className="p-5 md:p-6">
+    <HcCard tone="quiet" className="yd-dash-panel yd-dash-panel--assist h-full p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
         <div className="flex shrink-0 items-center gap-2.5">
           <span

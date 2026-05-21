@@ -14,9 +14,6 @@ type YdHomeMobileProps = {
   prefilledEmail?: string;
 };
 
-/**
- * Mobile entry — login, register, pricing. No long marketing scroll.
- */
 export function YdHomeMobile({
   initialPlan,
   inviteToken = "",
@@ -38,8 +35,11 @@ export function YdHomeMobile({
       <main className="yd-entry-mobile-main">
         <div className="yd-entry-mobile-hero">
           <p className="yd-clinical-eyebrow">{PUBLIC_ENTRY_COPY.eyebrow}</p>
-          <h1 className="yd-clinical-display yd-clinical-display--direct yd-entry-mobile-title">
-            {PUBLIC_ENTRY_COPY.title}
+          <h1 className="yd-clinical-display yd-clinical-display--hero yd-entry-mobile-title">
+            <span className="yd-clinical-display-line">{PUBLIC_ENTRY_COPY.title}</span>
+            <span className="yd-clinical-display-line yd-clinical-display-line--sans">
+              {PUBLIC_ENTRY_COPY.titleLine2}
+            </span>
           </h1>
           <p className="yd-entry-mobile-value">{PUBLIC_ENTRY_COPY.mobileValue}</p>
         </div>
@@ -49,14 +49,8 @@ export function YdHomeMobile({
             Praxisbereich starten
           </Link>
           <a href="#einblick-mobile" className="yd-clinical-cta-secondary">
-            Praxisablauf ansehen
+            Live-Einblick ansehen
           </a>
-          <p className="yd-clinical-cta-signin">
-            Bereits registriert?{" "}
-            <Link prefetch href="/login">
-              Anmelden
-            </Link>
-          </p>
         </div>
 
         <YdPracticeDemo compact />

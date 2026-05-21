@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { HcCard } from "@/components/design/hc-card";
+import { DashboardPanelChrome } from "@/components/dashboard/hc/dashboard-panel-chrome";
 import type { ActivityEvent } from "@/lib/queries/dashboard";
 import { YD } from "@/lib/design/yd-design-tokens";
 
@@ -26,13 +27,12 @@ type DashboardActivityStreamProps = {
 
 export function DashboardActivityStream({ events }: DashboardActivityStreamProps) {
   return (
-    <HcCard tone="default" className="flex min-h-[280px] flex-col p-5 md:p-6">
-      <div className="mb-4">
-        <p className="yd-dash-section">Letzte Aktivität</p>
-        <p className="yd-dash-meta mt-1 normal-case tracking-normal">
-          Strukturierter Praxisfluss — Eingang, Aufgaben, Abschlüsse
-        </p>
-      </div>
+    <HcCard tone="default" className="yd-dash-panel flex min-h-[300px] flex-col p-0">
+      <DashboardPanelChrome
+        title="Letzte Aktivität"
+        hint="Eingang, Aufgaben, Abschlüsse — strukturierter Fluss"
+      />
+      <div className="flex flex-1 flex-col px-5 py-4 md:px-6">
       {events === null ? (
         <p className="text-[13px]" style={{ color: YD.text.secondary }}>
           Aktivität momentan nicht verfügbar.
@@ -88,6 +88,7 @@ export function DashboardActivityStream({ events }: DashboardActivityStreamProps
           })}
         </ul>
       )}
+      </div>
     </HcCard>
   );
 }

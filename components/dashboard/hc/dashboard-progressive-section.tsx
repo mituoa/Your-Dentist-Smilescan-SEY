@@ -9,6 +9,8 @@ type DashboardProgressiveSectionProps = {
   children: ReactNode;
   /** Mobile: section starts expanded when true */
   defaultOpen?: boolean;
+  /** Mobile: always show content (core workspace depth) */
+  mobileAlwaysOpen?: boolean;
 };
 
 /**
@@ -20,9 +22,13 @@ export function DashboardProgressiveSection({
   hint,
   children,
   defaultOpen = false,
+  mobileAlwaysOpen = false,
 }: DashboardProgressiveSectionProps) {
   return (
-    <details className="yd-dash-fold" open={defaultOpen}>
+    <details
+      className={`yd-dash-fold${mobileAlwaysOpen ? " yd-dash-fold--mobile-open" : ""}`}
+      open={defaultOpen || mobileAlwaysOpen}
+    >
       <summary className="yd-dash-fold__summary">
         <span className="min-w-0">
           <span className="yd-dash-fold__title block">{title}</span>

@@ -114,10 +114,10 @@
 
 /* Hero — operational clarity over editorial drama */
 .yd-clinical-display--direct {
-  font-size: clamp(1.875rem, 5vw, 3rem);
+  font-size: clamp(1.375rem, 3vw, 1.75rem);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.12;
+  letter-spacing: -0.028em;
+  line-height: 1.22;
 }
 
 .yd-clinical-act-title--direct em {
@@ -175,16 +175,20 @@
 /* —— Hero stage (volumetric, not white card) —— */
 .yd-clinical-hero {
   position: relative;
-  padding: clamp(1.5rem, 4vw, 2.5rem) 0 clamp(3rem, 6vw, 4.5rem);
-  min-height: min(82vh, 760px);
+  padding: clamp(1rem, 3vw, 1.75rem) 0 clamp(1.5rem, 4vw, 2.5rem);
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+}
+
+.yd-clinical-hero--orchestrated.yd-clinical-hero--premium {
+  min-height: 0 !important;
 }
 
 .yd-clinical-hero--premium {
-  min-height: min(76vh, 700px);
-  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+  min-height: 0;
+  padding-bottom: clamp(1.25rem, 3vw, 2rem);
 }
 
 .yd-clinical-hero--premium .yd-clinical-hero-copy {

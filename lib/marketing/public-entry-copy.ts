@@ -1,6 +1,5 @@
 /**
  * Öffentlicher Einstieg — Produktnutzen zuerst, Ruhe als Ergebnis.
- * Warm und hochwertig, aber in 3 Sekunden klar: Infrastruktur für den Praxisalltag.
  */
 
 import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
@@ -8,44 +7,52 @@ import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
 export const PUBLIC_ENTRY_COPY = {
   eyebrow: "Medizinische Praxisinfrastruktur",
 
-  title: "Patienteneingänge strukturiert. Team am gleichen Fall.",
+  title: "Patienteneingänge strukturiert.",
+  titleLine2: "Direkt im Praxisbereich.",
 
   lead:
-    "Patient:innen senden Fotos und Anliegen direkt in Ihren Praxisbereich. Sie sichten und schätzen schneller ein — das Team koordiniert Übergaben, Aufgaben und Erinnerungen in Relay, nicht in WhatsApp, am Telefon oder in verstreuten E-Mails.",
+    "Patient:innen senden Anliegen und Fotos in Ihren Praxisbereich. Ihr Team koordiniert Übergaben, Aufgaben und Erinnerungen in einem geschützten Workspace — nicht in WhatsApp oder verstreuten Kanälen.",
 
   benefits: [
-    "Fotos & Anliegen von Patient:innen — strukturiert statt Anruf-Stau und Mailbox-Chaos",
-    "Ersteinschätzung im Praxisbereich: Priorität sehen, schneller reagieren",
-    "Teamkommunikation direkt am Fall — Übergaben, Aufgaben, Erinnerungen in Relay",
-    "Weniger Telefon, WhatsApp und E-Mail — ein Ort für den gesamten Praxisalltag",
+    "Eingänge strukturiert statt Telefon- und E-Mail-Chaos",
+    "Team am gleichen Fall in Relay — Übergaben und Aufgaben",
     COMMAND_AI_PUBLIC.heroLine,
   ] as const,
 
-  whisper:
-    "Ruhe im Team ist das Ergebnis — wenn Eingang, Kommunikation und Übergaben endlich einen festen Ort haben.",
+  benefitsSection: {
+    eyebrow: "Was Sie gewinnen",
+    title: "Operativer Überblick ohne Nebenkanäle",
+    items: [
+      {
+        label: "Eingang",
+        body: "Fotos und Anliegen landen strukturiert im Tracker — Priorität auf einen Blick.",
+      },
+      {
+        label: "Team",
+        body: "Relay bündelt Nachrichten, Übergaben und Erinnerungen am Fall.",
+      },
+      {
+        label: "Assistenz",
+        body: COMMAND_AI_PUBLIC.benefitAssist,
+      },
+    ],
+  },
 
   mobileValue:
-    "Fotos & Anliegen strukturiert ein. Schnellere Einschätzung. Team am Fall in Relay — nicht in WhatsApp oder am Telefon.",
-
-  ecosystem: {
-    eyebrow: "Was die Plattform leistet",
-    title: "Eingang, Kommunikation, Übergaben — in einem System",
-    lead:
-      "Strukturierte Patienteneingänge, interne Abstimmung am Fall, verlässliche Aufgaben und Routinen. Command AI entlastet zwischen den Behandlungen — ohne Lautstärke.",
-  },
+    "Eingänge strukturiert. Team am Fall. Command AI unterstützt leise im Hintergrund.",
 
   flow: {
-    title: "Vom Patienteneingang bis zur strukturierten Übergabe",
-    body:
-      "Fotos und Anliegen kommen strukturiert an, die Praxis priorisiert, das Team arbeitet in Relay weiter — Command AI unterstützt leise dazwischen.",
-  },
-
-  modules: {
-    title: "Infrastruktur für den Praxisalltag",
-    body:
-      "Tracker für Eingänge, Relay für Kommunikation und Routinen, Atlas für den Überblick — Command AI als leise Assistenz im Hintergrund.",
+    title: "Vom Eingang zur Übergabe",
+    body: "Sichten, priorisieren, intern abstimmen — in einem System.",
   },
 
   footer:
-    "Patienteneingänge · interne Kommunikation · Aufgaben & Erinnerungen — eine Praxisinfrastruktur",
+    "Patienteneingänge · interne Kommunikation · Aufgaben — eine Praxisinfrastruktur",
+
+  /** Legacy / optionale Deep-Sections (nicht auf Startseite) */
+  ecosystem: {
+    eyebrow: "Plattform",
+    title: "Eingang, Kommunikation, Übergaben",
+    lead: "Ein Workspace für den Praxisalltag — Command AI leise im Hintergrund.",
+  },
 } as const;

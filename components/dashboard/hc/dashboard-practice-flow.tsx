@@ -86,16 +86,16 @@ export function DashboardPracticeFlow({
 
   return (
     <div className="yd-dash-zone yd-dash-zone--flow">
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+      <div className="yd-dash-flow-rail mb-3 flex flex-wrap items-end justify-between gap-2 px-0.5">
         <div>
-          <p className="yd-dash-meta mb-0.5 uppercase">Praxisfluss</p>
-          <p className="yd-dash-section">Aktiver Betrieb — heute</p>
+          <p className="yd-dash-meta mb-0.5 uppercase">Heute</p>
+          <p className="yd-dash-section">Praxisfluss — Eingang bis Übergabe</p>
         </div>
-        <p className="yd-dash-meta max-w-[14rem] normal-case tracking-normal">
-          Eingang, Relay, Übergaben — ein ruhiger Überblick
+        <p className="yd-dash-meta max-w-[16rem] normal-case tracking-normal">
+          Fünf Zugänge · ein Überblick
         </p>
       </div>
-      <div className="yd-dash-ops-snap" role="list">
+      <div className="yd-dash-ops-snap yd-dash-ops-snap--structured" role="list">
         {nodes.map((node) => {
           const Icon = FLOW_ICONS[node.key];
           return (

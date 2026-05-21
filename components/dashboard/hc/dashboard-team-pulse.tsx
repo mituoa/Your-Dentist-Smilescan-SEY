@@ -41,7 +41,7 @@ export function DashboardTeamPulse({
   ] as const;
 
   return (
-    <HcCard tone="quiet" className="p-5 md:p-6">
+    <HcCard tone="quiet" className="yd-dash-panel p-5 md:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4" style={{ color: YD.text.muted }} strokeWidth={1.65} />

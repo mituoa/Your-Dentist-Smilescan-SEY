@@ -16,6 +16,7 @@ import { DashboardProgressiveSection } from "@/components/dashboard/hc/dashboard
 import { DashboardRelayCommsPanel } from "@/components/dashboard/hc/dashboard-relay-comms-panel";
 import { DashboardRelayOpsPanel } from "@/components/dashboard/hc/dashboard-relay-ops-panel";
 import { DashboardTeamPulse } from "@/components/dashboard/hc/dashboard-team-pulse";
+import { DashboardWorkzone } from "@/components/dashboard/hc/dashboard-workzone";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
@@ -177,41 +178,48 @@ export default async function DashboardPage() {
 
   return (
     <div
-      className="yd-dashboard relative mx-auto w-full min-w-0 pb-10"
+      className="yd-dashboard yd-dashboard--structured relative mx-auto w-full min-w-0 pb-10"
       style={{ maxWidth: YD.space.contentMax }}
     >
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--a" aria-hidden />
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--b" aria-hidden />
 
-      <DashboardAmbientHeader>
-        <DashboardHeader
-          greeting={greeting}
-          displayName={doctorDisplayName}
-          subtitle={`Praxisbetrieb für ${workspaceName} — ${todayLabel}`}
-          inboxCount={inboxCount}
-        />
-      </DashboardAmbientHeader>
+      <DashboardWorkzone
+        rail="Überblick"
+        title="Praxisüberblick"
+        hint={`${workspaceName} · ${todayLabel}`}
+        className="yd-dash-band--overview"
+      >
+        <DashboardAmbientHeader>
+          <DashboardHeader
+            greeting={greeting}
+            displayName={doctorDisplayName}
+            subtitle={`Eingang, Relay und Aufgaben — strukturiert im Team`}
+            inboxCount={inboxCount}
+          />
+        </DashboardAmbientHeader>
 
-      {dashboardOverviewIncomplete ? (
-        <p
-          className="yd-dash-meta mb-8 max-w-2xl normal-case tracking-normal"
-          style={{ color: YD.text.secondary }}
-          role="status"
-        >
-          Einige Kennzahlen konnten nicht geladen werden —{" "}
-          <Link href="/inbox" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
-            Posteingang
-          </Link>
-          {" · "}
-          <Link href="/my-tasks" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
-            Aufgaben
-          </Link>
-        </p>
-      ) : null}
+        {dashboardOverviewIncomplete ? (
+          <p
+            className="yd-dash-meta mb-4 max-w-2xl normal-case tracking-normal"
+            style={{ color: YD.text.secondary }}
+            role="status"
+          >
+            Einige Kennzahlen konnten nicht geladen werden —{" "}
+            <Link href="/inbox" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
+              Posteingang
+            </Link>
+            {" · "}
+            <Link href="/my-tasks" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
+              Aufgaben
+            </Link>
+          </p>
+        ) : null}
 
-      <DashboardAmbientKpis>
-        <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
-          <div className="yd-dash-kpi-hero-slot min-w-0 lg:col-span-5">
+        <DashboardAmbientKpis>
+          <div className="yd-dash-deck yd-dash-deck--kpi">
+            <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:gap-5">
+              <div className="yd-dash-kpi-hero-slot min-w-0 lg:col-span-5">
             <HcStatCard
               tone="primary"
               hero
@@ -243,9 +251,9 @@ export default async function DashboardPage() {
                 value: totalCount === null ? "—" : totalCount,
               }}
             />
-          </div>
-          <div className="yd-dash-kpi-compact-slot grid min-w-0 grid-cols-2 gap-2.5 sm:col-span-2 sm:gap-3 lg:contents lg:gap-6">
-            <div className="min-w-0 lg:col-span-3">
+              </div>
+              <div className="yd-dash-kpi-compact-slot grid min-w-0 grid-cols-2 gap-2.5 sm:col-span-2 sm:gap-3 lg:contents lg:gap-6">
+                <div className="min-w-0 lg:col-span-3">
               <HcStatCard
                 tone="quiet"
                 title="Einsendungen gesamt"
@@ -270,11 +278,11 @@ export default async function DashboardPage() {
                   value: unseenCount === null ? "—" : unseenCount,
                 }}
               />
-            </div>
-            <div className="min-w-0 lg:col-span-4">
-              <HcStatCard
-                tone="quiet"
-                title="Offene Aufgaben"
+                </div>
+                <div className="min-w-0 lg:col-span-4">
+                  <HcStatCard
+                    tone="quiet"
+                    title="Offene Aufgaben"
                 value={openTasks === null ? "—" : openTaskCount}
                 icon={CalendarCheck}
                 footnote="Relay · Praxisworkflow"
@@ -287,88 +295,111 @@ export default async function DashboardPage() {
                   label: "Status",
                   value: openTasks === null ? "—" : "Offen",
                 }}
-              />
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </DashboardAmbientKpis>
+        </DashboardAmbientKpis>
+      </DashboardWorkzone>
 
-      <DashboardAmbientOps>
-        <DashboardPracticeFlow
-          unseenCount={unseenCount}
-          openTaskCount={openTaskCount}
-          routineCount={routineCount}
-          relayUnread={relayUnread}
-          reminderCount={reminderCount}
-        />
+      <DashboardWorkzone
+        rail="Arbeitsfläche"
+        title="Aktiver Praxisbetrieb"
+        hint="Koordination, Kommunikation, Übergaben — heute"
+        className="yd-dash-band--operations"
+      >
+        <DashboardAmbientOps>
+          <DashboardPracticeFlow
+            unseenCount={unseenCount}
+            openTaskCount={openTaskCount}
+            routineCount={routineCount}
+            relayUnread={relayUnread}
+            reminderCount={reminderCount}
+          />
 
-        <DashboardProgressiveSection
-          title="Praxisbetrieb"
-          hint="Relay, Team, Aktivität — Kern des Tages"
-          defaultOpen
-        >
-          <div className="yd-dash-zone yd-dash-ops-grid">
-            <div className="yd-dash-ops-grid__relay min-w-0 lg:col-span-7">
-              <DashboardRelayOpsPanel tasks={openTasks} routines={routines} />
-            </div>
-            <div className="yd-dash-ops-grid__comms min-w-0 lg:col-span-5">
-              <DashboardRelayCommsPanel conversations={relayConversations} />
-            </div>
-            <div className="yd-dash-ops-grid__activity min-w-0 lg:col-span-4">
-              <DashboardActivityStream events={activityEvents} />
-            </div>
-            <div className="yd-dash-ops-grid__command min-w-0 lg:col-span-8">
-              <DashboardCommandStrip hints={commandHints.slice(0, 4)} />
-            </div>
-            <div className="yd-dash-ops-grid__team min-w-0 lg:col-span-12">
-              <DashboardTeamPulse
-                workspaceName={workspaceName}
-                memberCount={teamRes.ok ? teamRes.memberCount : null}
-                teamCount={teamRes.ok ? teamRes.teamCount : null}
-                openTaskCount={openTaskCount}
-                unseenInbox={unseenCount}
-              />
-            </div>
-          </div>
-        </DashboardProgressiveSection>
-      </DashboardAmbientOps>
-
-      <DashboardAmbientCharts>
-        <DashboardProgressiveSection
-          title="Verlauf & Verteilung"
-          hint="Statistik — bei Bedarf öffnen"
-          defaultOpen={false}
-        >
-          <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-7">
-            <div className="min-w-0 lg:col-span-8">
-              <HcAnalyticsBars
-                counts={weeklyCounts}
-                totalLabel="Letzte 7 Tage — Einsendungen"
-              />
-            </div>
-            <div className="min-w-0 lg:col-span-4 lg:pt-3">
-              <HcDistributionArc
-                unseen={unseenCount}
-                seen={seenCount}
-                total={totalCount}
-              />
-            </div>
-          </div>
-        </DashboardProgressiveSection>
-      </DashboardAmbientCharts>
-
-      <DashboardAmbientLower>
-        <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-8">
-          <div className="min-w-0 lg:col-span-8 lg:order-1">
-            <HcRecentTable rows={previewRows} />
-          </div>
-          <div className="min-w-0 lg:col-span-4 lg:order-2 lg:pt-4">
-            <DashboardProgressiveSection title="Kalender" hint="Terminüberblick" defaultOpen>
-              <HcMonthCalendar />
+          <div className="yd-dash-deck yd-dash-deck--work">
+            <DashboardProgressiveSection
+              title="Module"
+              hint="Relay · Aktivität · Assistenz · Team"
+              defaultOpen
+              mobileAlwaysOpen
+            >
+              <div className="yd-dash-zone yd-dash-ops-grid">
+                <div className="yd-dash-ops-grid__relay min-w-0 lg:col-span-7">
+                  <DashboardRelayOpsPanel tasks={openTasks} routines={routines} />
+                </div>
+                <div className="yd-dash-ops-grid__comms min-w-0 lg:col-span-5">
+                  <DashboardRelayCommsPanel conversations={relayConversations} />
+                </div>
+                <div className="yd-dash-ops-grid__activity min-w-0 lg:col-span-4">
+                  <DashboardActivityStream events={activityEvents} />
+                </div>
+                <div className="yd-dash-ops-grid__command min-w-0 lg:col-span-8">
+                  <DashboardCommandStrip hints={commandHints.slice(0, 4)} />
+                </div>
+                <div className="yd-dash-ops-grid__team min-w-0 lg:col-span-12">
+                  <DashboardTeamPulse
+                    workspaceName={workspaceName}
+                    memberCount={teamRes.ok ? teamRes.memberCount : null}
+                    teamCount={teamRes.ok ? teamRes.teamCount : null}
+                    openTaskCount={openTaskCount}
+                    unseenInbox={unseenCount}
+                  />
+                </div>
+              </div>
             </DashboardProgressiveSection>
           </div>
-        </div>
-      </DashboardAmbientLower>
+        </DashboardAmbientOps>
+      </DashboardWorkzone>
+
+      <DashboardWorkzone
+        rail="Archiv"
+        title="Verlauf & Einsendungen"
+        hint="Statistik und letzte Fälle — bei Bedarf vertiefen"
+        className="yd-dash-band--records"
+      >
+        <DashboardAmbientCharts>
+          <div className="yd-dash-deck yd-dash-deck--charts mb-5">
+            <DashboardProgressiveSection
+              title="Verlauf & Verteilung"
+              hint="Statistik — bei Bedarf öffnen"
+              defaultOpen={false}
+            >
+              <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+                <div className="min-w-0 lg:col-span-8">
+                  <HcAnalyticsBars
+                    counts={weeklyCounts}
+                    totalLabel="Letzte 7 Tage — Einsendungen"
+                  />
+                </div>
+                <div className="min-w-0 lg:col-span-4 lg:pt-1">
+                  <HcDistributionArc
+                    unseen={unseenCount}
+                    seen={seenCount}
+                    total={totalCount}
+                  />
+                </div>
+              </div>
+            </DashboardProgressiveSection>
+          </div>
+        </DashboardAmbientCharts>
+
+        <DashboardAmbientLower>
+          <div className="yd-dash-deck yd-dash-deck--records">
+            <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+              <div className="min-w-0 lg:col-span-8 lg:order-1">
+                <HcRecentTable rows={previewRows} />
+              </div>
+              <div className="min-w-0 lg:col-span-4 lg:order-2">
+                <DashboardProgressiveSection title="Kalender" hint="Terminüberblick" defaultOpen>
+                  <HcMonthCalendar />
+                </DashboardProgressiveSection>
+              </div>
+            </div>
+          </div>
+        </DashboardAmbientLower>
+      </DashboardWorkzone>
     </div>
   );
 }

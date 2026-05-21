@@ -33,10 +33,11 @@
   }
 
   .yd-mobile-nav-panel {
-    width: min(82vw, 288px);
-    max-width: 288px;
+    width: min(88vw, 300px);
+    max-width: 300px;
     height: 100%;
     max-height: 100%;
+    overflow: hidden;
     margin: 0;
     border-radius: 28px;
     border: 1px solid rgba(255, 255, 255, 0.82);
@@ -91,7 +92,12 @@
   }
 
   .yd-mobile-sidebar-header [data-brand="your-dentist"] {
-    max-width: 100%;
+    max-width: calc(100% - 3rem);
+    overflow: visible;
+  }
+
+  .yd-mobile-sidebar-header [data-brand="your-dentist"] img {
+    flex-shrink: 0;
   }
 
   .yd-mobile-sidebar-close {

@@ -247,3 +247,217 @@ main:has(.yd-dashboard) {
     grid-column: span 12;
   }
 }
+
+/* Mobile: Kernbereiche sichtbar — kein „leeres“ Dashboard */
+@media (max-width: 767px) {
+  .yd-dash-fold--mobile-open > .yd-dash-fold__summary {
+    pointer-events: none;
+  }
+
+  .yd-dash-fold--mobile-open > .yd-dash-fold__summary .yd-dash-fold__chevron {
+    display: none;
+  }
+
+  .yd-dash-fold--mobile-open:not([open]) .yd-dash-fold__panel,
+  .yd-dash-fold--mobile-open > .yd-dash-fold__panel {
+    display: block !important;
+  }
+
+  .yd-dashboard .yd-dash-zone--kpis {
+    margin-bottom: 1.25rem;
+  }
+
+  .yd-dashboard .yd-dash-ops-grid {
+    gap: 0.875rem;
+  }
+}
+
+/* ═══ Structured workspace — Ruhe mit Systemspannung (Farben unverändert) ═══ */
+
+.yd-dashboard--structured .yd-dash-band {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-dashboard--structured .yd-dash-band {
+    margin-bottom: 2.5rem;
+  }
+}
+
+.yd-dashboard--structured .yd-dash-band__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.28);
+}
+
+.yd-dashboard--structured .yd-dash-band__rail {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #6b849c;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(180, 198, 218, 0.3);
+}
+
+.yd-dashboard--structured .yd-dash-band__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: -0.024em;
+  line-height: 1.25;
+  color: var(--yd-dash-title);
+}
+
+.yd-dashboard--structured .yd-dash-band__hint {
+  flex: 1 1 100%;
+  margin: 0;
+  padding-left: 0;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  color: var(--yd-dash-body);
+}
+
+@media (min-width: 640px) {
+  .yd-dashboard--structured .yd-dash-band__hint {
+    flex: 1 1 auto;
+    text-align: right;
+    padding-left: 1rem;
+  }
+}
+
+/* Deck — warme Infrastruktur-Ebene */
+.yd-dashboard .yd-dash-deck {
+  border-radius: 18px;
+  border: 1px solid rgba(180, 198, 218, 0.34);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(255, 253, 250, 0.62) 48%,
+    rgba(248, 252, 255, 0.55) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 36px rgba(47, 128, 237, 0.06),
+    0 2px 10px rgba(15, 35, 58, 0.04);
+  padding: 0.875rem;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-deck {
+    border-radius: 20px;
+    padding: 1.125rem 1.25rem 1.25rem;
+  }
+}
+
+.yd-dashboard .yd-dash-deck--kpi {
+  margin-top: 0.25rem;
+}
+
+.yd-dashboard .yd-dash-deck--work {
+  margin-top: 0.75rem;
+}
+
+.yd-dashboard .yd-dash-band--operations .yd-dash-zone--flow {
+  margin-bottom: 0.875rem;
+}
+
+/* Panel — klare Module innerhalb des Decks */
+.yd-dashboard .yd-dash-panel {
+  height: 100%;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 4px 18px rgba(47, 128, 237, 0.05);
+}
+
+.yd-dashboard .yd-dash-panel--primary {
+  border-color: rgba(47, 128, 237, 0.12);
+}
+
+.yd-dashboard .yd-dash-panel--assist {
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(248, 250, 255, 0.88) 100%
+  );
+}
+
+.yd-dashboard .yd-dash-panel-head {
+  flex-shrink: 0;
+}
+
+/* Ops grid — Arbeitsflächen mit Mindesttiefe */
+@media (min-width: 1024px) {
+  .yd-dashboard .yd-dash-ops-grid {
+    gap: 1.125rem;
+    align-items: stretch;
+  }
+
+  .yd-dashboard .yd-dash-ops-grid__relay,
+  .yd-dashboard .yd-dash-ops-grid__comms,
+  .yd-dashboard .yd-dash-ops-grid__activity {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yd-dashboard .yd-dash-ops-grid__relay > *,
+  .yd-dashboard .yd-dash-ops-grid__comms > *,
+  .yd-dashboard .yd-dash-ops-grid__activity > * {
+    flex: 1 1 auto;
+    min-height: 100%;
+  }
+
+  .yd-dashboard .yd-dash-ops-grid__command,
+  .yd-dashboard .yd-dash-ops-grid__team {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Praxisfluss — stärkere Modulkarten */
+.yd-dashboard .yd-dash-flow-node {
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 6px 20px rgba(47, 128, 237, 0.06);
+  transition:
+    box-shadow 480ms cubic-bezier(0.19, 1, 0.32, 1),
+    transform 480ms cubic-bezier(0.19, 1, 0.32, 1);
+}
+
+@media (hover: hover) {
+  .yd-dashboard .yd-dash-flow-node:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 10px 28px rgba(47, 128, 237, 0.1);
+    transform: translateY(-1px);
+  }
+}
+
+.yd-dashboard--structured .yd-dash-header-axis {
+  margin-bottom: 0.75rem;
+}
+
+.yd-dashboard--structured .yd-dash-zone--kpis {
+  margin-bottom: 0;
+}
+
+.yd-dashboard--structured .yd-dash-band--overview .yd-dash-deck--kpi .yd-ambient-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 6px 22px rgba(47, 128, 237, 0.07);
+}

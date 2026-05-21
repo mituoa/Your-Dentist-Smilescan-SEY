@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ClipboardList, Repeat, UserRound } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
+import { DashboardPanelChrome } from "@/components/dashboard/hc/dashboard-panel-chrome";
 import { RECURRENCE_LABELS } from "@/lib/tasks/recurrence";
 import type { DashboardRoutineRow, OpenTaskRow } from "@/lib/queries/dashboard";
 import { YD } from "@/lib/design/yd-design-tokens";
@@ -33,28 +34,20 @@ export function DashboardRelayOpsPanel({ tasks, routines }: DashboardRelayOpsPan
     tasks?.filter((t) => t.recipient_type === "specific_person").slice(0, 3) ?? [];
 
   return (
-    <HcCard tone="primary" className="flex min-h-0 flex-col p-0">
-      <div
-        className="flex items-center justify-between gap-3 px-5 py-4 md:px-6"
-        style={{
-          background: YD.surface.tableHead,
-          borderBottom: `1px solid ${YD.border.soft}`,
-        }}
-      >
-        <div>
-          <p className="yd-dash-section">Relay · Aufgaben &amp; Routinen</p>
-          <p className="yd-dash-meta mt-1 normal-case tracking-normal">
-            Offene Schritte, wiederkehrende Praxisabläufe, Übergaben
-          </p>
-        </div>
-        <Link
-          href="/my-tasks"
-          className="shrink-0 text-[12px] font-medium no-underline"
-          style={{ color: YD.accent.core }}
-        >
-          Alle
-        </Link>
-      </div>
+    <HcCard tone="primary" className="yd-dash-panel yd-dash-panel--primary flex min-h-[320px] flex-col p-0">
+      <DashboardPanelChrome
+        title="Relay · Aufgaben &amp; Routinen"
+        hint="Offene Schritte, Übergaben, wiederkehrende Abläufe"
+        action={
+          <Link
+            href="/my-tasks"
+            className="shrink-0 text-[12px] font-medium no-underline"
+            style={{ color: YD.accent.core }}
+          >
+            Alle
+          </Link>
+        }
+      />
 
       <div className="flex flex-col gap-0 divide-y" style={{ borderColor: "rgba(180,198,218,0.22)" }}>
         <section className="px-5 py-4 md:px-6">

@@ -6,54 +6,35 @@ import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
 const DEMO_STEPS = [
   {
     phase: "Eingang",
-    title: "Patientin sendet Anliegen strukturiert",
-    detail: "3 Fotos · Schmerz linker Unterkiefer · 12:41 eingegangen",
-    context: "Tracker",
+    title: "Patient sendet strukturiert ein",
+    detail: "3 Fotos · Anliegen · im Tracker",
   },
   {
-    phase: "Sichtung",
-    title: "Priorität im Praxisbereich",
-    detail: "Rezeption markiert: Rückruf heute · ZFA für Röntgenfreigabe",
-    context: "Praxisbereich",
+    phase: "Team",
+    title: "Intern abstimmen in Relay",
+    detail: "Übergabe · ohne WhatsApp",
   },
   {
-    phase: "Übergabe",
-    title: "Interne Abstimmung ohne Nebenkanal",
-    detail: "Dr. Weber → ZFA: „Freigabe Röntgen prüfen — bitte bis heute“",
-    context: "Relay",
-  },
-  {
-    phase: "Kommunikation",
-    title: "Team bleibt am gleichen Fall",
-    detail: "Gruppe Implantatfälle · 2 neue Nachrichten · Verantwortung klar",
-    context: "Relay",
+    phase: "Aufgabe",
+    title: "Erinnerung & Routine",
+    detail: "Rückruf geplant · Verantwortung klar",
   },
   {
     phase: "Assistenz",
-    title: "Leise Orientierung im Hintergrund",
+    title: "Command AI unterstützt",
     detail: COMMAND_AI_PUBLIC.demoStep,
-    context: "Command AI",
-  },
-  {
-    phase: "Abschluss",
-    title: "Strukturierter Tagesabschluss",
-    detail: "Sichtung erledigt · Übergabe bestätigt · Rückruf für morgen geplant",
-    context: "Ruhe",
   },
 ] as const;
-
-const DEMO_STEPS_COMPACT = DEMO_STEPS.slice(0, 4);
 
 type YdPracticeDemoProps = {
   compact?: boolean;
 };
 
-/**
- * Ruhiger Live-Einblick — Praxisalltag, kein Sales-Funnel.
- */
+/** Kurzer Produktablauf — ruhig, ohne Sales-Dichte. */
 export function YdPracticeDemo({ compact = false }: YdPracticeDemoProps) {
-  const steps = compact ? DEMO_STEPS_COMPACT : DEMO_STEPS;
+  const steps = compact ? DEMO_STEPS.slice(0, 3) : DEMO_STEPS;
   const sectionId = compact ? "einblick-mobile" : "einblick";
+
   return (
     <section
       id={sectionId}
@@ -65,19 +46,13 @@ export function YdPracticeDemo({ compact = false }: YdPracticeDemoProps) {
       aria-labelledby="yd-practice-demo-title"
     >
       <header className="yd-practice-demo-head">
-        <p className="yd-clinical-eyebrow">{compact ? "Praxisablauf" : "Live-Einblick"}</p>
+        <p className="yd-clinical-eyebrow">{compact ? "Ablauf" : "Produktablauf"}</p>
         <h2 id="yd-practice-demo-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
-          {compact ? "Kurzer Einblick in den Alltag" : "So läuft ein Tag in Ihrem Praxisbereich"}
+          {compact ? "So arbeitet Ihr Team" : "Vom Eingang bis zur Übergabe"}
         </h2>
-        {!compact ? (
-          <p className="yd-clinical-body yd-practice-demo-lead">
-            Ein kurzer geführter Ablauf — von der Patientenanfrage bis zur ruhigen Übergabe im Team.
-            Zum Verstehen, nicht zum Verkaufen.
-          </p>
-        ) : null}
       </header>
 
-      <ol className="yd-practice-demo-flow">
+      <ol className="yd-practice-demo-flow yd-practice-demo-flow--compact">
         {steps.map((step, i) => (
           <li key={step.phase} className="yd-practice-demo-step">
             <div className="yd-practice-demo-step-rail" aria-hidden>
@@ -85,22 +60,13 @@ export function YdPracticeDemo({ compact = false }: YdPracticeDemoProps) {
               {i < steps.length - 1 ? <span className="yd-practice-demo-step-line" /> : null}
             </div>
             <div className="yd-practice-demo-step-body">
-              <div className="yd-practice-demo-step-meta">
-                <span className="yd-practice-demo-step-phase">{step.phase}</span>
-                <span className="yd-practice-demo-step-context">{step.context}</span>
-              </div>
+              <span className="yd-practice-demo-step-phase">{step.phase}</span>
               <p className="yd-practice-demo-step-title">{step.title}</p>
               <p className="yd-practice-demo-step-detail">{step.detail}</p>
             </div>
           </li>
         ))}
       </ol>
-
-      {!compact ? (
-        <p className="yd-clinical-whisper yd-practice-demo-close">
-          So entsteht ein klarerer Praxisalltag — und am Ende weniger Stress im Team.
-        </p>
-      ) : null}
     </section>
   );
 }

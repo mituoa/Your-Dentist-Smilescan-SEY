@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MessagesSquare, Users } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
+import { DashboardPanelChrome } from "@/components/dashboard/hc/dashboard-panel-chrome";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import { YD } from "@/lib/design/yd-design-tokens";
 
@@ -36,24 +37,16 @@ export function DashboardRelayCommsPanel({
   const items = conversations?.slice(0, 5) ?? [];
 
   return (
-    <HcCard tone="default" className="flex min-h-[280px] flex-col p-0">
-      <div
-        className="flex items-center justify-between gap-3 px-5 py-4 md:px-6"
-        style={{
-          background: YD.surface.tableHead,
-          borderBottom: `1px solid ${YD.border.soft}`,
-        }}
-      >
-        <div>
-          <p className="yd-dash-section">Interne Kommunikation</p>
-          <p className="yd-dash-meta mt-1 normal-case tracking-normal">
-            Relay · Direkt, Gruppen, fallbezogen
-          </p>
-        </div>
-        <Link href="/relay" className="text-[12px] font-medium no-underline" style={{ color: YD.accent.core }}>
-          Relay
-        </Link>
-      </div>
+    <HcCard tone="default" className="yd-dash-panel flex min-h-[300px] flex-col p-0">
+      <DashboardPanelChrome
+        title="Interne Kommunikation"
+        hint="Relay · Direkt, Gruppen, fallbezogen"
+        action={
+          <Link href="/relay" className="text-[12px] font-medium no-underline" style={{ color: YD.accent.core }}>
+            Relay
+          </Link>
+        }
+      />
 
       <div className="flex flex-1 flex-col px-5 py-4 md:px-6">
         {loadFailed ? (

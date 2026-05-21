@@ -1108,3 +1108,57 @@
 .yd-clinical-hero-cta-stack .yd-clinical-cta-secondary {
   align-self: flex-start;
 }
+
+/* —— Benefits: drei Karten, kein Ecosystem-Block —— */
+.yd-clinical-act--benefits {
+  padding-top: clamp(2rem, 4vw, 2.75rem);
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.yd-clinical-benefits-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  list-style: none;
+  padding: 0;
+}
+
+@media (min-width: 720px) {
+  .yd-clinical-benefits-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.yd-clinical-benefit-card {
+  padding: 1rem 1.125rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(180, 198, 218, 0.28);
+  box-shadow: 0 8px 24px rgba(72, 98, 128, 0.05);
+}
+
+.yd-clinical-benefit-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4a6278;
+  margin-bottom: 0.375rem;
+}
+
+.yd-clinical-benefit-body {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #3d5266;
+  margin: 0;
+}
+
+.yd-practice-demo--compact .yd-practice-demo-flow--compact {
+  gap: 0.625rem;
+}
+
+.yd-practice-demo-flow--compact .yd-practice-demo-step-detail {
+  font-size: 0.8125rem;
+}
