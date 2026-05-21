@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="30" y1="20" x2="150" y2="160" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8F4FC"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="50" y1="42" x2="210" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E0F2FE"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
+  <g transform="translate(24 24)">
+    <rect x="0" y="0" width="132" height="132" rx="32" fill="url(#panel)"/>
+    <rect x="1" y="1" width="130" height="130" rx="31" stroke="#0284C7" stroke-opacity="0.22" stroke-width="1.5"/>
+    <g transform="translate(14 14) scale(0.412)">
+      <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#0284C7" stroke-opacity="0.38" stroke-width="9" stroke-linecap="round"/>
+      <path d="M99 103L128 131L157 103" stroke="#0369A1" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M128 130V157" stroke="#0369A1" stroke-width="11" stroke-linecap="round"/>
+      <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#0284C7" stroke-opacity="0.92" stroke-width="10" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

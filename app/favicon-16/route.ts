@@ -1,7 +1,5 @@
-import { favicon16BrandImageResponse } from "@/lib/brand-share-image";
+import { SHARE_ASSET_PATHS, readShareAsset, pngResponse } from "@/lib/share-assets";
 
 export async function GET() {
-  const res = favicon16BrandImageResponse();
-  res.headers.set("Cache-Control", "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400");
-  return res;
+  return pngResponse(readShareAsset(SHARE_ASSET_PATHS.icon16));
 }

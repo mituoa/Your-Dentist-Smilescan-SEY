@@ -484,3 +484,361 @@
   color: #647a8f;
   text-align: center;
 }
+
+/* —— Ecosystem: Relay + Command AI —— */
+.yd-ecosystem {
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.yd-ecosystem-head {
+  max-width: 40rem;
+}
+
+.yd-ecosystem-lead {
+  max-width: 38rem;
+}
+
+.yd-ecosystem-grid {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .yd-ecosystem-grid {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+}
+
+.yd-ecosystem-panel {
+  padding: 1.375rem 1.5rem;
+  border-radius: 24px;
+  background: linear-gradient(168deg, rgba(255, 253, 250, 0.92) 0%, rgba(248, 252, 255, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 12px 40px rgba(80, 110, 140, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.yd-ecosystem-panel--command {
+  background: linear-gradient(
+    168deg,
+    rgba(255, 253, 250, 0.94) 0%,
+    rgba(248, 245, 255, 0.9) 55%,
+    rgba(240, 250, 252, 0.88) 100%
+  );
+  box-shadow:
+    0 12px 40px rgba(100, 90, 140, 0.06),
+    inset 0 0 0 1px rgba(167, 139, 250, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.yd-ecosystem-panel-badge {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2b6fe8;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(43, 111, 232, 0.08);
+}
+
+.yd-ecosystem-panel-badge--ai {
+  color: #5c4d8f;
+  background: rgba(167, 139, 250, 0.1);
+}
+
+.yd-ecosystem-panel-title {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0c1929;
+}
+
+.yd-ecosystem-panel-intro {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #5a6f84;
+}
+
+.yd-ecosystem-replaces-label {
+  margin: 1.25rem 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8ba3b8;
+}
+
+.yd-ecosystem-replaces {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+}
+
+.yd-ecosystem-replaces li {
+  font-size: 0.75rem;
+  color: #647a8f;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(230, 236, 244, 0.65);
+  text-decoration: line-through;
+  text-decoration-color: rgba(100, 122, 143, 0.45);
+}
+
+.yd-ecosystem-capabilities {
+  margin: 1.125rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yd-ecosystem-cap {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 10px;
+  border-left: 2px solid rgba(72, 178, 188, 0.45);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.yd-ecosystem-cap-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #243548;
+}
+
+.yd-ecosystem-cap-example {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: #647a8f;
+}
+
+.yd-ecosystem-moments {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.yd-ecosystem-moment {
+  padding: 0.5rem 0.625rem;
+  border-radius: 10px;
+  background: rgba(43, 111, 232, 0.04);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+}
+
+.yd-ecosystem-moment--routine {
+  background: rgba(255, 248, 240, 0.7);
+  border-color: rgba(255, 220, 190, 0.35);
+}
+
+.yd-ecosystem-moment-type {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #7a92a8;
+}
+
+.yd-ecosystem-moment p {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #3d5266;
+}
+
+.yd-ecosystem-command-list {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.yd-ecosystem-command-list li {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #4a5f73;
+  padding-left: 0.875rem;
+  border-left: 2px solid rgba(167, 139, 250, 0.35);
+}
+
+.yd-ecosystem-command-whisper {
+  margin-top: 1.125rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 12px;
+  background: rgba(167, 139, 250, 0.06);
+  border: 1px solid rgba(167, 139, 250, 0.12);
+}
+
+.yd-ecosystem-command-whisper-label {
+  margin: 0;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b5b95;
+}
+
+.yd-ecosystem-command-whisper-body {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-style: italic;
+  color: #5a6f84;
+}
+
+.yd-clinical-module--relay {
+  padding: 1rem 0.75rem;
+  margin: 0 -0.75rem;
+  border-radius: 12px;
+  background: rgba(43, 111, 232, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(43, 111, 232, 0.1);
+}
+
+.yd-clinical-module--relay .yd-clinical-module-name {
+  color: #1a4f9c;
+}
+
+/* —— Practice world: communication side + Command AI —— */
+.yd-practice-world-layout {
+  position: relative;
+  z-index: 8;
+  display: grid;
+  gap: 0.625rem;
+  margin: 0 0.75rem;
+}
+
+@media (min-width: 520px) {
+  .yd-practice-world-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.42fr);
+    align-items: start;
+  }
+}
+
+.yd-practice-world-side {
+  padding: 0.75rem 0.875rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(125, 211, 252, 0.25);
+  box-shadow: 0 6px 20px rgba(80, 110, 140, 0.06);
+}
+
+.yd-practice-world-side-title {
+  margin: 0;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a92a8;
+}
+
+.yd-practice-world-moments {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yd-practice-world-moment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(43, 111, 232, 0.04);
+}
+
+.yd-practice-world-moment-type {
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8ba3b8;
+}
+
+.yd-practice-world-moment-text {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: #3d5266;
+}
+
+.yd-practice-world-routine {
+  margin: 0.5rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: #5a6f84;
+}
+
+.yd-practice-world-routine span {
+  display: block;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8b7355;
+}
+
+.yd-practice-world-command {
+  position: relative;
+  z-index: 7;
+  margin: 0 0.75rem 0.35rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(167, 139, 250, 0.08) 0%,
+    rgba(255, 253, 250, 0.65) 100%
+  );
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+}
+
+.yd-practice-world-command-label {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #6b5b95;
+}
+
+.yd-practice-world-command-text {
+  margin: 0;
+  flex: 1;
+  min-width: 12rem;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: #5a6f84;
+  font-style: italic;
+}
+
+.yd-practice-world-stage-foot {
+  position: relative;
+  z-index: 6;
+  margin: 0 0.75rem 0.25rem;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: #647a8f;
+  text-align: center;
+  font-style: italic;
+}

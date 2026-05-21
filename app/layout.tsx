@@ -4,7 +4,14 @@ import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 
 import { getAppBaseUrl } from "@/lib/env";
 import {
+  absoluteShareUrl,
+  SHARE_ASSET_PATHS,
+  SHARE_IMAGE_HEIGHT,
+  SHARE_IMAGE_WIDTH,
+} from "@/lib/share-assets";
+import {
   SITE_DESCRIPTION,
+  SITE_OG_DESCRIPTION,
   SITE_OG_IMAGE_ALT,
   SITE_TITLE,
   SITE_TITLE_TEMPLATE,
@@ -51,7 +58,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon-16", sizes: "16x16", type: "image/png" },
+      { url: SHARE_ASSET_PATHS.icon16, sizes: "16x16", type: "image/png" },
+      { url: SHARE_ASSET_PATHS.icon32, sizes: "32x32", type: "image/png" },
+      { url: SHARE_ASSET_PATHS.icon512, sizes: "512x512", type: "image/png" },
       { url: "/icon", sizes: "32x32", type: "image/png" },
       {
         url: "/brand/your-dentist/logo-mark.svg",
@@ -59,7 +68,14 @@ export const metadata: Metadata = {
         sizes: "any",
       },
     ],
-    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: SHARE_ASSET_PATHS.appleTouch, sizes: "180x180", type: "image/png" }],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/brand/your-dentist/safari-pinned-tab.svg",
+        color: "#0284C7",
+      },
+    ],
   },
   appleWebApp: {
     capable: true,
@@ -72,12 +88,13 @@ export const metadata: Metadata = {
     siteName: "Your Dentist",
     url: "/",
     title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
+    description: SITE_OG_DESCRIPTION,
     images: [
       {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
+        url: absoluteShareUrl(SHARE_ASSET_PATHS.og),
+        secureUrl: absoluteShareUrl(SHARE_ASSET_PATHS.og),
+        width: SHARE_IMAGE_WIDTH,
+        height: SHARE_IMAGE_HEIGHT,
         alt: SITE_OG_IMAGE_ALT,
         type: "image/png",
       },
@@ -86,12 +103,12 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
+    description: SITE_OG_DESCRIPTION,
     images: [
       {
-        url: "/twitter-image",
-        width: 1200,
-        height: 630,
+        url: absoluteShareUrl(SHARE_ASSET_PATHS.twitter),
+        width: SHARE_IMAGE_WIDTH,
+        height: SHARE_IMAGE_HEIGHT,
         alt: SITE_OG_IMAGE_ALT,
       },
     ],
@@ -101,7 +118,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   other: {
-    "msapplication-TileColor": "#0F6E56",
+    "msapplication-TileColor": "#0284C7",
+    "og:image:width": String(SHARE_IMAGE_WIDTH),
+    "og:image:height": String(SHARE_IMAGE_HEIGHT),
   },
 };
 

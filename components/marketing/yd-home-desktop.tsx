@@ -3,42 +3,44 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { YdEcosystemRelayCommand } from "@/components/marketing/yd-ecosystem-relay-command";
 import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
 import { YdPublicPricingStage } from "@/components/marketing/yd-public-pricing-stage";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
 const HERO_LINES = [
-  "Patient:innen senden Fotos sicher ein.",
-  "Ihr Team koordiniert intern — ohne WhatsApp-Chaos.",
-  "Relay: Aufgaben, Nachrichten, Erinnerungen am Fall.",
-] as const;
-
-const RELIEF = [
-  "Strukturierter Patienteneingang statt verstreuter Kanäle.",
-  "Interne Nachrichten und Übergaben in einem geschützten Bereich.",
-  "Command AI hilft leise, Fälle und Abläufe einzuordnen.",
+  "Patient:innen senden Anliegen und Fotos strukturiert ein.",
+  "Ihr Team kommuniziert intern in Relay — ruhig, am Fall, ohne WhatsApp.",
+  "Routinen und Erinnerungen laufen verlässlich; Command AI entlastet leise.",
 ] as const;
 
 const WORKFLOW = [
-  { label: "Eingang", detail: "Fotos & Anliegen", product: "Tracker" },
-  { label: "Sichtung", detail: "Priorisieren am Fall", product: "Tracker" },
-  { label: "Team", detail: "Relay · Klärung intern", product: "Relay" },
-  { label: "Routine", detail: "Wiederholungen & Erinnerungen", product: "Relay" },
-  { label: "Antwort", detail: "Ruhig abschließen", product: "Profil" },
+  { label: "Eingang", detail: "Patientin · strukturierter Weg", product: "Tracker" },
+  { label: "Sichtung", detail: "Priorität im Praxisbereich", product: "Tracker" },
+  { label: "Intern", detail: "Nachrichten · Gruppen · Übergaben", product: "Relay" },
+  { label: "Routinen", detail: "Mo Laborkontrolle · tägl. Steri", product: "Relay" },
+  { label: "Unterstützung", detail: "Priorität · Überblick · Entlastung", product: "Command AI" },
 ] as const;
 
 const MODULES = [
-  { name: "Tracker", role: "Einsendungen", body: "Strukturierter Eingang für Patientenfälle.", accent: false },
-  { name: "Relay", role: "Koordination", body: "Nachrichten, Gruppen, Aufgaben, Erinnerungen.", accent: false },
+  {
+    name: "Relay",
+    role: "Interne Kommunikation",
+    body: "Nachrichten, Gruppen, Aufgaben, wiederkehrende Routinen, Erinnerungen, klare Verantwortung — kein Nebenkanal.",
+    accent: false,
+    featured: true,
+  },
   {
     name: "Command AI",
-    role: "Leise Orientierung",
-    body: "Fälle und Abläufe schneller verstehen — ohne KI-Lautstärke.",
+    role: "Leise Unterstützung",
+    body: "Orientierung, Priorisierung, Ablaufhilfe — weniger mentale Last, ohne KI-Marketing.",
     accent: true,
+    featured: false,
   },
-  { name: "Atlas", role: "Überblick", body: "Der ruhige Blick auf den Praxisalltag.", accent: false },
-  { name: "Profil", role: "Praxisseite", body: "Nach außen klar, nach innen kontrolliert.", accent: false },
-  { name: "Workspace", role: "Team", body: "Rollen und Zugänge an einem Ort.", accent: false },
+  { name: "Tracker", role: "Einsendungen", body: "Strukturierter Eingang für Patientenfälle.", accent: false, featured: false },
+  { name: "Atlas", role: "Überblick", body: "Operationaler Blick auf den Praxisalltag.", accent: false, featured: false },
+  { name: "Profil", role: "Praxisseite", body: "Nach außen klar, nach innen kontrolliert.", accent: false, featured: false },
+  { name: "Workspace", role: "Team", body: "Rollen, Zugänge, geschützter Bereich.", accent: false, featured: false },
 ] as const;
 
 type YdHomeDesktopProps = {
@@ -54,7 +56,7 @@ export function YdHomeDesktop({
 }: YdHomeDesktopProps) {
   return (
     <article className="yd-clinical-page yd-clinical-desktop-only">
-      <YdProductChrome setupHref="/#pricing" />
+      <YdProductChrome setupHref="/#ecosystem" />
 
       <section
         className="yd-clinical-hero yd-public-os-awaken-field"
@@ -65,13 +67,13 @@ export function YdHomeDesktop({
         <div className="yd-clinical-hero-vignette" aria-hidden />
         <div className="yd-clinical-hero-grid">
           <div className="yd-clinical-hero-copy">
-            <p className="yd-clinical-eyebrow">Premium-Infrastruktur für Zahnarztpraxen</p>
+            <p className="yd-clinical-eyebrow">Interne Kommunikation · ruhig gebündelt</p>
             <h1 id="yd-clinical-hero-title" className="yd-clinical-display">
-              Weniger Chaos. <em>Mehr</em> Ruhe im Team.
+              Endlich <em>zusammen</em> arbeiten — ohne Chaos zwischen den Kanälen.
             </h1>
             <p className="yd-clinical-lead">
-              Ein geschützter Praxisbereich für Patientenkommunikation, interne Abstimmung und
-              klare Übergaben — damit der Alltag leichter wird, nicht lauter.
+              Your Dentist verbindet Patienteneingang und Teamkoordination in einem geschützten
+              Praxisraum: strukturiert nach außen, ruhig und nachvollziehbar nach innen.
             </p>
             <ul className="yd-clinical-hero-benefits">
               {HERO_LINES.map((b) => (
@@ -85,9 +87,13 @@ export function YdHomeDesktop({
               <Link prefetch href="/login" className="yd-clinical-cta-secondary">
                 Anmelden
               </Link>
+              <Link href="#ecosystem" className="yd-clinical-cta-ghost">
+                Relay &amp; Command AI
+              </Link>
             </div>
             <p className="yd-clinical-whisper">
-              Für bestehende Praxen: direkt anmelden — Sie gelangen in Ihren geschützten Bereich.
+              Der eigentliche Gewinn: Ihre Praxis arbeitet endlich ruhig zusammen — nicht nur
+              „digitaler“.
             </p>
           </div>
           <div className="yd-clinical-hero-world">
@@ -96,31 +102,13 @@ export function YdHomeDesktop({
         </div>
       </section>
 
-      <section
-        className="yd-clinical-os-band yd-public-os-awaken-field"
-        style={{ ["--yd-public-field-i" as string]: "2" }}
-        aria-label="Was Your Dentist ist"
-      >
-        <p className="yd-clinical-os-band-lead">
-          <strong>Kein Tool-Katalog</strong> — ein ruhiger Praxisraum: Eingang, interne
-          Kommunikation, Aufgaben und sichere Zusammenarbeit.
-        </p>
-      </section>
-
-      <section
-        className="yd-clinical-act yd-clinical-act--relief yd-public-os-awaken-field"
+      <div
+        id="ecosystem"
+        className="yd-public-os-awaken-field"
         style={{ ["--yd-public-field-i" as string]: "3" }}
-        aria-labelledby="yd-clinical-relief-title"
       >
-        <h2 id="yd-clinical-relief-title" className="yd-clinical-act-title">
-          Stress im Alltag <em>reduzieren</em>
-        </h2>
-        <ul className="yd-clinical-relief-list">
-          {RELIEF.map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
-      </section>
+        <YdEcosystemRelayCommand />
+      </div>
 
       <section
         id="ablauf"
@@ -129,8 +117,12 @@ export function YdHomeDesktop({
         aria-labelledby="yd-clinical-flow-title"
       >
         <h2 id="yd-clinical-flow-title" className="yd-clinical-act-title">
-          Ein Fluss — <em>vom Eingang</em> bis zur Antwort
+          Ein geschützter <em>Fluss</em> — Eingang bis Team bis Erinnerung
         </h2>
+        <p className="yd-clinical-body">
+          Patientenanfrage, interne Abstimmung, verlässliche Routinen — Command AI unterstützt leise
+          dazwischen.
+        </p>
         <div className="yd-clinical-flow">
           {WORKFLOW.map((step, i) => (
             <div key={step.label} className="yd-clinical-flow-step">
@@ -151,15 +143,20 @@ export function YdHomeDesktop({
         aria-labelledby="yd-clinical-modules-title"
       >
         <h2 id="yd-clinical-modules-title" className="yd-clinical-act-title">
-          Im <em>geschützten</em> Bereich
+          Ein Raum — <em>nicht</em> ein Modulkatalog
         </h2>
+        <p className="yd-clinical-body">
+          Relay ist die ruhige Kommunikationsschicht Ihrer Praxis. Command AI arbeitet zurückhaltend
+          mit — für Orientierung statt Lautstärke.
+        </p>
         <div className="yd-clinical-modules">
           {MODULES.map((m) => (
             <div
               key={m.name}
               className={cn(
                 "yd-clinical-module",
-                m.accent && "yd-clinical-module--command-ai"
+                m.accent && "yd-clinical-module--command-ai",
+                m.featured && "yd-clinical-module--relay"
               )}
             >
               <div>
@@ -188,7 +185,9 @@ export function YdHomeDesktop({
           <Link href="/datenschutz">Datenschutz</Link>
           <Link href="/agb">AGB</Link>
         </div>
-        <p>Verschlüsselte Verbindung · Freischaltung nach Prüfung · Your Dentist</p>
+        <p>
+          Interne Kommunikation · Routinen · Command AI — ein geschützter Praxisbereich
+        </p>
       </footer>
     </article>
   );

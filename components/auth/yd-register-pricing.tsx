@@ -10,9 +10,9 @@ const PLAN_ORDER: RegisterPlanId[] = ["monthly", "halfyearly", "yearly"];
 
 const INCLUDED = [
   "Geschützter Praxis-Workspace",
-  "Einsendungen & Inbox (Tracker)",
-  "Relay: Aufgaben, Nachrichten, Erinnerungen",
-  "Command AI — ruhige Orientierung",
+  "Tracker: strukturierter Patienteneingang",
+  "Relay: Nachrichten, Gruppen, Routinen, Erinnerungen",
+  "Command AI: leise Orientierung & Entlastung",
   "Öffentliches Praxisprofil & Team",
   "Verschlüsselte Datenübertragung",
 ] as const;

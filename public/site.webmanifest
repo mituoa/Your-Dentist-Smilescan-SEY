@@ -1,33 +1,33 @@
 {
-  "name": "Your Dentist – Neutral Practice Platform",
+  "name": "Your Dentist — Neutral Practice Platform",
   "short_name": "Your Dentist",
-  "description": "Digitale Praxisplattform für moderne Zahnmedizin. Sichere Patientenverwaltung, Intake, Aufgaben, Journals und Praxisorganisation in einer zentralen Oberfläche.",
+  "description": "Neutral Practice Platform — ruhige Infrastruktur für moderne Zahnarztpraxen.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#F8FAFA",
-  "theme_color": "#0F6E56",
+  "background_color": "#FDFCFB",
+  "theme_color": "#0284C7",
   "icons": [
     {
-      "src": "/favicon-16",
+      "src": "/brand/share/icon-16.png",
       "sizes": "16x16",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon",
+      "src": "/brand/share/icon-32.png",
       "sizes": "32x32",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/brand/your-dentist/logo-mark.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/brand/share/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/apple-icon",
+      "src": "/brand/share/apple-touch-180.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any maskable"

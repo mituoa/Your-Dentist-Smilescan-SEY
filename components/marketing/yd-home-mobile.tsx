@@ -7,9 +7,10 @@ import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lo
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
 
 const VALUE_LINES = [
-  "Patient:innen senden Fotos strukturiert ein",
-  "Ihr Team koordiniert intern — ohne WhatsApp-Chaos",
-  "Relay: Aufgaben, Nachrichten, Erinnerungen",
+  "Patient:innen senden strukturiert ein",
+  "Relay: interne Nachrichten, Gruppen, Routinen",
+  "Erinnerungen statt Post-its und WhatsApp",
+  "Command AI — leise, weniger mentale Last",
 ] as const;
 
 type YdHomeMobileProps = {
@@ -18,9 +19,6 @@ type YdHomeMobileProps = {
   prefilledEmail?: string;
 };
 
-/**
- * Mobile entry — calm, focused, app-like. No long marketing scroll.
- */
 export function YdHomeMobile({
   initialPlan,
   inviteToken = "",
@@ -38,15 +36,15 @@ export function YdHomeMobile({
 
       <main className="yd-entry-mobile-main">
         <div className="yd-entry-mobile-hero">
-          <p className="yd-clinical-eyebrow">Ruhiger Praxisalltag</p>
+          <p className="yd-clinical-eyebrow">Ruhig zusammenarbeiten</p>
           <h1 className="yd-clinical-display yd-entry-mobile-title">
-            Weniger Stress. <em>Mehr</em> Klarheit im Team.
+            Weniger Stress im Team. <em>Mehr</em> Klarheit intern.
           </h1>
           <p className="yd-entry-mobile-value">
-            Ein geschützter Praxisbereich für Eingang, interne Kommunikation und
-            strukturierte Übergaben.
+            Ein geschützter Praxisraum: Eingang, interne Kommunikation in Relay, verlässliche
+            Erinnerungen — Command AI unterstützt leise.
           </p>
-          <ul className="yd-entry-mobile-lines" aria-label="Was sich ändert">
+          <ul className="yd-entry-mobile-lines" aria-label="Was Ihre Praxis gewinnt">
             {VALUE_LINES.map((line) => (
               <li key={line}>{line}</li>
             ))}

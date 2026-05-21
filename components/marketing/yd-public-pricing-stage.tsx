@@ -37,8 +37,8 @@ export function YdPublicPricingStage({
         Praxis einrichten — nach Prüfung <em>freischalten</em>
       </h2>
       <p className="yd-clinical-body">
-        Kein Druck: Abrechnungsrhythmus wählen, Assistenten in Ruhe durchlaufen. Nach Freigabe öffnet
-        sich Ihr geschützter Bereich.
+        Ihr geschützter Bereich inkl. Relay (interne Kommunikation, Routinen, Erinnerungen) und
+        Command AI — Abrechnungsrhythmus wählen, Registrierung in Ruhe durchlaufen.
       </p>
       {showHomeLink ? (
         <p className="yd-clinical-whisper">

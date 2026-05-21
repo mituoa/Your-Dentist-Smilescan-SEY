@@ -85,7 +85,7 @@ export function YdEntryPricingCompact({
       </button>
 
       <p className="yd-entry-pricing-foot">
-        Command AI · Nachrichten · Erinnerungen — im geschützten Praxisbereich
+        Relay: interne Kommunikation &amp; Routinen · Command AI leise im Hintergrund
       </p>
     </section>
   );
