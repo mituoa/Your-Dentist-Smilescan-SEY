@@ -11,14 +11,8 @@ export function LoginSubmitButton(props: { disabledExternal?: boolean }) {
       type="submit"
       disabled={disabled}
       aria-busy={pending}
-      className="max-md:mt-3 max-md:h-11 max-md:rounded-md max-md:text-[13px] max-md:shadow-none max-md:hover:shadow-sm mt-4 inline-flex h-12 w-full items-center justify-center rounded-lg px-4 text-[14px] font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-sm bg-[linear-gradient(to_bottom,#0284C7_0%,#0369A1_100%)] hover:bg-[linear-gradient(to_bottom,#0369A1_0%,#075985_100%)] lg:mt-6 lg:h-[56px] lg:rounded-xl lg:text-[15px]"
-      style={
-        pending
-          ? {
-              background: "linear-gradient(to bottom, #0369A1 0%, #075985 100%)",
-            }
-          : undefined
-      }
+      className="yd-login-btn-primary yd-login-awaken-field mt-5 lg:mt-6"
+      style={{ ["--yd-login-field-i" as string]: "2" }}
     >
       {pending ? (
         <span className="flex items-center justify-center gap-2">

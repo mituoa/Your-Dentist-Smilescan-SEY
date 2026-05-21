@@ -72,7 +72,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={() => mobileNav?.close()}
-            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-lg transition hover:bg-white/50"
+            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-lg transition hover:bg-[rgba(47,128,237,0.06)]"
             style={{ color: YD.text.muted }}
             aria-label="Menü schließen"
           >

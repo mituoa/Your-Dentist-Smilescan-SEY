@@ -3,6 +3,8 @@
 @import "./yd-workspace.css";
 @import "./yd-ambient.css";
 @import "./yd-dashboard.css";
+@import "./yd-sidebar.css";
+@import "./yd-login.css";
 
 @layer base {
   :root {

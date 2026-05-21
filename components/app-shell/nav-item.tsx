@@ -69,52 +69,46 @@ export function NavItem({
       title={label}
       data-active={isActive ? "true" : "false"}
       className={cn(
-        "yd-ambient-nav-link group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.3)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:px-0 md:py-0",
-        !isActive && "hover:bg-white/35 md:hover:bg-transparent"
+        "yd-ambient-nav-link group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-[background,box-shadow] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.22)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:rounded-none md:px-0 md:py-0",
+        isActive && "yd-nav-link-active"
       )}
     >
       {isActive ? (
-        <span
-          className="pointer-events-none absolute left-1/2 top-[calc(100%-4px)] hidden h-10 w-9 -translate-x-1/2 md:block"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(47,128,237,0.35) 0%, rgba(47,128,237,0.08) 55%, transparent 100%)",
-            borderRadius: "50%",
-            filter: "blur(6px)",
-          }}
-          aria-hidden
-        />
+        <>
+          <span className="yd-nav-active-halo" aria-hidden />
+          <span className="yd-nav-active-trace" aria-hidden />
+        </>
       ) : null}
 
       <span
         className={cn(
-          "yd-nav-icon-shell relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
-          isActive && "shadow-[0_6px_18px_rgba(30,91,189,0.4)]"
+          "yd-nav-icon-shell flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
+          isActive && "yd-nav-icon-shell--active"
         )}
         style={
           isActive
-            ? { background: YD.accent.navActive }
+            ? undefined
             : { backgroundColor: "transparent" }
         }
       >
         <Icon
-          className="h-[22px] w-[22px] transition-colors duration-300"
-          strokeWidth={isActive ? 2 : 1.5}
-          style={{ color: isActive ? "#FFFFFF" : YD.sidebar.iconIdle }}
+          className={cn("h-[22px] w-[22px] transition-[color,filter] duration-700", isActive && "yd-nav-icon--active")}
+          strokeWidth={isActive ? 2.1 : 1.55}
+          style={{ color: isActive ? YD.sidebar.iconActive : YD.sidebar.iconIdle }}
         />
       </span>
 
       <div className="min-w-0 flex-1 text-left md:hidden">
         <span
           className={cn(
-            "block truncate text-[14px] font-medium leading-snug",
-            isActive ? "text-[#0F172A]" : "text-[#475569]"
+            "yd-nav-label block truncate text-[14px] font-medium leading-snug transition-colors duration-700",
+            isActive ? "text-[#1A4F9C]" : "text-[#475569]"
           )}
         >
           {label}
         </span>
         {description ? (
-          <span className="mt-0.5 block text-[12px] text-[#94A3B8]">{description}</span>
+          <span className="mt-0.5 block text-[12px] text-[#8BA3B8]">{description}</span>
         ) : null}
       </div>
       {badge !== undefined && badge > 0 ? (

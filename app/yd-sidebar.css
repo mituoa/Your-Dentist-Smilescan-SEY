@@ -1,0 +1,122 @@
+/**
+ * Your Dentist — Sidebar rail (ambient navigation, not menu selection blocks)
+ */
+
+.yd-ambient-nav-link {
+  position: relative;
+}
+
+/* —— Active: radial halo only (no white panel) —— */
+.yd-nav-active-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: 56px;
+  height: 56px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(47, 128, 237, 0.2) 0%,
+    rgba(125, 211, 252, 0.1) 38%,
+    transparent 68%
+  );
+  opacity: 0.85;
+  filter: blur(1px);
+  transition: opacity 720ms var(--yd-ease-luminous, cubic-bezier(0.25, 0.9, 0.35, 1));
+}
+
+/* Subtle vertical light trace (device rail) */
+.yd-nav-active-trace {
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  z-index: 0;
+  display: none;
+  width: 2px;
+  height: 28px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(47, 128, 237, 0.45) 50%,
+    transparent 100%
+  );
+  opacity: 0.7;
+}
+
+@media (min-width: 768px) {
+  .yd-nav-active-trace {
+    display: block;
+  }
+}
+
+.yd-nav-icon-shell {
+  position: relative;
+  z-index: 1;
+  transition:
+    box-shadow 720ms var(--yd-ease-luminous, cubic-bezier(0.25, 0.9, 0.35, 1)),
+    background 720ms var(--yd-ease-spatial, cubic-bezier(0.19, 1, 0.32, 1)),
+    filter 720ms var(--yd-ease-spatial, cubic-bezier(0.19, 1, 0.32, 1));
+}
+
+/* Active icon: glass + glow, colored icon (NOT solid blue pill + white icon) */
+.yd-nav-icon-shell--active {
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.38),
+    0 0 28px rgba(47, 128, 237, 0.22),
+    0 0 10px rgba(125, 211, 252, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  filter: brightness(1.08);
+}
+
+.yd-nav-icon--active {
+  filter: drop-shadow(0 0 8px rgba(47, 128, 237, 0.35));
+}
+
+/* Mobile list row: whisper tint, never white block */
+@media (max-width: 767px) {
+  .yd-nav-link-active {
+    background: rgba(47, 128, 237, 0.05) !important;
+  }
+
+  .yd-nav-link-active .yd-nav-label {
+    color: #1a4f9c;
+  }
+}
+
+@media (hover: hover) {
+  .yd-ambient-nav-link:not([data-active="true"]):hover .yd-nav-icon-shell {
+    transform: none;
+    background: rgba(255, 255, 255, 0.14) !important;
+    filter: brightness(1.04);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.28),
+      0 0 20px rgba(47, 128, 237, 0.12);
+  }
+
+  .yd-ambient-nav-link[data-active="true"]:hover .yd-nav-icon-shell {
+    transform: none;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.45),
+      0 0 36px rgba(47, 128, 237, 0.28),
+      0 0 14px rgba(125, 211, 252, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+  }
+
+  .yd-ambient-nav-link:not([data-active="true"]):hover {
+    background: rgba(47, 128, 237, 0.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-nav-active-halo,
+  .yd-nav-icon-shell {
+    transition: none;
+  }
+}

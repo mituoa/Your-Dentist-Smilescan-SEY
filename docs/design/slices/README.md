@@ -1,77 +1,85 @@
-# Design-Slices — Healthcare Dashboard
+# Design-Slices — Referenz & Umsetzung
 
-Referenzbilder und zugeschnittene Teile für **Schritt-für-Schritt-Umsetzung**.  
-Funktionen in SmileScan bleiben gleich — nur Layout, Form und Farbe.
+**Stand:** Mai 2026 · System: **YD v0.5**
+
+Referenzbilder aus dem Figma Healthcare Dashboard. Die **Live-Implementierung** nutzt dieselbe DNA, ist aber atmosphärischer (icy gradients, spatial motion, floating context).
+
+---
 
 ## Referenz (Vollbild)
 
-| Datei | Route in SmileScan | Inhalt |
-|-------|-------------------|--------|
-| `reference/01-dashboard-full.png` | `/dashboard` | Atlas / Übersicht |
-| `reference/02-tracker-full.png` | `/inbox` | Einsendungen / Tracker |
+| Datei | Route | Status Code |
+|-------|-------|-------------|
+| `../reference/01-dashboard-full.png` | `/dashboard` | ✅ YD v0.5 (weiterentwickelt) |
+| `../reference/02-tracker-full.png` | `/inbox` | 🟡 YD shell + spatial rows |
 
-## Dashboard — Slices (`slices/dashboard/`)
+---
 
-| Slice | Datei | Was drin ist | Code-Ziel (später) |
-|-------|--------|--------------|-------------------|
-| 1 | `01-sidebar.png` | Schmale Icon-Rail, Logo oben, aktives Home | `components/app-shell/sidebar.tsx` |
-| 2 | `02-header.png` | Begrüßung, Suchfeld, Benachrichtigung | `Topbar` / `dashboard/greeting` |
-| 3 | `03-stat-cards.png` | 3 KPI-Karten (Patient, Room, Appointment) | `components/dashboard/stat-block.tsx` ×3 |
-| 4 | `04-chart-analytics.png` | Balkendiagramm „Analytics“ | Neuer Block oder bestehende Stats erweitern |
-| 5 | `05-chart-gender.png` | Halbkreis „Gender“ | Optional / Phase 2 |
-| 6 | `06-calendar.png` | Monatskalender | Optional / Phase 2 |
-| 7 | `07-table-preview.png` | Tabelle mit Status-Pills | Inspiration für Aktivität / Kurzliste |
+## Dashboard — Slices (`dashboard/`)
 
-**SmileScan-Mapping (Inhalt, nicht 1:1 Text aus Referenz):**
+| # | Datei | Inhalt Referenz | Code (aktuell) | Status |
+|---|--------|-----------------|----------------|--------|
+| 1 | `01-sidebar.png` | Icon-Rail | `sidebar.tsx`, `nav-item.tsx`, wordmark | ✅ |
+| 2 | `02-header.png` | Greeting + Suche | `dashboard-header.tsx` | ✅ v0.5 (Dr., OS search) |
+| 3 | `03-stat-cards.png` | 3 KPI-Karten | `stat-card.tsx`, asymmetric grid | ✅ |
+| 4 | `04-chart-analytics.png` | Balkendiagramm | `analytics-bars.tsx` | ✅ |
+| 5 | `05-chart-gender.png` | Halbkreis | `distribution-arc.tsx` (Bearbeitungsstand) | ✅ adapted |
+| 6 | `06-calendar.png` | Kalender | `month-calendar.tsx` | ✅ |
+| 7 | `07-table-preview.png` | Tabelle + Pills | `recent-table.tsx` | ✅ |
 
-- „Total Patient“ → z. B. neue Einsendungen / offene Fälle
-- „Appointment“ → offene Aufgaben
-- „Overall Room“ → ggf. Team-Metrik oder weglassen, wenn keine Daten
+---
 
-## Tracker (Einsendungen) — Slices (`slices/tracker/`)
+## Tracker — Slices (`tracker/`)
 
-| Slice | Datei | Was drin ist | Code-Ziel (später) |
-|-------|--------|--------------|-------------------|
-| 1 | `01-sidebar.png` | Rail, **Patients** aktiv (blauer Kreis) | `sidebar.tsx` — aktiver Nav `/inbox` |
-| 2 | `02-header.png` | Titel „Patient“, Suchleiste | `inbox` Listenkopf / Suche |
-| 3 | `03-table-card.png` | Weiße Karte, Tabelle, Pagination, Status-Pills | `InboxTrackerShell` + Listenzeilen |
+| # | Datei | Inhalt Referenz | Code (aktuell) | Status |
+|---|--------|-----------------|----------------|--------|
+| 1 | `01-sidebar.png` | Rail, Patients aktiv | `sidebar.tsx` → `/inbox` | ✅ |
+| 2 | `02-header.png` | Titel + Suche | `inbox/layout.tsx` | ✅ |
+| 3 | `03-table-card.png` | Tabellenkarte | `InboxTrackerShell`, list items | 🟡 |
 
-**SmileScan-Mapping:**
+---
 
-- Spalten Referenz → unsere Spalten: Fall-ID, Patient, Datum, Status, …
-- Status „Hospital / Consultation / Healthy“ → unsere Dringlichkeit/Workflow-Status (Farben aus `HC.status*`)
-
-## Reihenfolge Umsetzung (empfohlen)
+## Umsetzungsphasen (historisch → aktuell)
 
 ```
-Phase A — Grundgerüst (alle Seiten)
-  A1  Tokens + Canvas-Hintergrund (#E8EFF5)
-  A2  Sidebar-Redesign (Icon-Rail wie Slice 01)
-  A3  Karten-Stil (radius, shadow, weiß)
-
-Phase B — Dashboard (/dashboard)
-  B1  Header (Slice 02)
-  B2  Stat-Karten (Slice 03)
-  B3  Charts optional (04–07)
-
-Phase C — Tracker (/inbox)
-  C1  Header + Suche (Slice 02)
-  C2  Tabellenkarte + Pills (Slice 03)
-
-Phase D — Restliche App
-  Relay, Settings, Register, … gleiche Tokens
+✅ Phase A — Shell + YD Tokens + Canvas
+✅ Phase B — Dashboard v0.5 (composition, motion, floating context)
+🟡 Phase C — Inbox / Tracker (YD card, spatial rows)
+⬜ Phase D — Relay, Settings, Profile, Journals, Public flows
+⬜ Phase E — Auth surfaces (login/register) — bewusst separat
 ```
 
-## Lokal prüfen
+Details: [../IMPLEMENTATION-STATUS.md](../IMPLEMENTATION-STATUS.md)
 
-```bash
-npm run dev
-# Dashboard: http://127.0.0.1:3000/dashboard
-# Tracker:   http://127.0.0.1:3000/inbox
-```
+---
 
-Slices im Finder: `docs/design/slices/dashboard/` und `docs/design/slices/tracker/`.
+## SmileScan-Inhalt (nicht Figma-Text 1:1)
+
+| Referenz-KPI | SmileScan |
+|--------------|-----------|
+| Total Patient | Einsendungen gesamt |
+| Appointment | Offene Aufgaben (Relay) |
+| Unread / Room | Ungelesene Fälle (hero KPI) |
+
+---
 
 ## Tokens im Code
 
-`lib/design/healthcare-dashboard-tokens.ts` — export `HC` für Tailwind/inline styles.
+```ts
+import { YD } from "@/lib/design/yd-design-tokens";
+// oder Legacy:
+import { HC } from "@/lib/design/healthcare-dashboard-tokens";
+```
+
+---
+
+## Screenshots aktualisieren (optional)
+
+Wenn die Referenz veraltet wirkt, neue Vollbild-Screenshots der Live-UI ablegen:
+
+```
+docs/design/reference/03-dashboard-yd-v0.5.png
+docs/design/reference/04-inbox-yd-v0.5.png
+```
+
+Dann in dieser README verlinken.

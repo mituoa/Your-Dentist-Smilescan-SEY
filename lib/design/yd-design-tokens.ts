@@ -96,6 +96,14 @@ export const YD = {
     edgeGlow:
       "linear-gradient(180deg, transparent 0%, rgba(47,128,237,0.14) 50%, rgba(30,91,189,0.28) 100%)",
     iconIdle: "#6B849C",
+    iconActive: "#2F80ED",
+    /** Legacy solid orb — avoid for ambient rail */
+    navActiveSolid:
+      "linear-gradient(180deg, #4A9AF0 0%, #2F80ED 48%, #1E5BB8 100%)",
+    /** Soft glass + glow (preferred active) */
+    navActiveGlass: "rgba(255, 255, 255, 0.22)",
+    navActiveGlow:
+      "0 0 0 1px rgba(255, 255, 255, 0.42), 0 0 32px rgba(47, 128, 237, 0.24), 0 0 14px rgba(125, 211, 252, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.55)",
   },
 
   /* —— Radius —— */

@@ -259,35 +259,7 @@
   }
 }
 
-/* ═══════════════════════════════════════════
-   SIDEBAR — device illumination, no scale
-   ═══════════════════════════════════════════ */
-
-.yd-ambient-nav-link .yd-nav-icon-shell {
-  transition:
-    box-shadow 720ms var(--yd-ease-luminous),
-    background 720ms var(--yd-ease-spatial),
-    filter 720ms var(--yd-ease-spatial);
-}
-
-@media (hover: hover) {
-  .yd-ambient-nav-link:not([data-active="true"]):hover .yd-nav-icon-shell {
-    transform: none;
-    background: rgba(255, 255, 255, 0.38);
-    filter: brightness(1.06);
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.45),
-      0 0 24px rgba(47, 128, 237, 0.16),
-      0 8px 20px rgba(30, 91, 189, 0.1);
-  }
-
-  .yd-ambient-nav-link[data-active="true"]:hover .yd-nav-icon-shell {
-    transform: none;
-    box-shadow:
-      0 6px 20px rgba(30, 91, 189, 0.38),
-      0 0 32px rgba(47, 128, 237, 0.2);
-  }
-}
+/* Sidebar rail — see app/yd-sidebar.css */
 
 /* Spatial context panel — materializes beside rail */
 .yd-nav-ambient-panel {

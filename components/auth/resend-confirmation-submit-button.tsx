@@ -11,7 +11,7 @@ export function ResendConfirmationSubmitButton(props: { disabledExternal?: boole
       type="submit"
       disabled={disabled}
       aria-busy={pending}
-      className="h-[44px] w-full rounded-xl border border-amber-200 bg-white text-[13px] font-semibold text-amber-900 transition-colors hover:bg-amber-100/50 disabled:cursor-not-allowed disabled:opacity-60"
+      className="yd-login-btn-secondary mt-3 min-h-[44px] text-[13px]"
     >
       {pending ? "Wird gesendet…" : "Bestätigungs‑E‑Mail erneut senden"}
     </button>
