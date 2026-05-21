@@ -96,7 +96,7 @@ export function YdRegisterPricing({
                   type="button"
                   className={cn(
                     "yd-os-btn w-full",
-                    active ? "yd-os-btn--primary" : "yd-os-btn--quiet"
+                    active ? "yd-os-btn--primary" : "yd-os-btn--ghost"
                   )}
                   onClick={() => router.push(buildRegisterHref(id, inviteToken, prefilledEmail, "1"))}
                 >

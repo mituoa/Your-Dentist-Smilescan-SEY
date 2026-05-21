@@ -50,19 +50,19 @@ export function PricingPageClient({
   }, []);
 
   return (
-    <div className="yd-public-page yd-public-pricing-page">
+    <div className="yd-public-page">
       <header
-        className="yd-public-ops-bar yd-public-os-awaken-field"
+        className="yd-public-top yd-public-os-awaken-field"
         style={{ ["--yd-public-field-i" as string]: "0" }}
       >
         <Link href="/" className="yd-auth-brand-link" aria-label="Zur Startseite">
           <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" />
         </Link>
-        <nav className="yd-public-ops-nav" aria-label="Navigation">
+        <nav className="yd-public-top-nav" aria-label="Navigation">
           <Link prefetch href="/" className="yd-os-link">
             Übersicht
           </Link>
-          <Link prefetch href={loginHref} className="yd-os-btn yd-os-btn--quiet">
+          <Link prefetch href={loginHref} className="yd-os-btn yd-os-btn--ghost">
             Anmelden
           </Link>
         </nav>
@@ -73,56 +73,60 @@ export function PricingPageClient({
         style={{ ["--yd-public-field-i" as string]: "1" }}
         aria-labelledby="yd-pricing-title"
       >
-        <div>
-          <p className="yd-os-eyebrow">Lizenz & Onboarding</p>
-          <h1 id="yd-pricing-title" className="yd-os-title yd-os-title--lg">
-            Praxisbereich einrichten
-          </h1>
-          <p className="yd-os-lead">
-            Ruhige Infrastruktur für Einsendungen, Aufgaben und Teamarbeit — mit klarer Freischaltung
-            nach Prüfung, in derselben OS-Oberfläche wie der geschützte Arbeitsbereich.
-          </p>
-          <div className="yd-public-hero-actions">
-            <Link
-              href={`/register?plan=${selectedPlan}&step=1`}
-              className="yd-os-btn yd-os-btn--primary"
-            >
-              Registrierung starten
-            </Link>
-            <Link prefetch href={loginHref} className="yd-os-btn yd-os-btn--quiet">
-              Zum Login
-            </Link>
+        <div className="yd-public-pricing-hero-inner">
+          <div>
+            <p className="yd-public-kicker">Lizenz & Onboarding</p>
+            <h1 id="yd-pricing-title" className="yd-public-display" style={{ fontSize: "clamp(1.75rem, 5vw, 2.75rem)" }}>
+              Praxisbereich <em>einrichten</em>
+            </h1>
+            <p className="yd-public-lead">
+              Ruhiges Onboarding mit menschlicher Klarheit — Plan wählen, Praxis registrieren,
+              Freischaltung nach Prüfung. Kein Startup-Druck, volle Transparenz.
+            </p>
+            <div className="yd-public-hero-actions">
+              <Link
+                href={`/register?plan=${selectedPlan}&step=1`}
+                className="yd-os-btn yd-os-btn--primary"
+              >
+                Registrierung starten
+              </Link>
+              <Link prefetch href={loginHref} className="yd-os-btn yd-os-btn--ghost">
+                Zum Login
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <div className="yd-os-surface yd-os-surface-pad yd-spatial-surface">
-          <p className="yd-os-section-label">Ablauf</p>
-          <ol className="yd-public-pricing-steps" aria-label="Onboarding-Schritte">
-            {ONBOARDING_STEPS.map((step, i) => (
-              <li key={step.title} className="yd-public-pricing-step">
-                <span className="yd-public-pricing-step-num" aria-hidden>
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="yd-public-pricing-step-title">{step.title}</p>
-                  <p className="yd-public-pricing-step-body">{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+          <div>
+            <p className="yd-public-section-kicker">Ablauf</p>
+            <ol className="yd-public-pricing-steps" aria-label="Onboarding-Schritte">
+              {ONBOARDING_STEPS.map((step, i) => (
+                <li key={step.title} className="yd-public-pricing-step">
+                  <span className="yd-public-pricing-step-num" aria-hidden>
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="yd-public-pricing-step-title">{step.title}</p>
+                    <p className="yd-public-pricing-step-body">{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
       <div
-        className="yd-public-os-awaken-field"
+        className="yd-public-field yd-public-pricing-plans-wrap yd-public-os-awaken-field"
         style={{ ["--yd-public-field-i" as string]: "2" }}
       >
-        <YdRegisterPricing
-          selectedPlan={selectedPlan}
-          inviteToken={inviteToken}
-          prefilledEmail={prefilledEmail}
-          sectionId="plans"
-        />
+        <div className="yd-public-field-inner">
+          <YdRegisterPricing
+            selectedPlan={selectedPlan}
+            inviteToken={inviteToken}
+            prefilledEmail={prefilledEmail}
+            sectionId="plans"
+          />
+        </div>
       </div>
 
       <footer
