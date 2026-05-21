@@ -8,8 +8,9 @@ import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
 import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-button";
 import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirmation-submit-button";
-import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
 import { YdAuthPending } from "@/components/auth/yd-auth-ui";
+import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
+import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
 function safeDecodeQueryParam(value: string | undefined): string {
@@ -71,15 +72,6 @@ export function LoginPageClient({
   const passwordBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "password";
   const googleBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "google";
   const resendBlockedByOthers = loginChannelLock !== null && loginChannelLock !== "resend";
-
-  const pricingDefaultHref = useMemo(() => {
-    const qs = new URLSearchParams();
-    qs.set("plan", "yearly");
-    if (inviteToken) qs.set("invite", inviteToken);
-    if (prefilledEmail) qs.set("email", prefilledEmail);
-    const q = qs.toString();
-    return q ? `/pricing?${q}` : "/pricing";
-  }, [inviteToken, prefilledEmail]);
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
@@ -169,12 +161,29 @@ export function LoginPageClient({
 
   const shouldShowResend = normalizedQueryError === "email_not_confirmed";
 
+  const pricingHref = useMemo(() => {
+    const qs = new URLSearchParams();
+    qs.set("plan", "yearly");
+    if (inviteToken) qs.set("invite", inviteToken);
+    if (prefilledEmail) qs.set("email", prefilledEmail);
+    const q = qs.toString();
+    return q ? `/pricing?${q}` : "/pricing";
+  }, [inviteToken, prefilledEmail]);
+
+  const loginHref = inviteToken
+    ? `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
+    : "/login";
+
   return (
-    <YdAuthEnvironment>
+    <YdPublicOsEnvironment mode="focus">
+      <YdProductChrome variant="entry" />
+      <div className="yd-product-entry">
+        <div className="yd-product-entry-card">
       <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "0" }}>
-        <h1 className="yd-auth-title">Willkommen zurück</h1>
-        <p className="yd-auth-subtitle">
-          Ihr geschützter Praxisbereich — melden Sie sich an, um dort fortzufahren.
+        <h1 className="yd-public-entry-title">Willkommen zurück</h1>
+        <p className="yd-public-entry-lead">
+          Ihr geschützter Praxisbereich wartet — melden Sie sich an und arbeiten Sie dort in Ruhe
+          weiter.
         </p>
       </div>
 
@@ -329,7 +338,7 @@ export function LoginPageClient({
 
         <p className="yd-auth-register yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "5" }}>
           Noch keine Praxis?{" "}
-          <Link href={pricingDefaultHref} onClick={clearReturnToPricingFlag} className="yd-auth-link">
+          <Link href={pricingHref} onClick={clearReturnToPricingFlag} className="yd-os-link">
             Praxis einrichten
           </Link>
         </p>
@@ -357,21 +366,23 @@ export function LoginPageClient({
 
         <div className="yd-auth-legal">
           <div className="yd-auth-legal-links">
-            <Link prefetch href="/" className="yd-auth-link">
+            <Link prefetch href="/" className="yd-os-link">
               Startseite
             </Link>
             <span aria-hidden>·</span>
-            <Link href="/datenschutz" className="yd-auth-link">
+            <Link href="/datenschutz" className="yd-os-link">
               Datenschutz
             </Link>
             <span aria-hidden>·</span>
-            <Link href="/impressum" className="yd-auth-link">
+            <Link href="/impressum" className="yd-os-link">
               Impressum
             </Link>
           </div>
           <p className="mt-1.5">© {year} Your Dentist GmbH</p>
         </div>
-    </YdAuthEnvironment>
+        </div>
+      </div>
+    </YdPublicOsEnvironment>
   );
 }
 

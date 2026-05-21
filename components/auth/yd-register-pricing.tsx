@@ -50,13 +50,13 @@ export function YdRegisterPricing({
       aria-labelledby="yd-register-pricing-title"
     >
       <div className="yd-register-pricing-intro">
-        <p className="yd-register-pricing-eyebrow">Lizenz & Praxiszugang</p>
+        <p className="yd-register-pricing-eyebrow">Praxislizenz</p>
         <h2 id="yd-register-pricing-title" className="yd-register-pricing-title">
-          Professionelle Infrastruktur für Ihre Praxis
+          Abrechnungsrhythmus für Ihren Praxisbereich
         </h2>
         <p className="yd-register-pricing-subtitle">
-          Wählen Sie den Abrechnungsrhythmus. Alle Optionen umfassen denselben geschützten
-          Praxisbereich — transparent und ohne Marketing-Tricks.
+          Alle Optionen umfassen dieselbe geschützte Infrastruktur — Einsendungen, Relay, Profil und
+          Team. Der Unterschied liegt nur in der Abrechnungsperiode.
         </p>
       </div>
 
