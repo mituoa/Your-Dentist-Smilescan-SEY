@@ -47,3 +47,10 @@ export function buildTaskAssigned(d: MailData) {
   const html = `<p>Guten Tag,</p><p><strong>${escapeHtml(d.actorName)}</strong> hat Ihnen eine neue Aufgabe zugewiesen:</p><p><strong>${escapeHtml(d.taskTitle)}</strong></p><table cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;"><tr><td style="background-color: #1A1A1A; border-radius: 2px;"><a href="${escapeHtml(d.taskUrl)}" style="display: inline-block; padding: 14px 28px; color: #FAFAF8; text-decoration: none; font-weight: 500; font-family: sans-serif;">Aufgabe öffnen</a></td></tr></table><p>Mit freundlichen Grüßen<br>Your Dentist</p>`;
   return { subject, text, html };
 }
+
+export function buildTaskReminder(d: MailData) {
+  const subject = `Erinnerung: ${d.taskTitle}`;
+  const text = `Guten Tag,\n\nDies ist eine ruhige Erinnerung an Ihre Praxisroutine:\n\n"${d.taskTitle}"\n\n${d.taskUrl}\n\nMit freundlichen Grüßen\nYour Dentist`;
+  const html = `<p>Guten Tag,</p><p>Dies ist eine Erinnerung an Ihre Praxisroutine:</p><p><strong>${escapeHtml(d.taskTitle)}</strong></p><table cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;"><tr><td style="background-color: #1A1A1A; border-radius: 2px;"><a href="${escapeHtml(d.taskUrl)}" style="display: inline-block; padding: 14px 28px; color: #FAFAF8; text-decoration: none; font-weight: 500; font-family: sans-serif;">Aufgabe öffnen</a></td></tr></table><p>Mit freundlichen Grüßen<br>Your Dentist</p>`;
+  return { subject, text, html };
+}

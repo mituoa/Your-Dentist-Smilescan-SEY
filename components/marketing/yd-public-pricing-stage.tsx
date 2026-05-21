@@ -53,12 +53,13 @@ export function YdPublicPricingStage({
           Anmelden
         </Link>
       </p>
-      <div className="yd-clinical-pricing-stage">
+      <div className="yd-clinical-pricing-stage yd-clinical-pricing-stage--compact">
         <YdRegisterPricing
           selectedPlan={selectedPlan}
           inviteToken={inviteToken}
           prefilledEmail={prefilledEmail}
           sectionId="plans"
+          variant="compact"
         />
       </div>
     </section>

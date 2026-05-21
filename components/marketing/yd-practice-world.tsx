@@ -6,16 +6,48 @@ import { PUBLIC_EDITORIAL_IMAGES } from "@/lib/marketing/public-editorial-images
 
 const ambient = PUBLIC_EDITORIAL_IMAGES.practiceWorldAmbient;
 
+const WORKFLOW_STEPS = [
+  {
+    num: "01",
+    label: "Patientin sendet",
+    detail: "Bilder & Anliegen über Ihren Praxisweg",
+    state: "done",
+  },
+  {
+    num: "02",
+    label: "Tracker",
+    detail: "Einsendung strukturiert eingegangen",
+    state: "active",
+  },
+  {
+    num: "03",
+    label: "Relay",
+    detail: "Team klärt intern am Fall",
+    state: "next",
+  },
+  {
+    num: "04",
+    label: "Aufgabe",
+    detail: "Erinnerung · klare Verantwortung",
+    state: "next",
+  },
+  {
+    num: "05",
+    label: "Rückmeldung",
+    detail: "Ruhig erledigt — Patientin informiert",
+    state: "next",
+  },
+] as const;
+
 /**
- * Hero narrative — one coordinated practice day, not floating UI demos.
- * Patient path → structured inbox → internal team handoff.
+ * Hero workflow — one believable practice day, not floating UI samples.
  */
 export function YdPracticeWorld() {
   return (
     <div
       className="yd-practice-world"
       role="img"
-      aria-label="Praxisablauf: strukturierte Patientenanfrage, Einsendungen im Team und klare interne Übergabe"
+      aria-label="Praxisablauf: Patientin sendet Fotos, Tracker empfängt, Team koordiniert in Relay, Aufgabe mit Erinnerung, Fall ruhig abgeschlossen"
     >
       <div className="yd-practice-world-photo" aria-hidden>
         <Image
@@ -28,97 +60,86 @@ export function YdPracticeWorld() {
         />
         <div className="yd-practice-world-photo-veil" />
       </div>
-      <div className="yd-practice-world-atmosphere" aria-hidden />
-      <svg className="yd-practice-world-flow" viewBox="0 0 400 320" aria-hidden>
-        <path
-          d="M 72 248 C 120 220, 140 200, 168 188"
-          fill="none"
-          stroke="rgba(90, 154, 200, 0.35)"
-          strokeWidth="1.5"
-          strokeDasharray="4 6"
-        />
-        <path
-          d="M 232 168 C 268 155, 300 140, 328 108"
-          fill="none"
-          stroke="rgba(72, 178, 188, 0.38)"
-          strokeWidth="1.5"
-        />
-        <circle cx="168" cy="188" r="3" fill="rgba(47, 128, 237, 0.45)" />
-        <circle cx="232" cy="168" r="3" fill="rgba(56, 189, 198, 0.5)" />
-      </svg>
+      <div className="yd-practice-world-glow yd-practice-world-glow--warm" aria-hidden />
+      <div className="yd-practice-world-glow yd-practice-world-glow--cool" aria-hidden />
 
       <p className="yd-practice-world-kicker">
         <span className="yd-practice-world-kicker-dot" aria-hidden />
-        Heute in Ihrer Praxis
+        Ein ruhiger Tag in Ihrer Praxis
       </p>
 
-      {/* Center spine — inbox / coordination */}
-      <article className="yd-practice-world-core">
-        <header className="yd-practice-world-core-head">
+      <div className="yd-practice-world-stage">
+        <div className="yd-practice-world-stage-head">
           <div>
-            <span className="yd-practice-world-label">Einsendungen</span>
-            <p className="yd-practice-world-core-title">Alles an einem Ort</p>
+            <span className="yd-practice-world-label">Tracker · Einsendungen</span>
+            <p className="yd-practice-world-stage-title">Patientin M. K. — Schmerz &amp; Foto</p>
           </div>
-          <span className="yd-practice-world-pill">3 offen</span>
-        </header>
-        <ul className="yd-practice-world-inbox">
-          <li className="yd-practice-world-inbox-item yd-practice-world-inbox-item--focus">
-            <div className="yd-practice-world-inbox-main">
-              <p className="yd-practice-world-inbox-name">Patientin M. K. · Schmerz & Foto</p>
-              <p className="yd-practice-world-inbox-meta">Strukturiert eingegangen · vor 12 Min.</p>
-            </div>
-            <span className="yd-practice-world-status yd-practice-world-status--wait">Sichtung</span>
-          </li>
-          <li className="yd-practice-world-inbox-item">
-            <div className="yd-practice-world-inbox-main">
-              <p className="yd-practice-world-inbox-name">Überweisung · Laborbefund</p>
-              <p className="yd-practice-world-inbox-meta">Teamkommentar · Dr. Weber</p>
-            </div>
-            <span className="yd-practice-world-status">In Arbeit</span>
-          </li>
-        </ul>
-        <p className="yd-practice-world-core-note">
-          <span aria-hidden>↳</span> Interner Kommentar am Fall — kein separates Postfach
-        </p>
-      </article>
-
-      {/* Patient channel — left */}
-      <article className="yd-practice-world-lane yd-practice-world-lane--patient">
-        <span className="yd-practice-world-label">Patientenweg</span>
-        <p className="yd-practice-world-lane-title">Anfrage & Fotos</p>
-        <p className="yd-practice-world-lane-meta">Über Ihren Praxislink — sicher, verständlich</p>
-        <div className="yd-practice-world-photo-row" aria-hidden>
-          <span />
-          <span />
-          <span className="yd-practice-world-photo-row-more">+2</span>
+          <span className="yd-practice-world-pill">Sichtung</span>
         </div>
-      </article>
 
-      {/* Team handoff — right top */}
-      <article className="yd-practice-world-lane yd-practice-world-lane--handoff">
-        <span className="yd-practice-world-label">Übergabe · Relay</span>
-        <p className="yd-practice-world-lane-title">Rückfrage klären</p>
-        <p className="yd-practice-world-lane-meta">Zahnärztin · Status: übernommen</p>
-        <div className="yd-practice-world-assignee" aria-hidden>
-          <span className="yd-practice-world-avatar">ZW</span>
-          <span className="yd-practice-world-assignee-name">Klare Verantwortung</span>
+        <div className="yd-practice-world-stage-body">
+          <div className="yd-practice-world-patient-chip">
+            <span className="yd-practice-world-chip-label">Eingang</span>
+            <p>3 Fotos sicher übermittelt · vor 12 Min.</p>
+          </div>
+
+          <div className="yd-practice-world-stage-main">
+            <ul className="yd-practice-world-inbox">
+              <li className="yd-practice-world-inbox-item yd-practice-world-inbox-item--focus">
+                <div>
+                  <p className="yd-practice-world-inbox-name">Rückfrage Labor — Implantat</p>
+                  <p className="yd-practice-world-inbox-meta">Intern in Relay · Dr. Weber übernommen</p>
+                </div>
+                <span className="yd-practice-world-status yd-practice-world-status--wait">Team</span>
+              </li>
+              <li className="yd-practice-world-inbox-item">
+                <div>
+                  <p className="yd-practice-world-inbox-name">Erinnerung · Prophylaxe-Kontrolle</p>
+                  <p className="yd-practice-world-inbox-meta">Wöchentliche Routine · morgen 08:00</p>
+                </div>
+                <span className="yd-practice-world-status">Geplant</span>
+              </li>
+            </ul>
+            <p className="yd-practice-world-thread-line">
+              <strong>Relay:</strong> „Passt Befund — Patientin heute zurückrufen?“
+            </p>
+          </div>
         </div>
-      </article>
 
-      {/* Internal thread — right bottom */}
-      <aside className="yd-practice-world-thread">
-        <span className="yd-practice-world-label">Intern · Team</span>
-        <p className="yd-practice-world-thread-line">
-          <strong>Prophylaxe:</strong> „Röntgen anbei, bitte Rückruf“
+        <p className="yd-practice-world-stage-foot">
+          Kein Telefonchaos · keine verstreute E-Mail — alles am Fall
         </p>
-        <p className="yd-practice-world-thread-line yd-practice-world-thread-line--reply">
-          <strong>MFAs:</strong> „Erledigt — Patientin informiert“
-        </p>
-      </aside>
+      </div>
 
-      <p className="yd-practice-world-caption">
-        Strukturierter Eingang → ruhige Sichtung → klare Teamarbeit → professionelle Antwort
-      </p>
+      <ol className="yd-practice-world-spine" aria-hidden>
+        {WORKFLOW_STEPS.map((step) => (
+          <li
+            key={step.num}
+            className={`yd-practice-world-spine-step yd-practice-world-spine-step--${step.state}`}
+          >
+            <span className="yd-practice-world-spine-num">{step.num}</span>
+            <span className="yd-practice-world-spine-label">{step.label}</span>
+            <span className="yd-practice-world-spine-detail">{step.detail}</span>
+          </li>
+        ))}
+      </ol>
+
+      <svg className="yd-practice-world-connector" viewBox="0 0 520 48" aria-hidden>
+        <path
+          d="M 24 24 H 496"
+          fill="none"
+          stroke="url(#yd-flow-line)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <defs>
+          <linearGradient id="yd-flow-line" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="rgba(72, 178, 188, 0.5)" />
+            <stop offset="45%" stopColor="rgba(47, 128, 237, 0.55)" />
+            <stop offset="100%" stopColor="rgba(167, 139, 250, 0.35)" />
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
   );
 }

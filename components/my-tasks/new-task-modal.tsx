@@ -10,6 +10,7 @@ import {
   fetchAssignableMembersForTaskCreate,
 } from "@/app/(protected)/my-tasks/actions";
 import type { AssignableMember } from "@/lib/queries/team-members";
+import { TaskRoutineFields } from "@/components/my-tasks/task-routine-fields";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,7 @@ export function NewTaskModal({ open, onClose }: { open: boolean; onClose: () => 
   const [assignMode, setAssignMode] = useState<AssignMode>("self");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState("once");
 
   useEffect(() => setMounted(true), []);
 
@@ -351,6 +353,13 @@ export function NewTaskModal({ open, onClose }: { open: boolean; onClose: () => 
                 ) : null}
               </div>
             </div>
+
+            <TaskRoutineFields
+              disabled={isPending}
+              recurrenceValue={recurrenceType}
+              onRecurrenceChange={setRecurrenceType}
+              showCustomInterval
+            />
 
             <div>
               <label htmlFor="nt-tags" className={labelCls()}>

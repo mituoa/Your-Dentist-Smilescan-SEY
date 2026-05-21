@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 
-import { YdRegisterPricing } from "@/components/auth/yd-register-pricing";
+import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
 
-const MOBILE_TRUST = [
-  "Weniger Telefonstress — Anfragen strukturiert am Fall",
-  "Interne Teamkommunikation ohne E-Mail-Chaos",
-  "Geschützter Bereich · Freischaltung nach Prüfung",
+const VALUE_LINES = [
+  "Patient:innen senden Fotos strukturiert ein",
+  "Ihr Team koordiniert intern — ohne WhatsApp-Chaos",
+  "Relay: Aufgaben, Nachrichten, Erinnerungen",
 ] as const;
 
 type YdHomeMobileProps = {
@@ -18,83 +18,61 @@ type YdHomeMobileProps = {
   prefilledEmail?: string;
 };
 
-/** Mobile conversion surface — immediate trust + action, no scroll fatigue. */
+/**
+ * Mobile entry — calm, focused, app-like. No long marketing scroll.
+ */
 export function YdHomeMobile({
   initialPlan,
   inviteToken = "",
   prefilledEmail = "",
 }: YdHomeMobileProps) {
   const selectedPlan = coerceRegisterPlan(initialPlan) as RegisterPlanId;
-  const loginHref = "/login";
 
   return (
-    <div className="yd-clinical-mobile yd-clinical-mobile-only yd-clinical-page">
-      <header className="yd-clinical-chrome yd-clinical-chrome--minimal">
+    <div className="yd-entry-mobile yd-clinical-mobile-only">
+      <header className="yd-entry-mobile-header">
         <Link href="/" className="yd-auth-brand-link" aria-label="Startseite">
-          <YourDentistBrandLockup size="sm" tagline="Neutral Practice Platform" />
+          <YourDentistBrandLockup size="sm" tagline={null} />
         </Link>
       </header>
 
-      <main className="yd-clinical-mobile-main">
-        <div>
-          <p className="yd-clinical-eyebrow">Kommunikation & Organisation</p>
-          <h1 className="yd-clinical-display">
-            Weniger Chaos. <em>Klarere</em> Übergaben.
+      <main className="yd-entry-mobile-main">
+        <div className="yd-entry-mobile-hero">
+          <p className="yd-clinical-eyebrow">Ruhiger Praxisalltag</p>
+          <h1 className="yd-clinical-display yd-entry-mobile-title">
+            Weniger Stress. <em>Mehr</em> Klarheit im Team.
           </h1>
-          <p className="yd-clinical-lead">
-            Strukturierte Patientenanfragen und interne Teamarbeit — ein geschützter Praxisbereich
-            statt Telefon, E-Mail und Messenger.
+          <p className="yd-entry-mobile-value">
+            Ein geschützter Praxisbereich für Eingang, interne Kommunikation und
+            strukturierte Übergaben.
           </p>
+          <ul className="yd-entry-mobile-lines" aria-label="Was sich ändert">
+            {VALUE_LINES.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
         </div>
 
-        <div className="yd-clinical-mobile-actions">
-          <Link href="/#pricing" className="yd-clinical-cta-primary">
+        <div className="yd-entry-mobile-actions">
+          <Link href="/register" className="yd-clinical-cta-primary">
             Praxis einrichten
           </Link>
-          <Link prefetch href={loginHref} className="yd-clinical-cta-secondary">
+          <Link prefetch href="/login" className="yd-clinical-cta-secondary">
             Anmelden
           </Link>
         </div>
 
-        <section id="pricing" className="yd-clinical-mobile-pricing" aria-labelledby="yd-mobile-pricing-title">
-          <p id="yd-mobile-pricing-title" className="yd-clinical-eyebrow" style={{ marginTop: 0 }}>
-            Praxislizenz
-          </p>
-          <p className="yd-clinical-body" style={{ marginTop: "0.5rem", fontSize: "0.875rem" }}>
-            Wählen Sie den Rhythmus — nach Prüfung erhalten Sie Zugang zum geschützten Bereich.
-          </p>
-          <YdRegisterPricing
-            selectedPlan={selectedPlan}
-            inviteToken={inviteToken}
-            prefilledEmail={prefilledEmail}
-            sectionId="plans-mobile"
-          />
-        </section>
-
-        <section className="yd-clinical-mobile-trust" aria-label="Vertrauen">
-          <ul>
-            {MOBILE_TRUST.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>
-
-        <details className="yd-clinical-mobile-more">
-          <summary>Mehr über Your Dentist</summary>
-          <p className="yd-clinical-mobile-more-content">
-            Your Dentist verbindet Patientenwege und interne Koordination: Eingang, Sichtung,
-            Übergaben und Antworten an einem Ort — für mehr Ruhe im vollen Praxisalltag.
-          </p>
-        </details>
+        <YdEntryPricingCompact
+          initialPlan={selectedPlan}
+          inviteToken={inviteToken}
+          prefilledEmail={prefilledEmail}
+        />
       </main>
 
-      <footer className="yd-clinical-footer">
-        <div className="yd-clinical-footer-links">
-          <Link href="/impressum">Impressum</Link>
-          <Link href="/datenschutz">Datenschutz</Link>
-          <Link href="/agb">AGB</Link>
-        </div>
-        <p>Your Dentist</p>
+      <footer className="yd-entry-mobile-footer">
+        <Link href="/impressum">Impressum</Link>
+        <Link href="/datenschutz">Datenschutz</Link>
+        <Link href="/agb">AGB</Link>
       </footer>
     </div>
   );

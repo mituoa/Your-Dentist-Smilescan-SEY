@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 
+import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
 import { YdPublicPricingStage } from "@/components/marketing/yd-public-pricing-stage";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
+import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
 
 type PricingPageClientProps = {
   initialPlan?: string | null;
@@ -18,6 +20,8 @@ export function PricingPageClient({
   prefilledEmail = "",
   loginHref,
 }: PricingPageClientProps) {
+  const selectedPlan = coerceRegisterPlan(initialPlan) as RegisterPlanId;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const hash = window.location.hash.replace("#", "");
@@ -43,16 +47,26 @@ export function PricingPageClient({
           fieldIndex={1}
         />
       </div>
-      <div className="yd-clinical-mobile-only">
+      <div className="yd-entry-pricing-mobile-page yd-clinical-mobile-only">
         <YdProductChrome variant="entry" />
-        <YdPublicPricingStage
-          initialPlan={initialPlan}
-          inviteToken={inviteToken}
-          prefilledEmail={prefilledEmail}
-          loginHref={loginHref}
-          showHomeLink
-          fieldIndex={1}
-        />
+        <div className="yd-entry-pricing-mobile-inner">
+          <h1 className="yd-public-entry-title">Praxis einrichten</h1>
+          <p className="yd-public-entry-lead">
+            Rhythmus wählen und Registrierung starten — nach Prüfung öffnet sich Ihr geschützter
+            Bereich.
+          </p>
+          <YdEntryPricingCompact
+            initialPlan={selectedPlan}
+            inviteToken={inviteToken}
+            prefilledEmail={prefilledEmail}
+          />
+          <p className="yd-entry-pricing-mobile-login">
+            Bereits freigeschaltet?{" "}
+            <a href={loginHref} className="yd-clinical-cta-ghost">
+              Anmelden
+            </a>
+          </p>
+        </div>
       </div>
     </article>
   );

@@ -10,10 +10,10 @@ const PLAN_ORDER: RegisterPlanId[] = ["monthly", "halfyearly", "yearly"];
 
 const INCLUDED = [
   "Geschützter Praxis-Workspace",
-  "Einsendungen & Inbox",
-  "Aufgaben (Relay)",
-  "Öffentliches Praxisprofil",
-  "Team-Zugänge nach Vereinbarung",
+  "Einsendungen & Inbox (Tracker)",
+  "Relay: Aufgaben, Nachrichten, Erinnerungen",
+  "Command AI — ruhige Orientierung",
+  "Öffentliches Praxisprofil & Team",
   "Verschlüsselte Datenübertragung",
 ] as const;
 
@@ -23,6 +23,8 @@ type YdRegisterPricingProps = {
   prefilledEmail?: string;
   /** Anchor id for scroll targets (pricing page vs register). */
   sectionId?: string;
+  /** compact = calmer, lower height (entry + desktop pricing stage) */
+  variant?: "full" | "compact";
 };
 
 function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledEmail: string, step?: string) {
@@ -40,23 +42,29 @@ export function YdRegisterPricing({
   inviteToken = "",
   prefilledEmail = "",
   sectionId = "pricing",
+  variant = "full",
 }: YdRegisterPricingProps) {
   const router = useRouter();
+  const compact = variant === "compact";
 
   return (
     <section
       id={sectionId}
-      className="yd-register-pricing yd-auth-awaken-field scroll-mt-6"
+      className={cn(
+        "yd-register-pricing yd-auth-awaken-field scroll-mt-6",
+        compact && "yd-register-pricing--compact"
+      )}
       aria-labelledby="yd-register-pricing-title"
     >
       <div className="yd-register-pricing-intro">
         <p className="yd-register-pricing-eyebrow">Praxislizenz</p>
         <h2 id="yd-register-pricing-title" className="yd-register-pricing-title">
-          Abrechnungsrhythmus für Ihren Praxisbereich
+          {compact ? "Rhythmus wählen" : "Abrechnungsrhythmus für Ihren Praxisbereich"}
         </h2>
         <p className="yd-register-pricing-subtitle">
-          Alle Optionen öffnen denselben geschützten Praxisbereich — ruhig, vollständig, ohne
-          versteckte Stufen. Nur der Abrechnungsrhythmus unterscheidet sich.
+          {compact
+            ? "Derselbe geschützte Praxisbereich — nur der Abrechnungsrhythmus unterscheidet sich."
+            : "Alle Optionen öffnen denselben geschützten Praxisbereich — ruhig, vollständig, ohne versteckte Stufen. Nur der Abrechnungsrhythmus unterscheidet sich."}
         </p>
       </div>
 

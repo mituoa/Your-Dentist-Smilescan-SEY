@@ -1,7 +1,9 @@
-import { createRouteHandlerClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+
 import { sanitizeAuthNextPath } from "@/lib/auth/sanitize-auth-next";
 import { pathWithWorkspaceEnter } from "@/lib/design/yd-workspace-awakening";
-import { NextResponse } from "next/server";
+import { RETURNING_PRACTICE_COOKIE } from "@/lib/public-entry/returning-visitor";
+import { createRouteHandlerClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -23,7 +25,15 @@ export async function GET(request: Request) {
       const supabase = await createRouteHandlerClient();
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) {
-        return NextResponse.redirect(`${origin}${pathWithWorkspaceEnter(next)}`);
+        const res = NextResponse.redirect(`${origin}${pathWithWorkspaceEnter(next)}`);
+        res.cookies.set(RETURNING_PRACTICE_COOKIE, "1", {
+          maxAge: 60 * 60 * 24 * 365,
+          httpOnly: true,
+          sameSite: "lax",
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+        });
+        return res;
       }
       console.error("[auth/callback] exchangeCodeForSession", error.message);
     }

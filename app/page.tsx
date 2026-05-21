@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { YdHomePage } from "@/components/marketing/yd-home-page";
-import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
+import { isReturningPracticeVisitor } from "@/lib/public-entry/returning-visitor";
 import {
   getCurrentUser,
   getWorkspaceMembershipForUserId,
@@ -16,11 +16,12 @@ export const dynamic = "force-dynamic";
 
 /** Öffentliche Produktübersicht; eingeloggte Nutzer → Workspace. */
 interface HomePageProps {
-  searchParams: Promise<{ plan?: string; invite?: string; email?: string }>;
+  searchParams: Promise<{ plan?: string; invite?: string; email?: string; welcome?: string }>;
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
+  const showWelcome = params.welcome === "1";
   const user = await getCurrentUser();
 
   if (user) {
@@ -70,13 +71,19 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     redirect("/my-tasks");
   }
 
+  if (!showWelcome && (await isReturningPracticeVisitor())) {
+    const qs = new URLSearchParams();
+    if (params.invite) qs.set("invite", String(params.invite));
+    if (params.email) qs.set("email", String(params.email));
+    const q = qs.toString();
+    redirect(q ? `/login?${q}` : "/login");
+  }
+
   return (
-    <YdPublicOsEnvironment scroll>
-      <YdHomePage
-        initialPlan={params.plan}
-        inviteToken={params.invite}
-        prefilledEmail={params.email}
-      />
-    </YdPublicOsEnvironment>
+    <YdHomePage
+      initialPlan={params.plan}
+      inviteToken={params.invite}
+      prefilledEmail={params.email}
+    />
   );
 }

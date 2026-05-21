@@ -4,8 +4,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
 
 import { CardBoard } from "@/components/my-tasks/card-board";
+import { RelayMessagesPanel } from "@/components/my-tasks/relay-messages-panel";
 import { RelayQuickCreate } from "@/components/my-tasks/relay-quick-create";
 import type { MyTask } from "@/lib/queries/my-tasks";
+import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayScope } from "@/lib/tasks/relay-helpers";
 import { buildMemberAvatarMap, emailInitials, filterColumnTasks } from "@/lib/tasks/relay-helpers";
@@ -33,6 +35,7 @@ interface RelayWorkspaceViewProps {
   columns: BoardColumns;
   counts: RelayTaskCounts;
   assignableMembers: AssignableMember[];
+  conversations?: RelayConversationRow[];
 }
 
 export function RelayWorkspaceView({
@@ -43,16 +46,24 @@ export function RelayWorkspaceView({
   columns,
   counts,
   assignableMembers,
+  conversations = [],
 }: RelayWorkspaceViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRelay = basePath === "/relay";
   const urlScope = searchParams.get("scope") === "mine" ? "mine" : "all";
+  const urlPanel =
+    isRelay && searchParams.get("panel") === "messages" ? "messages" : "tasks";
   const [scope, setScope] = useState<RelayScope>(urlScope);
+  const [panel, setPanel] = useState<"tasks" | "messages">(urlPanel);
 
   useEffect(() => {
     setScope(urlScope);
   }, [urlScope]);
+
+  useEffect(() => {
+    setPanel(urlPanel);
+  }, [urlPanel]);
 
   const filtered = useMemo(
     () => ({
@@ -72,9 +83,22 @@ export function RelayWorkspaceView({
   }, [assignableMembers, userEmail, userId]);
 
   const setScopeNav = (next: RelayScope) => {
-    const path = next === "mine" ? `${basePath}?scope=mine` : basePath;
+    const qs = new URLSearchParams();
+    if (isRelay && panel === "messages") qs.set("panel", "messages");
+    if (next === "mine") qs.set("scope", "mine");
+    const q = qs.toString();
+    const path = q ? `${basePath}?${q}` : basePath;
     router.replace(path, { scroll: false });
     setScope(next);
+  };
+
+  const setPanelNav = (next: "tasks" | "messages") => {
+    const qs = new URLSearchParams();
+    if (next === "messages") qs.set("panel", "messages");
+    if (scope === "mine") qs.set("scope", "mine");
+    const q = qs.toString();
+    router.replace(q ? `${basePath}?${q}` : basePath, { scroll: false });
+    setPanel(next);
   };
 
   const toggleBtn = (active: boolean) =>
@@ -97,8 +121,9 @@ export function RelayWorkspaceView({
             {isRelay ? "Relay" : "Meine Aufgaben"}
           </h1>
           {isRelay ? (
-            <p className="mt-2 text-[14px] font-medium" style={{ color: "#2563EB" }}>
-              Praxisorganisation &amp; Aufgaben
+            <p className="mt-2 max-w-[560px] text-[14px] font-normal leading-relaxed" style={{ color: "#475569" }}>
+              Internes Koordinationszentrum — Aufgaben, Nachrichten, Übergaben und ruhige
+              Praxisroutinen an einem Ort.
             </p>
           ) : (
             <p
@@ -110,21 +135,62 @@ export function RelayWorkspaceView({
           )}
         </div>
 
-        <div
-          className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"
-          style={{ background: "rgba(43, 111, 232, 0.06)" }}
-          role="group"
-          aria-label="Aufgaben filtern"
-        >
-          <button type="button" className={toggleBtn(scope === "all")} onClick={() => setScopeNav("all")}>
-            Alle Aufgaben
-          </button>
-          <button type="button" className={toggleBtn(scope === "mine")} onClick={() => setScopeNav("mine")}>
-            Meine Aufgaben
-          </button>
+        <div className="flex flex-col gap-3 sm:items-end">
+          {isRelay ? (
+            <div
+              className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"
+              style={{ background: "rgba(43, 111, 232, 0.06)" }}
+              role="tablist"
+              aria-label="Relay Bereiche"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={panel === "tasks"}
+                className={toggleBtn(panel === "tasks")}
+                onClick={() => setPanelNav("tasks")}
+              >
+                Aufgaben
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={panel === "messages"}
+                className={toggleBtn(panel === "messages")}
+                onClick={() => setPanelNav("messages")}
+              >
+                Nachrichten
+              </button>
+            </div>
+          ) : null}
+          {panel === "tasks" ? (
+            <div
+              className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"
+              style={{ background: "rgba(43, 111, 232, 0.06)" }}
+              role="group"
+              aria-label="Aufgaben filtern"
+            >
+              <button type="button" className={toggleBtn(scope === "all")} onClick={() => setScopeNav("all")}>
+                Alle Aufgaben
+              </button>
+              <button type="button" className={toggleBtn(scope === "mine")} onClick={() => setScopeNav("mine")}>
+                Meine Aufgaben
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
 
+      {isRelay && panel === "messages" ? (
+        <RelayMessagesPanel
+          conversations={conversations}
+          assignableMembers={assignableMembers}
+          currentUserId={userId}
+        />
+      ) : null}
+
+      {panel === "tasks" ? (
+        <>
       <div className="mb-6 flex flex-wrap gap-2 text-[11px] font-medium">
         <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
           Offen: <strong className="tabular-nums text-[#0F172A]">{counts.open}</strong>
@@ -164,6 +230,8 @@ export function RelayWorkspaceView({
           done: "bg-[rgba(71,85,105,0.04)]",
         }}
       />
+        </>
+      ) : null}
       </div>
     </div>
   );

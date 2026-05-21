@@ -366,8 +366,8 @@ export function LoginPageClient({
 
         <div className="yd-auth-legal">
           <div className="yd-auth-legal-links">
-            <Link prefetch href="/" className="yd-os-link">
-              Startseite
+            <Link prefetch href="/?welcome=1" className="yd-os-link">
+              Neue Praxis
             </Link>
             <span aria-hidden>·</span>
             <Link href="/datenschutz" className="yd-os-link">

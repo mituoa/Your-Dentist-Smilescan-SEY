@@ -21,6 +21,12 @@ import type { User } from "@supabase/supabase-js";
 import { upsertTaskReceipts } from "@/lib/tasks/receipts";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
 import {
+  computeRemindAt,
+  parseRecurrenceType,
+  parseRemindBefore,
+} from "@/lib/tasks/recurrence";
+import { maybeSpawnNextRecurrence } from "@/lib/tasks/spawn-recurrence";
+import {
   canMoveTask,
   columnToTaskStatus,
   type BoardColumnId,
@@ -261,6 +267,21 @@ export async function createMyTask(formData: FormData): Promise<{
         ? content.trim().slice(0, 120)
         : null;
 
+  const recurrenceType = parseRecurrenceType(formData.get("recurrence_type") as string);
+  const intervalRaw = ((formData.get("recurrence_interval_days") as string) || "").trim();
+  const recurrenceIntervalDays =
+    recurrenceType === "custom" && intervalRaw
+      ? Math.min(365, Math.max(1, parseInt(intervalRaw, 10) || 0)) || null
+      : null;
+  if (recurrenceType === "custom" && !recurrenceIntervalDays) {
+    return { error: "Bitte geben Sie für den eigenen Rhythmus die Anzahl Tage an." };
+  }
+  const remindSelf = formData.get("remind_self") === "true";
+  const remindAssignees = formData.get("remind_assignees") === "true";
+  const remindBefore = parseRemindBefore(formData.get("remind_before") as string);
+  const dueForRemind = dueDateIso ? new Date(dueDateIso) : null;
+  const remindAt = computeRemindAt(dueForRemind, remindBefore, remindSelf, remindAssignees);
+
   const { data: inserted, error } = await supabase
     .from("tasks")
     .insert({
@@ -279,6 +300,12 @@ export async function createMyTask(formData: FormData): Promise<{
       created_by: user.id,
       status: "open",
       sort_order: sortOrder,
+      recurrence_type: recurrenceType,
+      recurrence_interval_days: recurrenceIntervalDays,
+      remind_self: remindSelf,
+      remind_assignees: remindAssignees,
+      remind_before: remindBefore,
+      remind_at: remindAt,
     })
     .select("id")
     .single();
@@ -436,6 +463,10 @@ export async function submitTaskForReview(
     }
   }
 
+  if (newStatus === "done") {
+    await maybeSpawnNextRecurrence(supabase, taskId, workspace.workspace_id);
+  }
+
   revalidatePath("/my-tasks");
   revalidatePath("/relay");
   revalidatePath(`/my-tasks/${taskId}`);
@@ -524,6 +555,10 @@ export async function moveTaskStatusByDrag(
   if (error) {
     console.error("[moveTaskStatusByDrag]", (error as { code?: string }).code ?? "unknown");
     return { error: "Die Aufgabe konnte nicht verschoben werden. Bitte versuchen Sie es erneut." };
+  }
+
+  if (nextStatus === "done") {
+    await maybeSpawnNextRecurrence(supabase, taskId, workspace.workspace_id);
   }
 
   revalidatePath("/my-tasks");
@@ -622,6 +657,8 @@ export async function approveTask(
       );
     }
   }
+
+  await maybeSpawnNextRecurrence(supabase, taskId, workspace.workspace_id);
 
   revalidatePath("/my-tasks");
   revalidatePath("/relay");

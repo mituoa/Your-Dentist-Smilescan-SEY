@@ -7,6 +7,7 @@ import { isAdminAllowlistUser } from "@/lib/auth-helpers";
 import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
 import { createClient } from "@/lib/supabase/server";
 import { resolveAuthenticatedEntryPath } from "@/lib/post-auth-entry";
+import { markReturningPracticeVisitor } from "@/lib/public-entry/returning-visitor";
 import { pathWithWorkspaceEnter } from "@/lib/design/yd-workspace-awakening";
 import {
   clipInviteTokenQuery,
@@ -54,6 +55,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     user = u;
   } catch {
     console.error("[LoginPage] event=get_user_failed");
+  }
+
+  try {
+    await markReturningPracticeVisitor();
+  } catch {
+    /* cookies() may throw outside request in edge cases — non-blocking */
   }
 
   if (user) {
