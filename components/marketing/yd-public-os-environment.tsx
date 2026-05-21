@@ -28,10 +28,9 @@ export function YdPublicOsEnvironment({ children, className }: YdPublicOsEnviron
     <div ref={rootRef} className={cn("yd-public-os yd-public-os-awakening", className)}>
       <div className="yd-public-os-bg" aria-hidden />
       <div className="yd-public-os-mesh" aria-hidden />
-      <div className="yd-public-os-orb yd-public-os-orb--cyan" aria-hidden />
-      <div className="yd-public-os-orb yd-public-os-orb--turquoise" aria-hidden />
-      <div className="yd-public-os-orb yd-public-os-orb--lavender" aria-hidden />
-      <div className="yd-public-os-orb yd-public-os-orb--ice" aria-hidden />
+      {/* Selective accent glow — under content, not full-screen flood */}
+      <div className="yd-public-os-ambient yd-public-os-ambient--upper" aria-hidden />
+      <div className="yd-public-os-ambient yd-public-os-ambient--lower" aria-hidden />
       <div className="yd-public-os-vignette" aria-hidden />
       <div className="yd-public-os-content yd-public-os-awaken-content">{children}</div>
     </div>
