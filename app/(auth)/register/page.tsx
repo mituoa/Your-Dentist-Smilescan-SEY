@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { Suspense } from "react";
 
+import { RegisterPageClient } from "@/components/auth/register-page-client";
 import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
 import { YdAuthLoadingState } from "@/components/auth/yd-auth-ui";
 import { resendSignupConfirmation, signUp } from "../actions";
 import { isRegistrationDemoMode, skipPaymentAtSignup } from "@/lib/registration-demo";
-import { RegisterClient } from "./RegisterClient";
 import {
   clipInviteTokenQuery,
   isInviteTokenFormat,
@@ -68,7 +67,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   const loginHrefWithPricingHash = fromPricing ? `${registerHrefPlain}#pricing` : null;
 
   return (
-    <YdAuthEnvironment scroll wide bare showBrand={false}>
+    <YdAuthEnvironment scroll bare showBrand={false}>
       <Suspense
         fallback={
           <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
@@ -76,7 +75,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           </div>
         }
       >
-        <RegisterClient
+        <RegisterPageClient
           signUpAction={signUp}
           resendConfirmationAction={resendSignupConfirmation}
           inviteToken={inviteToken}
@@ -95,12 +94,6 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           licenseStepOptional={isRegistrationDemoMode()}
         />
       </Suspense>
-      <p className="yd-auth-register-footer">
-        Schon ein Konto?{" "}
-        <Link prefetch href={loginHrefPlain} className="yd-auth-link">
-          Anmelden
-        </Link>
-      </p>
     </YdAuthEnvironment>
   );
 }

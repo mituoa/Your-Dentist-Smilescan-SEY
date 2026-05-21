@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,22 +12,20 @@ import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit
 import { ResendSignupSubmitButton } from "@/components/auth/resend-signup-submit-button";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
+import {
+  REGISTER_PLANS,
+  coerceRegisterPlan,
+  type RegisterPlanId,
+} from "@/lib/auth/register-plans";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
-type Plan = "monthly" | "halfyearly" | "yearly";
+type Plan = RegisterPlanId;
 type RegistrationStep = 1 | 2 | 3 | 4;
 
 const REGISTER_WIZARD_MAX_STEP_KEY = "yd-reg-max-wizard-step";
 
 type SignUpAction = (formData: FormData) => void | Promise<void>;
 type ResendAction = (formData: FormData) => void | Promise<void>;
-
-function coercePlan(value: string | null | undefined): Plan {
-  if (!value) return "yearly";
-  const v = value.toLowerCase();
-  if (v === "monthly" || v === "halfyearly" || v === "yearly") return v;
-  return "yearly";
-}
 
 /** Sperrt Plan, Zahlungsart und Vertrags-Checkboxen während Server-Action (ein Formular). */
 function RegisterStep4LockableFieldset({ children }: { children: React.ReactNode }) {
@@ -75,6 +74,8 @@ export function RegisterClient(props: {
   skipPaymentAtSignup?: boolean;
   /** Server (REGISTRATION_DEMO_MODE): Lizenz-Upload-Schritt optional überspringbar. */
   licenseStepOptional?: boolean;
+  /** Wizard overlay only when step or success is active (pricing stays on page). */
+  wizardOpen: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -114,18 +115,16 @@ export function RegisterClient(props: {
       pushRegisterUrl(p, "push");
       return;
     }
-    if (fromPricingFlow && loginPricingReturnHref) {
-      router.replace(loginPricingReturnHref);
-      return;
-    }
-    router.replace(loginBackHref);
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete("step");
+    if (props.initialPlan) p.set("plan", props.initialPlan);
+    const qs = p.toString();
+    router.replace(qs ? `/register?${qs}#pricing` : "/register#pricing");
   };
-  const plan = coercePlan(props.initialPlan);
+  const plan = coerceRegisterPlan(props.initialPlan);
   const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(
     () => props.initialWizardStep ?? 1
   );
-  const wizardStepUrlInitDone = React.useRef(false);
-
   const [regName, setRegName] = React.useState("");
   const [regPractice, setRegPractice] = React.useState("");
   const [regLicense, setRegLicense] = React.useState("");
@@ -154,16 +153,6 @@ export function RegisterClient(props: {
       /* ignore */
     }
   }, [props.success]);
-
-  React.useEffect(() => {
-    if (props.success || wizardStepUrlInitDone.current) return;
-    wizardStepUrlInitDone.current = true;
-    if (!searchParams.get("step")?.trim()) {
-      const p = new URLSearchParams(searchParams.toString());
-      p.set("step", "1");
-      pushRegisterUrl(p, "replace");
-    }
-  }, [props.success, pushRegisterUrl, searchParams]);
 
   React.useEffect(() => {
     if (props.success) return;
@@ -540,29 +529,7 @@ export function RegisterClient(props: {
     }
   }, [selectedPlan]);
 
-  const plans = {
-    monthly: {
-      price: 20,
-      total: 20,
-      label: "Monatlich",
-      save: null as string | null,
-      billing: "Monatlich abgerechnet",
-    },
-    halfyearly: {
-      price: 18,
-      total: 108,
-      label: "Halbjährlich",
-      save: "10%",
-      billing: "Alle 6 Monate abgerechnet",
-    },
-    yearly: {
-      price: 16,
-      total: 192,
-      label: "Jährlich",
-      save: "20%",
-      billing: "Jährlich abgerechnet",
-    },
-  };
+  const plans = REGISTER_PLANS;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -796,9 +763,17 @@ export function RegisterClient(props: {
     }
   };
 
-  return (
-    <>
-      <div className="yd-auth-register-overlay">
+  const [portalReady, setPortalReady] = React.useState(false);
+  React.useEffect(() => {
+    setPortalReady(true);
+  }, []);
+
+  if (!props.wizardOpen) {
+    return null;
+  }
+
+  const registerOverlay = (
+    <div className="yd-auth-register-overlay">
         <div className="yd-auth-register-backdrop" aria-hidden />
 
         <div className="yd-auth-register-stage">
@@ -1934,7 +1909,12 @@ export function RegisterClient(props: {
           </div>
         </div>
       </div>
-    </>
   );
+
+  if (!portalReady) {
+    return null;
+  }
+
+  return createPortal(registerOverlay, document.body);
 }
 

@@ -33,7 +33,7 @@ export function YdAuthEnvironment({
       className={cn(
         "yd-auth yd-auth-awakening",
         scroll && "yd-auth--scroll",
-        wide && "yd-auth-compose--wide"
+        bare && "yd-auth--bare-shell"
       )}
     >
       <div className="yd-auth-page-bg yd-auth-awaken-bg" aria-hidden />
@@ -49,11 +49,16 @@ export function YdAuthEnvironment({
 
       <div className="yd-auth-stage">
         {bare ? (
-          <div className="yd-auth-bare yd-auth-awaken-bare yd-auth-awaken-settle w-full min-w-0">
+          <div className="yd-auth-bare yd-auth-awaken-bare w-full min-w-0">
             {children}
           </div>
         ) : (
-          <div className="yd-auth-compose yd-auth-awaken-island yd-auth-awaken-settle">
+          <div
+            className={cn(
+              "yd-auth-compose yd-auth-awaken-island yd-auth-awaken-settle",
+              wide && "yd-auth-compose--wide"
+            )}
+          >
             <div className="yd-auth-panel-halo" aria-hidden />
             <div className="yd-auth-panel yd-auth-awaken-auth">
               <div className="yd-auth-panel-sheen" aria-hidden />
