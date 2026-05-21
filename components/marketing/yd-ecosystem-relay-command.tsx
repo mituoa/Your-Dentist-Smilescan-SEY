@@ -17,11 +17,11 @@ const RELAY_CAPABILITIES = [
 ] as const;
 
 const COMMAND_ASSISTS = [
-  "Prioritäten im Eingang einordnen",
-  "Abläufe im Überblick halten",
-  "Erinnerungen im richtigen Moment",
-  "Kommunikation am Fall bündeln",
-  "Weniger mentale Last im Team",
+  "Command AI: ähnliche Fälle erkannt",
+  "Command AI: Rückruf empfohlen",
+  "Command AI: Priorität erhöht",
+  "Command AI: Routineaufgabe morgen fällig",
+  "Command AI: Teamkonflikt erkannt",
 ] as const;
 
 /** Public positioning — Relay as communication layer, Command AI as quiet assistance. */
@@ -33,13 +33,13 @@ export function YdEcosystemRelayCommand() {
     >
       <header className="yd-ecosystem-head">
         <p className="yd-clinical-eyebrow">Das eigentliche Versprechen</p>
-        <h2 id="yd-ecosystem-title" className="yd-clinical-act-title">
-          Ihre Praxis arbeitet endlich <em>ruhig zusammen</em>
+        <h2 id="yd-ecosystem-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          Ihre Praxis arbeitet endlich ruhig zusammen
         </h2>
         <p className="yd-clinical-body yd-ecosystem-lead">
           Patient:innen senden strukturiert ein. Ihr Team koordiniert intern — mit Nachrichten,
           Routinen und verlässlichen Erinnerungen in einem geschützten Bereich. Command AI unterstützt
-          leise im Hintergrund, ohne Lautstärke.
+          leise im Hintergrund.
         </p>
       </header>
 
@@ -99,9 +99,9 @@ export function YdEcosystemRelayCommand() {
           </ul>
 
           <div className="yd-ecosystem-command-whisper" role="note">
-            <p className="yd-ecosystem-command-whisper-label">Im Hintergrund</p>
+            <p className="yd-ecosystem-command-whisper-label">Command AI · leise</p>
             <p className="yd-ecosystem-command-whisper-body">
-              „Drei Einsendungen warten auf Sichtung — Laborrückfrage zuerst einordnen.“
+              „Priorität erhöht — Implantat-Fall markieren? Rückruf morgen bereits eingeplant.“
             </p>
           </div>
         </article>

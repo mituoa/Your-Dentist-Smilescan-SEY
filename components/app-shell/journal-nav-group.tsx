@@ -5,8 +5,10 @@ import type { YdNavAmbientPreview } from "@/lib/ambient/nav-preview-types";
 
 export function JournalNavGroup({
   ambientPreview,
+  tier = "primary",
 }: {
   ambientPreview?: YdNavAmbientPreview;
+  tier?: "primary" | "secondary";
 }) {
   return (
     <NavItem
@@ -15,6 +17,7 @@ export function JournalNavGroup({
       label="Journals"
       description="Erklärungen"
       ambientPreview={ambientPreview}
+      tier={tier}
     />
   );
 }

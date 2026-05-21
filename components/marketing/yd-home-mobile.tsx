@@ -32,17 +32,20 @@ export function YdHomeMobile({
         <Link href="/" className="yd-auth-brand-link" aria-label="Startseite">
           <YourDentistBrandLockup size="sm" tagline={null} />
         </Link>
+        <Link prefetch href="/login" className="yd-entry-mobile-login">
+          Anmelden
+        </Link>
       </header>
 
       <main className="yd-entry-mobile-main">
         <div className="yd-entry-mobile-hero">
-          <p className="yd-clinical-eyebrow">Ruhig zusammenarbeiten</p>
-          <h1 className="yd-clinical-display yd-entry-mobile-title">
-            Weniger Stress im Team. <em>Mehr</em> Klarheit intern.
+          <p className="yd-clinical-eyebrow">Geschützter Praxisbereich</p>
+          <h1 className="yd-clinical-display yd-clinical-display--direct yd-entry-mobile-title">
+            Weniger Chaos. Mehr Ruhe im Team.
           </h1>
           <p className="yd-entry-mobile-value">
-            Ein geschützter Praxisraum: Eingang, interne Kommunikation in Relay, verlässliche
-            Erinnerungen — Command AI unterstützt leise.
+            Eingang, interne Koordination in Relay, verlässliche Erinnerungen — Command AI
+            unterstützt leise im Hintergrund.
           </p>
           <ul className="yd-entry-mobile-lines" aria-label="Was Ihre Praxis gewinnt">
             {VALUE_LINES.map((line) => (
@@ -51,13 +54,16 @@ export function YdHomeMobile({
           </ul>
         </div>
 
-        <div className="yd-entry-mobile-actions">
+        <div className="yd-entry-mobile-actions yd-clinical-hero-cta-stack">
           <Link href="/register" className="yd-clinical-cta-primary">
-            Praxis einrichten
+            Praxis starten
           </Link>
-          <Link prefetch href="/login" className="yd-clinical-cta-secondary">
-            Anmelden
-          </Link>
+          <p className="yd-clinical-cta-signin">
+            Bereits registriert?{" "}
+            <Link prefetch href="/login">
+              Anmelden
+            </Link>
+          </p>
         </div>
 
         <YdEntryPricingCompact

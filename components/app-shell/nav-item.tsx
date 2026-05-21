@@ -36,6 +36,8 @@ interface NavItemProps {
   badge?: number;
   badgeUrgent?: boolean;
   ambientPreview?: YdNavAmbientPreview;
+  /** Mobile: primary workflow vs quieter secondary destinations */
+  tier?: "primary" | "secondary";
 }
 
 export function NavItem({
@@ -46,6 +48,7 @@ export function NavItem({
   badge,
   badgeUrgent,
   ambientPreview,
+  tier = "primary",
 }: NavItemProps) {
   const pathname = usePathname();
   const Icon = ICON_BY_NAME[iconName] ?? Home;
@@ -69,7 +72,10 @@ export function NavItem({
       title={label}
       data-active={isActive ? "true" : "false"}
       className={cn(
-        "yd-ambient-nav-link group relative flex min-h-[48px] w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-2 transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.22)] md:min-h-0 md:w-11 md:flex-col md:justify-center md:rounded-none md:bg-transparent md:px-0 md:py-0",
+        "yd-ambient-nav-link group relative flex w-full touch-manipulation items-center transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.18)]",
+        "min-h-[44px] gap-2.5 rounded-[14px] px-2.5 py-1.5",
+        "md:min-h-0 md:w-11 md:flex-col md:justify-center md:gap-0 md:rounded-none md:bg-transparent md:px-0 md:py-0",
+        tier === "secondary" && "yd-nav-tier-secondary",
         isActive && "yd-nav-link-active"
       )}
     >
@@ -82,7 +88,7 @@ export function NavItem({
 
       <span
         className={cn(
-          "yd-nav-icon-shell flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
+          "yd-nav-icon-shell flex h-10 w-10 shrink-0 items-center justify-center rounded-full md:h-11 md:w-11",
           isActive && "yd-nav-icon-shell--active"
         )}
         style={
@@ -92,8 +98,11 @@ export function NavItem({
         }
       >
         <Icon
-          className={cn("h-[22px] w-[22px] transition-[color,filter] duration-700", isActive && "yd-nav-icon--active")}
-          strokeWidth={isActive ? 2.1 : 1.55}
+          className={cn(
+            "h-5 w-5 transition-[color,filter] duration-700 md:h-[22px] md:w-[22px]",
+            isActive && "yd-nav-icon--active"
+          )}
+          strokeWidth={isActive ? 2 : 1.55}
           style={{ color: isActive ? YD.sidebar.iconActive : YD.sidebar.iconIdle }}
         />
       </span>
@@ -101,14 +110,16 @@ export function NavItem({
       <div className="min-w-0 flex-1 text-left md:hidden">
         <span
           className={cn(
-            "yd-nav-label block truncate text-[14px] font-medium leading-snug transition-colors duration-700",
+            "yd-nav-label block truncate text-[13px] font-medium leading-snug transition-colors duration-700",
             isActive ? "text-[#1A4F9C]" : "text-[#475569]"
           )}
         >
           {label}
         </span>
         {description ? (
-          <span className="mt-0.5 block text-[12px] text-[#8BA3B8]">{description}</span>
+          <span className="yd-nav-desc mt-0.5 block text-[11px] leading-snug text-[#94A8B8]">
+            {description}
+          </span>
         ) : null}
       </div>
       {badge !== undefined && badge > 0 ? (

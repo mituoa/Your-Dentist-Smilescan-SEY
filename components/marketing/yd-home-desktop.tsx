@@ -10,7 +10,7 @@ import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
 const HERO_LINES = [
   "Patient:innen senden Anliegen und Fotos strukturiert ein.",
-  "Ihr Team kommuniziert intern in Relay — ruhig, am Fall, ohne WhatsApp.",
+  "Ihr Team koordiniert intern in Relay — ruhig, am Fall, ohne WhatsApp.",
   "Routinen und Erinnerungen laufen verlässlich; Command AI entlastet leise.",
 ] as const;
 
@@ -56,7 +56,7 @@ export function YdHomeDesktop({
 }: YdHomeDesktopProps) {
   return (
     <article className="yd-clinical-page yd-clinical-desktop-only">
-      <YdProductChrome setupHref="/#ecosystem" />
+      <YdProductChrome showSetupInHeader={false} />
 
       <section
         className="yd-clinical-hero yd-public-os-awaken-field"
@@ -67,29 +67,29 @@ export function YdHomeDesktop({
         <div className="yd-clinical-hero-vignette" aria-hidden />
         <div className="yd-clinical-hero-grid">
           <div className="yd-clinical-hero-copy">
-            <p className="yd-clinical-eyebrow">Interne Kommunikation · ruhig gebündelt</p>
-            <h1 id="yd-clinical-hero-title" className="yd-clinical-display">
-              Endlich <em>zusammen</em> arbeiten — ohne Chaos zwischen den Kanälen.
+            <p className="yd-clinical-eyebrow">Geschützter Praxisbereich</p>
+            <h1 id="yd-clinical-hero-title" className="yd-clinical-display yd-clinical-display--direct">
+              Weniger Chaos. Mehr Ruhe im Team.
             </h1>
             <p className="yd-clinical-lead">
-              Your Dentist verbindet Patienteneingang und Teamkoordination in einem geschützten
-              Praxisraum: strukturiert nach außen, ruhig und nachvollziehbar nach innen.
+              Your Dentist verbindet Patienteneingang und Teamkoordination in einem Raum — strukturiert
+              nach außen, ruhig und nachvollziehbar nach innen.
             </p>
             <ul className="yd-clinical-hero-benefits">
               {HERO_LINES.map((b) => (
                 <li key={b}>{b}</li>
               ))}
             </ul>
-            <div className="yd-clinical-hero-cta">
+            <div className="yd-clinical-hero-cta-stack">
               <Link href="/#pricing" className="yd-clinical-cta-primary">
-                Praxis einrichten
+                Praxis starten
               </Link>
-              <Link prefetch href="/login" className="yd-clinical-cta-secondary">
-                Anmelden
-              </Link>
-              <Link href="#ecosystem" className="yd-clinical-cta-ghost">
-                Relay &amp; Command AI
-              </Link>
+              <p className="yd-clinical-cta-signin">
+                Bereits registriert?{" "}
+                <Link prefetch href="/login">
+                  Anmelden
+                </Link>
+              </p>
             </div>
             <p className="yd-clinical-whisper">
               Der eigentliche Gewinn: Ihre Praxis arbeitet endlich ruhig zusammen — nicht nur
@@ -116,8 +116,8 @@ export function YdHomeDesktop({
         style={{ ["--yd-public-field-i" as string]: "4" }}
         aria-labelledby="yd-clinical-flow-title"
       >
-        <h2 id="yd-clinical-flow-title" className="yd-clinical-act-title">
-          Ein geschützter <em>Fluss</em> — Eingang bis Team bis Erinnerung
+        <h2 id="yd-clinical-flow-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          Ein geschützter Fluss — Eingang bis Team bis Erinnerung
         </h2>
         <p className="yd-clinical-body">
           Patientenanfrage, interne Abstimmung, verlässliche Routinen — Command AI unterstützt leise
@@ -142,8 +142,8 @@ export function YdHomeDesktop({
         style={{ ["--yd-public-field-i" as string]: "5" }}
         aria-labelledby="yd-clinical-modules-title"
       >
-        <h2 id="yd-clinical-modules-title" className="yd-clinical-act-title">
-          Ein Raum — <em>nicht</em> ein Modulkatalog
+        <h2 id="yd-clinical-modules-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          Ein Raum — nicht ein Modulkatalog
         </h2>
         <p className="yd-clinical-body">
           Relay ist die ruhige Kommunikationsschicht Ihrer Praxis. Command AI arbeitet zurückhaltend

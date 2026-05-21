@@ -34,7 +34,7 @@ export function YdPublicPricingStage({
     >
       <p className="yd-clinical-eyebrow">Wenn Sie bereit sind</p>
       <h2 id="yd-clinical-pricing-title" className="yd-clinical-act-title">
-        Praxis einrichten — nach Prüfung <em>freischalten</em>
+        Praxis starten — nach Prüfung <em>freischalten</em>
       </h2>
       <p className="yd-clinical-body">
         Ihr geschützter Bereich inkl. Relay (interne Kommunikation, Routinen, Erinnerungen) und

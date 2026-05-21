@@ -6,6 +6,12 @@ import { PUBLIC_EDITORIAL_IMAGES } from "@/lib/marketing/public-editorial-images
 
 const ambient = PUBLIC_EDITORIAL_IMAGES.practiceWorldAmbient;
 
+const RELAY_MOMENTS = [
+  { type: "Nachricht", text: "„Rückruf morgen“ · Zuständig: MFA" },
+  { type: "Gruppe", text: "Laborrückfragen" },
+  { type: "Mo", text: "Laborkontrolle" },
+] as const;
+
 const WORKFLOW_STEPS = [
   { num: "01", label: "Eingang", detail: "Patientin · Fotos", state: "done" as const },
   { num: "02", label: "Tracker", detail: "Strukturiert da", state: "done" as const },
@@ -14,21 +20,15 @@ const WORKFLOW_STEPS = [
   { num: "05", label: "Abschluss", detail: "Ruhig erledigt", state: "next" as const },
 ] as const;
 
-const RELAY_MOMENTS = [
-  { type: "Nachricht", text: "„Rückruf morgen“ · Zuständig: MFA" },
-  { type: "Gruppe", text: "Laborrückfragen" },
-  { type: "Mo", text: "Laborkontrolle" },
-] as const;
-
 /**
- * Hero — intake + internal communication + routines + quiet Command AI.
+ * Hero — one calm operational surface (not fragmented micro-cards).
  */
 export function YdPracticeWorld() {
   return (
     <div
       className="yd-practice-world"
       role="img"
-      aria-label="Praxisökosystem: strukturierter Patienteneingang, ruhige interne Kommunikation in Relay, Erinnerungen und Routinen, Command AI im Hintergrund"
+      aria-label="Praxisablauf: strukturierter Eingang, interne Koordination in Relay, Erinnerungen, leise Command AI Unterstützung"
     >
       <div className="yd-practice-world-photo" aria-hidden>
         <Image
@@ -71,7 +71,7 @@ export function YdPracticeWorld() {
                   <div>
                     <p className="yd-practice-world-inbox-name">Intern · Relay</p>
                     <p className="yd-practice-world-inbox-meta">
-                      Gruppe „Implantatfälle“ · 2 neue Hinweise
+                      Gruppe „Implantatfälle“ · Übergabe erledigt
                     </p>
                   </div>
                   <span className="yd-practice-world-status yd-practice-world-status--wait">Team</span>
@@ -82,6 +82,14 @@ export function YdPracticeWorld() {
                     <p className="yd-practice-world-inbox-meta">Morgen 09:00 · Dr. Weber</p>
                   </div>
                   <span className="yd-practice-world-status">Geplant</span>
+                </li>
+                <li className="yd-practice-world-inbox-item yd-practice-world-inbox-item--ai">
+                  <div>
+                    <p className="yd-practice-world-inbox-name">Command AI</p>
+                    <p className="yd-practice-world-inbox-meta">
+                      Rückruf empfohlen · Priorität erhöht
+                    </p>
+                  </div>
                 </li>
               </ul>
               <p className="yd-practice-world-thread-line">
@@ -107,15 +115,8 @@ export function YdPracticeWorld() {
         </aside>
       </div>
 
-      <div className="yd-practice-world-command" role="note">
-        <span className="yd-practice-world-command-label">Command AI</span>
-        <p className="yd-practice-world-command-text">
-          Leise Orientierung — Priorität und nächster Schritt, ohne Aufmerksamkeit zu verlangen
-        </p>
-      </div>
-
       <p className="yd-practice-world-stage-foot">
-        Kein WhatsApp · kein Post-it — Kommunikation bleibt im Praxisbereich
+        Kein WhatsApp · kein Post-it — alles bleibt im Praxisbereich
       </p>
 
       <ol className="yd-practice-world-spine" aria-hidden>

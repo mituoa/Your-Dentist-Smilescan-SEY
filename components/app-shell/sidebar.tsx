@@ -40,7 +40,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="yd-awaken-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] md:mt-3 md:mb-4 md:h-[calc(100dvh-1.75rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
+      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:bg-transparent max-md:shadow-none md:mt-3 md:mb-4 md:h-[calc(100dvh-1.75rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,
@@ -66,17 +66,17 @@ export function Sidebar({
         aria-hidden
       />
 
-      <div className="relative shrink-0 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 md:px-0 md:pt-7 md:pb-3">
+      <div className="relative shrink-0 px-3 pt-4 pb-2 md:px-0 md:pt-7 md:pb-3">
         <div className="flex items-center justify-between gap-2 md:hidden">
           <BrandMark compact />
           <button
             type="button"
             onClick={() => mobileNav?.close()}
-            className="inline-flex h-11 min-w-11 touch-manipulation items-center justify-center rounded-lg transition hover:bg-[rgba(47,128,237,0.06)]"
+            className="inline-flex h-10 min-w-10 touch-manipulation items-center justify-center rounded-xl transition hover:bg-[rgba(47,128,237,0.05)]"
             style={{ color: YD.text.muted }}
-            aria-label="Menü schließen"
+            aria-label="Navigation schließen"
           >
-            <X className="h-5 w-5" strokeWidth={2} />
+            <X className="h-[18px] w-[18px]" strokeWidth={1.85} />
           </button>
         </div>
         <div className="hidden md:flex md:justify-center">
@@ -85,54 +85,61 @@ export function Sidebar({
       </div>
 
       <nav
-        className="relative flex min-h-0 flex-1 flex-col items-stretch gap-1 overflow-y-auto overflow-x-hidden px-3 py-2 md:items-center md:gap-4 md:px-2 md:py-5"
+        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 py-1.5 md:items-center md:gap-4 md:px-2 md:py-5"
         aria-label="Hauptnavigation"
       >
-        {role === "doctor" && (
+        <div className="yd-nav-primary-group flex flex-col gap-0.5 md:contents">
+          {role === "doctor" && (
+            <NavItem
+              href="/dashboard"
+              iconName="dashboard"
+              label="Atlas"
+              description="Praxisüberblick"
+              ambientPreview={navAmbient?.dashboard}
+              tier="primary"
+            />
+          )}
+
           <NavItem
-            href="/dashboard"
-            iconName="dashboard"
-            label="Atlas"
-            description="Dashboard"
-            ambientPreview={navAmbient?.dashboard}
+            href="/inbox"
+            iconName="inbox"
+            label="Tracker"
+            description="Einsendungen"
+            badge={inboxCount}
+            ambientPreview={navAmbient?.inbox}
+            tier="primary"
           />
-        )}
 
-        <NavItem
-          href="/inbox"
-          iconName="inbox"
-          label="Tracker"
-          description="Einsendungen"
-          badge={inboxCount}
-          ambientPreview={navAmbient?.inbox}
-        />
-
-        <NavItem
-          href="/relay"
-          iconName="relay"
-          label="Relay"
-          description="Aufgaben"
-          badge={myTasksCount}
-          badgeUrgent={myTasksUrgent}
-          ambientPreview={navAmbient?.relay}
-        />
+          <NavItem
+            href="/relay"
+            iconName="relay"
+            label="Relay"
+            description="Aufgaben & Nachrichten"
+            badge={myTasksCount}
+            badgeUrgent={myTasksUrgent}
+            ambientPreview={navAmbient?.relay}
+            tier="primary"
+          />
+        </div>
 
         {role === "doctor" && (
-          <>
+          <div className="yd-nav-secondary-group mt-2 flex flex-col gap-0.5 pt-2 md:contents md:mt-0 md:pt-0">
             <NavItem
               href="/profile/editor"
               iconName="profile"
               label="Profil"
               description="Benutzer"
+              tier="secondary"
             />
-            <JournalNavGroup ambientPreview={navAmbient?.journal} />
+            <JournalNavGroup ambientPreview={navAmbient?.journal} tier="secondary" />
             <NavItem
               href="/settings"
               iconName="settings"
               label="Admin"
               description="Einstellungen"
+              tier="secondary"
             />
-          </>
+          </div>
         )}
       </nav>
 
@@ -144,7 +151,7 @@ export function Sidebar({
           email={email}
         />
       </div>
-      <div className="relative shrink-0 space-y-3 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:hidden">
+      <div className="relative shrink-0 space-y-2.5 border-t border-[rgba(180,198,218,0.18)] px-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
         <SignOutSidebarForm />
         <HcSidebarProfile
           avatarUrl={avatarUrl}

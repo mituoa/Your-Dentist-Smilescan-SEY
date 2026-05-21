@@ -36,18 +36,18 @@ export function DashboardHeader({
 
   return (
     <header className="yd-dash-header-axis w-full min-w-0 max-w-full">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
         <div className="min-w-0 lg:max-w-[48%]">
-          <p className="yd-dash-meta mb-1 uppercase">Praxisüberblick</p>
-          <h1 className="yd-dash-title text-[1.4rem] md:text-[1.65rem] lg:text-[1.75rem]">
+          <p className="yd-dash-meta mb-0.5 uppercase max-md:text-[10px]">Praxisüberblick</p>
+          <h1 className="yd-dash-title text-[1.25rem] md:text-[1.65rem] lg:text-[1.75rem]">
             {greeting}, {doctorLabel}
           </h1>
-          <p className="yd-dash-subtitle mt-1.5 max-w-lg text-[13px] md:text-[13px]">
+          <p className="yd-dash-subtitle mt-1 max-w-lg text-[12px] md:mt-1.5 md:text-[13px]">
             {subtitle}
           </p>
         </div>
 
-        <div className="flex w-full min-w-0 flex-1 items-center gap-2.5 sm:gap-3 lg:max-w-[560px] lg:justify-end">
+        <div className="flex w-full min-w-0 flex-1 items-center gap-2 max-md:mt-0.5 sm:gap-3 lg:max-w-[560px] lg:justify-end">
           <form
             action="/inbox"
             method="get"
@@ -62,7 +62,7 @@ export function DashboardHeader({
               type="search"
               name="q"
               placeholder="Fälle oder Patienten suchen…"
-              className="yd-dash-search-input h-12 w-full min-w-0 pl-12 pr-5 text-[13px] font-normal outline-none transition-[box-shadow,filter] duration-700 placeholder:text-[#8BA3B8] focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.14)]"
+              className="yd-dash-search-input h-11 w-full min-w-0 pl-11 pr-4 text-[16px] font-normal outline-none transition-[box-shadow,filter] duration-700 placeholder:text-[#8BA3B8] focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.14)] md:h-12 md:pl-12 md:pr-5 md:text-[13px]"
               style={{
                 background:
                   "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(236,244,252,0.95) 100%)",

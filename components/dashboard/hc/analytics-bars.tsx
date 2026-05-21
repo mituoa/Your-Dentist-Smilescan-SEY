@@ -19,7 +19,7 @@ export function HcAnalyticsBars({ counts, totalLabel }: AnalyticsBarsProps) {
   return (
     <HcCard
       tone="primary"
-      className="yd-awaken-chart flex min-h-[340px] min-w-0 flex-col overflow-hidden p-6 md:min-h-[360px] md:p-7"
+      className="yd-awaken-chart yd-dash-chart-card flex min-h-[340px] min-w-0 flex-col overflow-hidden p-6 md:min-h-[360px] md:p-7"
       style={{ ["--yd-chart-stagger" as string]: "0ms" }}
     >
       <div className="mb-7 flex items-start justify-between gap-4">

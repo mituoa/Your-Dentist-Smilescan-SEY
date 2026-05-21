@@ -10,6 +10,8 @@ type YdProductChromeProps = {
   /** Primary nav target — home anchors or /pricing */
   setupHref?: string;
   setupLabel?: string;
+  /** When false, header shows only Anmelden (hero owns the start CTA). */
+  showSetupInHeader?: boolean;
   /** entry = login focus (no pricing CTA in chrome) */
   variant?: "marketing" | "entry";
 };
@@ -18,7 +20,8 @@ type YdProductChromeProps = {
 export function YdProductChrome({
   loginHref = "/login",
   setupHref = "/#pricing",
-  setupLabel = "Praxis einrichten",
+  setupLabel = "Praxis starten",
+  showSetupInHeader = true,
   variant = "marketing",
 }: YdProductChromeProps) {
   return (
@@ -37,7 +40,7 @@ export function YdProductChrome({
           <Link prefetch href="/" className="yd-os-link">
             Zur Startseite
           </Link>
-        ) : (
+        ) : showSetupInHeader ? (
           <>
             <Link prefetch href={loginHref} className="yd-os-btn yd-os-btn--ghost">
               Anmelden
@@ -46,6 +49,10 @@ export function YdProductChrome({
               {setupLabel}
             </Link>
           </>
+        ) : (
+          <Link prefetch href={loginHref} className="yd-os-btn yd-os-btn--ghost">
+            Anmelden
+          </Link>
         )}
       </nav>
     </header>
