@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 
 import { PricingPageClient } from "@/components/auth/pricing-page-client";
-import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
 import { YdAuthLoadingState } from "@/components/auth/yd-auth-ui";
+import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import {
   clipInviteTokenQuery,
   isInviteTokenFormat,
@@ -27,7 +27,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
     : "/login";
 
   return (
-    <YdAuthEnvironment scroll bare showBrand={false}>
+    <YdPublicOsEnvironment>
       <Suspense
         fallback={
           <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
@@ -42,6 +42,6 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
           loginHref={loginHref}
         />
       </Suspense>
-    </YdAuthEnvironment>
+    </YdPublicOsEnvironment>
   );
 }

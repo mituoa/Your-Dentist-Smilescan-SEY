@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { YdHomePage } from "@/components/marketing/yd-home-page";
-import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
+import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import {
   getCurrentUser,
   getWorkspaceMembershipForUserId,
@@ -66,8 +66,8 @@ export default async function HomePage() {
   }
 
   return (
-    <YdAuthEnvironment scroll bare showBrand={false}>
+    <YdPublicOsEnvironment>
       <YdHomePage />
-    </YdAuthEnvironment>
+    </YdPublicOsEnvironment>
   );
 }

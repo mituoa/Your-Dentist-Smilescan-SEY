@@ -1,0 +1,964 @@
+/**
+ * Your Dentist — Public OS entry (home, pricing, onboarding)
+ * Inherits dashboard spatial DNA — not a marketing landing page.
+ */
+
+:root {
+  --yd-public-ease: cubic-bezier(0.19, 1, 0.32, 1);
+  --yd-public-title: #0c1929;
+  --yd-public-body: #3d5266;
+  --yd-public-muted: #6b849c;
+  --yd-public-faint: #8ba3b8;
+}
+
+/* —— Shell —— */
+.yd-public-os {
+  position: relative;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  color: var(--yd-public-title);
+}
+
+.yd-public-os-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+      ellipse 88% 65% at 78% 4%,
+      rgba(47, 128, 237, 0.2) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 12% 88%,
+      rgba(125, 211, 252, 0.1) 0%,
+      transparent 48%
+    ),
+    linear-gradient(165deg, #a3b3c2 0%, #8e9eae 100%);
+}
+
+.yd-public-os-orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(72px);
+}
+
+.yd-public-os-orb--a {
+  top: -6%;
+  right: 6%;
+  width: min(40vw, 400px);
+  height: min(40vw, 400px);
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.2) 0%, transparent 68%);
+}
+
+.yd-public-os-orb--b {
+  bottom: 8%;
+  left: -4%;
+  width: min(34vw, 340px);
+  height: min(34vw, 340px);
+  background: radial-gradient(circle, rgba(47, 128, 237, 0.16) 0%, transparent 70%);
+}
+
+.yd-public-os-orb--c {
+  top: 38%;
+  left: 42%;
+  width: min(50vw, 480px);
+  height: min(28vw, 260px);
+  opacity: 0.5;
+  background: radial-gradient(ellipse, rgba(47, 128, 237, 0.1) 0%, transparent 72%);
+}
+
+.yd-public-os-stage {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  min-height: 100dvh;
+  grid-template-columns: 1fr;
+  padding: max(0.5rem, env(safe-area-inset-top)) 0.625rem max(1.25rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 900px) {
+  .yd-public-os-stage {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0.625rem;
+    padding: max(0.75rem, env(safe-area-inset-top)) 1rem 1.5rem 0.75rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .yd-public-os-stage {
+    grid-template-columns: 6.25rem minmax(0, 1fr);
+    padding-left: 1rem;
+    padding-right: 1.25rem;
+  }
+}
+
+/* —— Sidebar rail (dashboard echo) —— */
+.yd-public-os-rail {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .yd-public-os-rail {
+    display: block;
+    position: relative;
+    min-height: 0;
+    align-self: stretch;
+  }
+
+  .yd-public-os-rail-inner {
+    position: sticky;
+    top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    height: calc(100dvh - 2rem);
+    max-height: calc(100dvh - 2rem);
+    padding: 1.125rem 0.5rem;
+    border-radius: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(220, 234, 248, 0.55) 100%
+    );
+    box-shadow:
+      0 12px 40px rgba(15, 35, 58, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .yd-public-os-rail-glow {
+    position: absolute;
+    inset: 8% 20%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(125, 211, 252, 0.35) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .yd-public-os-rail-mark {
+    position: relative;
+    z-index: 1;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #6ba8f5 0%, #2f80ed 42%, #1a4f9c 100%);
+    box-shadow: 0 4px 14px rgba(30, 91, 189, 0.28);
+  }
+
+  .yd-public-os-rail-nav {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    padding-top: 0.25rem;
+  }
+
+  .yd-public-os-rail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    opacity: 0.42;
+  }
+
+  .yd-public-os-rail-item--active {
+    opacity: 1;
+  }
+
+  .yd-public-os-rail-dot {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .yd-public-os-rail-item--active .yd-public-os-rail-dot {
+    border-color: rgba(125, 211, 252, 0.65);
+    background: linear-gradient(180deg, #4a9af0 0%, #2f80ed 48%, #1e5bb8 100%);
+    box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
+  }
+
+  .yd-public-os-rail-label {
+    font-size: 0.5625rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--yd-public-muted);
+  }
+
+  .yd-public-os-rail-item--active .yd-public-os-rail-label {
+    color: #1a4f9c;
+  }
+}
+
+/* —— Main canvas island —— */
+.yd-public-os-canvas {
+  position: relative;
+  min-width: 0;
+  min-height: min(100dvh, 100%);
+  border-radius: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(168deg, #f2f7fc 0%, #e6eff8 42%, #dae8f4 100%);
+  box-shadow:
+    0 16px 48px rgba(15, 35, 58, 0.14),
+    0 4px 16px rgba(47, 128, 237, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .yd-public-os-canvas {
+    border-radius: 48px;
+  }
+}
+
+.yd-public-os-canvas-halo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 85% 55% at 92% 8%,
+    rgba(91, 156, 245, 0.14) 0%,
+    transparent 58%
+  );
+}
+
+.yd-public-os-canvas-sheen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 38%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, transparent 100%);
+}
+
+.yd-public-os-canvas-inner {
+  position: relative;
+  z-index: 1;
+  max-height: calc(100dvh - 1.25rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 1.125rem 1rem 2rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+  .yd-public-os-canvas-inner {
+    padding: 1.375rem 1.5rem 2.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-public-os-canvas-inner {
+    padding: 1.5rem 1.75rem 2.5rem;
+  }
+}
+
+/* —— Awakening —— */
+.yd-public-os-awakening.yd-public-os-awakening-active .yd-public-os-awaken-canvas {
+  animation: yd-public-canvas-emerge 1400ms var(--yd-public-ease) 280ms both;
+}
+
+.yd-public-os-awakening.yd-public-os-awakening-active .yd-public-os-awaken-rail {
+  animation: yd-public-rail-emerge 1200ms var(--yd-public-ease) 520ms both;
+}
+
+.yd-public-os-awakening .yd-public-os-awaken-field {
+  animation: yd-public-field-rise 1100ms var(--yd-public-ease) both;
+  animation-delay: calc(720ms + var(--yd-public-field-i, 0) * 70ms);
+}
+
+@keyframes yd-public-canvas-emerge {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes yd-public-rail-emerge {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateX(-4px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes yd-public-field-rise {
+  0% {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* —— Typography —— */
+.yd-os-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--yd-public-muted);
+}
+
+.yd-os-title {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.375rem, 3.2vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.038em;
+  line-height: 1.12;
+  color: var(--yd-public-title);
+}
+
+.yd-os-title--lg {
+  font-size: clamp(1.5rem, 3.8vw, 2.25rem);
+}
+
+.yd-os-lead {
+  margin-top: 0.75rem;
+  max-width: 34rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--yd-public-body);
+}
+
+.yd-os-section-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--yd-public-faint);
+}
+
+.yd-os-section-title {
+  margin-top: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: var(--yd-public-title);
+}
+
+.yd-os-meta {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--yd-public-faint);
+}
+
+/* —— Embedded OS controls (not marketing CTAs) —— */
+.yd-os-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 40px;
+  padding: 0.4375rem 1.125rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(232, 243, 252, 0.92) 100%
+  );
+  color: var(--yd-public-title);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 4px 16px rgba(47, 128, 237, 0.08);
+  transition:
+    box-shadow 720ms var(--yd-public-ease),
+    filter 720ms var(--yd-public-ease),
+    border-color 720ms var(--yd-public-ease);
+}
+
+.yd-os-btn--primary {
+  border-color: rgba(125, 211, 252, 0.55);
+  background: linear-gradient(145deg, #6ba8f5 0%, #2f80ed 42%, #1a4f9c 100%);
+  color: #fff;
+  box-shadow:
+    0 4px 14px rgba(30, 91, 189, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.yd-os-btn--quiet {
+  background: rgba(255, 255, 255, 0.52);
+  border-color: rgba(186, 230, 253, 0.45);
+  color: var(--yd-public-body);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+@media (hover: hover) {
+  .yd-os-btn:hover {
+    filter: brightness(1.03);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      0 6px 22px rgba(47, 128, 237, 0.14);
+  }
+
+  .yd-os-btn--primary:hover {
+    box-shadow:
+      0 6px 20px rgba(30, 91, 189, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  }
+}
+
+.yd-os-btn:focus-visible {
+  outline: 2px solid rgba(47, 128, 237, 0.45);
+  outline-offset: 2px;
+}
+
+.yd-os-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1a4f9c;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.yd-os-link:hover {
+  color: #2f80ed;
+}
+
+.yd-os-link:focus-visible {
+  outline: 2px solid rgba(47, 128, 237, 0.4);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* —— Spatial surfaces —— */
+.yd-os-surface {
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(165deg, #ffffff 0%, #f6fafe 48%, #edf4fa 100%);
+  box-shadow:
+    0 2px 4px rgba(15, 35, 58, 0.04),
+    0 12px 36px rgba(30, 91, 189, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.yd-os-surface--quiet {
+  background: linear-gradient(165deg, #f9fbfd 0%, #f0f6fb 52%, #e8f0f8 100%);
+  box-shadow:
+    0 2px 8px rgba(15, 35, 58, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.yd-os-surface--sunken {
+  border-color: rgba(186, 230, 253, 0.35);
+  background: linear-gradient(
+    168deg,
+    rgba(232, 243, 252, 0.65) 0%,
+    rgba(218, 234, 248, 0.55) 100%
+  );
+  box-shadow: inset 0 2px 8px rgba(15, 35, 58, 0.04);
+}
+
+.yd-os-surface-pad {
+  padding: 1.125rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .yd-os-surface-pad {
+    padding: 1.25rem 1.25rem;
+  }
+}
+
+.yd-os-surface-pad--lg {
+  padding: 1.375rem 1.125rem;
+}
+
+@media (min-width: 768px) {
+  .yd-os-surface-pad--lg {
+    padding: 1.5rem 1.375rem;
+  }
+}
+
+/* —— Page chrome —— */
+.yd-public-page {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.yd-public-ops-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(186, 230, 253, 0.32);
+}
+
+.yd-public-ops-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.625rem;
+}
+
+/* —— Hero composition (asymmetric, not centered marketing) —— */
+.yd-public-hero {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (min-width: 900px) {
+  .yd-public-hero {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 1.125rem;
+    align-items: stretch;
+  }
+}
+
+.yd-public-hero-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.25rem 0;
+}
+
+.yd-public-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.375rem;
+}
+
+.yd-public-hero-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.yd-public-preview-card {
+  position: relative;
+  padding: 0.875rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(241, 248, 255, 0.94) 100%);
+  box-shadow: 0 8px 28px rgba(30, 91, 189, 0.1);
+}
+
+.yd-public-preview-card--offset {
+  margin-left: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .yd-public-preview-card--offset {
+    margin-left: 2rem;
+  }
+
+  .yd-public-preview-card--pull {
+    margin-right: 1.5rem;
+  }
+}
+
+.yd-public-preview-kicker {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--yd-public-faint);
+}
+
+.yd-public-preview-name {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #1a4f9c;
+}
+
+.yd-public-preview-body {
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--yd-public-body);
+}
+
+.yd-public-preview-metric {
+  margin-top: 0.625rem;
+  font-size: 1.375rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--yd-public-title);
+  font-variant-numeric: tabular-nums;
+}
+
+/* —— Zones —— */
+.yd-public-zone {
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .yd-public-zone {
+    margin-top: 1.75rem;
+  }
+}
+
+.yd-public-zone-header {
+  margin-bottom: 0.875rem;
+}
+
+.yd-public-pillars {
+  display: grid;
+  gap: 0.625rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .yd-public-pillars {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.yd-public-pillar {
+  padding: 0.875rem 0.75rem;
+}
+
+.yd-public-pillar-title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--yd-public-title);
+}
+
+.yd-public-pillar-body {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--yd-public-body);
+}
+
+/* —— Module bento —— */
+.yd-public-modules {
+  display: grid;
+  gap: 0.625rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .yd-public-modules {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-public-modules {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
+  .yd-public-module--span-4 {
+    grid-column: span 4;
+  }
+
+  .yd-public-module--span-5 {
+    grid-column: span 5;
+  }
+
+  .yd-public-module--span-3 {
+    grid-column: span 3;
+  }
+
+  .yd-public-module--span-6 {
+    grid-column: span 6;
+  }
+
+  .yd-public-module--span-8 {
+    grid-column: span 8;
+  }
+}
+
+.yd-public-module-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #1a4f9c;
+}
+
+.yd-public-module-role {
+  margin-top: 0.125rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--yd-public-faint);
+}
+
+.yd-public-module-body {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--yd-public-body);
+}
+
+/* —— Workflow rail —— */
+.yd-public-flow {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .yd-public-flow {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.625rem;
+  }
+}
+
+.yd-public-flow-step {
+  padding: 0.75rem 0.625rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.yd-public-flow-num {
+  display: inline-flex;
+  height: 1.375rem;
+  width: 1.375rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: #0c4a6e;
+  background: rgba(224, 242, 254, 0.95);
+  border: 1px solid rgba(125, 211, 252, 0.45);
+}
+
+.yd-public-flow-label {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--yd-public-title);
+}
+
+.yd-public-flow-detail {
+  margin-top: 0.125rem;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--yd-public-body);
+}
+
+/* —— Trust + entry command bar —— */
+.yd-public-trust-grid {
+  display: grid;
+  gap: 0.625rem;
+}
+
+@media (min-width: 768px) {
+  .yd-public-trust-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yd-public-trust-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+}
+
+.yd-public-trust-list li {
+  position: relative;
+  padding-left: 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--yd-public-body);
+}
+
+.yd-public-trust-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #2f80ed;
+  opacity: 0.65;
+}
+
+.yd-public-trust-note {
+  font-size: 0.6875rem;
+  line-height: 1.55;
+  color: var(--yd-public-muted);
+}
+
+.yd-public-entry-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+}
+
+.yd-public-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.yd-public-footer {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(186, 230, 253, 0.28);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.yd-public-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+.yd-public-footer-copy {
+  font-size: 0.6875rem;
+  color: var(--yd-public-faint);
+}
+
+/* —— Pricing page (onboarding OS) —— */
+.yd-public-pricing-hero {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .yd-public-pricing-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+    align-items: start;
+  }
+}
+
+.yd-public-pricing-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.yd-public-pricing-step {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.yd-public-pricing-step-num {
+  flex-shrink: 0;
+  display: flex;
+  height: 1.625rem;
+  width: 1.625rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #0c4a6e;
+  background: rgba(224, 242, 254, 0.95);
+  border: 1px solid rgba(125, 211, 252, 0.45);
+}
+
+.yd-public-pricing-step-title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--yd-public-title);
+}
+
+.yd-public-pricing-step-body {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--yd-public-body);
+}
+
+.yd-public-pricing-footer {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(186, 230, 253, 0.28);
+  font-size: 0.8125rem;
+  color: var(--yd-public-body);
+}
+
+.yd-public-pricing-footer-note {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--yd-public-muted);
+}
+
+/* Register pricing inside public OS */
+.yd-public-os .yd-register-pricing-intro {
+  text-align: left;
+  margin-bottom: 1.25rem;
+}
+
+.yd-public-os .yd-register-page-header {
+  text-align: left;
+  padding: 0;
+}
+
+.yd-public-os .yd-register-page-title {
+  margin-top: 0.5rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.25rem, 2.5vw, 1.625rem);
+}
+
+.yd-public-os .yd-register-plan-card {
+  border-radius: 20px;
+}
+
+.yd-public-os .yd-register-pricing-includes,
+.yd-public-os .yd-register-approval-note {
+  border-radius: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-public-os-awakening .yd-public-os-awaken-canvas,
+  .yd-public-os-awakening .yd-public-os-awaken-rail,
+  .yd-public-os-awakening .yd-public-os-awaken-field {
+    animation: none;
+  }
+}

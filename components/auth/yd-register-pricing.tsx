@@ -94,7 +94,10 @@ export function YdRegisterPricing({
                 <p className="yd-register-plan-desc">{plan.description}</p>
                 <button
                   type="button"
-                  className={active ? "yd-auth-btn-primary w-full" : "yd-auth-btn-secondary w-full"}
+                  className={cn(
+                    "yd-os-btn w-full",
+                    active ? "yd-os-btn--primary" : "yd-os-btn--quiet"
+                  )}
                   onClick={() => router.push(buildRegisterHref(id, inviteToken, prefilledEmail, "1"))}
                 >
                   {active ? "Mit diesem Plan registrieren" : "Plan wählen"}
