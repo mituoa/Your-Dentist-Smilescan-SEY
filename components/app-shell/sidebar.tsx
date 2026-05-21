@@ -40,7 +40,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:bg-transparent max-md:shadow-none md:mt-3 md:mb-4 md:h-[calc(100dvh-1.75rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
+      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-full max-md:bg-transparent max-md:shadow-none md:mt-3 md:mb-4 md:h-[calc(100dvh-1.75rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,
@@ -66,7 +66,7 @@ export function Sidebar({
         aria-hidden
       />
 
-      <div className="relative shrink-0 px-3 pt-4 pb-2 md:px-0 md:pt-7 md:pb-3">
+      <div className="relative shrink-0 px-4 pb-2 pt-5 md:px-0 md:pt-7 md:pb-3">
         <div className="flex items-center justify-between gap-2 md:hidden">
           <BrandMark compact />
           <button

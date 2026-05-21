@@ -1409,6 +1409,95 @@
   color: rgba(12, 25, 41, 0.45);
 }
 
+/* Login — mobile-only pricing sheet (entry warmth, not desktop duplicate) */
+.yd-login-register-trigger {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.yd-login-pricing-sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.yd-login-pricing-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(12, 25, 41, 0.14);
+  backdrop-filter: blur(12px) saturate(1.05);
+  -webkit-backdrop-filter: blur(12px) saturate(1.05);
+}
+
+.yd-login-pricing-sheet {
+  position: relative;
+  z-index: 1;
+  max-height: min(88dvh, 640px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 0.75rem max(0.75rem, env(safe-area-inset-bottom));
+  padding: 0.75rem 1.125rem 1.25rem;
+  border-radius: 28px 28px 24px 24px;
+  background: linear-gradient(
+    168deg,
+    rgba(255, 253, 250, 0.98) 0%,
+    rgba(248, 252, 255, 0.96) 48%,
+    rgba(241, 248, 255, 0.94) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 24px 64px rgba(15, 35, 58, 0.16),
+    0 8px 24px rgba(47, 128, 237, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.yd-login-pricing-sheet-handle {
+  width: 2.5rem;
+  height: 0.25rem;
+  margin: 0.25rem auto 0.875rem;
+  border-radius: 999px;
+  background: rgba(176, 192, 208, 0.45);
+}
+
+.yd-login-pricing-sheet-head {
+  margin-bottom: 0.25rem;
+}
+
+.yd-login-pricing-sheet-dismiss {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(47, 128, 237, 0.06);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #3d5266;
+  cursor: pointer;
+}
+
+.yd-login-pricing-sheet-dismiss:active {
+  background: rgba(47, 128, 237, 0.1);
+}
+
+@media (min-width: 768px) {
+  .yd-login-pricing-sheet-root {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .yd-auth-loading-pulse {
     animation: none;

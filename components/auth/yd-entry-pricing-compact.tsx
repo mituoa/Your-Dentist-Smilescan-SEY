@@ -85,7 +85,7 @@ export function YdEntryPricingCompact({
       </button>
 
       <p className="yd-entry-pricing-foot">
-        Relay: interne Kommunikation &amp; Routinen · Command AI leise im Hintergrund
+        Relay: Kommunikation &amp; Routinen · Command AI: Diktat &amp; Entwürfe im Alltag
       </p>
     </section>
   );

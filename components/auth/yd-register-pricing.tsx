@@ -12,7 +12,7 @@ const INCLUDED = [
   "Geschützter Praxis-Workspace",
   "Tracker: strukturierter Patienteneingang",
   "Relay: Nachrichten, Gruppen, Routinen, Erinnerungen",
-  "Command AI: leise Orientierung & Entlastung",
+  "Command AI: Diktat, Entwürfe & Schritte im Alltag",
   "Öffentliches Praxisprofil & Team",
   "Verschlüsselte Datenübertragung",
 ] as const;

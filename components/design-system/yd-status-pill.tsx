@@ -19,7 +19,7 @@ export function YdStatusPill({ label, variant = "active", className }: YdStatusP
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-medium tracking-wide",
+        "yd-status-pill inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-medium tracking-wide",
         className
       )}
       style={{ backgroundColor: v.bg, color: v.text }}

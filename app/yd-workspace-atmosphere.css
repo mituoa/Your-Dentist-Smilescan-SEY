@@ -1,0 +1,266 @@
+/**
+ * Workspace atmosphere — bridges landing calm into protected app.
+ * Subtle warmth, depth, rhythm — NOT wellness beige or glass overload.
+ */
+
+.yd-workspace {
+  --yd-ws-page-warm: #a8b6c4;
+  --yd-ws-canvas-top: #f8fbfe;
+  --yd-ws-canvas-mid: #f1f7fc;
+  --yd-ws-canvas-end: #e8f1f8;
+  --yd-ws-text-primary: #0b1828;
+  --yd-ws-text-body: #3a5063;
+  --yd-ws-text-label: #667d92;
+  --yd-ws-text-faint: #8a9fad;
+  --yd-ws-border-soft: rgba(176, 192, 208, 0.48);
+  --yd-ws-surface-whisper: rgba(255, 253, 250, 0.78);
+  --yd-ws-shadow-soft: 0 2px 4px rgba(15, 35, 58, 0.035), 0 14px 40px rgba(47, 128, 237, 0.09);
+  --yd-ws-shadow-lift: 0 6px 24px rgba(30, 91, 189, 0.11), 0 2px 6px rgba(15, 35, 58, 0.05);
+}
+
+/* Page shell — felt warmer, still medical */
+.yd-workspace.yd-awaken-page {
+  background: radial-gradient(
+      ellipse 88% 68% at 84% 0%,
+      rgba(200, 228, 248, 0.22) 0%,
+      transparent 54%
+    ),
+    radial-gradient(
+      ellipse 52% 48% at 6% 94%,
+      rgba(255, 250, 244, 0.18) 0%,
+      transparent 50%
+    ),
+    linear-gradient(168deg, #b0bec8 0%, #9eaeb9 42%, #94a5b2 100%) !important;
+}
+
+/* Canvas island — light, airy, same temperature as public entry */
+.yd-workspace .yd-awaken-canvas {
+  background: linear-gradient(
+    168deg,
+    var(--yd-ws-canvas-top) 0%,
+    var(--yd-ws-canvas-mid) 44%,
+    var(--yd-ws-canvas-end) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.82) !important;
+  box-shadow:
+    0 14px 44px rgba(15, 35, 58, 0.1),
+    0 4px 14px rgba(47, 128, 237, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+}
+
+.yd-workspace .yd-awaken-canvas > div:first-child {
+  background: radial-gradient(
+    ellipse 85% 55% at 92% 8%,
+    rgba(91, 156, 245, 0.09) 0%,
+    transparent 58%
+  ) !important;
+}
+
+.yd-workspace .yd-awaken-canvas > div:nth-child(2) {
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 100%,
+    rgba(255, 252, 247, 0.08) 0%,
+    transparent 55%
+  ) !important;
+}
+
+/* —— Sidebar: native platform rail, not admin toolbar —— */
+.yd-workspace .yd-awaken-sidebar {
+  background: rgba(252, 254, 255, 0.52) !important;
+  border-color: rgba(255, 255, 255, 0.78) !important;
+  box-shadow:
+    0 12px 40px rgba(15, 35, 58, 0.11),
+    0 4px 16px rgba(47, 128, 237, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+.yd-workspace .yd-awaken-sidebar > div:first-child {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 253, 250, 0.38) 0%,
+    rgba(232, 242, 252, 0.88) 42%,
+    rgba(210, 228, 244, 0.96) 100%
+  ) !important;
+}
+
+.yd-workspace .yd-glow-pulse {
+  opacity: 0.48;
+}
+
+.yd-workspace .yd-nav-active-halo {
+  width: 54px;
+  height: 54px;
+  background: radial-gradient(
+    circle,
+    rgba(47, 128, 237, 0.11) 0%,
+    rgba(255, 250, 244, 0.06) 38%,
+    transparent 72%
+  );
+}
+
+.yd-workspace .yd-nav-icon-shell--active {
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.38),
+    0 0 20px rgba(47, 128, 237, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.48) !important;
+}
+
+/* —— Dashboard typography & hierarchy —— */
+.yd-workspace .yd-dashboard {
+  --yd-dash-title: var(--yd-ws-text-primary);
+  --yd-dash-body: var(--yd-ws-text-body);
+  --yd-dash-label: var(--yd-ws-text-label);
+  --yd-dash-faint: var(--yd-ws-text-faint);
+}
+
+.yd-workspace .yd-dashboard .yd-dash-title {
+  font-weight: 500;
+  letter-spacing: -0.032em;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-meta {
+  color: var(--yd-ws-text-faint);
+  letter-spacing: 0.06em;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-section {
+  font-size: 0.9375rem;
+  letter-spacing: -0.022em;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-zone {
+  margin-bottom: 2.5rem;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-zone--kpis .yd-dash-kpi-hero {
+  font-size: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-workspace .yd-dashboard .yd-dash-zone {
+    margin-bottom: 2.875rem;
+  }
+}
+
+/* KPI cards — clearer primary vs quiet */
+.yd-workspace .yd-ambient-card {
+  box-shadow: var(--yd-ws-shadow-soft) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-zone--kpis > div > div:first-child .yd-ambient-card {
+  box-shadow: var(--yd-ws-shadow-lift) !important;
+}
+
+/* Search — softer, disappears into work */
+.yd-workspace .yd-dashboard .yd-dash-search-input {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 253, 250, 0.94) 0%,
+    rgba(238, 246, 252, 0.98) 100%
+  ) !important;
+  border-color: var(--yd-ws-border-soft) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(15, 35, 58, 0.025),
+    0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 3px 16px rgba(47, 128, 237, 0.05) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-search-input:hover {
+  box-shadow:
+    inset 0 1px 2px rgba(15, 35, 58, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.65),
+    0 5px 22px rgba(47, 128, 237, 0.08) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-control {
+  background: rgba(255, 253, 250, 0.78);
+  box-shadow: 0 3px 14px rgba(47, 128, 237, 0.06);
+}
+
+/* —— Tables: medical-tech surface, not SaaS grid —— */
+.yd-workspace .yd-dash-table thead th {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--yd-ws-text-faint);
+}
+
+.yd-workspace .yd-dash-table tbody .yd-dash-table-row {
+  border-color: rgba(176, 192, 208, 0.22);
+  transition: background-color 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.yd-workspace .yd-dash-table tbody .yd-dash-table-row td {
+  padding-top: 1.0625rem;
+  padding-bottom: 1.0625rem;
+}
+
+@media (min-width: 768px) {
+  .yd-workspace .yd-dash-table tbody .yd-dash-table-row td {
+    padding-top: 1.125rem;
+    padding-bottom: 1.125rem;
+  }
+}
+
+.yd-workspace .yd-dash-table tbody .yd-dash-table-row:hover {
+  background: rgba(255, 253, 250, 0.92);
+}
+
+.yd-workspace .yd-status-pill {
+  padding: 0.3125rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.yd-workspace .yd-status-pill span[aria-hidden] {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  opacity: 0.88;
+}
+
+/* —— Protected topbar —— */
+.yd-workspace .yd-protected-topbar {
+  border-bottom-color: rgba(176, 192, 208, 0.2) !important;
+  background: rgba(255, 253, 250, 0.78) !important;
+}
+
+@media (min-width: 768px) {
+  .yd-workspace .yd-protected-topbar {
+    background: transparent !important;
+    border-bottom: 0 !important;
+  }
+}
+
+/* —— Mobile drawer polish —— */
+@media (max-width: 767px) {
+  .yd-workspace .yd-mobile-nav-panel {
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.82);
+    box-shadow:
+      0 24px 64px rgba(15, 35, 58, 0.14),
+      0 8px 24px rgba(47, 128, 237, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .yd-workspace .yd-mobile-nav-root {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .yd-workspace #app-sidebar.yd-mobile-nav-sidebar nav {
+    padding-top: 0.375rem;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .yd-workspace .yd-dashboard {
+    padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
+  }
+
+  .yd-workspace main {
+    padding-bottom: max(3.25rem, env(safe-area-inset-bottom) + 2.25rem) !important;
+  }
+}

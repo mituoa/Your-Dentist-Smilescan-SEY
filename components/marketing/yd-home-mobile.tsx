@@ -5,13 +5,7 @@ import Link from "next/link";
 import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
-
-const VALUE_LINES = [
-  "Patient:innen senden strukturiert ein",
-  "Relay: interne Nachrichten, Gruppen, Routinen",
-  "Erinnerungen statt Post-its und WhatsApp",
-  "Command AI — leise, weniger mentale Last",
-] as const;
+import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
 
 type YdHomeMobileProps = {
   initialPlan?: string | null;
@@ -19,6 +13,9 @@ type YdHomeMobileProps = {
   prefilledEmail?: string;
 };
 
+/**
+ * Mobile entry — login, register, pricing. No long marketing scroll.
+ */
 export function YdHomeMobile({
   initialPlan,
   inviteToken = "",
@@ -27,7 +24,7 @@ export function YdHomeMobile({
   const selectedPlan = coerceRegisterPlan(initialPlan) as RegisterPlanId;
 
   return (
-    <div className="yd-entry-mobile yd-clinical-mobile-only">
+    <div className="yd-entry-mobile yd-entry-mobile--native yd-clinical-mobile-only">
       <header className="yd-entry-mobile-header">
         <Link href="/" className="yd-auth-brand-link" aria-label="Startseite">
           <YourDentistBrandLockup size="sm" tagline={null} />
@@ -44,19 +41,14 @@ export function YdHomeMobile({
             Weniger Chaos. Mehr Ruhe im Team.
           </h1>
           <p className="yd-entry-mobile-value">
-            Eingang, interne Koordination in Relay, verlässliche Erinnerungen — Command AI
-            unterstützt leise im Hintergrund.
+            Eingang, Relay, Routinen — und Command AI mit Diktat und Entwürfen, auch zwischen
+            Behandlungen.
           </p>
-          <ul className="yd-entry-mobile-lines" aria-label="Was Ihre Praxis gewinnt">
-            {VALUE_LINES.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
         </div>
 
         <div className="yd-entry-mobile-actions yd-clinical-hero-cta-stack">
           <Link href="/register" className="yd-clinical-cta-primary">
-            Praxis starten
+            Praxisbereich starten
           </Link>
           <p className="yd-clinical-cta-signin">
             Bereits registriert?{" "}

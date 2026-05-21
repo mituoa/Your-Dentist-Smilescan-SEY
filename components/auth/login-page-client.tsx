@@ -11,6 +11,7 @@ import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirm
 import { YdAuthPending } from "@/components/auth/yd-auth-ui";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
+import { LoginRegisterCta } from "@/components/auth/login-register-cta";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
 function safeDecodeQueryParam(value: string | undefined): string {
@@ -160,15 +161,6 @@ export function LoginPageClient({
   }, [normalizedQueryError]);
 
   const shouldShowResend = normalizedQueryError === "email_not_confirmed";
-
-  const pricingHref = useMemo(() => {
-    const qs = new URLSearchParams();
-    qs.set("plan", "yearly");
-    if (inviteToken) qs.set("invite", inviteToken);
-    if (prefilledEmail) qs.set("email", prefilledEmail);
-    const q = qs.toString();
-    return q ? `/pricing?${q}` : "/pricing";
-  }, [inviteToken, prefilledEmail]);
 
   const loginHref = inviteToken
     ? `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
@@ -336,12 +328,7 @@ export function LoginPageClient({
                   </fieldset>
                 </form>
 
-        <p className="yd-auth-register yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "5" }}>
-          Noch keine Praxis?{" "}
-          <Link href={pricingHref} onClick={clearReturnToPricingFlag} className="yd-os-link">
-            Praxis einrichten
-          </Link>
-        </p>
+        <LoginRegisterCta inviteToken={inviteToken} prefilledEmail={prefilledEmail} />
 
         <div className="yd-auth-trust yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "6" }}>
           <span className="yd-auth-trust-item">

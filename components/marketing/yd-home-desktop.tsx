@@ -7,11 +7,12 @@ import { YdEcosystemRelayCommand } from "@/components/marketing/yd-ecosystem-rel
 import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
 import { YdPublicPricingStage } from "@/components/marketing/yd-public-pricing-stage";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
+import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
 
 const HERO_LINES = [
-  "Patient:innen senden Anliegen und Fotos strukturiert ein.",
-  "Ihr Team koordiniert intern in Relay — ruhig, am Fall, ohne WhatsApp.",
-  "Routinen und Erinnerungen laufen verlässlich; Command AI entlastet leise.",
+  "Patient:innen senden Fotos und Anliegen strukturiert in Ihren Praxisbereich.",
+  "Interne Nachrichten, Gruppen, Übergaben und Aufgaben — ruhig in Relay, nicht in WhatsApp.",
+  COMMAND_AI_PUBLIC.heroLine,
 ] as const;
 
 const WORKFLOW = [
@@ -19,7 +20,7 @@ const WORKFLOW = [
   { label: "Sichtung", detail: "Priorität im Praxisbereich", product: "Tracker" },
   { label: "Intern", detail: "Nachrichten · Gruppen · Übergaben", product: "Relay" },
   { label: "Routinen", detail: "Mo Laborkontrolle · tägl. Steri", product: "Relay" },
-  { label: "Unterstützung", detail: "Priorität · Überblick · Entlastung", product: "Command AI" },
+  { label: "Assistenz", detail: "Diktat · Entwürfe · zwischen Terminen", product: "Command AI" },
 ] as const;
 
 const MODULES = [
@@ -32,8 +33,8 @@ const MODULES = [
   },
   {
     name: "Command AI",
-    role: "Leise Unterstützung",
-    body: "Orientierung, Priorisierung, Ablaufhilfe — weniger mentale Last, ohne KI-Marketing.",
+    role: COMMAND_AI_PUBLIC.moduleRole,
+    body: COMMAND_AI_PUBLIC.moduleBody,
     accent: true,
     featured: false,
   },
@@ -59,21 +60,22 @@ export function YdHomeDesktop({
       <YdProductChrome showSetupInHeader={false} />
 
       <section
-        className="yd-clinical-hero yd-public-os-awaken-field"
+        className="yd-clinical-hero yd-clinical-hero--premium yd-clinical-hero--orchestrated yd-public-os-awaken-field"
         style={{ ["--yd-public-field-i" as string]: "1" }}
         aria-labelledby="yd-clinical-hero-title"
       >
         <div className="yd-clinical-hero-lights" aria-hidden />
         <div className="yd-clinical-hero-vignette" aria-hidden />
-        <div className="yd-clinical-hero-grid">
+        <div className="yd-clinical-hero-stage">
+          <div className="yd-clinical-hero-grid">
           <div className="yd-clinical-hero-copy">
             <p className="yd-clinical-eyebrow">Geschützter Praxisbereich</p>
             <h1 id="yd-clinical-hero-title" className="yd-clinical-display yd-clinical-display--direct">
               Weniger Chaos. Mehr Ruhe im Team.
             </h1>
             <p className="yd-clinical-lead">
-              Your Dentist verbindet Patienteneingang und Teamkoordination in einem Raum — strukturiert
-              nach außen, ruhig und nachvollziehbar nach innen.
+              Ein geschützter Raum für Eingang, interne Kommunikation, Aufgaben, Routinen und leise
+              Unterstützung — damit Ihr Team den Tag ruhiger erlebt.
             </p>
             <ul className="yd-clinical-hero-benefits">
               {HERO_LINES.map((b) => (
@@ -82,7 +84,7 @@ export function YdHomeDesktop({
             </ul>
             <div className="yd-clinical-hero-cta-stack">
               <Link href="/#pricing" className="yd-clinical-cta-primary">
-                Praxis starten
+                Praxisbereich starten
               </Link>
               <p className="yd-clinical-cta-signin">
                 Bereits registriert?{" "}
@@ -92,12 +94,12 @@ export function YdHomeDesktop({
               </p>
             </div>
             <p className="yd-clinical-whisper">
-              Der eigentliche Gewinn: Ihre Praxis arbeitet endlich ruhig zusammen — nicht nur
-              „digitaler“.
+              Weniger Chaos im Kopf — mehr Ordnung im Praxisalltag. Modern, menschlich, sicher.
             </p>
           </div>
           <div className="yd-clinical-hero-world">
             <YdPracticeWorld />
+          </div>
           </div>
         </div>
       </section>

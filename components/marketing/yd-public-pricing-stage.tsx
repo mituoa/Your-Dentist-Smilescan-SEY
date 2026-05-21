@@ -34,11 +34,12 @@ export function YdPublicPricingStage({
     >
       <p className="yd-clinical-eyebrow">Wenn Sie bereit sind</p>
       <h2 id="yd-clinical-pricing-title" className="yd-clinical-act-title">
-        Praxis starten — nach Prüfung <em>freischalten</em>
+        Praxisbereich starten — nach Prüfung <em>freischalten</em>
       </h2>
       <p className="yd-clinical-body">
         Ihr geschützter Bereich inkl. Relay (interne Kommunikation, Routinen, Erinnerungen) und
-        Command AI — Abrechnungsrhythmus wählen, Registrierung in Ruhe durchlaufen.
+        Relay, Routinen und Command AI (Diktat, Entwürfe, Orientierung) — Registrierung in Ruhe
+        durchlaufen.
       </p>
       {showHomeLink ? (
         <p className="yd-clinical-whisper">

@@ -47,7 +47,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
       </div>
 
       <div className="max-w-full overflow-x-auto overscroll-x-contain">
-        <table className="w-full border-collapse text-left">
+        <table className="yd-dash-table w-full border-collapse text-left">
           <thead>
             <tr>
               {columns.map((col) => (
@@ -94,8 +94,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                 return (
                   <tr
                     key={row.id}
-                    className="group border-t transition-colors duration-300 hover:bg-[rgba(248,252,255,0.9)]"
-                    style={{ borderColor: "rgba(180, 198, 218, 0.28)" }}
+                    className="yd-dash-table-row group border-t"
                   >
                     <td className="px-5 py-4 md:px-6">
                       <span

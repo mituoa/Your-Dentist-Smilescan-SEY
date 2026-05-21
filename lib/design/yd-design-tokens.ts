@@ -7,9 +7,9 @@ export const YD = {
   atmosphere: {
     page: "#9AABB9",
     pageGradient:
-      "radial-gradient(ellipse 90% 70% at 82% 0%, rgba(47,128,237,0.18) 0%, transparent 55%), radial-gradient(ellipse 55% 50% at 8% 92%, rgba(125,211,252,0.08) 0%, transparent 50%), linear-gradient(165deg, #A3B3C2 0%, #8E9EAE 100%)",
+      "radial-gradient(ellipse 90% 70% at 82% 0%, rgba(47,128,237,0.16) 0%, transparent 55%), radial-gradient(ellipse 55% 50% at 8% 92%, rgba(255,250,244,0.12) 0%, transparent 50%), linear-gradient(168deg, #A8B6C4 0%, #94A5B2 100%)",
     canvas:
-      "linear-gradient(168deg, #F2F7FC 0%, #E6EFF8 42%, #DAE8F4 100%)",
+      "linear-gradient(168deg, #F8FBFE 0%, #F1F7FC 44%, #E8F1F8 100%)",
     canvasGlow:
       "radial-gradient(ellipse 85% 55% at 92% 8%, rgba(91,156,245,0.12) 0%, transparent 58%)",
     vignette:
@@ -20,18 +20,18 @@ export const YD = {
   surface: {
     island: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,252,255,0.88) 100%)",
     card:
-      "linear-gradient(165deg, #FFFFFF 0%, #F6FAFE 48%, #EDF4FA 100%)",
+      "linear-gradient(165deg, #FFFFFF 0%, #F8FBFE 48%, #EFF5FA 100%)",
     cardPrimary:
-      "linear-gradient(168deg, #FFFFFF 0%, #F9FCFF 38%, #E8F3FC 100%)",
+      "linear-gradient(168deg, #FFFFFF 0%, #FAFCFF 38%, #EBF3FA 100%)",
     cardQuiet:
-      "linear-gradient(165deg, #F9FBFD 0%, #F0F6FB 52%, #E8F0F8 100%)",
+      "linear-gradient(165deg, #FAFCFE 0%, #F2F7FB 52%, #EAF1F7 100%)",
     cardHover:
       "linear-gradient(165deg, #FFFFFF 0%, #F8FBFE 55%, #F0F7FD 100%)",
     elevated:
       "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(241,248,255,0.94) 100%)",
     sunken: "#D8E4EF",
     search: "linear-gradient(180deg, #E2EBF4 0%, #D6E3EF 100%)",
-    tableHead: "linear-gradient(180deg, #EEF4FA 0%, #E6EEF6 100%)",
+    tableHead: "linear-gradient(180deg, #F4F8FC 0%, #EBF2F8 100%)",
   },
 
   /* —— Luminous blue (not corporate #2563eb flat) —— */
@@ -90,9 +90,9 @@ export const YD = {
   sidebar: {
     width: 108,
     radius: "44px",
-    glass: "rgba(252, 254, 255, 0.48)",
+    glass: "rgba(252, 254, 255, 0.52)",
     flow:
-      "linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(228,240,252,0.9) 38%, rgba(200,220,240,0.98) 100%)",
+      "linear-gradient(180deg, rgba(255,253,250,0.38) 0%, rgba(232,242,252,0.9) 42%, rgba(210,228,244,0.98) 100%)",
     edgeGlow:
       "linear-gradient(180deg, transparent 0%, rgba(47,128,237,0.14) 50%, rgba(30,91,189,0.28) 100%)",
     iconIdle: "#6B849C",

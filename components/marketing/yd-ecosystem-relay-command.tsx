@@ -1,5 +1,7 @@
 "use client";
 
+import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
+
 const REPLACES = [
   "WhatsApp-Chaos",
   "mündliche Erinnerungen",
@@ -8,48 +10,46 @@ const REPLACES = [
   "vergessene Übergaben",
 ] as const;
 
-const RELAY_CAPABILITIES = [
-  { label: "Interne Nachrichten", example: "„Röntgenfreigabe prüfen“" },
-  { label: "Gruppen", example: "Laborrückfragen · Implantatfälle" },
-  { label: "Wiederkehrende Routinen", example: "Laborkontrolle jeden Montag" },
-  { label: "Erinnerungen", example: "Rückruf morgen · Steri täglich" },
-  { label: "Klare Verantwortung", example: "Urlaubsübergabe · Teammeeting" },
+const RELAY_COMMUNICATION = [
+  { label: "Direktnachrichten", example: "Team intern · am Fall" },
+  { label: "Gruppen & Kanäle", example: "Labor · Implantat · ZFA" },
+  { label: "Fallbezogen", example: "Kommunikation am Patientenfall" },
+  { label: "Übergaben", example: "Urlaub · Schicht · Verantwortung" },
+  { label: "Status & Rückfragen", example: "„Befund freigegeben?“" },
 ] as const;
 
-const COMMAND_ASSISTS = [
-  "Command AI: ähnliche Fälle erkannt",
-  "Command AI: Rückruf empfohlen",
-  "Command AI: Priorität erhöht",
-  "Command AI: Routineaufgabe morgen fällig",
-  "Command AI: Teamkonflikt erkannt",
+const RELAY_ROUTINES = [
+  { label: "Wiederkehrende Aufgaben", example: "Mo Laborkontrolle" },
+  { label: "Täglich · wöchentlich · monatlich", example: "Steri · Hygiene" },
+  { label: "Eigene Erinnerungen", example: "Rückruf · Nachfassen" },
+  { label: "Praxisroutinen", example: "Teammeeting · Freigaben" },
 ] as const;
 
-/** Public positioning — Relay as communication layer, Command AI as quiet assistance. */
+const COMMAND_ASSISTS = COMMAND_AI_PUBLIC.assists;
+
+/** Public positioning — Relay + Command AI as calm practice infrastructure. */
 export function YdEcosystemRelayCommand() {
   return (
-    <section
-      className="yd-ecosystem"
-      aria-labelledby="yd-ecosystem-title"
-    >
+    <section className="yd-ecosystem" aria-labelledby="yd-ecosystem-title">
       <header className="yd-ecosystem-head">
-        <p className="yd-clinical-eyebrow">Das eigentliche Versprechen</p>
+        <p className="yd-clinical-eyebrow">Ein Raum für den Praxisalltag</p>
         <h2 id="yd-ecosystem-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
           Ihre Praxis arbeitet endlich ruhig zusammen
         </h2>
         <p className="yd-clinical-body yd-ecosystem-lead">
-          Patient:innen senden strukturiert ein. Ihr Team koordiniert intern — mit Nachrichten,
-          Routinen und verlässlichen Erinnerungen in einem geschützten Bereich. Command AI unterstützt
-          leise im Hintergrund.
+          Patient:innen senden Fotos und Anliegen strukturiert ein. Ihr Team koordiniert intern —
+          mit Nachrichten, Gruppen, Übergaben und verlässlichen Erinnerungen. Command AI unterstützt
+          im Hintergrund, ohne Lautstärke.
         </p>
       </header>
 
       <div className="yd-ecosystem-grid">
         <article className="yd-ecosystem-panel yd-ecosystem-panel--relay">
           <div className="yd-ecosystem-panel-badge">Relay</div>
-          <h3 className="yd-ecosystem-panel-title">Ruhige interne Kommunikation</h3>
+          <h3 className="yd-ecosystem-panel-title">Ruhige interne Organisation</h3>
           <p className="yd-ecosystem-panel-intro">
-            Kein Aufgaben-Board-Gefühl — ein Ort für Abstimmung, Übergaben und Praxisroutinen. Ersetzt
-            Nebenkanäle, ohne Chat-App-Ästhetik.
+            Kein Slack-Gefühl — Kommunikation, Übergaben und Routinen in einem geschützten
+            Praxisbereich. Alles am Fall, nichts verstreut.
           </p>
 
           <p className="yd-ecosystem-replaces-label">Statt …</p>
@@ -59,8 +59,9 @@ export function YdEcosystemRelayCommand() {
             ))}
           </ul>
 
+          <p className="yd-ecosystem-cap-group-label">Interne Kommunikation</p>
           <ul className="yd-ecosystem-capabilities">
-            {RELAY_CAPABILITIES.map((cap) => (
+            {RELAY_COMMUNICATION.map((cap) => (
               <li key={cap.label} className="yd-ecosystem-cap">
                 <span className="yd-ecosystem-cap-label">{cap.label}</span>
                 <span className="yd-ecosystem-cap-example">{cap.example}</span>
@@ -68,28 +69,24 @@ export function YdEcosystemRelayCommand() {
             ))}
           </ul>
 
-          <div className="yd-ecosystem-moments" aria-hidden>
-            <div className="yd-ecosystem-moment">
-              <span className="yd-ecosystem-moment-type">Nachricht</span>
-              <p>MFAs → Zahnärztin: „Befund passt?“</p>
-            </div>
-            <div className="yd-ecosystem-moment">
-              <span className="yd-ecosystem-moment-type">Gruppe</span>
-              <p>Morgenbesprechung · 3 Teilnehmende</p>
-            </div>
-            <div className="yd-ecosystem-moment yd-ecosystem-moment--routine">
-              <span className="yd-ecosystem-moment-type">Routine</span>
-              <p>Steri-Kontrolle · täglich 08:00</p>
-            </div>
-          </div>
+          <p className="yd-ecosystem-cap-group-label">Routinen &amp; Erinnerungen</p>
+          <ul className="yd-ecosystem-capabilities yd-ecosystem-capabilities--routines">
+            {RELAY_ROUTINES.map((cap) => (
+              <li key={cap.label} className="yd-ecosystem-cap">
+                <span className="yd-ecosystem-cap-label">{cap.label}</span>
+                <span className="yd-ecosystem-cap-example">{cap.example}</span>
+              </li>
+            ))}
+          </ul>
         </article>
 
         <article className="yd-ecosystem-panel yd-ecosystem-panel--command">
           <div className="yd-ecosystem-panel-badge yd-ecosystem-panel-badge--ai">Command AI</div>
-          <h3 className="yd-ecosystem-panel-title">Leise intelligente Unterstützung</h3>
+          <h3 className="yd-ecosystem-panel-title">Leise Assistenz — auch zwischen Behandlungen</h3>
           <p className="yd-ecosystem-panel-intro">
-            Kein KI-Marketing — Orientierung im Arbeitsfluss. Weniger mentale Überlastung für
-            Ärztinnen und Team, mehr Klarheit bei Prioritäten und nächsten Schritten.
+            Sprechen statt tippen: Command bereitet Texte und Aufgaben als Entwurf vor. In Lücken im
+            Tagesablauf bleiben Rückrufe, Freigaben und Routine übersichtlich — Sie entscheiden, nichts
+            läuft automatisch an Patient:innen.
           </p>
 
           <ul className="yd-ecosystem-command-list">
@@ -99,10 +96,8 @@ export function YdEcosystemRelayCommand() {
           </ul>
 
           <div className="yd-ecosystem-command-whisper" role="note">
-            <p className="yd-ecosystem-command-whisper-label">Command AI · leise</p>
-            <p className="yd-ecosystem-command-whisper-body">
-              „Priorität erhöht — Implantat-Fall markieren? Rückruf morgen bereits eingeplant.“
-            </p>
+            <p className="yd-ecosystem-command-whisper-label">Im Hintergrund</p>
+            <p className="yd-ecosystem-command-whisper-body">„{COMMAND_AI_PUBLIC.whisper}“</p>
           </div>
         </article>
       </div>

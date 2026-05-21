@@ -3,39 +3,41 @@
 import Image from "next/image";
 
 import { PUBLIC_EDITORIAL_IMAGES } from "@/lib/marketing/public-editorial-images";
+import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
 
 const ambient = PUBLIC_EDITORIAL_IMAGES.practiceWorldAmbient;
 
 const RELAY_MOMENTS = [
-  { type: "Nachricht", text: "„Rückruf morgen“ · Zuständig: MFA" },
-  { type: "Gruppe", text: "Laborrückfragen" },
-  { type: "Mo", text: "Laborkontrolle" },
+  { type: "Direkt", text: "Dr. Weber → ZFA: Freigabe Röntgen?" },
+  { type: "Gruppe", text: "Implantatfälle · 4 im Thread" },
+  { type: "Übergabe", text: "Urlaub · ZFA übernimmt Fälle" },
+  { type: "Rezeption", text: "Rückruf-Termin · Patientin M. K." },
 ] as const;
 
 const WORKFLOW_STEPS = [
-  { num: "01", label: "Eingang", detail: "Patientin · Fotos", state: "done" as const },
-  { num: "02", label: "Tracker", detail: "Strukturiert da", state: "done" as const },
-  { num: "03", label: "Relay", detail: "Team · intern", state: "active" as const },
-  { num: "04", label: "Routine", detail: "Erinnerung", state: "next" as const },
-  { num: "05", label: "Abschluss", detail: "Ruhig erledigt", state: "next" as const },
+  { num: "01", label: "Eingang", detail: "3 Fotos", state: "done" as const },
+  { num: "02", label: "Tracker", detail: "Sichtung", state: "done" as const },
+  { num: "03", label: "Relay", detail: "Team", state: "active" as const },
+  { num: "04", label: "Routine", detail: "Rückruf", state: "next" as const },
+  { num: "05", label: "Ruhe", detail: "Erledigt", state: "next" as const },
 ] as const;
 
 /**
- * Hero — one calm operational surface (not fragmented micro-cards).
+ * Hero product — real practice states, one calm operational surface.
  */
 export function YdPracticeWorld() {
   return (
     <div
-      className="yd-practice-world"
+      className="yd-practice-world yd-practice-world--premium yd-practice-world--orchestrated"
       role="img"
-      aria-label="Praxisablauf: strukturierter Eingang, interne Koordination in Relay, Erinnerungen, leise Command AI Unterstützung"
+      aria-label="Praxissoftware in Nutzung: Patienteneingang, interne Kommunikation, Aufgaben, Erinnerungen, leise Assistenz"
     >
       <div className="yd-practice-world-photo" aria-hidden>
         <Image
           src={ambient.src}
           alt=""
           fill
-          sizes="(max-width: 960px) 100vw, 55vw"
+          sizes="(max-width: 960px) 100vw, 62vw"
           className="yd-practice-world-photo-img"
           priority
         />
@@ -46,54 +48,57 @@ export function YdPracticeWorld() {
 
       <p className="yd-practice-world-kicker">
         <span className="yd-practice-world-kicker-dot" aria-hidden />
-        Eingang · Team · Routinen — ein Raum
+        Live · Praxisbereich Dr. Weber
       </p>
 
       <div className="yd-practice-world-layout">
         <div className="yd-practice-world-stage">
           <div className="yd-practice-world-stage-head">
-            <div>
+            <div className="min-w-0 flex-1">
               <span className="yd-practice-world-label">Tracker · Einsendung</span>
-              <p className="yd-practice-world-stage-title">Patientin M. K. — Schmerz &amp; Foto</p>
+              <p className="yd-practice-world-stage-title">Patientin M. K. — Schmerz linker Unterkiefer</p>
             </div>
-            <span className="yd-practice-world-pill">Sichtung</span>
+            <span className="yd-practice-world-pill">Zu sichten</span>
           </div>
 
           <div className="yd-practice-world-stage-body">
             <div className="yd-practice-world-patient-chip">
               <span className="yd-practice-world-chip-label">Patientenweg</span>
-              <p>3 Fotos sicher · vor 12 Min.</p>
+              <p>3 intraorale Fotos · eingegangen 12:41</p>
             </div>
 
             <div className="yd-practice-world-stage-main">
               <ul className="yd-practice-world-inbox">
                 <li className="yd-practice-world-inbox-item yd-practice-world-inbox-item--focus">
-                  <div>
-                    <p className="yd-practice-world-inbox-name">Intern · Relay</p>
+                  <div className="min-w-0">
+                    <p className="yd-practice-world-inbox-name">Relay · Gruppe Implantatfälle</p>
                     <p className="yd-practice-world-inbox-meta">
-                      Gruppe „Implantatfälle“ · Übergabe erledigt
+                      Intern: „Röntgenfreigabe prüfen — bitte bis heute“
                     </p>
                   </div>
-                  <span className="yd-practice-world-status yd-practice-world-status--wait">Team</span>
+                  <span className="yd-practice-world-status yd-practice-world-status--wait">2 neu</span>
+                </li>
+                <li className="yd-practice-world-inbox-item yd-practice-world-inbox-item--task">
+                  <div className="min-w-0">
+                    <p className="yd-practice-world-inbox-name">Aufgabe · Röntgenfreigabe</p>
+                    <p className="yd-practice-world-inbox-meta">Zuständig: ZFA · seit 2 Tagen offen</p>
+                  </div>
+                  <span className="yd-practice-world-status yd-practice-world-status--open">Offen</span>
                 </li>
                 <li className="yd-practice-world-inbox-item">
-                  <div>
-                    <p className="yd-practice-world-inbox-name">Erinnerung · Rückruf</p>
-                    <p className="yd-practice-world-inbox-meta">Morgen 09:00 · Dr. Weber</p>
+                  <div className="min-w-0">
+                    <p className="yd-practice-world-inbox-name">Erinnerung · Rückruf Patientin</p>
+                    <p className="yd-practice-world-inbox-meta">Morgen 09:00 · Rezeption</p>
                   </div>
                   <span className="yd-practice-world-status">Geplant</span>
                 </li>
-                <li className="yd-practice-world-inbox-item yd-practice-world-inbox-item--ai">
-                  <div>
-                    <p className="yd-practice-world-inbox-name">Command AI</p>
-                    <p className="yd-practice-world-inbox-meta">
-                      Rückruf empfohlen · Priorität erhöht
-                    </p>
-                  </div>
-                </li>
               </ul>
-              <p className="yd-practice-world-thread-line">
-                <strong>Nachricht:</strong> „Röntgenfreigabe prüfen — bitte bis heute“
+
+              <p className="yd-practice-world-assist" role="note">
+                <span className="yd-practice-world-assist-label">Command</span>
+                <span className="yd-practice-world-assist-text">
+                  {COMMAND_AI_PUBLIC.showcaseAssist}
+                </span>
               </p>
             </div>
           </div>
@@ -110,13 +115,13 @@ export function YdPracticeWorld() {
             ))}
           </ul>
           <p className="yd-practice-world-routine">
-            <span>Routine</span> Steri-Kontrolle · täglich
+            <span>Routine</span> Steri-Kontrolle · täglich 08:00 · Erinnerung aktiv
           </p>
         </aside>
       </div>
 
       <p className="yd-practice-world-stage-foot">
-        Kein WhatsApp · kein Post-it — alles bleibt im Praxisbereich
+        Eingang · Team · Aufgaben · Erinnerungen — ein geschützter Raum
       </p>
 
       <ol className="yd-practice-world-spine" aria-hidden>
@@ -131,23 +136,6 @@ export function YdPracticeWorld() {
           </li>
         ))}
       </ol>
-
-      <svg className="yd-practice-world-connector" viewBox="0 0 520 48" aria-hidden>
-        <path
-          d="M 24 24 H 496"
-          fill="none"
-          stroke="url(#yd-flow-line)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <defs>
-          <linearGradient id="yd-flow-line" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(72, 178, 188, 0.5)" />
-            <stop offset="50%" stopColor="rgba(47, 128, 237, 0.55)" />
-            <stop offset="100%" stopColor="rgba(167, 139, 250, 0.35)" />
-          </linearGradient>
-        </defs>
-      </svg>
     </div>
   );
 }
