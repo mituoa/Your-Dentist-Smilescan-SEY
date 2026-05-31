@@ -211,11 +211,9 @@ export function LoginPageClient({
           ) : (
             <div
               className={`yd-auth-alert mb-6 min-w-0 break-words ${
-                parsedError.tone === "danger"
-                  ? "yd-auth-alert--danger"
-                  : parsedError.tone === "warning"
-                    ? "yd-auth-alert--warning"
-                    : "yd-auth-alert--info"
+                parsedError.tone === "warning"
+                  ? "yd-auth-alert--warning"
+                  : "yd-auth-alert--info"
               }`}
               role="alert"
             >
