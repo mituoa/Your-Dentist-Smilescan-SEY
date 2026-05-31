@@ -151,7 +151,7 @@ export default async function ProtectedLayout({
                 displayName={profileData?.display_name ?? null}
               />
 
-              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(5.5rem,env(safe-area-inset-bottom)+4.5rem)] md:p-0 md:pb-4">
+              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(5.5rem,env(safe-area-inset-bottom)+4.5rem)] md:p-5 md:pb-6">
                 <HcAppCanvas>{children}</HcAppCanvas>
               </main>
             </div>
