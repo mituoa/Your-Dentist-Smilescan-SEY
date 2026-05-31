@@ -99,6 +99,8 @@ export type SubmissionPreviewRow = {
   patient_notes: string | null;
   created_at: string;
   seen_at: string | null;
+  photo_count: number;
+  urgency: string | null;
 };
 
 export type SubmissionPreviewResult =
@@ -175,12 +177,34 @@ export const getRecentSubmissionsPreview = cache(
       return { ok: false };
     }
     const supabase = await createClient();
-    const { data, error } = await supabase
+    const selectWithUrgency =
+      "id, patient_name, patient_email, patient_notes, created_at, seen_at, urgency, submission_photos(count)";
+    const selectBase =
+      "id, patient_name, patient_email, patient_notes, created_at, seen_at, submission_photos(count)";
+
+    let data: Record<string, unknown>[] | null = null;
+    let error: { code?: string } | null = null;
+
+    const withUrgency = await supabase
       .from("submissions")
-      .select("id, patient_name, patient_email, patient_notes, created_at, seen_at")
+      .select(selectWithUrgency)
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false })
-      .limit(5);
+      .limit(8);
+
+    if (withUrgency.error) {
+      const fallback = await supabase
+        .from("submissions")
+        .select(selectBase)
+        .eq("workspace_id", workspaceId)
+        .order("created_at", { ascending: false })
+        .limit(8);
+      data = (fallback.data as Record<string, unknown>[] | null) ?? null;
+      error = fallback.error;
+    } else {
+      data = (withUrgency.data as Record<string, unknown>[] | null) ?? null;
+      error = withUrgency.error;
+    }
 
     if (error) {
       logDashboardDbFailure("submission_preview_failed", error);
@@ -196,6 +220,9 @@ export const getRecentSubmissionsPreview = cache(
         patient_notes: (row.patient_notes as string | null) ?? null,
         created_at: row.created_at as string,
         seen_at: (row.seen_at as string | null) ?? null,
+        photo_count:
+          (row.submission_photos as { count: number }[] | undefined)?.[0]?.count ?? 0,
+        urgency: (row.urgency as string | null | undefined) ?? null,
       })),
     };
   }

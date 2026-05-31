@@ -31,10 +31,8 @@ export function DashboardActivityStream({ events }: DashboardActivityStreamProps
     <HcCard tone="default" className="yd-dash-panel flex min-h-0 flex-col p-0 md:min-h-[240px]">
       <DashboardPanelChrome title={WORKSPACE_COPY.activity.title} />
       <div className="flex flex-1 flex-col px-5 py-4 md:px-6">
-        {events === null ? (
-          <p className="yd-workspace-quiet">{WORKSPACE_COPY.loadGap}</p>
-        ) : events.length === 0 ? (
-          <p className="yd-workspace-quiet">{WORKSPACE_COPY.activity.empty}</p>
+        {events === null || events.length === 0 ? (
+          <p className="yd-workspace-quiet">Heute ruhig</p>
         ) : (
           <ul className="min-h-0 flex-1 space-y-2">
             {events.map((event) => {

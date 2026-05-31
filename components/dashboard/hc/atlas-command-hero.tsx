@@ -4,19 +4,8 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { useAssistUiOptional } from "@/components/command-assist/assist-shell";
+import { COMMAND_AI_EXAMPLES, COMMAND_AI_PREPARED } from "@/lib/product/workflow";
 import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
-
-const EXAMPLES = [
-  "Patient Müller Terminvorschlag senden",
-  "Lisa an Rückruf erinnern",
-  "Heutige Eingänge zusammenfassen",
-] as const;
-
-const RESULT_PREVIEW = [
-  "Nachricht vorbereitet",
-  "Aufgabe erstellt",
-  "Team informiert",
-] as const;
 
 type AtlasCommandHeroProps = {
   suggestions: string[];
@@ -26,7 +15,7 @@ type AtlasCommandHeroProps = {
 export function AtlasCommandHero({ suggestions, compact = false }: AtlasCommandHeroProps) {
   const assist = useAssistUiOptional();
   const [draft, setDraft] = useState("");
-  const chips = suggestions.length > 0 ? suggestions : [...EXAMPLES];
+  const chips = suggestions.length > 0 ? suggestions : [...COMMAND_AI_EXAMPLES];
 
   const run = (text: string) => {
     setDraft(text);
@@ -35,8 +24,8 @@ export function AtlasCommandHero({ suggestions, compact = false }: AtlasCommandH
 
   return (
     <section
-      className={compact ? "yd-command-hero yd-command-hero--compact" : "yd-command-hero"}
-      aria-label="Command"
+      className={compact ? "yd-command-hero yd-command-hero--compact" : "yd-command-hero yd-command-hero--cockpit"}
+      aria-label="Command AI"
     >
       <div className="yd-command-hero-head">
         <Sparkles className="h-4 w-4 shrink-0" strokeWidth={1.65} aria-hidden />
@@ -73,9 +62,9 @@ export function AtlasCommandHero({ suggestions, compact = false }: AtlasCommandH
         ))}
       </div>
 
-      <ul className="yd-command-hero-results" aria-label="Ergebnis">
-        {RESULT_PREVIEW.map((line) => (
-          <li key={line} className="yd-command-hero-result">
+      <ul className="yd-command-hero-prepared" aria-label="Vorbereitet">
+        {COMMAND_AI_PREPARED.map((line) => (
+          <li key={line} className="yd-command-hero-prepared-item">
             <span className="yd-command-hero-check" aria-hidden>
               ✓
             </span>

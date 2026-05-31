@@ -6,7 +6,7 @@ export const WORKSPACE_COPY = {
   today: "Heute",
   allCurrent: "Alles aktuell",
   allDone: "Alles erledigt",
-  loadGap: "Kurz nicht geladen",
+  loadGap: "—",
 
   intake: {
     title: "Eingänge",
@@ -19,7 +19,7 @@ export const WORKSPACE_COPY = {
   relay: {
     title: "Relay",
     team: "Relay · Team",
-    quiet: "Keine neuen Nachrichten",
+    quiet: "Keine offenen Übergaben",
     open: "Rückfragen offen",
     teamCurrent: "Team aktuell",
   },

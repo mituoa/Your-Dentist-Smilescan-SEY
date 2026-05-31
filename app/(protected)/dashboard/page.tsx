@@ -2,25 +2,18 @@ import { redirect } from "next/navigation";
 
 import { AtlasOperationalCore } from "@/components/dashboard/hc/atlas-operational-core";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
-import { DashboardProgressiveSection } from "@/components/dashboard/hc/dashboard-progressive-section";
-import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
-import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
-import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
+import { buildDailyStatus } from "@/lib/dashboard/command-center";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import {
-  getNewSubmissionsCount,
   getTotalUnseenSubmissions,
-  getTotalSubmissionsCount,
   getOpenTasks,
-  getWeeklySubmissionCounts,
   getRecentSubmissionsPreview,
   getRecentActivity,
   getDashboardRoutineTasks,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
-import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import {
   formatDoctorDisplayName,
   greetingDoctorLabel,
@@ -58,38 +51,23 @@ export default async function DashboardPage() {
   const doctorDisplayName = formatDoctorDisplayName(displayName);
   const greetingDoctorName = greetingDoctorLabel(displayName);
 
-  const [
-    newRes,
-    unseenRes,
-    totalRes,
-    tasksRes,
-    weeklyRes,
-    previewRes,
-    inboxBadgeRes,
-    activityRes,
-    routinesRes,
-    relayConversations,
-  ] = await Promise.all([
-    getNewSubmissionsCount(workspaceId),
-    getTotalUnseenSubmissions(workspaceId),
-    getTotalSubmissionsCount(workspaceId),
-    getOpenTasks(workspaceId),
-    getWeeklySubmissionCounts(workspaceId),
-    getRecentSubmissionsPreview(workspaceId),
-    countUnseenInboxSubmissions(workspaceId),
-    getRecentActivity(workspaceId),
-    getDashboardRoutineTasks(workspaceId),
-    getRelayConversationsForUser(workspaceId, user.id).catch(() => []),
-  ]);
+  const [unseenRes, tasksRes, previewRes, activityRes, routinesRes, relayConversations] =
+    await Promise.all([
+      getTotalUnseenSubmissions(workspaceId),
+      getOpenTasks(workspaceId),
+      getRecentSubmissionsPreview(workspaceId),
+      getRecentActivity(workspaceId),
+      getDashboardRoutineTasks(workspaceId),
+      getRelayConversationsForUser(workspaceId, user.id).catch(() => []),
+    ]);
 
   const unseenCount = unseenRes.ok ? unseenRes.count : null;
-  const totalCount = totalRes.ok ? totalRes.count : null;
   const openTasks = tasksRes.ok ? tasksRes.tasks : null;
   const routines = routinesRes.ok ? routinesRes.routines : null;
   const activityEvents = activityRes.ok ? activityRes.events : null;
-  const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
   const relayUnread = relayConversations.reduce((sum, c) => sum + c.unread_count, 0);
+  const openTaskCount = openTasks?.length ?? 0;
 
   const now = Date.now();
   const reminderCount =
@@ -100,13 +78,7 @@ export default async function DashboardPage() {
       return due <= now + week;
     }).length ?? 0;
 
-  const inboxCount =
-    inboxBadgeRes.ok && inboxBadgeRes.count > 0 ? inboxBadgeRes.count : undefined;
-
-  const seenCount =
-    totalCount !== null && unseenCount !== null
-      ? Math.max(0, totalCount - unseenCount)
-      : null;
+  const dailyStatus = buildDailyStatus(unseenCount, openTaskCount, relayUnread);
 
   const hour = new Date().getHours();
   const greeting =
@@ -121,8 +93,7 @@ export default async function DashboardPage() {
         greeting={greeting}
         displayName={doctorDisplayName}
         greetingName={greetingDoctorName}
-        subtitle=""
-        inboxCount={inboxCount}
+        dailyStatus={dailyStatus}
       />
 
       <AtlasOperationalCore
@@ -135,27 +106,6 @@ export default async function DashboardPage() {
         reminderCount={reminderCount}
         activityEvents={activityEvents}
       />
-
-      <section className="yd-atlas-records mt-10" aria-labelledby="yd-atlas-records-title">
-        <h2 id="yd-atlas-records-title" className="sr-only">
-          Verlauf und Statistik
-        </h2>
-        <DashboardProgressiveSection
-          title="Verlauf & Statistik"
-          hint="Verlauf"
-          defaultOpen={false}
-        >
-          <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
-            <div className="min-w-0 lg:col-span-8">
-              <HcRecentTable rows={previewRows} />
-            </div>
-            <div className="min-w-0 space-y-5 lg:col-span-4">
-              <HcAnalyticsBars counts={weeklyCounts} totalLabel="Einsendungen · 7 Tage" />
-              <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
-            </div>
-          </div>
-        </DashboardProgressiveSection>
-      </section>
     </div>
   );
 }

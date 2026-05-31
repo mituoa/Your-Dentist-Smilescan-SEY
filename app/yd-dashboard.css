@@ -1235,3 +1235,455 @@ main:has(.yd-dashboard) {
   font-weight: 500;
   color: #3d5266;
 }
+
+/* —— Medical Command Center (cockpit IA) —— */
+
+.yd-cockpit-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.yd-cockpit-header-greet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.yd-cockpit-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.yd-cockpit-status-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yd-cockpit-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.yd-cockpit-status-dot--ok {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+.yd-cockpit-status-dot--active {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.yd-cockpit-status-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3d5266;
+}
+
+.yd-cockpit-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-cockpit-metric {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #0c1929;
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.yd-cockpit-metric:hover {
+  color: #2f80ed;
+}
+
+.yd-cockpit-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b849c;
+}
+
+.yd-cockpit-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2f80ed;
+  text-decoration: none;
+}
+
+.yd-cockpit-quiet {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b849c;
+}
+
+.yd-cockpit-desktop {
+  gap: 1.5rem;
+}
+
+.yd-cockpit-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.yd-command-hero--cockpit {
+  margin-bottom: 0;
+}
+
+.yd-command-hero-prepared {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-command-hero-prepared-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #6b849c;
+}
+
+.yd-today-important-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .yd-today-important-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .yd-today-important-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.yd-today-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.125rem;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.38);
+  background: rgba(255, 255, 255, 0.88);
+  height: 100%;
+}
+
+.yd-today-card-patient {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0c1929;
+}
+
+.yd-today-card-problem {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: #3d5266;
+}
+
+.yd-today-card-ai {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2f80ed;
+}
+
+.yd-today-card-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(180, 198, 218, 0.45);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #2f80ed;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.yd-today-card-cta--primary {
+  border-color: rgba(47, 128, 237, 0.35);
+  background: linear-gradient(180deg, rgba(47, 128, 237, 0.92) 0%, rgba(30, 91, 189, 0.95) 100%);
+  color: #fff;
+}
+
+.yd-cockpit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.yd-cockpit-grid-aside--stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  min-width: 0;
+}
+
+.yd-patient-case-row--rich {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  gap: 0.5rem;
+}
+
+.yd-patient-case-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.yd-patient-case-tag {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(180, 198, 218, 0.2);
+  color: #6b849c;
+}
+
+.yd-patient-case-tag--urgent {
+  background: rgba(225, 29, 72, 0.1);
+  color: #be123c;
+}
+
+.yd-patient-case-ai {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2f80ed;
+}
+
+.yd-patient-case-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yd-cockpit-tasks,
+.yd-cockpit-activity {
+  margin-top: 0;
+}
+
+.yd-workflow-rail-track {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  list-style: none;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+@media (min-width: 768px) {
+  .yd-workflow-rail-track {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .yd-workflow-rail-step {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .yd-workflow-rail-arrow {
+    flex-shrink: 0;
+    color: #8ba3b8;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.yd-workflow-rail-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.yd-workflow-rail-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.5rem;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.yd-workflow-rail-node:hover {
+  background: rgba(47, 128, 237, 0.06);
+}
+
+.yd-workflow-rail-count {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #0c1929;
+  line-height: 1;
+}
+
+.yd-workflow-rail-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #6b849c;
+}
+
+.yd-workflow-rail-arrow {
+  color: #8ba3b8;
+  width: 1rem;
+  height: 1rem;
+}
+
+.yd-patient-cases-head,
+.yd-relay-activity-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.yd-patient-cases-list,
+.yd-relay-activity-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yd-patient-case-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  background: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+
+.yd-patient-case-row:hover {
+  border-color: rgba(47, 128, 237, 0.28);
+}
+
+.yd-patient-case-name {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0c1929;
+}
+
+.yd-patient-case-type {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: #3d5266;
+}
+
+.yd-patient-case-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  font-size: 0.6875rem;
+  color: #6b849c;
+}
+
+.yd-patient-case-action {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2f80ed;
+  white-space: nowrap;
+}
+
+.yd-relay-activity-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 198, 218, 0.28);
+  background: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+}
+
+.yd-relay-activity-row:hover {
+  border-color: rgba(47, 128, 237, 0.22);
+}
+
+.yd-relay-activity-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #0c1929;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yd-relay-activity-meta {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #6b849c;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .yd-patient-case-row {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .yd-patient-case-meta {
+    align-items: flex-start;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .yd-patient-case-action {
+    justify-self: start;
+  }
+}
