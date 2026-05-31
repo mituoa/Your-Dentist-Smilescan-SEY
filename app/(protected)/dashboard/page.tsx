@@ -10,6 +10,7 @@ import {
   DashboardAmbientToday,
 } from "@/components/dashboard/hc/dashboard-ambient-sections";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
+import { DashboardMobileShell } from "@/components/dashboard/hc/dashboard-mobile-shell";
 import { DashboardTodayPriority } from "@/components/dashboard/hc/dashboard-today-priority";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
@@ -158,18 +159,33 @@ export default async function DashboardPage() {
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--a" aria-hidden />
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--b" aria-hidden />
 
-      <DashboardAmbientHeader>
-        <DashboardHeader
-          greeting={greeting}
-          displayName={doctorLabel}
-          pendingApprovals={unseenCount}
-          email={user.email || ""}
-          workspaceName="Praxis"
-          avatarUrl={profileData?.photo_url ?? null}
-          profileDisplayName={profileData?.display_name ?? null}
-          inboxCount={inboxCount}
-        />
-      </DashboardAmbientHeader>
+      <DashboardMobileShell
+        greeting={greeting}
+        displayName={doctorLabel}
+        pendingApprovals={unseenCount}
+        newCount={newCount}
+        openTaskCount={openTaskCount}
+        weeklyCounts={weeklyCounts}
+        unseenCount={unseenCount}
+        seenCount={seenCount}
+        totalCount={totalCount}
+        priorityItems={priorityItems}
+      />
+
+      <div className="hidden md:contents">
+        <DashboardAmbientHeader>
+          <DashboardHeader
+            greeting={greeting}
+            displayName={doctorLabel}
+            pendingApprovals={unseenCount}
+            email={user.email || ""}
+            workspaceName="Praxis"
+            avatarUrl={profileData?.photo_url ?? null}
+            profileDisplayName={profileData?.display_name ?? null}
+            inboxCount={inboxCount}
+          />
+        </DashboardAmbientHeader>
+      </div>
 
       {dashboardOverviewIncomplete ? (
         <p
@@ -181,6 +197,7 @@ export default async function DashboardPage() {
         </p>
       ) : null}
 
+      <div className="hidden md:contents">
       <DashboardAmbientKpis>
         <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:gap-5">
           <div className="min-w-0 order-1 sm:col-span-2 lg:col-span-6">
@@ -228,7 +245,9 @@ export default async function DashboardPage() {
           <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
         </div>
       </DashboardAmbientToday>
+      </div>
 
+      <div className="hidden md:contents">
       <DashboardAmbientCharts>
         <div className="yd-dash-zone yd-dash-zone--charts yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
           <div className="min-w-0 lg:col-span-8">
@@ -250,6 +269,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       </DashboardAmbientLower>
+      </div>
     </div>
   );
 }

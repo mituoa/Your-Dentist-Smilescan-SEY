@@ -40,7 +40,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-full max-md:bg-transparent max-md:shadow-none md:mt-3 md:mb-4 md:h-[calc(100dvh-1.75rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
+      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-full max-md:bg-transparent max-md:shadow-none md:h-full md:w-full md:overflow-visible md:rounded-[44px] md:border"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,
@@ -66,14 +66,15 @@ export function Sidebar({
         aria-hidden
       />
 
-      <div className="relative shrink-0 px-4 pb-2 pt-4 md:px-0 md:pt-5 md:pb-2">
-        <div className="flex items-center justify-between gap-2 md:hidden">
-          <BrandMark compact />
+      <div className="relative shrink-0 md:px-0 md:pt-5 md:pb-2">
+        <div className="yd-mobile-sidebar-drawer-head md:hidden">
+          <div className="yd-mobile-drawer-brand min-w-0">
+            <BrandMark compact />
+          </div>
           <button
             type="button"
             onClick={() => mobileNav?.close()}
-            className="inline-flex h-10 min-w-10 touch-manipulation items-center justify-center rounded-xl transition hover:bg-[rgba(47,128,237,0.05)]"
-            style={{ color: YD.text.muted }}
+            className="yd-mobile-sidebar-close touch-manipulation"
             aria-label="Navigation schließen"
           >
             <X className="h-[18px] w-[18px]" strokeWidth={1.85} />
@@ -85,7 +86,7 @@ export function Sidebar({
       </div>
 
       <nav
-        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 py-1.5 md:items-center md:gap-4 md:px-2 md:py-5"
+        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 py-1.5 md:items-center md:gap-4 md:px-2 md:py-5"
         aria-label="Hauptnavigation"
       >
         <div className="yd-nav-primary-group flex flex-col gap-0.5 md:contents">
@@ -151,7 +152,7 @@ export function Sidebar({
           email={email}
         />
       </div>
-      <div className="relative shrink-0 space-y-2.5 border-t border-[rgba(180,198,218,0.18)] px-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
+      <div className="yd-mobile-sidebar-footer relative shrink-0 space-y-2.5 md:hidden">
         <SignOutSidebarForm />
         <HcSidebarProfile
           avatarUrl={avatarUrl}

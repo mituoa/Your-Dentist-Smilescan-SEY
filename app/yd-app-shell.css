@@ -1,0 +1,72 @@
+/**
+ * Desktop app shell — sidebar + canvas aligned on one grid
+ */
+
+@media (min-width: 768px) {
+  .yd-workspace .yd-app-shell-row {
+    --yd-shell-pad-y: 0.75rem;
+    --yd-shell-pad-x: 0.5rem;
+    align-items: stretch;
+    padding: var(--yd-shell-pad-y) var(--yd-shell-pad-x);
+    gap: 0;
+  }
+
+  .yd-workspace .yd-desktop-nav-rail {
+    display: flex;
+    width: 108px;
+    max-width: 108px;
+    flex-shrink: 0;
+    align-self: stretch;
+    padding: 0 0 0 0.25rem;
+  }
+
+  .yd-workspace .yd-desktop-nav-rail .yd-mobile-nav-panel {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .yd-workspace #app-sidebar.yd-awaken-sidebar {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    height: 100% !important;
+    max-height: none !important;
+    min-height: 0;
+  }
+
+  .yd-workspace .yd-app-shell-main {
+    display: flex;
+    min-height: 0;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .yd-workspace .yd-app-shell-main > main {
+    padding: 0.75rem 1rem 1.25rem !important;
+  }
+
+  .yd-workspace .yd-awaken-canvas:has(.yd-dashboard--reference) {
+    padding: 1rem 1.25rem 1.5rem !important;
+  }
+
+  .yd-workspace .yd-dashboard--reference .yd-dash-header-premium {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-workspace .yd-app-shell-row {
+    --yd-shell-pad-y: 0.875rem;
+    --yd-shell-pad-x: 0.625rem;
+  }
+
+  .yd-workspace .yd-app-shell-main > main {
+    padding: 0.875rem 1.125rem 1.5rem !important;
+  }
+
+  .yd-workspace .yd-awaken-canvas:has(.yd-dashboard--reference) {
+    padding: 1.125rem 1.5rem 1.75rem !important;
+  }
+}
