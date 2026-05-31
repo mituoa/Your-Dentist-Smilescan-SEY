@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   ClipboardList,
+  ListTodo,
   Sparkles,
   TrendingUp,
   UserPlus,
@@ -21,12 +22,17 @@ export type StatCardInlinePreview = {
   moreLabel?: string;
 };
 
-export type DashboardKpiIconName = "clipboard-list" | "user-plus" | "sparkles";
+export type DashboardKpiIconName =
+  | "clipboard-list"
+  | "user-plus"
+  | "sparkles"
+  | "list-todo";
 
 const KPI_ICON_BY_NAME: Record<DashboardKpiIconName, LucideIcon> = {
   "clipboard-list": ClipboardList,
   "user-plus": UserPlus,
   sparkles: Sparkles,
+  "list-todo": ListTodo,
 };
 
 type StatCardProps = {

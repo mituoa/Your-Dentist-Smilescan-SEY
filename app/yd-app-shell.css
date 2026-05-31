@@ -50,9 +50,8 @@
     padding: 1rem 1.25rem 1.5rem !important;
   }
 
-  .yd-workspace .yd-dashboard--reference .yd-dash-header-premium {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
+  .yd-workspace .yd-dashboard--reference .yd-dash-header-axis {
+    padding-top: 0;
   }
 }
 

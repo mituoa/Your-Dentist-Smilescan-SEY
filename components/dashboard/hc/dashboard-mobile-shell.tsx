@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ChevronDown, ClipboardList, ListTodo, UserPlus } from "lucide-react";
 
+import { DashboardMobileActions } from "@/components/dashboard/hc/dashboard-mobile-actions";
 import { DashboardTodayPriority } from "@/components/dashboard/hc/dashboard-today-priority";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
+import { buildDashboardSubtitle } from "@/lib/dashboard/dashboard-status-copy";
 import type { DashboardPriorityItem } from "@/lib/queries/dashboard";
 
 type DashboardMobileShellProps = {
@@ -18,13 +20,6 @@ type DashboardMobileShellProps = {
   totalCount: number | null;
   priorityItems: DashboardPriorityItem[] | null;
 };
-
-function mobilePriorityLine(pending: number | null): string {
-  if (pending === null) return "Übersicht wird geladen …";
-  if (pending === 0) return "Keine Antworten zur Prüfung bereit";
-  if (pending === 1) return "1 Antwort zur Prüfung bereit";
-  return `${pending} Antworten zur Prüfung bereit`;
-}
 
 function MobileKpiCard({
   href,
@@ -70,16 +65,17 @@ export function DashboardMobileShell({
   totalCount,
   priorityItems,
 }: DashboardMobileShellProps) {
-  const freigaben = pendingApprovals ?? 0;
-
+  const subtitle = buildDashboardSubtitle(pendingApprovals, openTaskCount, newCount);
   return (
     <div className="yd-dash-mobile md:hidden">
       <header className="yd-dash-mobile__header">
         <h1 className="yd-dash-mobile__title">
           {greeting}, {displayName}
         </h1>
-        <p className="yd-dash-mobile__priority">{mobilePriorityLine(pendingApprovals)}</p>
+        <p className="yd-dash-mobile__priority">{subtitle}</p>
       </header>
+
+      <DashboardMobileActions className="mb-1" />
 
       <div className="yd-dash-mobile__status" role="status">
         <span className="yd-dash-mobile__status-pill yd-dash-mobile__status-pill--active">
@@ -87,7 +83,8 @@ export function DashboardMobileShell({
           Praxis aktiv
         </span>
         <span className="yd-dash-mobile__status-pill">
-          {freigaben} {freigaben === 1 ? "Freigabe" : "Freigaben"}
+          {pendingApprovals ?? 0}{" "}
+          {(pendingApprovals ?? 0) === 1 ? "Freigabe" : "Freigaben"}
         </span>
         <span className="yd-dash-mobile__status-pill">
           {openTaskCount} {openTaskCount === 1 ? "Aufgabe" : "Aufgaben"}
@@ -106,14 +103,14 @@ export function DashboardMobileShell({
         <div className="yd-dash-mobile__kpi-row">
           <MobileKpiCard
             href="/inbox"
-            title="Neue Anfragen"
+            title="Neue Fälle"
             value={newCount === null ? "—" : newCount}
             hint={newCount ? "Heute eingegangen" : "Keine neuen"}
             icon={UserPlus}
           />
           <MobileKpiCard
             href="/relay"
-            title="Aufgaben"
+            title="Offene Aufgaben"
             value={openTaskCount}
             hint={openTaskCount > 0 ? "Offen" : "Alles erledigt"}
             icon={ListTodo}

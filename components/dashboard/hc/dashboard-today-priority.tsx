@@ -24,8 +24,8 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
     readyCount === null
       ? "—"
       : readyCount === 1
-        ? "1 Antwort wartet auf Ihre Prüfung"
-        : `${readyCount} Antworten warten auf Ihre Prüfung`;
+        ? "1 Fall zur Prüfung"
+        : `${readyCount} Fälle zur Prüfung`;
 
   return (
     <section className="yd-dash-today min-w-0" aria-labelledby="yd-dash-today-title">

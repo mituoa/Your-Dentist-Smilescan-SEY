@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
-import { Plus, X } from "lucide-react";
+import { Plus, X, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -16,21 +16,57 @@ import { cn } from "@/lib/utils";
 
 type AssignMode = "self" | "all" | "specific";
 
-export function NewTaskModalTrigger() {
+type NewTaskModalTriggerProps = {
+  className?: string;
+  label?: string;
+  showIcon?: boolean;
+  preset?: "task" | "reminder";
+  icon?: LucideIcon;
+};
+
+export function NewTaskModalTrigger({
+  className,
+  label = "Neue Aufgabe",
+  showIcon = true,
+  preset = "task",
+  icon: Icon = Plus,
+}: NewTaskModalTriggerProps) {
   const [open, setOpen] = useState(false);
+  const isReminder = preset === "reminder";
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        title="Neue Aufgabe"
-        className="inline-flex h-10 items-center gap-2 rounded-xl border border-[rgba(15,23,42,0.08)] bg-white px-3 text-[13px] font-medium text-[#0F172A] transition-colors hover:border-[rgba(15,23,42,0.12)] hover:bg-[#F8FAFC] md:px-4 md:text-[14px]"
+        title={label}
+        className={
+          className ??
+          "inline-flex h-10 items-center gap-2 rounded-xl border border-[rgba(15,23,42,0.08)] bg-white px-3 text-[13px] font-medium text-[#0F172A] transition-colors hover:border-[rgba(15,23,42,0.12)] hover:bg-[#F8FAFC] md:px-4 md:text-[14px]"
+        }
       >
-        <Plus className="h-4 w-4 shrink-0 text-[#2F80ED]" strokeWidth={2} />
-        <span className="hidden sm:inline">Neue Aufgabe</span>
+        {showIcon ? (
+          <Icon
+            className={cn(
+              "h-4 w-4 shrink-0",
+              isReminder ? "text-[#2F80ED]" : "text-[#2F80ED]"
+            )}
+            strokeWidth={isReminder ? 1.75 : 2}
+          />
+        ) : null}
+        <span>{label}</span>
       </button>
-      <NewTaskModal open={open} onClose={() => setOpen(false)} />
+      <NewTaskModal
+        open={open}
+        onClose={() => setOpen(false)}
+        initialRecurrenceType={isReminder ? "weekly" : "once"}
+        dialogTitle={isReminder ? "Erinnerung" : undefined}
+        dialogHint={
+          isReminder
+            ? "Rückruf oder Kontrolle — Rhythmus und Termin nach Bedarf."
+            : undefined
+        }
+      />
     </>
   );
 }
@@ -43,7 +79,21 @@ function fieldCls() {
   return "w-full rounded-lg border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 text-[14px] text-[#0F172A] placeholder:text-[#94A3B8] shadow-none transition-colors focus:border-[rgba(15,23,42,0.14)] focus:outline-none focus:ring-2 focus:ring-[rgba(15,23,42,0.06)] disabled:cursor-not-allowed disabled:opacity-50";
 }
 
-export function NewTaskModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+type NewTaskModalProps = {
+  open: boolean;
+  onClose: () => void;
+  initialRecurrenceType?: string;
+  dialogTitle?: string;
+  dialogHint?: string;
+};
+
+export function NewTaskModal({
+  open,
+  onClose,
+  initialRecurrenceType = "once",
+  dialogTitle = "Neue Aufgabe",
+  dialogHint = "Kurz erfassen — Details können Sie später im Aufgabendetail ergänzen.",
+}: NewTaskModalProps) {
   const router = useRouter();
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -56,12 +106,13 @@ export function NewTaskModal({ open, onClose }: { open: boolean; onClose: () => 
   const [assignMode, setAssignMode] = useState<AssignMode>("self");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
-  const [recurrenceType, setRecurrenceType] = useState("once");
+  const [recurrenceType, setRecurrenceType] = useState(initialRecurrenceType);
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
+    setRecurrenceType(initialRecurrenceType);
     setError(null);
     setAssignMode("self");
     setSelectedIds([]);
@@ -177,11 +228,9 @@ export function NewTaskModal({ open, onClose }: { open: boolean; onClose: () => 
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[rgba(15,23,42,0.06)] px-5 py-4 sm:px-6">
           <div>
             <h2 id={titleId} className="text-[17px] font-semibold tracking-[-0.02em] text-[#0F172A]">
-              Neue Aufgabe
+              {dialogTitle}
             </h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-[#64748B]">
-              Kurz erfassen — Details können Sie später im Aufgabendetail ergänzen.
-            </p>
+            <p className="mt-1 text-[13px] leading-relaxed text-[#64748B]">{dialogHint}</p>
           </div>
           <button
             type="button"

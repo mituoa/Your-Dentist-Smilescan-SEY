@@ -128,7 +128,34 @@
   }
 }
 
-/* —— Premium dashboard header (command center) —— */
+/* —— Dashboard header (operational) —— */
+.yd-dashboard .yd-dash-header-axis {
+  margin-bottom: 0;
+}
+
+.yd-dashboard .yd-dash-zone--actions {
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.yd-dashboard .yd-dash-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-action-row {
+    gap: 0.625rem;
+  }
+}
+
+.yd-dashboard .yd-dash-zone--kpis {
+  margin-top: 0;
+}
+
+/* Legacy premium header (unused) */
 .yd-dashboard .yd-dash-header-premium {
   --yd-header-title: #0a1628;
   --yd-header-priority: #0c1929;
@@ -421,7 +448,7 @@
 }
 
 .yd-dashboard .yd-dash-zone--kpis {
-  margin-top: 2rem; /* 32px header → KPI */
+  margin-top: 0;
   margin-bottom: 1.5rem;
 }
 
