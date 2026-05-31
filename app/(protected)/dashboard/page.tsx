@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ClipboardList, Sparkles, UserPlus } from "lucide-react";
 
 import {
   DashboardAmbientCharts,
@@ -16,8 +14,6 @@ import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
 import { HcMonthCalendar } from "@/components/dashboard/hc/month-calendar";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
-import { KpiHoverPreview } from "@/components/dashboard/hc/kpi-hover-preview";
-import { KpiReviewHoverPreview } from "@/components/dashboard/hc/kpi-review-hover-preview";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import {
   buildHeroInlinePreview,
@@ -206,35 +202,32 @@ export default async function DashboardPage() {
               href="/inbox"
               title="Bereit zur Prüfung"
               value={unseenCount === null ? "—" : unseenCount}
-              icon={ClipboardList}
+              iconName="clipboard-list"
               footnote="Antworten vorbereitet"
               footnotePositive={(unseenCount ?? 0) > 0}
               inlinePreview={heroInline}
-              hoverPreview={
-                <KpiReviewHoverPreview patients={reviewHoverPatients} ctaHref="/inbox" />
-              }
+              reviewPatients={reviewHoverPatients}
+              reviewCtaHref="/inbox"
             />
           </div>
           <div className="min-w-0 order-2 sm:col-span-1 lg:col-span-3">
             <HcStatCard
               title="Neue Patientenfälle"
               value={newCount === null ? "—" : newCount}
-              icon={UserPlus}
+              iconName="user-plus"
               footnote={newCasesFootnote}
               footnotePositive={newCount === 0}
-              hoverPreview={<KpiHoverPreview lines={buildNewCasesHover(newCount)} />}
+              hoverLines={buildNewCasesHover(newCount)}
             />
           </div>
           <div className="min-w-0 order-3 sm:col-span-1 lg:col-span-3">
             <HcStatCard
               title="Praxis Assistenz"
               value={practiceClear ? "✓ Aktiv" : openTaskCount}
-              icon={Sparkles}
+              iconName="sparkles"
               footnote={practiceClear ? "Alle Abläufe bereit" : "Assistenz begleitet"}
               footnotePositive={practiceClear}
-              hoverPreview={
-                <KpiHoverPreview lines={buildAssistHover(openTaskCount, practiceClear)} />
-              }
+              hoverLines={buildAssistHover(openTaskCount, practiceClear)}
             />
           </div>
         </div>

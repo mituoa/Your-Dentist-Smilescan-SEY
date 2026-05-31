@@ -2,8 +2,17 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { TrendingUp, type LucideIcon } from "lucide-react";
+import {
+  ClipboardList,
+  Sparkles,
+  TrendingUp,
+  UserPlus,
+  type LucideIcon,
+} from "lucide-react";
 
+import { KpiHoverPreview } from "@/components/dashboard/hc/kpi-hover-preview";
+import { KpiReviewHoverPreview } from "@/components/dashboard/hc/kpi-review-hover-preview";
+import type { KpiReviewPatientLine } from "@/components/dashboard/hc/kpi-review-hover-preview";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 
@@ -12,102 +21,129 @@ export type StatCardInlinePreview = {
   moreLabel?: string;
 };
 
+export type DashboardKpiIconName = "clipboard-list" | "user-plus" | "sparkles";
+
+const KPI_ICON_BY_NAME: Record<DashboardKpiIconName, LucideIcon> = {
+  "clipboard-list": ClipboardList,
+  "user-plus": UserPlus,
+  sparkles: Sparkles,
+};
+
 type StatCardProps = {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  iconName: DashboardKpiIconName;
   footnote?: string;
   footnotePositive?: boolean;
   /** Primary KPI — stronger emphasis in the row */
   primary?: boolean;
   href?: string;
   inlinePreview?: StatCardInlinePreview;
+  hoverLines?: string[];
+  reviewPatients?: KpiReviewPatientLine[];
+  reviewCtaHref?: string;
+  /** @deprecated Prefer hoverLines / reviewPatients — kept for client-only usage */
   hoverPreview?: ReactNode;
 };
 
 export function HcStatCard({
   title,
   value,
-  icon: Icon,
+  iconName,
   footnote,
   footnotePositive = true,
   primary = false,
   href,
   inlinePreview,
+  hoverLines,
+  reviewPatients,
+  reviewCtaHref = "/inbox",
   hoverPreview,
 }: StatCardProps) {
+  const Icon = KPI_ICON_BY_NAME[iconName] ?? ClipboardList;
+
+  const resolvedHoverPreview =
+    hoverPreview ??
+    (reviewPatients ? (
+      <KpiReviewHoverPreview patients={reviewPatients} ctaHref={reviewCtaHref} />
+    ) : hoverLines?.length ? (
+      <KpiHoverPreview lines={hoverLines} />
+    ) : null);
+
   const cardBody = (
-      <div
-        className={cn(
-          "yd-dash-surface yd-dash-kpi-card flex min-w-0 flex-col p-4 md:p-5",
-          href && "yd-dash-kpi-card--linked",
-          primary ? "yd-dash-kpi-card--primary min-h-[168px] md:min-h-[176px]" : "min-h-[142px] md:min-h-[148px]"
-        )}
-      >
-        <div className="mb-3 flex items-center gap-2.5">
-          <span
-            className={cn(
-              "flex shrink-0 items-center justify-center rounded-full text-white",
-              primary ? "h-10 w-10 md:h-11 md:w-11" : "h-9 w-9 md:h-10 md:w-10"
-            )}
-            style={{
-              background: YD.accent.iconGradient,
-              boxShadow: primary
-                ? "0 6px 16px rgba(47, 128, 237, 0.28)"
-                : "0 4px 12px rgba(47, 128, 237, 0.2)",
-            }}
-          >
-            <Icon
-              className={primary ? "h-[18px] w-[18px] md:h-[19px] md:w-[19px]" : "h-[16px] w-[16px] md:h-[17px] md:w-[17px]"}
-              strokeWidth={1.65}
-            />
-          </span>
-          <p
-            className={cn(
-              "leading-snug",
-              primary ? "text-[14px] font-semibold" : "text-[13px] font-medium"
-            )}
-            style={{ color: primary ? YD.text.primary : YD.text.secondary }}
-          >
-            {title}
-          </p>
-        </div>
+    <div
+      className={cn(
+        "yd-dash-surface yd-dash-kpi-card flex min-w-0 flex-col p-4 md:p-5",
+        href && "yd-dash-kpi-card--linked",
+        primary ? "yd-dash-kpi-card--primary min-h-[168px] md:min-h-[176px]" : "min-h-[142px] md:min-h-[148px]"
+      )}
+    >
+      <div className="mb-3 flex items-center gap-2.5">
+        <span
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full text-white",
+            primary ? "h-10 w-10 md:h-11 md:w-11" : "h-9 w-9 md:h-10 md:w-10"
+          )}
+          style={{
+            background: YD.accent.iconGradient,
+            boxShadow: primary
+              ? "0 6px 16px rgba(47, 128, 237, 0.28)"
+              : "0 4px 12px rgba(47, 128, 237, 0.2)",
+          }}
+        >
+          <Icon
+            className={
+              primary ? "h-[18px] w-[18px] md:h-[19px] md:w-[19px]" : "h-[16px] w-[16px] md:h-[17px] md:w-[17px]"
+            }
+            strokeWidth={1.65}
+          />
+        </span>
         <p
           className={cn(
-            "yd-dash-kpi font-semibold",
-            primary && "yd-dash-kpi--primary",
-            !primary && "yd-dash-kpi-quiet text-[1.625rem]"
+            "leading-snug",
+            primary ? "text-[14px] font-semibold" : "text-[13px] font-medium"
           )}
+          style={{ color: primary ? YD.text.primary : YD.text.secondary }}
         >
-          {value}
+          {title}
         </p>
-        {footnote ? (
-          <p
-            className={cn(
-              "mt-2 inline-flex items-center gap-1 text-[11px] font-medium leading-snug",
-              primary && "text-[12px]"
-            )}
-            style={{ color: footnotePositive ? YD.trend.up : YD.text.muted }}
-          >
-            {!primary && footnotePositive ? (
-              <TrendingUp className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2} />
-            ) : null}
-            {footnote}
-          </p>
-        ) : null}
-        {inlinePreview && (inlinePreview.names.length > 0 || inlinePreview.moreLabel) ? (
-          <div className="yd-dash-kpi-inline-preview mt-3 border-t pt-3">
-            {inlinePreview.names.map((name) => (
-              <p key={name} className="yd-dash-kpi-inline-preview__name truncate">
-                {name}
-              </p>
-            ))}
-            {inlinePreview.moreLabel ? (
-              <p className="yd-dash-kpi-inline-preview__more">{inlinePreview.moreLabel}</p>
-            ) : null}
-          </div>
-        ) : null}
       </div>
+      <p
+        className={cn(
+          "yd-dash-kpi font-semibold",
+          primary && "yd-dash-kpi--primary",
+          !primary && "yd-dash-kpi-quiet text-[1.625rem]"
+        )}
+      >
+        {value}
+      </p>
+      {footnote ? (
+        <p
+          className={cn(
+            "mt-2 inline-flex items-center gap-1 text-[11px] font-medium leading-snug",
+            primary && "text-[12px]"
+          )}
+          style={{ color: footnotePositive ? YD.trend.up : YD.text.muted }}
+        >
+          {!primary && footnotePositive ? (
+            <TrendingUp className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2} />
+          ) : null}
+          {footnote}
+        </p>
+      ) : null}
+      {inlinePreview && (inlinePreview.names.length > 0 || inlinePreview.moreLabel) ? (
+        <div className="yd-dash-kpi-inline-preview mt-3 border-t pt-3">
+          {inlinePreview.names.map((name) => (
+            <p key={name} className="yd-dash-kpi-inline-preview__name truncate">
+              {name}
+            </p>
+          ))}
+          {inlinePreview.moreLabel ? (
+            <p className="yd-dash-kpi-inline-preview__more">{inlinePreview.moreLabel}</p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
   );
 
   return (
@@ -120,9 +156,9 @@ export function HcStatCard({
         cardBody
       )}
 
-      {hoverPreview ? (
+      {resolvedHoverPreview ? (
         <div className="yd-dash-kpi-float-preview" role="tooltip">
-          <div className="yd-dash-kpi-float-preview__panel">{hoverPreview}</div>
+          <div className="yd-dash-kpi-float-preview__panel">{resolvedHoverPreview}</div>
         </div>
       ) : null}
     </div>

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { YD } from "@/lib/design/yd-design-tokens";
