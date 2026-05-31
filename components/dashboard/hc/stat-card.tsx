@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { TrendingUp, type LucideIcon } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
@@ -13,13 +12,10 @@ type StatCardProps = {
   footnotePositive?: boolean;
   metricA?: { label: string; value: string | number };
   metricB?: { label: string; value: string | number };
-  lift?: boolean;
-  glow?: boolean;
   tone?: YdCardTone;
-  hero?: boolean;
-  hoverPreview?: ReactNode;
 };
 
+/** Reference KPI card — icon + title, metric, trend, split footer */
 export function HcStatCard({
   title,
   value,
@@ -28,44 +24,31 @@ export function HcStatCard({
   footnotePositive = true,
   metricA,
   metricB,
-  lift,
-  glow,
   tone = "default",
-  hero = false,
-  hoverPreview,
 }: StatCardProps) {
   return (
     <HcCard
-      lift={lift}
-      glow={glow}
       tone={tone}
-      hoverPreview={hoverPreview}
-      className={`flex min-w-0 flex-col ${hero ? "min-h-[204px] p-6 md:min-h-[220px] md:p-7" : "min-h-[176px] p-5 md:min-h-[188px] md:p-6"}`}
+      ambient={false}
+      className="yd-dash-surface yd-dash-kpi-card flex min-h-[142px] min-w-0 flex-col p-4 md:min-h-[148px] md:p-5"
     >
-      <div className={`flex items-start justify-between gap-3 ${hero ? "mb-5" : "mb-4"}`}>
+      <div className="mb-3 flex items-center gap-2.5">
         <span
-          className={`flex items-center justify-center rounded-full ${hero ? "h-11 w-11" : "h-10 w-10"}`}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10"
           style={{
             background: YD.accent.iconGradient,
-            boxShadow: hero
-              ? "0 6px 18px rgba(47, 128, 237, 0.28)"
-              : "0 4px 14px rgba(30, 91, 189, 0.2)",
+            boxShadow: "0 4px 12px rgba(47, 128, 237, 0.2)",
           }}
         >
-          <Icon
-            className={`text-white ${hero ? "h-[19px] w-[19px]" : "h-[17px] w-[17px]"}`}
-            strokeWidth={1.65}
-          />
+          <Icon className="h-[16px] w-[16px] text-white md:h-[17px] md:w-[17px]" strokeWidth={1.65} />
         </span>
+        <p className="yd-dash-kpi-title text-[13px] font-medium leading-snug">{title}</p>
       </div>
-      <p className="yd-dash-label">{title}</p>
-      <p className={`mt-2 ${hero ? "yd-dash-kpi-hero" : tone === "quiet" ? "yd-dash-kpi-quiet" : "yd-dash-kpi"}`}>
-        {value}
-      </p>
+      <p className={`yd-dash-kpi ${tone === "quiet" ? "yd-dash-kpi-quiet" : ""}`}>{value}</p>
       {footnote ? (
         <p
-          className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-medium leading-relaxed"
-          style={{ color: footnotePositive ? YD.trend.up : YD.text.faint }}
+          className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium leading-snug"
+          style={{ color: footnotePositive ? YD.trend.up : YD.text.muted }}
         >
           {footnotePositive ? (
             <TrendingUp className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2} />
@@ -75,21 +58,21 @@ export function HcStatCard({
       ) : null}
       {metricA || metricB ? (
         <div
-          className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t pt-4 text-[11px] leading-relaxed"
+          className="yd-dash-kpi-metrics mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3 text-[11px] leading-relaxed md:pt-3.5"
           style={{ borderColor: "rgba(180, 198, 218, 0.32)" }}
         >
           {metricA ? (
-            <span className="yd-dash-meta">
+            <span className="yd-dash-meta normal-case tracking-normal">
               {metricA.label}{" "}
-              <span className="font-medium" style={{ color: YD.text.secondary }}>
+              <span className="font-semibold" style={{ color: YD.text.secondary }}>
                 {metricA.value}
               </span>
             </span>
           ) : null}
           {metricB ? (
-            <span className="yd-dash-meta">
+            <span className="yd-dash-meta normal-case tracking-normal">
               {metricB.label}{" "}
-              <span className="font-medium" style={{ color: YD.text.secondary }}>
+              <span className="font-semibold" style={{ color: YD.text.secondary }}>
                 {metricB.value}
               </span>
             </span>

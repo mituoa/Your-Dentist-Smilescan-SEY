@@ -1,43 +1,54 @@
 /**
- * Your Dentist — Dashboard presentation layer
- * Scoped under .yd-dashboard for Atlas / Praxisüberblick
+ * Your Dentist — Dashboard (Dribbble reference layout)
+ * Scoped under .yd-dashboard
  */
 
 .yd-dashboard {
-  --yd-dash-title: #0c1929;
-  --yd-dash-body: #3d5266;
-  --yd-dash-label: #6b849c;
-  --yd-dash-faint: #8ba3b8;
+  --yd-dash-title: #0a1628;
+  --yd-dash-body: #475569;
+  --yd-dash-label: #64748b;
+  --yd-dash-faint: #94a3b8;
 }
 
 .yd-dashboard .yd-dash-title {
   color: var(--yd-dash-title);
-  font-weight: 500;
-  letter-spacing: -0.028em;
-  line-height: 1.14;
+  font-weight: 600;
+  letter-spacing: -0.032em;
+  line-height: 1.12;
 }
 
 .yd-dashboard .yd-dash-subtitle {
   color: var(--yd-dash-body);
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 1.55;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.45;
 }
 
 .yd-dashboard .yd-dash-section {
   color: var(--yd-dash-title);
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.25;
+}
+
+.yd-dashboard .yd-dash-kpi-title {
+  color: var(--yd-dash-body);
+  letter-spacing: -0.01em;
+}
+
+.yd-dashboard .yd-dash-patient-name {
+  color: var(--yd-dash-title);
   letter-spacing: -0.02em;
-  line-height: 1.3;
 }
 
 .yd-dashboard .yd-dash-label {
   color: var(--yd-dash-label);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
-  line-height: 1.4;
+  letter-spacing: 0.03em;
+  line-height: 1.35;
+  text-transform: uppercase;
 }
 
 .yd-dashboard .yd-dash-meta {
@@ -51,43 +62,103 @@
 .yd-dashboard .yd-dash-kpi {
   color: var(--yd-dash-title);
   font-size: 1.75rem;
-  font-weight: 500;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: -0.04em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-.yd-dashboard .yd-dash-kpi-hero {
-  font-size: 2.125rem;
-  font-weight: 500;
-  letter-spacing: -0.04em;
-}
-
-@media (min-width: 768px) {
-  .yd-dashboard .yd-dash-kpi {
-    font-size: 1.875rem;
-  }
-
-  .yd-dashboard .yd-dash-kpi-hero {
-    font-size: 2.375rem;
-  }
-}
-
 .yd-dashboard .yd-dash-kpi-quiet {
   font-size: 1.625rem;
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   color: #1a3348;
 }
 
+.yd-dashboard .yd-dash-header-ref {
+  margin-bottom: 0.25rem;
+}
+
 .yd-dashboard .yd-dash-zone {
-  margin-bottom: 2.75rem;
+  margin-bottom: 1.375rem;
+}
+
+.yd-dashboard .yd-dash-zone--kpis {
+  margin-bottom: 1.25rem;
+}
+
+.yd-dashboard .yd-dash-zone--charts {
+  margin-bottom: 1.25rem;
+}
+
+.yd-dashboard .yd-dash-zone--lower {
+  margin-bottom: 0.5rem;
+}
+
+/* Reference card surfaces — white, 24px radius, subtle depth */
+.yd-dashboard .yd-dash-surface {
+  background: #ffffff !important;
+  border: 1px solid rgba(160, 178, 198, 0.38) !important;
+  border-radius: 24px !important;
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.08) !important;
+}
+
+.yd-dashboard .yd-dash-surface .pointer-events-none {
+  opacity: 0.28;
+}
+
+.yd-dashboard .yd-dash-kpi-card {
+  transition: box-shadow 280ms ease, transform 280ms ease;
+}
+
+@media (hover: hover) {
+  .yd-dashboard .yd-dash-kpi-card:hover {
+    box-shadow:
+      0 2px 4px rgba(15, 35, 58, 0.05),
+      0 14px 32px rgba(30, 91, 189, 0.11) !important;
+  }
+}
+
+/* Tighter top — reference sits higher in canvas */
+.yd-awaken-canvas:has(.yd-dashboard--reference) {
+  padding: 0.5rem 0.875rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .yd-awaken-canvas:has(.yd-dashboard--reference) {
+    padding: 0.625rem 1.25rem 1.5rem;
+  }
 }
 
 @media (min-width: 1024px) {
-  .yd-dashboard .yd-dash-zone {
-    margin-bottom: 3.25rem;
+  .yd-awaken-canvas:has(.yd-dashboard--reference) {
+    padding: 0.75rem 1.5rem 1.75rem;
   }
+}
+
+main:has(.yd-dashboard--reference) {
+  padding-top: 0.125rem !important;
+}
+
+@media (min-width: 768px) {
+  main:has(.yd-dashboard--reference) {
+    padding-top: 0.25rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+.yd-dashboard .yd-dash-search-input:hover {
+  border-color: rgba(47, 128, 237, 0.35) !important;
+  box-shadow: 0 2px 10px rgba(47, 128, 237, 0.08) !important;
+}
+
+.yd-dashboard .yd-dash-control {
+  background: #ffffff;
+  border: 1px solid rgba(180, 198, 218, 0.35);
+  box-shadow: 0 2px 8px rgba(15, 35, 58, 0.05);
 }
 
 .yd-dashboard .yd-dash-ambient-orb {
@@ -95,20 +166,21 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(64px);
+  opacity: 0.75;
 }
 
 .yd-dashboard .yd-dash-ambient-orb--a {
-  top: -8%;
-  right: 4%;
-  width: min(42vw, 420px);
-  height: min(42vw, 420px);
-  background: radial-gradient(circle, rgba(125, 211, 252, 0.14) 0%, transparent 68%);
+  top: -5%;
+  right: 6%;
+  width: min(36vw, 340px);
+  height: min(36vw, 340px);
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.11) 0%, transparent 68%);
 }
 
 .yd-dashboard .yd-dash-ambient-orb--b {
-  bottom: 12%;
-  left: -4%;
-  width: min(36vw, 360px);
-  height: min(36vw, 360px);
-  background: radial-gradient(circle, rgba(47, 128, 237, 0.1) 0%, transparent 70%);
+  bottom: 20%;
+  left: -3%;
+  width: min(30vw, 280px);
+  height: min(30vw, 280px);
+  background: radial-gradient(circle, rgba(47, 128, 237, 0.08) 0%, transparent 70%);
 }

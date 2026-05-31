@@ -16,6 +16,7 @@ import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
+import { greetingDoctorLabel } from "@/lib/format-doctor-display-name";
 import {
   getNewSubmissionsCount,
   getTotalUnseenSubmissions,
@@ -30,6 +31,13 @@ import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
 
+function buildSubtitle(readyCount: number | null): string {
+  if (readyCount === null) return "Überblick wird geladen…";
+  if (readyCount === 0) return "Keine Freigaben offen — Posteingang ist auf dem aktuellen Stand.";
+  if (readyCount === 1) return "1 Antwort benötigt Ihre Freigabe.";
+  return `${readyCount} Antworten benötigen Ihre Freigabe.`;
+}
+
 export default async function DashboardPage() {
   const user = await requireUser();
   const workspace = await requireApprovedWorkspace();
@@ -42,8 +50,6 @@ export default async function DashboardPage() {
   }
 
   const workspaceId = workspace.workspace_id;
-  // @ts-expect-error - workspaces joined
-  const workspaceName = workspace.workspaces?.name || "Praxis";
 
   const supabase = await createClient();
   const { data: profileData, error: profileError } = await supabase
@@ -58,6 +64,7 @@ export default async function DashboardPage() {
 
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "Team";
+  const doctorLabel = greetingDoctorLabel(displayName);
 
   const [
     newRes,
@@ -80,6 +87,10 @@ export default async function DashboardPage() {
   const newCount = newRes.ok ? newRes.count : null;
   const unseenCount = unseenRes.ok ? unseenRes.count : null;
   const totalCount = totalRes.ok ? totalRes.count : null;
+  const seenCount =
+    totalCount !== null && unseenCount !== null
+      ? Math.max(0, totalCount - unseenCount)
+      : null;
   const openTasks = tasksRes.ok ? tasksRes.tasks : null;
   const openTaskCount = openTasks?.length ?? 0;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
@@ -87,31 +98,16 @@ export default async function DashboardPage() {
   const inboxCount =
     inboxBadgeRes.ok && inboxBadgeRes.count > 0 ? inboxBadgeRes.count : undefined;
 
-  const seenCount =
-    totalCount !== null && unseenCount !== null
-      ? Math.max(0, totalCount - unseenCount)
-      : null;
-
   const dashboardOverviewIncomplete =
-    !!profileError ||
-    !newRes.ok ||
-    !unseenRes.ok ||
-    !totalRes.ok ||
-    !tasksRes.ok;
+    !!profileError || !newRes.ok || !unseenRes.ok || !totalRes.ok || !tasksRes.ok;
 
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Guten Morgen" : hour < 18 ? "Guten Tag" : "Guten Abend";
 
-  const todayLabel = new Date().toLocaleDateString("de-DE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-
   return (
     <div
-      className="yd-dashboard relative mx-auto w-full min-w-0 pb-10"
+      className="yd-dashboard yd-dashboard--reference relative mx-auto w-full min-w-0 pb-8"
       style={{ maxWidth: YD.space.contentMax }}
     >
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--a" aria-hidden />
@@ -120,10 +116,10 @@ export default async function DashboardPage() {
       <DashboardAmbientHeader>
         <DashboardHeader
           greeting={greeting}
-          displayName={displayName}
-          subtitle={`Ruhiger Überblick für ${workspaceName} — ${todayLabel}`}
+          displayName={doctorLabel}
+          subtitle={buildSubtitle(unseenCount)}
           email={user.email || ""}
-          workspaceName={workspaceName}
+          workspaceName="Praxis"
           avatarUrl={profileData?.photo_url ?? null}
           profileDisplayName={profileData?.display_name ?? null}
           inboxCount={inboxCount}
@@ -132,7 +128,7 @@ export default async function DashboardPage() {
 
       {dashboardOverviewIncomplete ? (
         <p
-          className="yd-dash-meta mb-8 max-w-2xl normal-case tracking-normal"
+          className="yd-dash-meta mb-3 max-w-2xl normal-case tracking-normal"
           style={{ color: YD.text.secondary }}
           role="status"
         >
@@ -148,122 +144,69 @@ export default async function DashboardPage() {
       ) : null}
 
       <DashboardAmbientKpis>
-        <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
-          <div className="min-w-0 lg:col-span-3 lg:pt-2">
-            <HcStatCard
-              tone="quiet"
-              title="Einsendungen gesamt"
-              value={totalCount === null ? "—" : totalCount}
-              icon={Users}
-              footnote={
-                newCount !== null && newCount > 0
-                  ? `${newCount} neu in 24 Stunden`
-                  : "Aktueller Bestand"
-              }
-              hoverPreview={
-                <p className="text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
-                  Gesamtbestand aller Fälle in der Praxis.
-                </p>
-              }
-              metricA={{
-                label: "Neu (24h)",
-                value: newCount === null ? "—" : newCount,
-              }}
-              metricB={{
-                label: "Ungelesen",
-                value: unseenCount === null ? "—" : unseenCount,
-              }}
-            />
-          </div>
-          <div className="min-w-0 lg:col-span-5 lg:-mt-2">
-            <HcStatCard
-              tone="primary"
-              hero
-              lift
-              glow
-              title="Ungelesene Fälle"
-              value={unseenCount === null ? "—" : unseenCount}
-              icon={ClipboardList}
-              footnote={
-                unseenCount === 0
-                  ? "Posteingang ist auf dem aktuellen Stand"
-                  : "Priorität für klinische Sichtung"
-              }
-              footnotePositive={unseenCount === 0}
-              hoverPreview={
-                <div className="space-y-1 text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
-                  <p>Offene Sichtung im Posteingang — ohne CRM-Druck, mit klarer Priorität.</p>
-                  {unseenCount !== null && unseenCount > 0 ? (
-                    <p>
-                      <span className="font-medium" style={{ color: YD.text.secondary }}>
-                        {unseenCount} Fälle
-                      </span>{" "}
-                      warten auf Erstprüfung.
-                    </p>
-                  ) : null}
-                </div>
-              }
-              metricA={{
-                label: "Gelesen",
-                value: seenCount === null ? "—" : seenCount,
-              }}
-              metricB={{
-                label: "Gesamt",
-                value: totalCount === null ? "—" : totalCount,
-              }}
-            />
-          </div>
-          <div className="min-w-0 sm:col-span-2 lg:col-span-4 lg:pt-2">
-            <HcStatCard
-              tone="quiet"
-              title="Offene Aufgaben"
-              value={openTasks === null ? "—" : openTaskCount}
-              icon={CalendarCheck}
-              footnote="Relay · Praxisworkflow"
-              footnotePositive={false}
-              hoverPreview={
-                <p className="text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
-                  Koordination im Team — Aufgaben ohne Projektmanagement-Optik.
-                </p>
-              }
-              metricA={{
-                label: "Relay",
-                value: openTaskCount,
-              }}
-              metricB={{
-                label: "Status",
-                value: openTasks === null ? "—" : "Offen",
-              }}
-            />
-          </div>
+        <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+          <HcStatCard
+            tone="primary"
+            title="Ungelesene Fälle"
+            value={unseenCount === null ? "—" : unseenCount}
+            icon={ClipboardList}
+            footnote={
+              unseenCount === 0
+                ? "Posteingang ist auf dem aktuellen Stand"
+                : "Priorität für Ihre Prüfung"
+            }
+            footnotePositive={unseenCount === 0}
+            metricA={{ label: "Gelesen", value: seenCount === null ? "—" : seenCount }}
+            metricB={{ label: "Gesamt", value: totalCount === null ? "—" : totalCount }}
+          />
+          <HcStatCard
+            tone="quiet"
+            title="Einsendungen gesamt"
+            value={totalCount === null ? "—" : totalCount}
+            icon={Users}
+            footnote={
+              newCount !== null && newCount > 0
+                ? `${newCount} neu in 24 Stunden`
+                : "Aktueller Bestand"
+            }
+            footnotePositive={newCount === 0}
+            metricA={{ label: "Neu (24h)", value: newCount === null ? "—" : newCount }}
+            metricB={{ label: "Ungelesen", value: unseenCount === null ? "—" : unseenCount }}
+          />
+          <HcStatCard
+            tone="quiet"
+            title="Offene Aufgaben"
+            value={openTasks === null ? "—" : openTaskCount}
+            icon={CalendarCheck}
+            footnote={openTaskCount > 0 ? "Relay · Praxisworkflow" : "Keine offenen Aufgaben"}
+            footnotePositive={openTaskCount === 0}
+            metricA={{ label: "Relay", value: openTaskCount }}
+            metricB={{
+              label: "Status",
+              value: openTasks === null ? "—" : openTaskCount > 0 ? "Offen" : "Aktuell",
+            }}
+          />
         </div>
       </DashboardAmbientKpis>
 
       <DashboardAmbientCharts>
-        <div className="yd-dash-zone grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-7">
+        <div className="yd-dash-zone yd-dash-zone--charts grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
           <div className="min-w-0 lg:col-span-8">
-            <HcAnalyticsBars
-              counts={weeklyCounts}
-              totalLabel="Letzte 7 Tage — Einsendungen"
-            />
+            <HcAnalyticsBars counts={weeklyCounts} totalLabel="Letzte 7 Tage" />
           </div>
-          <div className="min-w-0 lg:col-span-4 lg:pt-3">
-            <HcDistributionArc
-              unseen={unseenCount}
-              seen={seenCount}
-              total={totalCount}
-            />
+          <div className="min-w-0 lg:col-span-4">
+            <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
           </div>
         </div>
       </DashboardAmbientCharts>
 
       <DashboardAmbientLower>
-        <div className="grid min-w-0 grid-cols-1 gap-7 lg:grid-cols-12 lg:gap-8">
-          <div className="min-w-0 lg:col-span-8 lg:order-1">
-            <HcRecentTable rows={previewRows} />
-          </div>
-          <div className="min-w-0 lg:col-span-4 lg:order-2 lg:pt-4">
+        <div className="yd-dash-zone yd-dash-zone--lower grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+          <div className="min-w-0 lg:col-span-4">
             <HcMonthCalendar />
+          </div>
+          <div className="min-w-0 lg:col-span-8">
+            <HcRecentTable rows={previewRows} />
           </div>
         </div>
       </DashboardAmbientLower>

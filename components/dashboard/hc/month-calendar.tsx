@@ -40,12 +40,9 @@ export function HcMonthCalendar() {
     view.getFullYear() === today.getFullYear();
 
   return (
-    <HcCard tone="quiet" className="flex min-h-[300px] min-w-0 flex-col p-6">
-      <div className="mb-5">
-        <p className="yd-dash-section">Monatsübersicht</p>
-        <p className="yd-dash-meta mt-1.5 normal-case tracking-normal">
-          Termine & Einsendungen
-        </p>
+    <HcCard tone="quiet" ambient={false} className="yd-dash-surface flex min-h-[300px] min-w-0 flex-col p-5 md:p-6">
+      <div className="mb-4">
+        <p className="yd-dash-section">Monatliche Aktivität</p>
       </div>
 
       <div

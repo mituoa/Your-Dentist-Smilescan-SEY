@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 
 /**
  * Lesequeries für die **Arzt-Startseite** (`/dashboard`): Tagesüberblick, unbearbeitete Einsendungen,
@@ -85,6 +86,19 @@ export type SubmissionPreviewRow = {
   seen_at: string | null;
 };
 
+export type DashboardPriorityItem = {
+  id: string;
+  patient_name: string | null;
+  patient_notes: string | null;
+  photo_count: number;
+  seen_at: string | null;
+  created_at: string;
+};
+
+export type DashboardPriorityResult =
+  | { ok: true; items: DashboardPriorityItem[] }
+  | { ok: false };
+
 export type SubmissionPreviewResult =
   | { ok: true; rows: SubmissionPreviewRow[] }
   | { ok: false };
@@ -149,6 +163,70 @@ export const getWeeklySubmissionCounts = cache(
     });
 
     return { ok: true, counts };
+  }
+);
+
+/** Ungelesene Fälle zuerst, danach jüngste — für „Heute wichtig“ auf dem Dashboard. */
+export const getDashboardPriorityItems = cache(
+  async (workspaceId: string, limit = 5): Promise<DashboardPriorityResult> => {
+    if (!isDashboardWorkspaceId(workspaceId)) {
+      logDashboardDbFailure("dashboard_priority_invalid_workspace_id", null);
+      return { ok: false };
+    }
+    const supabase = await createClient();
+    const selectWithDraft =
+      "id, patient_name, patient_notes, seen_at, created_at, is_draft, submission_photos(count)";
+    const selectBase =
+      "id, patient_name, patient_notes, seen_at, created_at, submission_photos(count)";
+
+    const queryLimit = Math.min(Math.max(limit, 1), 8) * 2;
+    const orderOpts = {
+      seenOrder: { ascending: true, nullsFirst: true } as const,
+      createdOrder: { ascending: false } as const,
+    };
+
+    const first = await supabase
+      .from("submissions")
+      .select(selectWithDraft)
+      .eq("workspace_id", workspaceId)
+      .order("seen_at", orderOpts.seenOrder)
+      .order("created_at", orderOpts.createdOrder)
+      .limit(queryLimit);
+
+    const resolved =
+      first.error && isLikelyMissingDbColumnError(first.error)
+        ? await supabase
+            .from("submissions")
+            .select(selectBase)
+            .eq("workspace_id", workspaceId)
+            .order("seen_at", orderOpts.seenOrder)
+            .order("created_at", orderOpts.createdOrder)
+            .limit(queryLimit)
+        : first;
+
+    if (resolved.error) {
+      logDashboardDbFailure("dashboard_priority_failed", resolved.error);
+      return { ok: false };
+    }
+
+    const rows = (resolved.data || []) as Record<string, unknown>[];
+    const items: DashboardPriorityItem[] = [];
+
+    for (const row of rows) {
+      if (row.is_draft === true) continue;
+      items.push({
+        id: row.id as string,
+        patient_name: (row.patient_name as string | null) ?? null,
+        patient_notes: (row.patient_notes as string | null) ?? null,
+        photo_count:
+          (row.submission_photos as { count: number }[] | undefined)?.[0]?.count || 0,
+        seen_at: (row.seen_at as string | null) ?? null,
+        created_at: row.created_at as string,
+      });
+      if (items.length >= limit) break;
+    }
+
+    return { ok: true, items };
   }
 );
 

@@ -19,36 +19,21 @@ export function HcAnalyticsBars({ counts, totalLabel }: AnalyticsBarsProps) {
   return (
     <HcCard
       tone="primary"
-      className="flex min-h-[340px] min-w-0 flex-col overflow-hidden p-6 md:min-h-[360px] md:p-7"
-      hoverPreview={
-        <div className="space-y-1.5 text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
-          <p>
-            <span className="font-medium" style={{ color: YD.text.secondary }}>
-              Klinischer Verlauf:{" "}
-            </span>
-            Einsendungen der letzten 7 Tage
-          </p>
-          <p>
-            Höchster Tag:{" "}
-            <span className="font-medium" style={{ color: YD.text.primary }}>
-              {Math.max(...values)} Eingänge
-            </span>
-          </p>
-        </div>
-      }
+      ambient={false}
+      className="yd-dash-surface yd-dash-analytics-card flex min-h-[320px] min-w-0 flex-col overflow-hidden p-5 md:min-h-[340px] md:p-6"
     >
-      <div className="mb-7 flex items-start justify-between gap-4">
+      <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="yd-dash-section">Einsendungsverlauf</p>
-          <p className="yd-dash-kpi mt-3">{counts === null ? "—" : weekTotal}</p>
-          <p className="yd-dash-meta mt-2 normal-case tracking-normal">{totalLabel}</p>
+          <p className="yd-dash-kpi mt-2.5">{counts === null ? "—" : weekTotal}</p>
+          <p className="yd-dash-meta mt-1.5 normal-case tracking-normal">{totalLabel}</p>
         </div>
         <HcFilterChip icon={<Calendar className="h-3.5 w-3.5" strokeWidth={1.65} />}>
           7 Tage
         </HcFilterChip>
       </div>
 
-      <div className="relative flex min-h-[240px] min-w-0 flex-1 items-end justify-between gap-1 overflow-hidden rounded-[20px] px-1 pb-2 sm:gap-2.5">
+      <div className="relative flex min-h-[220px] min-w-0 flex-1 items-end justify-between gap-1 overflow-hidden rounded-[20px] px-1 pb-2 sm:gap-2.5">
         <div
           className="pointer-events-none absolute inset-0 rounded-[20px]"
           style={{

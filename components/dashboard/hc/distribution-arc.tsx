@@ -23,7 +23,7 @@ export function HcDistributionArc({ unseen, seen, total }: DistributionArcProps)
   const seenLen = Math.round(seenPct * ARC_LEN);
 
   return (
-    <HcCard tone="quiet" className="flex min-h-[340px] min-w-0 flex-col p-6 md:p-6">
+    <HcCard tone="quiet" ambient={false} className="yd-dash-surface yd-dash-analytics-card flex min-h-[320px] min-w-0 flex-col p-5 md:min-h-[340px] md:p-6">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
           <p className="yd-dash-section">Bearbeitungsstand</p>

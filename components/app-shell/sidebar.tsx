@@ -66,7 +66,7 @@ export function Sidebar({
         aria-hidden
       />
 
-      <div className="relative shrink-0 px-4 pb-2 pt-5 md:px-0 md:pt-7 md:pb-3">
+      <div className="relative shrink-0 px-4 pb-2 pt-4 md:px-0 md:pt-5 md:pb-2">
         <div className="flex items-center justify-between gap-2 md:hidden">
           <BrandMark compact />
           <button

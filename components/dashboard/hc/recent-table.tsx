@@ -27,7 +27,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
   const columns = ["", "Fall", "Patient", "Eingang", "Status"] as const;
 
   return (
-    <HcCard tone="primary" className="max-w-full overflow-hidden p-0">
+    <HcCard tone="primary" ambient={false} className="yd-dash-surface max-w-full overflow-hidden p-0">
       <div
         className="flex items-center justify-between gap-4 px-6 py-5 md:px-7"
         style={{
@@ -37,9 +37,6 @@ export function HcRecentTable({ rows }: RecentTableProps) {
       >
         <div>
           <p className="yd-dash-section">Aktuelle Einsendungen</p>
-          <p className="yd-dash-meta mt-1.5 normal-case tracking-normal">
-            Klinische Übersicht — schnell scannbar
-          </p>
         </div>
         <HcFilterChip icon={<Calendar className="h-3.5 w-3.5" strokeWidth={1.65} />}>
           Aktuell
@@ -126,10 +123,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                           {name.charAt(0).toUpperCase()}
                         </span>
                         <span className="min-w-0">
-                          <span
-                            className="block truncate text-[14px] font-medium leading-snug"
-                            style={{ color: YD.text.primary }}
-                          >
+                          <span className="yd-dash-patient-name block truncate text-[14px] font-semibold leading-snug">
                             {name}
                           </span>
                           <span
