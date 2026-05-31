@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 
 import { getAppBaseUrl } from "@/lib/env";
 import {
@@ -21,13 +21,21 @@ import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 
 import "./globals.css";
 
-/** Inter Variable — single clinical OS sans (400–600 via font-variation-settings) */
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-dm-sans",
+  weight: ["400", "500"],
   display: "swap",
   preload: true,
-  adjustFontFallback: true,
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["300", "400", "500"],
+  style: ["normal", "italic"],
+  display: "swap",
+  preload: false,
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -147,7 +155,7 @@ export default async function RootLayout({
     <html
       lang="de"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} ${themeClass}`.trim()}
+      className={`${dmSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} ${themeClass}`.trim()}
     >
       <body>{children}</body>
     </html>

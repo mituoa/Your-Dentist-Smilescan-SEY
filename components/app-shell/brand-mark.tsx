@@ -12,7 +12,7 @@ interface BrandMarkProps {
 }
 
 /**
- * Sidebar: Medical-Blue-Mark + „Your Dentist“ (workspace sans wie Lockup).
+ * Sidebar: Medical-Blue-Mark + „Your Dentist“ (Fraunces / font-serif wie Lockup).
  */
 export function BrandMark({ compact = false }: BrandMarkProps) {
   return (

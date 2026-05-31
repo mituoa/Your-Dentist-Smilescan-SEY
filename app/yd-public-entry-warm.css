@@ -356,7 +356,7 @@
 }
 
 .yd-entry-pricing-price-value {
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.375rem;
   font-weight: 500;
   color: #0c1929;
@@ -468,7 +468,7 @@
 }
 
 .yd-public-entry-title {
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.5rem;
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -584,7 +584,7 @@
 
 .yd-ecosystem-panel-title {
   margin: 0.75rem 0 0;
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.25rem;
   font-weight: 500;
   letter-spacing: -0.02em;

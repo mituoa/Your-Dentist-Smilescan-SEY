@@ -89,22 +89,21 @@
   padding-bottom: 1rem;
 }
 
-/* —— Typography (clinical OS, breathable) —— */
+/* —— Typography (editorial, breathable) —— */
 .yd-clinical-eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   color: #4a6278;
-  line-height: 1.35;
+  line-height: 1.5;
 }
 
 .yd-clinical-display {
   margin-top: 0.75rem;
-  font-family: var(--yd-font-sans);
-  font-size: clamp(2.125rem, 4.2vw, 3.5rem);
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(2.25rem, 7vw, 3.75rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
   line-height: 1.05;
   color: #0c1929;
   text-wrap: balance;
@@ -125,26 +124,26 @@
 }
 
 .yd-clinical-display em {
-  font-style: normal;
-  font-weight: 600;
-  color: inherit;
+  font-style: italic;
+  font-weight: 400;
+  color: #3d6d8c;
 }
 
 .yd-clinical-lead {
   margin-top: 1.25rem;
   max-width: 34rem;
-  font-size: clamp(1rem, 1.6vw, 1.125rem);
-  line-height: 1.55;
-  color: #3d5266;
-  letter-spacing: 0;
+  font-size: clamp(1.0625rem, 2.2vw, 1.1875rem);
+  line-height: 1.75;
+  color: #334a5e;
+  letter-spacing: 0.01em;
 }
 
 .yd-clinical-act-title {
-  font-family: var(--yd-font-sans);
-  font-size: clamp(1.75rem, 2.8vw, 2.75rem);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.125rem);
+  font-weight: 500;
+  letter-spacing: -0.032em;
+  line-height: 1.12;
   color: #0c1929;
 }
 
@@ -834,7 +833,7 @@
 }
 
 .yd-practice-world-spine-num {
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: 0.625rem;
   color: rgba(255, 252, 248, 0.55);
 }
@@ -886,7 +885,7 @@
 }
 
 .yd-clinical-os-band-lead {
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: clamp(1.125rem, 2.5vw, 1.375rem);
   font-weight: 400;
   line-height: 1.45;
@@ -1081,7 +1080,7 @@
 }
 
 .yd-clinical-flow-num {
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.25rem;
   color: rgba(61, 109, 140, 0.5);
 }
@@ -1136,7 +1135,7 @@
 }
 
 .yd-clinical-module-name {
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1rem;
   font-weight: 500;
   color: #1a4f9c;

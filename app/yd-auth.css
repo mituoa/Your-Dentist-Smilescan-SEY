@@ -15,7 +15,7 @@
   max-height: 100dvh;
   width: 100%;
   overflow: hidden;
-  font-family: var(--yd-font-sans);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
   color: #0c1929;
 }
 
@@ -226,11 +226,10 @@
 
 /* —— Typography —— */
 .yd-auth-title {
-  font-family: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #0c1929;
   font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: -0.028em;
+  font-weight: 500;
+  letter-spacing: -0.032em;
   line-height: 1.2;
   text-align: center;
 }
@@ -282,18 +281,16 @@
 }
 
 .yd-auth-input:hover:not(:disabled) {
-  border-color: rgba(180, 198, 218, 0.5);
-  box-shadow:
-    inset 0 1px 2px rgba(15, 35, 58, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.6);
+  border-color: rgba(180, 198, 218, 0.55);
+  box-shadow: inset 0 1px 3px rgba(15, 35, 58, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.65),
+    0 4px 18px rgba(47, 128, 237, 0.07);
 }
 
 .yd-auth-input:focus {
   outline: none;
-  border-color: rgba(72, 118, 168, 0.32);
-  box-shadow:
-    inset 0 1px 2px rgba(15, 35, 58, 0.02),
-    0 0 0 3px rgba(72, 118, 168, 0.07);
+  border-color: rgba(47, 128, 237, 0.32);
+  box-shadow: inset 0 1px 2px rgba(15, 35, 58, 0.03), 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 0 0 4px rgba(47, 128, 237, 0.1), 0 8px 32px rgba(47, 128, 237, 0.12);
 }
 
 .yd-auth-input:disabled {
@@ -643,24 +640,23 @@
 }
 
 .yd-clinical-entry--login .yd-public-entry-title--login {
-  font-family: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 1.4375rem;
-  font-weight: 600;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.375rem;
+  font-weight: 500;
   letter-spacing: -0.028em;
-  line-height: 1.2;
-  color: #081422;
-  margin-bottom: 0.4375rem;
+  line-height: 1.22;
+  color: #0c1929;
+  margin-bottom: 0.5rem;
 }
 
 .yd-clinical-entry--login .yd-public-entry-lead--login {
   margin: 0 auto;
   max-width: 21rem;
-  font-family: var(--yd-font-sans);
-  font-size: 0.75rem;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.8125rem;
   font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
-  color: #7b8fa3;
+  line-height: 1.55;
+  color: #64748b;
 }
 
 .yd-clinical-entry--login .yd-auth-form-stack {
@@ -670,27 +666,19 @@
 .yd-public-os--focus .yd-clinical-entry--login .yd-auth-input {
   height: 2.75rem;
   border-radius: 14px;
-  border-color: rgba(180, 198, 218, 0.34);
-  background: rgba(255, 255, 255, 0.92);
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: #3d4f63;
+  border-color: rgba(180, 198, 218, 0.38);
+  background: rgba(255, 255, 255, 0.94);
+  font-size: 0.9375rem;
   box-shadow:
-    inset 0 1px 2px rgba(15, 35, 58, 0.02),
-    0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.yd-public-os--focus .yd-clinical-entry--login .yd-auth-input::placeholder {
-  color: #94a8ba;
-  opacity: 1;
+    inset 0 1px 2px rgba(15, 35, 58, 0.03),
+    0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .yd-public-os--focus .yd-clinical-entry--login .yd-auth-input:focus {
-  border-color: rgba(72, 118, 168, 0.32);
-  color: #2a3d52;
+  border-color: rgba(47, 128, 237, 0.28);
   box-shadow:
     inset 0 1px 2px rgba(15, 35, 58, 0.02),
-    0 0 0 3px rgba(72, 118, 168, 0.07);
+    0 0 0 3px rgba(47, 128, 237, 0.08);
 }
 
 .yd-public-os--focus .yd-clinical-entry--login .yd-auth-btn-primary {
@@ -704,9 +692,6 @@
   box-shadow:
     0 1px 2px rgba(30, 58, 95, 0.05),
     0 4px 14px rgba(30, 74, 122, 0.1);
-  transition:
-    box-shadow 520ms var(--yd-auth-ease-spatial),
-    filter 520ms var(--yd-auth-ease-spatial);
 }
 
 .yd-public-os--focus .yd-clinical-entry--login .yd-auth-btn-primary:hover:not(:disabled) {
@@ -757,37 +742,12 @@
 
 .yd-clinical-entry--login .yd-auth-login-trust {
   margin: 0.5rem 0 0;
-  font-family: var(--yd-font-sans);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: 0.02em;
   color: #8fa3b5;
-}
-
-.yd-clinical-entry--login .yd-auth-back-to-login {
-  margin-top: 1.375rem;
-  text-align: center;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.45;
-  color: #64748b;
-}
-
-.yd-clinical-entry--login .yd-auth-back-to-login a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.yd-clinical-entry--login .yd-auth-back-to-login a:hover {
-  color: #3d5266;
-}
-
-.yd-clinical-entry--login .yd-auth-back-to-login a:focus-visible {
-  outline: 2px solid rgba(72, 118, 168, 0.35);
-  outline-offset: 3px;
-  border-radius: 4px;
 }
 
 .yd-clinical-entry--login .yd-auth-legal-minimal {
@@ -1027,10 +987,6 @@
     align-items: flex-start;
     padding-top: max(0.5rem, env(safe-area-inset-top));
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-  }
-
-  .yd-clinical-entry--login .yd-clinical-entry-panel--login-entrance {
-    margin-top: 1rem;
   }
 }
 
@@ -1398,10 +1354,9 @@
 .yd-auth-register-title {
   margin-bottom: 0.5rem;
   text-align: center;
-  font-family: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.028em;
+  font-weight: 500;
+  letter-spacing: -0.03em;
   color: #0c1929;
 }
 
@@ -1442,10 +1397,9 @@
 
 .yd-register-page-title {
   margin-top: 1.25rem;
-  font-family: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.028em;
+  font-weight: 500;
+  letter-spacing: -0.03em;
   color: #0c1929;
 }
 
@@ -1482,10 +1436,9 @@
 
 .yd-register-pricing-title {
   margin-top: 0.5rem;
-  font-family: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.024em;
+  font-weight: 500;
+  letter-spacing: -0.025em;
   color: #0c1929;
 }
 

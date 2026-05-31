@@ -73,7 +73,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert prose-lg max-w-none focus:outline-none min-h-[60vh] font-sans",
+          "prose prose-invert prose-lg max-w-none focus:outline-none min-h-[60vh] font-serif",
       },
     },
     onUpdate: ({ editor: ed }: { editor: { getHTML: () => string } }) => {
@@ -207,7 +207,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Titel"
             maxLength={JOURNAL_LIMITS.title}
-            className="w-full border-none bg-transparent p-0 font-sans text-2xl font-semibold leading-tight tracking-[-0.025em] text-slate-900 outline-none placeholder:text-slate-300 md:text-[1.75rem] dark:text-white dark:placeholder:text-slate-700"
+            className="w-full border-none bg-transparent p-0 font-serif text-4xl font-light leading-tight tracking-tight text-slate-900 outline-none placeholder:text-slate-300 md:text-5xl dark:text-white dark:placeholder:text-slate-700"
           />
           {title.length > JOURNAL_LIMITS.title * 0.8 && (
             <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
@@ -258,24 +258,23 @@ export function JournalComposer({ article }: JournalComposerProps) {
           color: rgb(71 85 105);
         }
         .composer-content .ProseMirror h2 {
-          font-family: var(--font-sans), system-ui, sans-serif;
-          font-size: 1.5rem;
-          font-weight: 600;
+          font-family: Fraunces, serif;
+          font-size: 2.25rem;
+          font-weight: 300;
           margin-top: 2.5rem;
           margin-bottom: 1rem;
-          letter-spacing: -0.025em;
-        }
-        .composer-content .ProseMirror h3 {
-          font-family: var(--font-sans), system-ui, sans-serif;
-          font-size: 1.25rem;
-          font-weight: 600;
-          margin-top: 2rem;
-          margin-bottom: 0.75rem;
           letter-spacing: -0.02em;
         }
+        .composer-content .ProseMirror h3 {
+          font-family: Fraunces, serif;
+          font-size: 1.75rem;
+          font-weight: 300;
+          margin-top: 2rem;
+          margin-bottom: 0.75rem;
+        }
         .composer-content .ProseMirror p {
-          font-size: var(--yd-text-body-lg);
-          line-height: var(--yd-leading-body);
+          font-size: 1.25rem;
+          line-height: 1.7;
           margin-bottom: 1.5rem;
         }
         .composer-content .ProseMirror blockquote {

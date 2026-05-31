@@ -155,10 +155,14 @@ export default async function PublicArticlePage({ params }: ArticlePageProps) {
       </div>
 
       <style>{`
-        .prose-article { font-family: var(--font-sans), system-ui, sans-serif; color: #1A1A1A; }
-        .prose-article h2 { font-size: 1.5rem; font-weight: 600; margin: 3rem 0 1rem; letter-spacing: -0.025em; line-height: 1.25; }
-        .prose-article h3 { font-size: 1.25rem; font-weight: 600; margin: 2.5rem 0 0.75rem; letter-spacing: -0.02em; }
-        .prose-article p { font-size: 1.0625rem; line-height: 1.55; margin-bottom: 1.75rem; }
+        .prose-article { font-family: Fraunces, serif; color: #1A1A1A; }
+        .prose-article h2 { font-size: 2.25rem; font-weight: 300; margin: 3rem 0 1rem; letter-spacing: -0.02em; line-height: 1.1; }
+        .prose-article h3 { font-size: 1.75rem; font-weight: 300; margin: 2.5rem 0 0.75rem; }
+        .prose-article p { font-size: 1.25rem; line-height: 1.7; margin-bottom: 1.75rem; }
+        .prose-article p:first-of-type::first-letter {
+          font-size: 5rem; line-height: 0.9; float: left;
+          padding-right: 0.75rem; padding-top: 0.5rem; font-weight: 300;
+        }
         .prose-article blockquote {
           border-left: 2px solid #97958C;
           padding-left: 1.5rem; font-style: italic;

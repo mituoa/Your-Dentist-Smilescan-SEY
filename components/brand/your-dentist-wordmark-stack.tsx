@@ -7,7 +7,7 @@ type YourDentistWordmarkStackProps = {
 };
 
 /**
- * Vertikales Wordmark unter dem Mark — gleiche Typo wie YourDentistBrandLockup (workspace sans).
+ * Vertikales Wordmark unter dem Mark — gleiche Typo wie YourDentistBrandLockup (Fraunces / font-serif).
  */
 export function YourDentistWordmarkStack({
   className,

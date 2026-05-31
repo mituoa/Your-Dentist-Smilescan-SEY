@@ -3,16 +3,12 @@
  */
 
 .yd-workspace {
-  font-family: var(--yd-font-sans);
-  font-size: var(--yd-text-body);
-  line-height: var(--yd-leading-body);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
   color: var(--yd-text-primary, #0c1929);
 }
 
 .yd-workspace .yd-font-brand {
-  font-family: var(--yd-font-sans);
-  font-weight: 600;
-  letter-spacing: var(--yd-tracking-headline);
+  font-family: var(--font-fraunces), Georgia, serif;
 }
 
 /* Ambient sidebar glow — slow breathing light, not UI pulse */

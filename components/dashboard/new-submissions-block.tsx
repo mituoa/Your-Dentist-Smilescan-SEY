@@ -14,7 +14,7 @@ export function NewSubmissionsBlock({
       label="Neue Einsendungen"
       link={{ href: "/inbox", text: "Zur Inbox" }}
     >
-      <div className="font-sans text-6xl font-semibold tracking-[-0.03em] text-text-primary leading-none">
+      <div className="font-serif text-6xl font-light text-text-primary leading-none">
         {newCount}
       </div>
       <p className="text-sm text-text-secondary mt-3">
