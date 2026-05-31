@@ -9,16 +9,24 @@ import { useFormStatus } from "react-dom";
 
 import { RegisterFormBackButton } from "@/components/auth/register-form-back-button";
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
-import { ResendSignupSubmitButton } from "@/components/auth/resend-signup-submit-button";
+import { RegisterLicenseSideCard } from "@/components/auth/register-license-side-card";
+import { RegisterPasswordGuidance } from "@/components/auth/register-password-guidance";
+import { RegisterSuccessWaiting } from "@/components/auth/register-success-waiting";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { REGISTER_CONTACT_ROLES } from "@/lib/auth/register-contact-roles";
+import {
+  allPasswordRequirementsMet,
+  emailLooksCompleteForTypoHint,
+  isRegisterEmailFormatValid,
+  normalizeRegisterEmail,
+  suggestRegisterEmailFix,
+} from "@/lib/auth/register-validation";
 import {
   REGISTER_PLANS,
   coerceRegisterPlan,
   type RegisterPlanId,
 } from "@/lib/auth/register-plans";
-import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
 type Plan = RegisterPlanId;
@@ -219,29 +227,12 @@ export function RegisterClient(props: {
     prevEmail: string;
     appliedSuggested: string;
   } | null>(null);
+  const [emailBlurred, setEmailBlurred] = React.useState(false);
+  const [emailSubmitAttempted, setEmailSubmitAttempted] = React.useState(false);
+  const [step2SubmitAttempted, setStep2SubmitAttempted] = React.useState(false);
 
-  const [resendCooldown, setResendCooldown] = React.useState(0);
-  const [successEmail, setSuccessEmail] = React.useState(props.prefilledEmail ?? "");
-
-  const getPasswordStrength = (pwd: string): { strength: number; label: string; color: string } => {
-    let strength = 0;
-    if (pwd.length >= 8) strength++;
-    if (pwd.length >= 12) strength++;
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++;
-    if (/[0-9]/.test(pwd)) strength++;
-    if (/[^a-zA-Z0-9]/.test(pwd)) strength++;
-
-    if (strength <= 1) return { strength: 1, label: "Ausbaufähig", color: "#B45309" };
-    if (strength <= 3) return { strength: 2, label: "Solide", color: "#CA8A04" };
-    return { strength: 3, label: "Stark", color: "#047857" };
-  };
-
-  const passwordStrength = regPassword ? getPasswordStrength(regPassword) : null;
-
-  /** Trim + lowercase only; used for validation/submit — display state stays as typed. */
-  const normalizeEmail = (v: string) => v.trim().toLowerCase();
-
-  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(v));
+  const [frontDocStatus, setFrontDocStatus] = React.useState<"idle" | "checking" | "success" | "warn">("idle");
+  const [backDocStatus, setBackDocStatus] = React.useState<"idle" | "checking" | "success" | "warn">("idle");
 
   const passwordsMatch = React.useMemo(
     () => regPassword.length > 0 && regPassword === regPasswordConfirm,
@@ -288,108 +279,17 @@ export function RegisterClient(props: {
     return { tone: "warn" as const, text: "Bitte Nummer genau wie auf dem Ausweis eingeben (Format prüfen)." };
   }, [regLicense]);
 
-  /** Domain looks complete (user past „local@domain.tld“) — avoids hints while typing only the local part. */
-  const emailLooksCompleteForTypoHint = (raw: string) => {
-    const t = raw.trim();
-    const at = t.lastIndexOf("@");
-    if (at <= 0 || at >= t.length - 1) return false;
-    const domain = t.slice(at + 1);
-    if (!domain.includes(".")) return false;
-    const lastDot = domain.lastIndexOf(".");
-    return lastDot >= 1 && lastDot < domain.length - 2;
-  };
-
-  const suggestEmailFix = (raw: string): { original: string; suggested: string } | null => {
-    const original = raw.trim();
-    const value = normalizeEmail(original);
-    const at = value.lastIndexOf("@");
-    if (at <= 0) return null;
-    const local = value.slice(0, at);
-    const domain = value.slice(at + 1);
-    if (!local || !domain || !domain.includes(".")) return null;
-
-    const domainFixes: Record<string, string> = {
-      "gmial.com": "gmail.com",
-      "gmal.com": "gmail.com",
-      "gnail.com": "gmail.com",
-      "gmail.con": "gmail.com",
-      "gmai.com": "gmail.com",
-      "mgail.com": "gmail.com",
-      "outlok.com": "outlook.com",
-      "outllok.com": "outlook.com",
-      "outlook.con": "outlook.com",
-      "hotnail.com": "hotmail.com",
-      "hotmai.com": "hotmail.com",
-      "icloud.con": "icloud.com",
-      "icoud.com": "icloud.com",
-      "yaho.com": "yahoo.com",
-      "yahoo.con": "yahoo.com",
-      "gmx.con": "gmx.com",
-      "web.dee": "web.de",
-      "t-online.dee": "t-online.de",
-    };
-
-    // 1) Known hardcoded typos
-    const fixedDomainDirect = domainFixes[domain];
-    if (fixedDomainDirect) {
-      const suggested = `${local}@${fixedDomainDirect}`;
-      if (suggested === value) return null;
-      return { original, suggested };
+  const phoneFormatHint = React.useMemo(() => {
+    const digits = regPhone.replace(/\D/g, "");
+    if (!regPhone.trim()) return null;
+    if (digits.length >= 6 && digits.length <= 15) {
+      return { tone: "ok" as const, text: "Format wirkt plausibel — wir melden uns bei Bedarf unter dieser Nummer." };
     }
-
-    // 2) Near-miss suggestions for common providers (edit distance <= 2).
-    // Keeps it conservative to avoid false positives.
-    const commonDomains = [
-      "gmail.com",
-      "outlook.com",
-      "hotmail.com",
-      "icloud.com",
-      "yahoo.com",
-      "gmx.com",
-      "web.de",
-      "t-online.de",
-    ] as const;
-
-    const levenshtein = (a: string, b: string) => {
-      if (a === b) return 0;
-      const m = a.length;
-      const n = b.length;
-      if (m === 0) return n;
-      if (n === 0) return m;
-
-      const dp = new Array<number>(n + 1);
-      for (let j = 0; j <= n; j++) dp[j] = j;
-
-      for (let i = 1; i <= m; i++) {
-        let prev = dp[0]!;
-        dp[0] = i;
-        for (let j = 1; j <= n; j++) {
-          const temp = dp[j]!;
-          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-          dp[j] = Math.min(
-            dp[j]! + 1, // deletion
-            dp[j - 1]! + 1, // insertion
-            prev + cost // substitution
-          );
-          prev = temp;
-        }
-      }
-      return dp[n]!;
+    return {
+      tone: "warn" as const,
+      text: "Bitte Vorwahl und Nummer prüfen (z. B. +49 …). Sie können trotzdem fortfahren.",
     };
-
-    let best: { domain: string; dist: number } | null = null;
-    for (const d of commonDomains) {
-      const dist = levenshtein(domain, d);
-      if (dist === 0) return null;
-      if (dist <= 2 && (!best || dist < best.dist)) {
-        best = { domain: d, dist };
-      }
-    }
-
-    if (!best) return null;
-    const suggested = `${local}@${best.domain}`;
-    return { original, suggested };
-  };
+  }, [regPhone]);
 
   React.useEffect(() => {
     if (registrationStep !== 1) return;
@@ -404,7 +304,7 @@ export function RegisterClient(props: {
         setEmailTypoSuggestion(null);
         return;
       }
-      const suggestion = suggestEmailFix(email);
+      const suggestion = suggestRegisterEmailFix(email);
       setEmailTypoSuggestion(suggestion);
     }, 400);
 
@@ -417,38 +317,29 @@ export function RegisterClient(props: {
     return () => window.clearTimeout(t);
   }, [emailTypoUndo]);
 
-  React.useEffect(() => {
-    if (!props.success) return;
-    setResendCooldown(30);
-  }, [props.success]);
-
-  React.useEffect(() => {
-    if (!props.success) return;
-    setSuccessEmail(props.prefilledEmail ?? "");
-  }, [props.prefilledEmail, props.success]);
-
-  React.useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const t = window.setTimeout(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
-    return () => window.clearTimeout(t);
-  }, [resendCooldown]);
+  const showEmailValidationHints = emailBlurred || emailSubmitAttempted;
 
   React.useEffect(() => {
     if (registrationStep !== 1) return;
-    const email = normalizeEmail(regEmail);
+    const email = normalizeRegisterEmail(regEmail);
     if (!email) {
       setEmailCheckStatus("idle");
       setEmailCheckMessage("");
       return;
     }
-    if (!isValidEmail(email)) {
+    if (!isRegisterEmailFormatValid(email)) {
+      if (!showEmailValidationHints) {
+        setEmailCheckStatus("idle");
+        setEmailCheckMessage("");
+        return;
+      }
       setEmailCheckStatus("invalid");
-      setEmailCheckMessage("Bitte eine gültige E‑Mail-Adresse eingeben.");
+      setEmailCheckMessage("Bitte prüfen Sie die E-Mail-Adresse.");
       return;
     }
 
     setEmailCheckStatus("checking");
-    setEmailCheckMessage("Prüfe Eingabe…");
+    setEmailCheckMessage("");
 
     const t = window.setTimeout(async () => {
       try {
@@ -472,15 +363,15 @@ export function RegisterClient(props: {
         }
 
         setEmailCheckStatus("ready");
-        setEmailCheckMessage("Formal gültig — die endgültige Prüfung erfolgt beim Fortfahren.");
+        setEmailCheckMessage("");
       } catch {
         setEmailCheckStatus("error");
-        setEmailCheckMessage("Serverprüfung gerade nicht möglich — Sie können trotzdem fortfahren.");
+        setEmailCheckMessage("");
       }
     }, 450);
 
     return () => window.clearTimeout(t);
-  }, [regEmail, registrationStep]);
+  }, [regEmail, registrationStep, showEmailValidationHints]);
 
   React.useEffect(() => {
     try {
@@ -514,9 +405,33 @@ export function RegisterClient(props: {
     }
   };
 
+  const applyDocQualityResult = (side: "front" | "back", ok: boolean, hint: string) => {
+    if (side === "front") {
+      setFrontQualityOk(ok);
+      setFrontQualityHint(hint);
+      setFrontDocStatus(ok ? "success" : "warn");
+    } else {
+      setBackQualityOk(ok);
+      setBackQualityHint(hint);
+      setBackDocStatus(ok ? "success" : "warn");
+    }
+  };
+
+  const runSideDocCheck = async (file: File, side: "front" | "back") => {
+    if (side === "front") setFrontDocStatus("checking");
+    else setBackDocStatus("checking");
+    const result = await analyzeImageQuality(file);
+    applyDocQualityResult(side, result.ok, result.hint);
+  };
+
   const ingestLicenseFile = (file: File, side: "front" | "back") => {
-    if (side === "front") setLicenseFrontFile(file);
-    else setLicenseBackFile(file);
+    if (side === "front") {
+      setLicenseFrontFile(file);
+      setLicenseFrontStoragePath("");
+    } else {
+      setLicenseBackFile(file);
+      setLicenseBackStoragePath("");
+    }
 
     if (file.type.startsWith("image/")) {
       const reader = new FileReader();
@@ -528,15 +443,31 @@ export function RegisterClient(props: {
     } else {
       if (side === "front") setFrontPreview(null);
       else setBackPreview(null);
+      applyDocQualityResult(side, true, "PDF wird bei der Prüfung gesondert betrachtet.");
+      return;
     }
+
+    void runSideDocCheck(file, side);
   };
 
   const handleFrontFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) ingestLicenseFile(e.target.files[0], "front");
+    if (e.target.files?.[0]) ingestLicenseFile(e.target.files[0], "front");
+    e.target.value = "";
   };
 
   const handleBackFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) ingestLicenseFile(e.target.files[0], "back");
+    if (e.target.files?.[0]) ingestLicenseFile(e.target.files[0], "back");
+    e.target.value = "";
+  };
+
+  const handleFrontCameraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) ingestLicenseFile(e.target.files[0], "front");
+    e.target.value = "";
+  };
+
+  const handleBackCameraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) ingestLicenseFile(e.target.files[0], "back");
+    e.target.value = "";
   };
 
   const analyzeImageQuality = async (file: File): Promise<{ ok: boolean; hint: string }> => {
@@ -612,26 +543,27 @@ export function RegisterClient(props: {
     if (norm < 18) {
       return {
         ok: false,
-        hint: "Das Bild könnte klarer sein. Für eine schnellere Prüfung empfehlen wir eine ruhigere Aufnahme.",
+        hint: "Das Bild scheint unscharf zu sein. Bitte erneut aufnehmen.",
       };
     }
 
-    return { ok: true, hint: "Lesbar." };
+    return { ok: true, hint: "Dokument gut lesbar" };
   };
 
   const onStep1Submit = (e: FormEvent) => {
     e.preventDefault();
+    setEmailSubmitAttempted(true);
     setPasswordPairError("");
-    const email = normalizeEmail(regEmail);
+    const email = normalizeRegisterEmail(regEmail);
     if (!regName.trim()) return;
     if (!regRole) return;
-    if (!email || !isValidEmail(email)) return;
-    if (regPassword.length < 8) {
-      setPasswordPairError("Passwort muss mindestens 8 Zeichen haben.");
+    if (!email || !isRegisterEmailFormatValid(email)) return;
+    if (!allPasswordRequirementsMet(regPassword)) {
+      setPasswordPairError("Bitte erfüllen Sie alle Passwort-Anforderungen.");
       return;
     }
     if (!passwordsMatch) {
-      setPasswordPairError("Die Passwörter stimmen nicht überein.");
+      setPasswordPairError("Die Passwörter stimmen noch nicht überein.");
       return;
     }
     if (emailCheckStatus === "checking") return;
@@ -640,6 +572,7 @@ export function RegisterClient(props: {
 
   const onStep2Submit = (e: FormEvent) => {
     e.preventDefault();
+    setStep2SubmitAttempted(true);
     if (!regPractice.trim()) return;
     if (!regLicense.trim()) return;
     goToStep(3);
@@ -766,109 +699,14 @@ export function RegisterClient(props: {
 
             <div className="yd-auth-register-body">
               {props.success ? (
-                <div className="py-6 text-center" aria-labelledby="yd-register-success-title">
-                  <h3 id="yd-register-success-title" className="yd-auth-register-title">
-                    Anmeldung eingegangen
-                  </h3>
-                  {props.queryError ? (
-                    <p
-                      className="yd-auth-alert yd-auth-alert--warning mx-auto mb-4 max-w-md scroll-mt-6 text-left"
-                      role="alert"
-                    >
-                      {userFacingAuthError(
-                        (() => {
-                          try {
-                            return decodeURIComponent(props.queryError);
-                          } catch {
-                            return props.queryError;
-                          }
-                        })()
-                      )}
-                    </p>
-                  ) : null}
-                  {props.resent ? (
-                    <p
-                      className="yd-auth-alert yd-auth-alert--success mx-auto mb-4 max-w-md scroll-mt-6 text-left"
-                      role="status"
-                    >
-                      Sofern ein passendes Konto existiert, wurde die Bestätigungs-E-Mail erneut versendet. Bitte
-                      prüfen Sie auch den Spam-Ordner.
-                    </p>
-                  ) : null}
-                  <p className="yd-auth-register-subtitle mb-5 text-left mx-auto max-w-md">
-                    Ihr Zugang wird geprüft. Zuerst bestätigen Sie bitte Ihre E-Mail-Adresse — danach prüfen wir
-                    Praxisangaben und Nachweise. Die Freischaltung des geschützten Praxisbereichs erfolgt per E-Mail,
-                    sobald die Prüfung abgeschlossen ist.
-                  </p>
-
-                  <div className="yd-auth-checklist mx-auto mb-6 max-w-md text-left">
-                    <p className="yd-auth-checklist-title">Nächste Schritte</p>
-                    <ol className="mt-3 list-decimal space-y-2 pl-4 text-[13px] leading-relaxed text-gray-700">
-                      <li>Bestätigungs-E-Mail öffnen und Adresse verifizieren</li>
-                      <li>Posteingang und Spam-Ordner prüfen</li>
-                      <li>Auf Freischaltung warten — wir melden uns per E-Mail</li>
-                    </ol>
-                    <div className="mt-5">
-                      <label htmlFor="reg-success-email" className="mb-2 block text-[12px] font-semibold text-gray-600">
-                        E-Mail für erneuten Versand
-                      </label>
-                      <input
-                        id="reg-success-email"
-                        type="email"
-                        value={successEmail}
-                        onChange={(e) => setSuccessEmail(e.target.value)}
-                        autoComplete="email"
-                        className="yd-auth-input h-[48px] scroll-mt-8"
-                        aria-describedby="reg-success-email-hint"
-                      />
-                      <p id="reg-success-email-hint" className="mt-2 text-[12px] text-gray-500">
-                        Nur falls die Bestätigungs-E-Mail nicht ankommt — Adresse korrigieren und erneut anfordern.
-                      </p>
-                      {successEmail.trim() && !isValidEmail(successEmail) ? (
-                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
-                          Bitte eine gültige E-Mail-Adresse eingeben.
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <form action={props.resendConfirmationAction} className="mx-auto mb-4 max-w-md">
-                    <input type="hidden" name="resend_context" value="register_success" />
-                    <input type="hidden" name="email" value={successEmail.trim()} />
-                    {props.inviteToken ? (
-                      <input type="hidden" name="invite_token" value={props.inviteToken} />
-                    ) : null}
-                    <ResendSignupSubmitButton
-                      idleLabel={
-                        resendCooldown > 0
-                          ? `Erneut senden (${resendCooldown}s)`
-                          : "Bestätigungs-E-Mail erneut senden"
-                      }
-                      disabled={resendCooldown > 0 || !successEmail.trim() || !isValidEmail(successEmail)}
-                      pendingLabel="Wird gesendet…"
-                      className="yd-auth-btn-secondary h-[52px] w-full"
-                    />
-                  </form>
-
-                  <div className="mx-auto flex max-w-md flex-col gap-3 pt-2">
-                    <Link
-                      href={buildRegisterEntryHref(
-                        props.inviteToken,
-                        props.prefilledEmail,
-                        selectedPlan
-                      )}
-                      className="yd-auth-btn-primary inline-flex h-[52px] items-center justify-center"
-                    >
-                      Neue Registrierung starten
-                    </Link>
-                    <Link
-                      href={loginBackHref}
-                      className="inline-flex h-[48px] items-center justify-center text-[13px] font-medium yd-auth-link transition-colors duration-150 hover:text-[#0369A1]"
-                    >
-                      Zur Anmeldung
-                    </Link>
-                  </div>
-                </div>
+                <RegisterSuccessWaiting
+                  queryError={props.queryError}
+                  resent={props.resent}
+                  inviteToken={props.inviteToken}
+                  loginHref={loginBackHref}
+                  prefilledEmail={props.prefilledEmail}
+                  resendConfirmationAction={props.resendConfirmationAction}
+                />
               ) : null}
 
               {!props.success ? (
@@ -945,7 +783,7 @@ export function RegisterClient(props: {
                   {registrationStep === 1 && "Ansprechperson & Zugang"}
                   {registrationStep === 2 && "Praxis"}
                   {registrationStep === 3 && "Nachweis"}
-                  {registrationStep === 4 && "Zugang & Absenden"}
+                  {registrationStep === 4 && "Praxiszugang"}
                 </div>
               </div>
 
@@ -953,18 +791,18 @@ export function RegisterClient(props: {
                 <div className="yd-auth-awaken-field">
                   <div className="mb-7 text-center">
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Willkommen bei Your Dentist
+                      Geschützten Praxiszugang einrichten
                     </h3>
                     <p className="text-[13px] leading-relaxed text-gray-500">
                       {props.inviteToken ? (
                         <>
-                          Registrierung über Team-Einladung: Bitte dieselbe E‑Mail-Adresse verwenden wie in der
-                          Einladung.
+                          Team-Einladung: Bitte dieselbe E-Mail-Adresse wie in der Einladung verwenden. Die
+                          Freischaltung erfolgt nach fachlicher Prüfung.
                         </>
                       ) : (
                         <>
-                          Konto für Ihre Praxis — abschließend per E‑Mail bestätigen. Die Freigabe erfolgt nach
-                          fachlicher Prüfung.
+                          Erstellen Sie den Zugang für Ihre Praxis. Die Freischaltung erfolgt nach fachlicher
+                          Prüfung.
                         </>
                       )}
                     </p>
@@ -1019,27 +857,31 @@ export function RegisterClient(props: {
                         type="email"
                         value={regEmail}
                         onChange={(e) => setRegEmail(e.target.value)}
+                        onBlur={() => setEmailBlurred(true)}
                         autoComplete="email"
-                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        inputMode="email"
+                        aria-invalid={showEmailValidationHints && emailCheckStatus === "invalid"}
+                        className={`yd-auth-input h-[52px] scroll-mt-8 ${
+                          emailCheckStatus === "ready" && isRegisterEmailFormatValid(regEmail)
+                            ? "border-green-300/80"
+                            : ""
+                        }`}
                         required
                       />
-                      {emailCheckStatus !== "idle" ? (
-                        <div className="mt-2 flex items-center justify-between">
-                          <p
-                            className={`text-[12px] ${
-                              emailCheckStatus === "ready"
-                                ? "text-green-600"
-                                : emailCheckStatus === "invalid"
-                                  ? "text-amber-800"
-                                  : "text-gray-500"
-                            }`}
-                          >
-                            {emailCheckMessage}
-                          </p>
-                          {emailCheckStatus === "checking" ? (
-                            <span className="text-[12px] text-gray-400">…</span>
-                          ) : null}
-                        </div>
+                      {emailCheckStatus === "ready" && isRegisterEmailFormatValid(regEmail) ? (
+                        <p className="mt-2 text-[12px] text-green-700" role="status">
+                          ✓ E-Mail gültig
+                        </p>
+                      ) : null}
+                      {showEmailValidationHints && emailCheckStatus === "invalid" ? (
+                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
+                          {emailCheckMessage}
+                        </p>
+                      ) : null}
+                      {showEmailValidationHints && emailCheckStatus === "checking" ? (
+                        <p className="mt-2 text-[12px] text-slate-500" aria-live="polite">
+                          Prüfe Eingabe…
+                        </p>
                       ) : null}
 
                       {emailTypoSuggestion ? (
@@ -1057,9 +899,7 @@ export function RegisterClient(props: {
                             }}
                             className="font-medium yd-auth-link underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                           >
-                            {emailTypoSuggestion.suggested.includes("@")
-                              ? (emailTypoSuggestion.suggested.split("@")[1] ?? emailTypoSuggestion.suggested)
-                              : emailTypoSuggestion.suggested}
+                            {emailTypoSuggestion.suggested}
                           </button>
                           ?
                         </p>
@@ -1103,24 +943,7 @@ export function RegisterClient(props: {
                         required
                       />
 
-                      {regPassword && passwordStrength ? (
-                        <div className="mt-3">
-                          <div className="mb-2 flex items-center gap-2">
-                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${(passwordStrength.strength / 3) * 100}%`,
-                                  background: passwordStrength.color,
-                                }}
-                              />
-                            </div>
-                            <span className="text-[11px] font-semibold" style={{ color: passwordStrength.color }}>
-                              {passwordStrength.label}
-                            </span>
-                          </div>
-                        </div>
-                      ) : null}
+                      <RegisterPasswordGuidance password={regPassword} />
                     </div>
 
                     <div>
@@ -1148,19 +971,21 @@ export function RegisterClient(props: {
                           {passwordPairError}
                         </p>
                       ) : regPasswordConfirm.length > 0 && !passwordsMatch ? (
-                        <p className="mt-2 text-[12px] text-amber-800">Die Passwörter stimmen nicht überein.</p>
+                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
+                          Die Passwörter stimmen noch nicht überein.
+                        </p>
                       ) : null}
                     </div>
 
                     <button
                       type="submit"
                       disabled={
-                        emailCheckStatus === "invalid" ||
+                        (showEmailValidationHints && emailCheckStatus === "invalid") ||
                         emailCheckStatus === "checking" ||
                         !regName.trim() ||
                         !regRole ||
-                        !normalizeEmail(regEmail) ||
-                        regPassword.length < 8 ||
+                        !normalizeRegisterEmail(regEmail) ||
+                        !allPasswordRequirementsMet(regPassword) ||
                         !passwordsMatch
                       }
                       className="yd-auth-btn-primary mt-8 h-[56px]"
@@ -1196,6 +1021,11 @@ export function RegisterClient(props: {
                         className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
+                      {step2SubmitAttempted && !regPractice.trim() ? (
+                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
+                          Bitte geben Sie den Praxisnamen an.
+                        </p>
+                      ) : null}
                     </div>
 
                     <div>
@@ -1211,12 +1041,24 @@ export function RegisterClient(props: {
                         maxLength={30}
                         className="yd-auth-input h-[52px] scroll-mt-8"
                       />
+                      {phoneFormatHint ? (
+                        <p
+                          className={`mt-2 text-[12px] ${
+                            phoneFormatHint.tone === "ok" ? "text-slate-500" : "text-amber-800"
+                          }`}
+                        >
+                          {phoneFormatHint.text}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div>
                       <label htmlFor="reg-license" className="mb-2 block text-[13px] font-medium text-gray-700">
                         Zahnarzt-Zulassungsnummer *
                       </label>
+                      <p className="mb-2 text-[12px] leading-relaxed text-slate-500">
+                        Zur fachlichen Prüfung Ihres Praxiszugangs.
+                      </p>
                       <input
                         id="reg-license"
                         type="text"
@@ -1225,6 +1067,11 @@ export function RegisterClient(props: {
                         className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
+                      {step2SubmitAttempted && !regLicense.trim() ? (
+                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
+                          Bitte geben Sie Ihre Zulassungsnummer an.
+                        </p>
+                      ) : null}
                       {licenseFormatHint ? (
                         <p
                           className={`mt-2 text-[12px] ${
@@ -1272,164 +1119,84 @@ export function RegisterClient(props: {
                   <form onSubmit={onStep3Submit} className="space-y-5" aria-busy={licenseUploading}>
 
                     <div>
+                      {!licenseFrontFile && !licenseBackFile ? (
+                        <div className="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 px-4 py-4 text-left">
+                          <p className="text-[12px] font-medium text-slate-800">Für eine schnelle Prüfung:</p>
+                          <ul className="mt-2.5 space-y-1.5 text-[12px] leading-relaxed text-slate-600">
+                            <li className="flex gap-2">
+                              <span className="text-green-700" aria-hidden>
+                                ✓
+                              </span>
+                              Dokument vollständig sichtbar
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="text-green-700" aria-hidden>
+                                ✓
+                              </span>
+                              alle Ecken erkennbar
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="text-green-700" aria-hidden>
+                                ✓
+                              </span>
+                              gute Beleuchtung
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="text-green-700" aria-hidden>
+                                ✓
+                              </span>
+                              Angaben lesbar
+                            </li>
+                          </ul>
+                        </div>
+                      ) : null}
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {/* Vorderseite */}
-                        <div
-                          className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
-                            dragActive
-                              ? "border-[#0284C7] bg-[#0284C7]/10"
-                              : licenseFrontFile
-                                ? "border-green-400 bg-green-50"
-                                : "border-gray-300 bg-white hover:border-[#0284C7] hover:bg-[#0284C7]/5"
-                          }`}
+                        <RegisterLicenseSideCard
+                          title="Vorderseite"
+                          sideId="license-front"
+                          file={licenseFrontFile}
+                          preview={frontPreview}
+                          docStatus={frontDocStatus}
+                          qualityHint={frontQualityHint}
+                          dragActive={dragActive}
                           onDragEnter={handleDrag}
                           onDragLeave={handleDrag}
                           onDragOver={handleDrag}
                           onDrop={handleDrop}
-                        >
-                          <input
-                            id="license-front"
-                            type="file"
-                            accept="image/*,.pdf"
-                            onChange={handleFrontFileChange}
-                            className="hidden"
-                          />
-                          <label
-                            htmlFor="license-front"
-                            className="flex min-h-[120px] cursor-pointer flex-col justify-center px-5 py-6 max-md:min-h-[132px]"
-                          >
-                            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
-                              Vorderseite
-                            </p>
-                            {licenseFrontFile ? (
-                              <div className="mt-3">
-                                {frontPreview ? (
-                                  <div className="mb-3 overflow-hidden rounded-lg border border-green-200 bg-white">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={frontPreview} alt="Vorderseite" className="h-28 w-full object-cover" />
-                                  </div>
-                                ) : null}
-                                <p className="truncate text-[13px] font-semibold text-gray-900">
-                                  {licenseFrontFile.name}
-                                </p>
-                                <p className="mt-1 text-[12px] text-gray-500">
-                                  {(licenseFrontFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                                {frontQualityOk !== null ? (
-                                  <p
-                                    className={`mt-2 text-[12px] font-medium ${
-                                      frontQualityOk ? "text-green-700" : "text-amber-800"
-                                    }`}
-                                  >
-                                    {frontQualityHint}
-                                  </p>
-                                ) : null}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    setLicenseFrontFile(null);
-                                    setFrontPreview(null);
-                                    setFrontQualityOk(null);
-                                    setFrontQualityHint("");
-                                    setLicenseFrontStoragePath("");
-                                  }}
-                                  className="mt-3 text-[13px] font-medium yd-auth-link hover:text-[#0369A1]"
-                                >
-                                  Erneut auswählen
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="mt-3">
-                                <p className="text-[14px] font-semibold text-gray-900">
-                                  Foto hochladen
-                                </p>
-                                <p className="mt-1 text-[12px] text-gray-500">
-                                  JPG, PNG oder PDF (max. 10 MB)
-                                </p>
-                              </div>
-                            )}
-                          </label>
-                        </div>
-
-                        {/* Rückseite */}
-                        <div
-                          className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
-                            dragActive
-                              ? "border-[#0284C7] bg-[#0284C7]/10"
-                              : licenseBackFile
-                                ? "border-green-400 bg-green-50"
-                                : "border-gray-300 bg-white hover:border-[#0284C7] hover:bg-[#0284C7]/5"
-                          }`}
+                          onFilePick={handleFrontFileChange}
+                          onCameraPick={handleFrontCameraChange}
+                          onClear={() => {
+                            setLicenseFrontFile(null);
+                            setFrontPreview(null);
+                            setFrontQualityOk(null);
+                            setFrontQualityHint("");
+                            setFrontDocStatus("idle");
+                            setLicenseFrontStoragePath("");
+                          }}
+                        />
+                        <RegisterLicenseSideCard
+                          title="Rückseite"
+                          sideId="license-back"
+                          file={licenseBackFile}
+                          preview={backPreview}
+                          docStatus={backDocStatus}
+                          qualityHint={backQualityHint}
+                          dragActive={dragActive}
                           onDragEnter={handleDrag}
                           onDragLeave={handleDrag}
                           onDragOver={handleDrag}
                           onDrop={handleDrop}
-                        >
-                          <input
-                            id="license-back"
-                            type="file"
-                            accept="image/*,.pdf"
-                            onChange={handleBackFileChange}
-                            className="hidden"
-                          />
-                          <label
-                            htmlFor="license-back"
-                            className="flex min-h-[120px] cursor-pointer flex-col justify-center px-5 py-6 max-md:min-h-[132px]"
-                          >
-                            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
-                              Rückseite
-                            </p>
-                            {licenseBackFile ? (
-                              <div className="mt-3">
-                                {backPreview ? (
-                                  <div className="mb-3 overflow-hidden rounded-lg border border-green-200 bg-white">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={backPreview} alt="Rückseite" className="h-28 w-full object-cover" />
-                                  </div>
-                                ) : null}
-                                <p className="truncate text-[13px] font-semibold text-gray-900">
-                                  {licenseBackFile.name}
-                                </p>
-                                <p className="mt-1 text-[12px] text-gray-500">
-                                  {(licenseBackFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                                {backQualityOk !== null ? (
-                                  <p
-                                    className={`mt-2 text-[12px] font-medium ${
-                                      backQualityOk ? "text-green-700" : "text-amber-800"
-                                    }`}
-                                  >
-                                    {backQualityHint}
-                                  </p>
-                                ) : null}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    setLicenseBackFile(null);
-                                    setBackPreview(null);
-                                    setBackQualityOk(null);
-                                    setBackQualityHint("");
-                                    setLicenseBackStoragePath("");
-                                  }}
-                                  className="mt-3 text-[13px] font-medium yd-auth-link hover:text-[#0369A1]"
-                                >
-                                  Erneut auswählen
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="mt-3">
-                                <p className="text-[14px] font-semibold text-gray-900">
-                                  Foto hochladen
-                                </p>
-                                <p className="mt-1 text-[12px] text-gray-500">
-                                  JPG, PNG oder PDF (max. 10 MB)
-                                </p>
-                              </div>
-                            )}
-                          </label>
-                        </div>
+                          onFilePick={handleBackFileChange}
+                          onCameraPick={handleBackCameraChange}
+                          onClear={() => {
+                            setLicenseBackFile(null);
+                            setBackPreview(null);
+                            setBackQualityOk(null);
+                            setBackQualityHint("");
+                            setBackDocStatus("idle");
+                            setLicenseBackStoragePath("");
+                          }}
+                        />
                       </div>
                       {licenseUploadError ? (
                         <p
@@ -1442,20 +1209,10 @@ export function RegisterClient(props: {
                           {licenseUploadError}
                         </p>
                       ) : null}
-                      <div
-                        className="mt-3 flex items-start gap-2 rounded-lg p-3"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, rgba(2, 132, 199, 0.06) 0%, rgba(2, 132, 199, 0.03) 100%)",
-                          border: "1px solid rgba(2, 132, 199, 0.2)",
-                        }}
-                      >
-                        <svg className="mt-0.5 h-4 w-4 flex-shrink-0 yd-auth-link" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        <p className="text-[12px] leading-relaxed text-gray-700">
-                          Ihre Dateien werden über eine geschützte Verbindung übertragen und nur zur fachlichen
-                          Verifizierung verwendet.
+                      <div className="mt-4 rounded-xl border border-slate-200/90 bg-slate-50/40 px-4 py-3.5 text-left">
+                        <p className="text-[12px] leading-relaxed text-slate-600">
+                          Ihre Unterlagen werden verschlüsselt übertragen und ausschließlich zur Prüfung Ihres
+                          Praxiszugangs verwendet.
                         </p>
                       </div>
                     </div>
@@ -1492,38 +1249,22 @@ export function RegisterClient(props: {
                 <div className="yd-auth-awaken-field">
                   <header className="mb-8 text-center md:mb-10">
                     <h3 className="text-[22px] font-semibold leading-snug tracking-tight text-slate-900 md:text-[23px]">
-                      Tarif, Zahlungsweg und Zustimmungen
+                      Praxiszugang vorbereiten
                     </h3>
                     <p className="mx-auto mt-3 max-w-md text-[13px] leading-relaxed text-slate-600">
-                      Abschluss der Registrierung: Sie legen das Abrechnungsintervall fest und erteilen die
-                      vertraglich erforderlichen Einwilligungen. Die fachliche Freigabe Ihrer Praxis erfolgt separat.
+                      Wählen Sie Ihr Abrechnungsintervall. Ihr Zugang wird erst nach erfolgreicher Prüfung
+                      aktiviert.
                     </p>
                   </header>
 
                   <div className="mb-8 rounded-xl border border-slate-200/90 bg-slate-50/60 px-4 py-4 text-left md:mb-10 md:px-5 md:py-4">
-                    {props.skipPaymentAtSignup ? (
-                      <>
-                        <p className="text-[12px] font-medium text-slate-800">Hinweis zu dieser Umgebung</p>
-                        <ul className="mt-2.5 list-none space-y-2 text-[12px] leading-relaxed text-slate-600">
-                          <li>Über dieses Formular wird kein Betrag eingezogen.</li>
-                          <li>
-                            Leistungsumfang und eine spätere Zahlungsaktivierung ergeben sich aus den verlinkten
-                            Dokumenten und dem Onboarding.
-                          </li>
-                        </ul>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-[12px] font-medium text-slate-800">Hinweis zu Zahlung und Testphase</p>
-                        <ul className="mt-2.5 list-none space-y-2 text-[12px] leading-relaxed text-slate-600">
-                          <li>
-                            Wenn Sie eine Online-Zahlung wählen, folgt im nächsten Schritt ein sicherer
-                            Zahlungsdialog — in der Regel mit begrenzter Testphase; Einzelheiten im Vertrag und dort.
-                          </li>
-                          <li>Die gewählte Zahlungsweise können Sie später im Rahmen des Vertrags anpassen.</li>
-                        </ul>
-                      </>
-                    )}
+                    <p className="text-[12px] font-medium text-slate-800">Keine Abbuchung vor Freischaltung.</p>
+                    <p className="mt-2 text-[12px] leading-relaxed text-slate-600">
+                      Wir prüfen Ihre Angaben innerhalb von 24 Stunden.
+                      {props.skipPaymentAtSignup
+                        ? " In dieser Umgebung erfolgt keine Zahlungserfassung."
+                        : " Es erfolgt keine Abbuchung vor der Freischaltung."}
+                    </p>
                   </div>
 
                   <form
@@ -1547,22 +1288,37 @@ export function RegisterClient(props: {
                           {(Object.keys(plans) as Plan[]).map((key) => {
                             const p = plans[key];
                             const active = selectedPlan === key;
+                            const recommended = key === "yearly";
                             return (
                               <button
                                 key={key}
                                 type="button"
                                 onClick={() => setSelectedPlan(key)}
-                                className={`max-md:min-h-[52px] rounded-xl border px-4 py-3.5 text-left transition-colors duration-150 md:py-4 ${
+                                className={`relative max-md:min-h-[52px] rounded-xl border px-4 py-3.5 text-left transition-colors duration-150 md:py-4 ${
                                   active
-                                    ? "border-slate-500 bg-white ring-1 ring-slate-300/60"
+                                    ? "border-[#0284C7]/70 bg-[#0284C7]/[0.04] ring-1 ring-[#0284C7]/25"
                                     : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80"
                                 }`}
                               >
-                                <div className="mb-2 flex items-start justify-between gap-2">
+                                {active ? (
+                                  <span
+                                    className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#0284C7] text-white"
+                                    aria-hidden
+                                  >
+                                    <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  </span>
+                                ) : null}
+                                <div className="mb-2 flex items-start justify-between gap-2 pr-6">
                                   <p className="text-[14px] font-medium text-slate-900">{p.label}</p>
-                                  {p.save ? (
+                                  {recommended ? (
                                     <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                                      −{p.save}
+                                      Empfohlen
                                     </span>
                                   ) : null}
                                 </div>
@@ -1596,7 +1352,7 @@ export function RegisterClient(props: {
                         </h4>
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
                           <div className="min-w-0 flex-1 space-y-1.5">
-                            <p className="text-[14px] font-medium text-slate-900">Plattformnutzung</p>
+                            <p className="text-[14px] font-medium text-slate-900">Praxiszugang</p>
                             <p className="text-[12px] leading-relaxed text-slate-600">
                               Abrechnungsrhythmus:{" "}
                               <span className="font-medium text-slate-800">{plans[selectedPlan].billing}</span>
@@ -1705,21 +1461,21 @@ export function RegisterClient(props: {
 
                       <section
                         aria-labelledby="reg-step4-legal-heading"
-                        className="rounded-xl border border-slate-200/90 bg-slate-50/40 px-4 py-5 md:px-6 md:py-6"
+                        className="rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-4 md:px-5 md:py-4"
                       >
                         <h4
                           id="reg-step4-legal-heading"
-                          className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
+                          className="mb-3 text-[10px] font-medium uppercase tracking-wider text-slate-400"
                         >
                           Vertrag und Einwilligungen
                         </h4>
-                        <div className="space-y-3 md:space-y-3.5">
-                          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent bg-white/70 px-3 py-3 text-[13px] leading-snug text-slate-700 transition-colors hover:border-slate-200/90 md:py-2.5">
+                        <div className="space-y-2">
+                          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-transparent px-2 py-2 text-[12px] leading-snug text-slate-600 transition-colors hover:border-slate-200/80">
                             <input
                               type="checkbox"
                               checked={acceptedTos}
                               onChange={(e) => setAcceptedTos(e.target.checked)}
-                              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30 md:mt-1 md:h-4 md:w-4"
+                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30"
                             />
                             <span>
                               Ich akzeptiere die{" "}
@@ -1732,12 +1488,12 @@ export function RegisterClient(props: {
                               . *
                             </span>
                           </label>
-                          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent bg-white/70 px-3 py-3 text-[13px] leading-snug text-slate-700 transition-colors hover:border-slate-200/90 md:py-2.5">
+                          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-transparent px-2 py-2 text-[12px] leading-snug text-slate-600 transition-colors hover:border-slate-200/80">
                             <input
                               type="checkbox"
                               checked={acceptedPrivacy}
                               onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30 md:mt-1 md:h-4 md:w-4"
+                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30"
                             />
                             <span>
                               Ich habe die{" "}
@@ -1750,12 +1506,12 @@ export function RegisterClient(props: {
                               zur Kenntnis genommen. *
                             </span>
                           </label>
-                          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent bg-white/70 px-3 py-3 text-[13px] leading-snug text-slate-700 transition-colors hover:border-slate-200/90 md:py-2.5">
+                          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-transparent px-2 py-2 text-[12px] leading-snug text-slate-600 transition-colors hover:border-slate-200/80">
                             <input
                               type="checkbox"
                               checked={acceptedWithdrawal}
                               onChange={(e) => setAcceptedWithdrawal(e.target.checked)}
-                              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30 md:mt-1 md:h-4 md:w-4"
+                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30"
                             />
                             <span>
                               Ich verlange ausdrücklich, dass Your Dentist vor Ablauf der Widerrufsfrist mit der
@@ -1763,7 +1519,7 @@ export function RegisterClient(props: {
                             </span>
                           </label>
                         </div>
-                        <p className="mt-4 border-t border-slate-200/80 pt-4 text-[11px] leading-relaxed text-slate-500">
+                        <p className="mt-3 border-t border-slate-200/70 pt-3 text-[10px] leading-relaxed text-slate-500">
                           * Pflichtangaben.{" "}
                           <Link
                             href="/widerruf"
@@ -1778,7 +1534,7 @@ export function RegisterClient(props: {
                     <RegisterStep4PendingIntentSync intentRef={registerStep4SubmitIntentRef} />
 
                     <div className="mt-6 space-y-3">
-                    <input type="hidden" name="email" value={normalizeEmail(regEmail)} />
+                    <input type="hidden" name="email" value={normalizeRegisterEmail(regEmail)} />
                     <input type="hidden" name="password" value={regPassword} />
                     <input type="hidden" name="password_confirm" value={regPasswordConfirm} />
                     <input type="hidden" name="display_name" value={regName} />

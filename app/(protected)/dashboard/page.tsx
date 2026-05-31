@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { AtlasOperationalCore } from "@/components/dashboard/hc/atlas-operational-core";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
-import { buildDailyStatus } from "@/lib/dashboard/command-center";
+import { buildAttentionSummary } from "@/lib/dashboard/command-center";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -14,10 +14,7 @@ import {
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
-import {
-  formatDoctorDisplayName,
-  greetingDoctorLabel,
-} from "@/lib/format-doctor-display-name";
+import { formatDoctorDisplayName } from "@/lib/format-doctor-display-name";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +46,6 @@ export default async function DashboardPage() {
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "Team";
   const doctorDisplayName = formatDoctorDisplayName(displayName);
-  const greetingDoctorName = greetingDoctorLabel(displayName);
 
   const [unseenRes, tasksRes, previewRes, activityRes, routinesRes, relayConversations] =
     await Promise.all([
@@ -78,7 +74,7 @@ export default async function DashboardPage() {
       return due <= now + week;
     }).length ?? 0;
 
-  const dailyStatus = buildDailyStatus(unseenCount, openTaskCount, relayUnread);
+  const attentionSummary = buildAttentionSummary(unseenCount, previewRows, openTasks);
 
   const hour = new Date().getHours();
   const greeting =
@@ -92,8 +88,7 @@ export default async function DashboardPage() {
       <DashboardHeader
         greeting={greeting}
         displayName={doctorDisplayName}
-        greetingName={greetingDoctorName}
-        dailyStatus={dailyStatus}
+        attentionSummary={attentionSummary}
       />
 
       <AtlasOperationalCore

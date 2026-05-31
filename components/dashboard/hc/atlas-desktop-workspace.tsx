@@ -9,7 +9,7 @@ import {
   buildPatientCases,
   buildRelayActivity,
   buildTaskPreviews,
-  buildTodayImportant,
+  buildTodayMetrics,
 } from "@/lib/dashboard/command-center";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type {
@@ -30,16 +30,16 @@ type AtlasDesktopWorkspaceProps = {
   activityEvents: ActivityEvent[] | null;
 };
 
-/** Praxis-Cockpit — Workflow: Aufmerksamkeit → Command → Abschluss. */
+/** Praxis-Cockpit — Aufmerksamkeit → Anfragen → Command → Team → Aktivität. */
 export function AtlasDesktopWorkspace({
+  unseenCount,
   previewRows,
   openTasks,
   relayConversations,
-  relayUnread,
   activityEvents,
 }: AtlasDesktopWorkspaceProps) {
   const openTaskCount = openTasks?.length ?? 0;
-  const todayCards = buildTodayImportant(previewRows, openTasks);
+  const todayMetrics = buildTodayMetrics(unseenCount, previewRows, openTasks);
   const commandSuggestions = buildCommandSuggestions(previewRows, openTaskCount);
   const patientCases = buildPatientCases(previewRows);
   const relayLines = buildRelayActivity(relayConversations, activityEvents, openTasks);
@@ -47,17 +47,13 @@ export function AtlasDesktopWorkspace({
 
   return (
     <div className="yd-cockpit yd-cockpit-desktop hidden md:flex md:flex-col" aria-label="Praxis Cockpit">
+      <AtlasTodayImportant cards={todayMetrics} />
+      <AtlasPatientCases cases={patientCases} />
       <AtlasCommandHero suggestions={commandSuggestions} />
-      <AtlasTodayImportant cards={todayCards} />
-
       <div className="yd-cockpit-grid">
-        <AtlasPatientCases cases={patientCases} />
-        <div className="yd-cockpit-grid-aside yd-cockpit-grid-aside--stack">
-          <AtlasRelayActivity lines={relayLines} />
-          <AtlasCockpitTasks tasks={taskRows} />
-        </div>
+        <AtlasRelayActivity lines={relayLines} />
+        <AtlasCockpitTasks tasks={taskRows} />
       </div>
-
       <AtlasCockpitActivity events={activityEvents} />
     </div>
   );

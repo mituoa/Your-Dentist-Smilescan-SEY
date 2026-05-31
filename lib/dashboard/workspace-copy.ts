@@ -39,13 +39,14 @@ export const WORKSPACE_COPY = {
   },
 
   command: {
-    placeholder: "Was soll erledigt werden?",
+    placeholder: "Nachricht, Aufgabe oder Zusammenfassung vorbereiten…",
+    subtitle: "Was soll vorbereitet werden?",
     open: "Öffnen",
     quick: [
-      { label: "Termin senden", phrase: "Termin senden" },
-      { label: "Patient informieren", phrase: "Patient informieren" },
+      { label: "Antwort vorbereiten", phrase: "Antwort vorbereiten" },
       { label: "Aufgabe erstellen", phrase: "Aufgabe erstellen" },
-      { label: "Team erinnern", phrase: "Team erinnern" },
+      { label: "Team informieren", phrase: "Team informieren" },
+      { label: "Eingang zusammenfassen", phrase: "Eingang zusammenfassen" },
     ] as const,
   },
 

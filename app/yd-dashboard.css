@@ -1013,16 +1013,29 @@ main:has(.yd-dashboard) {
 
 .yd-command-hero-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   margin-bottom: 0.875rem;
   color: #0c1929;
 }
 
+.yd-command-hero-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
 .yd-command-hero-title {
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.02em;
+}
+
+.yd-command-hero-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b849c;
 }
 
 .yd-command-hero-input-wrap {
@@ -1241,8 +1254,16 @@ main:has(.yd-dashboard) {
 .yd-cockpit-header {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 0.5rem;
   margin-bottom: 1.25rem;
+}
+
+.yd-dash-attention {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--yd-dash-body, #3d5266);
 }
 
 .yd-cockpit-header-greet {
@@ -1361,6 +1382,63 @@ main:has(.yd-dashboard) {
   color: #6b849c;
 }
 
+.yd-today-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .yd-today-metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.yd-today-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.125rem;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.38);
+  background: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.yd-today-metric-card:hover {
+  border-color: rgba(47, 128, 237, 0.35);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.yd-today-metric-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b849c;
+}
+
+.yd-today-metric-count {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: #0c1929;
+  line-height: 1.1;
+}
+
+.yd-today-metric-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: #3d5266;
+}
+
 .yd-today-important-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -1438,9 +1516,131 @@ main:has(.yd-dashboard) {
 
 .yd-cockpit-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
   align-items: start;
+}
+
+.yd-patient-request-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.125rem;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.38);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.yd-patient-request-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.yd-patient-request-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(47, 128, 237, 0.1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e5bbd;
+}
+
+.yd-patient-request-intro {
+  flex: 1;
+  min-width: 0;
+}
+
+.yd-patient-request-type {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b849c;
+}
+
+.yd-patient-request-time {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: #8ba3b8;
+}
+
+.yd-patient-request-checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #8ba3b8;
+}
+
+.yd-patient-request-check--ok {
+  color: #15803d;
+  font-weight: 500;
+}
+
+.yd-patient-request-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  min-height: 2.25rem;
+  padding: 0 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(47, 128, 237, 0.35);
+  background: rgba(47, 128, 237, 0.08);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #2f80ed;
+  text-decoration: none;
+}
+
+.yd-patient-request-cta:hover {
+  background: rgba(47, 128, 237, 0.14);
+}
+
+.yd-patient-case-status {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.yd-patient-case-status--new {
+  color: #1e5bbd;
+  background: rgba(47, 128, 237, 0.1);
+}
+
+.yd-patient-case-status--progress {
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.yd-patient-case-status--approval {
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.yd-patient-case-status--done {
+  color: #6b849c;
+  background: rgba(180, 198, 218, 0.25);
+}
+
+.yd-cockpit-empty-block {
+  padding: 0.25rem 0;
+}
+
+.yd-cockpit-empty-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #8ba3b8;
 }
 
 .yd-cockpit-grid-aside--stack {

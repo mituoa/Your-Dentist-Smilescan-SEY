@@ -1,13 +1,21 @@
 import Link from "next/link";
 
 import { COCKPIT_SECTIONS } from "@/lib/product/workflow";
+import { formatRelativeTime } from "@/lib/dashboard/atlas-mobile-helpers";
 import type { ActivityEvent } from "@/lib/queries/dashboard";
 
-const TYPE_LABEL: Record<ActivityEvent["type"], string> = {
-  submission_received: "Eingang",
-  task_created: "Aufgabe",
-  task_done: "Erledigt",
-};
+function activityLabel(event: ActivityEvent): string {
+  if (event.type === "submission_received") {
+    return event.text.includes("Einsendung") ? "Anfrage eingegangen" : event.text;
+  }
+  if (event.type === "task_done") {
+    return event.text.toLowerCase().includes("erledigt") ? "Aufgabe erledigt" : event.text;
+  }
+  if (event.type === "task_created") {
+    return "Aufgabe erstellt";
+  }
+  return event.text;
+}
 
 type AtlasCockpitActivityProps = {
   events: ActivityEvent[] | null;
@@ -22,20 +30,20 @@ export function AtlasCockpitActivity({ events }: AtlasCockpitActivityProps) {
         {COCKPIT_SECTIONS.activity}
       </h2>
       {items.length === 0 ? (
-        <p className="yd-cockpit-quiet">Heute ruhig</p>
+        <p className="yd-cockpit-quiet">Heute noch keine Aktivität</p>
       ) : (
         <ul className="yd-relay-activity-list">
           {items.slice(0, 5).map((event) => (
             <li key={event.id}>
               {event.link ? (
                 <Link href={event.link} className="yd-relay-activity-row">
-                  <span className="yd-relay-activity-label">{event.text}</span>
-                  <span className="yd-relay-activity-meta">{TYPE_LABEL[event.type]}</span>
+                  <span className="yd-relay-activity-label">{activityLabel(event)}</span>
+                  <span className="yd-relay-activity-meta">{formatRelativeTime(event.timestamp)}</span>
                 </Link>
               ) : (
                 <div className="yd-relay-activity-row">
-                  <span className="yd-relay-activity-label">{event.text}</span>
-                  <span className="yd-relay-activity-meta">{TYPE_LABEL[event.type]}</span>
+                  <span className="yd-relay-activity-label">{activityLabel(event)}</span>
+                  <span className="yd-relay-activity-meta">{formatRelativeTime(event.timestamp)}</span>
                 </div>
               )}
             </li>

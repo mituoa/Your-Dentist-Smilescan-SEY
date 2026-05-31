@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 import { COCKPIT_SECTIONS } from "@/lib/product/workflow";
-import type { TodayImportantCard } from "@/lib/dashboard/command-center";
+import type { TodayMetricCard } from "@/lib/dashboard/command-center";
 
 type AtlasTodayImportantProps = {
-  cards: TodayImportantCard[];
+  cards: TodayMetricCard[];
   title?: string;
 };
 
@@ -12,41 +12,31 @@ export function AtlasTodayImportant({
   cards,
   title = COCKPIT_SECTIONS.todayImportant,
 }: AtlasTodayImportantProps) {
-  if (cards.length === 0) {
-    return (
-      <section className="yd-today-important yd-today-important--empty" aria-label={title}>
-        <h2 className="yd-cockpit-section-title">{title}</h2>
-        <p className="yd-cockpit-quiet">Alles aktuell</p>
-      </section>
-    );
-  }
+  const allClear = cards.every((c) => c.count === 0 || c.count === null);
 
   return (
-    <section className="yd-today-important" aria-label={title}>
+    <section
+      className={allClear ? "yd-today-important yd-today-important--empty" : "yd-today-important"}
+      aria-label={title}
+    >
       <h2 className="yd-cockpit-section-title">{title}</h2>
-      <ul className="yd-today-important-grid">
-        {cards.map((card) => (
-          <li key={card.id}>
-            <article className="yd-today-card">
-              <div className="yd-today-card-body">
-                <p className="yd-today-card-patient">{card.patientName}</p>
-                <p className="yd-today-card-problem">{card.problem}</p>
-                <p className="yd-today-card-ai">{card.aiResult}</p>
-              </div>
-              <Link
-                href={card.href}
-                className={
-                  card.primaryAction === "freigeben"
-                    ? "yd-today-card-cta yd-today-card-cta--primary"
-                    : "yd-today-card-cta"
-                }
-              >
-                {card.actionLabel}
+      {allClear ? (
+        <p className="yd-cockpit-quiet">Keine offenen Anfragen — alles aktuell.</p>
+      ) : (
+        <ul className="yd-today-metrics-grid">
+          {cards.map((card) => (
+            <li key={card.id}>
+              <Link href={card.href} className="yd-today-metric-card">
+                <p className="yd-today-metric-label">{card.label}</p>
+                <p className="yd-today-metric-count">
+                  {card.count === null ? "—" : card.count}
+                </p>
+                <p className="yd-today-metric-hint">{card.hint}</p>
               </Link>
-            </article>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

@@ -14,12 +14,12 @@ export function AtlasCockpitTasks({ tasks }: AtlasCockpitTasksProps) {
         <h2 id="yd-cockpit-tasks-title" className="yd-cockpit-section-title">
           {COCKPIT_SECTIONS.tasks}
         </h2>
-        <Link href="/relay" className="yd-cockpit-link">
-          Öffnen
+        <Link href="/my-tasks" className="yd-cockpit-link">
+          Alle
         </Link>
       </div>
       {tasks.length === 0 ? (
-        <p className="yd-cockpit-quiet">Alles erledigt</p>
+        <p className="yd-cockpit-quiet">Keine offenen Aufgaben</p>
       ) : (
         <ul className="yd-relay-activity-list">
           {tasks.map((task) => (

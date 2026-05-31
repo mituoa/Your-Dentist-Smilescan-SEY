@@ -9,7 +9,7 @@ import {
   buildPatientCases,
   buildRelayActivity,
   buildTaskPreviews,
-  buildTodayImportant,
+  buildTodayMetrics,
 } from "@/lib/dashboard/command-center";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type {
@@ -30,15 +30,16 @@ type AtlasMobileWorkspaceProps = {
   activityEvents: ActivityEvent[] | null;
 };
 
-/** Mobile — 5 Sekunden zwischen Patienten: Command → Wichtig → Fälle → Relay → Aufgaben. */
+/** Mobile — gleiche Priorität wie Desktop, nur gestapelt. */
 export function AtlasMobileWorkspace({
+  unseenCount,
   previewRows,
   openTasks,
   relayConversations,
   activityEvents,
 }: AtlasMobileWorkspaceProps) {
   const openTaskCount = openTasks?.length ?? 0;
-  const todayCards = buildTodayImportant(previewRows, openTasks);
+  const todayMetrics = buildTodayMetrics(unseenCount, previewRows, openTasks);
   const commandSuggestions = buildCommandSuggestions(previewRows, openTaskCount);
   const patientCases = buildPatientCases(previewRows);
   const relayLines = buildRelayActivity(relayConversations, activityEvents, openTasks);
@@ -46,9 +47,9 @@ export function AtlasMobileWorkspace({
 
   return (
     <div className="yd-cockpit yd-cockpit-mobile md:hidden" aria-label="Praxis Cockpit">
-      <AtlasCommandHero suggestions={commandSuggestions} compact />
-      <AtlasTodayImportant cards={todayCards} />
+      <AtlasTodayImportant cards={todayMetrics} />
       <AtlasPatientCases cases={patientCases} />
+      <AtlasCommandHero suggestions={commandSuggestions} compact />
       <AtlasRelayActivity lines={relayLines} />
       <AtlasCockpitTasks tasks={taskRows} />
       <AtlasCockpitActivity events={activityEvents} />

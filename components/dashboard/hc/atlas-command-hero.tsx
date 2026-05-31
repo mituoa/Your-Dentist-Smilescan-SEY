@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { useAssistUiOptional } from "@/components/command-assist/assist-shell";
-import { COMMAND_AI_EXAMPLES, COMMAND_AI_PREPARED } from "@/lib/product/workflow";
+import { COMMAND_AI_PREPARED } from "@/lib/product/workflow";
 import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
 
 type AtlasCommandHeroProps = {
@@ -15,7 +15,8 @@ type AtlasCommandHeroProps = {
 export function AtlasCommandHero({ suggestions, compact = false }: AtlasCommandHeroProps) {
   const assist = useAssistUiOptional();
   const [draft, setDraft] = useState("");
-  const chips = suggestions.length > 0 ? suggestions : [...COMMAND_AI_EXAMPLES];
+  const chips =
+    suggestions.length > 0 ? suggestions : WORKSPACE_COPY.command.quick.map((q) => q.phrase);
 
   const run = (text: string) => {
     setDraft(text);
@@ -29,7 +30,10 @@ export function AtlasCommandHero({ suggestions, compact = false }: AtlasCommandH
     >
       <div className="yd-command-hero-head">
         <Sparkles className="h-4 w-4 shrink-0" strokeWidth={1.65} aria-hidden />
-        <span className="yd-command-hero-title">Command AI</span>
+        <div className="yd-command-hero-titles">
+          <span className="yd-command-hero-title">Command AI</span>
+          <span className="yd-command-hero-subtitle">{WORKSPACE_COPY.command.subtitle}</span>
+        </div>
       </div>
 
       <form
@@ -49,7 +53,7 @@ export function AtlasCommandHero({ suggestions, compact = false }: AtlasCommandH
         />
       </form>
 
-      <div className="yd-command-hero-chips" role="group" aria-label="Vorschläge">
+      <div className="yd-command-hero-chips" role="group" aria-label="Schnellaktionen">
         {chips.map((line) => (
           <button
             key={line}

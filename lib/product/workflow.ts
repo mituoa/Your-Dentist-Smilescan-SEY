@@ -14,28 +14,30 @@ export const PRODUCT_WORKFLOW_STEPS = [
   "Protokoll",
 ] as const;
 
-/** Command AI — feste Vorschläge (Tracker + Atlas). */
+/** Command AI — Beispielphrasen (Assist + Atlas). */
 export const COMMAND_AI_EXAMPLES = [
-  "Patient Müller Terminvorschlag senden",
-  "Lisa an Rückruf erinnern",
+  "Bereite die Antworten für offene Anfragen vor",
   "Neue Eingänge zusammenfassen",
-  "Antwort vorbereiten",
-  "Aufgabe für ZFA erstellen",
+  "Patient Müller Terminvorschlag senden",
 ] as const;
 
-/** Vorbereitet durch Command — sichtbar als Ergebniszeilen. */
-export const COMMAND_AI_PREPARED = [
-  "Antwort vorbereitet",
-  "Aufgabe erstellt",
-  "Team informiert",
+/** Schnellaktionen im Atlas-Cockpit. */
+export const COMMAND_AI_QUICK_ACTIONS = [
+  "Antwort vorbereiten",
+  "Aufgabe erstellen",
+  "Team informieren",
+  "Eingang zusammenfassen",
 ] as const;
+
+/** Vorbereitet durch Command — Zahnarzt gibt frei. */
+export const COMMAND_AI_PREPARED = ["Entwürfe erstellt", "warten auf Freigabe"] as const;
 
 export const COCKPIT_SECTIONS = {
   todayImportant: "Heute wichtig",
-  patientCases: "Patientenfälle",
-  relay: "Relay",
+  patientCases: "Patientenanfragen",
+  relay: "Team",
   tasks: "Aufgaben",
-  activity: "Aktivität",
+  activity: "Letzte Aktivitäten",
   tracker: "Tracker",
 } as const;
 

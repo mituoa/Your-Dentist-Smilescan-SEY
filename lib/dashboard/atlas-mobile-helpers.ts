@@ -5,6 +5,31 @@ export function patientDisplayName(row: SubmissionPreviewRow): string {
   return row.patient_name?.trim() || row.patient_email?.trim() || "Patient";
 }
 
+export function patientInitials(row: SubmissionPreviewRow): string {
+  const name = patientDisplayName(row);
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
+/** Relative time for cockpit cards — calm, German. */
+export function formatRelativeTime(iso: string): string {
+  const then = new Date(iso).getTime();
+  const diffMs = Date.now() - then;
+  if (diffMs < 0) return "Gerade eben";
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return "Gerade eben";
+  if (mins < 60) return `Vor ${mins} Min.`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Vor ${hours} Std.`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Gestern";
+  if (days < 7) return `Vor ${days} Tagen`;
+  return formatIntakeDate(iso);
+}
+
 export function intakeSubjectLine(row: SubmissionPreviewRow): string {
   const notes = row.patient_notes?.trim();
   if (!notes) return "Einsendung";

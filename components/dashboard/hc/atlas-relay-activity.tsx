@@ -12,14 +12,14 @@ export function AtlasRelayActivity({ lines }: AtlasRelayActivityProps) {
     <section className="yd-relay-activity" aria-labelledby="yd-relay-activity-title">
       <div className="yd-relay-activity-head">
         <h2 id="yd-relay-activity-title" className="yd-cockpit-section-title">
-          Relay
+          {COCKPIT_SECTIONS.relay}
         </h2>
         <Link href="/relay" className="yd-cockpit-link">
           Öffnen
         </Link>
       </div>
       {lines.length === 0 ? (
-        <p className="yd-cockpit-quiet">Keine offenen Übergaben</p>
+        <p className="yd-cockpit-quiet">Keine wichtigen Team-Meldungen</p>
       ) : (
         <ul className="yd-relay-activity-list">
           {lines.map((line) => (

@@ -446,10 +446,11 @@ export const getRecentActivity = cache(
     const events: ActivityEvent[] = [];
 
     (submissionsRes.data || []).forEach((s) => {
+      const who = (s.patient_name as string | null)?.trim() || "Patient";
       events.push({
         type: "submission_received",
         id: s.id,
-        text: `Neue Einsendung von ${s.patient_name || "Patient"}`,
+        text: `Anfrage von ${who} eingegangen`,
         timestamp: s.created_at,
         link: `/inbox/${s.id}`,
       });
@@ -459,7 +460,7 @@ export const getRecentActivity = cache(
       events.push({
         type: "task_created",
         id: t.id,
-        text: `Aufgabe: ${t.content.substring(0, 60)}${t.content.length > 60 ? "…" : ""}`,
+        text: "Aufgabe erstellt",
         timestamp: t.created_at,
         link: `/my-tasks/${t.id}`,
       });
@@ -470,7 +471,7 @@ export const getRecentActivity = cache(
         events.push({
           type: "task_done",
           id: `done-${t.id}`,
-          text: `Aufgabe erledigt: ${t.content.substring(0, 60)}${t.content.length > 60 ? "…" : ""}`,
+          text: t.submission_id ? "Antwort gesendet" : "Aufgabe erledigt",
           timestamp: t.done_at,
           link: t.submission_id ? `/inbox/${t.submission_id}` : `/my-tasks/${t.id}`,
         });

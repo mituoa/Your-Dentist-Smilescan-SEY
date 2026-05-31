@@ -1,10 +1,7 @@
-/** Rolle der anmeldenden Person in der Praxis (Registrierung). */
+/** Rolle der anmeldenden Person — nur zahnärztliche Funktionen (kein öffentliches SaaS). */
 export const REGISTER_CONTACT_ROLES = [
-  { value: "dentist_owner", label: "Zahnarzt / Zahnärztin (Inhaber/in)" },
-  { value: "dentist_associate", label: "Zahnarzt / Zahnärztin (angestellt)" },
-  { value: "practice_manager", label: "Praxismanager/in" },
-  { value: "team_lead", label: "Teamleitung / Koordination" },
-  { value: "other", label: "Sonstige Funktion in der Praxis" },
+  { value: "dentist_owner", label: "Praxisinhaber/in" },
+  { value: "dentist_associate", label: "Zahnärztin / Zahnarzt im Praxisteam" },
 ] as const;
 
 export type RegisterContactRole = (typeof REGISTER_CONTACT_ROLES)[number]["value"];

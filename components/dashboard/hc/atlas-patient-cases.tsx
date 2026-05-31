@@ -7,6 +7,13 @@ type AtlasPatientCasesProps = {
   cases: PatientCaseRow[];
 };
 
+const STATUS_CLASS: Record<PatientCaseRow["statusLabel"], string> = {
+  Neu: "yd-patient-case-status--new",
+  "In Bearbeitung": "yd-patient-case-status--progress",
+  "Wartet auf Freigabe": "yd-patient-case-status--approval",
+  Abgeschlossen: "yd-patient-case-status--done",
+};
+
 export function AtlasPatientCases({ cases }: AtlasPatientCasesProps) {
   return (
     <section className="yd-patient-cases" aria-labelledby="yd-patient-cases-title">
@@ -19,34 +26,42 @@ export function AtlasPatientCases({ cases }: AtlasPatientCasesProps) {
         </Link>
       </div>
       {cases.length === 0 ? (
-        <p className="yd-cockpit-quiet">Alles aktuell</p>
+        <div className="yd-cockpit-empty-block">
+          <p className="yd-cockpit-quiet">Keine offenen Anfragen</p>
+          <p className="yd-cockpit-empty-hint">
+            Neue Patienteneingänge erscheinen automatisch hier.
+          </p>
+        </div>
       ) : (
         <ul className="yd-patient-cases-list">
           {cases.map((row) => (
             <li key={row.id}>
-              <Link href={row.href} className="yd-patient-case-row yd-patient-case-row--rich">
-                <div className="yd-patient-case-main">
-                  <p className="yd-patient-case-name">{row.patientName}</p>
-                  <p className="yd-patient-case-type">{row.concern}</p>
-                </div>
-                <div className="yd-patient-case-tags">
-                  <span className="yd-patient-case-tag">{row.attachmentsLabel}</span>
-                  <span
-                    className={
-                      row.urgencyLabel === "Dringend"
-                        ? "yd-patient-case-tag yd-patient-case-tag--urgent"
-                        : "yd-patient-case-tag"
-                    }
-                  >
-                    {row.urgencyLabel}
+              <article className="yd-patient-request-card">
+                <div className="yd-patient-request-head">
+                  <span className="yd-patient-request-avatar" aria-hidden>
+                    {row.initials}
+                  </span>
+                  <div className="yd-patient-request-intro">
+                    <p className="yd-patient-case-name">{row.patientName}</p>
+                    <p className="yd-patient-request-type">{row.requestType}</p>
+                    <p className="yd-patient-request-time">{row.receivedLabel}</p>
+                  </div>
+                  <span className={`yd-patient-case-status ${STATUS_CLASS[row.statusLabel]}`}>
+                    {row.statusLabel}
                   </span>
                 </div>
-                <p className="yd-patient-case-ai">{row.aiPrepared}</p>
-                <div className="yd-patient-case-foot">
-                  <span className="yd-patient-case-status">{row.statusLabel}</span>
-                  <span className="yd-patient-case-action">{row.nextAction}</span>
-                </div>
-              </Link>
+                <ul className="yd-patient-request-checks" aria-label="Vorbereitung">
+                  <li className={row.hasImages ? "yd-patient-request-check--ok" : ""}>
+                    {row.hasImages ? "✓" : "○"} Bilder vorhanden
+                  </li>
+                  <li className={row.replyPrepared ? "yd-patient-request-check--ok" : ""}>
+                    {row.replyPrepared ? "✓" : "○"} Antwort vorbereitet
+                  </li>
+                </ul>
+                <Link href={row.href} className="yd-patient-request-cta">
+                  Prüfen
+                </Link>
+              </article>
             </li>
           ))}
         </ul>
