@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { ForgotPasswordCard } from "@/components/auth/forgot-password-card";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 
 type ForgotPasswordPageClientProps = {
@@ -28,7 +29,7 @@ export function ForgotPasswordPageClient({
             className="yd-auth-login-brand yd-auth-awaken-field"
             style={{ ["--yd-auth-field-i" as string]: "0" }}
           >
-            <YourDentistBrandLockup size="md" centered />
+            <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
           </div>
 
           <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>

@@ -1,18 +1,18 @@
 import Link from "next/link";
 
-import { AUTH_ACCESS_COPY, buildPricingEntryHref } from "@/lib/marketing/auth-access-copy";
+import { AUTH_ACCESS_COPY, buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 
 type LoginRegisterCtaProps = {
   inviteToken?: string;
   prefilledEmail?: string;
 };
 
-/** Ein Hinweis unter dem Login — Link zur Zugangsseite, kein zweites Pricing-UI. */
+/** Ein Hinweis unter dem Login — direkt zur Registrierung (kein Umweg über die Startseite). */
 export function LoginRegisterCta({
   inviteToken = "",
   prefilledEmail = "",
 }: LoginRegisterCtaProps) {
-  const pricingHref = buildPricingEntryHref(inviteToken, prefilledEmail);
+  const registerHref = buildRegisterEntryHref(inviteToken, prefilledEmail);
 
   return (
     <div
@@ -21,7 +21,7 @@ export function LoginRegisterCta({
     >
       <p className="yd-auth-register yd-auth-register--subtle">
         {AUTH_ACCESS_COPY.loginRegisterLead}{" "}
-        <Link prefetch href={pricingHref} className="yd-auth-access-link">
+        <Link prefetch href={registerHref} className="yd-auth-access-link">
           {AUTH_ACCESS_COPY.loginRegisterLink}
         </Link>
       </p>

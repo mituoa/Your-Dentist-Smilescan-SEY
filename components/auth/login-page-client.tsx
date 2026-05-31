@@ -11,6 +11,7 @@ import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirm
 import { YdAuthPending } from "@/components/auth/yd-auth-ui";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { LoginRegisterCta } from "@/components/auth/login-register-cta";
 import { AUTH_LOGIN_INVALID_CREDENTIALS } from "@/lib/auth-user-facing-errors";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
@@ -77,18 +78,10 @@ export function LoginPageClient({
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash === "#pricing" || window.location.hash === "#preise") {
-      const params = new URLSearchParams();
-      if (inviteToken) params.set("invite", inviteToken);
-      if (prefilledEmail) params.set("email", prefilledEmail);
-      const q = params.toString();
-      window.location.replace(q ? `/?${q}#preise` : "/#preise");
-      return;
-    }
     if (!signedOut) {
       window.scrollTo(0, 0);
     }
-  }, [signedOut, inviteToken, prefilledEmail]);
+  }, [signedOut]);
 
   useEffect(() => {
     if (!signedOut) return;
@@ -193,7 +186,7 @@ export function LoginPageClient({
       <div className="yd-clinical-entry yd-clinical-entry--login">
         <div className="yd-clinical-entry-panel yd-clinical-entry-panel--login-entrance">
           <div className="yd-auth-login-brand yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "0" }}>
-            <YourDentistBrandLockup size="md" centered />
+            <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
           </div>
 
           <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>

@@ -12,6 +12,7 @@ type RegisterLicenseSideCardProps = {
   preview: string | null;
   docStatus: DocStatus;
   qualityHint: string;
+  sideError?: string | null;
   dragActive: boolean;
   onDragEnter: (e: DragEvent) => void;
   onDragLeave: (e: DragEvent) => void;
@@ -22,13 +23,18 @@ type RegisterLicenseSideCardProps = {
   onClear: () => void;
 };
 
-function borderClass(file: File | null, docStatus: DocStatus, dragActive: boolean): string {
-  if (dragActive) return "border-[#0284C7] bg-[#0284C7]/5";
-  if (!file) return "border-gray-300 bg-white";
-  if (docStatus === "checking") return "border-slate-300 bg-slate-50/80";
-  if (docStatus === "success") return "border-green-500 bg-green-50/60";
-  if (docStatus === "warn") return "border-amber-300 bg-amber-50/40";
-  return "border-gray-300 bg-white";
+function borderClass(
+  file: File | null,
+  docStatus: DocStatus,
+  dragActive: boolean,
+  sideError: string | null | undefined
+): string {
+  if (sideError) return "border-amber-200/90 bg-amber-50/35";
+  if (dragActive) return "border-[#0284C7]/40 bg-[#0284C7]/5";
+  if (!file) return "border-slate-200/90 bg-slate-50/35";
+  if (docStatus === "checking") return "border-slate-200/90 bg-slate-50/50";
+  if (docStatus === "warn") return "border-amber-200/90 bg-amber-50/35";
+  return "border-green-200/90 bg-green-50/45";
 }
 
 export function RegisterLicenseSideCard({
@@ -38,6 +44,7 @@ export function RegisterLicenseSideCard({
   preview,
   docStatus,
   qualityHint,
+  sideError,
   dragActive,
   onDragEnter,
   onDragLeave,
@@ -51,91 +58,108 @@ export function RegisterLicenseSideCard({
   const cameraInputId = `${sideId}-camera`;
 
   return (
-    <div
-      className={`relative rounded-xl border-2 border-dashed px-5 py-5 transition-colors duration-200 max-md:min-h-[148px] ${borderClass(file, docStatus, dragActive)}`}
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-    >
-      <input
-        id={fileInputId}
-        type="file"
-        accept="image/jpeg,image/png,image/jpg,application/pdf,.pdf"
-        onChange={onFilePick}
-        className="sr-only"
-      />
-      <input
-        id={cameraInputId}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={onCameraPick}
-        className="sr-only"
-      />
+    <div className="min-w-0">
+      <div
+        className={`relative rounded-xl border border-dashed px-4 py-4 transition-colors duration-200 max-md:min-h-[148px] sm:px-5 sm:py-5 ${borderClass(file, docStatus, dragActive, sideError)}`}
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+      >
+        <input
+          id={fileInputId}
+          type="file"
+          accept="image/jpeg,image/png,image/jpg,application/pdf,.pdf"
+          onChange={onFilePick}
+          className="sr-only"
+        />
+        <input
+          id={cameraInputId}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={onCameraPick}
+          className="sr-only"
+        />
 
-      <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">{title}</p>
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">{title}</p>
 
-      {file ? (
-        <div className="mt-3">
-          {preview ? (
-            <div className="mb-3 overflow-hidden rounded-lg border border-green-200/80 bg-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={preview} alt={title} className="h-28 w-full object-cover" />
-            </div>
-          ) : null}
-          <p className="truncate text-[13px] font-medium text-gray-900">{file.name}</p>
-          <p className="mt-1 text-[12px] text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-
-          {docStatus === "checking" ? (
-            <p className="mt-2 flex items-center gap-1.5 text-[12px] text-slate-600" aria-live="polite">
-              <span className="yd-auth-loading-pulse !h-3 !w-3" aria-hidden />
-              Dokument wird geprüft…
+        {file ? (
+          <div className="mt-3">
+            <p className="flex items-center gap-1.5 text-[13px] font-medium text-green-800">
+              <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Datei hinzugefügt
             </p>
-          ) : qualityHint ? (
-            <p
-              className={`mt-2 flex items-start gap-1.5 text-[12px] ${
-                docStatus === "success" ? "font-medium text-green-700" : "text-amber-800"
-              }`}
+            {preview ? (
+              <div className="mb-3 mt-3 overflow-hidden rounded-lg border border-green-200/70 bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={preview} alt={title} className="h-28 w-full object-cover" />
+              </div>
+            ) : null}
+            <p className="truncate text-[13px] font-medium text-gray-900">{file.name}</p>
+            <p className="mt-0.5 text-[12px] text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+
+            {docStatus === "checking" ? (
+              <p className="mt-2 flex items-center gap-1.5 text-[12px] text-slate-600" aria-live="polite">
+                <span className="yd-auth-loading-pulse !h-3 !w-3" aria-hidden />
+                Nachweis wird geprüft…
+              </p>
+            ) : qualityHint ? (
+              <p
+                className={`mt-2 flex items-start gap-1.5 text-[12px] ${
+                  docStatus === "success" ? "font-medium text-green-700" : "text-amber-800"
+                }`}
+              >
+                {docStatus === "success" ? (
+                  <svg className="mt-0.5 h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : null}
+                <span>{qualityHint}</span>
+              </p>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={onClear}
+              className="mt-3 text-[13px] font-medium yd-auth-link hover:text-[#0369A1]"
             >
-              {docStatus === "success" ? (
-                <svg className="mt-0.5 h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              ) : null}
-              <span>{qualityHint}</span>
-            </p>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={onClear}
-            className="mt-3 text-[13px] font-medium yd-auth-link hover:text-[#0369A1]"
-          >
-            Erneut auswählen
-          </button>
-        </div>
-      ) : (
-        <div className="mt-4 flex flex-col gap-2">
-          <label
-            htmlFor={fileInputId}
-            className="yd-auth-btn-primary inline-flex h-[44px] cursor-pointer items-center justify-center text-[13px]"
-          >
-            Datei hochladen
-          </label>
-          <label
-            htmlFor={cameraInputId}
-            className="yd-auth-btn-secondary inline-flex h-[44px] cursor-pointer items-center justify-center text-[13px]"
-          >
-            Foto aufnehmen
-          </label>
-          <p className="text-[11px] leading-relaxed text-gray-500">JPG, PNG oder PDF (max. 10 MB)</p>
-        </div>
-      )}
+              Andere Datei wählen
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 flex flex-col gap-2">
+            <label
+              htmlFor={fileInputId}
+              className="inline-flex h-[44px] cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+            >
+              Datei hinzufügen
+            </label>
+            <label
+              htmlFor={cameraInputId}
+              className="yd-auth-btn-secondary inline-flex h-[44px] cursor-pointer items-center justify-center text-[13px]"
+            >
+              Foto aufnehmen
+            </label>
+            <p className="text-[11px] leading-relaxed text-gray-500">JPG, PNG oder PDF (max. 10 MB)</p>
+          </div>
+        )}
+      </div>
+      {sideError ? (
+        <p className="mt-2 text-[12px] leading-relaxed text-amber-900" role="alert">
+          {sideError}
+        </p>
+      ) : null}
     </div>
   );
 }

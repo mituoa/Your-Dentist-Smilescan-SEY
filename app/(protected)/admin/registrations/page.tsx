@@ -125,15 +125,9 @@ export default async function AdminRegistrationsPage() {
                   </div>
                   <div className="rounded-xl bg-slate-50 p-3">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                      Zahnarzt-ID
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-gray-900">
-                      {r.workspace_contracts?.dentist_license_number ?? "—"}
+                      Zahnarztausweis
                     </p>
                     <div className="mt-2 space-y-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                        Ausweis
-                      </p>
                       {r.workspace_contracts?.dentist_license_storage_path_front ? (
                         <form
                           action={async () => {

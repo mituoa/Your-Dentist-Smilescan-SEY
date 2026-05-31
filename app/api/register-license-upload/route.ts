@@ -100,7 +100,11 @@ export async function POST(request: NextRequest) {
       const tooBig = file.size > MAX_LICENSE_SIZE_BYTES;
       console.warn("[api/register-license-upload] validation rejected", tooBig ? "size" : "format");
       return NextResponse.json(
-        { error: tooBig ? "Die Datei ist zu groß." : "Die Datei entspricht nicht den Vorgaben." },
+        {
+          error: tooBig
+            ? "Die Datei ist zu groß. Bitte wählen Sie eine Datei unter 10 MB."
+            : "Dieses Format wird nicht unterstützt. Bitte JPG, PNG oder PDF verwenden.",
+        },
         { status: 400 }
       );
     }

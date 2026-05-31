@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { cn } from "@/lib/utils";
 
 export type YdAuthEnvironmentProps = {
@@ -70,14 +71,14 @@ export function YdAuthEnvironment({
                 {showBrand ? (
                   <div className="yd-auth-brand">
                     {brandHref === false ? (
-                      <YourDentistBrandLockup size="md" centered />
+                      <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
                     ) : (
                       <Link
                         href={brandHref}
                         className="yd-auth-brand-link"
                         aria-label="Zur Startseite"
                       >
-                        <YourDentistBrandLockup size="md" centered />
+                        <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
                       </Link>
                     )}
                   </div>

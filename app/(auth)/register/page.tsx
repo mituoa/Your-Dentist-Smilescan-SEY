@@ -30,18 +30,6 @@ function parseWizardStep(raw: string | undefined): 1 | 2 | 3 | 4 {
   return 1;
 }
 
-function buildPricingHref(params: {
-  plan?: string;
-  invite?: string;
-  email?: string;
-}): string {
-  const p = new URLSearchParams();
-  if (params.plan?.trim()) p.set("plan", params.plan.trim());
-  if (params.invite?.trim()) p.set("invite", params.invite.trim());
-  if (params.email?.trim()) p.set("email", params.email.trim());
-  const qs = p.toString();
-  return qs ? `/?${qs}#preise` : "/#preise";
-}
 
 const MAX_REGISTER_QUERY_ERROR_LEN = 512;
 
@@ -75,12 +63,6 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     ? `/login?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
     : "/login";
 
-  const pricingHref = buildPricingHref({
-    plan: params.plan,
-    invite: inviteToken,
-    email: prefilledEmail,
-  });
-
   return (
     <YdPublicOsEnvironment mode="register" scroll>
       <YdProductChrome variant="entry" />
@@ -104,7 +86,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           initialWizardStep={initialWizardStep}
           fromPricing={fromPricing}
           loginHref={loginHrefPlain}
-          pricingHref={pricingHref}
+          exitHref="/"
           registrationDemoUi={registrationDemoUi}
           registrationDemoServer={isRegistrationDemoMode()}
           skipPaymentAtSignup={skipPaymentAtSignup()}

@@ -9,10 +9,18 @@ import { useFormStatus } from "react-dom";
 
 import { RegisterFormBackButton } from "@/components/auth/register-form-back-button";
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
+import { RegisterStep4Checkbox } from "@/components/auth/register-step4-checkbox";
+import { RegisterStep4TrustStatus } from "@/components/auth/register-step4-trust-status";
+import { RegisterStep4WithdrawalConsent } from "@/components/auth/register-step4-withdrawal-consent";
 import { RegisterLicenseSideCard } from "@/components/auth/register-license-side-card";
+import {
+  userFacingRegisterProofFileError,
+  userFacingRegisterProofUploadError,
+} from "@/lib/auth/register-practice-proof-errors";
 import { RegisterPasswordGuidance } from "@/components/auth/register-password-guidance";
 import { RegisterSuccessWaiting } from "@/components/auth/register-success-waiting";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { REGISTER_CONTACT_ROLES } from "@/lib/auth/register-contact-roles";
 import {
@@ -28,6 +36,7 @@ import {
   type RegisterPlanId,
 } from "@/lib/auth/register-plans";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
+import { cn } from "@/lib/utils";
 
 type Plan = RegisterPlanId;
 type RegistrationStep = 1 | 2 | 3 | 4;
@@ -72,8 +81,8 @@ export function RegisterClient(props: {
   /** Aus URL `step` (1–4), nur wenn nicht `success`. */
   initialWizardStep?: RegistrationStep;
   loginHref: string;
-  /** Separate pricing/onboarding page — close wizard returns here. */
-  pricingHref: string;
+  /** Schließen auf Schritt 1 (z. B. Startseite). */
+  exitHref: string;
   fromPricing?: boolean;
   /** Zeigt zweiten Submit „ohne Stripe“ (wirksam nur mit REGISTRATION_DEMO_MODE am Server). */
   registrationDemoUi?: boolean;
@@ -89,7 +98,7 @@ export function RegisterClient(props: {
   const router = useRouter();
   const searchParams = useSearchParams();
   const loginBackHref = props.loginHref;
-  const pricingHref = props.pricingHref;
+  const exitHref = props.exitHref;
   const fromPricingFlow = Boolean(props.fromPricing);
 
   const pushRegisterUrl = React.useCallback(
@@ -120,7 +129,7 @@ export function RegisterClient(props: {
       pushRegisterUrl(p, "push");
       return;
     }
-    router.replace(pricingHref);
+    router.replace(exitHref);
   };
   const plan = coerceRegisterPlan(props.initialPlan);
   const [registrationStep, setRegistrationStep] = React.useState<RegistrationStep>(
@@ -130,7 +139,7 @@ export function RegisterClient(props: {
   const [regRole, setRegRole] = React.useState("");
   const [regPractice, setRegPractice] = React.useState("");
   const [regPhone, setRegPhone] = React.useState("");
-  const [regLicense, setRegLicense] = React.useState("");
+  const [regWebsite, setRegWebsite] = React.useState("");
   const [regEmail, setRegEmail] = React.useState(props.prefilledEmail ?? "");
   const [navBusy, setNavBusy] = React.useState(false);
   const registerStep4SubmitIntentRef = React.useRef<string | null>(null);
@@ -202,6 +211,8 @@ export function RegisterClient(props: {
   const [licenseBackStoragePath, setLicenseBackStoragePath] = React.useState<string>("");
   const [licenseUploading, setLicenseUploading] = React.useState(false);
   const [licenseUploadError, setLicenseUploadError] = React.useState<string>("");
+  const [frontSideError, setFrontSideError] = React.useState("");
+  const [backSideError, setBackSideError] = React.useState("");
 
   const [frontQualityOk, setFrontQualityOk] = React.useState<boolean | null>(null);
   const [backQualityOk, setBackQualityOk] = React.useState<boolean | null>(null);
@@ -265,31 +276,6 @@ export function RegisterClient(props: {
   const registrationDocsSatisfied =
     props.licenseStepOptional === true ||
     Boolean(licenseFrontStoragePath || licenseBackStoragePath || licenseStoragePath);
-
-  const normalizeLicenseNumber = (v: string) => v.replace(/\s+/g, "").trim();
-  const licenseFormatHint = React.useMemo(() => {
-    const v = normalizeLicenseNumber(regLicense);
-    if (!v) return null;
-    // Keep permissive: final verification remains manual approval by admin.
-    const ok =
-      /^z-?\d{6,10}$/i.test(v) || // e.g. Z-12345678
-      /^\d{7,10}$/.test(v) || // pure digits
-      /^[a-z]{1,3}-?\d{6,10}$/i.test(v); // e.g. prefix-1234567
-    if (ok) return { tone: "ok" as const, text: "Format sieht plausibel aus." };
-    return { tone: "warn" as const, text: "Bitte Nummer genau wie auf dem Ausweis eingeben (Format prüfen)." };
-  }, [regLicense]);
-
-  const phoneFormatHint = React.useMemo(() => {
-    const digits = regPhone.replace(/\D/g, "");
-    if (!regPhone.trim()) return null;
-    if (digits.length >= 6 && digits.length <= 15) {
-      return { tone: "ok" as const, text: "Format wirkt plausibel — wir melden uns bei Bedarf unter dieser Nummer." };
-    }
-    return {
-      tone: "warn" as const,
-      text: "Bitte Vorwahl und Nummer prüfen (z. B. +49 …). Sie können trotzdem fortfahren.",
-    };
-  }, [regPhone]);
 
   React.useEffect(() => {
     if (registrationStep !== 1) return;
@@ -381,6 +367,15 @@ export function RegisterClient(props: {
     }
   }, [selectedPlan]);
 
+  React.useEffect(() => {
+    if (selectedPlan === "monthly" && paymentMethod === "invoice") {
+      setPaymentMethod("sepa_debit");
+    }
+    if (paymentMethod === "paypal") {
+      setPaymentMethod("sepa_debit");
+    }
+  }, [selectedPlan, paymentMethod]);
+
   const plans = REGISTER_PLANS;
 
   const handleDrag = (e: React.DragEvent) => {
@@ -425,10 +420,30 @@ export function RegisterClient(props: {
   };
 
   const ingestLicenseFile = (file: File, side: "front" | "back") => {
+    const fileError = userFacingRegisterProofFileError(file);
+    if (fileError) {
+      if (side === "front") {
+        setFrontSideError(fileError);
+        setLicenseFrontFile(null);
+        setFrontPreview(null);
+        setFrontDocStatus("idle");
+        setFrontQualityHint("");
+      } else {
+        setBackSideError(fileError);
+        setLicenseBackFile(null);
+        setBackPreview(null);
+        setBackDocStatus("idle");
+        setBackQualityHint("");
+      }
+      return;
+    }
+
     if (side === "front") {
+      setFrontSideError("");
       setLicenseFrontFile(file);
       setLicenseFrontStoragePath("");
     } else {
+      setBackSideError("");
       setLicenseBackFile(file);
       setLicenseBackStoragePath("");
     }
@@ -443,7 +458,7 @@ export function RegisterClient(props: {
     } else {
       if (side === "front") setFrontPreview(null);
       else setBackPreview(null);
-      applyDocQualityResult(side, true, "PDF wird bei der Prüfung gesondert betrachtet.");
+      applyDocQualityResult(side, true, "PDF wird bei der Bearbeitung gesondert betrachtet.");
       return;
     }
 
@@ -472,7 +487,7 @@ export function RegisterClient(props: {
 
   const analyzeImageQuality = async (file: File): Promise<{ ok: boolean; hint: string }> => {
     if (!file.type.startsWith("image/")) {
-      return { ok: true, hint: "PDF wird bei der Prüfung gesondert betrachtet." };
+      return { ok: true, hint: "PDF wird bei der Bearbeitung gesondert betrachtet." };
     }
 
     const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -574,7 +589,6 @@ export function RegisterClient(props: {
     e.preventDefault();
     setStep2SubmitAttempted(true);
     if (!regPractice.trim()) return;
-    if (!regLicense.trim()) return;
     goToStep(3);
   };
 
@@ -594,8 +608,8 @@ export function RegisterClient(props: {
       const msg =
         typeof json.error === "string" && json.error.trim().length > 0
           ? json.error.trim()
-          : "Upload fehlgeschlagen.";
-      throw new Error(msg);
+          : "";
+      throw new Error(userFacingRegisterProofUploadError(msg));
     }
     return json.storagePath;
   };
@@ -619,7 +633,9 @@ export function RegisterClient(props: {
           goToStep(4);
           return;
         }
-        setLicenseUploadError("Bitte laden Sie Vorder- und Rückseite hoch (oder eine Seite als Bild/PDF).");
+        setLicenseUploadError(
+          "Bitte fügen Sie mindestens Vorder- oder Rückseite Ihres Nachweises hinzu (JPG, PNG oder PDF)."
+        );
         return;
       }
 
@@ -645,14 +661,14 @@ export function RegisterClient(props: {
       setLicenseUploadError("");
       if (!frontQ.ok || !backQ.ok) {
         setLicenseUploadError(
-          "Hinweis: Die Scan-Qualität ist für eine manuelle Prüfung grenzwertig. Sie können fortfahren; wir prüfen das Dokument später."
+          "Hinweis: Die Aufnahme ist für die Bearbeitung grenzwertig. Sie können fortfahren — wir melden uns bei Bedarf."
         );
       }
       goToStep(4);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Upload fehlgeschlagen.";
       console.error("[RegisterClient] license upload", raw);
-      setLicenseUploadError(userFacingAuthError(raw));
+      setLicenseUploadError(userFacingRegisterProofUploadError(raw));
     } finally {
       setLicenseUploading(false);
     }
@@ -692,9 +708,17 @@ export function RegisterClient(props: {
           </button>
 
             <div className="yd-auth-register-header">
-              <div className="mb-1 flex justify-center">
-                <YourDentistBrandLockup size="md" centered />
+              <div className="mb-4 flex justify-center pb-0.5">
+                <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
               </div>
+              {!props.success ? (
+                <p className="yd-auth-register-login-hint mt-3 text-center text-[13px] text-gray-500">
+                  Bereits Zugang?{" "}
+                  <Link href={loginBackHref} className="yd-auth-link font-medium">
+                    Anmelden
+                  </Link>
+                </p>
+              ) : null}
             </div>
 
             <div className="yd-auth-register-body">
@@ -1000,10 +1024,10 @@ export function RegisterClient(props: {
                 <div className="yd-auth-awaken-field">
                   <div className="mb-7 text-center">
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Ihre Praxis
+                      Praxisinformationen
                     </h3>
                     <p className="text-[13px] text-gray-500">
-                      Damit wir Sie optimal unterstützen können
+                      Angaben zur Praxis, für die der Zugang eingerichtet wird.
                     </p>
                   </div>
 
@@ -1030,8 +1054,11 @@ export function RegisterClient(props: {
 
                     <div>
                       <label htmlFor="reg-phone" className="mb-2 block text-[13px] font-medium text-gray-700">
-                        Telefonnummer <span className="font-normal text-gray-500">(optional)</span>
+                        Telefonnummer
                       </label>
+                      <p className="mb-2 text-[12px] leading-relaxed text-slate-500">
+                        Telefonnummer für Rückfragen zur Freischaltung.
+                      </p>
                       <input
                         id="reg-phone"
                         type="tel"
@@ -1039,48 +1066,25 @@ export function RegisterClient(props: {
                         onChange={(e) => setRegPhone(e.target.value)}
                         autoComplete="tel"
                         maxLength={30}
-                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        className="yd-auth-input h-[52px] scroll-mt-8 text-[16px]"
                       />
-                      {phoneFormatHint ? (
-                        <p
-                          className={`mt-2 text-[12px] ${
-                            phoneFormatHint.tone === "ok" ? "text-slate-500" : "text-amber-800"
-                          }`}
-                        >
-                          {phoneFormatHint.text}
-                        </p>
-                      ) : null}
                     </div>
 
                     <div>
-                      <label htmlFor="reg-license" className="mb-2 block text-[13px] font-medium text-gray-700">
-                        Zahnarzt-Zulassungsnummer *
+                      <label htmlFor="reg-website" className="mb-2 block text-[13px] font-medium text-gray-700">
+                        Website <span className="font-normal text-gray-500">(optional)</span>
                       </label>
-                      <p className="mb-2 text-[12px] leading-relaxed text-slate-500">
-                        Zur fachlichen Prüfung Ihres Praxiszugangs.
-                      </p>
                       <input
-                        id="reg-license"
-                        type="text"
-                        value={regLicense}
-                        onChange={(e) => setRegLicense(e.target.value)}
-                        className="yd-auth-input h-[52px] scroll-mt-8"
-                        required
+                        id="reg-website"
+                        type="url"
+                        inputMode="url"
+                        value={regWebsite}
+                        onChange={(e) => setRegWebsite(e.target.value)}
+                        autoComplete="url"
+                        maxLength={100}
+                        placeholder="https://ihre-praxis.de"
+                        className="yd-auth-input h-[52px] scroll-mt-8 text-[16px]"
                       />
-                      {step2SubmitAttempted && !regLicense.trim() ? (
-                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
-                          Bitte geben Sie Ihre Zulassungsnummer an.
-                        </p>
-                      ) : null}
-                      {licenseFormatHint ? (
-                        <p
-                          className={`mt-2 text-[12px] ${
-                            licenseFormatHint.tone === "ok" ? "text-green-700" : "text-amber-800"
-                          }`}
-                        >
-                          {licenseFormatHint.text}
-                        </p>
-                      ) : null}
                     </div>
 
                     <div className="flex gap-3 pt-4">
@@ -1103,25 +1107,24 @@ export function RegisterClient(props: {
                 <div className="yd-auth-awaken-field">
                   <div className="mb-7 text-center">
                     <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Verifizierung
+                      Praxiszugang bestätigen
                     </h3>
-                    <p className="text-[13px] text-gray-500">
-                      Bitte laden Sie Ihre Zahnarzt-Zulassung hoch — idealerweise Vorder- und Rückseite; mindestens
-                      eine Seite als Bild oder PDF.
+                    <p className="mx-auto max-w-md text-[13px] leading-relaxed text-gray-500">
+                      Für die geschützte Nutzung prüfen wir neue Praxiszugänge vor der Freischaltung.
                     </p>
                     {props.licenseStepOptional ? (
-                      <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-gray-500">
-                        Demo: Sie können ohne Upload fortfahren — die Dokumente können Sie später nachreichen.
+                      <p className="mx-auto mt-3 max-w-md text-[12px] leading-relaxed text-gray-500">
+                        Sie können diesen Schritt überspringen und die Unterlagen später ergänzen.
                       </p>
                     ) : null}
                   </div>
 
-                  <form onSubmit={onStep3Submit} className="space-y-5" aria-busy={licenseUploading}>
+                  <form onSubmit={onStep3Submit} className="min-w-0 space-y-5" aria-busy={licenseUploading}>
 
-                    <div>
+                    <div className="min-w-0">
                       {!licenseFrontFile && !licenseBackFile ? (
                         <div className="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 px-4 py-4 text-left">
-                          <p className="text-[12px] font-medium text-slate-800">Für eine schnelle Prüfung:</p>
+                          <p className="text-[12px] font-medium text-slate-800">Für eine schnelle Bearbeitung:</p>
                           <ul className="mt-2.5 space-y-1.5 text-[12px] leading-relaxed text-slate-600">
                             <li className="flex gap-2">
                               <span className="text-green-700" aria-hidden>
@@ -1133,13 +1136,13 @@ export function RegisterClient(props: {
                               <span className="text-green-700" aria-hidden>
                                 ✓
                               </span>
-                              alle Ecken erkennbar
+                              Alle Ecken erkennbar
                             </li>
                             <li className="flex gap-2">
                               <span className="text-green-700" aria-hidden>
                                 ✓
                               </span>
-                              gute Beleuchtung
+                              Gute Beleuchtung
                             </li>
                             <li className="flex gap-2">
                               <span className="text-green-700" aria-hidden>
@@ -1150,7 +1153,11 @@ export function RegisterClient(props: {
                           </ul>
                         </div>
                       ) : null}
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <p className="mb-1 text-[13px] font-medium text-gray-800">Nachweis hochladen</p>
+                      <p className="mb-4 text-[12px] leading-relaxed text-gray-500">
+                        Zum Beispiel Zahnarztausweis oder vergleichbarer Praxisnachweis.
+                      </p>
+                      <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2">
                         <RegisterLicenseSideCard
                           title="Vorderseite"
                           sideId="license-front"
@@ -1158,6 +1165,7 @@ export function RegisterClient(props: {
                           preview={frontPreview}
                           docStatus={frontDocStatus}
                           qualityHint={frontQualityHint}
+                          sideError={frontSideError || null}
                           dragActive={dragActive}
                           onDragEnter={handleDrag}
                           onDragLeave={handleDrag}
@@ -1172,6 +1180,7 @@ export function RegisterClient(props: {
                             setFrontQualityHint("");
                             setFrontDocStatus("idle");
                             setLicenseFrontStoragePath("");
+                            setFrontSideError("");
                           }}
                         />
                         <RegisterLicenseSideCard
@@ -1181,6 +1190,7 @@ export function RegisterClient(props: {
                           preview={backPreview}
                           docStatus={backDocStatus}
                           qualityHint={backQualityHint}
+                          sideError={backSideError || null}
                           dragActive={dragActive}
                           onDragEnter={handleDrag}
                           onDragLeave={handleDrag}
@@ -1195,6 +1205,7 @@ export function RegisterClient(props: {
                             setBackQualityHint("");
                             setBackDocStatus("idle");
                             setLicenseBackStoragePath("");
+                            setBackSideError("");
                           }}
                         />
                       </div>
@@ -1203,15 +1214,30 @@ export function RegisterClient(props: {
                           className={`mt-3 break-words rounded-lg border px-3 py-2 text-[12px] leading-relaxed ${
                             licenseUploadError.startsWith("Hinweis:")
                               ? "border-amber-200 bg-amber-50 text-amber-900"
-                              : "yd-auth-alert yd-auth-alert--danger border-0"
+                              : "border-amber-200/80 bg-amber-50/60 text-amber-950"
                           }`}
+                          role="alert"
                         >
                           {licenseUploadError}
                         </p>
                       ) : null}
-                      <div className="mt-4 rounded-xl border border-slate-200/90 bg-slate-50/40 px-4 py-3.5 text-left">
+                      <div className="mt-4 flex gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/40 px-4 py-3.5 text-left">
+                        <svg
+                          className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={1.75}
+                          aria-hidden
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                          />
+                        </svg>
                         <p className="text-[12px] leading-relaxed text-slate-600">
-                          Ihre Unterlagen werden verschlüsselt übertragen und ausschließlich zur Prüfung Ihres
+                          Ihre Angaben werden geschützt übertragen und ausschließlich zur Einrichtung Ihres
                           Praxiszugangs verwendet.
                         </p>
                       </div>
@@ -1247,29 +1273,20 @@ export function RegisterClient(props: {
 
               {registrationStep === 4 ? (
                 <div className="yd-auth-awaken-field">
-                  <header className="mb-8 text-center md:mb-10">
+                  <header className="mb-4 text-center md:mb-5">
                     <h3 className="text-[22px] font-semibold leading-snug tracking-tight text-slate-900 md:text-[23px]">
                       Praxiszugang vorbereiten
                     </h3>
-                    <p className="mx-auto mt-3 max-w-md text-[13px] leading-relaxed text-slate-600">
-                      Wählen Sie Ihr Abrechnungsintervall. Ihr Zugang wird erst nach erfolgreicher Prüfung
-                      aktiviert.
+                    <p className="mx-auto mt-2.5 max-w-md text-[13px] leading-relaxed text-slate-600">
+                      Abrechnung vorbereiten. Aktivierung nach Prüfung Ihrer Praxis.
                     </p>
                   </header>
 
-                  <div className="mb-8 rounded-xl border border-slate-200/90 bg-slate-50/60 px-4 py-4 text-left md:mb-10 md:px-5 md:py-4">
-                    <p className="text-[12px] font-medium text-slate-800">Keine Abbuchung vor Freischaltung.</p>
-                    <p className="mt-2 text-[12px] leading-relaxed text-slate-600">
-                      Wir prüfen Ihre Angaben innerhalb von 24 Stunden.
-                      {props.skipPaymentAtSignup
-                        ? " In dieser Umgebung erfolgt keine Zahlungserfassung."
-                        : " Es erfolgt keine Abbuchung vor der Freischaltung."}
-                    </p>
-                  </div>
+                  <RegisterStep4TrustStatus />
 
                   <form
                     action={props.signUpAction}
-                    className="block min-w-0 space-y-8 md:space-y-10"
+                    className="block min-w-0 space-y-8"
                     onSubmit={(e) => {
                       const sub = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null | undefined;
                       registerStep4SubmitIntentRef.current =
@@ -1277,269 +1294,182 @@ export function RegisterClient(props: {
                     }}
                   >
                     <RegisterStep4LockableFieldset>
-                      <section aria-labelledby="reg-step4-tarif-heading" className="min-w-0">
-                        <h4
-                          id="reg-step4-tarif-heading"
-                          className="mb-4 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500"
-                        >
-                          Abrechnungsintervall
-                        </h4>
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
-                          {(Object.keys(plans) as Plan[]).map((key) => {
-                            const p = plans[key];
-                            const active = selectedPlan === key;
-                            const recommended = key === "yearly";
-                            return (
-                              <button
-                                key={key}
-                                type="button"
-                                onClick={() => setSelectedPlan(key)}
-                                className={`relative max-md:min-h-[52px] rounded-xl border px-4 py-3.5 text-left transition-colors duration-150 md:py-4 ${
-                                  active
-                                    ? "border-[#0284C7]/70 bg-[#0284C7]/[0.04] ring-1 ring-[#0284C7]/25"
-                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80"
-                                }`}
-                              >
-                                {active ? (
-                                  <span
-                                    className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#0284C7] text-white"
-                                    aria-hidden
-                                  >
-                                    <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  </span>
-                                ) : null}
-                                <div className="mb-2 flex items-start justify-between gap-2 pr-6">
-                                  <p className="text-[14px] font-medium text-slate-900">{p.label}</p>
-                                  {recommended ? (
-                                    <span className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                                      Empfohlen
+                      <div className="flex flex-col gap-8">
+                        <section aria-labelledby="reg-step4-tarif-heading" className="min-w-0">
+                          <h4
+                            id="reg-step4-tarif-heading"
+                            className="mb-4 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500"
+                          >
+                            Abrechnungsintervall
+                          </h4>
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                            {(Object.keys(plans) as Plan[]).map((key) => {
+                              const p = plans[key];
+                              const active = selectedPlan === key;
+                              const recommended = key === "yearly";
+                              return (
+                                <button
+                                  key={key}
+                                  type="button"
+                                  onClick={() => setSelectedPlan(key)}
+                                  className={cn(
+                                    "relative rounded-xl border px-4 py-3.5 text-left transition-colors duration-150",
+                                    active ? "yd-reg-step4-plan--selected" : "yd-reg-step4-plan--idle"
+                                  )}
+                                >
+                                  {active ? (
+                                    <span
+                                      className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#0284C7] text-white"
+                                      aria-hidden
+                                    >
+                                      <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                          clipRule="evenodd"
+                                        />
+                                      </svg>
                                     </span>
                                   ) : null}
-                                </div>
-                                <p className="mb-3 text-[11px] leading-snug text-slate-500">{p.billing}</p>
-                                <div className="flex items-baseline gap-1.5">
-                                  <span className="text-[1.35rem] font-semibold tabular-nums tracking-tight text-slate-800 md:text-[1.5rem]">
-                                    €{p.price}
-                                  </span>
-                                  <span className="text-[12px] text-slate-500">pro Monat</span>
-                                </div>
-                                {key !== "monthly" ? (
-                                  <p className="mt-2 text-[11px] text-slate-500">Gesamt je Periode: €{p.total}</p>
-                                ) : (
-                                  <p className="mt-2 text-[11px] text-slate-500">&nbsp;</p>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </section>
-
-                      <section
-                        aria-labelledby="reg-step4-summary-heading"
-                        className="rounded-xl border border-slate-200/90 bg-white px-4 py-5 md:px-6 md:py-6"
-                      >
-                        <h4
-                          id="reg-step4-summary-heading"
-                          className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
-                        >
-                          Zusammenfassung
-                        </h4>
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-                          <div className="min-w-0 flex-1 space-y-1.5">
-                            <p className="text-[14px] font-medium text-slate-900">Praxiszugang</p>
-                            <p className="text-[12px] leading-relaxed text-slate-600">
-                              Abrechnungsrhythmus:{" "}
-                              <span className="font-medium text-slate-800">{plans[selectedPlan].billing}</span>
-                            </p>
-                            <p className="text-[12px] leading-relaxed text-slate-600">
-                              Aktivierung des Zugangs:{" "}
-                              <span className="font-medium text-slate-800">nach fachlicher Prüfung Ihrer Praxis</span>
-                            </p>
+                                  <div className="flex items-center gap-2 pr-7">
+                                    <p className="text-[13px] font-medium text-slate-900">{p.label}</p>
+                                    {recommended ? (
+                                      <span className="text-[10px] font-medium text-slate-500">Empfohlen</span>
+                                    ) : null}
+                                  </div>
+                                  <p className="mt-2 text-[1.15rem] font-semibold tabular-nums tracking-tight text-slate-800">
+                                    {p.price} €
+                                  </p>
+                                  {active && key !== "monthly" ? (
+                                    <p className="mt-1.5 text-[10px] leading-snug text-slate-500">
+                                      {p.total} €
+                                      {key === "halfyearly" ? " alle 6 Monate" : " jährlich"}
+                                    </p>
+                                  ) : null}
+                                </button>
+                              );
+                            })}
                           </div>
-                          <div className="shrink-0 border-t border-slate-100 pt-3 text-left sm:border-t-0 sm:border-l sm:pl-6 sm:pt-0 sm:text-right">
-                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
-                              Monatlicher Betrag
-                            </p>
-                            <p className="mt-1 text-xl font-semibold tabular-nums text-slate-800 md:text-2xl">
-                              €{plans[selectedPlan].price}
-                            </p>
-                            <p className="mt-0.5 text-[11px] text-slate-500">pro Monat</p>
-                          </div>
+                        </section>
+
+                        <div className="border-t border-slate-100 pt-4" aria-live="polite">
+                          <p className="text-[13px] font-medium text-slate-900">Praxiszugang</p>
+                          <p className="text-[12px] text-slate-600">{plans[selectedPlan].label}</p>
+                          <p className="mt-1 text-[14px] font-semibold tabular-nums text-slate-900">
+                            {plans[selectedPlan].price} €/Monat
+                          </p>
                         </div>
 
-                        <div className="my-6 h-px w-full bg-slate-100" />
-
-                        <h4 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-                          Bevorzugte Zahlungsweise
-                        </h4>
-                        <p className="mb-3 text-[12px] leading-relaxed text-slate-600">
-                          Diese Auswahl dient der Vorbereitung Ihres Vertragskontos; technische Umsetzung erfolgt im
-                          nächsten Schritt bzw. nach Freischaltung, je nach Konfiguration.
-                        </p>
-                        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod("sepa_debit")}
-                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
-                              paymentMethod === "sepa_debit"
-                                ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
-                                : "border-slate-200 bg-white hover:border-slate-300"
-                            }`}
-                          >
-                            <p className="text-[13px] font-medium text-slate-900">SEPA‑Lastschrift</p>
-                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
-                              {props.skipPaymentAtSignup
-                                ? "Abbuchung erst nach vertraglicher Freischaltung und Einrichtung."
-                                : "Wiederkehrend gemäß gewähltem Intervall."}
-                            </p>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod("card")}
-                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
-                              paymentMethod === "card"
-                                ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
-                                : "border-slate-200 bg-white hover:border-slate-300"
-                            }`}
-                          >
-                            <p className="text-[13px] font-medium text-slate-900">Karte</p>
-                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
-                              {props.skipPaymentAtSignup
-                                ? "Kartendaten können nach Freischaltung ergänzt werden."
-                                : "Sichere Erfassung im folgenden Schritt."}
-                            </p>
-                          </button>
-                          <button
-                            type="button"
-                            disabled={selectedPlan === "monthly"}
-                            onClick={() => setPaymentMethod("invoice")}
-                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
-                              selectedPlan === "monthly"
-                                ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"
-                                : paymentMethod === "invoice"
-                                  ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
-                                  : "border-slate-200 bg-white hover:border-slate-300"
-                            }`}
-                          >
-                            <p className="text-[13px] font-medium text-slate-900">Rechnung</p>
-                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
-                              {selectedPlan === "monthly"
-                                ? "Nur bei Halbjahres- oder Jahresintervall."
-                                : props.skipPaymentAtSignup
-                                  ? "Abstimmung nach Vereinbarung."
-                                  : "Zahlung auf Rechnung (Praxen)."}
-                            </p>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod("paypal")}
-                            className={`min-h-[48px] rounded-lg border px-3.5 py-3 text-left transition-colors duration-150 md:min-h-0 md:px-4 ${
-                              paymentMethod === "paypal"
-                                ? "border-slate-500 bg-slate-50 ring-1 ring-slate-200/80"
-                                : "border-slate-200 bg-white hover:border-slate-300"
-                            }`}
-                          >
-                            <p className="text-[13px] font-medium text-slate-900">PayPal</p>
-                            <p className="mt-1 text-[11px] leading-snug text-slate-600">
-                              {props.skipPaymentAtSignup
-                                ? "Optional nach Freischaltung."
-                                : "Optional im folgenden Schritt."}
-                            </p>
-                          </button>
-                        </div>
-                        <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-500">
-                          Unterstützte Verfahren umfassen unter anderem SEPA‑Lastschrift, Kartenzahlung und PayPal —
-                          je nach Tarif und Freigabestatus.
-                        </p>
-                      </section>
-
-                      <section
-                        aria-labelledby="reg-step4-legal-heading"
-                        className="rounded-xl border border-slate-200/80 bg-slate-50/30 px-4 py-4 md:px-5 md:py-4"
-                      >
-                        <h4
-                          id="reg-step4-legal-heading"
-                          className="mb-3 text-[10px] font-medium uppercase tracking-wider text-slate-400"
+                        <section
+                          aria-labelledby="reg-step4-pay-heading"
+                          className="border-t border-slate-100 pt-5"
                         >
-                          Vertrag und Einwilligungen
-                        </h4>
-                        <div className="space-y-2">
-                          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-transparent px-2 py-2 text-[12px] leading-snug text-slate-600 transition-colors hover:border-slate-200/80">
-                            <input
-                              type="checkbox"
-                              checked={acceptedTos}
-                              onChange={(e) => setAcceptedTos(e.target.checked)}
-                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30"
-                            />
-                            <span>
-                              Ich akzeptiere die{" "}
-                              <Link
-                                href="/agb"
-                                className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
-                              >
-                                AGB
-                              </Link>
-                              . *
-                            </span>
-                          </label>
-                          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-transparent px-2 py-2 text-[12px] leading-snug text-slate-600 transition-colors hover:border-slate-200/80">
-                            <input
-                              type="checkbox"
-                              checked={acceptedPrivacy}
-                              onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30"
-                            />
-                            <span>
-                              Ich habe die{" "}
-                              <Link
-                                href="/datenschutz"
-                                className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
-                              >
-                                Datenschutzerklärung
-                              </Link>{" "}
-                              zur Kenntnis genommen. *
-                            </span>
-                          </label>
-                          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-transparent px-2 py-2 text-[12px] leading-snug text-slate-600 transition-colors hover:border-slate-200/80">
-                            <input
-                              type="checkbox"
+                          <h4
+                            id="reg-step4-pay-heading"
+                            className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
+                          >
+                            Zahlungsweise
+                          </h4>
+                          <div className="grid grid-cols-3 gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => setPaymentMethod("sepa_debit")}
+                              className={cn(
+                                "flex min-h-[44px] items-center justify-center rounded-lg border px-2 text-[13px] font-medium transition-colors duration-150",
+                                paymentMethod === "sepa_debit"
+                                  ? "yd-reg-step4-pay--selected text-slate-900"
+                                  : "yd-reg-step4-pay--idle text-slate-700"
+                              )}
+                            >
+                              SEPA
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPaymentMethod("card")}
+                              className={cn(
+                                "flex min-h-[44px] items-center justify-center rounded-lg border px-2 text-[13px] font-medium transition-colors duration-150",
+                                paymentMethod === "card"
+                                  ? "yd-reg-step4-pay--selected text-slate-900"
+                                  : "yd-reg-step4-pay--idle text-slate-700"
+                              )}
+                            >
+                              Karte
+                            </button>
+                            <button
+                              type="button"
+                              disabled={selectedPlan === "monthly"}
+                              onClick={() => setPaymentMethod("invoice")}
+                              className={cn(
+                                "flex min-h-[44px] items-center justify-center rounded-lg border px-2 text-[13px] font-medium transition-colors duration-150",
+                                selectedPlan === "monthly"
+                                  ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"
+                                  : paymentMethod === "invoice"
+                                    ? "yd-reg-step4-pay--selected text-slate-900"
+                                    : "yd-reg-step4-pay--idle text-slate-700"
+                              )}
+                            >
+                              Rechnung
+                            </button>
+                          </div>
+                          <p className="mt-2.5 text-[11px] leading-relaxed text-slate-500">
+                            {selectedPlan === "monthly"
+                              ? "Zahlung nach Freischaltung — Rechnung ab Halbjahres- oder Jahrestarif."
+                              : "Einrichtung der Zahlungsweise nach Freischaltung Ihres Praxiszugangs."}
+                          </p>
+                        </section>
+
+                        <section aria-label="Zustimmungen" className="border-t border-slate-100 pt-6">
+                          <div className="space-y-0.5">
+                            <RegisterStep4Checkbox checked={acceptedTos} onChange={setAcceptedTos}>
+                              <>
+                                <Link
+                                  href="/agb"
+                                  className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
+                                >
+                                  AGB
+                                </Link>{" "}
+                                akzeptieren
+                              </>
+                            </RegisterStep4Checkbox>
+                            <RegisterStep4Checkbox checked={acceptedPrivacy} onChange={setAcceptedPrivacy}>
+                              <>
+                                <Link
+                                  href="/datenschutz"
+                                  className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
+                                >
+                                  Datenschutz
+                                </Link>{" "}
+                                bestätigen
+                              </>
+                            </RegisterStep4Checkbox>
+                            <RegisterStep4WithdrawalConsent
                               checked={acceptedWithdrawal}
-                              onChange={(e) => setAcceptedWithdrawal(e.target.checked)}
-                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-600 focus:ring-slate-400/30"
+                              onChange={setAcceptedWithdrawal}
                             />
-                            <span>
-                              Ich verlange ausdrücklich, dass Your Dentist vor Ablauf der Widerrufsfrist mit der
-                              Leistung beginnt, und bestätige, dass ich dadurch mein Widerrufsrecht verlieren kann. *
-                            </span>
-                          </label>
-                        </div>
-                        <p className="mt-3 border-t border-slate-200/70 pt-3 text-[10px] leading-relaxed text-slate-500">
-                          * Pflichtangaben.{" "}
-                          <Link
-                            href="/widerruf"
-                            className="font-medium text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-slate-900"
-                          >
-                            Widerrufsbelehrung
-                          </Link>
-                          . Vertragsdokumentation: <span className="font-medium text-slate-700">Version v1</span>
-                        </p>
-                      </section>
+                          </div>
+                          <p className="mt-3 text-[10px] leading-relaxed text-slate-500">
+                            <Link
+                              href="/widerruf"
+                              className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+                            >
+                              Widerrufsbelehrung
+                            </Link>
+                            {" · "}
+                            Vertrag v1
+                          </p>
+                        </section>
+                      </div>
                     </RegisterStep4LockableFieldset>
                     <RegisterStep4PendingIntentSync intentRef={registerStep4SubmitIntentRef} />
 
-                    <div className="mt-6 space-y-3">
+                    <div className="mt-6 space-y-4">
                     <input type="hidden" name="email" value={normalizeRegisterEmail(regEmail)} />
                     <input type="hidden" name="password" value={regPassword} />
                     <input type="hidden" name="password_confirm" value={regPasswordConfirm} />
                     <input type="hidden" name="display_name" value={regName} />
                     <input type="hidden" name="contact_role" value={regRole} />
                     <input type="hidden" name="contact_phone" value={regPhone.trim()} />
+                    <input type="hidden" name="practice_website" value={regWebsite.trim()} />
                     <input type="hidden" name="workspace_name" value={regPractice} />
                     <input type="hidden" name="billing_interval" value={selectedPlan} />
                     <input type="hidden" name="contract_version" value="v1" />
@@ -1548,7 +1478,6 @@ export function RegisterClient(props: {
                     <input type="hidden" name="accepted_privacy" value={acceptedPrivacy ? "1" : "0"} />
                     <input type="hidden" name="accepted_withdrawal" value={acceptedWithdrawal ? "1" : "0"} />
                     <input type="hidden" name="payment_method" value={paymentMethod} />
-                    <input type="hidden" name="dentist_license_number" value={regLicense} />
                     <input type="hidden" name="dentist_license_storage_path" value={licenseStoragePath} />
                     <input
                       type="hidden"
@@ -1564,13 +1493,6 @@ export function RegisterClient(props: {
                       <input type="hidden" name="invite_token" value={props.inviteToken} />
                     ) : null}
 
-                    {props.skipPaymentAtSignup ? (
-                      <p className="text-center text-[12px] leading-relaxed text-slate-600">
-                        Ihr gewähltes Intervall wird mit dem Praxis-Konto verknüpft. In dieser Konfiguration erfolgt
-                        kein Zahlungsdialog über diese Seite.
-                      </p>
-                    ) : null}
-
                     <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
                       <RegisterFormBackButton
                         onBack={() => goToStep(3)}
@@ -1583,11 +1505,7 @@ export function RegisterClient(props: {
                         value="standard"
                         submitIntentRef={registerStep4SubmitIntentRef}
                         submitIntentValue="standard"
-                        label={
-                          props.skipPaymentAtSignup
-                            ? "Registrierung absenden"
-                            : "Weiter zur vertraglichen Freischaltung"
-                        }
+                        label="Registrierung absenden"
                         pendingLabel="Wird übermittelt…"
                         disabled={
                           !acceptedTos ||
@@ -1595,7 +1513,14 @@ export function RegisterClient(props: {
                           !acceptedWithdrawal ||
                           !registrationDocsSatisfied
                         }
-                        className="h-[52px] min-h-[48px] flex-1 sm:h-[52px]"
+                        className={cn(
+                          "h-[52px] min-h-[48px] flex-1 sm:h-[52px]",
+                          acceptedTos &&
+                            acceptedPrivacy &&
+                            acceptedWithdrawal &&
+                            registrationDocsSatisfied &&
+                            "yd-reg-step4-submit"
+                        )}
                       />
                     </div>
                     </div>
@@ -1633,12 +1558,6 @@ export function RegisterClient(props: {
                   ) : null}
 
                   </form>
-
-                  <p className="mt-6 text-center text-[11px] leading-relaxed text-slate-500">
-                    Auswahl: <span className="font-medium text-slate-700">{plans[selectedPlan].label}</span>
-                    {" · "}
-                    {plans[selectedPlan].billing}
-                  </p>
                 </div>
               ) : null}
                 </>

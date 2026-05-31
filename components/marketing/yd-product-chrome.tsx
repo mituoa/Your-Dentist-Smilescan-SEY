@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { cn } from "@/lib/utils";
 
 type YdProductChromeProps = {
@@ -33,7 +34,7 @@ export function YdProductChrome({
       style={{ ["--yd-public-field-i" as string]: "0" }}
     >
       <Link href="/" className="yd-auth-brand-link" aria-label="Startseite">
-        <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" />
+        <YourDentistBrandLockup size="md" tagline={PUBLIC_BRAND_TAGLINE} />
       </Link>
       <nav
         className={cn("yd-product-chrome-nav", variant === "entry" && "yd-product-chrome-nav--entry")}

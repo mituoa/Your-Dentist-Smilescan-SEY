@@ -3,6 +3,7 @@
  */
 
 import type { RegisterPlanId } from "@/lib/auth/register-plans";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 
 export const PUBLIC_SITE_SECTIONS = {
   problem: "problem",
@@ -216,7 +217,7 @@ export const PUBLIC_SITE_DEMO = {
 } as const;
 
 export const PUBLIC_SITE_FOOTER = {
-  tagline: "Neutral Practice Platform",
+  tagline: PUBLIC_BRAND_TAGLINE,
   links: [
     { label: "Datenschutz", href: "/datenschutz" },
     { label: "Impressum", href: "/impressum" },

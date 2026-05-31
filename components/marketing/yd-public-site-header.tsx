@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 import {
+  PUBLIC_SITE_FOOTER,
   PUBLIC_SITE_HERO,
   PUBLIC_SITE_NAV,
   PUBLIC_SITE_SECTIONS,
@@ -80,7 +81,7 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
       >
         <div className="yd-public-site-header-inner">
           <Link href="/" className="yd-public-site-header-brand min-w-0" aria-label="Startseite">
-            <YourDentistBrandLockup size="sm" tagline="Neutral Practice Platform" />
+            <YourDentistBrandLockup size="sm" tagline={PUBLIC_SITE_FOOTER.tagline} />
           </Link>
 
           <nav

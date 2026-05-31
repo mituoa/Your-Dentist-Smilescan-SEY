@@ -18,7 +18,8 @@ type RegisterPageClientProps = {
   initialWizardStep: 1 | 2 | 3 | 4;
   fromPricing: boolean;
   loginHref: string;
-  pricingHref: string;
+  /** Schließen auf Schritt 1 — Startseite, nicht Preissektion. */
+  exitHref: string;
   registrationDemoUi: boolean;
   registrationDemoServer: boolean;
   skipPaymentAtSignup: boolean;
@@ -42,7 +43,7 @@ export function RegisterPageClient(props: RegisterPageClientProps) {
       initialWizardStep={props.initialWizardStep}
       fromPricing={props.fromPricing}
       loginHref={props.loginHref}
-      pricingHref={props.pricingHref}
+      exitHref={props.exitHref}
       registrationDemoUi={props.registrationDemoUi}
       registrationDemoServer={props.registrationDemoServer}
       skipPaymentAtSignup={props.skipPaymentAtSignup}

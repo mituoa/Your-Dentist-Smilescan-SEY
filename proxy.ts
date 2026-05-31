@@ -80,6 +80,13 @@ export async function proxy(request: NextRequest) {
       if (authError && isBlockingAuthError(authError) && !isAuthRelaxMode()) {
         return supabaseResponse;
       }
+      // Nach Registrierung: Wartezustand auf /register, nicht sofort ins Dashboard.
+      if (
+        pathname.startsWith("/register") &&
+        request.nextUrl.searchParams.get("success") === "1"
+      ) {
+        return supabaseResponse;
+      }
       // Login page sends invite holders to /accept-invite; do not bounce to dashboard first.
       if (
         pathname.startsWith("/login") &&

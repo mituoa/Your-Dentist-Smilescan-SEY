@@ -64,7 +64,7 @@ export function Sidebar({
 
       <header className="yd-mobile-sidebar-drawer-head relative shrink-0 md:hidden">
         <div className="yd-mobile-drawer-brand min-w-0">
-          <YourDentistBrandLockup size="sm" tagline="Praxis Workspace" />
+          <YourDentistBrandLockup size="sm" tagline={null} />
         </div>
         <button
           type="button"

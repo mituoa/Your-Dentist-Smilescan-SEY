@@ -192,6 +192,7 @@ export async function signUp(formData: FormData) {
   const displayName = (formData.get("display_name") as string)?.trim() ?? "";
   const contactRole = (formData.get("contact_role") as string | null)?.trim() ?? "";
   const contactPhone = (formData.get("contact_phone") as string | null)?.trim() ?? "";
+  const practiceWebsite = (formData.get("practice_website") as string | null)?.trim() ?? "";
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
 
   const billingInterval = (formData.get("billing_interval") as string | null)?.trim();
@@ -421,6 +422,7 @@ export async function signUp(formData: FormData) {
       display_name: displayName || email,
       practice_name: workspaceName || null,
       practice_phone: contactPhone || null,
+      practice_website: practiceWebsite || null,
     };
     const { error: profileErr } = await admin
       .from("profile_data")
@@ -517,9 +519,6 @@ export async function signUp(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  if (signData.session) {
-    redirect("/dashboard");
-  }
   const successInviteQ = inviteToken ? `&invite=${encodeURIComponent(inviteToken)}` : "";
   redirect(`/register?success=1&email=${encodeURIComponent(email)}${successInviteQ}`);
 }
