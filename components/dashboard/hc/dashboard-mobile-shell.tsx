@@ -3,7 +3,7 @@ import { ChevronDown, ClipboardList, ListTodo, UserPlus } from "lucide-react";
 
 import { DashboardMobileActions } from "@/components/dashboard/hc/dashboard-mobile-actions";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
-import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
+import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
 
@@ -15,7 +15,6 @@ type DashboardMobileShellProps = {
   weeklyCounts: number[] | null;
   unseenCount: number | null;
   seenCount: number | null;
-  totalCount: number | null;
   previewRows: SubmissionPreviewRow[] | null;
 };
 
@@ -54,7 +53,6 @@ export function DashboardMobileShell({
   weeklyCounts,
   unseenCount,
   seenCount,
-  totalCount,
   previewRows,
 }: DashboardMobileShellProps) {
   const reviewCount = pendingApprovals ?? 0;
@@ -122,9 +120,13 @@ export function DashboardMobileShell({
           <ChevronDown className="yd-dash-fold__chevron" aria-hidden />
         </summary>
         <div className="yd-dash-fold__panel yd-dash-mobile__fold-panel">
-          <HcAnalyticsBars counts={weeklyCounts} totalLabel="Einsendungsverlauf · 7 Tage" />
+          <HcAnalyticsBars counts={weeklyCounts} />
           <div className="mt-3">
-            <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
+            <HcPracticeStatus
+              unseen={unseenCount}
+              seen={seenCount}
+              openTaskCount={openTaskCount}
+            />
           </div>
         </div>
       </details>

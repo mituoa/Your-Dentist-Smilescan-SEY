@@ -9,14 +9,14 @@ import {
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { DashboardMobileShell } from "@/components/dashboard/hc/dashboard-mobile-shell";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
-import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
+import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import {
-  KPI_HOVER_AKTIVE_FAELLE,
-  KPI_HOVER_AUFGABEN,
-  KPI_HOVER_EINSENDUNGEN,
-} from "@/lib/dashboard/kpi-hover-copy";
+  buildActiveCasesWorkContext,
+  buildNewSubmissionsWorkContext,
+  buildOpenTasksWorkContext,
+} from "@/lib/dashboard/kpi-work-context";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
@@ -26,6 +26,7 @@ import {
   getOpenTasks,
   getWeeklySubmissionCounts,
   getRecentSubmissionsPreview,
+  getDashboardPriorityItems,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { YD } from "@/lib/design/yd-design-tokens";
@@ -60,13 +61,15 @@ export default async function DashboardPage() {
     profileData?.display_name || user.email?.split("@")[0] || "Team";
   const doctorLabel = cockpitDoctorLabel(displayName);
 
-  const [unseenRes, totalRes, tasksRes, weeklyRes, previewRes] = await Promise.all([
-    getTotalUnseenSubmissions(workspaceId),
-    getTotalSubmissionsCount(workspaceId),
-    getOpenTasks(workspaceId),
-    getWeeklySubmissionCounts(workspaceId),
-    getRecentSubmissionsPreview(workspaceId),
-  ]);
+  const [unseenRes, totalRes, tasksRes, weeklyRes, previewRes, priorityRes] =
+    await Promise.all([
+      getTotalUnseenSubmissions(workspaceId),
+      getTotalSubmissionsCount(workspaceId),
+      getOpenTasks(workspaceId),
+      getWeeklySubmissionCounts(workspaceId),
+      getRecentSubmissionsPreview(workspaceId),
+      getDashboardPriorityItems(workspaceId, 6),
+    ]);
 
   const unseenCount = unseenRes.ok ? unseenRes.count : null;
   const totalCount = totalRes.ok ? totalRes.count : null;
@@ -78,13 +81,20 @@ export default async function DashboardPage() {
   const openTaskCount = openTasks?.length ?? 0;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
+  const priorityItems = priorityRes.ok ? priorityRes.items : null;
+
+  const newSubmissionsContext = buildNewSubmissionsWorkContext(priorityItems, previewRows);
+  const activeCasesContext = buildActiveCasesWorkContext(priorityItems, previewRows);
+  const openTasksContext = buildOpenTasksWorkContext(openTasks);
+  const nextTaskLabel = openTasks?.[0]?.content ?? null;
 
   const dashboardOverviewIncomplete =
     !!profileError ||
     !unseenRes.ok ||
     !totalRes.ok ||
     !tasksRes.ok ||
-    !previewRes.ok;
+    !previewRes.ok ||
+    !priorityRes.ok;
 
   const hour = new Date().getHours();
   const greeting =
@@ -108,7 +118,6 @@ export default async function DashboardPage() {
         weeklyCounts={weeklyCounts}
         unseenCount={unseenCount}
         seenCount={seenCount}
-        totalCount={totalCount}
         previewRows={previewRows}
       />
 
@@ -132,35 +141,35 @@ export default async function DashboardPage() {
         ) : null}
 
         <DashboardAmbientKpis>
-          <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:gap-5">
-            <div className="flex min-w-0 sm:col-span-1 lg:col-span-4">
+          <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            <div className="flex min-w-0">
               <HcStatCard
                 href="/inbox"
                 title="Neue Einsendungen"
                 value={unseenCount === null ? "—" : unseenCount}
                 iconName="clipboard-list"
                 footnote="Patientenfälle zur Durchsicht"
-                hoverHint={KPI_HOVER_EINSENDUNGEN}
+                workContext={newSubmissionsContext}
               />
             </div>
-            <div className="flex min-w-0 sm:col-span-1 lg:col-span-4">
+            <div className="flex min-w-0">
               <HcStatCard
                 href="/inbox"
                 title="Aktive Fälle"
                 value={seenCount === null ? "—" : seenCount}
                 iconName="user-plus"
                 footnote="Laufende Patientenprozesse"
-                hoverHint={KPI_HOVER_AKTIVE_FAELLE}
+                workContext={activeCasesContext}
               />
             </div>
-            <div className="flex min-w-0 sm:col-span-1 lg:col-span-4">
+            <div className="flex min-w-0">
               <HcStatCard
                 href="/relay"
                 title="Offene Aufgaben"
                 value={openTaskCount}
                 iconName="list-todo"
                 footnote="Praxisworkflow"
-                hoverHint={KPI_HOVER_AUFGABEN}
+                workContext={openTasksContext}
               />
             </div>
           </div>
@@ -175,10 +184,15 @@ export default async function DashboardPage() {
         <DashboardAmbientCharts>
           <div className="yd-dash-zone yd-dash-zone--charts yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
             <div className="min-w-0 lg:col-span-8">
-              <HcAnalyticsBars counts={weeklyCounts} totalLabel="Einsendungsverlauf · 7 Tage" />
+              <HcAnalyticsBars counts={weeklyCounts} />
             </div>
             <div className="min-w-0 lg:col-span-4">
-              <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
+              <HcPracticeStatus
+                unseen={unseenCount}
+                seen={seenCount}
+                openTaskCount={openTaskCount}
+                nextTaskLabel={nextTaskLabel}
+              />
             </div>
           </div>
         </DashboardAmbientCharts>

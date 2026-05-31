@@ -37,6 +37,10 @@
   padding: 0.5rem 1rem 0.5rem 1.125rem;
 }
 
+.yd-workspace .yd-workspace-toolbar__inner--no-search {
+  grid-template-columns: minmax(10.5rem, auto) minmax(0, 1fr);
+}
+
 @media (min-width: 1024px) {
   .yd-workspace .yd-workspace-toolbar__inner {
     min-height: 4rem;

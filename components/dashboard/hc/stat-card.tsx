@@ -10,6 +10,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import {
+  KpiWorkContextPreview,
+  type KpiWorkContextData,
+} from "@/components/dashboard/hc/kpi-work-context-preview";
 import { KpiHoverPreview } from "@/components/dashboard/hc/kpi-hover-preview";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
@@ -33,6 +37,7 @@ type StatCardProps = {
   iconName: DashboardKpiIconName;
   footnote?: string;
   href?: string;
+  workContext?: KpiWorkContextData;
   hoverHint?: string;
   hoverLines?: string[];
   hoverPreview?: ReactNode;
@@ -44,6 +49,7 @@ export function HcStatCard({
   iconName,
   footnote,
   href,
+  workContext,
   hoverHint,
   hoverLines,
   hoverPreview,
@@ -52,14 +58,16 @@ export function HcStatCard({
 
   const resolvedHoverPreview =
     hoverPreview ??
-    (hoverHint || hoverLines?.length ? (
+    (workContext ? (
+      <KpiWorkContextPreview data={workContext} />
+    ) : hoverHint || hoverLines?.length ? (
       <KpiHoverPreview hint={hoverHint} lines={hoverLines} />
     ) : null);
 
   const cardBody = (
     <div
       className={cn(
-        "yd-dash-surface yd-dash-kpi-card flex h-full min-w-0 flex-col justify-between p-5 md:p-[1.375rem]",
+        "yd-dash-surface yd-dash-kpi-card flex h-full min-w-0 flex-col justify-between p-5 md:p-6",
         href && "yd-dash-kpi-card--linked"
       )}
     >
@@ -74,7 +82,7 @@ export function HcStatCard({
           <Icon className="h-[16px] w-[16px]" strokeWidth={1.6} />
         </span>
       </div>
-      <div className="mt-auto pt-4">
+      <div className="mt-auto pt-5">
         <p className="yd-dash-kpi yd-dash-kpi--balanced font-semibold">{value}</p>
         {footnote ? (
           <p

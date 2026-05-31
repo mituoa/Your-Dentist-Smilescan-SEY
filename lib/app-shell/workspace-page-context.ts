@@ -35,3 +35,12 @@ export function resolveWorkspacePageContext(pathname: string): WorkspacePageCont
   }
   return { title: "Arbeitsbereich" };
 }
+
+/** Suche nur dort, wo Patienten-/Fallkontext sinnvoll ist. */
+export function resolveWorkspaceSearchVisible(pathname: string): boolean {
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) return true;
+  if (pathname.startsWith("/inbox")) return true;
+  if (pathname.startsWith("/create-case")) return true;
+  if (pathname.startsWith("/journal")) return true;
+  return false;
+}
