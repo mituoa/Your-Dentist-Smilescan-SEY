@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { TrendingUp, type LucideIcon } from "lucide-react";
 
-import { YdFloatingContext } from "@/components/ambient/yd-floating-context";
 import { HcCard } from "@/components/design/hc-card";
 import type { YdCardTone } from "@/components/design-system/yd-card";
 import { YD } from "@/lib/design/yd-design-tokens";
@@ -18,8 +17,7 @@ type StatCardProps = {
   glow?: boolean;
   tone?: YdCardTone;
   hero?: boolean;
-  /** Floating OS context layer — does not resize card */
-  floatingPreview?: ReactNode;
+  hoverPreview?: ReactNode;
 };
 
 export function HcStatCard({
@@ -34,18 +32,19 @@ export function HcStatCard({
   glow,
   tone = "default",
   hero = false,
-  floatingPreview,
+  hoverPreview,
 }: StatCardProps) {
-  const card = (
+  return (
     <HcCard
       lift={lift}
       glow={glow}
       tone={tone}
-      className={`flex min-w-0 flex-col ${hero ? "min-h-[156px] p-4 md:min-h-[216px] md:p-7" : "min-h-[132px] p-4 md:min-h-[188px] md:p-6"}`}
+      hoverPreview={hoverPreview}
+      className={`flex min-w-0 flex-col ${hero ? "min-h-[204px] p-6 md:min-h-[220px] md:p-7" : "min-h-[176px] p-5 md:min-h-[188px] md:p-6"}`}
     >
-      <div className={`flex items-start justify-between gap-3 ${hero ? "mb-3 md:mb-5" : "mb-2.5 md:mb-4"}`}>
+      <div className={`flex items-start justify-between gap-3 ${hero ? "mb-5" : "mb-4"}`}>
         <span
-          className={`flex items-center justify-center rounded-full ${hero ? "h-9 w-9 md:h-11 md:w-11" : "h-8 w-8 md:h-10 md:w-10"}`}
+          className={`flex items-center justify-center rounded-full ${hero ? "h-11 w-11" : "h-10 w-10"}`}
           style={{
             background: YD.accent.iconGradient,
             boxShadow: hero
@@ -76,7 +75,7 @@ export function HcStatCard({
       ) : null}
       {metricA || metricB ? (
         <div
-          className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-3 text-[11px] leading-relaxed md:gap-x-4 md:pt-4"
+          className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t pt-4 text-[11px] leading-relaxed"
           style={{ borderColor: "rgba(180, 198, 218, 0.32)" }}
         >
           {metricA ? (
@@ -99,8 +98,4 @@ export function HcStatCard({
       ) : null}
     </HcCard>
   );
-
-  if (!floatingPreview) return card;
-
-  return <YdFloatingContext preview={floatingPreview}>{card}</YdFloatingContext>;
 }

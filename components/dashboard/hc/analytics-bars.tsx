@@ -19,8 +19,23 @@ export function HcAnalyticsBars({ counts, totalLabel }: AnalyticsBarsProps) {
   return (
     <HcCard
       tone="primary"
-      className="yd-awaken-chart yd-dash-chart-card flex min-h-[340px] min-w-0 flex-col overflow-hidden p-6 md:min-h-[360px] md:p-7"
-      style={{ ["--yd-chart-stagger" as string]: "0ms" }}
+      className="flex min-h-[340px] min-w-0 flex-col overflow-hidden p-6 md:min-h-[360px] md:p-7"
+      hoverPreview={
+        <div className="space-y-1.5 text-[11px] leading-relaxed" style={{ color: YD.text.muted }}>
+          <p>
+            <span className="font-medium" style={{ color: YD.text.secondary }}>
+              Klinischer Verlauf:{" "}
+            </span>
+            Einsendungen der letzten 7 Tage
+          </p>
+          <p>
+            Höchster Tag:{" "}
+            <span className="font-medium" style={{ color: YD.text.primary }}>
+              {Math.max(...values)} Eingänge
+            </span>
+          </p>
+        </div>
+      }
     >
       <div className="mb-7 flex items-start justify-between gap-4">
         <div>

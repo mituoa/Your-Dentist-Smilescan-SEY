@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 import { YdAwakenBootstrap } from "@/components/ambient/yd-awaken-bootstrap";
 import { YdWorkspaceAwakening } from "@/components/ambient/yd-workspace-awakening";
-import { isAdminAllowlistUser, requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
+import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { buildNavAmbientPreviews } from "@/lib/ambient/build-nav-ambient-previews";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { getOpenTasks } from "@/lib/queries/dashboard";
@@ -34,7 +34,6 @@ export default async function ProtectedLayout({
   const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE_NAME)?.value);
 
   const role = (workspace?.role || "team") as "doctor" | "team";
-  const showAdmin = isAdminAllowlistUser(user);
   // @ts-expect-error - workspaces is joined
   const workspaceName = workspace?.workspaces?.name || "Unbekannt";
 
@@ -126,22 +125,24 @@ export default async function ProtectedLayout({
             <YdAwakenBootstrap />
           </Suspense>
           <div
-            className="yd-workspace yd-awaken-page relative flex h-[100dvh] flex-col overflow-hidden max-md:overflow-x-hidden max-md:overflow-y-hidden"
+            className="yd-workspace yd-awaken-page relative flex h-[100dvh] flex-col overflow-hidden"
             style={{ background: YD.atmosphere.pageGradient }}
           >
-            <div className="yd-workspace-body relative flex min-h-0 flex-1 flex-row max-md:overflow-visible md:overflow-hidden">
+            <div className="relative flex min-h-0 flex-1 flex-row overflow-hidden">
               <MobileSidebarFrame>
                 <Sidebar
                   role={role}
                   inboxCount={inboxCount}
                   myTasksCount={myTasksCount}
                   myTasksOverdueCount={myTasksOverdueCount}
-                  showAdmin={showAdmin}
+                  avatarUrl={profileData?.photo_url ?? null}
+                  displayName={profileData?.display_name ?? null}
+                  email={user.email || ""}
                   navAmbient={navAmbient}
                 />
               </MobileSidebarFrame>
 
-            <div className="yd-workspace-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               <ProtectedTopbar
                 email={user.email || ""}
                 workspaceName={workspaceName}
@@ -151,7 +152,7 @@ export default async function ProtectedLayout({
                 displayName={profileData?.display_name ?? null}
               />
 
-              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(5.5rem,env(safe-area-inset-bottom)+4.5rem)] md:p-5 md:pb-6">
+              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(3rem,env(safe-area-inset-bottom)+2rem)] md:p-5 md:pb-6">
                 <HcAppCanvas>{children}</HcAppCanvas>
               </main>
             </div>

@@ -39,7 +39,7 @@ export function BrandMark({ compact = false }: BrandMarkProps) {
       <span className="md:hidden">
         <YourDentistBrandLockup
           size={compact ? "sm" : "md"}
-          tagline={null}
+          tagline={compact ? null : "Neutral Practice Platform"}
           className="min-w-0"
           priority
         />

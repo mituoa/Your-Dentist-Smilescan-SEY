@@ -6,8 +6,8 @@ import {
   BookOpen,
   CalendarDays,
   Home,
+  MessageSquare,
   Settings,
-  UserRound,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -23,7 +23,7 @@ const ICON_BY_NAME: Record<string, LucideIcon> = {
   inbox: Users,
   tasks: CalendarDays,
   relay: CalendarDays,
-  profile: UserRound,
+  profile: MessageSquare,
   settings: Settings,
   journal: BookOpen,
 };
@@ -54,8 +54,6 @@ export function NavItem({
   const Icon = ICON_BY_NAME[iconName] ?? Home;
   const isRelayNav = href === "/relay";
   const isSettingsNav = href === "/settings";
-  const isAdminNav = href === "/admin/registrations";
-  const isProfileNav = href === "/profile";
   const isCreateCaseNav = href === "/create-case";
   const isActive = isRelayNav
     ? pathname === "/relay" ||
@@ -63,16 +61,10 @@ export function NavItem({
       pathname === "/my-tasks" ||
       pathname.startsWith("/my-tasks/")
     : isSettingsNav
-      ? pathname === "/settings"
-      : isAdminNav
-        ? pathname.startsWith("/admin")
-        : isProfileNav
-          ? pathname === "/profile" ||
-            pathname.startsWith("/profile/") ||
-            pathname === "/profile/editor"
-          : isCreateCaseNav
-            ? pathname === "/create-case"
-            : pathname === href || pathname.startsWith(href + "/");
+      ? pathname === "/settings" || pathname === "/admin"
+      : isCreateCaseNav
+        ? pathname === "/create-case"
+        : pathname === href || pathname.startsWith(href + "/");
 
   return (
     <Link
@@ -83,7 +75,6 @@ export function NavItem({
         "yd-ambient-nav-link group relative flex w-full touch-manipulation items-center transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.18)]",
         "min-h-[44px] gap-2.5 rounded-[14px] px-2.5 py-1.5",
         "md:min-h-0 md:w-11 md:flex-col md:justify-center md:gap-0 md:rounded-none md:bg-transparent md:px-0 md:py-0",
-        tier === "primary" && "yd-nav-tier-primary",
         tier === "secondary" && "yd-nav-tier-secondary",
         isActive && "yd-nav-link-active"
       )}
@@ -120,7 +111,7 @@ export function NavItem({
         <span
           className={cn(
             "yd-nav-label block truncate text-[13px] font-medium leading-snug transition-colors duration-700",
-            isActive ? "text-[#2d5f9c]" : "text-[#475569]"
+            isActive ? "text-[#1A4F9C]" : "text-[#475569]"
           )}
         >
           {label}

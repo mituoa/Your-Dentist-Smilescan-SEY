@@ -23,11 +23,7 @@ export function HcDistributionArc({ unseen, seen, total }: DistributionArcProps)
   const seenLen = Math.round(seenPct * ARC_LEN);
 
   return (
-    <HcCard
-      tone="quiet"
-      className="yd-awaken-chart flex min-h-[340px] min-w-0 flex-col p-6 md:p-6"
-      style={{ ["--yd-chart-stagger" as string]: "140ms" }}
-    >
+    <HcCard tone="quiet" className="flex min-h-[340px] min-w-0 flex-col p-6 md:p-6">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
           <p className="yd-dash-section">Bearbeitungsstand</p>

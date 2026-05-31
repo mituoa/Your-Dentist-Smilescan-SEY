@@ -147,37 +147,28 @@ function placeholderForZone(
   }
   switch (zone) {
     case "dashboard":
-      return "Was soll erledigt werden?";
+      return "Befehl — z. B. Überblick, Aufgabe, neuer Fall …";
     case "relay":
-      return "Was soll erledigt werden?";
+      return "Befehl — z. B. Delegation, Priorität …";
     case "journal":
-      return "Was soll erledigt werden?";
+      return "Befehl — z. B. Zusammenfassung, Gliederung …";
     case "settings":
-      return "Was soll erledigt werden?";
+      return "Befehl — z. B. Einstellung, Rollen …";
     case "inbox":
-      return "Was soll erledigt werden?";
+      return "Kurz eingeben — z. B. Triage, Terminvorbereitung (nur Hilfe, kein Versand) …";
     default:
-      return "Was soll erledigt werden?";
+      return "Befehl — Posteingang, Relay, Journals …";
   }
 }
 
-type CommandAssistProps = {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-};
-
-export function CommandAssist({ open: controlledOpen, onOpenChange }: CommandAssistProps = {}) {
+export function CommandAssist() {
   const pathname = usePathname();
   const router = useRouter();
   const assistCtx = useAssistCaseOptional();
   const inboxCase =
     assistCtx?.casePayload?.kind === "inbox" ? assistCtx.casePayload : null;
 
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
-  const open = isControlled ? controlledOpen : uncontrolledOpen;
-  const setOpen = isControlled ? onOpenChange! : setUncontrolledOpen;
-  const toggleOpen = useCallback(() => setOpen(!open), [open, setOpen]);
+  const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
@@ -480,19 +471,18 @@ export function CommandAssist({ open: controlledOpen, onOpenChange }: CommandAss
 
       <div
         className={cn(
-          "yd-command-assist-fab fixed z-[46]",
-          "bottom-[max(1rem,env(safe-area-inset-bottom,0px)+4.5rem)] right-4",
-          "md:bottom-8 md:right-8"
+          "fixed z-[46]",
+          "bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 md:bottom-8 md:right-8"
         )}
       >
         <button
           ref={fabRef}
           type="button"
-          onClick={toggleOpen}
+          onClick={() => setOpen((o) => !o)}
           className={FAB}
           aria-expanded={open}
           aria-controls="command-assist-panel"
-          aria-label={open ? "Command AI schließen" : "Command AI öffnen"}
+          aria-label={open ? "Command schließen" : "Command öffnen"}
         >
           <Command className="h-[22px] w-[22px] shrink-0" strokeWidth={2} aria-hidden />
         </button>

@@ -62,21 +62,6 @@ export type OpenTaskRow = {
   content: string;
   submission_id: string | null;
   created_at: string;
-  title?: string | null;
-  recurrence_type?: string;
-  remind_at?: string | null;
-  due_date?: string | null;
-  priority?: string;
-  recipient_type?: string;
-};
-
-export type DashboardRoutineRow = {
-  id: string;
-  title: string;
-  content: string;
-  recurrence_type: string;
-  due_date: string | null;
-  remind_at: string | null;
 };
 
 export type OpenTasksResult = { ok: true; tasks: OpenTaskRow[] } | { ok: false };
@@ -96,11 +81,8 @@ export type SubmissionPreviewRow = {
   id: string;
   patient_name: string | null;
   patient_email: string | null;
-  patient_notes: string | null;
   created_at: string;
   seen_at: string | null;
-  photo_count: number;
-  urgency: string | null;
 };
 
 export type SubmissionPreviewResult =
@@ -177,34 +159,12 @@ export const getRecentSubmissionsPreview = cache(
       return { ok: false };
     }
     const supabase = await createClient();
-    const selectWithUrgency =
-      "id, patient_name, patient_email, patient_notes, created_at, seen_at, urgency, submission_photos(count)";
-    const selectBase =
-      "id, patient_name, patient_email, patient_notes, created_at, seen_at, submission_photos(count)";
-
-    let data: Record<string, unknown>[] | null = null;
-    let error: { code?: string } | null = null;
-
-    const withUrgency = await supabase
+    const { data, error } = await supabase
       .from("submissions")
-      .select(selectWithUrgency)
+      .select("id, patient_name, patient_email, created_at, seen_at")
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false })
-      .limit(8);
-
-    if (withUrgency.error) {
-      const fallback = await supabase
-        .from("submissions")
-        .select(selectBase)
-        .eq("workspace_id", workspaceId)
-        .order("created_at", { ascending: false })
-        .limit(8);
-      data = (fallback.data as Record<string, unknown>[] | null) ?? null;
-      error = fallback.error;
-    } else {
-      data = (withUrgency.data as Record<string, unknown>[] | null) ?? null;
-      error = withUrgency.error;
-    }
+      .limit(5);
 
     if (error) {
       logDashboardDbFailure("submission_preview_failed", error);
@@ -217,12 +177,8 @@ export const getRecentSubmissionsPreview = cache(
         id: row.id as string,
         patient_name: (row.patient_name as string | null) ?? null,
         patient_email: (row.patient_email as string | null) ?? null,
-        patient_notes: (row.patient_notes as string | null) ?? null,
         created_at: row.created_at as string,
         seen_at: (row.seen_at as string | null) ?? null,
-        photo_count:
-          (row.submission_photos as { count: number }[] | undefined)?.[0]?.count ?? 0,
-        urgency: (row.urgency as string | null | undefined) ?? null,
       })),
     };
   }
@@ -285,15 +241,11 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
 
   const { data, error } = await supabase
     .from("tasks")
-    .select(
-      "id, content, title, submission_id, created_at, recurrence_type, remind_at, due_date, priority, recipient_type"
-    )
+    .select("id, content, submission_id, created_at")
     .eq("workspace_id", workspaceId)
     .in("status", ["open", "pending_review"])
-    .order("priority", { ascending: false })
-    .order("due_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(10);
 
   if (error) {
     logDashboardDbFailure("open_tasks_select_failed", error);
@@ -303,97 +255,12 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
   const tasks: OpenTaskRow[] = (data || []).map((row) => ({
     id: row.id as string,
     content: row.content as string,
-    title: (row.title as string | null) ?? null,
     submission_id: (row.submission_id as string | null) ?? null,
     created_at: row.created_at as string,
-    recurrence_type: (row.recurrence_type as string) ?? "once",
-    remind_at: (row.remind_at as string | null) ?? null,
-    due_date: (row.due_date as string | null) ?? null,
-    priority: (row.priority as string) ?? "normal",
-    recipient_type: (row.recipient_type as string) ?? "all_team",
   }));
 
   return { ok: true, tasks };
 });
-
-export type DashboardRoutinesResult =
-  | { ok: true; routines: DashboardRoutineRow[] }
-  | { ok: false };
-
-/** Wiederkehrende Praxisroutinen (Relay) — offen, für Dashboard-Überblick. */
-export const getDashboardRoutineTasks = cache(
-  async (workspaceId: string): Promise<DashboardRoutinesResult> => {
-    if (!isDashboardWorkspaceId(workspaceId)) {
-      logDashboardDbFailure("dashboard_routines_invalid_workspace_id", null);
-      return { ok: false };
-    }
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("id, title, content, recurrence_type, due_date, remind_at")
-      .eq("workspace_id", workspaceId)
-      .in("status", ["open", "pending_review"])
-      .neq("recurrence_type", "once")
-      .order("due_date", { ascending: true, nullsFirst: false })
-      .limit(6);
-
-    if (error) {
-      logDashboardDbFailure("dashboard_routines_failed", error);
-      return { ok: false };
-    }
-
-    return {
-      ok: true,
-      routines: (data || []).map((row) => ({
-        id: row.id as string,
-        title: ((row.title as string) || (row.content as string) || "Routine").trim(),
-        content: row.content as string,
-        recurrence_type: row.recurrence_type as string,
-        due_date: (row.due_date as string | null) ?? null,
-        remind_at: (row.remind_at as string | null) ?? null,
-      })),
-    };
-  }
-);
-
-export type TeamPulseResult =
-  | { ok: true; memberCount: number; teamCount: number }
-  | { ok: false };
-
-export const getDashboardTeamPulse = cache(
-  async (workspaceId: string): Promise<TeamPulseResult> => {
-    if (!isDashboardWorkspaceId(workspaceId)) {
-      return { ok: false };
-    }
-    const supabase = await createClient();
-    const { count, error } = await supabase
-      .from("workspace_members")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", workspaceId);
-
-    if (error) {
-      logDashboardDbFailure("dashboard_team_pulse_failed", error);
-      return { ok: false };
-    }
-
-    const { count: teamOnly, error: teamErr } = await supabase
-      .from("workspace_members")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", workspaceId)
-      .eq("role", "team");
-
-    if (teamErr) {
-      logDashboardDbFailure("dashboard_team_pulse_role_failed", teamErr);
-      return { ok: false };
-    }
-
-    return {
-      ok: true,
-      memberCount: count ?? 0,
-      teamCount: teamOnly ?? 0,
-    };
-  }
-);
 
 /**
  * Kurz-Chronik: bis zu drei neueste Zeilen je Quelle (Einsendungen, offene/erledigte Aufgaben),
@@ -446,11 +313,10 @@ export const getRecentActivity = cache(
     const events: ActivityEvent[] = [];
 
     (submissionsRes.data || []).forEach((s) => {
-      const who = (s.patient_name as string | null)?.trim() || "Patient";
       events.push({
         type: "submission_received",
         id: s.id,
-        text: `Anfrage von ${who} eingegangen`,
+        text: `Neue Einsendung von ${s.patient_name || "Patient"}`,
         timestamp: s.created_at,
         link: `/inbox/${s.id}`,
       });
@@ -460,7 +326,7 @@ export const getRecentActivity = cache(
       events.push({
         type: "task_created",
         id: t.id,
-        text: "Aufgabe erstellt",
+        text: `Aufgabe: ${t.content.substring(0, 60)}${t.content.length > 60 ? "…" : ""}`,
         timestamp: t.created_at,
         link: `/my-tasks/${t.id}`,
       });
@@ -471,7 +337,7 @@ export const getRecentActivity = cache(
         events.push({
           type: "task_done",
           id: `done-${t.id}`,
-          text: t.submission_id ? "Antwort gesendet" : "Aufgabe erledigt",
+          text: `Aufgabe erledigt: ${t.content.substring(0, 60)}${t.content.length > 60 ? "…" : ""}`,
           timestamp: t.done_at,
           link: t.submission_id ? `/inbox/${t.submission_id}` : `/my-tasks/${t.id}`,
         });
@@ -481,6 +347,6 @@ export const getRecentActivity = cache(
     events.sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-    return { ok: true, events: events.slice(0, 6) };
+    return { ok: true, events: events.slice(0, 4) };
   }
 );

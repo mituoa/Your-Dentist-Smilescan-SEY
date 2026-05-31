@@ -37,7 +37,6 @@ export function MobileWorkspaceTopbar({
           <YourDentistBrandLockup size="sm" tagline={null} className="min-w-0" />
         </Link>
         <UserMenu
-          variant="avatar"
           email={email}
           workspaceName={workspaceName}
           role={role}
