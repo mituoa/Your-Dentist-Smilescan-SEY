@@ -70,22 +70,14 @@ export function YdAuthEnvironment({
                 {showBrand ? (
                   <div className="yd-auth-brand">
                     {brandHref === false ? (
-                      <YourDentistBrandLockup
-                        size="md"
-                        tagline="Neutral Practice Platform"
-                        centered
-                      />
+                      <YourDentistBrandLockup size="md" centered />
                     ) : (
                       <Link
                         href={brandHref}
                         className="yd-auth-brand-link"
                         aria-label="Zur Startseite"
                       >
-                        <YourDentistBrandLockup
-                          size="md"
-                          tagline="Neutral Practice Platform"
-                          centered
-                        />
+                        <YourDentistBrandLockup size="md" centered />
                       </Link>
                     )}
                   </div>

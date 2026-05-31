@@ -15,11 +15,17 @@ export function LoginRegisterCta({
   const pricingHref = buildPricingEntryHref(inviteToken, prefilledEmail);
 
   return (
-    <p className="yd-auth-register yd-auth-register--subtle yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "5" }}>
-      {AUTH_ACCESS_COPY.loginRegisterLead}{" "}
-      <Link prefetch href={pricingHref} className="yd-auth-access-link">
-        {AUTH_ACCESS_COPY.loginRegisterLink}
-      </Link>
-    </p>
+    <div
+      className="yd-auth-login-access yd-auth-awaken-field"
+      style={{ ["--yd-auth-field-i" as string]: "5" }}
+    >
+      <p className="yd-auth-register yd-auth-register--subtle">
+        {AUTH_ACCESS_COPY.loginRegisterLead}{" "}
+        <Link prefetch href={pricingHref} className="yd-auth-access-link">
+          {AUTH_ACCESS_COPY.loginRegisterLink}
+        </Link>
+      </p>
+      <p className="yd-auth-login-trust">Für autorisierte Praxisteams</p>
+    </div>
   );
 }

@@ -77,11 +77,11 @@ export function YourDentistBrandLockup({
       />
       <div
         className={cn(
-          "min-w-0 font-serif font-medium tracking-tight text-gray-900",
+          "min-w-0 font-sans font-semibold tracking-[-0.02em] text-gray-900",
           WORD[lockupSize]
         )}
       >
-        <span className="font-light italic">Your</span> Dentist
+        <span className="font-medium">Your</span> Dentist
       </div>
     </div>
   );
@@ -89,7 +89,7 @@ export function YourDentistBrandLockup({
   const taglineNode = tagline ? (
     <p
       className={cn(
-        "max-w-[min(100%,20rem)] text-[9px] font-medium uppercase leading-tight tracking-[0.12em] text-slate-500/90",
+        "max-w-[min(100%,20rem)] text-[9px] font-medium uppercase leading-tight tracking-[0.06em] text-slate-500/90",
         centered ? "text-center" : TAGLINE_INDENT[lockupSize]
       )}
     >

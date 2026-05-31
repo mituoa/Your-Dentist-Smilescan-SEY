@@ -22,7 +22,7 @@ export function RegisterOnboardingShell({ children, loginHref }: RegisterOnboard
   return (
     <div className="yd-register-page">
       <header className="yd-register-page-header yd-auth-awaken-field">
-        <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
+        <YourDentistBrandLockup size="md" centered />
         <h1 className="yd-register-page-title">{AUTH_ACCESS_COPY.registerPageTitle}</h1>
         <p className="yd-register-page-lead">{AUTH_ACCESS_COPY.registerPageLead}</p>
         <p className="yd-register-page-login-hint">

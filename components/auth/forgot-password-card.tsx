@@ -12,7 +12,6 @@ import {
   YdAuthIntro,
   YdAuthLabel,
   YdAuthLegalFooter,
-  YdAuthSuccess,
 } from "@/components/auth/yd-auth-ui";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 
@@ -113,28 +112,19 @@ export function ForgotPasswordCard(props: {
     <>
       {shell === "full" ? (
         <YdAuthIntro
-          title="Passwort sicher zurücksetzen"
+          title="Passwort zurücksetzen"
           subtitle={
             sent ? (
-              <>
-                Bitte prüfen Sie Ihren Posteingang. Falls ein Konto gefunden wurde, erhalten Sie in wenigen
-                Minuten eine E-Mail mit dem Link zum Zurücksetzen.
-              </>
+              <>E-Mail gesendet. Bitte prüfen Sie Ihr Postfach.</>
             ) : (
-              <>Geben Sie Ihre E-Mail-Adresse ein. Sie erhalten einen geschützten Link zum Zurücksetzen.</>
+              <>
+                Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres
+                Passworts.
+              </>
             )
           }
           fieldIndex={0}
         />
-      ) : null}
-
-      {sent ? (
-        <YdAuthSuccess title="Anfrage übermittelt" className="mb-6">
-          <p>
-            Der Link ist nur begrenzt gültig. Prüfen Sie auch den Spam-Ordner, falls keine Nachricht
-            ankommt.
-          </p>
-        </YdAuthSuccess>
       ) : null}
 
       {errorDisplay ? (

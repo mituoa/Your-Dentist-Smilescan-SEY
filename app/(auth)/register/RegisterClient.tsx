@@ -760,7 +760,7 @@ export function RegisterClient(props: {
 
             <div className="yd-auth-register-header">
               <div className="mb-1 flex justify-center">
-                <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
+                <YourDentistBrandLockup size="md" centered />
               </div>
             </div>
 

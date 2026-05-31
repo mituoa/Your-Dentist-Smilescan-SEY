@@ -199,7 +199,7 @@ export function LoginPageClient({
           <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>
             <h1 className="yd-public-entry-title yd-public-entry-title--login">Ihr geschützter Arbeitsbereich</h1>
             <p className="yd-public-entry-lead yd-public-entry-lead--login">
-              Anmelden und dort fortfahren, wo Ihr Team aufgehört hat.
+              Ihr Zugang zu Fällen, Aufgaben und Teamabläufen.
             </p>
           </div>
 
@@ -269,7 +269,7 @@ export function LoginPageClient({
                   }
                   className="yd-auth-link inline-flex min-h-[44px] items-center max-md:py-2 md:min-h-0 md:py-0"
                 >
-                  Zugang wiederherstellen
+                  Passwort vergessen?
                 </Link>
               </div>
               <input

@@ -6,7 +6,7 @@ import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanit
 export const metadata: Metadata = {
   title: "Passwort zurücksetzen",
   description:
-    "Geschützter Link zum Zurücksetzen Ihres Praxis-Zugangs — Your Dentist, Neutral Practice Platform.",
+    "Link zum Zurücksetzen Ihres Passworts — Your Dentist.",
   robots: { index: false, follow: false },
 };
 

@@ -16,6 +16,7 @@
 @import "./yd-public-entry-warm.css";
 @import "./yd-public-site.css";
 @import "./yd-relay-messages.css";
+@import "./yd-typography.css";
 
 @layer base {
   :root {
@@ -59,9 +60,6 @@
 
   body {
     font-feature-settings: "ss01", "cv11";
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    letter-spacing: -0.01em;
   }
 }
 
@@ -238,3 +236,4 @@ nextjs-portal,
     padding-right: 14px;
   }
 }
+

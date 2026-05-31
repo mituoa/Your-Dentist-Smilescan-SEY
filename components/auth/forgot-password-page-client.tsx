@@ -23,20 +23,20 @@ export function ForgotPasswordPageClient({
   return (
     <YdPublicOsEnvironment mode="focus">
       <div className="yd-clinical-entry yd-clinical-entry--login">
-        <div className="yd-clinical-entry-panel">
+        <div className="yd-clinical-entry-panel yd-clinical-entry-panel--login-entrance">
           <div
             className="yd-auth-login-brand yd-auth-awaken-field"
             style={{ ["--yd-auth-field-i" as string]: "0" }}
           >
-            <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
+            <YourDentistBrandLockup size="md" centered />
           </div>
 
           <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>
-            <h1 className="yd-public-entry-title">Zugang wiederherstellen</h1>
-            <p className="yd-public-entry-lead">
+            <h1 className="yd-public-entry-title yd-public-entry-title--login">Passwort zurücksetzen</h1>
+            <p className="yd-public-entry-lead yd-public-entry-lead--login">
               {sent
-                ? "Prüfen Sie Ihren Posteingang — der Link ist nur begrenzt gültig."
-                : "E-Mail eingeben. Sie erhalten einen geschützten Link zum Zurücksetzen Ihres Zugangs."}
+                ? "E-Mail gesendet. Bitte prüfen Sie Ihr Postfach."
+                : "Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts."}
             </p>
           </div>
 
@@ -48,9 +48,9 @@ export function ForgotPasswordPageClient({
             shell="minimal"
           />
 
-          <p className="yd-auth-legal-minimal yd-auth-awaken-field mt-6" style={{ ["--yd-auth-field-i" as string]: "3" }}>
+          <p className="yd-auth-back-to-login yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "3" }}>
             <Link prefetch href={inviteToken ? `/login?invite=${encodeURIComponent(inviteToken)}` : "/login"}>
-              Zur Anmeldung
+              ← Zurück zur Anmeldung
             </Link>
           </p>
         </div>

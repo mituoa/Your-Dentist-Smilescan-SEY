@@ -56,7 +56,7 @@ const primaryCtaClass =
   "inline-flex min-h-[48px] w-full touch-manipulation items-center justify-center gap-2 rounded-[10px] bg-slate-700 px-4 py-3 text-[16px] font-medium leading-snug text-white shadow-[0px_8px_22px_rgba(51,65,85,0.25)] transition-all duration-200 hover:bg-slate-800 active:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700/30 focus-visible:ring-offset-2 sm:text-[15px]";
 
 const inviteHeadingClass =
-  "min-w-0 max-w-full text-balance font-serif text-3xl font-light tracking-tight text-[#111111] md:text-4xl";
+  "min-w-0 max-w-full text-balance font-sans text-3xl font-semibold tracking-[-0.025em] text-[#111111] md:text-4xl";
 
 const inviteBodyClass =
   "min-w-0 max-w-full text-pretty text-left text-sm leading-relaxed text-slate-600 break-words [overflow-wrap:anywhere]";

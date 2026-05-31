@@ -22,7 +22,7 @@ export function Greeting({ name }: GreetingProps) {
       <p className="text-xs font-mono uppercase tracking-wider text-text-tertiary mb-3">
         {formattedDate}
       </p>
-      <h1 className="font-serif text-5xl font-light tracking-tight text-text-primary">
+      <h1 className="font-sans text-[2rem] font-semibold tracking-[-0.025em] text-text-primary sm:text-5xl">
         {timeGreeting}, {name}.
       </h1>
     </div>
