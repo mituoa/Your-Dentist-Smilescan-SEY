@@ -31,11 +31,10 @@ export function DashboardHeader({
       <div className="hidden md:block">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
           <div className="min-w-0 lg:max-w-[48%]">
-            <p className="yd-dash-meta mb-0.5 uppercase">Praxisüberblick</p>
+            <p className="yd-dash-meta mb-0.5 uppercase">Heute</p>
             <h1 className="yd-dash-title text-[1.65rem] lg:text-[1.75rem]">
               {greeting}, {displayName}
             </h1>
-            <p className="yd-dash-subtitle mt-1.5 max-w-lg text-[13px]">{subtitle}</p>
           </div>
 
           <div className="flex w-full min-w-0 flex-1 items-center gap-3 lg:max-w-[560px] lg:justify-end">

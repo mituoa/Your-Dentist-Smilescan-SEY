@@ -7,6 +7,7 @@ import {
   activityDayGroup,
   activityHeadline,
 } from "@/lib/dashboard/atlas-mobile-helpers";
+import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
 import type { ActivityEvent } from "@/lib/queries/dashboard";
 
 type AtlasMobileActivityProps = {
@@ -23,12 +24,12 @@ export function AtlasMobileActivity({ events }: AtlasMobileActivityProps) {
     <section className="yd-atlas-m-card" aria-labelledby="yd-atlas-m-activity-title">
       <div className="yd-atlas-m-card-head">
         <h2 id="yd-atlas-m-activity-title" className="yd-atlas-m-card-title">
-          Aktivität
+          {WORKSPACE_COPY.activity.title}
         </h2>
       </div>
 
       {all.length === 0 ? (
-        <p className="yd-atlas-m-empty-positive">Noch keine Einträge — der Verlauf startet mit dem nächsten Schritt.</p>
+        <p className="yd-atlas-m-empty-positive">{WORKSPACE_COPY.activity.empty}</p>
       ) : (
         <>
           <ul className="yd-atlas-m-activity-list">
@@ -54,7 +55,7 @@ export function AtlasMobileActivity({ events }: AtlasMobileActivityProps) {
               className="yd-atlas-m-text-action"
               onClick={() => setExpanded((v) => !v)}
             >
-              {expanded ? "Weniger anzeigen" : "Alle anzeigen"}
+              {expanded ? WORKSPACE_COPY.activity.showLess : WORKSPACE_COPY.activity.showAll}
             </button>
           ) : null}
         </>

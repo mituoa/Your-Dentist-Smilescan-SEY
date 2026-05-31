@@ -466,6 +466,54 @@ main:has(.yd-dashboard) {
   margin-top: 0.25rem;
 }
 
+.yd-atlas-status-line {
+  margin: 0 0 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #3d5266;
+}
+
+.yd-workspace-quiet {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #6b849c;
+}
+
+.yd-workspace-section-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8ba3b8;
+}
+
+.yd-command-hint-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.yd-command-hint-item {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: #5a6f84;
+}
+
+.yd-dashboard .yd-dash-section {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 .yd-atlas-state-block {
   margin-bottom: 1rem;
   padding: 0.875rem 1rem;
@@ -858,4 +906,332 @@ main:has(.yd-dashboard) {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
     0 6px 22px rgba(47, 128, 237, 0.07);
+}
+
+/* —— Command Center (desktop workspace) —— */
+
+.yd-atlas-desktop {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.yd-atlas-desktop > .yd-command-hero {
+  margin-bottom: 0.25rem;
+}
+
+.yd-atlas-tier {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.yd-atlas-attention-lead {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0c1929;
+}
+
+.yd-atlas-tier--status {
+  gap: 0.625rem;
+  padding-top: 0.25rem;
+}
+
+.yd-dash-zone--flow-compact .yd-dash-ops-snap--structured {
+  gap: 0.5rem;
+}
+
+.yd-dash-zone--flow-compact .yd-dash-flow-node--compact {
+  min-height: 84px !important;
+}
+
+.yd-atlas-empty-positive {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b849c;
+}
+
+.yd-atlas-empty-positive--inline {
+  margin-bottom: 0.5rem;
+}
+
+.yd-command-center {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 38%);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.yd-command-center--workspace {
+  margin-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .yd-command-center {
+    grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+.yd-command-center-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.yd-command-center-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.yd-command-center-aside .yd-dash-panel {
+  min-height: 0 !important;
+}
+
+.yd-command-hero {
+  padding: 1.25rem 1.375rem;
+  border-radius: 18px;
+  border: 1px solid rgba(180, 198, 218, 0.38);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(236, 244, 252, 0.92) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 8px 28px rgba(47, 128, 237, 0.06);
+}
+
+.yd-command-hero--compact {
+  padding: 1rem 1.125rem;
+  border-radius: 16px;
+}
+
+.yd-command-hero-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+  color: #0c1929;
+}
+
+.yd-command-hero-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.yd-command-hero-input-wrap {
+  margin-bottom: 0.75rem;
+}
+
+.yd-command-hero-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.35;
+  color: #0c1929;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.45);
+  background: rgba(255, 255, 255, 0.88);
+  outline: none;
+}
+
+.yd-command-hero-input::placeholder {
+  color: #8ba3b8;
+}
+
+.yd-command-hero-input:focus-visible {
+  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.12);
+  border-color: rgba(47, 128, 237, 0.35);
+}
+
+.yd-command-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.yd-command-hero-chip {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 450;
+  line-height: 1.35;
+  color: #3d5266;
+  border-radius: 999px;
+  border: 1px solid rgba(180, 198, 218, 0.4);
+  background: rgba(255, 255, 255, 0.7);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.yd-command-hero-chip:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(47, 128, 237, 0.28);
+}
+
+.yd-command-hero-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-command-hero-result {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #6b849c;
+}
+
+.yd-command-hero-check {
+  color: #2f80ed;
+  font-size: 0.75rem;
+}
+
+/* Priority feed */
+
+.yd-priority-feed-title {
+  margin: 0 0 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: #3d5266;
+}
+
+.yd-priority-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-priority-feed-empty {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 450;
+  color: #6b849c;
+}
+
+.yd-priority-card {
+  display: block;
+  padding: 0.875rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.35);
+  background: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.yd-priority-card:hover {
+  border-color: rgba(47, 128, 237, 0.28);
+  box-shadow: 0 4px 16px rgba(47, 128, 237, 0.06);
+}
+
+.yd-priority-card--urgent {
+  border-left: 3px solid #e11d48;
+}
+
+.yd-priority-card--waiting {
+  border-left: 3px solid #d97706;
+}
+
+.yd-priority-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.yd-priority-card-level {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b849c;
+}
+
+.yd-priority-card--urgent .yd-priority-card-level {
+  color: #be123c;
+}
+
+.yd-priority-card-action {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2f80ed;
+}
+
+.yd-priority-card-name {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0c1929;
+}
+
+.yd-priority-card-subject {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: #3d5266;
+}
+
+.yd-priority-card-detail,
+.yd-priority-card-ai {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #6b849c;
+}
+
+.yd-priority-card-ai {
+  color: #2f80ed;
+}
+
+/* Ops strip — secondary */
+
+.yd-ops-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.yd-ops-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  background: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  font-size: 0.6875rem;
+  color: #6b849c;
+  transition: background 0.2s ease;
+}
+
+.yd-ops-chip:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.yd-ops-chip-label {
+  font-weight: 500;
+}
+
+.yd-ops-chip-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: #3d5266;
 }

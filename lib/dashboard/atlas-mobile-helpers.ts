@@ -1,4 +1,5 @@
 import type { ActivityEvent, OpenTaskRow, SubmissionPreviewRow } from "@/lib/queries/dashboard";
+import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
 
 export function patientDisplayName(row: SubmissionPreviewRow): string {
   return row.patient_name?.trim() || row.patient_email?.trim() || "Patient";
@@ -18,40 +19,6 @@ export function formatIntakeDate(iso: string): string {
   });
 }
 
-export function buildMobileHeaderStatus(
-  unseenCount: number | null,
-  openTaskCount: number,
-  relayUnread: number
-): string {
-  const parts: string[] = [];
-
-  if (unseenCount === null) {
-    parts.push("Eingang im Blick");
-  } else if (unseenCount > 0) {
-    parts.push(
-      unseenCount === 1 ? "1 neuer Eingang" : `${unseenCount} neue Eingänge`
-    );
-  } else {
-    parts.push("Eingang auf Stand");
-  }
-
-  if (openTaskCount > 0) {
-    parts.push(
-      openTaskCount === 1 ? "1 Aufgabe offen" : `${openTaskCount} Aufgaben offen`
-    );
-  } else {
-    parts.push("keine offenen Aufgaben");
-  }
-
-  if (relayUnread > 0) {
-    parts.push(
-      relayUnread === 1 ? "1 Relay-Nachricht" : `${relayUnread} Relay-Nachrichten`
-    );
-  }
-
-  return parts.join(" · ");
-}
-
 export function buildTodaySummaryLines(input: {
   unseenCount: number | null;
   openTaskCount: number;
@@ -60,28 +27,28 @@ export function buildTodaySummaryLines(input: {
   const lines: string[] = [];
 
   if (input.unseenCount === null) {
-    lines.push("Eingang wird geladen");
+    lines.push("— Eingänge");
   } else if (input.unseenCount > 0) {
     lines.push(
-      input.unseenCount === 1
-        ? "1 neuer Eingang"
-        : `${input.unseenCount} neue Eingänge`
+      input.unseenCount === 1 ? "1 Eingang" : `${input.unseenCount} Eingänge`
     );
   } else {
-    lines.push("Keine neuen Eingänge");
+    lines.push("0 Eingänge");
   }
 
   if (input.openTaskCount > 0) {
     lines.push(
-      input.openTaskCount === 1
-        ? "1 offene Aufgabe"
-        : `${input.openTaskCount} offene Aufgaben`
+      input.openTaskCount === 1 ? "1 Aufgabe" : `${input.openTaskCount} Aufgaben`
     );
   } else {
-    lines.push("Keine offenen Aufgaben");
+    lines.push("0 Aufgaben");
   }
 
-  lines.push(input.relayUnread > 0 ? "Relay mit Rückfragen" : "Relay ruhig");
+  lines.push(
+    input.relayUnread > 0
+      ? `${input.relayUnread} Relay`
+      : "0 Relay"
+  );
 
   return lines;
 }
@@ -105,7 +72,7 @@ export function activityDayGroup(timestamp: string): "Heute" | "Gestern" | "Frü
 }
 
 export function activityHeadline(event: ActivityEvent): string {
-  if (event.type === "submission_received") return "Neue Einsendung erhalten";
-  if (event.type === "task_done") return "Aufgabe erledigt";
-  return "Aufgabe erstellt";
+  if (event.type === "submission_received") return "Eingang";
+  if (event.type === "task_done") return "Erledigt";
+  return "Aufgabe";
 }

@@ -33,27 +33,27 @@ export const PUBLIC_SITE_NAV_MOBILE = [
 ] as const;
 
 export const PUBLIC_SITE_HERO = {
-  eyebrow: "Medizinische Praxisinfrastruktur",
-  title: "Struktur für Eingang, Team und Fall.",
+  eyebrow: "Intelligente Praxiskommunikation",
+  title: "Patient:innen senden ein — Ihre Praxis antwortet strukturiert.",
   titleLine2: "",
   lead:
-    "Patient:innen senden Anliegen strukturiert ein. Ihr Team koordiniert am Fall — mit Relay, Aufgaben und Command AI, die den nächsten Schritt vorbereitet.",
+    "Your Dentist ordnet Anliegen und Fotos, bereitet Schritte mit Command AI vor und hält Team, Aufgaben und Relay an einem ruhigen Arbeitsplatz.",
   primaryCta: "Praxis registrieren",
   secondaryCta: "Live-Einblick ansehen",
   signInPrefix: "Bereits registriert?",
   signInLabel: "Anmelden",
   bullets: [
-    "Patient:innen senden Fotos und Anliegen ein.",
-    "Praxis sichtet strukturiert.",
-    "Team kommuniziert am Fall.",
-    "Aufgaben, Erinnerungen und Command AI unterstützen ruhig.",
+    "Patient:innen senden Anliegen und Fotos digital.",
+    "Eingänge werden strukturiert und priorisiert.",
+    "Command AI bereitet Antworten und Aufgaben vor.",
+    "Team arbeitet am Fall — mit Relay und Aufgaben.",
   ],
 } as const;
 
 export const PUBLIC_SITE_NUTZEN = {
   eyebrow: "Nutzen",
   title: "Was sich im Praxisalltag ändert",
-  lead: "Weniger verstreute Kanäle — mehr Klarheit für Eingang, Team und Übergaben.",
+  lead: "Bessere Patientenkommunikation, schnellere Einschätzung, weniger manuelle Abstimmung.",
   cards: [
     {
       id: "eingang",

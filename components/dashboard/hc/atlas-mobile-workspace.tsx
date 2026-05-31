@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 
 import { AtlasMobileActivity } from "@/components/dashboard/hc/atlas-mobile-activity";
 import { AtlasMobileCommandPanel } from "@/components/dashboard/hc/atlas-mobile-command-panel";
+import { AtlasPriorityFeed } from "@/components/dashboard/hc/atlas-priority-feed";
 import {
   buildTodaySummaryLines,
   formatIntakeDate,
@@ -10,6 +11,8 @@ import {
   patientDisplayName,
   taskTitleShort,
 } from "@/lib/dashboard/atlas-mobile-helpers";
+import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
+import type { PriorityFeedItem } from "@/lib/dashboard/priority-feed";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type {
   ActivityEvent,
@@ -27,6 +30,8 @@ type AtlasMobileWorkspaceProps = {
   relayUnread: number;
   reminderCount: number;
   activityEvents: ActivityEvent[] | null;
+  priorityItems: PriorityFeedItem[];
+  commandSuggestions: string[];
 };
 
 function conversationTitle(c: RelayConversationRow): string {
@@ -36,10 +41,10 @@ function conversationTitle(c: RelayConversationRow): string {
     const local = c.other_party_email.split("@")[0];
     return local ? local.replace(/\./g, " ") : c.other_party_email;
   }
-  return "Direktnachricht";
+  return "Direkt";
 }
 
-/** Mobile Atlas — eigenes Layout, nicht Desktop gestapelt. */
+/** Mobile — eigenes Layout; Features erhalten, Priorität zuerst. */
 export function AtlasMobileWorkspace({
   unseenCount,
   previewRows,
@@ -49,11 +54,11 @@ export function AtlasMobileWorkspace({
   relayUnread,
   reminderCount: _reminderCount,
   activityEvents,
+  priorityItems,
 }: AtlasMobileWorkspaceProps) {
   void _reminderCount;
 
   const openTaskCount = openTasks?.length ?? 0;
-  const routineCount = routines?.length ?? 0;
   const summaryLines = buildTodaySummaryLines({
     unseenCount,
     openTaskCount,
@@ -74,12 +79,19 @@ export function AtlasMobileWorkspace({
     relayUnread > 0 || commsPreview.some((c) => c.unread_count > 0);
 
   return (
-    <div className="yd-atlas-mobile md:hidden" aria-label="Praxisüberblick">
-      <AtlasMobileCommandPanel />
+    <div className="yd-atlas-mobile md:hidden" aria-label={WORKSPACE_COPY.today}>
+      <AtlasMobileCommandPanel
+        unseenCount={unseenCount}
+        openTaskCount={openTaskCount}
+        relayUnread={relayUnread}
+        previewRows={previewRows}
+      />
+
+      <AtlasPriorityFeed items={priorityItems} />
 
       <section className="yd-atlas-m-card yd-atlas-m-card--today" aria-labelledby="yd-atlas-m-today-title">
         <h2 id="yd-atlas-m-today-title" className="yd-atlas-m-card-title">
-          Heute
+          {WORKSPACE_COPY.today}
         </h2>
         <ul className="yd-atlas-m-metrics">
           {summaryLines.map((line) => (
@@ -93,15 +105,15 @@ export function AtlasMobileWorkspace({
       <section className="yd-atlas-m-card" aria-labelledby="yd-atlas-m-intake-title">
         <div className="yd-atlas-m-card-head">
           <h2 id="yd-atlas-m-intake-title" className="yd-atlas-m-card-title">
-            Eingänge
+            {WORKSPACE_COPY.intake.title}
           </h2>
           <Link href="/inbox" className="yd-atlas-m-card-link">
-            Tracker
+            {WORKSPACE_COPY.command.open}
           </Link>
         </div>
 
         {intakePreview.length === 0 ? (
-          <p className="yd-atlas-m-empty-positive">Alles aktuell.</p>
+          <p className="yd-atlas-m-empty-positive">{WORKSPACE_COPY.allCurrent}</p>
         ) : (
           <ul className="yd-atlas-m-intake-list">
             {intakePreview.map((row) => (
@@ -124,10 +136,10 @@ export function AtlasMobileWorkspace({
       <section className="yd-atlas-m-card" aria-labelledby="yd-atlas-m-relay-title">
         <div className="yd-atlas-m-card-head">
           <h2 id="yd-atlas-m-relay-title" className="yd-atlas-m-card-title">
-            Relay · Team
+            {WORKSPACE_COPY.relay.team}
           </h2>
           <Link href="/relay?panel=messages" className="yd-atlas-m-card-link">
-            Öffnen
+            Relay
           </Link>
         </div>
 
@@ -148,7 +160,7 @@ export function AtlasMobileWorkspace({
               ))}
           </ul>
         ) : (
-          <p className="yd-atlas-m-empty-positive">Keine offenen Rückfragen</p>
+          <p className="yd-atlas-m-empty-positive">{WORKSPACE_COPY.relay.quiet}</p>
         )}
 
         <Link href="/relay?panel=messages" className="yd-atlas-m-secondary-action">
@@ -160,9 +172,9 @@ export function AtlasMobileWorkspace({
       <section className="yd-atlas-m-card yd-atlas-m-card--split" aria-label="Aufgaben und Routinen">
         <div className="yd-atlas-m-split-block">
           <div className="yd-atlas-m-card-head">
-            <h2 className="yd-atlas-m-card-title">Aufgaben</h2>
+            <h2 className="yd-atlas-m-card-title">{WORKSPACE_COPY.tasks.title}</h2>
             <Link href="/my-tasks" className="yd-atlas-m-card-link">
-              Öffnen
+              {WORKSPACE_COPY.command.open}
             </Link>
           </div>
           {taskPreview.length > 0 ? (
@@ -176,7 +188,7 @@ export function AtlasMobileWorkspace({
               ))}
             </ul>
           ) : (
-            <p className="yd-atlas-m-empty-positive">Keine Aufgaben für heute</p>
+            <p className="yd-atlas-m-empty-positive">{WORKSPACE_COPY.tasks.empty}</p>
           )}
         </div>
 
@@ -200,7 +212,7 @@ export function AtlasMobileWorkspace({
               ))}
             </ul>
           ) : (
-            <p className="yd-atlas-m-empty-positive">Keine Routine offen</p>
+            <p className="yd-atlas-m-empty-positive">{WORKSPACE_COPY.tasks.routinesEmpty}</p>
           )}
         </div>
       </section>

@@ -3,11 +3,12 @@
 import { X } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
+import { DesktopCommandNavEntry } from "./desktop-command-nav-entry";
+import { JournalNavGroup } from "./journal-nav-group";
 import { MobileCommandNavEntry } from "./mobile-command-nav-entry";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { NavItem } from "./nav-item";
-import { JournalNavGroup } from "./journal-nav-group";
 import { SignOutSidebarForm } from "./sign-out-form";
 import { useMobileNavOptional } from "./mobile-nav";
 import type { YdNavAmbientMap } from "@/lib/ambient/nav-preview-types";
@@ -35,7 +36,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-none max-md:bg-transparent max-md:shadow-none md:h-full md:w-full md:overflow-visible md:rounded-[44px] md:border md:self-stretch"
+      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-none max-md:bg-transparent max-md:shadow-none md:h-full md:w-full md:overflow-visible md:rounded-[40px] md:border md:self-stretch"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,
@@ -56,7 +57,7 @@ export function Sidebar({
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-y-8 right-0 hidden w-[2px] rounded-full md:block"
+        className="pointer-events-none absolute inset-y-6 right-0 hidden w-[2px] rounded-full md:block"
         style={{ background: YD.sidebar.edgeGlow }}
         aria-hidden
       />
@@ -75,12 +76,12 @@ export function Sidebar({
         </button>
       </header>
 
-      <div className="relative hidden shrink-0 md:flex md:justify-center md:px-0 md:pb-3 md:pt-5">
+      <div className="relative hidden shrink-0 md:flex md:justify-center md:px-0 md:pb-1 md:pt-3">
         <BrandMark />
       </div>
 
       <nav
-        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-1 flex-col overflow-hidden max-md:min-h-0 md:items-center md:justify-center md:gap-3 md:overflow-y-auto md:overflow-x-hidden md:px-2 md:py-3"
+        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-1 flex-col overflow-hidden max-md:min-h-0 md:items-center md:justify-center md:gap-2 md:overflow-y-auto md:overflow-x-hidden md:px-2 md:py-2"
         aria-label="Hauptnavigation"
       >
         <div className="yd-mobile-sidebar-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-2 pb-2 pt-1 max-md:px-3 md:contents md:overflow-visible md:p-0">
@@ -89,8 +90,7 @@ export function Sidebar({
               <NavItem
                 href="/dashboard"
                 iconName="dashboard"
-                label="Atlas"
-                description="Überblick"
+                label="Home"
                 ambientPreview={navAmbient?.dashboard}
                 tier="primary"
               />
@@ -99,8 +99,7 @@ export function Sidebar({
             <NavItem
               href="/inbox"
               iconName="inbox"
-              label="Tracker"
-              description="Eingänge"
+              label="Patients"
               badge={inboxCount}
               ambientPreview={navAmbient?.inbox}
               tier="primary"
@@ -110,43 +109,43 @@ export function Sidebar({
               href="/relay"
               iconName="relay"
               label="Relay"
-              description="Team & Übergaben"
               badge={myTasksCount}
               badgeUrgent={myTasksUrgent}
               ambientPreview={navAmbient?.relay}
               tier="primary"
             />
 
-            <div className="md:hidden">
-              <NavItem
-                href="/my-tasks"
-                iconName="tasks"
-                label="Aufgaben"
-                description="Offene Schritte"
-                tier="primary"
-              />
-            </div>
+            <NavItem
+              href="/my-tasks"
+              iconName="tasks"
+              label="Tasks"
+              tier="primary"
+            />
 
+            <div className="hidden md:block">
+              <DesktopCommandNavEntry />
+            </div>
             <div className="md:hidden">
               <MobileCommandNavEntry />
             </div>
           </div>
 
-          {role === "doctor" && (
+          {role === "team" ? (
             <div className="yd-nav-secondary-group flex flex-col md:contents">
               <JournalNavGroup ambientPreview={navAmbient?.journal} tier="secondary" />
               <NavItem
-                href="/profile/editor"
-                iconName="profile"
-                label="Profil"
-                description="Praxisseite"
+                href="/settings"
+                iconName="settings"
+                label="Settings"
                 tier="secondary"
               />
+            </div>
+          ) : (
+            <div className="yd-nav-footer-group flex flex-col md:contents">
               <NavItem
                 href="/settings"
                 iconName="settings"
-                label="Einstellungen"
-                description="Konto"
+                label="Settings"
                 tier="secondary"
               />
             </div>
@@ -154,7 +153,7 @@ export function Sidebar({
         </div>
       </nav>
 
-      <div className="yd-sidebar-rail-footer relative hidden shrink-0 px-2 pb-5 pt-2 md:flex md:justify-center">
+      <div className="yd-sidebar-rail-footer relative hidden shrink-0 px-2 pb-4 pt-1 md:flex md:justify-center">
         <SignOutSidebarForm variant="rail" />
       </div>
 

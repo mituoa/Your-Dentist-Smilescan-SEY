@@ -147,17 +147,17 @@ function placeholderForZone(
   }
   switch (zone) {
     case "dashboard":
-      return "Befehl — z. B. Überblick, Aufgabe, neuer Fall …";
+      return "Was soll erledigt werden?";
     case "relay":
-      return "Befehl — z. B. Delegation, Priorität …";
+      return "Was soll erledigt werden?";
     case "journal":
-      return "Befehl — z. B. Zusammenfassung, Gliederung …";
+      return "Was soll erledigt werden?";
     case "settings":
-      return "Befehl — z. B. Einstellung, Rollen …";
+      return "Was soll erledigt werden?";
     case "inbox":
-      return "Kurz eingeben — z. B. Triage, Terminvorbereitung (nur Hilfe, kein Versand) …";
+      return "Was soll erledigt werden?";
     default:
-      return "Befehl — Posteingang, Relay, Journals …";
+      return "Was soll erledigt werden?";
   }
 }
 

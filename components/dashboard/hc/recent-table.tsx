@@ -5,6 +5,7 @@ import { HcCard } from "@/components/design/hc-card";
 import { HcFilterChip } from "@/components/dashboard/hc/hc-filter-chip";
 import { YdStatusPill } from "@/components/design-system/yd-status-pill";
 import { YD } from "@/lib/design/yd-design-tokens";
+import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
 import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
 
 function statusVariant(row: SubmissionPreviewRow): "active" | "calm" {
@@ -36,10 +37,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
         }}
       >
         <div>
-          <p className="yd-dash-section">Aktuelle Einsendungen</p>
-          <p className="yd-dash-meta mt-1.5 normal-case tracking-normal">
-            Klinische Übersicht — schnell scannbar
-          </p>
+          <p className="yd-dash-section">{WORKSPACE_COPY.intake.title}</p>
         </div>
         <HcFilterChip icon={<Calendar className="h-3.5 w-3.5" strokeWidth={1.65} />}>
           Aktuell
@@ -69,7 +67,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                   className="px-6 py-12 text-center text-[13px] leading-relaxed"
                   style={{ color: YD.text.secondary }}
                 >
-                  Daten momentan nicht verfügbar.
+                  {WORKSPACE_COPY.loadGap}
                 </td>
               </tr>
             ) : rows.length === 0 ? (
@@ -79,7 +77,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                   className="px-6 py-12 text-center text-[13px] leading-relaxed"
                   style={{ color: YD.text.secondary }}
                 >
-                  Noch keine Einsendungen in diesem Ausschnitt.
+                  {WORKSPACE_COPY.allCurrent}
                 </td>
               </tr>
             ) : (

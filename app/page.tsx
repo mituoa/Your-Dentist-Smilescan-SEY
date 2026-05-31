@@ -1,9 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { YdHomePage } from "@/components/marketing/yd-home-page";
-import { RETURNING_PRACTICE_COOKIE } from "@/lib/public-entry/returning-visitor";
-import { hasLikelyAuthSessionCookie } from "@/lib/public-entry/has-auth-session-cookie";
 import {
   getCurrentUser,
   getWorkspaceMembershipForUserId,
@@ -14,7 +11,7 @@ import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
 import { requireEmailConfirmationBeforeApp, requireWorkspaceApprovalBeforeApp } from "@/lib/launch-guards";
 import { findPendingInviteTokenByEmail } from "@/lib/team-invitations/find-pending-invite-token-by-email";
 
-/** Öffentliche Produktübersicht; eingeloggte Nutzer → Workspace. */
+/** Öffentliche Produktübersicht; nur gültige Session → Workspace. */
 interface HomePageProps {
   searchParams: Promise<{ plan?: string; invite?: string; email?: string; welcome?: string }>;
 }
@@ -71,23 +68,10 @@ async function redirectAuthenticatedUser(
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
-  const showWelcome = params.welcome === "1";
-  const cookieStore = await cookies();
-  const allCookies = cookieStore.getAll();
 
-  if (hasLikelyAuthSessionCookie(allCookies)) {
-    const user = await getCurrentUser();
-    if (user) {
-      await redirectAuthenticatedUser(params, user);
-    }
-  }
-
-  if (!showWelcome && cookieStore.get(RETURNING_PRACTICE_COOKIE)?.value === "1") {
-    const qs = new URLSearchParams();
-    if (params.invite) qs.set("invite", String(params.invite));
-    if (params.email) qs.set("email", String(params.email));
-    const q = qs.toString();
-    redirect(q ? `/login?${q}` : "/login");
+  const user = await getCurrentUser();
+  if (user) {
+    await redirectAuthenticatedUser(params, user);
   }
 
   return (

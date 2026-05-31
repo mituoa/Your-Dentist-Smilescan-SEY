@@ -104,7 +104,7 @@ export function buildNavAmbientPreviews(input: {
     map.dashboard = {
       title: "Atlas",
       lines: [
-        { value: "Praxisüberblick & Kennzahlen" },
+        { value: "Atlas · Kennzahlen" },
         { label: "Fokus", value: "Einsendungen & Relay", tone: "muted" },
       ],
     };

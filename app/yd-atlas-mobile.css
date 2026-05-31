@@ -118,7 +118,42 @@
     background: rgba(47, 128, 237, 0.06);
     font-size: 0.75rem;
     font-weight: 600;
-    color: #3d5266;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: #0c1929;
+  }
+
+  .yd-atlas-m-insights {
+    margin: 0.625rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .yd-atlas-m-insight {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: #5a6f84;
+    letter-spacing: -0.01em;
+  }
+
+  .yd-atlas-m-insight::before {
+    content: "· ";
+    color: #8ba3b8;
+  }
+
+  .yd-atlas-m-card-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .yd-atlas-m-empty-positive {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b849c;
   }
 
   .yd-atlas-m-card {

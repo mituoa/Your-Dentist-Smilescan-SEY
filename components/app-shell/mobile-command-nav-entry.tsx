@@ -26,8 +26,7 @@ export function MobileCommandNavEntry() {
         <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.65} aria-hidden />
       </span>
       <span className="min-w-0 flex-1 text-left">
-        <span className="yd-nav-label block">Command AI</span>
-        <span className="yd-nav-desc block">Assistenz</span>
+        <span className="yd-nav-label block">Command</span>
       </span>
     </button>
   );

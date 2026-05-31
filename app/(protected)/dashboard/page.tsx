@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AtlasOperationalCore } from "@/components/dashboard/hc/atlas-operational-core";
@@ -109,9 +108,6 @@ export default async function DashboardPage() {
       ? Math.max(0, totalCount - unseenCount)
       : null;
 
-  const dashboardOverviewIncomplete =
-    !!profileError || !newRes.ok || !unseenRes.ok || !totalRes.ok || !tasksRes.ok;
-
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Guten Morgen" : hour < 18 ? "Guten Tag" : "Guten Abend";
@@ -125,26 +121,9 @@ export default async function DashboardPage() {
         greeting={greeting}
         displayName={doctorDisplayName}
         greetingName={greetingDoctorName}
-        subtitle="Eingang, Relay, Aufgaben, Routinen und Aktivität — ruhig im Überblick"
+        subtitle=""
         inboxCount={inboxCount}
       />
-
-      {dashboardOverviewIncomplete ? (
-        <p
-          className="yd-dash-meta mb-4 max-w-2xl normal-case tracking-normal"
-          style={{ color: YD.text.secondary }}
-          role="status"
-        >
-          Einige Bereiche konnten nicht geladen werden —{" "}
-          <Link href="/inbox" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
-            Eingang
-          </Link>
-          {" · "}
-          <Link href="/my-tasks" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
-            Aufgaben
-          </Link>
-        </p>
-      ) : null}
 
       <AtlasOperationalCore
         unseenCount={unseenCount}
@@ -163,7 +142,7 @@ export default async function DashboardPage() {
         </h2>
         <DashboardProgressiveSection
           title="Verlauf & Statistik"
-          hint="Nur bei Bedarf — kein operativer Mittelpunkt"
+          hint="Verlauf"
           defaultOpen={false}
         >
           <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
