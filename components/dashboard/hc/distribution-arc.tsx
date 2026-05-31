@@ -23,10 +23,10 @@ export function HcDistributionArc({ unseen, seen, total }: DistributionArcProps)
   const seenLen = Math.round(seenPct * ARC_LEN);
 
   return (
-    <HcCard tone="quiet" ambient={false} className="yd-dash-surface yd-dash-analytics-card flex min-h-[320px] min-w-0 flex-col p-5 md:min-h-[340px] md:p-6">
+    <HcCard tone="quiet" ambient={false} className="yd-dash-surface yd-dash-analytics-card flex min-w-0 flex-col p-5 md:p-6">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <p className="yd-dash-section">Bearbeitungsstand</p>
+          <p className="yd-dash-section yd-dash-section--secondary">Praxisstatus</p>
           <p className="yd-dash-kpi-quiet mt-3">{total === null ? "—" : t}</p>
         </div>
         <HcFilterChip icon={<Calendar className="h-3.5 w-3.5" strokeWidth={1.65} />}>
@@ -88,7 +88,7 @@ export function HcDistributionArc({ unseen, seen, total }: DistributionArcProps)
             ) : null}
           </svg>
           <div className="absolute inset-x-0 bottom-0 text-center">
-            <p className="yd-dash-meta normal-case">Einsendungen</p>
+            <p className="yd-dash-meta normal-case">Patientenfälle</p>
             <p className="yd-dash-kpi-quiet mt-1 text-[1.5rem]">{total === null ? "—" : t}</p>
           </div>
         </div>
@@ -100,7 +100,7 @@ export function HcDistributionArc({ unseen, seen, total }: DistributionArcProps)
               style={{ background: YD.accent.iconGradient }}
             />
             <span style={{ color: YD.text.secondary }}>
-              Ungelesen{" "}
+              Zur Prüfung{" "}
               <span className="font-medium" style={{ color: YD.text.primary }}>
                 {total === null ? "—" : `${Math.round(unseenPct * 100)}%`}
               </span>
@@ -109,7 +109,7 @@ export function HcDistributionArc({ unseen, seen, total }: DistributionArcProps)
           <li className="flex items-center gap-2.5">
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: YD.accent.light }} />
             <span style={{ color: YD.text.secondary }}>
-              Gelesen{" "}
+              Freigegeben{" "}
               <span className="font-medium" style={{ color: YD.text.primary }}>
                 {total === null ? "—" : `${Math.round(seenPct * 100)}%`}
               </span>

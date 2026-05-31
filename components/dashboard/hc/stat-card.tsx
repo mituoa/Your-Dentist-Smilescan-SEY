@@ -1,8 +1,16 @@
+"use client";
+
+import type { ReactNode } from "react";
+import Link from "next/link";
 import { TrendingUp, type LucideIcon } from "lucide-react";
 
-import { HcCard } from "@/components/design/hc-card";
-import type { YdCardTone } from "@/components/design-system/yd-card";
 import { YD } from "@/lib/design/yd-design-tokens";
+import { cn } from "@/lib/utils";
+
+export type StatCardInlinePreview = {
+  names: string[];
+  moreLabel?: string;
+};
 
 type StatCardProps = {
   title: string;
@@ -10,75 +18,113 @@ type StatCardProps = {
   icon: LucideIcon;
   footnote?: string;
   footnotePositive?: boolean;
-  metricA?: { label: string; value: string | number };
-  metricB?: { label: string; value: string | number };
-  tone?: YdCardTone;
+  /** Primary KPI — stronger emphasis in the row */
+  primary?: boolean;
+  href?: string;
+  inlinePreview?: StatCardInlinePreview;
+  hoverPreview?: ReactNode;
 };
 
-/** Reference KPI card — icon + title, metric, trend, split footer */
 export function HcStatCard({
   title,
   value,
   icon: Icon,
   footnote,
   footnotePositive = true,
-  metricA,
-  metricB,
-  tone = "default",
+  primary = false,
+  href,
+  inlinePreview,
+  hoverPreview,
 }: StatCardProps) {
-  return (
-    <HcCard
-      tone={tone}
-      ambient={false}
-      className="yd-dash-surface yd-dash-kpi-card flex min-h-[142px] min-w-0 flex-col p-4 md:min-h-[148px] md:p-5"
-    >
-      <div className="mb-3 flex items-center gap-2.5">
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10"
-          style={{
-            background: YD.accent.iconGradient,
-            boxShadow: "0 4px 12px rgba(47, 128, 237, 0.2)",
-          }}
-        >
-          <Icon className="h-[16px] w-[16px] text-white md:h-[17px] md:w-[17px]" strokeWidth={1.65} />
-        </span>
-        <p className="yd-dash-kpi-title text-[13px] font-medium leading-snug">{title}</p>
-      </div>
-      <p className={`yd-dash-kpi ${tone === "quiet" ? "yd-dash-kpi-quiet" : ""}`}>{value}</p>
-      {footnote ? (
+  const cardBody = (
+      <div
+        className={cn(
+          "yd-dash-surface yd-dash-kpi-card flex min-w-0 flex-col p-4 md:p-5",
+          href && "yd-dash-kpi-card--linked",
+          primary ? "yd-dash-kpi-card--primary min-h-[168px] md:min-h-[176px]" : "min-h-[142px] md:min-h-[148px]"
+        )}
+      >
+        <div className="mb-3 flex items-center gap-2.5">
+          <span
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded-full text-white",
+              primary ? "h-10 w-10 md:h-11 md:w-11" : "h-9 w-9 md:h-10 md:w-10"
+            )}
+            style={{
+              background: YD.accent.iconGradient,
+              boxShadow: primary
+                ? "0 6px 16px rgba(47, 128, 237, 0.28)"
+                : "0 4px 12px rgba(47, 128, 237, 0.2)",
+            }}
+          >
+            <Icon
+              className={primary ? "h-[18px] w-[18px] md:h-[19px] md:w-[19px]" : "h-[16px] w-[16px] md:h-[17px] md:w-[17px]"}
+              strokeWidth={1.65}
+            />
+          </span>
+          <p
+            className={cn(
+              "leading-snug",
+              primary ? "text-[14px] font-semibold" : "text-[13px] font-medium"
+            )}
+            style={{ color: primary ? YD.text.primary : YD.text.secondary }}
+          >
+            {title}
+          </p>
+        </div>
         <p
-          className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium leading-snug"
-          style={{ color: footnotePositive ? YD.trend.up : YD.text.muted }}
+          className={cn(
+            "yd-dash-kpi font-semibold",
+            primary && "yd-dash-kpi--primary",
+            !primary && "yd-dash-kpi-quiet text-[1.625rem]"
+          )}
         >
-          {footnotePositive ? (
-            <TrendingUp className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2} />
-          ) : null}
-          {footnote}
+          {value}
         </p>
-      ) : null}
-      {metricA || metricB ? (
-        <div
-          className="yd-dash-kpi-metrics mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3 text-[11px] leading-relaxed md:pt-3.5"
-          style={{ borderColor: "rgba(180, 198, 218, 0.32)" }}
-        >
-          {metricA ? (
-            <span className="yd-dash-meta normal-case tracking-normal">
-              {metricA.label}{" "}
-              <span className="font-semibold" style={{ color: YD.text.secondary }}>
-                {metricA.value}
-              </span>
-            </span>
-          ) : null}
-          {metricB ? (
-            <span className="yd-dash-meta normal-case tracking-normal">
-              {metricB.label}{" "}
-              <span className="font-semibold" style={{ color: YD.text.secondary }}>
-                {metricB.value}
-              </span>
-            </span>
-          ) : null}
+        {footnote ? (
+          <p
+            className={cn(
+              "mt-2 inline-flex items-center gap-1 text-[11px] font-medium leading-snug",
+              primary && "text-[12px]"
+            )}
+            style={{ color: footnotePositive ? YD.trend.up : YD.text.muted }}
+          >
+            {!primary && footnotePositive ? (
+              <TrendingUp className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2} />
+            ) : null}
+            {footnote}
+          </p>
+        ) : null}
+        {inlinePreview && (inlinePreview.names.length > 0 || inlinePreview.moreLabel) ? (
+          <div className="yd-dash-kpi-inline-preview mt-3 border-t pt-3">
+            {inlinePreview.names.map((name) => (
+              <p key={name} className="yd-dash-kpi-inline-preview__name truncate">
+                {name}
+              </p>
+            ))}
+            {inlinePreview.moreLabel ? (
+              <p className="yd-dash-kpi-inline-preview__more">{inlinePreview.moreLabel}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+  );
+
+  return (
+    <div className={cn("group relative min-w-0", primary && "z-[1]")}>
+      {href ? (
+        <Link href={href} className="block min-w-0 no-underline">
+          {cardBody}
+        </Link>
+      ) : (
+        cardBody
+      )}
+
+      {hoverPreview ? (
+        <div className="yd-dash-kpi-float-preview" role="tooltip">
+          <div className="yd-dash-kpi-float-preview__panel">{hoverPreview}</div>
         </div>
       ) : null}
-    </HcCard>
+    </div>
   );
 }

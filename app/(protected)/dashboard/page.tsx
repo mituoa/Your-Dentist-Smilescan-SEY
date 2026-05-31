@@ -1,22 +1,30 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CalendarCheck, ClipboardList, Users } from "lucide-react";
+import { ClipboardList, Sparkles, UserPlus } from "lucide-react";
 
 import {
   DashboardAmbientCharts,
   DashboardAmbientHeader,
   DashboardAmbientKpis,
   DashboardAmbientLower,
+  DashboardAmbientToday,
 } from "@/components/dashboard/hc/dashboard-ambient-sections";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
+import { DashboardTodayPriority } from "@/components/dashboard/hc/dashboard-today-priority";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
 import { HcMonthCalendar } from "@/components/dashboard/hc/month-calendar";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
+import { KpiHoverPreview } from "@/components/dashboard/hc/kpi-hover-preview";
+import { KpiReviewHoverPreview } from "@/components/dashboard/hc/kpi-review-hover-preview";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
+import {
+  buildHeroInlinePreview,
+  buildReviewHoverPatients,
+} from "@/lib/dashboard/kpi-preview-helpers";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
-import { greetingDoctorLabel } from "@/lib/format-doctor-display-name";
+import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import {
   getNewSubmissionsCount,
   getTotalUnseenSubmissions,
@@ -24,6 +32,7 @@ import {
   getOpenTasks,
   getWeeklySubmissionCounts,
   getRecentSubmissionsPreview,
+  getDashboardPriorityItems,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
@@ -31,11 +40,24 @@ import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
 
-function buildSubtitle(readyCount: number | null): string {
-  if (readyCount === null) return "Überblick wird geladen…";
-  if (readyCount === 0) return "Keine Freigaben offen — Posteingang ist auf dem aktuellen Stand.";
-  if (readyCount === 1) return "1 Antwort benötigt Ihre Freigabe.";
-  return `${readyCount} Antworten benötigen Ihre Freigabe.`;
+function buildNewCasesHover(newCount: number | null): string[] {
+  const n = newCount ?? 0;
+  return [
+    n > 0 ? `${n} neue Anfragen` : "keine neuen Anfragen",
+    "offene Patientenkommunikation",
+    n > 0 ? "Eingang heute" : "ruhiger Tagesverlauf",
+  ];
+}
+
+function buildAssistHover(openTasks: number, practiceClear: boolean): string[] {
+  if (practiceClear) {
+    return ["Antworten erstellt", "Aufgaben geprüft", "Prozesse aktiv"];
+  }
+  return [
+    "Antworten erstellt",
+    openTasks > 0 ? `${openTasks} Aufgaben offen` : "Aufgaben geprüft",
+    "Prozesse aktiv",
+  ];
 }
 
 export default async function DashboardPage() {
@@ -64,7 +86,7 @@ export default async function DashboardPage() {
 
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "Team";
-  const doctorLabel = greetingDoctorLabel(displayName);
+  const doctorLabel = cockpitDoctorLabel(displayName);
 
   const [
     newRes,
@@ -74,6 +96,7 @@ export default async function DashboardPage() {
     weeklyRes,
     previewRes,
     inboxBadgeRes,
+    priorityRes,
   ] = await Promise.all([
     getNewSubmissionsCount(workspaceId),
     getTotalUnseenSubmissions(workspaceId),
@@ -82,6 +105,7 @@ export default async function DashboardPage() {
     getWeeklySubmissionCounts(workspaceId),
     getRecentSubmissionsPreview(workspaceId),
     countUnseenInboxSubmissions(workspaceId),
+    getDashboardPriorityItems(workspaceId, 5),
   ]);
 
   const newCount = newRes.ok ? newRes.count : null;
@@ -95,15 +119,36 @@ export default async function DashboardPage() {
   const openTaskCount = openTasks?.length ?? 0;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
+  const priorityItems = priorityRes.ok ? priorityRes.items : null;
   const inboxCount =
     inboxBadgeRes.ok && inboxBadgeRes.count > 0 ? inboxBadgeRes.count : undefined;
 
+  const practiceClear =
+    (unseenCount ?? 0) === 0 && openTaskCount === 0 && (newCount ?? 0) === 0;
+
   const dashboardOverviewIncomplete =
-    !!profileError || !newRes.ok || !unseenRes.ok || !totalRes.ok || !tasksRes.ok;
+    !!profileError ||
+    !newRes.ok ||
+    !unseenRes.ok ||
+    !totalRes.ok ||
+    !tasksRes.ok ||
+    !priorityRes.ok;
 
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Guten Morgen" : hour < 18 ? "Guten Tag" : "Guten Abend";
+
+  const newCasesFootnote =
+    newCount !== null && newCount > 0
+      ? `${newCount} neue Anfragen`
+      : "Keine neuen Anfragen";
+
+  const heroInline =
+    priorityItems && unseenCount !== null
+      ? buildHeroInlinePreview(priorityItems, unseenCount)
+      : { names: [] as string[], moreLabel: undefined as string | undefined };
+
+  const reviewHoverPatients = buildReviewHoverPatients(priorityItems ?? []);
 
   return (
     <div
@@ -117,7 +162,7 @@ export default async function DashboardPage() {
         <DashboardHeader
           greeting={greeting}
           displayName={doctorLabel}
-          subtitle={buildSubtitle(unseenCount)}
+          pendingApprovals={unseenCount}
           email={user.email || ""}
           workspaceName="Praxis"
           avatarUrl={profileData?.photo_url ?? null}
@@ -132,67 +177,62 @@ export default async function DashboardPage() {
           style={{ color: YD.text.secondary }}
           role="status"
         >
-          Einige Kennzahlen konnten nicht geladen werden —{" "}
-          <Link href="/inbox" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
-            Posteingang
-          </Link>
-          {" · "}
-          <Link href="/my-tasks" className="font-medium hover:underline" style={{ color: YD.accent.core }}>
-            Aufgaben
-          </Link>
+          Einige Bereiche konnten nicht geladen werden — bitte Seite erneut laden.
         </p>
       ) : null}
 
       <DashboardAmbientKpis>
-        <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-          <HcStatCard
-            tone="primary"
-            title="Ungelesene Fälle"
-            value={unseenCount === null ? "—" : unseenCount}
-            icon={ClipboardList}
-            footnote={
-              unseenCount === 0
-                ? "Posteingang ist auf dem aktuellen Stand"
-                : "Priorität für Ihre Prüfung"
-            }
-            footnotePositive={unseenCount === 0}
-            metricA={{ label: "Gelesen", value: seenCount === null ? "—" : seenCount }}
-            metricB={{ label: "Gesamt", value: totalCount === null ? "—" : totalCount }}
-          />
-          <HcStatCard
-            tone="quiet"
-            title="Einsendungen gesamt"
-            value={totalCount === null ? "—" : totalCount}
-            icon={Users}
-            footnote={
-              newCount !== null && newCount > 0
-                ? `${newCount} neu in 24 Stunden`
-                : "Aktueller Bestand"
-            }
-            footnotePositive={newCount === 0}
-            metricA={{ label: "Neu (24h)", value: newCount === null ? "—" : newCount }}
-            metricB={{ label: "Ungelesen", value: unseenCount === null ? "—" : unseenCount }}
-          />
-          <HcStatCard
-            tone="quiet"
-            title="Offene Aufgaben"
-            value={openTasks === null ? "—" : openTaskCount}
-            icon={CalendarCheck}
-            footnote={openTaskCount > 0 ? "Relay · Praxisworkflow" : "Keine offenen Aufgaben"}
-            footnotePositive={openTaskCount === 0}
-            metricA={{ label: "Relay", value: openTaskCount }}
-            metricB={{
-              label: "Status",
-              value: openTasks === null ? "—" : openTaskCount > 0 ? "Offen" : "Aktuell",
-            }}
-          />
+        <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:gap-5">
+          <div className="min-w-0 order-1 sm:col-span-2 lg:col-span-6">
+            <HcStatCard
+              primary
+              href="/inbox"
+              title="Bereit zur Prüfung"
+              value={unseenCount === null ? "—" : unseenCount}
+              icon={ClipboardList}
+              footnote="Antworten vorbereitet"
+              footnotePositive={(unseenCount ?? 0) > 0}
+              inlinePreview={heroInline}
+              hoverPreview={
+                <KpiReviewHoverPreview patients={reviewHoverPatients} ctaHref="/inbox" />
+              }
+            />
+          </div>
+          <div className="min-w-0 order-2 sm:col-span-1 lg:col-span-3">
+            <HcStatCard
+              title="Neue Patientenfälle"
+              value={newCount === null ? "—" : newCount}
+              icon={UserPlus}
+              footnote={newCasesFootnote}
+              footnotePositive={newCount === 0}
+              hoverPreview={<KpiHoverPreview lines={buildNewCasesHover(newCount)} />}
+            />
+          </div>
+          <div className="min-w-0 order-3 sm:col-span-1 lg:col-span-3">
+            <HcStatCard
+              title="Praxis Assistenz"
+              value={practiceClear ? "✓ Aktiv" : openTaskCount}
+              icon={Sparkles}
+              footnote={practiceClear ? "Alle Abläufe bereit" : "Assistenz begleitet"}
+              footnotePositive={practiceClear}
+              hoverPreview={
+                <KpiHoverPreview lines={buildAssistHover(openTaskCount, practiceClear)} />
+              }
+            />
+          </div>
         </div>
       </DashboardAmbientKpis>
 
+      <DashboardAmbientToday>
+        <div className="yd-dash-zone yd-dash-zone--today">
+          <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
+        </div>
+      </DashboardAmbientToday>
+
       <DashboardAmbientCharts>
-        <div className="yd-dash-zone yd-dash-zone--charts grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="yd-dash-zone yd-dash-zone--charts yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
           <div className="min-w-0 lg:col-span-8">
-            <HcAnalyticsBars counts={weeklyCounts} totalLabel="Letzte 7 Tage" />
+            <HcAnalyticsBars counts={weeklyCounts} totalLabel="Patientenanfragen · 7 Tage" />
           </div>
           <div className="min-w-0 lg:col-span-4">
             <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
@@ -201,7 +241,7 @@ export default async function DashboardPage() {
       </DashboardAmbientCharts>
 
       <DashboardAmbientLower>
-        <div className="yd-dash-zone yd-dash-zone--lower grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="yd-dash-zone yd-dash-zone--lower yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
           <div className="min-w-0 lg:col-span-4">
             <HcMonthCalendar />
           </div>

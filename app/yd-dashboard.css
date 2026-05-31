@@ -24,6 +24,48 @@
   line-height: 1.45;
 }
 
+.yd-dashboard .yd-dash-status-line {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  max-width: 100%;
+  color: #5e7389;
+  font-weight: 500;
+}
+
+.yd-dashboard .yd-dash-status-line__dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.14);
+  flex-shrink: 0;
+}
+
+.yd-dashboard .yd-dash-status-line__practice {
+  color: #15803d;
+  font-weight: 500;
+}
+
+.yd-dashboard .yd-dash-status-line__sep {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.yd-dashboard .yd-dash-status-line__tail {
+  color: #5e7389;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 639px) {
+  .yd-dashboard .yd-dash-status-line {
+    white-space: normal;
+  }
+}
+
 .yd-dashboard .yd-dash-section {
   color: var(--yd-dash-title);
   font-size: 1rem;
@@ -75,24 +117,90 @@
   color: #1a3348;
 }
 
-.yd-dashboard .yd-dash-header-ref {
-  margin-bottom: 0.25rem;
+.yd-dashboard .yd-dash-kpi--primary {
+  font-size: 2rem;
+  letter-spacing: -0.042em;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-kpi--primary {
+    font-size: 2.125rem;
+  }
+}
+
+/* —— Cockpit header —— */
+.yd-dashboard .yd-dash-header-cockpit {
+  margin-bottom: 0;
+}
+
+.yd-dashboard .yd-dash-header-cockpit__greeting {
+  padding-top: 1.75rem; /* +28px breathing room above greeting */
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-header-cockpit__greeting {
+    padding-top: 2rem; /* +32px on desktop */
+  }
+}
+
+.yd-dashboard .yd-dash-header-cockpit__row {
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .yd-dashboard .yd-dash-header-cockpit__row {
+    min-height: 48px;
+  }
+
+  .yd-dashboard .yd-dash-header-cockpit__search {
+    align-self: center;
+  }
+
+  .yd-dashboard .yd-dash-header-cockpit__actions {
+    align-self: center;
+  }
+}
+
+.yd-dashboard .yd-dash-search-input {
+  box-shadow: 0 1px 2px rgba(15, 35, 58, 0.03);
 }
 
 .yd-dashboard .yd-dash-zone {
-  margin-bottom: 1.375rem;
+  margin-bottom: 1.5rem;
 }
 
 .yd-dashboard .yd-dash-zone--kpis {
-  margin-bottom: 1.25rem;
+  margin-top: 2rem; /* 32px header → KPI */
+  margin-bottom: 1.5rem;
 }
 
-.yd-dashboard .yd-dash-zone--charts {
-  margin-bottom: 1.25rem;
+.yd-dashboard .yd-dash-zone--today {
+  margin-bottom: 1.625rem;
 }
 
+.yd-dashboard .yd-dash-zone--charts,
 .yd-dashboard .yd-dash-zone--lower {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.375rem;
+}
+
+.yd-dashboard .yd-dash-zone--secondary {
+  opacity: 0.94;
+}
+
+.yd-dashboard .yd-dash-section--secondary {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.yd-dashboard .yd-dash-analytics-card {
+  min-height: 300px !important;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-analytics-card {
+    min-height: 300px !important;
+  }
 }
 
 /* Reference card surfaces — white, 24px radius, subtle depth */
@@ -110,41 +218,273 @@
 }
 
 .yd-dashboard .yd-dash-kpi-card {
-  transition: box-shadow 280ms ease, transform 280ms ease;
+  transition:
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease;
+}
+
+.yd-dashboard .yd-dash-kpi-card--primary {
+  border-color: rgba(47, 128, 237, 0.22) !important;
+  box-shadow:
+    0 2px 4px rgba(15, 35, 58, 0.05),
+    0 12px 32px rgba(47, 128, 237, 0.12) !important;
+}
+
+.yd-dashboard .yd-dash-interactive-card {
+  transition:
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (hover: hover) {
-  .yd-dashboard .yd-dash-kpi-card:hover {
+  .yd-dashboard .yd-dash-kpi-card:hover,
+  .yd-dashboard .yd-dash-interactive-card:hover {
+    transform: translateY(-2px);
     box-shadow:
-      0 2px 4px rgba(15, 35, 58, 0.05),
-      0 14px 32px rgba(30, 91, 189, 0.11) !important;
+      0 4px 8px rgba(15, 35, 58, 0.06),
+      0 16px 36px rgba(30, 91, 189, 0.12) !important;
+  }
+
+  .yd-dashboard .yd-dash-kpi-card--primary:hover {
+    box-shadow:
+      0 6px 12px rgba(15, 35, 58, 0.07),
+      0 20px 40px rgba(47, 128, 237, 0.14) !important;
   }
 }
 
-/* Tighter top — reference sits higher in canvas */
+/* KPI hover glass preview */
+.yd-dashboard .yd-dash-kpi-float-preview {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition:
+    opacity 180ms ease 120ms,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+}
+
+.yd-dashboard .yd-dash-kpi-float-preview__panel {
+  border-radius: 16px;
+  border: 1px solid rgba(180, 198, 218, 0.38);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  padding: 0.7rem 0.8rem;
+  box-shadow:
+    0 8px 24px rgba(30, 91, 189, 0.1),
+    0 2px 6px rgba(15, 35, 58, 0.05);
+}
+
+@media (hover: hover) {
+  .yd-dashboard .group:hover .yd-dash-kpi-float-preview {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+.yd-dashboard .yd-dash-kpi-card--linked {
+  cursor: pointer;
+}
+
+.yd-dashboard .yd-dash-kpi-inline-preview {
+  border-color: rgba(180, 198, 218, 0.28) !important;
+}
+
+.yd-dashboard .yd-dash-kpi-inline-preview__name {
+  color: #1a3348;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.45;
+}
+
+.yd-dashboard .yd-dash-kpi-inline-preview__name + .yd-dash-kpi-inline-preview__name {
+  margin-top: 0.15rem;
+}
+
+.yd-dashboard .yd-dash-kpi-inline-preview__more {
+  margin-top: 0.35rem;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__item {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__name {
+  color: #0f233a;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__concern {
+  margin-top: 0.1rem;
+  color: #5e7389;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__status {
+  margin-top: 0.2rem;
+  color: #166534;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__cta {
+  display: inline-flex;
+  margin-top: 0.55rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: opacity 150ms ease;
+}
+
+.yd-dashboard .yd-dash-kpi-review-preview__cta:hover {
+  opacity: 0.82;
+  text-decoration: underline;
+}
+
+.yd-dashboard .yd-dash-chart-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.yd-dashboard .yd-dash-chart-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.yd-dashboard .yd-dash-chart-legend__dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.yd-dashboard .yd-dash-chart-legend__dot--primary {
+  background: #2f80ed;
+}
+
+.yd-dashboard .yd-dash-chart-legend__dot--soft {
+  background: rgba(47, 128, 237, 0.45);
+}
+
+.yd-dashboard .yd-dash-chart-legend__dot--muted {
+  background: rgba(148, 163, 184, 0.65);
+}
+
+.yd-dashboard .yd-dash-patient-card {
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .yd-dashboard .yd-dash-interactive-card:hover {
+    cursor: default;
+  }
+
+  .yd-dashboard .yd-dash-primary-action:hover {
+    cursor: pointer;
+  }
+}
+
+.yd-dashboard .yd-dash-today .yd-dash-section {
+  font-size: 1.0625rem;
+}
+
+.yd-dashboard .yd-dash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #5e7389;
+  background: rgba(241, 247, 252, 0.95);
+  border: 1px solid rgba(180, 198, 218, 0.32);
+}
+
+.yd-dashboard .yd-dash-chip--ok {
+  color: #166534;
+  background: rgba(220, 252, 231, 0.65);
+  border-color: rgba(134, 239, 172, 0.45);
+}
+
+.yd-dashboard .yd-dash-chip--pending {
+  color: #1d4ed8;
+  background: rgba(219, 234, 254, 0.75);
+  border-color: rgba(147, 197, 253, 0.5);
+}
+
+.yd-dashboard .yd-dash-primary-action {
+  background: linear-gradient(145deg, #4a9af0 0%, #2f80ed 48%, #1e5bb8 100%);
+  box-shadow: 0 6px 20px rgba(47, 128, 237, 0.28);
+}
+
+.yd-dashboard .yd-dash-kpi-metrics {
+  border-color: rgba(180, 198, 218, 0.22) !important;
+}
+
+/* Premium top breathing room — intentionally placed, not glued */
 .yd-awaken-canvas:has(.yd-dashboard--reference) {
-  padding: 0.5rem 0.875rem 1.25rem;
+  padding: 0.875rem 0.875rem 1.375rem;
 }
 
 @media (min-width: 768px) {
   .yd-awaken-canvas:has(.yd-dashboard--reference) {
-    padding: 0.625rem 1.25rem 1.5rem;
+    padding: 1rem 1.25rem 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .yd-awaken-canvas:has(.yd-dashboard--reference) {
-    padding: 0.75rem 1.5rem 1.75rem;
+    padding: 1.125rem 1.5rem 1.75rem;
   }
 }
 
 main:has(.yd-dashboard--reference) {
-  padding-top: 0.125rem !important;
+  padding-top: 0.25rem !important;
 }
 
 @media (min-width: 768px) {
   main:has(.yd-dashboard--reference) {
-    padding-top: 0.25rem !important;
+    padding-top: 0.375rem !important;
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }

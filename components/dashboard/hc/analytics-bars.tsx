@@ -20,13 +20,29 @@ export function HcAnalyticsBars({ counts, totalLabel }: AnalyticsBarsProps) {
     <HcCard
       tone="primary"
       ambient={false}
-      className="yd-dash-surface yd-dash-analytics-card flex min-h-[320px] min-w-0 flex-col overflow-hidden p-5 md:min-h-[340px] md:p-6"
+      className="yd-dash-surface yd-dash-analytics-card flex min-w-0 flex-col overflow-hidden p-5 md:p-6"
     >
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
-          <p className="yd-dash-section">Einsendungsverlauf</p>
-          <p className="yd-dash-kpi mt-2.5">{counts === null ? "—" : weekTotal}</p>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="yd-dash-section yd-dash-section--secondary">Praxisentwicklung</p>
+          <p className="yd-dash-kpi-quiet mt-2 text-[1.5rem] md:text-[1.625rem]">
+            {counts === null ? "—" : weekTotal}
+          </p>
           <p className="yd-dash-meta mt-1.5 normal-case tracking-normal">{totalLabel}</p>
+          <ul className="yd-dash-chart-legend mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+            <li className="yd-dash-chart-legend__item">
+              <span className="yd-dash-chart-legend__dot yd-dash-chart-legend__dot--primary" aria-hidden />
+              Patientenanfragen
+            </li>
+            <li className="yd-dash-chart-legend__item">
+              <span className="yd-dash-chart-legend__dot yd-dash-chart-legend__dot--soft" aria-hidden />
+              Bearbeitete Fälle
+            </li>
+            <li className="yd-dash-chart-legend__item">
+              <span className="yd-dash-chart-legend__dot yd-dash-chart-legend__dot--muted" aria-hidden />
+              Freigegebene Antworten
+            </li>
+          </ul>
         </div>
         <HcFilterChip icon={<Calendar className="h-3.5 w-3.5" strokeWidth={1.65} />}>
           7 Tage

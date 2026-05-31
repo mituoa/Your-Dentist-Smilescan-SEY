@@ -12,10 +12,14 @@ export function DashboardAmbientKpis({ children }: { children: ReactNode }) {
   return <YdAwakenStagger index={1}>{children}</YdAwakenStagger>;
 }
 
-export function DashboardAmbientCharts({ children }: { children: ReactNode }) {
+export function DashboardAmbientToday({ children }: { children: ReactNode }) {
   return <YdAwakenStagger index={2}>{children}</YdAwakenStagger>;
 }
 
-export function DashboardAmbientLower({ children }: { children: ReactNode }) {
+export function DashboardAmbientCharts({ children }: { children: ReactNode }) {
   return <YdAwakenStagger index={3}>{children}</YdAwakenStagger>;
+}
+
+export function DashboardAmbientLower({ children }: { children: ReactNode }) {
+  return <YdAwakenStagger index={4}>{children}</YdAwakenStagger>;
 }

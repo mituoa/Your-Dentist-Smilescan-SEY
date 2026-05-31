@@ -24,8 +24,8 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
     readyCount === null
       ? "—"
       : readyCount === 1
-        ? "1 benötigt Ihre Prüfung"
-        : `${readyCount} benötigen Ihre Prüfung`;
+        ? "1 Antwort wartet auf Ihre Prüfung"
+        : `${readyCount} Antworten warten auf Ihre Prüfung`;
 
   return (
     <section className="yd-dash-today min-w-0" aria-labelledby="yd-dash-today-title">
@@ -43,7 +43,7 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
           className="text-[12px] font-medium transition hover:opacity-80"
           style={{ color: YD.accent.core }}
         >
-          Posteingang
+          Alle Fälle
         </Link>
       </div>
 
@@ -59,7 +59,7 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
             Keine offenen Prüfungen
           </p>
           <p className="mt-1 text-[12px]" style={{ color: YD.text.muted }}>
-            Neue Einsendungen erscheinen hier zuerst.
+            Neue Patientenfälle erscheinen hier zuerst.
           </p>
         </HcCard>
       ) : (
@@ -74,7 +74,10 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
 
             return (
               <li key={item.id}>
-                <HcCard tone="default" className="yd-dash-surface yd-dash-patient-card p-4 md:p-5">
+                <HcCard
+                  tone="default"
+                  className="yd-dash-surface yd-dash-patient-card yd-dash-interactive-card p-4 md:p-5"
+                >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 gap-3">
                       <div
@@ -98,10 +101,18 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
                           {issue}
                         </p>
                         <ul className="mt-2.5 flex flex-wrap gap-2">
+                          {isUnseen ? (
+                            <li className="yd-dash-chip yd-dash-chip--ok">
+                              <Check className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
+                              Antwort vorbereitet
+                            </li>
+                          ) : (
+                            <li className="yd-dash-chip">In Bearbeitung</li>
+                          )}
                           {item.photo_count > 0 ? (
                             <li className="yd-dash-chip yd-dash-chip--ok">
                               <Check className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
-                              Bilder vorhanden
+                              Bilder geprüft
                             </li>
                           ) : null}
                           {item.patient_notes?.trim() ? (
@@ -110,11 +121,6 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
                               Anliegen erfasst
                             </li>
                           ) : null}
-                          {isUnseen ? (
-                            <li className="yd-dash-chip yd-dash-chip--pending">Freigabe ausstehend</li>
-                          ) : (
-                            <li className="yd-dash-chip">In Bearbeitung</li>
-                          )}
                         </ul>
                       </div>
                     </div>
@@ -122,7 +128,7 @@ export function DashboardTodayPriority({ items, readyCount }: DashboardTodayPrio
                       href={`/inbox/${item.id}`}
                       className="yd-dash-primary-action inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-5 text-[13px] font-semibold text-white transition hover:brightness-[1.03] active:scale-[0.99] sm:min-w-[168px]"
                     >
-                      {isUnseen ? "Antwort prüfen" : "Fall öffnen"}
+                      {isUnseen ? "Prüfen" : "Fall öffnen"}
                       <ArrowRight className="h-4 w-4" strokeWidth={2} aria-hidden />
                     </Link>
                   </div>

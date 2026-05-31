@@ -12,7 +12,7 @@ function statusVariant(row: SubmissionPreviewRow): "active" | "calm" {
 }
 
 function statusLabel(row: SubmissionPreviewRow) {
-  return row.seen_at ? "In Bearbeitung" : "Ungelesen";
+  return row.seen_at ? "In Bearbeitung" : "Zur Prüfung";
 }
 
 function roomId(id: string) {
@@ -36,7 +36,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
         }}
       >
         <div>
-          <p className="yd-dash-section">Aktuelle Einsendungen</p>
+          <p className="yd-dash-section yd-dash-section--secondary">Aktuelle Patientenfälle</p>
         </div>
         <HcFilterChip icon={<Calendar className="h-3.5 w-3.5" strokeWidth={1.65} />}>
           Aktuell
@@ -76,7 +76,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                   className="px-6 py-12 text-center text-[13px] leading-relaxed"
                   style={{ color: YD.text.secondary }}
                 >
-                  Noch keine Einsendungen in diesem Ausschnitt.
+                  Noch keine Patientenfälle in diesem Ausschnitt.
                 </td>
               </tr>
             ) : (
@@ -165,7 +165,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
           className="text-[12px] font-medium tracking-wide transition hover:underline"
           style={{ color: YD.accent.core }}
         >
-          Alle Einsendungen öffnen →
+          Alle Patientenfälle →
         </Link>
       </div>
     </HcCard>
