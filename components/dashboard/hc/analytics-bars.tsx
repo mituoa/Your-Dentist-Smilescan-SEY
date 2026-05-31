@@ -2,19 +2,25 @@ import { Calendar } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
 import { HcFilterChip } from "@/components/dashboard/hc/hc-filter-chip";
+import type { PracticeDevelopmentSnapshot } from "@/lib/command-ai/practice-intelligence";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 const DAY_LABELS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 
 type AnalyticsBarsProps = {
   counts: number[] | null;
+  development?: PracticeDevelopmentSnapshot | null;
 };
 
-export function HcAnalyticsBars({ counts }: AnalyticsBarsProps) {
+export function HcAnalyticsBars({ counts, development = null }: AnalyticsBarsProps) {
   const values = counts ?? [0, 0, 0, 0, 0, 0, 0];
   const max = Math.max(...values, 1);
   const weekTotal = values.reduce((a, b) => a + b, 0);
   const activeDays = values.filter((c) => c > 0).length;
+
+  const prepared = development?.preparedResponses ?? null;
+  const activeCases = development?.activeCases ?? null;
+  const decisions = development?.decisionsPending ?? null;
 
   return (
     <HcCard
@@ -26,7 +32,7 @@ export function HcAnalyticsBars({ counts }: AnalyticsBarsProps) {
         <div className="min-w-0">
           <p className="yd-dash-section yd-dash-section--secondary">Praxisentwicklung</p>
           <p className="mt-2 text-[13px] font-medium leading-snug" style={{ color: YD.text.secondary }}>
-            Wie entwickelt sich Ihr digitaler Praxisworkflow?
+            Wert durch Assistenz — diese Woche
           </p>
           <p className="yd-dash-kpi-quiet mt-3 text-[1.5rem] md:text-[1.625rem]">
             {counts === null ? "—" : weekTotal}
@@ -35,6 +41,29 @@ export function HcAnalyticsBars({ counts }: AnalyticsBarsProps) {
             Neue Patientenfälle · 7 Tage
             {counts !== null && activeDays > 0 ? ` · ${activeDays} aktive Tage` : ""}
           </p>
+
+          {development ? (
+            <ul className="mt-4 space-y-1.5">
+              {prepared !== null ? (
+                <li className="text-[12px] leading-snug text-[#475569]">
+                  <span className="font-medium text-[#334155]">{prepared}</span>{" "}
+                  {prepared === 1 ? "Antwort vorbereitet" : "Antworten vorbereitet"}
+                </li>
+              ) : null}
+              {activeCases !== null && activeCases > 0 ? (
+                <li className="text-[12px] leading-snug text-[#475569]">
+                  <span className="font-medium text-[#334155]">{activeCases}</span>{" "}
+                  {activeCases === 1 ? "Fall aktiv bearbeitet" : "Fälle aktiv bearbeitet"}
+                </li>
+              ) : null}
+              {decisions !== null && decisions > 0 ? (
+                <li className="text-[12px] leading-snug text-[#475569]">
+                  <span className="font-medium text-[#334155]">{decisions}</span>{" "}
+                  {decisions === 1 ? "Entscheidung ausstehend" : "Entscheidungen ausstehend"}
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
         </div>
         <HcFilterChip icon={<Calendar className="h-3.5 w-3.5" strokeWidth={1.65} />}>
           Woche

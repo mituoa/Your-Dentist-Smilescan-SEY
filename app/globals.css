@@ -10,6 +10,7 @@
 @import "./yd-workspace-atmosphere.css";
 @import "./yd-app-shell.css";
 @import "./yd-workspace-toolbar.css";
+@import "./yd-workspace-integrated-header.css";
 @import "./yd-command-ai.css";
 @import "./yd-hero-composition.css";
 @import "./yd-auth.css";

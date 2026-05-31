@@ -29,9 +29,15 @@ function detectKind(text: string): CommandIntentKind {
   if (!t) return "unknown";
   if (/(zusammenfass|überblick|übersicht).*(neue|eingang|patient)/.test(t)) return "summarize_inbox";
   if (/was ist heute wichtig|heute wichtig|tagesüberblick|praxistag/.test(t)) return "summarize_day";
-  if (/(recall|erinner|implantat)/.test(t)) return "recall_patients";
-  if (/(aufgabe|task|team).*(erstell|anlegen|neu)/.test(t)) return "create_task";
+  if (/(recall|erinner|pzr|kontrolle).*(patient|nachricht|vorbereit)/.test(t)) return "recall_patients";
+  if (
+    /(aufgabe|task|erinner|anruf|telefon|telefonat|rückruf|diktat)/.test(t) ||
+    /\b(lisa|team|empfang|zfa)\b.*\b(morgen|heute|woche)\b/.test(t)
+  ) {
+    return "create_task";
+  }
   if (/(schreib|send|termin|link|nachricht|mail|rückmeld)/.test(t)) return "patient_message";
+  if (/fasse|zusammenfass/.test(t)) return "patient_message";
   if (/(inbox|tracker|relay|dashboard|einstellung)/.test(t)) return "navigate";
   return "unknown";
 }

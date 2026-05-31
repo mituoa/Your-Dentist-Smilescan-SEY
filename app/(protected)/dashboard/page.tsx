@@ -1,15 +1,13 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 
 import {
   DashboardAmbientCharts,
-  DashboardAmbientHeader,
   DashboardAmbientKpis,
   DashboardAmbientSubmissions,
 } from "@/components/dashboard/hc/dashboard-ambient-sections";
-import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { DashboardMobileShell } from "@/components/dashboard/hc/dashboard-mobile-shell";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
+import { MorningBriefing } from "@/components/dashboard/hc/morning-briefing";
 import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
@@ -35,8 +33,12 @@ import {
   countPreparedAwaitingReview,
   countTasksNeedingDecision,
 } from "@/lib/command-ai/submission-preparation";
+import {
+  buildPracticeBriefing,
+  buildPracticeDevelopment,
+  buildPracticeHealth,
+} from "@/lib/command-ai/practice-intelligence";
 import { YD } from "@/lib/design/yd-design-tokens";
-import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
@@ -67,10 +69,6 @@ export default async function DashboardPage() {
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "Team";
   const doctorLabel = cockpitDoctorLabel(displayName);
-  const cookieStore = await cookies();
-  const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE_NAME)?.value);
-  // @ts-expect-error - workspaces is joined
-  const workspaceName = workspace.workspaces?.name || "Praxis";
 
   const [unseenRes, totalRes, tasksRes, weeklyRes, previewRes, priorityRes] =
     await Promise.all([
@@ -135,7 +133,44 @@ export default async function DashboardPage() {
   const greeting =
     hour < 12 ? "Guten Morgen" : hour < 18 ? "Guten Tag" : "Guten Abend";
 
-  const subtitle = "Praxis aktiv · Vorgänge und Patienten im Überblick";
+  const briefing =
+    previewRows !== null && priorityItems !== null
+      ? buildPracticeBriefing({
+          displayName: doctorLabel,
+          greeting,
+          priorityItems: (priorityItems ?? []).map((item) => ({
+            id: item.id,
+            patient_name: item.patient_name,
+            patient_notes: item.patient_notes,
+            seen_at: item.seen_at,
+            photo_count: item.photo_count,
+          })),
+          previewRows: previewRows ?? [],
+          openTaskCount,
+          tasksNeedingDecision: tasksNeedingDecision ?? 0,
+          preparedAwaitingCount: preparedAwaitingCount ?? 0,
+        })
+      : null;
+
+  const practiceHealth =
+    previewRows !== null
+      ? buildPracticeHealth({
+          unseenCount: unseenCount ?? 0,
+          preparedAwaitingCount: preparedAwaitingCount ?? 0,
+          previewRows: previewRows ?? [],
+          tasksNeedingDecision: tasksNeedingDecision ?? 0,
+        })
+      : null;
+
+  const practiceDevelopment =
+    previewRows !== null
+      ? buildPracticeDevelopment({
+          weeklyCounts,
+          seenCount,
+          preparedAwaitingCount: preparedAwaitingCount ?? 0,
+          tasksNeedingDecision: tasksNeedingDecision ?? 0,
+        })
+      : null;
 
   return (
     <div
@@ -167,20 +202,6 @@ export default async function DashboardPage() {
       />
 
       <div className="hidden md:contents">
-        <DashboardAmbientHeader>
-          <DashboardHeader
-            greeting={greeting}
-            displayName={doctorLabel}
-            subtitle={subtitle}
-            email={user.email || ""}
-            workspaceName={workspaceName}
-            role="doctor"
-            initialTheme={theme}
-            avatarUrl={profileData?.photo_url ?? null}
-            inboxCount={unseenCount && unseenCount > 0 ? unseenCount : undefined}
-          />
-        </DashboardAmbientHeader>
-
         {dashboardOverviewIncomplete ? (
           <p
             className="yd-dash-meta mb-3 max-w-2xl normal-case tracking-normal"
@@ -190,6 +211,8 @@ export default async function DashboardPage() {
             Einige Bereiche konnten nicht geladen werden — bitte Seite erneut laden.
           </p>
         ) : null}
+
+        {briefing ? <MorningBriefing briefing={briefing} /> : null}
 
         <DashboardAmbientKpis>
           <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
@@ -206,20 +229,20 @@ export default async function DashboardPage() {
             <div className="flex min-w-0">
               <HcStatCard
                 href="/inbox"
-                title="Vorbereitet durch AI"
+                title="AI vorbereitet"
                 value={preparedAwaitingCount === null ? "—" : preparedAwaitingCount}
                 iconName="sparkles"
-                footnote="Antworten & Aktionen bereit"
+                footnote="Antworten & nächste Schritte bereit"
                 hoverHint="Assistenz hat Entwürfe und nächste Schritte vorbereitet — zur Freigabe im Tracker prüfen."
               />
             </div>
             <div className="flex min-w-0">
               <HcStatCard
                 href="/relay"
-                title="Praxisaufgaben"
+                title="Offene Entscheidungen"
                 value={tasksNeedingDecision === null ? openTaskCount : tasksNeedingDecision}
                 iconName="list-todo"
-                footnote="Benötigen Entscheidung"
+                footnote="Freigabe durch Sie erforderlich"
                 workContext={openTasksContext}
               />
             </div>
@@ -235,15 +258,15 @@ export default async function DashboardPage() {
         <DashboardAmbientCharts>
           <div className="yd-dash-zone yd-dash-zone--charts yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
             <div className="min-w-0 lg:col-span-8">
-              <HcAnalyticsBars counts={weeklyCounts} />
+              <HcAnalyticsBars counts={weeklyCounts} development={practiceDevelopment} />
             </div>
             <div className="min-w-0 lg:col-span-4">
               <HcPracticeStatus
                 unseen={unseenCount}
-                seen={seenCount}
                 openTaskCount={openTaskCount}
                 preparedAwaitingCount={preparedAwaitingCount}
                 nextTaskLabel={nextTaskLabel}
+                health={practiceHealth}
               />
             </div>
           </div>

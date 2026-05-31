@@ -1,15 +1,17 @@
 import { Check } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
+import type { PracticeHealthSnapshot } from "@/lib/command-ai/practice-intelligence";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 
 type PracticeStatusProps = {
   unseen: number | null;
-  seen: number | null;
+  seen?: number | null;
   openTaskCount: number;
   preparedAwaitingCount?: number | null;
   nextTaskLabel?: string | null;
+  health?: PracticeHealthSnapshot | null;
 };
 
 function StatusLine({
@@ -42,16 +44,19 @@ function StatusLine({
 
 export function HcPracticeStatus({
   unseen,
-  seen,
   openTaskCount,
   preparedAwaitingCount = null,
   nextTaskLabel,
+  health = null,
 }: PracticeStatusProps) {
   const u = unseen ?? 0;
-  const s = seen ?? 0;
   const p = preparedAwaitingCount ?? 0;
-  const needsAttention = u > 0 || openTaskCount > 0;
-  const headline = needsAttention ? "Handlungsbedarf" : "Praxis läuft ruhig";
+  const stale = health?.staleUnseenCount ?? 0;
+  const critical = health?.criticalDelays ?? 0;
+
+  const needsAttention =
+    health != null ? !health.calmPractice : u > 0 || openTaskCount > 0;
+  const headline = health?.headline ?? (needsAttention ? "Handlungsbedarf" : "Praxis läuft ruhig");
   const headlineTone = needsAttention ? YD.text.primary : "#166534";
 
   return (
@@ -72,6 +77,14 @@ export function HcPracticeStatus({
           <p className="yd-dash-practice-status__group">Patienten</p>
           <ul className="mt-2 space-y-2">
             <StatusLine
+              ok={stale === 0}
+              label={
+                stale === 0
+                  ? "Keine Patienten >24h unbeantwortet"
+                  : `${stale} ${stale === 1 ? "Fall" : "Fälle"} >24h ohne Rückmeldung`
+              }
+            />
+            <StatusLine
               ok={u === 0}
               label={
                 u === 0
@@ -80,17 +93,21 @@ export function HcPracticeStatus({
               }
             />
             <StatusLine
-              ok={s > 0 || u === 0}
-              label={s > 0 ? `${s} ${s === 1 ? "Fall aktiv" : "Fälle aktiv"}` : "Keine aktiven Fälle"}
-            />
-            <StatusLine
-              ok={p === 0 && u === 0}
+              ok={p > 0 || u === 0}
               label={
                 p > 0
-                  ? `${p} ${p === 1 ? "Antwort bereit" : "Antworten bereit"} zur Prüfung`
+                  ? `${p} ${p === 1 ? "Antwort vorbereitet" : "Antworten vorbereitet"}`
                   : u === 0
                     ? "Assistenz hat alles vorbereitet"
                     : "Antworten warten auf Freigabe"
+              }
+            />
+            <StatusLine
+              ok={critical === 0}
+              label={
+                critical === 0
+                  ? "0 kritische Verzögerungen"
+                  : `${critical} kritische Verzögerungen`
               }
             />
           </ul>

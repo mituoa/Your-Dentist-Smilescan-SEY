@@ -1,4 +1,5 @@
-import { frameNextStep } from "./safety-copy";
+import { frameNextStep, frameSituation } from "./safety-copy";
+import { buildPhotoWorkflowChecks } from "./photo-workflow";
 import { suggestNextStepFromNotes } from "./preparation-engine";
 import type { SubmissionPreparation, SubmissionPreparationInput } from "./types";
 
@@ -10,30 +11,39 @@ export function buildSubmissionPreparation(
   const hasPhotos = input.photo_count > 0;
   const isUnseen = !input.seen_at;
 
+  const photoChecks = buildPhotoWorkflowChecks(input.photo_count);
+
   const checks = hasPhotos
     ? [
-        { id: "images", label: "Bilder geprüft", done: true },
-        { id: "summary", label: "Zusammenfassung erstellt", done: hasNotes },
+        { id: "images", label: "Fotos geprüft", done: true },
+        { id: "summary", label: "Angaben zusammengefasst", done: hasNotes },
         { id: "response", label: "Antwort vorbereitet", done: isUnseen && hasNotes },
       ]
     : [
-        { id: "summary", label: "Zusammenfassung erstellt", done: hasNotes },
+        { id: "summary", label: "Angaben zusammengefasst", done: hasNotes },
         { id: "response", label: "Antwort vorbereitet", done: isUnseen && hasNotes },
       ];
 
   const readyForReview = isUnseen && hasNotes;
 
   const nextStep = suggestNextStepFromNotes(input.patient_notes);
+  const name = input.patient_name?.trim() || "Patient";
   const summaryLine = hasNotes
     ? input.patient_notes!.trim().slice(0, 72) + (input.patient_notes!.length > 72 ? "…" : "")
+    : null;
+
+  const responseSummary = hasNotes
+    ? frameSituation(input.patient_notes, name)
     : null;
 
   return {
     submissionId: input.id,
     readyForReview,
     checks,
+    photoChecks,
     suggestedNextStep: frameNextStep(nextStep),
     summaryLine,
+    responseSummary,
   };
 }
 

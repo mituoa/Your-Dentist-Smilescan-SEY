@@ -3,4 +3,6 @@ export * from "./safety-copy";
 export * from "./intent-resolver";
 export * from "./preparation-engine";
 export * from "./submission-preparation";
+export * from "./photo-workflow";
+export * from "./practice-intelligence";
 export * from "./draft-bridge";

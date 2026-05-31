@@ -203,29 +203,18 @@
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92);
 }
 
-/* Dashboard: integrated header replaces global toolbar */
-.yd-workspace .yd-app-shell-main:has(.yd-dashboard--reference) .yd-workspace-toolbar {
-  display: none;
+/* Legacy toolbar — replaced by integrated workspace header (md+) */
+.yd-workspace .yd-workspace-toolbar {
+  display: none !important;
 }
 
-.yd-workspace .yd-app-shell-main:has(.yd-dashboard--reference) > main {
+.yd-workspace .yd-app-shell-main > main {
   padding-top: 0.375rem !important;
 }
 
 @media (min-width: 768px) {
-  .yd-workspace .yd-app-shell-main:has(.yd-dashboard--reference) > main {
-    padding-top: 0.5rem !important;
-  }
-}
-
-/* Shell: toolbar + canvas alignment */
-.yd-workspace .yd-app-shell-main > main {
-  padding-top: 0.5rem !important;
-}
-
-@media (min-width: 768px) {
   .yd-workspace .yd-app-shell-main > main {
-    padding-top: 0.625rem !important;
+    padding-top: 0.5rem !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
@@ -237,3 +226,4 @@
     padding-right: 1.125rem !important;
   }
 }
+

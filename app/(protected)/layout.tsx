@@ -14,7 +14,9 @@ import {
   MobileNavProvider,
   MobileSidebarFrame,
 } from "@/components/app-shell/mobile-nav";
+import { WorkspaceIntegratedHeaderBridge } from "@/components/app-shell/workspace-integrated-header-bridge";
 import { ProtectedTopbar } from "@/components/app-shell/protected-topbar";
+import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
@@ -91,6 +93,9 @@ export default async function ProtectedLayout({
   ]);
 
   const profileData = headerState.profileData;
+  const doctorLabel = cockpitDoctorLabel(
+    profileData?.display_name || user.email?.split("@")[0] || workspaceName
+  );
 
   let navAmbient = buildNavAmbientPreviews({
     inboxItems: [],
@@ -154,7 +159,18 @@ export default async function ProtectedLayout({
               />
 
               <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(3rem,env(safe-area-inset-bottom)+2rem)] md:p-5 md:pb-6">
-                <HcAppCanvas>{children}</HcAppCanvas>
+                <HcAppCanvas>
+                  <WorkspaceIntegratedHeaderBridge
+                    email={user.email || ""}
+                    workspaceName={workspaceName}
+                    role={role}
+                    initialTheme={theme}
+                    displayName={doctorLabel}
+                    avatarUrl={profileData?.photo_url ?? null}
+                    inboxCount={inboxCount}
+                  />
+                  {children}
+                </HcAppCanvas>
               </main>
             </div>
           </div>

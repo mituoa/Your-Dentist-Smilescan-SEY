@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
 
 import { CardBoard } from "@/components/my-tasks/card-board";
+import { RelayAssistHint } from "@/components/command-ai/relay-assist-hint";
 import { RelayMessagesPanel } from "@/components/my-tasks/relay-messages-panel";
 import { RelayQuickCreate } from "@/components/my-tasks/relay-quick-create";
 import type { MyTask } from "@/lib/queries/my-tasks";
@@ -180,6 +181,8 @@ export function RelayWorkspaceView({
           ) : null}
         </div>
       </div>
+
+      {isRelay && isDoctor && panel === "tasks" ? <RelayAssistHint /> : null}
 
       {isRelay && panel === "messages" ? (
         <RelayMessagesPanel

@@ -2,6 +2,7 @@ import { buildFollowUpDraft } from "@/lib/clinical/message-templates";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 
 import { frameNextStep, frameSituation, frameSuggestion } from "./safety-copy";
+import { formatDueLabel, parseTaskFromVoice } from "./task-intent";
 import type { CommandIntent, CommandWorkspaceHints, PreparedWorkItem } from "./types";
 
 function suggestNextStepFromNotes(notes: string | null): string {
@@ -157,20 +158,88 @@ function buildSummarizeDayWork(intent: CommandIntent): PreparedWorkItem {
   };
 }
 
+function buildSummarizePatientWork(
+  intent: CommandIntent,
+  hints: CommandWorkspaceHints | null
+): PreparedWorkItem {
+  const patient =
+    hints?.patients.find((p) => p.submissionId === intent.submissionId) ??
+    hints?.patients.find((p) => p.name === intent.patientName) ??
+    null;
+
+  const patientName = intent.patientName ?? patient?.name ?? "Patient";
+  const concernLine = patient?.concernLine ?? null;
+  const nextStep = suggestNextStepFromNotes(concernLine);
+
+  return {
+    id: `prep-summary-${intent.submissionId ?? patientName}-${Date.now()}`,
+    status: "ready_for_review",
+    createdAt: new Date().toISOString(),
+    intent,
+    patientName,
+    submissionId: intent.submissionId ?? patient?.submissionId ?? null,
+    situationSummary: frameSituation(concernLine, patientName),
+    suggestionSummary: frameSuggestion(nextStep),
+    messageDraft: null,
+    checks: [
+      { id: "timeline", label: "Verlauf zusammengefasst", done: Boolean(concernLine) },
+      { id: "context", label: "Fallkontext geladen", done: Boolean(intent.submissionId) },
+      { id: "next", label: "Nächster Schritt vorbereitet", done: true },
+    ],
+    actions: [
+      {
+        id: "open_case",
+        kind: "navigate",
+        label: "Fall öffnen",
+        description: "Zusammenfassung im Tracker prüfen",
+        enabled: Boolean(intent.submissionId),
+        href: intent.submissionId ? `/inbox/${intent.submissionId}#tracker-assistenz` : "/inbox",
+      },
+    ],
+  };
+}
+
 function buildCreateTaskWork(intent: CommandIntent): PreparedWorkItem {
+  const parsed = parseTaskFromVoice(intent.rawText);
+  const patientName = intent.patientName ?? parsed.patientHint;
+  const dueLabel = formatDueLabel(parsed.dueHint);
+  const assignee = parsed.assigneeHint
+    ? parsed.assigneeHint.charAt(0).toUpperCase() + parsed.assigneeHint.slice(1)
+    : null;
+
+  const isCallNote = /anruf|telefon|telefonat|rückruf/.test(intent.rawText.toLowerCase());
+
+  const situationSummary = isCallNote
+    ? "Telefonnotiz strukturiert — Fallzusammenfassung und Follow-up vorbereitet."
+    : "Aufgabe für das Praxisteam vorbereitet.";
+
+  const draftLines = [
+    `Aufgabe: ${parsed.taskTitle}`,
+    patientName ? `Patient: ${patientName}` : null,
+    assignee ? `Zugewiesen: ${assignee}` : null,
+    `Fällig: ${dueLabel}`,
+    parsed.rawSummary ? `Notiz: ${parsed.rawSummary}` : null,
+  ].filter(Boolean);
+
   return {
     id: `prep-task-${Date.now()}`,
     status: "ready_for_review",
     createdAt: new Date().toISOString(),
     intent,
-    patientName: intent.patientName,
+    patientName,
     submissionId: intent.submissionId,
-    situationSummary: "Aufgabe für das Praxisteam vorbereitet.",
+    situationSummary,
     suggestionSummary: frameSuggestion("Entwurf in Relay prüfen und zuweisen."),
-    messageDraft: intent.patientName
-      ? `Aufgabe: Rückmeldung für ${intent.patientName} koordinieren.`
-      : "Aufgabe: [Beschreibung ergänzen]",
-    checks: [{ id: "task_draft", label: "Aufgabenentwurf erstellt", done: true }],
+    messageDraft: draftLines.join("\n"),
+    checks: [
+      { id: "task_draft", label: "Aufgabenentwurf erstellt", done: true },
+      ...(isCallNote
+        ? [
+            { id: "case_note", label: "Patientennotiz vorbereitet", done: true },
+            { id: "followup", label: "Follow-up erkannt", done: true },
+          ]
+        : []),
+    ],
     actions: [
       {
         id: "relay",
@@ -191,6 +260,9 @@ export function prepareWorkFromIntent(
 ): PreparedWorkItem | null {
   switch (intent.kind) {
     case "patient_message":
+      if (/fasse|zusammenfass/.test(intent.rawText.toLowerCase()) && (intent.patientName || intent.submissionId)) {
+        return buildSummarizePatientWork(intent, hints);
+      }
       if (!intent.patientName && !intent.submissionId) return null;
       return buildPatientMessageWork(intent, hints);
     case "summarize_inbox":

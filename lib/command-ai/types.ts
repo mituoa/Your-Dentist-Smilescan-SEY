@@ -72,6 +72,8 @@ export type SubmissionPreparation = {
   submissionId: string;
   readyForReview: boolean;
   checks: { id: string; label: string; done: boolean }[];
+  photoChecks: { id: string; label: string; done: boolean }[];
   suggestedNextStep: string;
   summaryLine: string | null;
+  responseSummary: string | null;
 };

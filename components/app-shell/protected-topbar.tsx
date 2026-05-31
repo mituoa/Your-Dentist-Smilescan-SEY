@@ -3,7 +3,6 @@
 import { MobileMenuButton } from "./mobile-nav";
 import { MobileWorkspaceBrandAnchor } from "./mobile-workspace-brand";
 import { UserMenu } from "./user-menu";
-import { WorkspaceToolbar } from "./workspace-toolbar";
 import { cn } from "@/lib/utils";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -18,8 +17,7 @@ type ProtectedTopbarProps = {
 };
 
 /**
- * App-Shell: Mobile-Topbar (Drawer) + Desktop-Workspace-Toolbar (global).
- * Dashboard-Inhalt bleibt ohne eigene Aktionsleiste.
+ * App-Shell: Mobile-Topbar (Drawer) + Desktop integrierte Headline im Canvas (Layout).
  */
 export function ProtectedTopbar({
   email,
@@ -54,16 +52,6 @@ export function ProtectedTopbar({
           </div>
         </div>
       </header>
-
-      <WorkspaceToolbar
-        email={email}
-        workspaceName={workspaceName}
-        role={role}
-        initialTheme={initialTheme}
-        avatarUrl={avatarUrl}
-        displayName={displayName}
-        inboxCount={inboxCount}
-      />
     </>
   );
 }
