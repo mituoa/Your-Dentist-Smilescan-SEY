@@ -14,11 +14,6 @@ import { KpiHoverPreview } from "@/components/dashboard/hc/kpi-hover-preview";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 
-export type StatCardInlinePreview = {
-  names: string[];
-  moreLabel?: string;
-};
-
 export type DashboardKpiIconName =
   | "clipboard-list"
   | "user-plus"
@@ -38,10 +33,8 @@ type StatCardProps = {
   iconName: DashboardKpiIconName;
   footnote?: string;
   href?: string;
-  /** Einzeiliger Hover-Hinweis (dezenter Tooltip) */
   hoverHint?: string;
   hoverLines?: string[];
-  /** @deprecated Prefer hoverHint — kept for client-only usage */
   hoverPreview?: ReactNode;
 };
 
@@ -66,37 +59,39 @@ export function HcStatCard({
   const cardBody = (
     <div
       className={cn(
-        "yd-dash-surface yd-dash-kpi-card flex min-w-0 flex-col p-4 md:px-5 md:py-[1.125rem]",
+        "yd-dash-surface yd-dash-kpi-card flex h-full min-w-0 flex-col justify-between p-5 md:p-[1.375rem]",
         href && "yd-dash-kpi-card--linked"
       )}
     >
-      <div className="mb-2.5 flex items-center gap-2.5">
-        <span className="yd-dash-kpi-card__icon flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-[2.375rem] md:w-[2.375rem]">
-          <Icon className="h-[16px] w-[16px] md:h-[17px] md:w-[17px]" strokeWidth={1.65} />
-        </span>
+      <div className="flex items-start justify-between gap-3">
         <p
-          className="text-[13px] font-medium leading-snug tracking-[-0.01em]"
-          style={{ color: YD.text.secondary }}
+          className="text-[12px] font-medium leading-snug tracking-[-0.01em] md:text-[13px]"
+          style={{ color: YD.text.muted }}
         >
           {title}
         </p>
+        <span className="yd-dash-kpi-card__icon flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+          <Icon className="h-[16px] w-[16px]" strokeWidth={1.6} />
+        </span>
       </div>
-      <p className="yd-dash-kpi yd-dash-kpi--balanced font-semibold">{value}</p>
-      {footnote ? (
-        <p
-          className="mt-1.5 text-[11px] font-medium leading-snug md:text-[12px]"
-          style={{ color: YD.text.muted }}
-        >
-          {footnote}
-        </p>
-      ) : null}
+      <div className="mt-auto pt-4">
+        <p className="yd-dash-kpi yd-dash-kpi--balanced font-semibold">{value}</p>
+        {footnote ? (
+          <p
+            className="mt-1.5 text-[10px] font-medium leading-snug md:text-[11px]"
+            style={{ color: YD.text.faint }}
+          >
+            {footnote}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 
   return (
-    <div className="group relative min-w-0">
+    <div className="group relative flex h-full min-w-0 flex-col">
       {href ? (
-        <Link href={href} className="block min-w-0 no-underline">
+        <Link href={href} className="block h-full min-w-0 no-underline">
           {cardBody}
         </Link>
       ) : (

@@ -2,10 +2,10 @@ import Link from "next/link";
 import { ChevronDown, ClipboardList, ListTodo, UserPlus } from "lucide-react";
 
 import { DashboardMobileActions } from "@/components/dashboard/hc/dashboard-mobile-actions";
-import { DashboardTodayPriority } from "@/components/dashboard/hc/dashboard-today-priority";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
-import type { DashboardPriorityItem } from "@/lib/queries/dashboard";
+import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
+import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
 
 type DashboardMobileShellProps = {
   greeting: string;
@@ -16,7 +16,7 @@ type DashboardMobileShellProps = {
   unseenCount: number | null;
   seenCount: number | null;
   totalCount: number | null;
-  priorityItems: DashboardPriorityItem[] | null;
+  previewRows: SubmissionPreviewRow[] | null;
 };
 
 function MobileKpiCard({
@@ -25,20 +25,15 @@ function MobileKpiCard({
   value,
   hint,
   icon: Icon,
-  emphasis = false,
 }: {
   href: string;
   title: string;
   value: string | number;
   hint: string;
   icon: typeof ClipboardList;
-  emphasis?: boolean;
 }) {
   return (
-    <Link
-      href={href}
-      className={`yd-dash-mobile-kpi ${emphasis ? "yd-dash-mobile-kpi--emphasis" : ""}`}
-    >
+    <Link href={href} className="yd-dash-mobile-kpi">
       <div className="yd-dash-mobile-kpi__icon" aria-hidden>
         <Icon strokeWidth={1.65} className="h-[16px] w-[16px]" />
       </div>
@@ -60,7 +55,7 @@ export function DashboardMobileShell({
   unseenCount,
   seenCount,
   totalCount,
-  priorityItems,
+  previewRows,
 }: DashboardMobileShellProps) {
   const reviewCount = pendingApprovals ?? 0;
   const statusLine =
@@ -70,7 +65,7 @@ export function DashboardMobileShell({
         ? `${reviewCount} ${reviewCount === 1 ? "Einsendung" : "Einsendungen"} zur Durchsicht`
         : openTaskCount > 0
           ? `${openTaskCount} ${openTaskCount === 1 ? "Aufgabe" : "Aufgaben"} offen`
-          : "Alles im Blick — keine offenen Punkte";
+          : "Praxis aktiv — keine offenen Vorgänge";
 
   return (
     <div className="yd-dash-mobile md:hidden">
@@ -86,12 +81,11 @@ export function DashboardMobileShell({
 
       <DashboardMobileActions />
 
-      <section className="yd-dash-mobile__today" aria-label="Heute wichtig">
-        <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
+      <section className="yd-dash-mobile__submissions" aria-label="Aktuelle Einsendungen">
+        <HcRecentTable rows={previewRows} />
       </section>
 
-      <section className="yd-dash-mobile__kpis" aria-label="Kennzahlen">
-        <h2 className="yd-dash-mobile__section-label">Überblick</h2>
+      <section className="yd-dash-mobile__kpis" aria-label="Überblick">
         <div className="yd-dash-mobile__kpi-stack">
           <MobileKpiCard
             href="/inbox"
@@ -99,14 +93,13 @@ export function DashboardMobileShell({
             value={unseenCount === null ? "—" : unseenCount}
             hint="Patientenfälle zur Durchsicht"
             icon={ClipboardList}
-            emphasis
           />
           <div className="yd-dash-mobile__kpi-row">
             <MobileKpiCard
               href="/inbox"
               title="Aktive Fälle"
               value={seenCount === null ? "—" : seenCount}
-              hint="In Bearbeitung"
+              hint="Laufende Patientenprozesse"
               icon={UserPlus}
             />
             <MobileKpiCard
@@ -129,7 +122,7 @@ export function DashboardMobileShell({
           <ChevronDown className="yd-dash-fold__chevron" aria-hidden />
         </summary>
         <div className="yd-dash-fold__panel yd-dash-mobile__fold-panel">
-          <HcAnalyticsBars counts={weeklyCounts} totalLabel="Patientenanfragen · 7 Tage" />
+          <HcAnalyticsBars counts={weeklyCounts} totalLabel="Einsendungsverlauf · 7 Tage" />
           <div className="mt-3">
             <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
           </div>

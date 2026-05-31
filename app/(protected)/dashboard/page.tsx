@@ -4,33 +4,28 @@ import {
   DashboardAmbientCharts,
   DashboardAmbientHeader,
   DashboardAmbientKpis,
-  DashboardAmbientLower,
-  DashboardAmbientToday,
+  DashboardAmbientSubmissions,
 } from "@/components/dashboard/hc/dashboard-ambient-sections";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { DashboardMobileShell } from "@/components/dashboard/hc/dashboard-mobile-shell";
-import { DashboardTodayPriority } from "@/components/dashboard/hc/dashboard-today-priority";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
-import { HcMonthCalendar } from "@/components/dashboard/hc/month-calendar";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import {
-  kpiHoverAktiveFaelle,
-  kpiHoverAufgaben,
-  kpiHoverEinsendungen,
+  KPI_HOVER_AKTIVE_FAELLE,
+  KPI_HOVER_AUFGABEN,
+  KPI_HOVER_EINSENDUNGEN,
 } from "@/lib/dashboard/kpi-hover-copy";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import {
-  getNewSubmissionsCount,
   getTotalUnseenSubmissions,
   getTotalSubmissionsCount,
   getOpenTasks,
   getWeeklySubmissionCounts,
   getRecentSubmissionsPreview,
-  getDashboardPriorityItems,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { YD } from "@/lib/design/yd-design-tokens";
@@ -65,25 +60,14 @@ export default async function DashboardPage() {
     profileData?.display_name || user.email?.split("@")[0] || "Team";
   const doctorLabel = cockpitDoctorLabel(displayName);
 
-  const [
-    newRes,
-    unseenRes,
-    totalRes,
-    tasksRes,
-    weeklyRes,
-    previewRes,
-    priorityRes,
-  ] = await Promise.all([
-    getNewSubmissionsCount(workspaceId),
+  const [unseenRes, totalRes, tasksRes, weeklyRes, previewRes] = await Promise.all([
     getTotalUnseenSubmissions(workspaceId),
     getTotalSubmissionsCount(workspaceId),
     getOpenTasks(workspaceId),
     getWeeklySubmissionCounts(workspaceId),
     getRecentSubmissionsPreview(workspaceId),
-    getDashboardPriorityItems(workspaceId, 5),
   ]);
 
-  const newCount = newRes.ok ? newRes.count : null;
   const unseenCount = unseenRes.ok ? unseenRes.count : null;
   const totalCount = totalRes.ok ? totalRes.count : null;
   const seenCount =
@@ -94,15 +78,13 @@ export default async function DashboardPage() {
   const openTaskCount = openTasks?.length ?? 0;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
-  const priorityItems = priorityRes.ok ? priorityRes.items : null;
 
   const dashboardOverviewIncomplete =
     !!profileError ||
-    !newRes.ok ||
     !unseenRes.ok ||
     !totalRes.ok ||
     !tasksRes.ok ||
-    !priorityRes.ok;
+    !previewRes.ok;
 
   const hour = new Date().getHours();
   const greeting =
@@ -127,7 +109,7 @@ export default async function DashboardPage() {
         unseenCount={unseenCount}
         seenCount={seenCount}
         totalCount={totalCount}
-        priorityItems={priorityItems}
+        previewRows={previewRows}
       />
 
       <div className="hidden md:contents">
@@ -149,68 +131,57 @@ export default async function DashboardPage() {
           </p>
         ) : null}
 
-        <DashboardAmbientToday>
-          <div className="yd-dash-zone yd-dash-zone--today yd-dash-zone--today-first">
-            <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
-          </div>
-        </DashboardAmbientToday>
-
         <DashboardAmbientKpis>
           <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:gap-5">
-            <div className="min-w-0 sm:col-span-1 lg:col-span-4">
+            <div className="flex min-w-0 sm:col-span-1 lg:col-span-4">
               <HcStatCard
                 href="/inbox"
                 title="Neue Einsendungen"
                 value={unseenCount === null ? "—" : unseenCount}
                 iconName="clipboard-list"
                 footnote="Patientenfälle zur Durchsicht"
-                hoverHint={kpiHoverEinsendungen(unseenCount)}
+                hoverHint={KPI_HOVER_EINSENDUNGEN}
               />
             </div>
-            <div className="min-w-0 sm:col-span-1 lg:col-span-4">
+            <div className="flex min-w-0 sm:col-span-1 lg:col-span-4">
               <HcStatCard
                 href="/inbox"
                 title="Aktive Fälle"
                 value={seenCount === null ? "—" : seenCount}
                 iconName="user-plus"
-                footnote="In Bearbeitung"
-                hoverHint={kpiHoverAktiveFaelle(seenCount)}
+                footnote="Laufende Patientenprozesse"
+                hoverHint={KPI_HOVER_AKTIVE_FAELLE}
               />
             </div>
-            <div className="min-w-0 sm:col-span-1 lg:col-span-4">
+            <div className="flex min-w-0 sm:col-span-1 lg:col-span-4">
               <HcStatCard
                 href="/relay"
                 title="Offene Aufgaben"
                 value={openTaskCount}
                 iconName="list-todo"
                 footnote="Praxisworkflow"
-                hoverHint={kpiHoverAufgaben(openTaskCount)}
+                hoverHint={KPI_HOVER_AUFGABEN}
               />
             </div>
           </div>
         </DashboardAmbientKpis>
 
+        <DashboardAmbientSubmissions>
+          <div className="yd-dash-zone yd-dash-zone--submissions min-w-0">
+            <HcRecentTable rows={previewRows} />
+          </div>
+        </DashboardAmbientSubmissions>
+
         <DashboardAmbientCharts>
           <div className="yd-dash-zone yd-dash-zone--charts yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
             <div className="min-w-0 lg:col-span-8">
-              <HcAnalyticsBars counts={weeklyCounts} totalLabel="Patientenanfragen · 7 Tage" />
+              <HcAnalyticsBars counts={weeklyCounts} totalLabel="Einsendungsverlauf · 7 Tage" />
             </div>
             <div className="min-w-0 lg:col-span-4">
               <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
             </div>
           </div>
         </DashboardAmbientCharts>
-
-        <DashboardAmbientLower>
-          <div className="yd-dash-zone yd-dash-zone--lower yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
-            <div className="min-w-0 lg:col-span-4">
-              <HcMonthCalendar />
-            </div>
-            <div className="min-w-0 lg:col-span-8">
-              <HcRecentTable rows={previewRows} />
-            </div>
-          </div>
-        </DashboardAmbientLower>
       </div>
     </div>
   );

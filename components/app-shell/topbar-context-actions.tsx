@@ -10,13 +10,14 @@ import { NewTaskModalTrigger } from "@/components/my-tasks/new-task-modal";
 type ActionVariant = "both" | "newCase" | "newTask" | "none";
 
 function resolveVariant(pathname: string, role: "doctor" | "team"): ActionVariant {
-  if (role === "doctor") {
-    return "both";
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+    return role === "doctor" ? "both" : "none";
   }
 
   if (pathname.startsWith("/inbox")) {
     return "newCase";
   }
+
   if (
     pathname === "/relay" ||
     pathname.startsWith("/relay/") ||
@@ -25,6 +26,7 @@ function resolveVariant(pathname: string, role: "doctor" | "team"): ActionVarian
   ) {
     return "newTask";
   }
+
   return "none";
 }
 

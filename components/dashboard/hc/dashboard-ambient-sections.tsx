@@ -12,7 +12,7 @@ export function DashboardAmbientKpis({ children }: { children: ReactNode }) {
   return <YdAwakenStagger index={1}>{children}</YdAwakenStagger>;
 }
 
-export function DashboardAmbientToday({ children }: { children: ReactNode }) {
+export function DashboardAmbientSubmissions({ children }: { children: ReactNode }) {
   return <YdAwakenStagger index={2}>{children}</YdAwakenStagger>;
 }
 

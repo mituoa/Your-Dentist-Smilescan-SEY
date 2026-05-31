@@ -7,7 +7,7 @@ export type WorkspacePageContext = {
 
 export function resolveWorkspacePageContext(pathname: string): WorkspacePageContext {
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
-    return { title: "Dashboard", hint: "Praxisüberblick" };
+    return { title: "Dashboard" };
   }
   if (pathname.startsWith("/inbox")) {
     return { title: "Tracker", hint: "Patientenfälle" };

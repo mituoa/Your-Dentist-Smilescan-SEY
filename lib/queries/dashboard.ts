@@ -82,6 +82,7 @@ export type SubmissionPreviewRow = {
   id: string;
   patient_name: string | null;
   patient_email: string | null;
+  patient_notes: string | null;
   created_at: string;
   seen_at: string | null;
 };
@@ -251,13 +252,24 @@ export const getRecentSubmissionsPreview = cache(
 
     return {
       ok: true,
-      rows: (data || []).map((row) => ({
-        id: row.id as string,
-        patient_name: (row.patient_name as string | null) ?? null,
-        patient_email: (row.patient_email as string | null) ?? null,
-        created_at: row.created_at as string,
-        seen_at: (row.seen_at as string | null) ?? null,
-      })),
+      rows: (data || []).map((row) => {
+        const r = row as {
+          id: string;
+          patient_name: string | null;
+          patient_email: string | null;
+          patient_notes: string | null;
+          created_at: string;
+          seen_at: string | null;
+        };
+        return {
+          id: r.id,
+          patient_name: r.patient_name ?? null,
+          patient_email: r.patient_email ?? null,
+          patient_notes: r.patient_notes ?? null,
+          created_at: r.created_at,
+          seen_at: r.seen_at ?? null,
+        };
+      }),
     };
   }
 );
