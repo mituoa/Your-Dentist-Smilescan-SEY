@@ -35,12 +35,11 @@ export function YdProductChrome({
       <Link href="/" className="yd-auth-brand-link" aria-label="Startseite">
         <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" />
       </Link>
-      <nav className="yd-product-chrome-nav" aria-label="Hauptnavigation">
-        {variant === "entry" ? (
-          <Link prefetch href="/" className="yd-os-link">
-            Zur Startseite
-          </Link>
-        ) : showSetupInHeader ? (
+      <nav
+        className={cn("yd-product-chrome-nav", variant === "entry" && "yd-product-chrome-nav--entry")}
+        aria-label="Hauptnavigation"
+      >
+        {variant === "entry" ? null : showSetupInHeader ? (
           <>
             <Link prefetch href={loginHref} className="yd-os-btn yd-os-btn--ghost">
               Anmelden

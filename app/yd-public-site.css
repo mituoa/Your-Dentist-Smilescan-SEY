@@ -22,6 +22,49 @@ html:has(.yd-public-site-page) {
   border-top: none;
 }
 
+/* Desktop landing hero — kompakt, kein Editorial-Stage/Mockup */
+.yd-public-site-hero--landing {
+  padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 1.75rem) clamp(1.25rem, 2.5vw, 1.75rem);
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.yd-public-site-hero-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.yd-public-site-hero--landing .yd-clinical-eyebrow {
+  margin: 0;
+}
+
+.yd-public-site-hero-headline {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.625rem, 3.2vw, 2.125rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #0c1929;
+  max-width: 22rem;
+}
+
+.yd-public-site-hero--landing .yd-public-site-hero-points {
+  margin: 0.25rem 0 0.5rem;
+  gap: 0.375rem;
+  max-width: 26rem;
+}
+
+.yd-public-site-hero--landing .yd-public-site-hero-points li {
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.yd-public-site-hero--landing .yd-public-site-hero-cta-stack {
+  margin-top: 0.5rem;
+}
+
 .yd-public-site-page .yd-clinical-hero-stage {
   border: none;
   box-shadow: 0 24px 64px rgba(72, 98, 128, 0.07);
@@ -76,6 +119,8 @@ html:has(.yd-public-site-page) {
 .yd-public-site-header-nav {
   align-items: center;
   gap: 0.125rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .yd-public-site-nav-link {
@@ -285,19 +330,22 @@ html:has(.yd-public-site-page) {
   border-bottom-color: rgba(47, 95, 143, 0.22);
 }
 
-/* Mobile — stacked, breathable, not full-bleed giants */
-.yd-public-site-mobile-page .yd-entry-mobile-actions {
+/* Mobile — stacked CTAs, touch-safe */
+.yd-public-site-mobile-ctas {
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
-  padding-bottom: 1.25rem;
   align-items: stretch;
+  padding: 0 0 1.25rem;
 }
 
-.yd-public-site-mobile-page .yd-entry-mobile-actions .yd-clinical-cta-primary,
-.yd-public-site-mobile-page .yd-entry-mobile-actions .yd-clinical-cta-secondary {
+.yd-public-site-mobile-ctas .yd-clinical-cta-primary,
+.yd-public-site-mobile-ctas .yd-clinical-cta-secondary {
   width: 100%;
   max-width: 20rem;
   margin-inline: auto;
   min-height: 44px;
+  touch-action: manipulation;
 }
 
 .yd-public-site-mobile-page .yd-public-site-cta-signin {
@@ -516,28 +564,101 @@ html:has(.yd-public-site-page) {
   color: #1a4f9c;
 }
 
-/* Mobile landing — scrollable page, no trapped overflow */
-.yd-public-site-mobile-page.yd-entry-mobile,
-.yd-public-site-mobile-page.yd-entry-mobile--native {
-  min-height: 100dvh;
-  max-height: none;
-  height: auto;
-  overflow: visible;
-  overflow-x: hidden;
+/* ═══ Mobile landing — native page (not desktop squeeze) ═══ */
+
+@media (max-width: 899px) {
+  .yd-public-os-content:has(.yd-public-site-mobile-page) {
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
-.yd-public-site-mobile-page .yd-entry-mobile-main {
-  flex: none;
-  min-height: 0;
-  overflow: visible;
-  gap: 1rem;
+.yd-public-site-mobile-page {
+  --yd-public-header-h: 3.75rem;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100dvh;
+  min-height: 100svh;
+  box-sizing: border-box;
+  overflow-x: clip;
+  padding:
+    max(0.5rem, env(safe-area-inset-top, 0px))
+    max(1rem, env(safe-area-inset-right, 0px))
+    max(1.25rem, env(safe-area-inset-bottom, 0px))
+    max(1rem, env(safe-area-inset-left, 0px));
+}
+
+.yd-public-site-mobile-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.yd-public-site-mobile-page .yd-public-site-header {
+  margin-bottom: 0.25rem;
+}
+
+/* Kurzer Mobile-Hero */
+.yd-public-site-hero-mobile {
+  padding: 0.25rem 0 0.75rem;
+  min-width: 0;
+}
+
+.yd-public-site-hero-mobile .yd-clinical-eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+}
+
+.yd-public-site-hero-mobile-title {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.5rem, 7vw, 1.875rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: #0c1929;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  max-width: 100%;
+}
+
+.yd-public-site-hero-mobile-title-line2 {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: clamp(1.375rem, 6.5vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #1a3d5c;
+}
+
+.yd-public-site-hero-points--mobile {
+  margin: 0.625rem 0 0;
+  display: grid;
+  gap: 0.3125rem;
+  max-width: 22rem;
+}
+
+.yd-public-site-mobile-page .yd-public-site-hero-points--mobile {
+  display: grid;
+}
+
+.yd-public-site-mobile-pricing {
+  min-width: 0;
+  padding: 0 0 0.5rem;
 }
 
 .yd-public-site-mobile-page .yd-entry-pricing-compact {
   position: relative;
   z-index: 1;
   min-width: 0;
-  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .yd-public-site-mobile-page .yd-entry-pricing-segments,
@@ -555,6 +676,8 @@ html:has(.yd-public-site-page) {
   position: relative;
   z-index: 0;
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .yd-public-site-mobile-page .yd-public-site-demo-panel {
@@ -562,40 +685,39 @@ html:has(.yd-public-site-page) {
   overflow-wrap: break-word;
 }
 
-/* Mobile landing — native order */
-.yd-public-site-mobile-page .yd-public-site-hero {
-  padding-bottom: 1rem;
-}
-
-.yd-public-site-mobile-page .yd-clinical-hero-world {
-  display: none;
-}
-
-.yd-public-site-mobile-page .yd-clinical-hero-cta-stack {
-  display: none;
-}
-
-.yd-public-site-mobile-page .yd-entry-mobile-main {
-  padding-top: 0;
-}
-
 .yd-public-site-mobile-page .yd-public-site-section {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
-.yd-public-site-mobile-page .yd-public-site-section--audience,
-.yd-public-site-mobile-page .yd-public-site-section--intro {
-  display: none;
+  padding: 1.25rem 0;
 }
 
 .yd-public-site-mobile-page .yd-public-site-section--nutzen-compact {
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .yd-public-site-mobile-page .yd-public-site-section--nutzen-compact .yd-public-site-section-lead {
   font-size: 0.8125rem;
+}
+
+.yd-public-site-mobile-page .yd-public-site-card-grid--2 {
+  gap: 0.625rem;
+}
+
+.yd-public-site-mobile-page .yd-public-site-card {
+  min-width: 0;
+}
+
+.yd-public-site-mobile-page .yd-public-site-footer {
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.yd-public-site-mobile-page .yd-public-site-demo-actions .yd-clinical-cta-primary,
+.yd-public-site-mobile-page .yd-public-site-demo-actions .yd-clinical-cta-secondary {
+  min-height: 44px;
+  touch-action: manipulation;
 }
 
 .yd-public-site-pricing-anchor {
@@ -634,10 +756,6 @@ html:has(.yd-public-site-page) {
   border-radius: 50%;
   background: rgba(47, 128, 237, 0.45);
   transform: translateY(-50%);
-}
-
-.yd-public-site-mobile-page .yd-public-site-hero-points {
-  display: none;
 }
 
 .yd-entry-pricing-sublabel {

@@ -131,7 +131,7 @@ export function LoginPricingBlock() {
             </div>
             <div className="mb-8 h-[20px]" />
             <Link
-              href="/register?plan=monthly"
+              href="/register?plan=monthly&step=1"
               className="mt-auto inline-flex h-[48px] w-full items-center justify-center rounded-xl border-2 border-gray-900 bg-white text-[15px] font-semibold text-gray-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white active:scale-[0.98]"
             >
               Jetzt starten
@@ -163,7 +163,7 @@ export function LoginPricingBlock() {
               </span>
             </div>
             <Link
-              href="/register?plan=halfyearly"
+              href="/register?plan=halfyearly&step=1"
               className="mt-auto inline-flex h-[48px] w-full items-center justify-center rounded-xl border-2 border-gray-900 bg-white text-[15px] font-semibold text-gray-900 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white active:scale-[0.98]"
             >
               Jetzt starten
@@ -195,7 +195,7 @@ export function LoginPricingBlock() {
               </span>
             </div>
             <Link
-              href="/register?plan=yearly"
+              href="/register?plan=yearly&step=1"
               className="mt-auto inline-flex h-[48px] w-full items-center justify-center rounded-xl bg-gradient-to-b from-[#0284C7] to-[#0369A1] text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-gradient-to-b hover:from-[#0369A1] hover:to-[#075985] hover:shadow-lg motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.02] active:scale-[0.98]"
             >
               Jetzt starten

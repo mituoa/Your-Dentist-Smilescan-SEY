@@ -14,8 +14,6 @@ export const AUTH_ACCESS_COPY = {
     "Wählen Sie den Abrechnungsrhythmus. Nach Prüfung öffnet sich Ihr geschützter Praxisbereich.",
   pricingPlanCtaActive: "Mit diesem Zugang registrieren",
   pricingPlanCtaSelect: "Zugang wählen",
-  loginTrustPrimary: "Geschützter Praxiszugang",
-  loginTrustSecondary: "Verschlüsselte Verbindung",
 } as const;
 
 export function buildPricingEntryHref(inviteToken = "", prefilledEmail = ""): string {

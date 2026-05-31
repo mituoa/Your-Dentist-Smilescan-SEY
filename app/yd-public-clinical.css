@@ -51,15 +51,12 @@
 }
 
 .yd-clinical-world.yd-public-os--scroll {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.yd-clinical-world.yd-public-os--scroll {
   min-height: 100dvh;
   height: auto;
   overflow-x: hidden;
   overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 .yd-clinical-world.yd-public-os--scroll .yd-public-os-content {

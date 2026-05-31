@@ -224,7 +224,7 @@
     box-shadow: 0 2px 12px rgba(47, 128, 237, 0.06);
   }
 
-  .yd-entry-mobile--native {
+  .yd-entry-mobile--native:not(.yd-public-site-mobile-page) {
     min-height: 100dvh;
     max-height: 100dvh;
     padding-top: max(0.875rem, env(safe-area-inset-top));
@@ -233,7 +233,7 @@
     padding-right: max(1rem, env(safe-area-inset-right));
   }
 
-  .yd-entry-mobile--native .yd-entry-mobile-main {
+  .yd-entry-mobile--native:not(.yd-public-site-mobile-page) .yd-entry-mobile-main {
     justify-content: flex-start;
     gap: 1.25rem;
   }

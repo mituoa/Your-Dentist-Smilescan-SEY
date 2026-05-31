@@ -30,6 +30,7 @@ import {
   waitForWorkspaceMembership,
 } from "@/lib/register-signup-helpers";
 import { rollbackIncompleteRegistrationAfterFailure } from "@/lib/register-signup-rollback";
+import { isRegisterContactRole } from "@/lib/auth/register-contact-roles";
 import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
 
 export async function signInWithGoogle(formData: FormData) {
@@ -186,8 +187,11 @@ export async function getAuthenticatedEntryPath(): Promise<string> {
 export async function signUp(formData: FormData) {
   const email = (formData.get("email") as string)?.trim() ?? "";
   const password = formData.get("password") as string;
-  const workspaceName = formData.get("workspace_name") as string;
-  const displayName = formData.get("display_name") as string;
+  const passwordConfirm = (formData.get("password_confirm") as string | null) ?? "";
+  const workspaceName = (formData.get("workspace_name") as string)?.trim() ?? "";
+  const displayName = (formData.get("display_name") as string)?.trim() ?? "";
+  const contactRole = (formData.get("contact_role") as string | null)?.trim() ?? "";
+  const contactPhone = (formData.get("contact_phone") as string | null)?.trim() ?? "";
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
 
   const billingInterval = (formData.get("billing_interval") as string | null)?.trim();
@@ -249,9 +253,12 @@ export async function signUp(formData: FormData) {
     } catch (e) {
       console.error("[signUp] registerFail cleanup", e);
     }
-    redirect(
-      `/register?error=${encodeURIComponent(msg)}&email=${encodeURIComponent(email)}${inviteQuerySuffix}`
-    );
+    const failParams = new URLSearchParams();
+    failParams.set("error", msg);
+    failParams.set("email", email);
+    failParams.set("step", "4");
+    if (inviteToken) failParams.set("invite", inviteToken);
+    redirect(`/register?${failParams.toString()}`);
   };
 
   if (!email || !password) {
@@ -260,6 +267,26 @@ export async function signUp(formData: FormData) {
 
   if (password.length < 8) {
     await registerFail("Passwort muss mindestens 8 Zeichen haben.");
+  }
+
+  if (password !== passwordConfirm) {
+    await registerFail("Die Passwörter stimmen nicht überein.");
+  }
+
+  if (!displayName) {
+    await registerFail("Bitte geben Sie den Namen der Ansprechperson an.");
+  }
+
+  if (!workspaceName) {
+    await registerFail("Bitte geben Sie den Praxisnamen an.");
+  }
+
+  if (!contactRole || !isRegisterContactRole(contactRole)) {
+    await registerFail("Bitte wählen Sie Ihre Rolle in der Praxis.");
+  }
+
+  if (contactPhone.length > 30) {
+    await registerFail("Die Telefonnummer ist zu lang (max. 30 Zeichen).");
   }
 
   const hdrs = await headers();
@@ -281,6 +308,8 @@ export async function signUp(formData: FormData) {
   const userMetadata: Record<string, string | null> = {
     display_name: displayName || email,
     invite_token: inviteToken || null,
+    contact_role: contactRole,
+    contact_phone: contactPhone || null,
   };
   if (!inviteToken) {
     userMetadata.workspace_name = workspaceName || "Meine Praxis";
@@ -386,6 +415,19 @@ export async function signUp(formData: FormData) {
         "Die Vertragsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut.",
         { deleteRegistrationAuthUser: true, workspaceIdHint: workspaceId }
       );
+    }
+
+    const profilePatch: Record<string, string | null> = {
+      display_name: displayName || email,
+      practice_name: workspaceName || null,
+      practice_phone: contactPhone || null,
+    };
+    const { error: profileErr } = await admin
+      .from("profile_data")
+      .update(profilePatch)
+      .eq("workspace_id", workspaceId);
+    if (profileErr) {
+      console.error("[signUp] profile_data update failed", profileErr);
     }
 
     const interval = billingInterval as "monthly" | "halfyearly" | "yearly";

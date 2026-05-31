@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { RegisterPageClient } from "@/components/auth/register-page-client";
@@ -31,15 +30,6 @@ function parseWizardStep(raw: string | undefined): 1 | 2 | 3 | 4 {
   return 1;
 }
 
-function isWizardActive(params: {
-  success?: string;
-  step?: string;
-}): boolean {
-  if (params.success === "1") return true;
-  const s = params.step?.trim();
-  return s === "1" || s === "2" || s === "3" || s === "4";
-}
-
 function buildPricingHref(params: {
   plan?: string;
   invite?: string;
@@ -68,10 +58,6 @@ function normalizeRegisterQueryError(
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
   const params = await searchParams;
-
-  if (!isWizardActive(params)) {
-    redirect(buildPricingHref(params));
-  }
 
   const inviteRaw = clipInviteTokenQuery(params.invite);
   const inviteToken = isInviteTokenFormat(inviteRaw) ? inviteRaw : "";

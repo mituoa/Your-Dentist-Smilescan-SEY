@@ -456,6 +456,328 @@ main:has(.yd-dashboard) {
   margin-bottom: 0;
 }
 
+/* ═══ Atlas — operational state (not SaaS dashboard) ═══ */
+
+.yd-dashboard--atlas .yd-dash-ambient-orb {
+  display: none;
+}
+
+.yd-atlas-core {
+  margin-top: 0.25rem;
+}
+
+.yd-atlas-state-block {
+  margin-bottom: 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.28);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.yd-atlas-state {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.yd-atlas-state-lead {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: #0c1929;
+}
+
+.yd-atlas-state-sub {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #5a6f84;
+}
+
+.yd-atlas-state--pressure .yd-atlas-state-lead {
+  color: #1a3348;
+}
+
+.yd-atlas-pressure-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.yd-atlas-pressure-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.625rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.yd-atlas-pressure-item--active {
+  border-color: rgba(47, 128, 237, 0.18);
+  background: rgba(237, 244, 252, 0.65);
+}
+
+.yd-atlas-pressure-item--idle {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(180, 198, 218, 0.2);
+}
+
+.yd-atlas-pressure-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8ba3b8;
+}
+
+.yd-atlas-pressure-value {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #334a5e;
+}
+
+.yd-atlas-pressure-item--active .yd-atlas-pressure-value {
+  color: #1a4f9c;
+}
+
+.yd-atlas-main-grid {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .yd-atlas-main-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 1.25rem;
+  }
+}
+
+.yd-atlas-primary {
+  min-width: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(248, 252, 255, 0.68) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 12px 40px rgba(47, 128, 237, 0.06);
+}
+
+.yd-atlas-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.125rem 0.75rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.2);
+}
+
+.yd-atlas-panel-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  color: #0c1929;
+}
+
+.yd-atlas-panel-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #8ba3b8;
+}
+
+.yd-atlas-panel-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2f5f8f;
+  text-decoration: none;
+}
+
+.yd-atlas-intake-list {
+  padding: 0.5rem 0.625rem 0.875rem;
+}
+
+.yd-atlas-queue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.yd-atlas-queue-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6875rem 0.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.14);
+  transition: background 180ms ease;
+}
+
+.yd-atlas-queue li:last-child .yd-atlas-queue-row {
+  border-bottom: 0;
+}
+
+.yd-atlas-queue-row:hover {
+  background: rgba(248, 252, 255, 0.85);
+}
+
+.yd-atlas-queue-row--waiting {
+  background: rgba(237, 244, 252, 0.35);
+}
+
+.yd-atlas-queue-row--waiting:hover {
+  background: rgba(237, 244, 252, 0.55);
+}
+
+.yd-atlas-queue-name {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #0c1929;
+}
+
+.yd-atlas-queue-meta {
+  margin: 0.1875rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #6b849c;
+}
+
+.yd-atlas-queue-state {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #1a4f9c;
+  padding-top: 0.125rem;
+}
+
+.yd-atlas-queue-state--muted {
+  font-weight: 500;
+  color: #8ba3b8;
+}
+
+.yd-atlas-queue-secondary {
+  margin-top: 0.875rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(180, 198, 218, 0.18);
+}
+
+.yd-atlas-queue-secondary-label {
+  margin: 0 0 0.375rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-atlas-queue--muted .yd-atlas-queue-row {
+  opacity: 0.88;
+}
+
+.yd-atlas-empty {
+  margin: 0.5rem 0.625rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #6b849c;
+}
+
+.yd-atlas-secondary-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.yd-atlas-secondary .yd-dash-panel {
+  min-height: 0 !important;
+}
+
+.yd-atlas-secondary .yd-dash-panel--primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 8px 28px rgba(47, 128, 237, 0.05);
+}
+
+.yd-atlas-continuity {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-atlas-continuity-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-atlas-continuity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.yd-atlas-continuity-row {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.375rem 0;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.12);
+}
+
+.yd-atlas-continuity-row:last-child {
+  border-bottom: 0;
+}
+
+.yd-atlas-continuity-time {
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: #8ba3b8;
+}
+
+.yd-atlas-continuity-text {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #5a6f84;
+}
+
+.yd-atlas-records {
+  opacity: 0.92;
+}
+
+@media (max-width: 767px) {
+  .yd-atlas-primary {
+    border-radius: 14px;
+  }
+
+  .yd-atlas-state-block {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .yd-atlas-state-lead {
+    font-size: 0.875rem;
+  }
+}
+
 .yd-dashboard--structured .yd-dash-band--overview .yd-dash-deck--kpi .yd-ambient-card {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),

@@ -5,13 +5,14 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 import {
   PUBLIC_SITE_HERO,
   PUBLIC_SITE_NAV,
   PUBLIC_SITE_NAV_MOBILE,
   PUBLIC_SITE_SECTIONS,
 } from "@/lib/marketing/public-site-ia";
-import { scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
+import { getPublicSiteScrollRoot, scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
 import { cn } from "@/lib/utils";
 
 type YdPublicSiteHeaderProps = {
@@ -32,9 +33,32 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const readScrollTop = () => {
+      const root = getPublicSiteScrollRoot();
+      if (
+        root &&
+        root !== document.documentElement &&
+        root !== document.body
+      ) {
+        return root.scrollTop;
+      }
+      return window.scrollY;
+    };
+    const onScroll = () => setScrolled(readScrollTop() > 8);
     onScroll();
+    const root = getPublicSiteScrollRoot();
     window.addEventListener("scroll", onScroll, { passive: true });
+    if (
+      root &&
+      root !== document.documentElement &&
+      root !== document.body
+    ) {
+      root.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        root.removeEventListener("scroll", onScroll);
+      };
+    }
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -78,13 +102,6 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
           </nav>
 
           <div className="yd-public-site-header-actions">
-            <button
-              type="button"
-              className="yd-public-site-cta-ghost hidden lg:inline-flex"
-              onClick={() => go(PUBLIC_SITE_SECTIONS.demo)}
-            >
-              Demo buchen
-            </button>
             <Link prefetch href="/login" className="yd-public-site-cta-login hidden lg:inline-flex">
               Anmelden
             </Link>
@@ -134,19 +151,20 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
               </button>
             ))}
             <Link
-              href="/register"
+              href={buildRegisterEntryHref()}
               className="yd-public-site-mobile-link"
               onClick={() => setMenuOpen(false)}
             >
               {PUBLIC_SITE_HERO.primaryCta}
             </Link>
-            <button
-              type="button"
+            <Link
+              prefetch
+              href="/login"
               className="yd-public-site-mobile-link"
-              onClick={() => go(PUBLIC_SITE_SECTIONS.demo)}
+              onClick={() => setMenuOpen(false)}
             >
-              {PUBLIC_SITE_HERO.secondaryCta}
-            </button>
+              Anmelden
+            </Link>
           </nav>
         </div>
       </div>

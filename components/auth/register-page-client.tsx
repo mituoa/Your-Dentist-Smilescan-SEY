@@ -1,7 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-
 import { RegisterClient } from "@/app/(auth)/register/RegisterClient";
 import type { resendSignupConfirmation, signUp } from "@/app/(auth)/actions";
 
@@ -27,15 +25,9 @@ type RegisterPageClientProps = {
   licenseStepOptional: boolean;
 };
 
-function isWizardStep(raw: string | null): raw is "1" | "2" | "3" | "4" {
-  return raw === "1" || raw === "2" || raw === "3" || raw === "4";
-}
-
-/** Nur Registrierungs-Assistent (Pricing lebt auf /pricing). */
+/** Registrierungs-Assistent — immer sichtbar auf /register (Pricing optional über /pricing). */
 export function RegisterPageClient(props: RegisterPageClientProps) {
-  const searchParams = useSearchParams();
-  const stepRaw = searchParams.get("step");
-  const wizardOpen = props.success || isWizardStep(stepRaw?.trim() ?? null);
+  const wizardOpen = true;
 
   return (
     <RegisterClient

@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "@/components/auth/login-page-client";
+import { isGoogleLoginEnabled } from "@/lib/auth-google-login";
 import { isBlockingAuthError } from "@/lib/auth-blocking-errors";
 import { isAdminAllowlistUser } from "@/lib/auth-helpers";
 import { isAuthRelaxMode } from "@/lib/auth-relax-mode";
@@ -41,7 +42,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const prefilledEmail = clipQueryString(params.email, MAX_EMAIL_QUERY_LEN);
   const resent = params.resent === "1";
   const signedOut = params.signed_out === "1";
-  const year = new Date().getFullYear();
   const authFlowResetKey = [queryError, inviteToken, prefilledEmail, resent ? "1" : "0", signedOut ? "1" : "0"].join(
     "\u001f"
   );
@@ -81,7 +81,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       signedOut={signedOut}
       inviteToken={inviteToken}
       prefilledEmail={prefilledEmail}
-      year={year}
+      googleLoginEnabled={isGoogleLoginEnabled()}
     />
   );
 }

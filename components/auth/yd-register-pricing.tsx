@@ -31,14 +31,13 @@ type YdRegisterPricingProps = {
   embedded?: boolean;
 };
 
-function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledEmail: string, step?: string) {
+function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledEmail: string) {
   const p = new URLSearchParams();
   p.set("plan", plan);
-  if (step) p.set("step", step);
+  p.set("step", "1");
   if (inviteToken) p.set("invite", inviteToken);
   if (prefilledEmail) p.set("email", prefilledEmail);
-  const qs = p.toString();
-  return `/register?${qs}`;
+  return `/register?${p.toString()}`;
 }
 
 export function YdRegisterPricing({
@@ -126,7 +125,7 @@ export function YdRegisterPricing({
                     "yd-os-btn w-full",
                     active ? "yd-os-btn--primary" : "yd-os-btn--ghost"
                   )}
-                  onClick={() => router.push(buildRegisterHref(id, inviteToken, prefilledEmail, "1"))}
+                  onClick={() => router.push(buildRegisterHref(id, inviteToken, prefilledEmail))}
                 >
                   {access
                     ? active

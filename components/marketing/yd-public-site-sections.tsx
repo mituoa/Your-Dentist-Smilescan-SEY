@@ -11,7 +11,7 @@ import {
   Headphones,
 } from "lucide-react";
 
-import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
+import { YdPublicSiteHeroCta } from "@/components/marketing/yd-public-site-hero-cta";
 import {
   PUBLIC_SITE_DEMO,
   PUBLIC_SITE_EINFUEHRUNG,
@@ -30,59 +30,50 @@ const NUTZEN_ICONS = {
 
 const FUER_WEN_ICONS = [Building2, Users, ClipboardList, Headphones] as const;
 
+/** Mobile start — kurzer Hero ohne Desktop-Stage, Grid oder Produkt-Mockup. */
+export function YdPublicSiteHeroMobile() {
+  return (
+    <section
+      className="yd-public-site-hero-mobile yd-public-os-awaken-field"
+      style={{ ["--yd-public-field-i" as string]: "1" }}
+      aria-labelledby="yd-public-hero-mobile-title"
+    >
+      <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
+      <h1 id="yd-public-hero-mobile-title" className="yd-public-site-hero-mobile-title">
+        {PUBLIC_SITE_HERO.title}
+      </h1>
+      <ul className="yd-public-site-hero-points yd-public-site-hero-points--mobile">
+        {PUBLIC_SITE_HERO.bullets.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 type YdPublicSiteHeroProps = {
   showSignIn?: boolean;
 };
 
+/** Desktop Startseite — kompakt, nutzenorientiert, ohne Editorial-Mockup. */
 export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
   return (
     <section
-      className="yd-public-site-hero yd-clinical-hero yd-clinical-hero--premium yd-clinical-hero--orchestrated yd-public-os-awaken-field"
+      className="yd-public-site-hero yd-public-site-hero--landing yd-public-os-awaken-field"
       style={{ ["--yd-public-field-i" as string]: "1" }}
       aria-labelledby="yd-public-hero-title"
     >
-      <div className="yd-clinical-hero-lights" aria-hidden />
-      <div className="yd-clinical-hero-vignette" aria-hidden />
-      <div className="yd-clinical-hero-stage">
-        <div className="yd-clinical-hero-grid">
-          <div className="yd-clinical-hero-copy">
-            <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
-            <h1 id="yd-public-hero-title" className="yd-clinical-display yd-clinical-display--hero">
-              <span className="yd-clinical-display-line">{PUBLIC_SITE_HERO.title}</span>
-              <span className="yd-clinical-display-line yd-clinical-display-line--sans">
-                {PUBLIC_SITE_HERO.titleLine2}
-              </span>
-            </h1>
-            <p className="yd-clinical-lead">{PUBLIC_SITE_HERO.lead}</p>
-            <ul className="yd-public-site-hero-points">
-              {PUBLIC_SITE_HERO.bullets.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-            <div className="yd-clinical-hero-cta-stack yd-public-site-hero-cta-stack">
-              <Link prefetch href="/register" className="yd-clinical-cta-primary yd-public-site-cta-primary">
-                {PUBLIC_SITE_HERO.primaryCta}
-              </Link>
-              <a
-                href={`/#${PUBLIC_SITE_SECTIONS.demo}`}
-                className="yd-clinical-cta-secondary yd-public-site-cta-secondary"
-              >
-                {PUBLIC_SITE_HERO.secondaryCta}
-              </a>
-              {showSignIn ? (
-                <p className="yd-clinical-cta-signin yd-public-site-cta-signin">
-                  {PUBLIC_SITE_HERO.signInPrefix}{" "}
-                  <Link prefetch href="/login">
-                    {PUBLIC_SITE_HERO.signInLabel}
-                  </Link>
-                </p>
-              ) : null}
-            </div>
-          </div>
-          <div className="yd-clinical-hero-world">
-            <YdPracticeWorld />
-          </div>
-        </div>
+      <div className="yd-public-site-hero-inner">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
+        <h1 id="yd-public-hero-title" className="yd-public-site-hero-headline">
+          {PUBLIC_SITE_HERO.title}
+        </h1>
+        <ul className="yd-public-site-hero-points">
+          {PUBLIC_SITE_HERO.bullets.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        <YdPublicSiteHeroCta showSignIn={showSignIn} />
       </div>
     </section>
   );

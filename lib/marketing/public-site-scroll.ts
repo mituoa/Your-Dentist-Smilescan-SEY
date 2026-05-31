@@ -18,7 +18,7 @@ function getPublicSiteScope(): ParentNode {
   return document;
 }
 
-function getScrollRoot(): HTMLElement | null {
+export function getPublicSiteScrollRoot(): HTMLElement | null {
   if (typeof document === "undefined") return null;
   const osScroll = document.querySelector<HTMLElement>(".yd-public-os--scroll");
   if (osScroll) return osScroll;
@@ -45,7 +45,7 @@ export function scrollToPublicSection(sectionId: string, onDone?: () => void): b
   const el = resolvePublicSectionElement(sectionId);
   if (!el) return false;
 
-  const scrollRoot = getScrollRoot();
+  const scrollRoot = getPublicSiteScrollRoot();
   const headerOffset = getHeaderOffset();
   const extraGap = 12;
 
@@ -62,6 +62,11 @@ export function scrollToPublicSection(sectionId: string, onDone?: () => void): b
     const top =
       scrollRoot.scrollTop + (elRect.top - rootRect.top) - headerOffset - extraGap;
     scrollRoot.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+
+  if (typeof window !== "undefined" && window.location.hash !== `#${sectionId}`) {
+    const url = `${window.location.pathname}${window.location.search}#${sectionId}`;
+    window.history.replaceState(null, "", url);
   }
 
   onDone?.();

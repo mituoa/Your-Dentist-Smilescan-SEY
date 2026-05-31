@@ -12,11 +12,13 @@ import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit
 import { ResendSignupSubmitButton } from "@/components/auth/resend-signup-submit-button";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
+import { REGISTER_CONTACT_ROLES } from "@/lib/auth/register-contact-roles";
 import {
   REGISTER_PLANS,
   coerceRegisterPlan,
   type RegisterPlanId,
 } from "@/lib/auth/register-plans";
+import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
 type Plan = RegisterPlanId;
@@ -117,20 +119,16 @@ export function RegisterClient(props: {
     () => props.initialWizardStep ?? 1
   );
   const [regName, setRegName] = React.useState("");
+  const [regRole, setRegRole] = React.useState("");
   const [regPractice, setRegPractice] = React.useState("");
+  const [regPhone, setRegPhone] = React.useState("");
   const [regLicense, setRegLicense] = React.useState("");
   const [regEmail, setRegEmail] = React.useState(props.prefilledEmail ?? "");
-  const [regEmailConfirm, setRegEmailConfirm] = React.useState("");
-  const [regEmailConfirmDirty, setRegEmailConfirmDirty] = React.useState(false);
-  const [emailPairError, setEmailPairError] = React.useState("");
-  /** Mismatch hint only after blur, length near primary, or failed „Weiter“ — not on every keystroke. */
-  const [confirmEmailBlurred, setConfirmEmailBlurred] = React.useState(false);
-  const [confirmMismatchAfterContinueAttempt, setConfirmMismatchAfterContinueAttempt] = React.useState(false);
-  /** Short overlay when advancing steps (calm brand mark). */
   const [navBusy, setNavBusy] = React.useState(false);
-  /** Welcher Step-4-Submit (standard | demo) gerade läuft — gemeinsames Formular, ein Spinner. */
   const registerStep4SubmitIntentRef = React.useRef<string | null>(null);
   const [regPassword, setRegPassword] = React.useState("");
+  const [regPasswordConfirm, setRegPasswordConfirm] = React.useState("");
+  const [passwordPairError, setPasswordPairError] = React.useState("");
 
   React.useEffect(() => {
     if (!fromPricingFlow) clearReturnToPricingFlag();
@@ -219,7 +217,6 @@ export function RegisterClient(props: {
   } | null>(null);
   const [emailTypoUndo, setEmailTypoUndo] = React.useState<{
     prevEmail: string;
-    prevConfirm: string;
     appliedSuggested: string;
   } | null>(null);
 
@@ -246,37 +243,10 @@ export function RegisterClient(props: {
 
   const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(v));
 
-  const emailsMatchNormalized = React.useMemo(() => {
-    const e = normalizeEmail(regEmail);
-    const c = normalizeEmail(regEmailConfirm);
-    return e.length > 0 && e === c;
-  }, [regEmail, regEmailConfirm]);
-
-  const emailConfirmMismatch = React.useMemo(
-    () => normalizeEmail(regEmailConfirm).length > 0 && !emailsMatchNormalized,
-    [regEmailConfirm, emailsMatchNormalized]
+  const passwordsMatch = React.useMemo(
+    () => regPassword.length > 0 && regPassword === regPasswordConfirm,
+    [regPassword, regPasswordConfirm]
   );
-
-  const showConfirmMismatchHint = React.useMemo(() => {
-    if (!emailConfirmMismatch) return false;
-    const confirmMeaningful =
-      regEmailConfirm.trim().length > 0 && emailLooksCompleteForTypoHint(regEmailConfirm);
-    return (
-      confirmMismatchAfterContinueAttempt ||
-      confirmEmailBlurred ||
-      confirmMeaningful
-    );
-  }, [
-    emailConfirmMismatch,
-    regEmailConfirm,
-    confirmEmailBlurred,
-    confirmMismatchAfterContinueAttempt,
-  ]);
-
-  React.useEffect(() => {
-    setConfirmEmailBlurred(false);
-    setConfirmMismatchAfterContinueAttempt(false);
-  }, [regEmail]);
 
   const goToStep = React.useCallback(
     (next: RegistrationStep) => {
@@ -651,18 +621,17 @@ export function RegisterClient(props: {
 
   const onStep1Submit = (e: FormEvent) => {
     e.preventDefault();
+    setPasswordPairError("");
     const email = normalizeEmail(regEmail);
-    const confirm = normalizeEmail(regEmailConfirm);
-    setEmailPairError("");
-    setConfirmMismatchAfterContinueAttempt(false);
+    if (!regName.trim()) return;
+    if (!regRole) return;
     if (!email || !isValidEmail(email)) return;
-    if (!confirm) {
-      setEmailPairError("Bitte geben Sie Ihre E-Mail-Adresse zur Bestätigung erneut ein.");
+    if (regPassword.length < 8) {
+      setPasswordPairError("Passwort muss mindestens 8 Zeichen haben.");
       return;
     }
-    if (email !== confirm) {
-      setEmailPairError("Die beiden E-Mail-Eingaben passen nicht zueinander.");
-      setConfirmMismatchAfterContinueAttempt(true);
+    if (!passwordsMatch) {
+      setPasswordPairError("Die Passwörter stimmen nicht überein.");
       return;
     }
     if (emailCheckStatus === "checking") return;
@@ -671,6 +640,8 @@ export function RegisterClient(props: {
 
   const onStep2Submit = (e: FormEvent) => {
     e.preventDefault();
+    if (!regPractice.trim()) return;
+    if (!regLicense.trim()) return;
     goToStep(3);
   };
 
@@ -795,10 +766,15 @@ export function RegisterClient(props: {
 
             <div className="yd-auth-register-body">
               {props.success ? (
-                <div className="py-6 text-center">
-                  <h3 className="yd-auth-register-title">Bitte E‑Mail bestätigen</h3>
+                <div className="py-6 text-center" aria-labelledby="yd-register-success-title">
+                  <h3 id="yd-register-success-title" className="yd-auth-register-title">
+                    Anmeldung eingegangen
+                  </h3>
                   {props.queryError ? (
-                    <p className="yd-auth-alert yd-auth-alert--warning mx-auto mb-4 max-w-md scroll-mt-6 text-left">
+                    <p
+                      className="yd-auth-alert yd-auth-alert--warning mx-auto mb-4 max-w-md scroll-mt-6 text-left"
+                      role="alert"
+                    >
                       {userFacingAuthError(
                         (() => {
                           try {
@@ -811,61 +787,48 @@ export function RegisterClient(props: {
                     </p>
                   ) : null}
                   {props.resent ? (
-                    <p className="yd-auth-alert yd-auth-alert--success mx-auto mb-4 max-w-md scroll-mt-6 text-left">
+                    <p
+                      className="yd-auth-alert yd-auth-alert--success mx-auto mb-4 max-w-md scroll-mt-6 text-left"
+                      role="status"
+                    >
                       Sofern ein passendes Konto existiert, wurde die Bestätigungs-E-Mail erneut versendet. Bitte
                       prüfen Sie auch den Spam-Ordner.
                     </p>
                   ) : null}
-                  <p className="yd-auth-register-subtitle mb-5">
-                    Um den Zugang zu aktivieren, bestätigen Sie bitte Ihre E‑Mail-Adresse über den Link in der
-                    Bestätigungs‑E‑Mail.
+                  <p className="yd-auth-register-subtitle mb-5 text-left mx-auto max-w-md">
+                    Ihr Zugang wird geprüft. Zuerst bestätigen Sie bitte Ihre E-Mail-Adresse — danach prüfen wir
+                    Praxisangaben und Nachweise. Die Freischaltung des geschützten Praxisbereichs erfolgt per E-Mail,
+                    sobald die Prüfung abgeschlossen ist.
                   </p>
 
-                  <div className="yd-auth-checklist mx-auto mb-6 max-w-md">
-                    <p className="yd-auth-checklist-title">Checkliste</p>
-                    <ul className="mt-3 space-y-2 text-[13px] text-gray-700">
-                      <li>1) Posteingang prüfen</li>
-                      <li>2) Spam/Promotion prüfen</li>
-                      <li>3) Absender als vertrauenswürdig markieren</li>
-                    </ul>
-                    <div className="mt-4">
-                      <label className="mb-2 block text-[12px] font-semibold uppercase tracking-wide text-gray-600">
-                        E‑Mail-Adresse
+                  <div className="yd-auth-checklist mx-auto mb-6 max-w-md text-left">
+                    <p className="yd-auth-checklist-title">Nächste Schritte</p>
+                    <ol className="mt-3 list-decimal space-y-2 pl-4 text-[13px] leading-relaxed text-gray-700">
+                      <li>Bestätigungs-E-Mail öffnen und Adresse verifizieren</li>
+                      <li>Posteingang und Spam-Ordner prüfen</li>
+                      <li>Auf Freischaltung warten — wir melden uns per E-Mail</li>
+                    </ol>
+                    <div className="mt-5">
+                      <label htmlFor="reg-success-email" className="mb-2 block text-[12px] font-semibold text-gray-600">
+                        E-Mail für erneuten Versand
                       </label>
                       <input
+                        id="reg-success-email"
                         type="email"
                         value={successEmail}
                         onChange={(e) => setSuccessEmail(e.target.value)}
-                        placeholder="name@praxis.de"
+                        autoComplete="email"
                         className="yd-auth-input h-[48px] scroll-mt-8"
+                        aria-describedby="reg-success-email-hint"
                       />
-                      {successEmail.trim() && !isValidEmail(successEmail) ? (
-                        <p className="mt-2 text-[12px] text-amber-800">Bitte eine gültige E‑Mail-Adresse eingeben.</p>
-                      ) : null}
-                      {(() => {
-                        const raw = successEmail.trim();
-                        if (!emailLooksCompleteForTypoHint(raw)) return null;
-                        const suggestion = suggestEmailFix(raw);
-                        if (!suggestion) return null;
-                        return (
-                          <p className="mt-2 text-[12px] leading-relaxed text-gray-600">
-                            Meinten Sie{" "}
-                            <button
-                              type="button"
-                              onClick={() => setSuccessEmail(suggestion.suggested)}
-                              className="font-medium yd-auth-link underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
-                            >
-                              {suggestion.suggested.includes("@")
-                                ? (suggestion.suggested.split("@")[1] ?? suggestion.suggested)
-                                : suggestion.suggested}
-                            </button>
-                            ?
-                          </p>
-                        );
-                      })()}
-                      <p className="mt-2 text-[12px] text-gray-500">
-                        Falls Sie sich vertippt haben: hier korrigieren und erneut senden.
+                      <p id="reg-success-email-hint" className="mt-2 text-[12px] text-gray-500">
+                        Nur falls die Bestätigungs-E-Mail nicht ankommt — Adresse korrigieren und erneut anfordern.
                       </p>
+                      {successEmail.trim() && !isValidEmail(successEmail) ? (
+                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
+                          Bitte eine gültige E-Mail-Adresse eingeben.
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 
@@ -878,28 +841,33 @@ export function RegisterClient(props: {
                     <ResendSignupSubmitButton
                       idleLabel={
                         resendCooldown > 0
-                          ? `E‑Mail erneut senden (${resendCooldown}s)`
-                          : "Bestätigungs‑E‑Mail erneut senden"
+                          ? `Erneut senden (${resendCooldown}s)`
+                          : "Bestätigungs-E-Mail erneut senden"
                       }
                       disabled={resendCooldown > 0 || !successEmail.trim() || !isValidEmail(successEmail)}
                       pendingLabel="Wird gesendet…"
-                      className="yd-auth-btn-secondary h-[52px]"
+                      className="yd-auth-btn-secondary h-[52px] w-full"
                     />
                   </form>
 
-                  <Link
-                    href="/register?step=1"
-                    className="inline-flex items-center gap-2 text-[13px] font-semibold yd-auth-link transition-colors duration-150 hover:text-[#0369A1]"
-                  >
-                    Falsche E‑Mail eingegeben?
-                  </Link>
-
-                  <Link
-                    href={loginBackHref}
-                    className="mt-5 inline-flex items-center justify-center gap-2 text-[13px] font-medium yd-auth-link transition-colors duration-150 hover:text-[#0369A1]"
-                  >
-                    Zurück zur Login-Seite
-                  </Link>
+                  <div className="mx-auto flex max-w-md flex-col gap-3 pt-2">
+                    <Link
+                      href={buildRegisterEntryHref(
+                        props.inviteToken,
+                        props.prefilledEmail,
+                        selectedPlan
+                      )}
+                      className="yd-auth-btn-primary inline-flex h-[52px] items-center justify-center"
+                    >
+                      Neue Registrierung starten
+                    </Link>
+                    <Link
+                      href={loginBackHref}
+                      className="inline-flex h-[48px] items-center justify-center text-[13px] font-medium yd-auth-link transition-colors duration-150 hover:text-[#0369A1]"
+                    >
+                      Zur Anmeldung
+                    </Link>
+                  </div>
                 </div>
               ) : null}
 
@@ -974,10 +942,10 @@ export function RegisterClient(props: {
                   ))}
                 </div>
                 <div className="mt-3 text-center text-[12px] font-medium text-gray-500">
-                  {registrationStep === 1 && "Persönliche Daten"}
-                  {registrationStep === 2 && "Praxisinformationen"}
-                  {registrationStep === 3 && "Verifizierung"}
-                  {registrationStep === 4 && "Bestätigung"}
+                  {registrationStep === 1 && "Ansprechperson & Zugang"}
+                  {registrationStep === 2 && "Praxis"}
+                  {registrationStep === 3 && "Nachweis"}
+                  {registrationStep === 4 && "Zugang & Absenden"}
                 </div>
               </div>
 
@@ -1009,32 +977,48 @@ export function RegisterClient(props: {
                   >
                     <div>
                       <label htmlFor="reg-name" className="mb-2 block text-[13px] font-medium text-gray-700">
-                        Vollständiger Name *
+                        Name Ansprechpartner/in *
                       </label>
                       <input
                         id="reg-name"
                         type="text"
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
-                        placeholder="Dr. med. dent. Max Mustermann"
+                        autoComplete="name"
                         className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
                     </div>
 
                     <div>
+                      <label htmlFor="reg-role" className="mb-2 block text-[13px] font-medium text-gray-700">
+                        Rolle in der Praxis *
+                      </label>
+                      <select
+                        id="reg-role"
+                        value={regRole}
+                        onChange={(e) => setRegRole(e.target.value)}
+                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        required
+                      >
+                        <option value="">Bitte wählen</option>
+                        {REGISTER_CONTACT_ROLES.map((r) => (
+                          <option key={r.value} value={r.value}>
+                            {r.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
                       <label htmlFor="reg-email" className="mb-2 block text-[13px] font-medium text-gray-700">
-                        E-Mail-Adresse *
+                        E-Mail *
                       </label>
                       <input
                         id="reg-email"
                         type="email"
                         value={regEmail}
-                        onChange={(e) => {
-                          setRegEmail(e.target.value);
-                          setEmailPairError("");
-                        }}
-                        placeholder="max.mustermann@praxis.de"
+                        onChange={(e) => setRegEmail(e.target.value)}
                         autoComplete="email"
                         className="yd-auth-input h-[52px] scroll-mt-8"
                         required
@@ -1066,14 +1050,10 @@ export function RegisterClient(props: {
                             onClick={() => {
                               setEmailTypoUndo({
                                 prevEmail: regEmail,
-                                prevConfirm: regEmailConfirm,
                                 appliedSuggested: emailTypoSuggestion.suggested,
                               });
                               setRegEmail(emailTypoSuggestion.suggested);
                               setEmailTypoSuggestion(null);
-                              setRegEmailConfirmDirty(true);
-                              setEmailPairError("");
-                              setConfirmMismatchAfterContinueAttempt(false);
                             }}
                             className="font-medium yd-auth-link underline decoration-[#0284C7]/30 underline-offset-2 hover:decoration-[#0284C7]"
                           >
@@ -1095,7 +1075,6 @@ export function RegisterClient(props: {
                             type="button"
                             onClick={() => {
                               setRegEmail(emailTypoUndo.prevEmail);
-                              setRegEmailConfirm(emailTypoUndo.prevConfirm);
                               setEmailTypoUndo(null);
                             }}
                             className="text-[12px] font-semibold yd-auth-link hover:underline"
@@ -1107,37 +1086,6 @@ export function RegisterClient(props: {
                     </div>
 
                     <div>
-                      <label htmlFor="reg-email-confirm" className="mb-2 block text-[13px] font-medium text-gray-700">
-                        E-Mail-Adresse bestätigen *
-                      </label>
-                      <input
-                        id="reg-email-confirm"
-                        type="email"
-                        value={regEmailConfirm}
-                        onChange={(e) => {
-                          setRegEmailConfirmDirty(true);
-                          setRegEmailConfirm(e.target.value);
-                          setEmailPairError("");
-                          setConfirmMismatchAfterContinueAttempt(false);
-                        }}
-                        onFocus={() => setConfirmEmailBlurred(false)}
-                        onBlur={() => setConfirmEmailBlurred(true)}
-                        placeholder="E-Mail-Adresse erneut eingeben"
-                        autoComplete="off"
-                        name="email_confirm_register"
-                        className="yd-auth-input h-[52px] scroll-mt-8"
-                        required
-                      />
-                      {emailPairError ? (
-                        <p className="mt-2 text-[12px] text-amber-800">{emailPairError}</p>
-                      ) : showConfirmMismatchHint ? (
-                        <p className="mt-2 text-[12px] text-amber-800">
-                          Die E-Mail-Adressen sollten übereinstimmen.
-                        </p>
-                      ) : null}
-                    </div>
-
-                    <div>
                       <label htmlFor="reg-password" className="mb-2 block text-[13px] font-medium text-gray-700">
                         Passwort *
                       </label>
@@ -1145,8 +1093,10 @@ export function RegisterClient(props: {
                         id="reg-password"
                         type="password"
                         value={regPassword}
-                        onChange={(e) => setRegPassword(e.target.value)}
-                        placeholder="Mindestens 8 Zeichen"
+                        onChange={(e) => {
+                          setRegPassword(e.target.value);
+                          setPasswordPairError("");
+                        }}
                         autoComplete="new-password"
                         minLength={8}
                         className="yd-auth-input h-[52px] scroll-mt-8"
@@ -1173,13 +1123,45 @@ export function RegisterClient(props: {
                       ) : null}
                     </div>
 
+                    <div>
+                      <label
+                        htmlFor="reg-password-confirm"
+                        className="mb-2 block text-[13px] font-medium text-gray-700"
+                      >
+                        Passwort bestätigen *
+                      </label>
+                      <input
+                        id="reg-password-confirm"
+                        type="password"
+                        value={regPasswordConfirm}
+                        onChange={(e) => {
+                          setRegPasswordConfirm(e.target.value);
+                          setPasswordPairError("");
+                        }}
+                        autoComplete="new-password"
+                        minLength={8}
+                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        required
+                      />
+                      {passwordPairError ? (
+                        <p className="mt-2 text-[12px] text-amber-800" role="alert">
+                          {passwordPairError}
+                        </p>
+                      ) : regPasswordConfirm.length > 0 && !passwordsMatch ? (
+                        <p className="mt-2 text-[12px] text-amber-800">Die Passwörter stimmen nicht überein.</p>
+                      ) : null}
+                    </div>
+
                     <button
                       type="submit"
                       disabled={
                         emailCheckStatus === "invalid" ||
                         emailCheckStatus === "checking" ||
-                        !normalizeEmail(regEmailConfirm) ||
-                        !emailsMatchNormalized
+                        !regName.trim() ||
+                        !regRole ||
+                        !normalizeEmail(regEmail) ||
+                        regPassword.length < 8 ||
+                        !passwordsMatch
                       }
                       className="yd-auth-btn-primary mt-8 h-[56px]"
                     >
@@ -1210,9 +1192,24 @@ export function RegisterClient(props: {
                         type="text"
                         value={regPractice}
                         onChange={(e) => setRegPractice(e.target.value)}
-                        placeholder="Zahnarztpraxis Mustermann"
+                        autoComplete="organization"
                         className="yd-auth-input h-[52px] scroll-mt-8"
                         required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="reg-phone" className="mb-2 block text-[13px] font-medium text-gray-700">
+                        Telefonnummer <span className="font-normal text-gray-500">(optional)</span>
+                      </label>
+                      <input
+                        id="reg-phone"
+                        type="tel"
+                        value={regPhone}
+                        onChange={(e) => setRegPhone(e.target.value)}
+                        autoComplete="tel"
+                        maxLength={30}
+                        className="yd-auth-input h-[52px] scroll-mt-8"
                       />
                     </div>
 
@@ -1225,7 +1222,6 @@ export function RegisterClient(props: {
                         type="text"
                         value={regLicense}
                         onChange={(e) => setRegLicense(e.target.value)}
-                        placeholder="Z-12345678"
                         className="yd-auth-input h-[52px] scroll-mt-8"
                         required
                       />
@@ -1784,7 +1780,10 @@ export function RegisterClient(props: {
                     <div className="mt-6 space-y-3">
                     <input type="hidden" name="email" value={normalizeEmail(regEmail)} />
                     <input type="hidden" name="password" value={regPassword} />
+                    <input type="hidden" name="password_confirm" value={regPasswordConfirm} />
                     <input type="hidden" name="display_name" value={regName} />
+                    <input type="hidden" name="contact_role" value={regRole} />
+                    <input type="hidden" name="contact_phone" value={regPhone.trim()} />
                     <input type="hidden" name="workspace_name" value={regPractice} />
                     <input type="hidden" name="billing_interval" value={selectedPlan} />
                     <input type="hidden" name="contract_version" value="v1" />
@@ -1830,7 +1829,7 @@ export function RegisterClient(props: {
                         submitIntentValue="standard"
                         label={
                           props.skipPaymentAtSignup
-                            ? "Registrierung abschließen"
+                            ? "Registrierung absenden"
                             : "Weiter zur vertraglichen Freischaltung"
                         }
                         pendingLabel="Wird übermittelt…"

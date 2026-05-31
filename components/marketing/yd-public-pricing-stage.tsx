@@ -26,7 +26,8 @@ export function YdPublicPricingStage({
 
   return (
     <section
-      className="yd-clinical-pricing-act yd-clinical-access-act yd-public-site-section yd-public-os-awaken-field"
+      id={PUBLIC_SITE_SECTIONS.pricing}
+      className="yd-clinical-pricing-act yd-clinical-access-act yd-public-site-section yd-public-site-scroll-anchor yd-public-os-awaken-field"
       style={{ ["--yd-public-field-i" as string]: String(fieldIndex) }}
       aria-labelledby="yd-clinical-access-title"
     >
@@ -44,10 +45,7 @@ export function YdPublicPricingStage({
           </Link>
         </p>
       ) : null}
-      <div
-        id={PUBLIC_SITE_SECTIONS.pricing}
-        className="yd-clinical-pricing-stage yd-clinical-pricing-stage--access yd-public-site-pricing-anchor"
-      >
+      <div className="yd-clinical-pricing-stage yd-clinical-pricing-stage--access yd-public-site-pricing-anchor">
         <YdRegisterPricing
           selectedPlan={selectedPlan}
           inviteToken={inviteToken}

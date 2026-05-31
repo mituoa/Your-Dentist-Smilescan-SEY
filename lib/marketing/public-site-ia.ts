@@ -16,29 +16,30 @@ export const PUBLIC_SITE_NAV = [
   { label: "Für wen", sectionId: PUBLIC_SITE_SECTIONS.fuerWen },
   { label: "Einführung", sectionId: PUBLIC_SITE_SECTIONS.einfuehrung },
   { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
+  { label: "Demo buchen", sectionId: PUBLIC_SITE_SECTIONS.demo },
 ] as const;
 
-/** Mobile Drawer — nur Sektionen, die auf der Mobilseite sichtbar sind. */
+/** Mobile Drawer — Sektionen, die auf der Mobilseite vorhanden sind. */
 export const PUBLIC_SITE_NAV_MOBILE = [
   { label: "Nutzen", sectionId: PUBLIC_SITE_SECTIONS.nutzen },
   { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
+  { label: "Demo buchen", sectionId: PUBLIC_SITE_SECTIONS.demo },
 ] as const;
 
 export const PUBLIC_SITE_HERO = {
   eyebrow: "Medizinische Praxisinfrastruktur",
-  title: "Patientenanfragen.",
-  titleLine2: "Geordnet statt verstreut.",
-  lead:
-    "Patient:innen senden Fotos und Anliegen sicher ein. Ihr Team sichtet, bespricht und organisiert alles direkt im geschützten Praxisbereich.",
+  title: "Struktur für Eingang, Team und Fall.",
+  titleLine2: "",
+  lead: "",
   primaryCta: "Praxis registrieren",
   secondaryCta: "Live-Einblick ansehen",
   signInPrefix: "Bereits registriert?",
   signInLabel: "Anmelden",
   bullets: [
-    "Patient:innen senden Fotos und Anliegen strukturiert ein",
-    "Die Praxis erhält Einsendungen im geschützten Bereich",
-    "Das Team koordiniert intern — Relay am Fall",
-    "Aufgaben, Erinnerungen und Command AI unterstützen leise",
+    "Patient:innen senden Fotos und Anliegen ein.",
+    "Praxis sichtet strukturiert.",
+    "Team kommuniziert am Fall.",
+    "Aufgaben, Erinnerungen und Command AI unterstützen ruhig.",
   ],
 } as const;
 
