@@ -1,6 +1,7 @@
 import {
   patientDisplayName,
   patientInitials,
+  formatIntakeDate,
   formatRelativeTime,
 } from "@/lib/dashboard/atlas-mobile-helpers";
 import {
@@ -111,7 +112,7 @@ export function buildTodayMetrics(
   return [
     {
       id: "intake",
-      label: "Neue Eingänge",
+      label: "Neue Anfragen",
       count: unseenCount === null && rows.length === 0 ? null : neue,
       hint: "Patientenanfragen warten",
       href: "/inbox",
@@ -156,7 +157,7 @@ export function buildPatientCases(
       patientName: patientDisplayName(row),
       initials: patientInitials(row),
       requestType: "Patientenanfrage",
-      receivedLabel: formatRelativeTime(row.created_at),
+      receivedLabel: formatIntakeDate(row.created_at),
       statusLabel: status,
       hasImages: row.photo_count > 0,
       replyPrepared: seen,

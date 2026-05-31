@@ -39,7 +39,7 @@ export const WORKSPACE_COPY = {
   },
 
   command: {
-    placeholder: "Nachricht, Aufgabe oder Zusammenfassung vorbereiten…",
+    placeholder: "Was möchten Sie vorbereiten?",
     subtitle: "Was soll vorbereitet werden?",
     open: "Öffnen",
     quick: [

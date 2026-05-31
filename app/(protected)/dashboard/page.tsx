@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AtlasOperationalCore } from "@/components/dashboard/hc/atlas-operational-core";
+import { AtlasWorkspaceShell } from "@/components/dashboard/hc/atlas-workspace-shell";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { buildAttentionSummary } from "@/lib/dashboard/command-center";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
@@ -82,25 +83,28 @@ export default async function DashboardPage() {
 
   return (
     <div
-      className="yd-dashboard yd-dashboard--atlas relative mx-auto w-full min-w-0 pb-10"
+      className="yd-dashboard yd-dashboard--medical relative mx-auto w-full min-w-0 pb-10"
       style={{ maxWidth: YD.space.contentMax }}
     >
-      <DashboardHeader
-        greeting={greeting}
-        displayName={doctorDisplayName}
-        attentionSummary={attentionSummary}
-      />
+      <AtlasWorkspaceShell>
+        <DashboardHeader
+          greeting={greeting}
+          displayName={doctorDisplayName}
+          attentionSummary={attentionSummary}
+          photoUrl={profileData?.photo_url ?? null}
+        />
 
-      <AtlasOperationalCore
-        unseenCount={unseenCount}
-        previewRows={previewRows}
-        openTasks={openTasks}
-        routines={routines}
-        relayConversations={relayConversations}
-        relayUnread={relayUnread}
-        reminderCount={reminderCount}
-        activityEvents={activityEvents}
-      />
+        <AtlasOperationalCore
+          unseenCount={unseenCount}
+          previewRows={previewRows}
+          openTasks={openTasks}
+          routines={routines}
+          relayConversations={relayConversations}
+          relayUnread={relayUnread}
+          reminderCount={reminderCount}
+          activityEvents={activityEvents}
+        />
+      </AtlasWorkspaceShell>
     </div>
   );
 }

@@ -76,12 +76,12 @@ export function Sidebar({
         </button>
       </header>
 
-      <div className="relative hidden shrink-0 md:flex md:justify-center md:px-0 md:pb-1 md:pt-3">
+      <div className="relative hidden shrink-0 md:flex md:justify-center md:px-2 md:pb-3 md:pt-5">
         <BrandMark />
       </div>
 
       <nav
-        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-1 flex-col overflow-hidden max-md:min-h-0 md:items-center md:justify-center md:gap-2 md:overflow-y-auto md:overflow-x-hidden md:px-2 md:py-2"
+        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-1 flex-col overflow-hidden max-md:min-h-0 md:items-center md:justify-start md:gap-2 md:overflow-y-auto md:overflow-x-hidden md:px-2 md:pb-2 md:pt-1"
         aria-label="Hauptnavigation"
       >
         <div className="yd-mobile-sidebar-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-2 pb-2 pt-1 max-md:px-3 md:contents md:overflow-visible md:p-0">
@@ -134,7 +134,7 @@ export function Sidebar({
         </div>
       </nav>
 
-      <div className="yd-sidebar-rail-footer relative hidden shrink-0 px-2 pb-4 pt-1 md:flex md:justify-center">
+      <div className="yd-sidebar-rail-footer relative mt-auto hidden shrink-0 px-2 pb-5 pt-2 md:flex md:justify-center">
         <SignOutSidebarForm variant="rail" />
       </div>
 

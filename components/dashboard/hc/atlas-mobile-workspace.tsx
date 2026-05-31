@@ -1,14 +1,9 @@
-import { AtlasCockpitActivity } from "@/components/dashboard/hc/atlas-cockpit-activity";
-import { AtlasCockpitTasks } from "@/components/dashboard/hc/atlas-cockpit-tasks";
-import { AtlasCommandHero } from "@/components/dashboard/hc/atlas-command-hero";
-import { AtlasPatientCases } from "@/components/dashboard/hc/atlas-patient-cases";
-import { AtlasRelayActivity } from "@/components/dashboard/hc/atlas-relay-activity";
-import { AtlasTodayImportant } from "@/components/dashboard/hc/atlas-today-important";
+import { AtlasInboxList } from "@/components/dashboard/hc/atlas-inbox-list";
+import { AtlasOverviewMetrics } from "@/components/dashboard/hc/atlas-overview-metrics";
+import { AtlasPracticeToday } from "@/components/dashboard/hc/atlas-practice-today";
 import {
-  buildCommandSuggestions,
   buildPatientCases,
   buildRelayActivity,
-  buildTaskPreviews,
   buildTodayMetrics,
 } from "@/lib/dashboard/command-center";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
@@ -30,7 +25,6 @@ type AtlasMobileWorkspaceProps = {
   activityEvents: ActivityEvent[] | null;
 };
 
-/** Mobile — gleiche Priorität wie Desktop, nur gestapelt. */
 export function AtlasMobileWorkspace({
   unseenCount,
   previewRows,
@@ -38,21 +32,15 @@ export function AtlasMobileWorkspace({
   relayConversations,
   activityEvents,
 }: AtlasMobileWorkspaceProps) {
-  const openTaskCount = openTasks?.length ?? 0;
   const todayMetrics = buildTodayMetrics(unseenCount, previewRows, openTasks);
-  const commandSuggestions = buildCommandSuggestions(previewRows, openTaskCount);
   const patientCases = buildPatientCases(previewRows);
-  const relayLines = buildRelayActivity(relayConversations, activityEvents, openTasks);
-  const taskRows = buildTaskPreviews(openTasks);
+  const teamHints = buildRelayActivity(relayConversations, activityEvents, openTasks);
 
   return (
-    <div className="yd-cockpit yd-cockpit-mobile md:hidden" aria-label="Praxis Cockpit">
-      <AtlasTodayImportant cards={todayMetrics} />
-      <AtlasPatientCases cases={patientCases} />
-      <AtlasCommandHero suggestions={commandSuggestions} compact />
-      <AtlasRelayActivity lines={relayLines} />
-      <AtlasCockpitTasks tasks={taskRows} />
-      <AtlasCockpitActivity events={activityEvents} />
+    <div className="yd-med-layout yd-med-layout--mobile md:hidden" aria-label="Praxis Cockpit">
+      <AtlasOverviewMetrics cards={todayMetrics} />
+      <AtlasInboxList cases={patientCases} />
+      <AtlasPracticeToday metrics={todayMetrics} teamHints={teamHints} />
     </div>
   );
 }

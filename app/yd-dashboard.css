@@ -101,30 +101,30 @@
 
 /* Canvas: dashboard starts higher — less “dropped” feeling */
 .yd-awaken-canvas:has(.yd-dashboard) {
-  padding: 0.75rem 1rem 1.5rem;
+  padding: 0.5rem 0.75rem 1rem;
 }
 
 @media (min-width: 768px) {
   .yd-awaken-canvas:has(.yd-dashboard) {
-    padding: 1rem 1.5rem 1.75rem;
+    padding: 0.5rem 0.875rem 1.25rem;
   }
 }
 
 @media (min-width: 1024px) {
   .yd-awaken-canvas:has(.yd-dashboard) {
-    padding: 1.125rem 1.75rem 2rem;
+    padding: 0.625rem 1rem 1.375rem;
   }
 }
 
 main:has(.yd-dashboard) {
-  padding-top: 0.375rem !important;
+  padding-top: 0.25rem !important;
 }
 
 @media (min-width: 768px) {
   main:has(.yd-dashboard) {
-    padding-top: 0.5rem !important;
-    padding-left: 0.625rem !important;
-    padding-right: 0.625rem !important;
+    padding-top: 0.25rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 }
 
@@ -1886,4 +1886,552 @@ main:has(.yd-dashboard) {
   .yd-patient-case-action {
     justify-self: start;
   }
+}
+
+/* —— Medical command center (glass workspace, inbox IA) —— */
+
+.yd-dashboard--medical {
+  --yd-med-radius: 32px;
+  --yd-med-surface: rgba(255, 255, 255, 0.72);
+  --yd-med-shadow: 0 24px 64px rgba(15, 35, 58, 0.08), 0 4px 16px rgba(15, 35, 58, 0.04);
+}
+
+.yd-med-workspace {
+  border-radius: var(--yd-med-radius);
+  background: var(--yd-med-surface);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow: var(--yd-med-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.yd-med-workspace__inner {
+  padding: 1rem 1rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .yd-med-workspace__inner {
+    padding: 1.125rem 1.375rem 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .yd-med-workspace__inner {
+    padding: 1.25rem 1.625rem 1.75rem;
+  }
+}
+
+.yd-med-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0;
+}
+
+.yd-med-header__text {
+  min-width: 0;
+  flex: 1;
+}
+
+.yd-med-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: #0c1929;
+}
+
+@media (min-width: 768px) {
+  .yd-med-header__title {
+    font-size: 1.65rem;
+  }
+}
+
+.yd-med-header__attention {
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #3d5266;
+}
+
+.yd-med-header__profile {
+  flex-shrink: 0;
+}
+
+.yd-med-header__avatar-img,
+.yd-med-header__avatar-fallback {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.yd-med-header__avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(47, 128, 237, 0.1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e5bbd;
+}
+
+.yd-med-layout {
+  gap: 1.75rem;
+}
+
+.yd-med-layout--desktop {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  align-items: start;
+}
+
+.yd-med-layout--mobile {
+  display: flex;
+  flex-direction: column;
+}
+
+.yd-med-layout__primary {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-width: 0;
+}
+
+.yd-med-section-title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b849c;
+}
+
+.yd-med-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2f80ed;
+  text-decoration: none;
+}
+
+.yd-med-quiet {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b849c;
+}
+
+/* Overview metrics */
+
+.yd-med-metrics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .yd-med-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.yd-med-metric-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  height: 100%;
+  min-height: 6.5rem;
+  padding: 1.125rem 1.25rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 2px 12px rgba(15, 35, 58, 0.05);
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.yd-med-metric-card:hover {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 6px 20px rgba(15, 35, 58, 0.08);
+}
+
+.yd-med-metric-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(47, 128, 237, 0.08);
+  color: #2f80ed;
+}
+
+.yd-med-metric-card__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yd-med-metric-card__label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b849c;
+}
+
+.yd-med-metric-card__count {
+  margin: 0;
+  font-size: 1.625rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #0c1929;
+}
+
+.yd-med-metric-card__hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #3d5266;
+}
+
+/* Inbox rows */
+
+.yd-med-inbox__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.yd-med-inbox__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yd-med-inbox-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  padding: 1rem 1.125rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 4px rgba(15, 35, 58, 0.04);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.yd-med-inbox-row:hover {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 4px 14px rgba(15, 35, 58, 0.06);
+}
+
+@media (max-width: 639px) {
+  .yd-med-inbox-row {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .yd-med-inbox-row__actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+.yd-med-inbox-row__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(47, 128, 237, 0.1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e5bbd;
+}
+
+.yd-med-inbox-row__main {
+  min-width: 0;
+}
+
+.yd-med-inbox-row__name {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0c1929;
+}
+
+.yd-med-inbox-row__meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: #6b849c;
+}
+
+.yd-med-inbox-row__dot {
+  margin: 0 0.25rem;
+}
+
+.yd-med-inbox-row__checks {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  font-size: 0.6875rem;
+  color: #8ba3b8;
+}
+
+.yd-med-inbox-check--ok {
+  color: #15803d;
+  font-weight: 500;
+}
+
+.yd-med-inbox-row__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.yd-med-inbox-pill {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.yd-med-inbox-pill--new {
+  color: #1e5bbd;
+  background: rgba(47, 128, 237, 0.1);
+}
+
+.yd-med-inbox-pill--progress {
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.yd-med-inbox-pill--approval {
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.yd-med-inbox-pill--done {
+  color: #6b849c;
+  background: rgba(180, 198, 218, 0.25);
+}
+
+.yd-med-inbox-row__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0 0.875rem;
+  border-radius: 10px;
+  background: rgba(47, 128, 237, 0.1);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #2f80ed;
+  text-decoration: none;
+}
+
+.yd-med-inbox-row__cta:hover {
+  background: rgba(47, 128, 237, 0.16);
+}
+
+/* Command assist */
+
+.yd-med-command {
+  padding: 1.125rem 1.25rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 1px 4px rgba(15, 35, 58, 0.04);
+}
+
+.yd-med-command__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.yd-med-command__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0c1929;
+}
+
+.yd-med-command__form {
+  margin: 0;
+}
+
+.yd-med-command__input {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 0.875rem;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 198, 218, 0.45);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  color: #0c1929;
+  outline: none;
+}
+
+.yd-med-command__input::placeholder {
+  color: #8ba3b8;
+}
+
+.yd-med-command__input:focus {
+  border-color: rgba(47, 128, 237, 0.45);
+  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.12);
+}
+
+.yd-med-command__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.yd-med-command__chip {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: none;
+  background: rgba(47, 128, 237, 0.08);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #2f80ed;
+  cursor: pointer;
+}
+
+.yd-med-command__chip:hover {
+  background: rgba(47, 128, 237, 0.14);
+}
+
+/* Praxis heute (aside) */
+
+.yd-med-praxis-today {
+  padding: 1.25rem 1.125rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.48);
+  box-shadow: 0 2px 12px rgba(15, 35, 58, 0.05);
+}
+
+.yd-med-layout--mobile .yd-med-praxis-today {
+  margin-top: 0.25rem;
+}
+
+.yd-med-praxis-today__list {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yd-med-praxis-today__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.yd-med-praxis-today__row:hover {
+  background: rgba(47, 128, 237, 0.06);
+}
+
+.yd-med-praxis-today__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3d5266;
+}
+
+.yd-med-praxis-today__value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #0c1929;
+}
+
+.yd-med-praxis-today__hints {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(180, 198, 218, 0.35);
+}
+
+.yd-med-praxis-today__hints-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8ba3b8;
+}
+
+.yd-med-praxis-today__hints-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yd-med-praxis-today__hint {
+  display: block;
+  padding: 0.5rem 0.35rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.yd-med-praxis-today__hint:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.yd-med-praxis-today__hint-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #0c1929;
+}
+
+.yd-med-praxis-today__hint-meta {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.6875rem;
+  color: #8ba3b8;
+}
+
+.yd-med-praxis-today__quiet {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  color: #8ba3b8;
 }

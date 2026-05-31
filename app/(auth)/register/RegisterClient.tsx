@@ -10,8 +10,13 @@ import { useFormStatus } from "react-dom";
 import { RegisterFormBackButton } from "@/components/auth/register-form-back-button";
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
 import { RegisterStep4Checkbox } from "@/components/auth/register-step4-checkbox";
+import {
+  isRegisterStep4PaymentSetupValid,
+  RegisterStep4PaymentSetup,
+  type RegisterStep4PaymentFields,
+  type RegisterStep4PaymentMethod,
+} from "@/components/auth/register-step4-payment-setup";
 import { RegisterStep4TrustStatus } from "@/components/auth/register-step4-trust-status";
-import { RegisterStep4WithdrawalConsent } from "@/components/auth/register-step4-withdrawal-consent";
 import { RegisterLicenseSideCard } from "@/components/auth/register-license-side-card";
 import {
   userFacingRegisterProofFileError,
@@ -219,12 +224,17 @@ export function RegisterClient(props: {
   const [frontQualityHint, setFrontQualityHint] = React.useState<string>("");
   const [backQualityHint, setBackQualityHint] = React.useState<string>("");
 
-  const [acceptedTos, setAcceptedTos] = React.useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = React.useState(false);
+  const [acceptedLegal, setAcceptedLegal] = React.useState(false);
   const [acceptedWithdrawal, setAcceptedWithdrawal] = React.useState(false);
-  const [paymentMethod, setPaymentMethod] = React.useState<
-    "sepa_debit" | "card" | "invoice" | "paypal"
-  >("sepa_debit");
+  const [paymentMethod, setPaymentMethod] = React.useState<RegisterStep4PaymentMethod>("sepa_debit");
+  const [paymentFields, setPaymentFields] = React.useState<RegisterStep4PaymentFields>({
+    sepaAccountHolder: "",
+    sepaIban: "",
+    invoiceName: "",
+    invoiceAddress: "",
+    invoicePostalCity: "",
+    invoiceVatId: "",
+  });
 
   const [emailCheckStatus, setEmailCheckStatus] = React.useState<
     "idle" | "checking" | "ready" | "invalid" | "error"
@@ -273,9 +283,18 @@ export function RegisterClient(props: {
     [pushRegisterUrl, searchParams]
   );
 
-  const registrationDocsSatisfied =
-    props.licenseStepOptional === true ||
-    Boolean(licenseFrontStoragePath || licenseBackStoragePath || licenseStoragePath);
+  const registrationDocsSatisfied = Boolean(
+    licenseFrontStoragePath || licenseBackStoragePath || licenseStoragePath
+  );
+
+  const paymentSetupValid = isRegisterStep4PaymentSetupValid(
+    paymentMethod,
+    selectedPlan,
+    paymentFields
+  );
+
+  const step4CanSubmit =
+    acceptedLegal && acceptedWithdrawal && registrationDocsSatisfied && paymentSetupValid;
 
   React.useEffect(() => {
     if (registrationStep !== 1) return;
@@ -371,10 +390,18 @@ export function RegisterClient(props: {
     if (selectedPlan === "monthly" && paymentMethod === "invoice") {
       setPaymentMethod("sepa_debit");
     }
-    if (paymentMethod === "paypal") {
-      setPaymentMethod("sepa_debit");
-    }
   }, [selectedPlan, paymentMethod]);
+
+  React.useEffect(() => {
+    if (!regPractice.trim()) return;
+    setPaymentFields((prev) =>
+      prev.invoiceName.trim() ? prev : { ...prev, invoiceName: regPractice.trim() }
+    );
+  }, [regPractice]);
+
+  const onPaymentFieldChange = (field: keyof RegisterStep4PaymentFields, value: string) => {
+    setPaymentFields((prev) => ({ ...prev, [field]: value }));
+  };
 
   const plans = REGISTER_PLANS;
 
@@ -618,23 +645,10 @@ export function RegisterClient(props: {
     e.preventDefault();
     setLicenseUploading(true);
     setLicenseUploadError("");
-    const optional = props.licenseStepOptional === true;
     try {
       if (!licenseFrontFile && !licenseBackFile) {
-        if (optional) {
-          setLicenseUploadError("");
-          setLicenseFrontStoragePath("");
-          setLicenseBackStoragePath("");
-          setLicenseStoragePath("");
-          setFrontQualityOk(null);
-          setBackQualityOk(null);
-          setFrontQualityHint("");
-          setBackQualityHint("");
-          goToStep(4);
-          return;
-        }
         setLicenseUploadError(
-          "Bitte fügen Sie mindestens Vorder- oder Rückseite Ihres Nachweises hinzu (JPG, PNG oder PDF)."
+          "Bitte laden Sie Vorder- oder Rückseite Ihres Zahnarztausweises oder Ihrer Approbationsurkunde hoch."
         );
         return;
       }
@@ -708,17 +722,9 @@ export function RegisterClient(props: {
           </button>
 
             <div className="yd-auth-register-header">
-              <div className="mb-4 flex justify-center pb-0.5">
+              <div className="mb-5 flex justify-center pb-1 md:mb-6">
                 <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
               </div>
-              {!props.success ? (
-                <p className="yd-auth-register-login-hint mt-3 text-center text-[13px] text-gray-500">
-                  Bereits Zugang?{" "}
-                  <Link href={loginBackHref} className="yd-auth-link font-medium">
-                    Anmelden
-                  </Link>
-                </p>
-              ) : null}
             </div>
 
             <div className="yd-auth-register-body">
@@ -806,7 +812,7 @@ export function RegisterClient(props: {
                 <div className="mt-3 text-center text-[12px] font-medium text-gray-500">
                   {registrationStep === 1 && "Ansprechperson & Zugang"}
                   {registrationStep === 2 && "Praxis"}
-                  {registrationStep === 3 && "Nachweis"}
+                  {registrationStep === 3 && "Verifizierung"}
                   {registrationStep === 4 && "Praxiszugang"}
                 </div>
               </div>
@@ -1106,57 +1112,45 @@ export function RegisterClient(props: {
               {registrationStep === 3 ? (
                 <div className="yd-auth-awaken-field">
                   <div className="mb-7 text-center">
-                    <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Praxiszugang bestätigen
+                    <h3 className="mb-2 text-[24px] font-semibold tracking-tight text-gray-900">
+                      Berufliche Verifizierung
                     </h3>
-                    <p className="mx-auto max-w-md text-[13px] leading-relaxed text-gray-500">
-                      Für die geschützte Nutzung prüfen wir neue Praxiszugänge vor der Freischaltung.
+                    <p className="mx-auto max-w-md text-[13px] leading-relaxed text-gray-600">
+                      Laden Sie Ihren Zahnarztausweis oder Ihre Approbationsurkunde hoch.
                     </p>
-                    {props.licenseStepOptional ? (
-                      <p className="mx-auto mt-3 max-w-md text-[12px] leading-relaxed text-gray-500">
-                        Sie können diesen Schritt überspringen und die Unterlagen später ergänzen.
-                      </p>
-                    ) : null}
+                    <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-gray-500">
+                      Wir prüfen Ihre Angaben vor der Freischaltung Ihres Praxiszugangs.
+                    </p>
                   </div>
 
                   <form onSubmit={onStep3Submit} className="min-w-0 space-y-5" aria-busy={licenseUploading}>
 
                     <div className="min-w-0">
                       {!licenseFrontFile && !licenseBackFile ? (
-                        <div className="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 px-4 py-4 text-left">
-                          <p className="text-[12px] font-medium text-slate-800">Für eine schnelle Bearbeitung:</p>
-                          <ul className="mt-2.5 space-y-1.5 text-[12px] leading-relaxed text-slate-600">
+                        <div className="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 px-4 py-3.5 text-left">
+                          <p className="text-[12px] font-medium text-slate-800">Gute Aufnahme:</p>
+                          <ul className="mt-2 space-y-1 text-[12px] leading-relaxed text-slate-600">
                             <li className="flex gap-2">
                               <span className="text-green-700" aria-hidden>
                                 ✓
                               </span>
-                              Dokument vollständig sichtbar
+                              vollständig sichtbar
                             </li>
                             <li className="flex gap-2">
                               <span className="text-green-700" aria-hidden>
                                 ✓
                               </span>
-                              Alle Ecken erkennbar
+                              gute Beleuchtung
                             </li>
                             <li className="flex gap-2">
                               <span className="text-green-700" aria-hidden>
                                 ✓
                               </span>
-                              Gute Beleuchtung
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="text-green-700" aria-hidden>
-                                ✓
-                              </span>
-                              Angaben lesbar
+                              Text lesbar
                             </li>
                           </ul>
                         </div>
                       ) : null}
-                      <p className="mb-1 text-[13px] font-medium text-gray-800">Nachweis hochladen</p>
-                      <p className="mb-4 text-[12px] leading-relaxed text-gray-500">
-                        Zum Beispiel Zahnarztausweis oder vergleichbarer Praxisnachweis.
-                      </p>
                       <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2">
                         <RegisterLicenseSideCard
                           title="Vorderseite"
@@ -1302,7 +1296,7 @@ export function RegisterClient(props: {
                           >
                             Abrechnungsintervall
                           </h4>
-                          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-4">
                             {(Object.keys(plans) as Plan[]).map((key) => {
                               const p = plans[key];
                               const active = selectedPlan === key;
@@ -1313,7 +1307,7 @@ export function RegisterClient(props: {
                                   type="button"
                                   onClick={() => setSelectedPlan(key)}
                                   className={cn(
-                                    "relative rounded-xl border px-4 py-3.5 text-left transition-colors duration-150",
+                                    "relative rounded-xl border px-5 py-4 text-left transition-colors duration-150",
                                     active ? "yd-reg-step4-plan--selected" : "yd-reg-step4-plan--idle"
                                   )}
                                 >
@@ -1370,57 +1364,24 @@ export function RegisterClient(props: {
                           >
                             Zahlungsweise
                           </h4>
-                          <div className="grid grid-cols-3 gap-2.5">
-                            <button
-                              type="button"
-                              onClick={() => setPaymentMethod("sepa_debit")}
-                              className={cn(
-                                "flex min-h-[44px] items-center justify-center rounded-lg border px-2 text-[13px] font-medium transition-colors duration-150",
-                                paymentMethod === "sepa_debit"
-                                  ? "yd-reg-step4-pay--selected text-slate-900"
-                                  : "yd-reg-step4-pay--idle text-slate-700"
-                              )}
-                            >
-                              SEPA
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setPaymentMethod("card")}
-                              className={cn(
-                                "flex min-h-[44px] items-center justify-center rounded-lg border px-2 text-[13px] font-medium transition-colors duration-150",
-                                paymentMethod === "card"
-                                  ? "yd-reg-step4-pay--selected text-slate-900"
-                                  : "yd-reg-step4-pay--idle text-slate-700"
-                              )}
-                            >
-                              Karte
-                            </button>
-                            <button
-                              type="button"
-                              disabled={selectedPlan === "monthly"}
-                              onClick={() => setPaymentMethod("invoice")}
-                              className={cn(
-                                "flex min-h-[44px] items-center justify-center rounded-lg border px-2 text-[13px] font-medium transition-colors duration-150",
-                                selectedPlan === "monthly"
-                                  ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"
-                                  : paymentMethod === "invoice"
-                                    ? "yd-reg-step4-pay--selected text-slate-900"
-                                    : "yd-reg-step4-pay--idle text-slate-700"
-                              )}
-                            >
-                              Rechnung
-                            </button>
-                          </div>
-                          <p className="mt-2.5 text-[11px] leading-relaxed text-slate-500">
-                            {selectedPlan === "monthly"
-                              ? "Zahlung nach Freischaltung — Rechnung ab Halbjahres- oder Jahrestarif."
-                              : "Einrichtung der Zahlungsweise nach Freischaltung Ihres Praxiszugangs."}
-                          </p>
+                          <RegisterStep4PaymentSetup
+                            method={paymentMethod}
+                            onMethodChange={setPaymentMethod}
+                            selectedPlan={selectedPlan}
+                            fields={paymentFields}
+                            onFieldChange={onPaymentFieldChange}
+                          />
                         </section>
 
-                        <section aria-label="Zustimmungen" className="border-t border-slate-100 pt-6">
+                        <section aria-labelledby="reg-step4-agreements-heading" className="border-t border-slate-100 pt-6">
+                          <h4
+                            id="reg-step4-agreements-heading"
+                            className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
+                          >
+                            Vereinbarungen
+                          </h4>
                           <div className="space-y-0.5">
-                            <RegisterStep4Checkbox checked={acceptedTos} onChange={setAcceptedTos}>
+                            <RegisterStep4Checkbox checked={acceptedLegal} onChange={setAcceptedLegal}>
                               <>
                                 <Link
                                   href="/agb"
@@ -1428,35 +1389,37 @@ export function RegisterClient(props: {
                                 >
                                   AGB
                                 </Link>{" "}
-                                akzeptieren
-                              </>
-                            </RegisterStep4Checkbox>
-                            <RegisterStep4Checkbox checked={acceptedPrivacy} onChange={setAcceptedPrivacy}>
-                              <>
+                                und{" "}
                                 <Link
                                   href="/datenschutz"
                                   className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
                                 >
                                   Datenschutz
                                 </Link>{" "}
-                                bestätigen
+                                akzeptieren
                               </>
                             </RegisterStep4Checkbox>
-                            <RegisterStep4WithdrawalConsent
+                            <RegisterStep4Checkbox
                               checked={acceptedWithdrawal}
                               onChange={setAcceptedWithdrawal}
-                            />
-                          </div>
-                          <p className="mt-3 text-[10px] leading-relaxed text-slate-500">
-                            <Link
-                              href="/widerruf"
-                              className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+                              ariaLabel="Ich verlange ausdrücklich, dass Your Dentist vor Ablauf der Widerrufsfrist mit der Leistung beginnt, und bestätige, dass ich dadurch mein Widerrufsrecht verlieren kann."
                             >
-                              Widerrufsbelehrung
-                            </Link>
-                            {" · "}
-                            Vertrag v1
-                          </p>
+                              <>
+                                Aktivierung nach Freischaltung bestätigen
+                                <span className="text-slate-500">
+                                  {" "}
+                                  (
+                                  <Link
+                                    href="/widerruf"
+                                    className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+                                  >
+                                    Widerruf
+                                  </Link>
+                                  )
+                                </span>
+                              </>
+                            </RegisterStep4Checkbox>
+                          </div>
                         </section>
                       </div>
                     </RegisterStep4LockableFieldset>
@@ -1474,8 +1437,8 @@ export function RegisterClient(props: {
                     <input type="hidden" name="billing_interval" value={selectedPlan} />
                     <input type="hidden" name="contract_version" value="v1" />
                     <input type="hidden" name="accepted_at" value={new Date().toISOString()} />
-                    <input type="hidden" name="accepted_tos" value={acceptedTos ? "1" : "0"} />
-                    <input type="hidden" name="accepted_privacy" value={acceptedPrivacy ? "1" : "0"} />
+                    <input type="hidden" name="accepted_tos" value={acceptedLegal ? "1" : "0"} />
+                    <input type="hidden" name="accepted_privacy" value={acceptedLegal ? "1" : "0"} />
                     <input type="hidden" name="accepted_withdrawal" value={acceptedWithdrawal ? "1" : "0"} />
                     <input type="hidden" name="payment_method" value={paymentMethod} />
                     <input type="hidden" name="dentist_license_storage_path" value={licenseStoragePath} />
@@ -1507,19 +1470,10 @@ export function RegisterClient(props: {
                         submitIntentValue="standard"
                         label="Registrierung absenden"
                         pendingLabel="Wird übermittelt…"
-                        disabled={
-                          !acceptedTos ||
-                          !acceptedPrivacy ||
-                          !acceptedWithdrawal ||
-                          !registrationDocsSatisfied
-                        }
+                        disabled={!step4CanSubmit}
                         className={cn(
                           "h-[52px] min-h-[48px] flex-1 sm:h-[52px]",
-                          acceptedTos &&
-                            acceptedPrivacy &&
-                            acceptedWithdrawal &&
-                            registrationDocsSatisfied &&
-                            "yd-reg-step4-submit"
+                          step4CanSubmit && "yd-reg-step4-submit"
                         )}
                       />
                     </div>
@@ -1544,12 +1498,7 @@ export function RegisterClient(props: {
                         submitIntentValue="demo"
                         label="Test: ohne Zahlungsdialog abschließen"
                         pendingLabel="Wird übermittelt…"
-                        disabled={
-                          !acceptedTos ||
-                          !acceptedPrivacy ||
-                          !acceptedWithdrawal ||
-                          !registrationDocsSatisfied
-                        }
+                        disabled={!step4CanSubmit}
                         className="h-[50px] w-full min-h-[48px] rounded-lg border border-amber-400/70 bg-white text-[13px] font-medium text-amber-950 transition-colors duration-150 hover:bg-amber-50/90 disabled:cursor-not-allowed disabled:opacity-50"
                         style={{ backgroundColor: "#fffbeb" }}
                         pendingStyle={{ backgroundColor: "#fef3c7" }}

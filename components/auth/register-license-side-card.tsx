@@ -86,16 +86,18 @@ export function RegisterLicenseSideCard({
 
         {file ? (
           <div className="mt-3">
-            <p className="flex items-center gap-1.5 text-[13px] font-medium text-green-800">
-              <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Datei hinzugefügt
-            </p>
+            {docStatus !== "checking" ? (
+              <p className="flex items-center gap-1.5 text-[13px] font-medium text-green-800">
+                <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Dokument bereit zur Prüfung
+              </p>
+            ) : null}
             {preview ? (
               <div className="mb-3 mt-3 overflow-hidden rounded-lg border border-green-200/70 bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

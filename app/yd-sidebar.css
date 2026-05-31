@@ -67,10 +67,17 @@
     min-height: 0;
     max-height: none;
     border-radius: 40px;
+    display: flex;
+    flex-direction: column;
   }
 
   .yd-workspace-body .yd-desktop-nav-rail {
     align-items: stretch;
+    align-self: flex-start;
+  }
+
+  .yd-awaken-sidebar .yd-mobile-sidebar-nav {
+    justify-content: flex-start;
   }
 }
 

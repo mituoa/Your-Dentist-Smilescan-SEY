@@ -209,6 +209,12 @@ export async function signUp(formData: FormData) {
   const dentistLicenseStoragePathBack =
     (formData.get("dentist_license_storage_path_back") as string | null)?.trim() || null;
   const paymentMethod = (formData.get("payment_method") as string | null)?.trim() || null;
+  const sepaAccountHolder = (formData.get("sepa_account_holder") as string | null)?.trim() ?? "";
+  const sepaIban = ((formData.get("sepa_iban") as string | null)?.trim() ?? "").replace(/\s/g, "");
+  const invoiceName = (formData.get("invoice_name") as string | null)?.trim() ?? "";
+  const invoiceAddress = (formData.get("invoice_address") as string | null)?.trim() ?? "";
+  const invoicePostalCity = (formData.get("invoice_postal_city") as string | null)?.trim() ?? "";
+  const invoiceVatId = (formData.get("invoice_vat_id") as string | null)?.trim() ?? "";
   const registerSubmit = (formData.get("register_submit") as string | null)?.trim();
   const registrationDemoSkip =
     registerSubmit === "demo" ||
@@ -360,6 +366,30 @@ export async function signUp(formData: FormData) {
       });
     }
 
+    const allowedPayment = new Set(["sepa_debit", "card", "invoice"]);
+    if (!paymentMethod || !allowedPayment.has(paymentMethod)) {
+      await registerFail("Bitte wählen Sie eine Zahlungsweise.", {
+        deleteRegistrationAuthUser: true,
+      });
+    }
+    if (paymentMethod === "sepa_debit" && (!sepaAccountHolder || sepaIban.length < 15)) {
+      await registerFail("Bitte geben Sie Kontoinhaber und IBAN für SEPA vollständig an.", {
+        deleteRegistrationAuthUser: true,
+      });
+    }
+    if (paymentMethod === "invoice") {
+      if (billingInterval === "monthly") {
+        await registerFail("Rechnung ist beim Monatstarif nicht verfügbar.", {
+          deleteRegistrationAuthUser: true,
+        });
+      }
+      if (!invoiceName || !invoiceAddress || !invoicePostalCity) {
+        await registerFail("Bitte Rechnungsangaben vollständig ausfüllen.", {
+          deleteRegistrationAuthUser: true,
+        });
+      }
+    }
+
     const acceptedAt = acceptedAtRaw ? new Date(acceptedAtRaw) : new Date();
     if (Number.isNaN(acceptedAt.getTime())) {
       await registerFail("Ungültiges Vertragsdatum.", { deleteRegistrationAuthUser: true });
@@ -416,6 +446,32 @@ export async function signUp(formData: FormData) {
         "Die Vertragsdaten konnten nicht gespeichert werden. Bitte melden Sie sich an oder versuchen Sie es später erneut.",
         { deleteRegistrationAuthUser: true, workspaceIdHint: workspaceId }
       );
+    }
+
+    const registrationPaymentSetup: Record<string, string> = { method: paymentMethod as string };
+    if (paymentMethod === "sepa_debit") {
+      registrationPaymentSetup.sepa_account_holder = sepaAccountHolder;
+      registrationPaymentSetup.sepa_iban = sepaIban;
+    }
+    if (paymentMethod === "invoice") {
+      registrationPaymentSetup.invoice_name = invoiceName;
+      registrationPaymentSetup.invoice_address = invoiceAddress;
+      registrationPaymentSetup.invoice_postal_city = invoicePostalCity;
+      if (invoiceVatId) registrationPaymentSetup.invoice_vat_id = invoiceVatId;
+    }
+
+    const { data: userRow } = await admin.auth.admin.getUserById(userId);
+    const mergedMetadata = {
+      ...(typeof userRow?.user?.user_metadata === "object" && userRow.user.user_metadata !== null
+        ? userRow.user.user_metadata
+        : {}),
+      registration_payment_setup: registrationPaymentSetup,
+    };
+    const { error: paymentMetaErr } = await admin.auth.admin.updateUserById(userId, {
+      user_metadata: mergedMetadata,
+    });
+    if (paymentMetaErr) {
+      console.error("[signUp] registration_payment_setup metadata failed");
     }
 
     const profilePatch: Record<string, string | null> = {
