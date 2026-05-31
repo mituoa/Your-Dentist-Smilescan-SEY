@@ -5,6 +5,7 @@ import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compac
 import { YdPublicSiteFooter } from "@/components/marketing/yd-public-site-footer";
 import { YdPublicSiteHeader } from "@/components/marketing/yd-public-site-header";
 import { YdPublicSiteMobileCtas } from "@/components/marketing/yd-public-site-mobile-ctas";
+import { PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
 import {
   YdPublicSiteDemo,
   YdPublicSiteEinfuehrung,
@@ -42,8 +43,8 @@ export function YdHomeMobile({
         <YdPublicSiteMobileCtas dashboardHref={dashboardHref} />
 
         <section
-          id="pricing"
-          className="yd-public-site-mobile-pricing scroll-mt-[5.5rem]"
+          id={PUBLIC_SITE_SECTIONS.pricing}
+          className="yd-public-site-mobile-pricing yd-public-site-scroll-anchor"
           aria-label="Praxiszugang und Preise"
         >
           <YdEntryPricingCompact

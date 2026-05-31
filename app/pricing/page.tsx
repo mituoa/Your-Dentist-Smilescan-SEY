@@ -16,5 +16,5 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   if (params.invite) qs.set("invite", params.invite);
   if (params.email) qs.set("email", params.email);
   const base = qs.toString() ? `/?${qs.toString()}` : "/";
-  redirect(`${base}#pricing`);
+  redirect(`${base}#preise`);
 }

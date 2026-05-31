@@ -1,6 +1,32 @@
 /** Desktop breakpoint — matches .yd-clinical-desktop-only visibility. */
 export const PUBLIC_SITE_DESKTOP_MQ = "(min-width: 900px)";
 
+import { PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
+
+/** Legacy-Hashes und Nav-Keys → kanonische Section-IDs */
+const SECTION_ID_ALIASES: Record<string, string> = {
+  preise: PUBLIC_SITE_SECTIONS.pricing,
+  pakete: PUBLIC_SITE_SECTIONS.pricing,
+  pricing: PUBLIC_SITE_SECTIONS.pricing,
+  nutzen: PUBLIC_SITE_SECTIONS.nutzen,
+  funktionen: PUBLIC_SITE_SECTIONS.nutzen,
+  ablauf: PUBLIC_SITE_SECTIONS.ablauf,
+  loesung: PUBLIC_SITE_SECTIONS.ablauf,
+  "fuer-wen": PUBLIC_SITE_SECTIONS.fuerWen,
+  "fuer-praxen": PUBLIC_SITE_SECTIONS.fuerWen,
+  einfuehrung: PUBLIC_SITE_SECTIONS.einfuehrung,
+  demo: PUBLIC_SITE_SECTIONS.demo,
+};
+
+/** Mobile hat weniger Sektionen — sinnvolle Scroll-Ziele */
+const SECTION_SCROLL_FALLBACKS: Record<string, string> = {
+  [PUBLIC_SITE_SECTIONS.ablauf]: PUBLIC_SITE_SECTIONS.nutzen,
+  [PUBLIC_SITE_SECTIONS.problem]: PUBLIC_SITE_SECTIONS.nutzen,
+  [PUBLIC_SITE_SECTIONS.perspektive]: PUBLIC_SITE_SECTIONS.nutzen,
+  [PUBLIC_SITE_SECTIONS.command]: PUBLIC_SITE_SECTIONS.demo,
+  [PUBLIC_SITE_SECTIONS.plattform]: PUBLIC_SITE_SECTIONS.nutzen,
+};
+
 function isDesktopPublicSite(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia(PUBLIC_SITE_DESKTOP_MQ).matches;
@@ -32,28 +58,31 @@ function getHeaderOffset(): number {
   return Number.isFinite(parsed) ? parsed : 68;
 }
 
-/** Hash-Aliase: /#preise → pricing */
 export function normalizePublicSectionId(sectionId: string): string {
   const id = sectionId.replace(/^#/, "").trim();
-  if (id === "preise" || id === "pakete") return "pricing";
-  return id;
+  return SECTION_ID_ALIASES[id] ?? id;
+}
+
+function findSectionInScope(scope: ParentNode, sectionId: string): HTMLElement | null {
+  const normalized = normalizePublicSectionId(sectionId);
+  if (scope === document) {
+    return document.getElementById(normalized);
+  }
+  const el = scope.querySelector<HTMLElement>(`#${CSS.escape(normalized)}`);
+  if (el) return el;
+
+  const fallback = SECTION_SCROLL_FALLBACKS[normalized];
+  if (!fallback) return null;
+  return scope.querySelector<HTMLElement>(`#${CSS.escape(fallback)}`);
 }
 
 export function resolvePublicSectionElement(sectionId: string): HTMLElement | null {
   if (typeof document === "undefined") return null;
-  const normalized = normalizePublicSectionId(sectionId);
   const scope = getPublicSiteScope();
-  if (scope === document) {
-    return document.getElementById(normalized);
-  }
-  return scope.querySelector<HTMLElement>(`#${CSS.escape(normalized)}`);
+  return findSectionInScope(scope, sectionId);
 }
 
-export function scrollToPublicSection(sectionId: string, onDone?: () => void): boolean {
-  const normalized = normalizePublicSectionId(sectionId);
-  const el = resolvePublicSectionElement(normalized);
-  if (!el) return false;
-
+function scrollElementIntoView(el: HTMLElement): void {
   const scrollRoot = getPublicSiteScrollRoot();
   const headerOffset = getHeaderOffset();
   const extraGap = 12;
@@ -72,6 +101,14 @@ export function scrollToPublicSection(sectionId: string, onDone?: () => void): b
       scrollRoot.scrollTop + (elRect.top - rootRect.top) - headerOffset - extraGap;
     scrollRoot.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   }
+}
+
+export function scrollToPublicSection(sectionId: string, onDone?: () => void): boolean {
+  const normalized = normalizePublicSectionId(sectionId);
+  const el = resolvePublicSectionElement(sectionId);
+  if (!el) return false;
+
+  scrollElementIntoView(el);
 
   if (typeof window !== "undefined" && window.location.hash !== `#${normalized}`) {
     const url = `${window.location.pathname}${window.location.search}#${normalized}`;
@@ -82,7 +119,7 @@ export function scrollToPublicSection(sectionId: string, onDone?: () => void): b
   return true;
 }
 
-/** Initial load: /#nutzen etc. */
+/** Initial load: /#funktionen etc. */
 export function scrollToPublicSectionFromHash(hash?: string): boolean {
   const raw = (hash ?? (typeof window !== "undefined" ? window.location.hash : ""))
     .replace(/^#/, "")

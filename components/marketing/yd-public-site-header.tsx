@@ -62,7 +62,10 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
   }, [menuOpen]);
 
   const go = useCallback((sectionId: string) => {
-    scrollToPublicSection(sectionId, () => setMenuOpen(false));
+    const scrolled = scrollToPublicSection(sectionId, () => setMenuOpen(false));
+    if (!scrolled && typeof window !== "undefined") {
+      window.setTimeout(() => scrollToPublicSection(sectionId, () => setMenuOpen(false)), 80);
+    }
   }, []);
 
   return (

@@ -36,7 +36,10 @@ export function YdHomePage({
 
   useEffect(() => {
     if (!window.location.hash) return;
-    const run = () => scrollToPublicSectionFromHash();
+    const run = () => {
+      if (scrollToPublicSectionFromHash()) return;
+      window.setTimeout(() => scrollToPublicSectionFromHash(), 120);
+    };
     requestAnimationFrame(() => requestAnimationFrame(run));
     const onHash = () => scrollToPublicSectionFromHash();
     window.addEventListener("hashchange", onHash);

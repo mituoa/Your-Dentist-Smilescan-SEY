@@ -7,13 +7,13 @@ import type { RegisterPlanId } from "@/lib/auth/register-plans";
 export const PUBLIC_SITE_SECTIONS = {
   problem: "problem",
   perspektive: "perspektive",
-  nutzen: "nutzen",
-  ablauf: "ablauf",
+  nutzen: "funktionen",
+  ablauf: "loesung",
   command: "command-ai",
   plattform: "plattform",
-  fuerWen: "fuer-wen",
+  fuerWen: "fuer-praxen",
   einfuehrung: "einfuehrung",
-  pricing: "pricing",
+  pricing: "preise",
   demo: "demo",
 } as const;
 
@@ -211,7 +211,7 @@ export const PUBLIC_SITE_DEMO = {
   submitPending: "Wird gesendet …",
   note: "Ihre Angaben werden nur zur Terminvereinbarung genutzt.",
   successTitle: "Anfrage ist eingegangen",
-  successBody: "Wir melden uns in Kürze per E-Mail.",
+  successBody: "Wir melden uns mit einem Terminvorschlag.",
   successAnother: "Weitere Anfrage",
 } as const;
 

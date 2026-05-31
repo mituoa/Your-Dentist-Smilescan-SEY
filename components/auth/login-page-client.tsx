@@ -12,6 +12,7 @@ import { YdAuthPending } from "@/components/auth/yd-auth-ui";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { LoginRegisterCta } from "@/components/auth/login-register-cta";
+import { AUTH_LOGIN_INVALID_CREDENTIALS } from "@/lib/auth-user-facing-errors";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
 function safeDecodeQueryParam(value: string | undefined): string {
@@ -76,12 +77,12 @@ export function LoginPageClient({
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash === "#pricing") {
+    if (window.location.hash === "#pricing" || window.location.hash === "#preise") {
       const params = new URLSearchParams();
       if (inviteToken) params.set("invite", inviteToken);
       if (prefilledEmail) params.set("email", prefilledEmail);
       const q = params.toString();
-      window.location.replace(q ? `/?${q}#pricing` : "/#pricing");
+      window.location.replace(q ? `/?${q}#preise` : "/#preise");
       return;
     }
     if (!signedOut) {
@@ -148,15 +149,40 @@ export function LoginPageClient({
       return {
         tone: "warning" as const,
         title: "Anmeldung mit diesem Anbieter nicht verfügbar",
-        body: "Der gewählte Anmelde‑Anbieter ist in Ihrer Umgebung noch nicht freigeschaltet. Bitte nutzen Sie E‑Mail oder Google, oder wenden Sie sich an den Support.",
+        body: "Der gewählte Anmelde‑Anbieter ist in Ihrer Umgebung noch nicht freigeschaltet. Bitte nutzen Sie E‑Mail und Passwort.",
+        compact: false,
       };
     }
 
-    // Unbekannter Hinweis — keine technischen Rohstrings (z. B. Supabase) anzeigen
+    if (
+      raw === AUTH_LOGIN_INVALID_CREDENTIALS ||
+      raw === "E-Mail oder Passwort ist ungültig." ||
+      /invalid login credentials|invalid_credentials/i.test(raw)
+    ) {
+      return {
+        tone: "warning" as const,
+        body: AUTH_LOGIN_INVALID_CREDENTIALS,
+        compact: true,
+      };
+    }
+
+    if (
+      raw.length <= 220 &&
+      /^(Bitte|Die |Das |Der |Diese |E-Mail|Passwort|Zu viele|Verbindung|Google-Anmeldung|Der Link)/i.test(
+        raw
+      )
+    ) {
+      return {
+        tone: "warning" as const,
+        body: raw,
+        compact: true,
+      };
+    }
+
     return {
-      tone: "danger" as const,
-      title: "Anmeldung nicht möglich",
-      body: "Es liegt ein Problem mit Ihrem Zugang vor. Bitte versuchen Sie es erneut. Wenn das weiterhin auftritt, wenden Sie sich an Ihre Praxis oder den technischen Support.",
+      tone: "warning" as const,
+      body: "Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+      compact: true,
     };
   }, [normalizedQueryError]);
 
@@ -165,14 +191,16 @@ export function LoginPageClient({
   return (
     <YdPublicOsEnvironment mode="focus">
       <div className="yd-clinical-entry yd-clinical-entry--login">
-        <div className="yd-clinical-entry-panel">
+        <div className="yd-clinical-entry-panel yd-clinical-entry-panel--login-entrance">
           <div className="yd-auth-login-brand yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "0" }}>
-            <YourDentistBrandLockup size="md" tagline="Neutral Practice Platform" centered />
+            <YourDentistBrandLockup size="md" centered />
           </div>
 
           <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>
-            <h1 className="yd-public-entry-title">Willkommen zurück</h1>
-            <p className="yd-public-entry-lead">Melden Sie sich mit Ihren Zugangsdaten an.</p>
+            <h1 className="yd-public-entry-title yd-public-entry-title--login">Ihr geschützter Arbeitsbereich</h1>
+            <p className="yd-public-entry-lead yd-public-entry-lead--login">
+              Anmelden und dort fortfahren, wo Ihr Team aufgehört hat.
+            </p>
           </div>
 
         {parsedError ? (
@@ -191,8 +219,14 @@ export function LoginPageClient({
               }`}
               role="alert"
             >
-              <p className="yd-auth-alert-title">{parsedError.title}</p>
-              <p className="mt-1">{parsedError.body}</p>
+              {"compact" in parsedError && parsedError.compact ? (
+                <p>{parsedError.body}</p>
+              ) : (
+                <>
+                  <p className="yd-auth-alert-title">{parsedError.title}</p>
+                  <p className="mt-1">{parsedError.body}</p>
+                </>
+              )}
             </div>
           )
         ) : null}
@@ -237,7 +271,7 @@ export function LoginPageClient({
                   }
                   className="yd-auth-link inline-flex min-h-[44px] items-center max-md:py-2 md:min-h-0 md:py-0"
                 >
-                  Passwort vergessen?
+                  Zugang wiederherstellen
                 </Link>
               </div>
               <input
@@ -297,7 +331,10 @@ export function LoginPageClient({
                 disabled={googleBlockedByOthers}
                 className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
               >
-                <OAuthFormSubmitButton pendingLabel="Weiter zu Google…" className="yd-auth-btn-secondary">
+                <OAuthFormSubmitButton
+                  pendingLabel="Weiter zu Google…"
+                  className="yd-auth-btn-secondary yd-auth-btn-secondary--oauth"
+                >
                   <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       fill="#4285F4"

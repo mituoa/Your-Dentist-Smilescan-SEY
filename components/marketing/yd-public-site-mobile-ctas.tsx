@@ -10,7 +10,7 @@ type YdPublicSiteMobileCtasProps = {
   dashboardHref?: string | null;
 };
 
-/** Mobile — direkter Zugang: Anmelden, Registrieren, Demo (ohne Umweg über Register). */
+/** Mobile Hero-CTAs — Demo scrollt, Zugang → Register, Anmelden → Login. */
 export function YdPublicSiteMobileCtas({ dashboardHref = null }: YdPublicSiteMobileCtasProps) {
   return (
     <section className="yd-public-site-mobile-ctas" aria-label="Zugang zur Praxis">
@@ -19,23 +19,26 @@ export function YdPublicSiteMobileCtas({ dashboardHref = null }: YdPublicSiteMob
           Zum Dashboard
         </Link>
       ) : null}
-      <Link prefetch href="/login" className="yd-clinical-cta-primary yd-public-site-cta-primary">
-        {PUBLIC_SITE_HERO.signInLabel}
-      </Link>
+      <button
+        type="button"
+        className="yd-clinical-cta-primary yd-public-site-cta-primary"
+        onClick={() => scrollToPublicSection(PUBLIC_SITE_SECTIONS.demo)}
+      >
+        {PUBLIC_SITE_HERO.primaryCta}
+      </button>
       <Link
         prefetch
         href={buildRegisterEntryHref()}
         className="yd-clinical-cta-secondary yd-public-site-cta-secondary"
       >
-        {PUBLIC_SITE_HERO.primaryCta}
+        {PUBLIC_SITE_HERO.secondaryCta}
       </Link>
-      <button
-        type="button"
-        className="yd-public-site-cta-tertiary"
-        onClick={() => scrollToPublicSection(PUBLIC_SITE_SECTIONS.demo)}
-      >
-        Demo buchen
-      </button>
+      <p className="yd-clinical-cta-signin yd-public-site-cta-signin">
+        {PUBLIC_SITE_HERO.signInPrefix}{" "}
+        <Link prefetch href="/login">
+          {PUBLIC_SITE_HERO.signInLabel}
+        </Link>
+      </p>
     </section>
   );
 }

@@ -42,5 +42,6 @@ export const REGISTER_PLANS: Record<RegisterPlanId, RegisterPlanDefinition> = {
 
 export function coerceRegisterPlan(value: string | null | undefined): RegisterPlanId {
   if (value === "monthly" || value === "halfyearly" || value === "yearly") return value;
+  if (value === "half-yearly" || value === "half_yearly") return "halfyearly";
   return "yearly";
 }

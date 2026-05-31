@@ -1,3 +1,7 @@
+/** Login — ruhige Meldung bei falschen Zugangsdaten (URL + UI). */
+export const AUTH_LOGIN_INVALID_CREDENTIALS =
+  "Die Zugangsdaten konnten nicht bestätigt werden.";
+
 /**
  * Maps provider / Supabase messages to short German copy for redirects and UI.
  * Log the raw message on the server before replacing.
@@ -7,7 +11,7 @@ export function userFacingAuthError(raw: string): string {
   if (!m) return "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.";
 
   if (/invalid login credentials|invalid_credentials|invalid email or password/i.test(m)) {
-    return "E-Mail oder Passwort ist ungültig.";
+    return AUTH_LOGIN_INVALID_CREDENTIALS;
   }
   if (/email not confirmed|email_not_confirmed/i.test(m)) {
     return "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse über den Link in der Bestätigungsmail.";

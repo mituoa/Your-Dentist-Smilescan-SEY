@@ -32,11 +32,11 @@ export function ForgotPasswordPageClient({
           </div>
 
           <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>
-            <h1 className="yd-public-entry-title">Passwort zurücksetzen</h1>
+            <h1 className="yd-public-entry-title">Zugang wiederherstellen</h1>
             <p className="yd-public-entry-lead">
               {sent
                 ? "Prüfen Sie Ihren Posteingang — der Link ist nur begrenzt gültig."
-                : "E-Mail eingeben — Sie erhalten einen geschützten Link zum Zurücksetzen."}
+                : "E-Mail eingeben. Sie erhalten einen geschützten Link zum Zurücksetzen Ihres Zugangs."}
             </p>
           </div>
 

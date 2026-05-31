@@ -21,7 +21,7 @@ export function buildPricingEntryHref(inviteToken = "", prefilledEmail = ""): st
   if (inviteToken) params.set("invite", inviteToken);
   if (prefilledEmail) params.set("email", prefilledEmail);
   const qs = params.toString();
-  return qs ? `/?${qs}#pricing` : "/#pricing";
+  return qs ? `/?${qs}#preise` : "/#preise";
 }
 
 export function buildRegisterEntryHref(

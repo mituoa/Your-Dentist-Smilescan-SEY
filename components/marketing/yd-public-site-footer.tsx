@@ -1,9 +1,22 @@
+"use client";
+
 import Link from "next/link";
+import { useCallback } from "react";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { PUBLIC_SITE_FOOTER } from "@/lib/marketing/public-site-ia";
+import { scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
 
 export function YdPublicSiteFooter() {
+  const onAnchorClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+      if (typeof window === "undefined" || window.location.pathname !== "/") return;
+      event.preventDefault();
+      scrollToPublicSection(sectionId);
+    },
+    []
+  );
+
   return (
     <footer className="yd-public-site-footer yd-public-os-awaken-field">
       <div className="yd-public-site-footer-inner">
@@ -11,22 +24,31 @@ export function YdPublicSiteFooter() {
           <YourDentistBrandLockup size="sm" tagline={PUBLIC_SITE_FOOTER.tagline} />
         </div>
         <nav className="yd-public-site-footer-nav" aria-label="Rechtliches und Zugang">
-          {PUBLIC_SITE_FOOTER.links.map((link) =>
-            link.href.startsWith("/#") ? (
-              <a key={link.href} href={link.href} className="yd-public-site-footer-link">
-                {link.label}
-              </a>
-            ) : (
+          {PUBLIC_SITE_FOOTER.links.map((link) => {
+            if (link.href.startsWith("/#")) {
+              const sectionId = link.href.replace("/#", "");
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="yd-public-site-footer-link"
+                  onClick={(e) => onAnchorClick(e, sectionId)}
+                >
+                  {link.label}
+                </a>
+              );
+            }
+            return (
               <Link
                 key={link.href}
                 href={link.href}
-                prefetch={!link.href.startsWith("/#")}
+                prefetch
                 className="yd-public-site-footer-link"
               >
                 {link.label}
               </Link>
-            )
-          )}
+            );
+          })}
         </nav>
       </div>
     </footer>

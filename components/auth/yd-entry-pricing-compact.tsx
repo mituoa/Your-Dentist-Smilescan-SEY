@@ -40,8 +40,7 @@ export function YdEntryPricingCompact({
 
   return (
     <section
-      id="pricing"
-      className="yd-entry-pricing-compact scroll-mt-[5.5rem]"
+      className="yd-entry-pricing-compact"
       aria-labelledby="yd-entry-pricing-title"
     >
       <p id="yd-entry-pricing-title" className="yd-entry-pricing-label">
