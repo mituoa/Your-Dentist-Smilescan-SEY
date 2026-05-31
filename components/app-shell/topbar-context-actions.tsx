@@ -30,13 +30,30 @@ function resolveVariant(pathname: string, role: "doctor" | "team"): ActionVarian
   return "none";
 }
 
-function NeuerFallLink({ pathname }: { pathname: string }) {
+function actionClasses(variant: "toolbar" | "dashboard", kind: "primary" | "secondary") {
+  if (variant === "dashboard") {
+    return kind === "primary"
+      ? "yd-dash-header-premium__cta yd-dash-header-premium__cta--primary inline-flex items-center gap-2"
+      : "yd-dash-header-premium__cta yd-dash-header-premium__cta--secondary inline-flex items-center gap-2";
+  }
+  return kind === "primary"
+    ? "yd-workspace-toolbar__cta yd-workspace-toolbar__cta--primary inline-flex items-center gap-2"
+    : "yd-workspace-toolbar__cta yd-workspace-toolbar__cta--secondary inline-flex items-center gap-2";
+}
+
+function NeuerFallLink({
+  pathname,
+  variant = "toolbar",
+}: {
+  pathname: string;
+  variant?: "toolbar" | "dashboard";
+}) {
   const from = createCaseFromQuery(pathname);
   return (
     <Link
       href={`/create-case?from=${from}`}
       title="Neuer Fall"
-      className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--primary inline-flex items-center gap-2"
+      className={actionClasses(variant, "primary")}
     >
       <Plus className="h-4 w-4 shrink-0" strokeWidth={2} />
       <span>Neuer Fall</span>
@@ -46,25 +63,34 @@ function NeuerFallLink({ pathname }: { pathname: string }) {
 
 type TopbarContextActionsProps = {
   role: "doctor" | "team";
+  variant?: "toolbar" | "dashboard";
 };
 
-/** Globale Schnellaktionen — Workspace-Toolbar, nicht Dashboard-Inhalt. */
-export function TopbarContextActions({ role }: TopbarContextActionsProps) {
+/** Globale Schnellaktionen — Workspace-Toolbar oder integrierte Dashboard-Headline. */
+export function TopbarContextActions({ role, variant = "toolbar" }: TopbarContextActionsProps) {
   const pathname = usePathname() || "";
-  const variant = resolveVariant(pathname, role);
+  const actionVariant = resolveVariant(pathname, role);
 
-  if (variant === "none") return null;
+  if (actionVariant === "none") return null;
 
   return (
-    <div className="flex shrink-0 items-center gap-2">
-      {(variant === "both" || variant === "newTask") && (
+    <div
+      className={
+        variant === "dashboard"
+          ? "yd-dash-header-premium__cta-group flex shrink-0 items-center gap-2"
+          : "flex shrink-0 items-center gap-2"
+      }
+    >
+      {(actionVariant === "both" || actionVariant === "newTask") && (
         <NewTaskModalTrigger
-          className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--secondary inline-flex items-center gap-2"
+          className={actionClasses(variant, "secondary")}
           label="Neue Aufgabe"
           showIcon
         />
       )}
-      {(variant === "both" || variant === "newCase") && <NeuerFallLink pathname={pathname} />}
+      {(actionVariant === "both" || actionVariant === "newCase") && (
+        <NeuerFallLink pathname={pathname} variant={variant} />
+      )}
     </div>
   );
 }

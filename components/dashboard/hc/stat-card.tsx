@@ -67,7 +67,7 @@ export function HcStatCard({
   const cardBody = (
     <div
       className={cn(
-        "yd-dash-surface yd-dash-kpi-card flex h-full min-w-0 flex-col justify-between p-5 md:p-6",
+        "yd-dash-surface yd-dash-kpi-card flex h-full min-w-0 flex-col justify-between p-5 md:px-6 md:py-[1.375rem]",
         href && "yd-dash-kpi-card--linked"
       )}
     >
@@ -78,8 +78,8 @@ export function HcStatCard({
         >
           {title}
         </p>
-        <span className="yd-dash-kpi-card__icon flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
-          <Icon className="h-[16px] w-[16px]" strokeWidth={1.6} />
+        <span className="yd-dash-kpi-card__icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full md:h-[2.625rem] md:w-[2.625rem]">
+          <Icon className="h-[17px] w-[17px] md:h-[18px] md:w-[18px]" strokeWidth={1.75} />
         </span>
       </div>
       <div className="mt-auto pt-5">

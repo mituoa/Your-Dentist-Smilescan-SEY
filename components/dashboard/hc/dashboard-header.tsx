@@ -1,20 +1,50 @@
+import { DashboardHeaderControls } from "./dashboard-header-controls";
+import type { ThemePreference } from "@/lib/theme";
+
 type DashboardHeaderProps = {
   greeting: string;
   displayName: string;
   subtitle: string;
+  email: string;
+  workspaceName: string;
+  role: "doctor" | "team";
+  initialTheme: ThemePreference;
+  avatarUrl?: string | null;
+  inboxCount?: number;
 };
 
-/** Praxis-Begrüßung — Aktionen/Suche leben in der globalen Workspace-Toolbar. */
-export function DashboardHeader({ greeting, displayName, subtitle }: DashboardHeaderProps) {
+/** Integrierte Praxis-Headline — Begrüßung links, Suche & Aktionen rechts (Referenz-Layout). */
+export function DashboardHeader({
+  greeting,
+  displayName,
+  subtitle,
+  email,
+  workspaceName,
+  role,
+  initialTheme,
+  avatarUrl,
+  inboxCount,
+}: DashboardHeaderProps) {
   return (
-    <header className="yd-dash-header-axis w-full min-w-0 max-w-full">
-      <p className="yd-dash-meta mb-2.5 uppercase tracking-[0.06em]">Praxisüberblick</p>
-      <h1 className="yd-dash-title text-[1.4375rem] md:text-[1.8125rem]">
-        {greeting}, {displayName}
-      </h1>
-      <p className="yd-dash-subtitle mt-3 max-w-xl text-[13px] font-medium md:mt-3.5 md:text-[14px]">
-        {subtitle}
-      </p>
+    <header className="yd-dash-header-premium w-full min-w-0 max-w-full">
+      <div className="yd-dash-header-premium__grid">
+        <div className="yd-dash-header-premium__identity">
+          <h1 className="yd-dash-header-premium__title">
+            {greeting}, {displayName}
+          </h1>
+          <p className="yd-dash-header-premium__subtitle">{subtitle}</p>
+        </div>
+
+        <DashboardHeaderControls
+          email={email}
+          workspaceName={workspaceName}
+          role={role}
+          initialTheme={initialTheme}
+          avatarUrl={avatarUrl}
+          displayName={displayName}
+          inboxCount={inboxCount}
+        />
+      </div>
     </header>
   );
 }

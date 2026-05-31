@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 import {
   DashboardAmbientCharts,
@@ -30,6 +31,7 @@ import {
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
 import { YD } from "@/lib/design/yd-design-tokens";
+import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +62,10 @@ export default async function DashboardPage() {
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "Team";
   const doctorLabel = cockpitDoctorLabel(displayName);
+  const cookieStore = await cookies();
+  const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE_NAME)?.value);
+  // @ts-expect-error - workspaces is joined
+  const workspaceName = workspace.workspaces?.name || "Praxis";
 
   const [unseenRes, totalRes, tasksRes, weeklyRes, previewRes, priorityRes] =
     await Promise.all([
@@ -127,6 +133,12 @@ export default async function DashboardPage() {
             greeting={greeting}
             displayName={doctorLabel}
             subtitle={subtitle}
+            email={user.email || ""}
+            workspaceName={workspaceName}
+            role="doctor"
+            initialTheme={theme}
+            avatarUrl={profileData?.photo_url ?? null}
+            inboxCount={unseenCount && unseenCount > 0 ? unseenCount : undefined}
           />
         </DashboardAmbientHeader>
 
@@ -141,7 +153,7 @@ export default async function DashboardPage() {
         ) : null}
 
         <DashboardAmbientKpis>
-          <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-4">
             <div className="flex min-w-0">
               <HcStatCard
                 href="/inbox"

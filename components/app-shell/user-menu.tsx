@@ -8,6 +8,7 @@ interface UserMenuProps {
   initialTheme: ThemePreference;
   avatarUrl?: string | null;
   displayName?: string | null;
+  compact?: boolean;
 }
 
 export function UserMenu({
@@ -17,6 +18,7 @@ export function UserMenu({
   initialTheme,
   avatarUrl,
   displayName,
+  compact = false,
 }: UserMenuProps) {
   const fallbackBase = (displayName || workspaceName || email).trim();
   const initials = fallbackBase
@@ -25,6 +27,32 @@ export function UserMenu({
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("") || "U";
+
+  const avatar = avatarUrl ? (
+    <img
+      src={avatarUrl}
+      alt={displayName || workspaceName || "Profilbild"}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <div
+      className={
+        compact
+          ? "yd-dash-header-premium__avatar-fallback"
+          : "flex h-full w-full items-center justify-center bg-slate-100 text-xs font-semibold tracking-wide text-slate-700"
+      }
+    >
+      {initials}
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <div className="yd-dash-header-premium__avatar" title={displayName || workspaceName}>
+        {avatar}
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-w-0 items-center gap-2 md:gap-3">
@@ -38,17 +66,7 @@ export function UserMenu({
         </div>
       </div>
       <div className="h-10 w-10 overflow-hidden rounded-full border border-white/70 bg-white/80 shadow-[0px_6px_14px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/60">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={displayName || workspaceName || "Profilbild"}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-100 text-xs font-semibold tracking-wide text-slate-700">
-            {initials}
-          </div>
-        )}
+        {avatar}
       </div>
     </div>
   );

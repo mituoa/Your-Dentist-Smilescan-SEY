@@ -35,6 +35,10 @@ export function WorkspaceToolbar({
   const pathname = usePathname() || "";
   const showSearch = resolveWorkspaceSearchVisible(pathname);
 
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+    return null;
+  }
+
   return (
     <header className="yd-workspace-toolbar hidden shrink-0 md:block">
       <div className="yd-workspace-toolbar__shell">

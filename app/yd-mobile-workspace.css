@@ -192,7 +192,7 @@
 
   .yd-dash-mobile-kpi {
     display: flex;
-    min-height: 4.5rem;
+    min-height: 4.75rem;
     min-width: 0;
     align-items: center;
     gap: 0.6875rem;
@@ -219,15 +219,16 @@
 
   .yd-dash-mobile-kpi__icon {
     display: flex;
-    height: 2.25rem;
-    width: 2.25rem;
+    height: 2.375rem;
+    width: 2.375rem;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    color: #2f80ed;
-    background: rgba(47, 128, 237, 0.08);
-    box-shadow: none;
+    color: #1a4f9c;
+    background: rgba(26, 79, 156, 0.1);
+    border: 1px solid rgba(26, 79, 156, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
 
   .yd-dash-mobile-kpi__title {
