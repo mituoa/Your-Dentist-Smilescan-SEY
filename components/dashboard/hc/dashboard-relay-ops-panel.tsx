@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { Repeat, UserRound } from "lucide-react";
+import { ClipboardList, Repeat, UserRound } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
 import { DashboardPanelChrome } from "@/components/dashboard/hc/dashboard-panel-chrome";
-import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
 import { RECURRENCE_LABELS } from "@/lib/tasks/recurrence";
 import type { DashboardRoutineRow, OpenTaskRow } from "@/lib/queries/dashboard";
 import { YD } from "@/lib/design/yd-design-tokens";
@@ -35,26 +34,35 @@ export function DashboardRelayOpsPanel({ tasks, routines }: DashboardRelayOpsPan
     tasks?.filter((t) => t.recipient_type === "specific_person").slice(0, 3) ?? [];
 
   return (
-    <HcCard tone="primary" className="yd-dash-panel yd-dash-panel--primary flex min-h-0 flex-col p-0 md:min-h-[280px]">
+    <HcCard tone="primary" className="yd-dash-panel yd-dash-panel--primary flex min-h-[320px] flex-col p-0">
       <DashboardPanelChrome
-        title={WORKSPACE_COPY.tasks.title}
+        title="Relay · Aufgaben &amp; Routinen"
+        hint="Offene Schritte, Übergaben, wiederkehrende Abläufe"
         action={
           <Link
             href="/my-tasks"
-            className="shrink-0 text-[12px] font-semibold no-underline"
+            className="shrink-0 text-[12px] font-medium no-underline"
             style={{ color: YD.accent.core }}
           >
-            {WORKSPACE_COPY.command.open}
+            Alle
           </Link>
         }
       />
 
       <div className="flex flex-col gap-0 divide-y" style={{ borderColor: "rgba(180,198,218,0.22)" }}>
         <section className="px-5 py-4 md:px-6">
+          <p className="yd-dash-meta mb-2.5 flex items-center gap-1.5 normal-case tracking-normal">
+            <ClipboardList className="h-3.5 w-3.5" strokeWidth={1.65} style={{ color: YD.text.faint }} />
+            Offene Aufgaben
+          </p>
           {visibleTasks === null ? (
-            <p className="yd-workspace-quiet">{WORKSPACE_COPY.loadGap}</p>
+            <p className="text-[13px]" style={{ color: YD.text.secondary }}>
+              Momentan nicht verfügbar.
+            </p>
           ) : visibleTasks.length === 0 ? (
-            <p className="yd-workspace-quiet">{WORKSPACE_COPY.tasks.empty}</p>
+            <p className="text-[13px]" style={{ color: YD.text.secondary }}>
+              Keine offenen Aufgaben — guter Stand im Team.
+            </p>
           ) : (
             <ul className="space-y-2">
               {visibleTasks.map((task) => (
@@ -66,11 +74,15 @@ export function DashboardRelayOpsPanel({ tasks, routines }: DashboardRelayOpsPan
                     <p className="text-[13px] font-medium leading-snug" style={{ color: YD.text.primary }}>
                       {taskLabel(task)}
                     </p>
-                    {task.due_date ? (
-                      <p className="mt-0.5 text-[11px] tabular-nums" style={{ color: YD.text.faint }}>
-                        {formatDue(task.due_date)}
-                      </p>
-                    ) : null}
+                    <p className="mt-0.5 flex flex-wrap gap-x-2 text-[11px]" style={{ color: YD.text.faint }}>
+                      {task.priority === "important" ? (
+                        <span style={{ color: YD.status.urgent.text }}>Priorität</span>
+                      ) : null}
+                      {task.due_date ? <span>Fällig {formatDue(task.due_date)}</span> : null}
+                      {task.recurrence_type && task.recurrence_type !== "once" ? (
+                        <span>Routine</span>
+                      ) : null}
+                    </p>
                   </Link>
                 </li>
               ))}
@@ -80,7 +92,7 @@ export function DashboardRelayOpsPanel({ tasks, routines }: DashboardRelayOpsPan
 
         {handoffs.length > 0 ? (
           <section className="px-5 py-4 md:px-6">
-            <p className="yd-workspace-section-label mb-2 flex items-center gap-1.5">
+            <p className="yd-dash-meta mb-2.5 flex items-center gap-1.5 normal-case tracking-normal">
               <UserRound className="h-3.5 w-3.5" strokeWidth={1.65} />
               Übergaben
             </p>
@@ -101,14 +113,18 @@ export function DashboardRelayOpsPanel({ tasks, routines }: DashboardRelayOpsPan
         ) : null}
 
         <section className="px-5 py-4 md:px-6">
-          <p className="yd-workspace-section-label mb-2 flex items-center gap-1.5">
+          <p className="yd-dash-meta mb-2.5 flex items-center gap-1.5 normal-case tracking-normal">
             <Repeat className="h-3.5 w-3.5" strokeWidth={1.65} />
-            Routinen
+            Wiederkehrende Routinen
           </p>
           {visibleRoutines === null ? (
-            <p className="yd-workspace-quiet">{WORKSPACE_COPY.loadGap}</p>
+            <p className="text-[13px]" style={{ color: YD.text.secondary }}>
+              Routinen nicht geladen.
+            </p>
           ) : visibleRoutines.length === 0 ? (
-            <p className="yd-workspace-quiet">{WORKSPACE_COPY.tasks.routinesEmpty}</p>
+            <p className="text-[13px]" style={{ color: YD.text.secondary }}>
+              Noch keine aktiven Routinen — in Relay anlegbar.
+            </p>
           ) : (
             <ul className="space-y-2">
               {visibleRoutines.map((r) => (
@@ -123,6 +139,7 @@ export function DashboardRelayOpsPanel({ tasks, routines }: DashboardRelayOpsPan
                     <p className="mt-0.5 text-[11px]" style={{ color: YD.text.faint }}>
                       {RECURRENCE_LABELS[r.recurrence_type as keyof typeof RECURRENCE_LABELS] ??
                         r.recurrence_type}
+                      {r.remind_at ? ` · Erinnerung ${formatDue(r.remind_at)}` : null}
                     </p>
                   </Link>
                 </li>

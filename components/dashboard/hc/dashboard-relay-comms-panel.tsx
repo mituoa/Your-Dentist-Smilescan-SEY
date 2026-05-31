@@ -3,7 +3,6 @@ import { MessagesSquare, Users } from "lucide-react";
 
 import { HcCard } from "@/components/design/hc-card";
 import { DashboardPanelChrome } from "@/components/dashboard/hc/dashboard-panel-chrome";
-import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import { YD } from "@/lib/design/yd-design-tokens";
 
@@ -23,7 +22,7 @@ function conversationTitle(c: RelayConversationRow): string {
     const local = c.other_party_email.split("@")[0];
     return local ? local.replace(/\./g, " ") : c.other_party_email;
   }
-  return "Direkt";
+  return "Direktnachricht";
 }
 
 type DashboardRelayCommsPanelProps = {
@@ -38,11 +37,12 @@ export function DashboardRelayCommsPanel({
   const items = conversations?.slice(0, 5) ?? [];
 
   return (
-    <HcCard tone="default" className="yd-dash-panel flex min-h-0 flex-col p-0 md:min-h-[280px]">
+    <HcCard tone="default" className="yd-dash-panel flex min-h-[300px] flex-col p-0">
       <DashboardPanelChrome
-        title="Team"
+        title="Interne Kommunikation"
+        hint="Relay · Direkt, Gruppen, fallbezogen"
         action={
-          <Link href="/relay" className="text-[12px] font-semibold no-underline" style={{ color: YD.accent.core }}>
+          <Link href="/relay" className="text-[12px] font-medium no-underline" style={{ color: YD.accent.core }}>
             Relay
           </Link>
         }
@@ -50,9 +50,13 @@ export function DashboardRelayCommsPanel({
 
       <div className="flex flex-1 flex-col px-5 py-4 md:px-6">
         {loadFailed ? (
-          <p className="yd-workspace-quiet">{WORKSPACE_COPY.loadGap}</p>
+          <p className="text-[13px]" style={{ color: YD.text.secondary }}>
+            Kommunikation momentan nicht verfügbar.
+          </p>
         ) : items.length === 0 ? (
-          <p className="yd-workspace-quiet">{WORKSPACE_COPY.relay.quiet}</p>
+          <p className="text-[13px]" style={{ color: YD.text.secondary }}>
+            Noch keine Konversationen — Team startet in Relay.
+          </p>
         ) : (
           <ul className="space-y-2.5">
             {items.map((c) => (
@@ -82,7 +86,7 @@ export function DashboardRelayCommsPanel({
                       </p>
                       {c.unread_count > 0 ? (
                         <span
-                          className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+                          className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
                           style={{
                             background: YD.status.active.bg,
                             color: YD.status.active.text,
@@ -92,8 +96,11 @@ export function DashboardRelayCommsPanel({
                         </span>
                       ) : null}
                     </div>
+                    <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug" style={{ color: YD.text.secondary }}>
+                      {c.last_message_preview || "Noch keine Nachricht"}
+                    </p>
                     {c.last_message_at ? (
-                      <p className="mt-0.5 text-[10px] tabular-nums" style={{ color: YD.text.faint }}>
+                      <p className="mt-0.5 text-[10px]" style={{ color: YD.text.faint }}>
                         {formatRelative(c.last_message_at)}
                       </p>
                     ) : null}

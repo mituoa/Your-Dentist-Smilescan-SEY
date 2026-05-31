@@ -10,8 +10,6 @@ type DashboardPracticeFlowProps = {
   routineCount: number;
   relayUnread: number;
   reminderCount: number;
-  /** Sekundäre Statuszeile — kleinere Karten. */
-  compact?: boolean;
 };
 
 const FLOW_ICONS = {
@@ -28,7 +26,6 @@ export function DashboardPracticeFlow({
   routineCount,
   relayUnread,
   reminderCount,
-  compact = false,
 }: DashboardPracticeFlowProps) {
   const nodes = [
     {
@@ -38,8 +35,8 @@ export function DashboardPracticeFlow({
         unseenCount === null
           ? "—"
           : unseenCount > 0
-            ? `${unseenCount} neu`
-            : "0",
+            ? `${unseenCount} zu sichten`
+            : "auf Stand",
       href: "/inbox",
       count: unseenCount,
       urgent: unseenCount !== null && unseenCount > 0,
@@ -47,7 +44,7 @@ export function DashboardPracticeFlow({
     {
       key: "tasks",
       label: "Aufgaben",
-      detail: openTaskCount > 0 ? `${openTaskCount} offen` : "0",
+      detail: openTaskCount > 0 ? `${openTaskCount} offen` : "keine offenen",
       href: "/my-tasks",
       count: openTaskCount,
       urgent: openTaskCount > 0,
@@ -55,7 +52,10 @@ export function DashboardPracticeFlow({
     {
       key: "relay",
       label: "Relay",
-      detail: relayUnread > 0 ? `${relayUnread} neu` : "0",
+      detail:
+        relayUnread > 0
+          ? `${relayUnread} ungelesen`
+          : "Kommunikation ruhig",
       href: "/relay",
       count: relayUnread > 0 ? relayUnread : undefined,
       urgent: relayUnread > 0,
@@ -63,7 +63,10 @@ export function DashboardPracticeFlow({
     {
       key: "routines",
       label: "Routinen",
-      detail: routineCount > 0 ? `${routineCount} aktiv` : "0",
+      detail:
+        routineCount > 0
+          ? `${routineCount} aktiv`
+          : "Routinen planbar",
       href: "/my-tasks",
       count: routineCount > 0 ? routineCount : undefined,
       urgent: false,
@@ -71,7 +74,10 @@ export function DashboardPracticeFlow({
     {
       key: "handoff",
       label: "Erinnerungen",
-      detail: reminderCount > 0 ? `${reminderCount}` : "0",
+      detail:
+        reminderCount > 0
+          ? `${reminderCount} anstehend`
+          : "strukturiert",
       href: "/my-tasks",
       count: reminderCount > 0 ? reminderCount : undefined,
       urgent: reminderCount > 0,
@@ -79,16 +85,16 @@ export function DashboardPracticeFlow({
   ] as const;
 
   return (
-    <div
-      className={compact ? "yd-dash-zone yd-dash-zone--flow yd-dash-zone--flow-compact" : "yd-dash-zone yd-dash-zone--flow"}
-    >
-      <div className="yd-dash-flow-rail mb-3 hidden flex-wrap items-end justify-between gap-2 px-0.5 md:flex">
+    <div className="yd-dash-zone yd-dash-zone--flow">
+      <div className="yd-dash-flow-rail mb-3 flex flex-wrap items-end justify-between gap-2 px-0.5">
         <div>
           <p className="yd-dash-meta mb-0.5 uppercase">Heute</p>
-          <p className="yd-dash-section">Heute</p>
+          <p className="yd-dash-section">Praxisfluss — Eingang bis Übergabe</p>
         </div>
+        <p className="yd-dash-meta max-w-[16rem] normal-case tracking-normal">
+          Fünf Zugänge · ein Überblick
+        </p>
       </div>
-      <p className="yd-dash-flow-mobile-label mb-2.5 px-0.5 md:hidden">Heute</p>
       <div className="yd-dash-ops-snap yd-dash-ops-snap--structured" role="list">
         {nodes.map((node) => {
           const Icon = FLOW_ICONS[node.key];
@@ -96,11 +102,7 @@ export function DashboardPracticeFlow({
             <div key={node.key} role="listitem" className="min-w-0">
             <HcCard
               tone="quiet"
-              className={
-                compact
-                  ? "yd-dash-flow-node yd-dash-flow-node--compact min-h-[88px] p-3"
-                  : "yd-dash-flow-node min-h-[108px] p-4"
-              }
+              className="yd-dash-flow-node min-h-[108px] p-4"
             >
               <Link href={node.href} className="flex h-full flex-col gap-2 no-underline">
                 <div className="flex items-start justify-between gap-2">
