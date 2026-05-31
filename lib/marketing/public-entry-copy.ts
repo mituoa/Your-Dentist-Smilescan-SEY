@@ -52,7 +52,7 @@ export const PUBLIC_ENTRY_COPY = {
   /** Legacy / optionale Deep-Sections (nicht auf Startseite) */
   ecosystem: {
     eyebrow: "Plattform",
-    title: "Eingang, Kommunikation, Übergaben",
-    lead: "Ein Workspace für den Praxisalltag — Command AI leise im Hintergrund.",
+    title: "Eingang, Team, Übergaben",
+    lead: "Relay und Aufgaben am Fall — statt WhatsApp, Telefon und verstreuten Notizen.",
   },
 } as const;

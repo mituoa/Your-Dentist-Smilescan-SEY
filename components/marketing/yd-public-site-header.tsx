@@ -103,13 +103,13 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
                 Zum Dashboard
               </Link>
             ) : null}
-            <Link
-              prefetch
-              href={buildRegisterEntryHref()}
+            <button
+              type="button"
               className="yd-public-site-cta-register hidden lg:inline-flex"
+              onClick={() => go(PUBLIC_SITE_SECTIONS.demo)}
             >
               {PUBLIC_SITE_HERO.primaryCta}
-            </Link>
+            </button>
             <Link prefetch href="/login" className="yd-public-site-cta-login hidden lg:inline-flex">
               Anmelden
             </Link>
@@ -158,13 +158,13 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
                 {item.label}
               </button>
             ))}
-            <Link
-              href={buildRegisterEntryHref()}
+            <button
+              type="button"
               className="yd-public-site-mobile-link"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => go(PUBLIC_SITE_SECTIONS.demo)}
             >
               {PUBLIC_SITE_HERO.primaryCta}
-            </Link>
+            </button>
             {dashboardHref ? (
               <Link
                 prefetch

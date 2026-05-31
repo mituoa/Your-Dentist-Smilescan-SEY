@@ -12,6 +12,7 @@ import {
   YdPublicSiteFuerWen,
   YdPublicSiteHero,
   YdPublicSiteNutzen,
+  YdPublicSiteProblem,
 } from "@/components/marketing/yd-public-site-sections";
 
 type YdHomeDesktopProps = {
@@ -33,6 +34,8 @@ export function YdHomeDesktop({
       <YdPublicSiteHeader dashboardHref={dashboardHref} />
 
       <YdPublicSiteHero />
+
+      <YdPublicSiteProblem />
 
       <YdPracticeDemo />
 

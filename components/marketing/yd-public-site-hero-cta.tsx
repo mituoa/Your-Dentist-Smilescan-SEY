@@ -14,20 +14,20 @@ type YdPublicSiteHeroCtaProps = {
 export function YdPublicSiteHeroCta({ showSignIn = true, registerPlan }: YdPublicSiteHeroCtaProps) {
   return (
     <div className="yd-clinical-hero-cta-stack yd-public-site-hero-cta-stack">
+      <button
+        type="button"
+        className="yd-clinical-cta-primary yd-public-site-cta-primary"
+        onClick={() => scrollToPublicSection(PUBLIC_SITE_SECTIONS.demo)}
+      >
+        {PUBLIC_SITE_HERO.primaryCta}
+      </button>
       <Link
         prefetch
         href={buildRegisterEntryHref("", "", registerPlan ?? "yearly")}
-        className="yd-clinical-cta-primary yd-public-site-cta-primary"
-      >
-        {PUBLIC_SITE_HERO.primaryCta}
-      </Link>
-      <button
-        type="button"
         className="yd-clinical-cta-secondary yd-public-site-cta-secondary"
-        onClick={() => scrollToPublicSection(PUBLIC_SITE_SECTIONS.demo)}
       >
         {PUBLIC_SITE_HERO.secondaryCta}
-      </button>
+      </Link>
       {showSignIn ? (
         <p className="yd-clinical-cta-signin yd-public-site-cta-signin">
           {PUBLIC_SITE_HERO.signInPrefix}{" "}

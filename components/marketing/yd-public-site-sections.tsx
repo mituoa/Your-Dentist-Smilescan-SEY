@@ -8,7 +8,6 @@ import {
   Building2,
   Users,
   ClipboardList,
-  Headphones,
 } from "lucide-react";
 
 import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
@@ -20,6 +19,7 @@ import {
   PUBLIC_SITE_FUER_WEN,
   PUBLIC_SITE_HERO,
   PUBLIC_SITE_NUTZEN,
+  PUBLIC_SITE_PROBLEM,
   PUBLIC_SITE_SECTIONS,
 } from "@/lib/marketing/public-site-ia";
 
@@ -30,7 +30,7 @@ const NUTZEN_ICONS = {
   command: Sparkles,
 } as const;
 
-const FUER_WEN_ICONS = [Building2, Users, ClipboardList, Headphones] as const;
+const FUER_WEN_ICONS = [Building2, Users, ClipboardList] as const;
 
 /** Mobile start — kurzer Hero ohne Desktop-Stage, Grid oder Produkt-Mockup. */
 export function YdPublicSiteHeroMobile() {
@@ -42,13 +42,10 @@ export function YdPublicSiteHeroMobile() {
     >
       <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
       <h1 id="yd-public-hero-mobile-title" className="yd-public-site-hero-mobile-title">
-        {PUBLIC_SITE_HERO.title}
+        {PUBLIC_SITE_HERO.titleMobile}
       </h1>
-      <ul className="yd-public-site-hero-points yd-public-site-hero-points--mobile">
-        {PUBLIC_SITE_HERO.bullets.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
+      <p className="yd-public-site-hero-mobile-lead">{PUBLIC_SITE_HERO.lead}</p>
+      <p className="yd-clinical-whisper yd-public-site-hero-whisper">{PUBLIC_SITE_HERO.whisper}</p>
     </section>
   );
 }
@@ -57,29 +54,67 @@ type YdPublicSiteHeroProps = {
   showSignIn?: boolean;
 };
 
-/** Desktop Startseite — kompakt, Mockup zeigt den Ablauf in fünf Momenten. */
+/** Desktop — emotional orchestrated hero, glass stage, abstract preview. */
 export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
   return (
     <section
-      className="yd-public-site-hero yd-public-site-hero--landing yd-public-os-awaken-field"
+      className="yd-public-site-hero yd-clinical-hero yd-clinical-hero--premium yd-clinical-hero--orchestrated yd-public-os-awaken-field"
       style={{ ["--yd-public-field-i" as string]: "1" }}
       aria-labelledby="yd-public-hero-title"
     >
-      <div className="yd-public-site-hero-layout">
-        <div className="yd-public-site-hero-inner">
-          <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
-          <h1 id="yd-public-hero-title" className="yd-public-site-hero-headline">
-            {PUBLIC_SITE_HERO.title}
-          </h1>
-          {PUBLIC_SITE_HERO.lead ? (
-            <p className="yd-public-site-hero-lead">{PUBLIC_SITE_HERO.lead}</p>
-          ) : null}
-          <YdPublicSiteHeroCta showSignIn={showSignIn} />
+      <div className="yd-clinical-hero-lights" aria-hidden />
+      <div className="yd-clinical-hero-vignette" aria-hidden />
+      <div className="yd-clinical-hero-stage">
+        <div className="yd-clinical-hero-grid">
+          <div className="yd-clinical-hero-copy">
+            <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
+            <h1
+              id="yd-public-hero-title"
+              className="yd-clinical-display yd-clinical-display--hero yd-clinical-display--digital"
+            >
+              <span className="yd-clinical-display-line">{PUBLIC_SITE_HERO.title}</span>
+              <span className="yd-clinical-display-line yd-clinical-display-line--accent">
+                {PUBLIC_SITE_HERO.titleLine2}
+              </span>
+              <span className="yd-clinical-display-line yd-clinical-display-line--accent">
+                {PUBLIC_SITE_HERO.titleLine3}
+              </span>
+            </h1>
+            <p className="yd-clinical-lead">{PUBLIC_SITE_HERO.lead}</p>
+            <YdPublicSiteHeroCta showSignIn={showSignIn} />
+          </div>
+          <div className="yd-clinical-hero-world">
+            <YdPracticeWorld />
+          </div>
         </div>
-        <aside className="yd-public-site-hero-visual">
-          <YdPracticeWorld />
-        </aside>
       </div>
+    </section>
+  );
+}
+
+/** Schmerzpunkte — kurz, ohne Sales-Dichte */
+export function YdPublicSiteProblem() {
+  return (
+    <section
+      id={PUBLIC_SITE_SECTIONS.problem}
+      className="yd-public-site-section yd-public-site-section--problem yd-public-os-awaken-field yd-public-site-scroll-anchor"
+      style={{ ["--yd-public-field-i" as string]: "1.5" }}
+      aria-labelledby="yd-public-problem-title"
+    >
+      <header className="yd-public-site-section-head yd-public-site-section-head--tight">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_PROBLEM.eyebrow}</p>
+        <h2 id="yd-public-problem-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+          {PUBLIC_SITE_PROBLEM.title}
+        </h2>
+      </header>
+      <ul className="yd-public-site-problem-grid">
+        {PUBLIC_SITE_PROBLEM.pains.map((pain) => (
+          <li key={pain.label} className="yd-public-site-problem-item">
+            <p className="yd-public-site-problem-label">{pain.label}</p>
+            <p className="yd-public-site-problem-detail">{pain.detail}</p>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

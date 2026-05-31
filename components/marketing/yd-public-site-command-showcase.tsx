@@ -25,6 +25,11 @@ export function YdPublicSiteCommandShowcase() {
           {PUBLIC_SITE_COMMAND.title}
         </h2>
         <p className="yd-public-site-section-lead">{PUBLIC_SITE_COMMAND.lead}</p>
+        <ul className="yd-public-command-examples" aria-label="Beispiele für Command AI">
+          {PUBLIC_SITE_COMMAND.examples.map((example) => (
+            <li key={example}>{example}</li>
+          ))}
+        </ul>
       </header>
 
       <div className="yd-public-command-stage">
@@ -60,8 +65,7 @@ export function YdPublicSiteCommandShowcase() {
         </ul>
 
         <p className="yd-public-command-foot" role="note">
-          Command AI arbeitet leise im Hintergrund — Sie prüfen und geben frei. Kein
-          automatischer Versand an Patient:innen.
+          Sie prüfen und geben frei — nichts geht ohne Freigabe raus.
         </p>
       </div>
     </section>

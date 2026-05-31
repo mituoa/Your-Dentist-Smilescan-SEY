@@ -1,32 +1,57 @@
-const ESSENCE_MOMENTS = [
-  { id: "patient", text: "Patient sendet Fotos und Anliegen" },
-  { id: "intake", text: "Praxis sieht strukturierten Eingang" },
-  { id: "relay", text: "Relay: interne Rückfrage" },
-  { id: "task", text: "Erinnerung / Aufgabe" },
-  { id: "command", text: "Command AI: leiser Hinweis", quiet: true },
-] as const;
+import { PUBLIC_SITE_HERO_PREVIEW } from "@/lib/marketing/public-site-ia";
 
 /**
- * Hero-Produktvisual — fünf Momente, ohne UI-Collage oder Mini-Labels.
+ * Abstrakte Produktvorschau — Eingang + Command AI als WOW-Moment.
+ * Keine Patientendaten auf der öffentlichen Landing.
  */
 export function YdPracticeWorld() {
+  const preview = PUBLIC_SITE_HERO_PREVIEW;
+
   return (
     <div
-      className="yd-practice-world yd-practice-world--essence"
+      className="yd-practice-world yd-practice-world--premium yd-practice-world--orchestrated yd-practice-world--abstract yd-practice-world--pipeline"
       role="img"
-      aria-label="Ablauf: Patienteneingang, strukturierte Sichtung, Relay, Aufgabe, leise Command AI"
+      aria-label="Produktvorschau: Neue Anfrage strukturiert, Command AI bereitet Antwort vor"
     >
-      <ol className="yd-practice-world-essence-flow">
-        {ESSENCE_MOMENTS.map((moment) => (
-          <li
-            key={moment.id}
-            className={`yd-practice-world-essence-step${"quiet" in moment && moment.quiet ? " yd-practice-world-essence-step--quiet" : ""}`}
-          >
-            <span className="yd-practice-world-essence-marker" aria-hidden />
-            <span className="yd-practice-world-essence-text">{moment.text}</span>
-          </li>
-        ))}
-      </ol>
+      <p className="yd-practice-world-kicker">
+        <span className="yd-practice-world-kicker-dot" aria-hidden />
+        Praxisbereich
+      </p>
+
+      <div className="yd-practice-world-pipeline">
+        <article className="yd-practice-world-pipeline-step">
+          <p className="yd-practice-world-pipeline-title">{preview.intakeTitle}</p>
+          <ul className="yd-practice-world-abstract-flow" aria-label="Bearbeitungsstand">
+            {preview.intakeChecks.map((step) => (
+              <li key={step} className="yd-practice-world-abstract-step">
+                <span className="yd-practice-world-abstract-check" aria-hidden>
+                  ✓
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <div className="yd-practice-world-pipeline-connector" aria-hidden>
+          <span className="yd-practice-world-pipeline-arrow" />
+        </div>
+
+        <article className="yd-practice-world-pipeline-step yd-practice-world-pipeline-step--command">
+          <span className="yd-practice-world-label">{preview.commandLabel}</span>
+          <p className="yd-practice-world-command-phrase">„{preview.commandPhrase}"</p>
+          <ul className="yd-practice-world-abstract-flow" aria-label="Command AI Ergebnis">
+            {preview.commandOutcomes.map((step) => (
+              <li key={step} className="yd-practice-world-abstract-step">
+                <span className="yd-practice-world-abstract-check" aria-hidden>
+                  ✓
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </div>
     </div>
   );
 }
