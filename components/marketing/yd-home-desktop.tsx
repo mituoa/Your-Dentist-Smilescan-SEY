@@ -18,6 +18,7 @@ type YdHomeDesktopProps = {
   initialPlan?: string | null;
   inviteToken?: string;
   prefilledEmail?: string;
+  dashboardHref?: string | null;
 };
 
 /** Öffentliche Landing — editorial, überzeugend, vollständige Produktstory. */
@@ -25,10 +26,11 @@ export function YdHomeDesktop({
   initialPlan,
   inviteToken = "",
   prefilledEmail = "",
+  dashboardHref = null,
 }: YdHomeDesktopProps) {
   return (
     <article className="yd-clinical-page yd-public-site-page yd-clinical-desktop-only">
-      <YdPublicSiteHeader />
+      <YdPublicSiteHeader dashboardHref={dashboardHref} />
 
       <YdPublicSiteHero />
 

@@ -11,12 +11,19 @@ type YdHomePageProps = {
   initialPlan?: string | null;
   inviteToken?: string;
   prefilledEmail?: string;
+  /** Eingeloggt — optionaler Link, kein Auto-Redirect von /. */
+  dashboardHref?: string | null;
 };
 
 /**
  * Öffentliche Landing — Desktop (editorial) und Mobile (eigene IA), getrennte Layouts.
  */
-export function YdHomePage({ initialPlan, inviteToken, prefilledEmail }: YdHomePageProps) {
+export function YdHomePage({
+  initialPlan,
+  inviteToken,
+  prefilledEmail,
+  dashboardHref = null,
+}: YdHomePageProps) {
   const [scroll, setScroll] = useState(false);
 
   useEffect(() => {
@@ -42,11 +49,13 @@ export function YdHomePage({ initialPlan, inviteToken, prefilledEmail }: YdHomeP
         initialPlan={initialPlan}
         inviteToken={inviteToken}
         prefilledEmail={prefilledEmail}
+        dashboardHref={dashboardHref}
       />
       <YdHomeDesktop
         initialPlan={initialPlan}
         inviteToken={inviteToken}
         prefilledEmail={prefilledEmail}
+        dashboardHref={dashboardHref}
       />
     </YdPublicOsEnvironment>
   );

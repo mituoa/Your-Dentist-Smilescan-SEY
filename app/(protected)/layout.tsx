@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 import { YdAwakenBootstrap } from "@/components/ambient/yd-awaken-bootstrap";
 import { YdWorkspaceAwakening } from "@/components/ambient/yd-workspace-awakening";
-import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
+import { isAdminAllowlistUser, requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { buildNavAmbientPreviews } from "@/lib/ambient/build-nav-ambient-previews";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { getOpenTasks } from "@/lib/queries/dashboard";
@@ -34,6 +34,7 @@ export default async function ProtectedLayout({
   const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE_NAME)?.value);
 
   const role = (workspace?.role || "team") as "doctor" | "team";
+  const showAdmin = isAdminAllowlistUser(user);
   // @ts-expect-error - workspaces is joined
   const workspaceName = workspace?.workspaces?.name || "Unbekannt";
 
@@ -135,6 +136,7 @@ export default async function ProtectedLayout({
                   inboxCount={inboxCount}
                   myTasksCount={myTasksCount}
                   myTasksOverdueCount={myTasksOverdueCount}
+                  showAdmin={showAdmin}
                   navAmbient={navAmbient}
                 />
               </MobileSidebarFrame>
@@ -149,7 +151,7 @@ export default async function ProtectedLayout({
                 displayName={profileData?.display_name ?? null}
               />
 
-              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(3rem,env(safe-area-inset-bottom)+2rem)] md:p-5 md:pb-6">
+              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(5.5rem,env(safe-area-inset-bottom)+4.5rem)] md:p-5 md:pb-6">
                 <HcAppCanvas>{children}</HcAppCanvas>
               </main>
             </div>

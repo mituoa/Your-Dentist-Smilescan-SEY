@@ -17,6 +17,7 @@ type YdHomeMobileProps = {
   initialPlan?: string | null;
   inviteToken?: string;
   prefilledEmail?: string;
+  dashboardHref?: string | null;
 };
 
 /**
@@ -27,17 +28,18 @@ export function YdHomeMobile({
   initialPlan,
   inviteToken = "",
   prefilledEmail = "",
+  dashboardHref = null,
 }: YdHomeMobileProps) {
   const selectedPlan = coerceRegisterPlan(initialPlan) as RegisterPlanId;
 
   return (
     <div className="yd-public-site-page yd-public-site-mobile-page yd-clinical-mobile-only">
-      <YdPublicSiteHeader />
+      <YdPublicSiteHeader dashboardHref={dashboardHref} />
 
       <main className="yd-public-site-mobile-main" id="yd-public-mobile-main">
         <YdPublicSiteHeroMobile />
 
-        <YdPublicSiteMobileCtas />
+        <YdPublicSiteMobileCtas dashboardHref={dashboardHref} />
 
         <section
           id="pricing"
@@ -51,13 +53,13 @@ export function YdHomeMobile({
           />
         </section>
 
-        <YdPublicSiteNutzen />
+        <YdPublicSiteDemo />
+
+        <YdPublicSiteNutzen compact />
 
         <YdPublicSiteFuerWen />
 
         <YdPublicSiteEinfuehrung />
-
-        <YdPublicSiteDemo />
       </main>
 
       <YdPublicSiteFooter />

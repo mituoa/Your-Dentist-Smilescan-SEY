@@ -14,23 +14,17 @@ export const PUBLIC_SITE_SECTIONS = {
   demo: "demo",
 } as const;
 
+/** Header-Navigation — scrollt zu Sektionen auf /. */
 export const PUBLIC_SITE_NAV = [
-  { label: "Nutzen", sectionId: PUBLIC_SITE_SECTIONS.nutzen },
-  { label: "Command AI", sectionId: PUBLIC_SITE_SECTIONS.command },
-  { label: "Relay", sectionId: PUBLIC_SITE_SECTIONS.plattform },
-  { label: "Für wen", sectionId: PUBLIC_SITE_SECTIONS.fuerWen },
-  { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
-  { label: "Demo", sectionId: PUBLIC_SITE_SECTIONS.demo },
-] as const;
-
-/** Mobile Landing — kompakte Scroll-IA (ohne Desktop-Only-Sektionen). */
-export const PUBLIC_SITE_NAV_MOBILE = [
   { label: "Nutzen", sectionId: PUBLIC_SITE_SECTIONS.nutzen },
   { label: "Für wen", sectionId: PUBLIC_SITE_SECTIONS.fuerWen },
   { label: "Einführung", sectionId: PUBLIC_SITE_SECTIONS.einfuehrung },
   { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
-  { label: "Demo", sectionId: PUBLIC_SITE_SECTIONS.demo },
+  { label: "Demo buchen", sectionId: PUBLIC_SITE_SECTIONS.demo },
 ] as const;
+
+/** Mobile — gleiche IA, kompakte Seite (ohne Desktop-only Blöcke). */
+export const PUBLIC_SITE_NAV_MOBILE = PUBLIC_SITE_NAV;
 
 export const PUBLIC_SITE_HERO = {
   eyebrow: "Intelligente Praxiskommunikation",

@@ -388,6 +388,57 @@ html:has(.yd-public-site-page) {
   box-shadow: 0 4px 14px rgba(47, 128, 237, 0.12);
 }
 
+.yd-public-site-cta-register,
+.yd-public-site-cta-dashboard {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.4375rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 280ms ease,
+    border-color 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.yd-public-site-cta-register {
+  border: 1px solid rgba(47, 128, 237, 0.35);
+  background: linear-gradient(180deg, rgba(47, 128, 237, 0.92) 0%, rgba(30, 91, 189, 0.95) 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(47, 128, 237, 0.2);
+}
+
+.yd-public-site-cta-dashboard {
+  border: 1px solid rgba(47, 128, 237, 0.22);
+  background: rgba(255, 255, 255, 0.78);
+  color: #1a4f9c;
+}
+
+.yd-public-site-mobile-ctas .yd-public-site-cta-dashboard {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 14px;
+  font-size: 0.875rem;
+}
+
+.yd-public-site-cta-tertiary {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 0;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3d5266;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .yd-public-site-menu-btn {
   display: inline-flex;
   align-items: center;

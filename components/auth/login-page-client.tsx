@@ -81,7 +81,7 @@ export function LoginPageClient({
       if (inviteToken) params.set("invite", inviteToken);
       if (prefilledEmail) params.set("email", prefilledEmail);
       const q = params.toString();
-      window.location.replace(`/pricing${q ? `?${q}` : ""}`);
+      window.location.replace(q ? `/?${q}#pricing` : "/#pricing");
       return;
     }
     if (!signedOut) {

@@ -9,7 +9,6 @@ import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 import {
   PUBLIC_SITE_HERO,
   PUBLIC_SITE_NAV,
-  PUBLIC_SITE_NAV_MOBILE,
   PUBLIC_SITE_SECTIONS,
 } from "@/lib/marketing/public-site-ia";
 import { getPublicSiteScrollRoot, scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
@@ -17,20 +16,13 @@ import { cn } from "@/lib/utils";
 
 type YdPublicSiteHeaderProps = {
   className?: string;
+  /** Session aktiv — kleiner Link, Landing bleibt sichtbar. */
+  dashboardHref?: string | null;
 };
 
-export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
+export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublicSiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isMobileNav, setIsMobileNav] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1023px)");
-    const sync = () => setIsMobileNav(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
 
   useEffect(() => {
     const readScrollTop = () => {
@@ -102,6 +94,22 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
           </nav>
 
           <div className="yd-public-site-header-actions">
+            {dashboardHref ? (
+              <Link
+                prefetch
+                href={dashboardHref}
+                className="yd-public-site-cta-dashboard hidden lg:inline-flex"
+              >
+                Zum Dashboard
+              </Link>
+            ) : null}
+            <Link
+              prefetch
+              href={buildRegisterEntryHref()}
+              className="yd-public-site-cta-register hidden lg:inline-flex"
+            >
+              {PUBLIC_SITE_HERO.primaryCta}
+            </Link>
             <Link prefetch href="/login" className="yd-public-site-cta-login hidden lg:inline-flex">
               Anmelden
             </Link>
@@ -140,7 +148,7 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
         />
         <div className="yd-public-site-mobile-panel">
           <nav className="flex flex-col gap-1 p-4" aria-label="Mobile Navigation">
-            {(isMobileNav ? PUBLIC_SITE_NAV_MOBILE : PUBLIC_SITE_NAV).map((item) => (
+            {PUBLIC_SITE_NAV.map((item) => (
               <button
                 key={item.sectionId}
                 type="button"
@@ -157,6 +165,16 @@ export function YdPublicSiteHeader({ className }: YdPublicSiteHeaderProps) {
             >
               {PUBLIC_SITE_HERO.primaryCta}
             </Link>
+            {dashboardHref ? (
+              <Link
+                prefetch
+                href={dashboardHref}
+                className="yd-public-site-mobile-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                Zum Dashboard
+              </Link>
+            ) : null}
             <Link
               prefetch
               href="/login"

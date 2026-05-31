@@ -32,17 +32,26 @@ function getHeaderOffset(): number {
   return Number.isFinite(parsed) ? parsed : 68;
 }
 
+/** Hash-Aliase: /#preise → pricing */
+export function normalizePublicSectionId(sectionId: string): string {
+  const id = sectionId.replace(/^#/, "").trim();
+  if (id === "preise" || id === "pakete") return "pricing";
+  return id;
+}
+
 export function resolvePublicSectionElement(sectionId: string): HTMLElement | null {
   if (typeof document === "undefined") return null;
+  const normalized = normalizePublicSectionId(sectionId);
   const scope = getPublicSiteScope();
   if (scope === document) {
-    return document.getElementById(sectionId);
+    return document.getElementById(normalized);
   }
-  return scope.querySelector<HTMLElement>(`#${CSS.escape(sectionId)}`);
+  return scope.querySelector<HTMLElement>(`#${CSS.escape(normalized)}`);
 }
 
 export function scrollToPublicSection(sectionId: string, onDone?: () => void): boolean {
-  const el = resolvePublicSectionElement(sectionId);
+  const normalized = normalizePublicSectionId(sectionId);
+  const el = resolvePublicSectionElement(normalized);
   if (!el) return false;
 
   const scrollRoot = getPublicSiteScrollRoot();
@@ -64,8 +73,8 @@ export function scrollToPublicSection(sectionId: string, onDone?: () => void): b
     scrollRoot.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   }
 
-  if (typeof window !== "undefined" && window.location.hash !== `#${sectionId}`) {
-    const url = `${window.location.pathname}${window.location.search}#${sectionId}`;
+  if (typeof window !== "undefined" && window.location.hash !== `#${normalized}`) {
+    const url = `${window.location.pathname}${window.location.search}#${normalized}`;
     window.history.replaceState(null, "", url);
   }
 
@@ -75,9 +84,18 @@ export function scrollToPublicSection(sectionId: string, onDone?: () => void): b
 
 /** Initial load: /#nutzen etc. */
 export function scrollToPublicSectionFromHash(hash?: string): boolean {
-  const id = (hash ?? (typeof window !== "undefined" ? window.location.hash : ""))
+  const raw = (hash ?? (typeof window !== "undefined" ? window.location.hash : ""))
     .replace(/^#/, "")
     .trim();
-  if (!id) return false;
-  return scrollToPublicSection(id);
+  if (!raw) return false;
+  return scrollToPublicSection(normalizePublicSectionId(raw));
+}
+
+/** Von anderer Route: Preise/Demo auf der Landing. */
+export function publicSectionHref(sectionId: string): string {
+  const id = normalizePublicSectionId(sectionId);
+  if (typeof window !== "undefined" && window.location.pathname === "/") {
+    return `#${id}`;
+  }
+  return `/#${id}`;
 }

@@ -40,7 +40,7 @@ function buildPricingHref(params: {
   if (params.invite?.trim()) p.set("invite", params.invite.trim());
   if (params.email?.trim()) p.set("email", params.email.trim());
   const qs = p.toString();
-  return qs ? `/pricing?${qs}` : "/pricing";
+  return qs ? `/?${qs}#pricing` : "/#pricing";
 }
 
 const MAX_REGISTER_QUERY_ERROR_LEN = 512;

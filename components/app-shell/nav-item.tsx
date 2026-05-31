@@ -54,6 +54,8 @@ export function NavItem({
   const Icon = ICON_BY_NAME[iconName] ?? Home;
   const isRelayNav = href === "/relay";
   const isSettingsNav = href === "/settings";
+  const isAdminNav = href === "/admin/registrations";
+  const isProfileNav = href === "/profile";
   const isCreateCaseNav = href === "/create-case";
   const isActive = isRelayNav
     ? pathname === "/relay" ||
@@ -61,10 +63,16 @@ export function NavItem({
       pathname === "/my-tasks" ||
       pathname.startsWith("/my-tasks/")
     : isSettingsNav
-      ? pathname === "/settings" || pathname === "/admin"
-      : isCreateCaseNav
-        ? pathname === "/create-case"
-        : pathname === href || pathname.startsWith(href + "/");
+      ? pathname === "/settings"
+      : isAdminNav
+        ? pathname.startsWith("/admin")
+        : isProfileNav
+          ? pathname === "/profile" ||
+            pathname.startsWith("/profile/") ||
+            pathname === "/profile/editor"
+          : isCreateCaseNav
+            ? pathname === "/create-case"
+            : pathname === href || pathname.startsWith(href + "/");
 
   return (
     <Link

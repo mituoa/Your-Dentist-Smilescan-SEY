@@ -3,9 +3,7 @@
 import { X } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
-import { DesktopCommandNavEntry } from "./desktop-command-nav-entry";
 import { JournalNavGroup } from "./journal-nav-group";
-import { MobileCommandNavEntry } from "./mobile-command-nav-entry";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { NavItem } from "./nav-item";
@@ -18,6 +16,7 @@ export interface SidebarProps {
   inboxCount?: number;
   myTasksCount: number;
   myTasksOverdueCount: number;
+  showAdmin?: boolean;
   navAmbient?: YdNavAmbientMap;
 }
 
@@ -28,6 +27,7 @@ export function Sidebar({
   inboxCount,
   myTasksCount,
   myTasksOverdueCount,
+  showAdmin = false,
   navAmbient,
 }: SidebarProps) {
   const myTasksUrgent = myTasksOverdueCount > 0;
@@ -90,7 +90,7 @@ export function Sidebar({
               <NavItem
                 href="/dashboard"
                 iconName="dashboard"
-                label="Home"
+                label="Atlas"
                 ambientPreview={navAmbient?.dashboard}
                 tier="primary"
               />
@@ -99,7 +99,7 @@ export function Sidebar({
             <NavItem
               href="/inbox"
               iconName="inbox"
-              label="Patients"
+              label="Tracker"
               badge={inboxCount}
               ambientPreview={navAmbient?.inbox}
               tier="primary"
@@ -115,41 +115,22 @@ export function Sidebar({
               tier="primary"
             />
 
-            <NavItem
-              href="/my-tasks"
-              iconName="tasks"
-              label="Tasks"
-              tier="primary"
-            />
-
-            <div className="hidden md:block">
-              <DesktopCommandNavEntry />
-            </div>
-            <div className="md:hidden">
-              <MobileCommandNavEntry />
-            </div>
+            {role === "doctor" && (
+              <>
+                <JournalNavGroup ambientPreview={navAmbient?.journal} tier="primary" />
+                <NavItem href="/profile" iconName="profile" label="Benutzer" tier="primary" />
+                <NavItem href="/settings" iconName="settings" label="Einstellungen" tier="primary" />
+                {showAdmin ? (
+                  <NavItem
+                    href="/admin/registrations"
+                    iconName="settings"
+                    label="Admin"
+                    tier="secondary"
+                  />
+                ) : null}
+              </>
+            )}
           </div>
-
-          {role === "team" ? (
-            <div className="yd-nav-secondary-group flex flex-col md:contents">
-              <JournalNavGroup ambientPreview={navAmbient?.journal} tier="secondary" />
-              <NavItem
-                href="/settings"
-                iconName="settings"
-                label="Settings"
-                tier="secondary"
-              />
-            </div>
-          ) : (
-            <div className="yd-nav-footer-group flex flex-col md:contents">
-              <NavItem
-                href="/settings"
-                iconName="settings"
-                label="Settings"
-                tier="secondary"
-              />
-            </div>
-          )}
         </div>
       </nav>
 

@@ -15,7 +15,6 @@ export function JournalNavGroup({
       href="/journal"
       iconName="journal"
       label="Journals"
-      description="Erklärungen"
       ambientPreview={ambientPreview}
       tier={tier}
     />

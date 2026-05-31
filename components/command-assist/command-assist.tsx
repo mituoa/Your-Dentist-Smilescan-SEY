@@ -481,8 +481,8 @@ export function CommandAssist({ open: controlledOpen, onOpenChange }: CommandAss
       <div
         className={cn(
           "yd-command-assist-fab fixed z-[46]",
-          "max-md:hidden",
-          "bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 md:bottom-8 md:right-8"
+          "bottom-[max(1rem,env(safe-area-inset-bottom,0px)+4.5rem)] right-4",
+          "md:bottom-8 md:right-8"
         )}
       >
         <button
@@ -492,7 +492,7 @@ export function CommandAssist({ open: controlledOpen, onOpenChange }: CommandAss
           className={FAB}
           aria-expanded={open}
           aria-controls="command-assist-panel"
-          aria-label={open ? "Command schließen" : "Command öffnen"}
+          aria-label={open ? "Command AI schließen" : "Command AI öffnen"}
         >
           <Command className="h-[22px] w-[22px] shrink-0" strokeWidth={2} aria-hidden />
         </button>
