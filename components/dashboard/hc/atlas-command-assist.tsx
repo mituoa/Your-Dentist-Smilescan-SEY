@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { useAssistUiOptional } from "@/components/command-assist/assist-shell";
+import { COMMAND_AI_QUICK_ACTIONS } from "@/lib/dashboard/command-center";
 import { WORKSPACE_COPY } from "@/lib/dashboard/workspace-copy";
 
 type AtlasCommandAssistProps = {
   suggestions?: string[];
 };
 
-/** Command AI as helper card — not dashboard hero. */
+/** Command AI — compact analytics-style module below priority patients. */
 export function AtlasCommandAssist({ suggestions = [] }: AtlasCommandAssistProps) {
   const assist = useAssistUiOptional();
   const [draft, setDraft] = useState("");
+
+  const chips = useMemo(() => {
+    const fromData = suggestions.slice(0, 4);
+    if (fromData.length > 0) return fromData;
+    return COMMAND_AI_QUICK_ACTIONS.slice(0, 4);
+  }, [suggestions]);
 
   const run = (text: string) => {
     setDraft(text);
@@ -21,13 +28,22 @@ export function AtlasCommandAssist({ suggestions = [] }: AtlasCommandAssistProps
   };
 
   return (
-    <section className="yd-med-command" aria-label="Command AI">
-      <div className="yd-med-command__head">
-        <Sparkles className="h-4 w-4 shrink-0 text-[#2f80ed]" strokeWidth={1.65} aria-hidden />
-        <span className="yd-med-command__title">Command AI</span>
+    <section
+      className="yd-cockpit-module yd-cockpit-module--command"
+      aria-label="Command AI"
+    >
+      <div className="yd-cockpit-module__head">
+        <div className="yd-cockpit-module__title-row">
+          <Sparkles
+            className="h-[17px] w-[17px] shrink-0 text-[#2f80ed]"
+            strokeWidth={1.65}
+            aria-hidden
+          />
+          <h2 className="yd-cockpit-module__title">Command AI</h2>
+        </div>
       </div>
       <form
-        className="yd-med-command__form"
+        className="yd-cockpit-command__form"
         onSubmit={(event) => {
           event.preventDefault();
           run(draft.trim() || WORKSPACE_COPY.command.placeholder);
@@ -38,19 +54,22 @@ export function AtlasCommandAssist({ suggestions = [] }: AtlasCommandAssistProps
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder={WORKSPACE_COPY.command.placeholder}
-          className="yd-med-command__input"
+          className="yd-cockpit-command__input"
           autoComplete="off"
         />
       </form>
-      {suggestions.length > 0 ? (
-        <div className="yd-med-command__chips" role="group" aria-label="Vorschläge">
-          {suggestions.slice(0, 3).map((line) => (
-            <button key={line} type="button" className="yd-med-command__chip" onClick={() => run(line)}>
-              {line}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <div className="yd-cockpit-command__chips" role="group" aria-label="Vorgeschlagene Aktionen">
+        {chips.map((line) => (
+          <button
+            key={line}
+            type="button"
+            className="yd-cockpit-command__chip"
+            onClick={() => run(line)}
+          >
+            {line}
+          </button>
+        ))}
+      </div>
     </section>
   );
 }

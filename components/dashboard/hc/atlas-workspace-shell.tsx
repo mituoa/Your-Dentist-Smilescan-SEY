@@ -4,11 +4,11 @@ type AtlasWorkspaceShellProps = {
   children: ReactNode;
 };
 
-/** Single glass workspace surface — cards live inside, not on page background. */
+/** Floating cockpit canvas — layered cards inside, blue atmosphere outside. */
 export function AtlasWorkspaceShell({ children }: AtlasWorkspaceShellProps) {
   return (
-    <div className="yd-med-workspace" aria-label="Praxis-Arbeitsbereich">
-      <div className="yd-med-workspace__inner">{children}</div>
+    <div className="yd-cockpit-canvas" aria-label="Praxis-Arbeitsbereich">
+      <div className="yd-cockpit-canvas__inner">{children}</div>
     </div>
   );
 }

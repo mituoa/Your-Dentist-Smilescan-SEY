@@ -15,21 +15,21 @@ type AtlasOverviewMetricsProps = {
 
 export function AtlasOverviewMetrics({ cards }: AtlasOverviewMetricsProps) {
   return (
-    <ul className="yd-med-metrics" aria-label="Überblick">
+    <ul className="yd-cockpit-kpis" aria-label="Überblick">
       {cards.map((card) => {
         const Icon = ICONS[card.id] ?? Inbox;
         return (
-          <li key={card.id} className="yd-med-metrics__item">
-            <Link href={card.href} className="yd-med-metric-card">
-              <span className="yd-med-metric-card__icon" aria-hidden>
+          <li key={card.id} className="yd-cockpit-kpis__item">
+            <Link href={card.href} className="yd-cockpit-kpi">
+              <span className="yd-cockpit-kpi__bubble" aria-hidden>
                 <Icon className="h-[18px] w-[18px]" strokeWidth={1.65} />
               </span>
-              <div className="yd-med-metric-card__body">
-                <p className="yd-med-metric-card__label">{card.label}</p>
-                <p className="yd-med-metric-card__count">
+              <div className="yd-cockpit-kpi__body">
+                <p className="yd-cockpit-kpi__label">{card.label}</p>
+                <p className="yd-cockpit-kpi__count">
                   {card.count === null ? "—" : card.count}
                 </p>
-                <p className="yd-med-metric-card__hint">{card.hint}</p>
+                <p className="yd-cockpit-kpi__hint">{card.hint}</p>
               </div>
             </Link>
           </li>

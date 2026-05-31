@@ -1,7 +1,9 @@
+import { AtlasCommandAssist } from "@/components/dashboard/hc/atlas-command-assist";
 import { AtlasInboxList } from "@/components/dashboard/hc/atlas-inbox-list";
 import { AtlasOverviewMetrics } from "@/components/dashboard/hc/atlas-overview-metrics";
 import { AtlasPracticeToday } from "@/components/dashboard/hc/atlas-practice-today";
 import {
+  buildCommandSuggestions,
   buildPatientCases,
   buildRelayActivity,
   buildTodayMetrics,
@@ -32,17 +34,25 @@ export function AtlasDesktopWorkspace({
   relayConversations,
   activityEvents,
 }: AtlasDesktopWorkspaceProps) {
+  const openTaskCount = openTasks?.length ?? 0;
   const todayMetrics = buildTodayMetrics(unseenCount, previewRows, openTasks);
+  const commandSuggestions = buildCommandSuggestions(previewRows, openTaskCount);
   const patientCases = buildPatientCases(previewRows);
   const teamHints = buildRelayActivity(relayConversations, activityEvents, openTasks);
 
   return (
-    <div className="yd-med-layout yd-med-layout--desktop hidden md:grid" aria-label="Praxis Cockpit">
-      <div className="yd-med-layout__primary">
-        <AtlasOverviewMetrics cards={todayMetrics} />
-        <AtlasInboxList cases={patientCases} />
+    <div className="yd-cockpit yd-cockpit--desktop hidden md:block" aria-label="Praxis Cockpit">
+      <AtlasOverviewMetrics cards={todayMetrics} />
+
+      <div className="yd-cockpit__grid">
+        <div className="yd-cockpit__column yd-cockpit__column--primary">
+          <AtlasInboxList cases={patientCases} />
+          <AtlasCommandAssist suggestions={commandSuggestions} />
+        </div>
+        <aside className="yd-cockpit__column yd-cockpit__column--aside">
+          <AtlasPracticeToday metrics={todayMetrics} teamHints={teamHints} />
+        </aside>
       </div>
-      <AtlasPracticeToday metrics={todayMetrics} teamHints={teamHints} />
     </div>
   );
 }

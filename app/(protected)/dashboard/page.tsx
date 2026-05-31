@@ -83,7 +83,7 @@ export default async function DashboardPage() {
 
   return (
     <div
-      className="yd-dashboard yd-dashboard--medical relative mx-auto w-full min-w-0 pb-10"
+      className="yd-dashboard yd-dashboard--cockpit relative mx-auto w-full min-w-0 pb-6 md:pb-8"
       style={{ maxWidth: YD.space.contentMax }}
     >
       <AtlasWorkspaceShell>
