@@ -56,6 +56,7 @@ export function SubmissionActions({
               Entwurf für die Rückmeldung
             </p>
             <FollowUpMessageDraft
+              submissionId={submissionId}
               patientName={patientName}
               urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
               practicePhone={practicePhone ?? null}

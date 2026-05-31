@@ -8,7 +8,13 @@ import {
   buildAssistQuickDraft,
   type AssistQuickActionId,
 } from "@/lib/clinical/message-templates";
+import { PreparedWorkPreview } from "@/components/command-ai/prepared-work-preview";
 import { createCaseFromQuery } from "@/lib/create-case-return";
+import { stashCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
+import { resolveCommandIntent } from "@/lib/command-ai/intent-resolver";
+import { prepareWorkFromIntent } from "@/lib/command-ai/preparation-engine";
+import { COMMAND_AI_NO_AUTO_SEND } from "@/lib/command-ai/safety-copy";
+import { COMMAND_AI_EXAMPLES } from "@/lib/product/workflow";
 import {
   assistContextQuickActions,
   detectAssistZone,
@@ -168,7 +174,11 @@ export function CommandAssist() {
   const inboxCase =
     assistCtx?.casePayload?.kind === "inbox" ? assistCtx.casePayload : null;
 
-  const [open, setOpen] = useState(false);
+  const open = assistCtx?.commandOpen ?? false;
+  const setOpen = assistCtx?.setCommandOpen ?? (() => {});
+  const preparedWork = assistCtx?.preparedWork ?? null;
+  const setPreparedWork = assistCtx?.setPreparedWork ?? (() => {});
+
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
@@ -201,9 +211,49 @@ export function CommandAssist() {
     (id: AssistQuickActionId) => {
       if (!draftParams) return;
       setText(buildAssistQuickDraft(id, draftParams));
+      setPreparedWork(null);
     },
-    [draftParams]
+    [draftParams, setPreparedWork]
   );
+
+  const runPrepare = useCallback(() => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const intent = resolveCommandIntent(trimmed, assistCtx?.workspaceHints ?? null);
+    const work = prepareWorkFromIntent(intent, assistCtx?.workspaceHints ?? null);
+    if (work) {
+      setPreparedWork(work);
+      return;
+    }
+    setPreparedWork(null);
+  }, [text, assistCtx?.workspaceHints, setPreparedWork]);
+
+  const handleApprovePrepared = useCallback(() => {
+    if (!preparedWork) return;
+    if (preparedWork.messageDraft && preparedWork.submissionId) {
+      stashCommandDraftForSubmission({
+        submissionId: preparedWork.submissionId,
+        body: preparedWork.messageDraft,
+        savedAt: new Date().toISOString(),
+      });
+    }
+    const href = preparedWork.actions.find((a) => a.enabled && a.href)?.href;
+    setPreparedWork(null);
+    setOpen(false);
+    if (href) router.push(href);
+  }, [preparedWork, router, setOpen, setPreparedWork]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setOpen(!open);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, setOpen]);
 
   const contextQuick = useMemo(() => {
     if (inboxCase && draftParams) return [];
@@ -326,11 +376,15 @@ export function CommandAssist() {
               <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[#94A3B8] dark:text-slate-500">
                 Praxis
               </span>
+              <kbd className="hidden rounded-md border border-black/[0.08] bg-white/80 px-1.5 py-0.5 text-[10px] font-medium text-[#64748B] sm:inline dark:border-white/[0.1] dark:bg-[rgb(22_24_28/0.8)]">
+                ⌘K
+              </kbd>
             </div>
             <p className="mt-1.5 text-[13px] leading-relaxed text-[#64748B] dark:text-slate-400">
-              Entwurfshilfe, Navigation, Diktat — ausschließlich unter Ihrer Kontrolle, ohne autonome
-              Aktionen.{" "}
-              <span className="font-medium text-[#475569] dark:text-slate-300">Kein automatischer Versand</span>.
+              Absicht eingeben — Assistenz bereitet Entwürfe und nächste Schritte vor.{" "}
+              <span className="font-medium text-[#475569] dark:text-slate-300">
+                {COMMAND_AI_NO_AUTO_SEND}
+              </span>
             </p>
           </div>
         </div>
@@ -374,7 +428,15 @@ export function CommandAssist() {
             </div>
           ) : null}
 
-          {!inboxCase && contextQuick.length > 0 ? (
+          {preparedWork ? (
+            <PreparedWorkPreview
+              work={preparedWork}
+              onApprove={handleApprovePrepared}
+              onDismiss={() => setPreparedWork(null)}
+            />
+          ) : null}
+
+          {!preparedWork && !inboxCase && contextQuick.length > 0 ? (
             <div className="rounded-xl border border-black/[0.06] bg-[#FAFBFF] px-3.5 py-3.5 dark:border-white/[0.08] dark:bg-[rgba(43,111,232,0.06)]">
               <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Entwurfsbausteine</p>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -394,18 +456,50 @@ export function CommandAssist() {
 
           <textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              if (preparedWork) setPreparedWork(null);
+            }}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                runPrepare();
+              }
+            }}
             rows={5}
             placeholder={placeholderForZone(zone, Boolean(inboxCase && draftParams))}
             className={INPUT_AREA}
           />
 
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={runPrepare}
+              disabled={!text.trim()}
+              className="inline-flex h-11 shrink-0 items-center rounded-xl bg-[#0F172A] px-4 text-[14px] font-semibold text-white transition hover:bg-[#1E293B] disabled:opacity-45 dark:bg-[#E2E8F0] dark:text-[#0F172A]"
+            >
+              Vorbereiten
+            </button>
             <button type="button" onClick={startDictation} disabled={listening} className={BTN_SECONDARY}>
               <Mic className="h-4 w-4 text-[#2563EB]" strokeWidth={1.75} />
               {listening ? "Hört zu …" : "Diktat"}
             </button>
           </div>
+
+          {!preparedWork && COMMAND_AI_EXAMPLES.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {COMMAND_AI_EXAMPLES.map((example) => (
+                <button
+                  key={example}
+                  type="button"
+                  onClick={() => setText(example)}
+                  className={CHIP}
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           {hints.length > 0 ? (
             <div className="space-y-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.08]">
@@ -478,11 +572,15 @@ export function CommandAssist() {
         <button
           ref={fabRef}
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => {
+            setOpen(!open);
+            if (open) setPreparedWork(null);
+          }}
           className={FAB}
           aria-expanded={open}
           aria-controls="command-assist-panel"
-          aria-label={open ? "Command schließen" : "Command öffnen"}
+          aria-label={open ? "Command schließen" : "Command öffnen (⌘K)"}
+          title="Command (⌘K)"
         >
           <Command className="h-[22px] w-[22px] shrink-0" strokeWidth={2} aria-hidden />
         </button>

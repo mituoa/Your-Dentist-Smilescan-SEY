@@ -14,7 +14,6 @@ import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import {
-  buildActiveCasesWorkContext,
   buildNewSubmissionsWorkContext,
   buildOpenTasksWorkContext,
 } from "@/lib/dashboard/kpi-work-context";
@@ -30,6 +29,12 @@ import {
   getDashboardPriorityItems,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
+import { DashboardAssistHydration } from "@/components/command-ai/dashboard-assist-hydration";
+import {
+  buildSubmissionPreparation,
+  countPreparedAwaitingReview,
+  countTasksNeedingDecision,
+} from "@/lib/command-ai/submission-preparation";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 
@@ -51,7 +56,7 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: profileData, error: profileError } = await supabase
     .from("profile_data")
-    .select("display_name, photo_url")
+    .select("display_name, photo_url, practice_phone, appointment_link")
     .eq("workspace_id", workspaceId)
     .maybeSingle();
 
@@ -85,14 +90,38 @@ export default async function DashboardPage() {
       : null;
   const openTasks = tasksRes.ok ? tasksRes.tasks : null;
   const openTaskCount = openTasks?.length ?? 0;
+  const tasksNeedingDecision = openTasks ? countTasksNeedingDecision(openTasks) : null;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
   const priorityItems = priorityRes.ok ? priorityRes.items : null;
 
   const newSubmissionsContext = buildNewSubmissionsWorkContext(priorityItems, previewRows);
-  const activeCasesContext = buildActiveCasesWorkContext(priorityItems, previewRows);
   const openTasksContext = buildOpenTasksWorkContext(openTasks);
   const nextTaskLabel = openTasks?.[0]?.content ?? null;
+
+  const photoCountBySubmission = new Map(
+    (priorityItems ?? []).map((item) => [item.id, item.photo_count] as const)
+  );
+
+  const preparationInputs = (previewRows ?? []).map((row) => ({
+    id: row.id,
+    patient_name: row.patient_name,
+    patient_notes: row.patient_notes,
+    seen_at: row.seen_at,
+    photo_count: photoCountBySubmission.get(row.id) ?? 0,
+  }));
+
+  const preparedAwaitingCount =
+    previewRows === null || priorityRes.ok === false
+      ? null
+      : countPreparedAwaitingReview(preparationInputs);
+
+  const preparationById = Object.fromEntries(
+    preparationInputs.map((input) => [input.id, buildSubmissionPreparation(input)])
+  );
+
+  const practicePhone = profileData?.practice_phone ?? null;
+  const appointmentUrl = profileData?.appointment_link ?? null;
 
   const dashboardOverviewIncomplete =
     !!profileError ||
@@ -115,6 +144,16 @@ export default async function DashboardPage() {
     >
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--a" aria-hidden />
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--b" aria-hidden />
+
+      <DashboardAssistHydration
+        patients={(priorityItems ?? previewRows ?? []).map((p) => ({
+          id: p.id,
+          patient_name: p.patient_name,
+          patient_notes: p.patient_notes,
+        }))}
+        practicePhone={practicePhone}
+        appointmentUrl={appointmentUrl}
+      />
 
       <DashboardMobileShell
         greeting={greeting}
@@ -153,34 +192,34 @@ export default async function DashboardPage() {
         ) : null}
 
         <DashboardAmbientKpis>
-          <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-4">
+          <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
             <div className="flex min-w-0">
               <HcStatCard
                 href="/inbox"
                 title="Neue Einsendungen"
                 value={unseenCount === null ? "—" : unseenCount}
                 iconName="clipboard-list"
-                footnote="Patientenfälle zur Durchsicht"
+                footnote="Patientenfälle zur Sichtung"
                 workContext={newSubmissionsContext}
               />
             </div>
             <div className="flex min-w-0">
               <HcStatCard
                 href="/inbox"
-                title="Aktive Fälle"
-                value={seenCount === null ? "—" : seenCount}
-                iconName="user-plus"
-                footnote="Laufende Patientenprozesse"
-                workContext={activeCasesContext}
+                title="Vorbereitet durch AI"
+                value={preparedAwaitingCount === null ? "—" : preparedAwaitingCount}
+                iconName="sparkles"
+                footnote="Antworten & Aktionen bereit"
+                hoverHint="Assistenz hat Entwürfe und nächste Schritte vorbereitet — zur Freigabe im Tracker prüfen."
               />
             </div>
             <div className="flex min-w-0">
               <HcStatCard
                 href="/relay"
-                title="Offene Aufgaben"
-                value={openTaskCount}
+                title="Praxisaufgaben"
+                value={tasksNeedingDecision === null ? openTaskCount : tasksNeedingDecision}
                 iconName="list-todo"
-                footnote="Praxisworkflow"
+                footnote="Benötigen Entscheidung"
                 workContext={openTasksContext}
               />
             </div>
@@ -189,7 +228,7 @@ export default async function DashboardPage() {
 
         <DashboardAmbientSubmissions>
           <div className="yd-dash-zone yd-dash-zone--submissions min-w-0">
-            <HcRecentTable rows={previewRows} />
+            <HcRecentTable rows={previewRows} preparationById={preparationById} />
           </div>
         </DashboardAmbientSubmissions>
 
@@ -203,6 +242,7 @@ export default async function DashboardPage() {
                 unseen={unseenCount}
                 seen={seenCount}
                 openTaskCount={openTaskCount}
+                preparedAwaitingCount={preparedAwaitingCount}
                 nextTaskLabel={nextTaskLabel}
               />
             </div>

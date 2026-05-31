@@ -5,6 +5,7 @@ import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
 import { PhotoViewer } from "@/components/inbox/photo-viewer";
 import { SubmissionActions } from "@/components/inbox/submission-actions";
+import { TrackerAiSummary } from "@/components/inbox/tracker-ai-summary";
 import { TrackerPrimaryActions } from "@/components/inbox/tracker-primary-actions";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
@@ -358,6 +359,16 @@ export default async function InboxDetailPage({
                   ? submission.patient_notes
                   : "Keine Patientennotiz."}
               </p>
+            </div>
+
+            <div className="mt-4 min-w-0 max-w-[520px]">
+              <TrackerAiSummary
+                submissionId={submission.id}
+                patientName={submission.patient_name}
+                patientNotes={submission.patient_notes}
+                photoCount={submission.photos.length}
+                seenAt={submission.seen_at}
+              />
             </div>
 
             <div id="tracker-empfehlung" className="min-w-0 max-w-[520px] scroll-mt-16 md:scroll-mt-24">

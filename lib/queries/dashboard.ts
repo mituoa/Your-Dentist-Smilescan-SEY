@@ -63,6 +63,7 @@ export type OpenTaskRow = {
   content: string;
   submission_id: string | null;
   created_at: string;
+  status: string;
   patient_name?: string | null;
 };
 
@@ -332,7 +333,7 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
 
   const { data, error } = await supabase
     .from("tasks")
-    .select("id, content, submission_id, created_at, submissions(patient_name)")
+    .select("id, content, submission_id, created_at, status, submissions(patient_name)")
     .eq("workspace_id", workspaceId)
     .in("status", ["open", "pending_review"])
     .order("created_at", { ascending: false })
@@ -349,6 +350,7 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
       content: string;
       submission_id: string | null;
       created_at: string;
+      status: string;
       submissions: { patient_name: string | null } | { patient_name: string | null }[] | null;
     };
     const submission = Array.isArray(r.submissions) ? r.submissions[0] : r.submissions;
@@ -357,6 +359,7 @@ export const getOpenTasks = cache(async (workspaceId: string): Promise<OpenTasks
       content: r.content,
       submission_id: r.submission_id ?? null,
       created_at: r.created_at,
+      status: r.status,
       patient_name: submission?.patient_name ?? null,
     };
   });

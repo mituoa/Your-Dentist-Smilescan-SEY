@@ -15,7 +15,6 @@ import {
   type KpiWorkContextData,
 } from "@/components/dashboard/hc/kpi-work-context-preview";
 import { KpiHoverPreview } from "@/components/dashboard/hc/kpi-hover-preview";
-import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 
 export type DashboardKpiIconName =
@@ -67,28 +66,22 @@ export function HcStatCard({
   const cardBody = (
     <div
       className={cn(
-        "yd-dash-surface yd-dash-kpi-card flex h-full min-w-0 flex-col justify-between p-5 md:px-6 md:py-[1.375rem]",
+        "yd-dash-surface yd-dash-kpi-card flex h-full min-w-0 flex-col p-5 md:p-[1.375rem]",
         href && "yd-dash-kpi-card--linked"
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <p
-          className="text-[12px] font-medium leading-snug tracking-[-0.01em] md:text-[13px]"
-          style={{ color: YD.text.muted }}
-        >
+      <div className="yd-dash-kpi-card__head flex min-w-0 items-center gap-3">
+        <span className="yd-dash-kpi-card__icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full md:h-11 md:w-11">
+          <Icon className="h-[18px] w-[18px] md:h-[19px] md:w-[19px]" strokeWidth={1.85} />
+        </span>
+        <p className="yd-dash-kpi-card__title min-w-0 text-[13px] font-semibold leading-snug tracking-[-0.015em] md:text-[14px]">
           {title}
         </p>
-        <span className="yd-dash-kpi-card__icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full md:h-[2.625rem] md:w-[2.625rem]">
-          <Icon className="h-[17px] w-[17px] md:h-[18px] md:w-[18px]" strokeWidth={1.75} />
-        </span>
       </div>
-      <div className="mt-auto pt-5">
+      <div className="yd-dash-kpi-card__body mt-auto pt-4 md:pt-[1.125rem]">
         <p className="yd-dash-kpi yd-dash-kpi--balanced font-semibold">{value}</p>
         {footnote ? (
-          <p
-            className="mt-1.5 text-[10px] font-medium leading-snug md:text-[11px]"
-            style={{ color: YD.text.faint }}
-          >
+          <p className="yd-dash-kpi-card__footnote mt-1.5 text-[11px] font-medium leading-snug md:text-[12px]">
             {footnote}
           </p>
         ) : null}

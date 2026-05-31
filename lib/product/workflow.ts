@@ -14,11 +14,12 @@ export const PRODUCT_WORKFLOW_STEPS = [
   "Protokoll",
 ] as const;
 
-/** Command AI — Beispielphrasen (Assist + Atlas). */
+/** Command AI — intent examples surfaced in ⌘K palette. */
 export const COMMAND_AI_EXAMPLES = [
-  "Bereite die Antworten für offene Anfragen vor",
-  "Neue Eingänge zusammenfassen",
-  "Patient Müller Terminvorschlag senden",
+  "Bitte Berk Baysal schreiben, dass er diese Woche kommen soll und Terminlink senden",
+  "Alle neuen Patienten zusammenfassen",
+  "Was ist heute wichtig?",
+  "Neue Aufgabe für Team erstellen",
 ] as const;
 
 /** Schnellaktionen im Atlas-Cockpit. */

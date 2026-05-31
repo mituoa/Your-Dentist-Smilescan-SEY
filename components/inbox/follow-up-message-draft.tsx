@@ -8,8 +8,10 @@ import {
   FOLLOW_UP_SNIPPETS,
   type UrgencyKey,
 } from "@/lib/clinical/message-templates";
+import { consumeCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
 
 interface FollowUpMessageDraftProps {
+  submissionId: string;
   patientName: string | null;
   urgency: UrgencyKey;
   practicePhone: string | null;
@@ -17,6 +19,7 @@ interface FollowUpMessageDraftProps {
 }
 
 export function FollowUpMessageDraft({
+  submissionId,
   patientName,
   urgency,
   practicePhone,
@@ -50,7 +53,17 @@ export function FollowUpMessageDraft({
   const [flash, setFlash] = useState(false);
   const [copied, setCopied] = useState(false);
   const prevSig = useRef<string | null>(null);
+  const commandDraftApplied = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (commandDraftApplied.current) return;
+    const pending = consumeCommandDraftForSubmission(submissionId);
+    if (pending) {
+      setBody(pending);
+      commandDraftApplied.current = true;
+    }
+  }, [submissionId]);
 
   /** iOS Safari: Tastatur öffnen — Feld kurz in den sichtbaren Bereich scrollen (ohne Layout-Umbau). */
   const scrollDraftIntoView = useCallback(() => {

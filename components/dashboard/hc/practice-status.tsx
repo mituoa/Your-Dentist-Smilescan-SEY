@@ -8,6 +8,7 @@ type PracticeStatusProps = {
   unseen: number | null;
   seen: number | null;
   openTaskCount: number;
+  preparedAwaitingCount?: number | null;
   nextTaskLabel?: string | null;
 };
 
@@ -43,10 +44,12 @@ export function HcPracticeStatus({
   unseen,
   seen,
   openTaskCount,
+  preparedAwaitingCount = null,
   nextTaskLabel,
 }: PracticeStatusProps) {
   const u = unseen ?? 0;
   const s = seen ?? 0;
+  const p = preparedAwaitingCount ?? 0;
   const needsAttention = u > 0 || openTaskCount > 0;
   const headline = needsAttention ? "Handlungsbedarf" : "Praxis läuft ruhig";
   const headlineTone = needsAttention ? YD.text.primary : "#166534";
@@ -81,8 +84,14 @@ export function HcPracticeStatus({
               label={s > 0 ? `${s} ${s === 1 ? "Fall aktiv" : "Fälle aktiv"}` : "Keine aktiven Fälle"}
             />
             <StatusLine
-              ok={u === 0}
-              label={u === 0 ? "Alle Antworten vorbereitet" : "Antworten warten auf Freigabe"}
+              ok={p === 0 && u === 0}
+              label={
+                p > 0
+                  ? `${p} ${p === 1 ? "Antwort bereit" : "Antworten bereit"} zur Prüfung`
+                  : u === 0
+                    ? "Assistenz hat alles vorbereitet"
+                    : "Antworten warten auf Freigabe"
+              }
             />
           </ul>
         </div>

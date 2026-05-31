@@ -29,7 +29,8 @@ export function DashboardHeader({
     <header className="yd-dash-header-premium w-full min-w-0 max-w-full">
       <div className="yd-dash-header-premium__grid">
         <div className="yd-dash-header-premium__identity">
-          <h1 className="yd-dash-header-premium__title">
+          <p className="yd-dash-header-premium__headline">Praxisüberblick</p>
+          <h1 className="yd-dash-header-premium__greeting">
             {greeting}, {displayName}
           </h1>
           <p className="yd-dash-header-premium__subtitle">{subtitle}</p>

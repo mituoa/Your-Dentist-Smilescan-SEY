@@ -198,9 +198,9 @@
     gap: 0.6875rem;
     padding: 0.8125rem 0.875rem;
     border-radius: 18px;
-    border: 1px solid rgba(160, 178, 198, 0.34);
+    border: 1px solid rgba(226, 232, 240, 0.95);
     background: #ffffff;
-    box-shadow: 0 1px 2px rgba(15, 35, 58, 0.03), 0 6px 18px rgba(30, 91, 189, 0.05);
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
     text-decoration: none;
     transition:
       box-shadow 200ms ease,
@@ -225,10 +225,11 @@
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    color: #1a4f9c;
-    background: rgba(26, 79, 156, 0.1);
-    border: 1px solid rgba(26, 79, 156, 0.1);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    color: #ffffff;
+    background: linear-gradient(145deg, #3d8ef0 0%, #2f80ed 55%, #2563eb 100%);
+    box-shadow:
+      0 2px 6px rgba(37, 99, 235, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
   }
 
   .yd-dash-mobile-kpi__title {

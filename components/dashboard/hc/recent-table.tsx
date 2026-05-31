@@ -1,7 +1,9 @@
 import Link from "next/link";
 
+import { PreparationStatusBlock } from "@/components/command-ai/preparation-status-block";
 import { HcCard } from "@/components/design/hc-card";
 import { YdStatusPill } from "@/components/design-system/yd-status-pill";
+import type { SubmissionPreparation } from "@/lib/command-ai/types";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { YD } from "@/lib/design/yd-design-tokens";
 import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
@@ -11,7 +13,13 @@ type SubmissionStatus = {
   variant: "active" | "calm" | "done" | "pending";
 };
 
-function resolveSubmissionStatus(row: SubmissionPreviewRow): SubmissionStatus {
+function resolveSubmissionStatus(
+  row: SubmissionPreviewRow,
+  preparation?: SubmissionPreparation
+): SubmissionStatus {
+  if (preparation?.readyForReview) {
+    return { label: "Bereit zur Prüfung", variant: "pending" };
+  }
   if (!row.seen_at) {
     return { label: "Neu", variant: "active" };
   }
@@ -20,10 +28,11 @@ function resolveSubmissionStatus(row: SubmissionPreviewRow): SubmissionStatus {
 
 type RecentTableProps = {
   rows: SubmissionPreviewRow[] | null;
+  preparationById?: Record<string, SubmissionPreparation>;
 };
 
-export function HcRecentTable({ rows }: RecentTableProps) {
-  const columns = ["Patient", "Anliegen", "Status", "Datum", "Aktion"] as const;
+export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) {
+  const columns = ["Patient", "Anliegen", "Assistenz", "Status", "Datum", "Aktion"] as const;
 
   return (
     <HcCard tone="primary" ambient={false} className="yd-dash-surface yd-dash-recent-table max-w-full overflow-hidden p-0">
@@ -36,6 +45,9 @@ export function HcRecentTable({ rows }: RecentTableProps) {
       >
         <div>
           <p className="yd-dash-section yd-dash-section--secondary">Aktuelle Einsendungen</p>
+          <p className="mt-1 text-[11px] font-medium leading-snug" style={{ color: YD.text.muted }}>
+            Assistenz bereitet Zusammenfassungen und Antworten vor — Sie prüfen und geben frei.
+          </p>
         </div>
         <Link
           href="/inbox"
@@ -47,7 +59,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
       </div>
 
       <div className="max-w-full overflow-x-auto overscroll-x-contain">
-        <table className="w-full min-w-[620px] border-collapse text-left">
+        <table className="w-full min-w-[760px] border-collapse text-left">
           <thead>
             <tr>
               {columns.map((col) => (
@@ -64,7 +76,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
           <tbody>
             {rows === null ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12">
+                <td colSpan={6} className="px-6 py-12">
                   <div className="yd-dash-empty-state mx-auto max-w-sm text-center">
                     <p className="text-[13px] font-medium" style={{ color: YD.text.primary }}>
                       Übersicht momentan nicht verfügbar
@@ -77,7 +89,7 @@ export function HcRecentTable({ rows }: RecentTableProps) {
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12">
+                <td colSpan={6} className="px-6 py-12">
                   <div className="yd-dash-empty-state mx-auto max-w-sm text-center">
                     <p className="text-[13px] font-medium" style={{ color: YD.text.primary }}>
                       Keine offenen Vorgänge
@@ -100,7 +112,9 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                   month: "short",
                   year: "numeric",
                 });
-                const status = resolveSubmissionStatus(row);
+                const preparation = preparationById[row.id];
+                const status = resolveSubmissionStatus(row, preparation);
+                const actionLabel = preparation?.readyForReview ? "Prüfen" : "Fall öffnen";
 
                 return (
                   <tr
@@ -117,11 +131,20 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                       </span>
                     </td>
                     <td
-                      className="max-w-[200px] truncate px-5 py-3.5 text-[12px] leading-snug md:px-6"
+                      className="max-w-[180px] truncate px-5 py-3.5 text-[12px] leading-snug md:px-6"
                       style={{ color: YD.text.secondary }}
                       title={issue}
                     >
                       {issue}
+                    </td>
+                    <td className="min-w-[168px] max-w-[220px] px-5 py-3.5 md:px-6">
+                      {preparation ? (
+                        <PreparationStatusBlock preparation={preparation} compact />
+                      ) : (
+                        <span className="text-[11px]" style={{ color: YD.text.faint }}>
+                          —
+                        </span>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 md:px-6">
                       <YdStatusPill
@@ -140,9 +163,11 @@ export function HcRecentTable({ rows }: RecentTableProps) {
                       <Link
                         href={`/inbox/${row.id}`}
                         className="yd-dash-table-action text-[12px] font-medium no-underline transition hover:opacity-75"
-                        style={{ color: YD.text.secondary }}
+                        style={{
+                          color: preparation?.readyForReview ? YD.accent.core : YD.text.secondary,
+                        }}
                       >
-                        Fall öffnen
+                        {actionLabel}
                       </Link>
                     </td>
                   </tr>
