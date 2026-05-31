@@ -19,6 +19,7 @@ import {
   PUBLIC_SITE_FUER_WEN,
   PUBLIC_SITE_HERO,
   PUBLIC_SITE_NUTZEN,
+  PUBLIC_SITE_PERSPECTIVE,
   PUBLIC_SITE_PROBLEM,
   PUBLIC_SITE_SECTIONS,
 } from "@/lib/marketing/public-site-ia";
@@ -45,7 +46,6 @@ export function YdPublicSiteHeroMobile() {
         {PUBLIC_SITE_HERO.titleMobile}
       </h1>
       <p className="yd-public-site-hero-mobile-lead">{PUBLIC_SITE_HERO.lead}</p>
-      <p className="yd-clinical-whisper yd-public-site-hero-whisper">{PUBLIC_SITE_HERO.whisper}</p>
     </section>
   );
 }
@@ -70,14 +70,13 @@ export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
             <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
             <h1
               id="yd-public-hero-title"
-              className="yd-clinical-display yd-clinical-display--hero yd-clinical-display--digital"
+              className="yd-clinical-display yd-clinical-display--hero"
             >
-              <span className="yd-clinical-display-line">{PUBLIC_SITE_HERO.title}</span>
-              <span className="yd-clinical-display-line yd-clinical-display-line--accent">
-                {PUBLIC_SITE_HERO.titleLine2}
+              <span className="yd-clinical-display-line yd-clinical-display-line--serif">
+                {PUBLIC_SITE_HERO.title}
               </span>
               <span className="yd-clinical-display-line yd-clinical-display-line--accent">
-                {PUBLIC_SITE_HERO.titleLine3}
+                {PUBLIC_SITE_HERO.titleLine2}
               </span>
             </h1>
             <p className="yd-clinical-lead">{PUBLIC_SITE_HERO.lead}</p>
@@ -103,7 +102,7 @@ export function YdPublicSiteProblem() {
     >
       <header className="yd-public-site-section-head yd-public-site-section-head--tight">
         <p className="yd-clinical-eyebrow">{PUBLIC_SITE_PROBLEM.eyebrow}</p>
-        <h2 id="yd-public-problem-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+        <h2 id="yd-public-problem-title" className="yd-clinical-act-title">
           {PUBLIC_SITE_PROBLEM.title}
         </h2>
       </header>
@@ -115,6 +114,53 @@ export function YdPublicSiteProblem() {
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+/** Patient:innen und Praxis — zwei Seiten, ohne Erklärungstext. */
+export function YdPublicSitePerspective() {
+  const { patient, practice } = PUBLIC_SITE_PERSPECTIVE;
+
+  return (
+    <section
+      id={PUBLIC_SITE_SECTIONS.perspektive}
+      className="yd-public-site-section yd-public-site-section--perspective yd-public-os-awaken-field yd-public-site-scroll-anchor"
+      style={{ ["--yd-public-field-i" as string]: "1.75" }}
+      aria-labelledby="yd-public-perspective-title"
+    >
+      <header className="yd-public-site-section-head yd-public-site-section-head--tight">
+        <h2 id="yd-public-perspective-title" className="yd-clinical-act-title">
+          <span className="block">{PUBLIC_SITE_PERSPECTIVE.title}</span>
+          <span className="yd-clinical-display-line--accent block">
+            {PUBLIC_SITE_PERSPECTIVE.titleLine2}
+          </span>
+        </h2>
+      </header>
+      <div className="yd-public-site-perspective-grid">
+        <article className="yd-public-site-perspective-card">
+          <h3 className="yd-public-site-perspective-label">{patient.label}</h3>
+          <ul className="yd-public-site-perspective-list">
+            {patient.items.map((item) => (
+              <li key={item}>
+                <span aria-hidden>✓ </span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </article>
+        <article className="yd-public-site-perspective-card">
+          <h3 className="yd-public-site-perspective-label">{practice.label}</h3>
+          <ul className="yd-public-site-perspective-list">
+            {practice.items.map((item) => (
+              <li key={item}>
+                <span aria-hidden>✓ </span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </article>
+      </div>
     </section>
   );
 }
@@ -140,21 +186,19 @@ export function YdPublicSiteNutzen({ compact = false }: YdPublicSiteNutzenProps)
     >
       <header className="yd-public-site-section-head">
         <p className="yd-clinical-eyebrow">{PUBLIC_SITE_NUTZEN.eyebrow}</p>
-        <h2 id="yd-public-nutzen-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+        <h2 id="yd-public-nutzen-title" className="yd-clinical-act-title">
           {PUBLIC_SITE_NUTZEN.title}
         </h2>
-        <p className="yd-public-site-section-lead">{PUBLIC_SITE_NUTZEN.lead}</p>
       </header>
       <ul className="yd-public-site-card-grid yd-public-site-card-grid--2">
         {cards.map((card) => {
           const Icon = NUTZEN_ICONS[card.id as keyof typeof NUTZEN_ICONS];
           return (
-            <li key={card.id} className="yd-public-site-card">
+            <li key={card.id} className="yd-public-site-card yd-public-site-card--functional">
               <span className="yd-public-site-card-icon" aria-hidden>
                 <Icon className="h-4 w-4" strokeWidth={1.65} />
               </span>
-              <p className="yd-public-site-card-kicker">{card.label}</p>
-              <h3 className="yd-public-site-card-title">{card.title}</h3>
+              <h3 className="yd-public-site-card-title">{card.label}</h3>
               <p className="yd-public-site-card-body">{card.body}</p>
             </li>
           );
@@ -174,7 +218,7 @@ export function YdPublicSiteFuerWen() {
     >
       <header className="yd-public-site-section-head">
         <p className="yd-clinical-eyebrow">{PUBLIC_SITE_FUER_WEN.eyebrow}</p>
-        <h2 id="yd-public-fuer-wen-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+        <h2 id="yd-public-fuer-wen-title" className="yd-clinical-act-title">
           {PUBLIC_SITE_FUER_WEN.title}
         </h2>
       </header>
@@ -182,7 +226,7 @@ export function YdPublicSiteFuerWen() {
         {PUBLIC_SITE_FUER_WEN.cards.map((card, i) => {
           const Icon = FUER_WEN_ICONS[i] ?? Building2;
           return (
-            <li key={card.title} className="yd-public-site-audience-card">
+            <li key={card.title} className="yd-public-site-audience-card yd-public-site-card--functional">
               <span className="yd-public-site-card-icon" aria-hidden>
                 <Icon className="h-4 w-4" strokeWidth={1.65} />
               </span>
@@ -206,24 +250,17 @@ export function YdPublicSiteEinfuehrung() {
     >
       <header className="yd-public-site-section-head">
         <p className="yd-clinical-eyebrow">{PUBLIC_SITE_EINFUEHRUNG.eyebrow}</p>
-        <h2
-          id="yd-public-einfuehrung-title"
-          className="yd-clinical-act-title yd-clinical-act-title--direct"
-        >
+        <h2 id="yd-public-einfuehrung-title" className="yd-clinical-act-title">
           {PUBLIC_SITE_EINFUEHRUNG.title}
         </h2>
-        <p className="yd-public-site-section-lead">{PUBLIC_SITE_EINFUEHRUNG.lead}</p>
       </header>
       <ol className="yd-public-site-steps">
         {PUBLIC_SITE_EINFUEHRUNG.steps.map((step) => (
-          <li key={step.num} className="yd-public-site-step">
+          <li key={step.num} className="yd-public-site-step yd-public-site-step--title-only">
             <span className="yd-public-site-step-num" aria-hidden>
               {step.num}
             </span>
-            <div className="min-w-0">
-              <h3 className="yd-public-site-card-title">{step.title}</h3>
-              <p className="yd-public-site-card-body">{step.body}</p>
-            </div>
+            <h3 className="yd-public-site-card-title">{step.title}</h3>
           </li>
         ))}
       </ol>
@@ -235,16 +272,17 @@ export function YdPublicSiteDemo() {
   return (
     <section
       id={PUBLIC_SITE_SECTIONS.demo}
-      className="yd-public-site-section yd-public-site-section--demo yd-public-os-awaken-field yd-public-site-scroll-anchor"
+      className="yd-public-site-section yd-public-site-section--demo yd-public-site-section--demo-emphasis yd-public-os-awaken-field yd-public-site-scroll-anchor"
       style={{ ["--yd-public-field-i" as string]: "8" }}
       aria-labelledby="yd-public-demo-title"
     >
       <div className="yd-public-site-demo-panel">
         <p className="yd-clinical-eyebrow">{PUBLIC_SITE_DEMO.eyebrow}</p>
-        <h2 id="yd-public-demo-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+        <h2 id="yd-public-demo-title" className="yd-clinical-act-title">
           {PUBLIC_SITE_DEMO.title}
         </h2>
         <p className="yd-public-site-section-lead">{PUBLIC_SITE_DEMO.lead}</p>
+        <p className="yd-public-site-demo-trust">{PUBLIC_SITE_DEMO.trustNote}</p>
         <YdPublicSiteDemoForm />
         <p className="yd-public-site-demo-note">{PUBLIC_SITE_DEMO.note}</p>
       </div>

@@ -2,8 +2,11 @@
  * Öffentliche Website — Informationsarchitektur & Copy.
  */
 
+import type { RegisterPlanId } from "@/lib/auth/register-plans";
+
 export const PUBLIC_SITE_SECTIONS = {
   problem: "problem",
+  perspektive: "perspektive",
   nutzen: "nutzen",
   ablauf: "ablauf",
   command: "command-ai",
@@ -31,158 +34,160 @@ export const PUBLIC_SITE_NAV_MOBILE = [
 
 export const PUBLIC_SITE_HERO = {
   eyebrow: "Intelligente Praxiskommunikation",
-  title: "Jede Anfrage.",
-  titleLine2: "Klar erfasst.",
-  titleLine3: "Sicher weitergeführt.",
-  titleMobile: "Jede Anfrage. Klar erfasst. Sicher weitergeführt.",
+  title: "Weniger Chaos im Praxisalltag.",
+  titleLine2: "Jede Anfrage an einem Ort.",
+  titleMobile: "Weniger Chaos im Praxisalltag. Jede Anfrage an einem Ort.",
   lead:
-    "Your Dentist bündelt Patientenanfragen, Bilder und interne Abstimmung an einem Ort. Ihr Team erkennt Prioritäten schneller und führt jeden Fall strukturiert weiter.",
+    "Patient:innen übermitteln Anliegen und Bilder direkt an die Praxis. Your Dentist strukturiert den Eingang, erkennt nächste Schritte und hält Team, Aufgaben und Kommunikation zusammen.",
   primaryCta: "Demo buchen",
   secondaryCta: "Zugang anfordern",
   signInPrefix: "Bereits registriert?",
   signInLabel: "Anmelden",
-  whisper: "Weniger suchen. Weniger nachfragen. Weniger wiederholen.",
 } as const;
 
 /** Hero-Produktvorschau — abstrakt, ohne Patientendaten */
 export const PUBLIC_SITE_HERO_PREVIEW = {
-  intakeTitle: "Neue Anfrage",
+  intakeTitle: "Patientenanfrage eingegangen",
   intakeChecks: [
-    "Fotos erhalten",
-    "Anliegen strukturiert",
-    "Priorität erkannt",
+    "Anliegen erhalten",
+    "Bilder hinzugefügt",
+    "Informationen strukturiert",
   ] as const,
   commandLabel: "Command AI",
-  commandPhrase: "Antwort vorbereiten",
-  commandOutcomes: ["Nachricht erstellt", "Aufgabe übergeben"] as const,
+  commandPhrase: "Nächsten Schritt vorbereiten",
+  commandOutcomes: [
+    "Antwort vorbereitet",
+    "Aufgabe erstellt",
+    "Team informiert",
+  ] as const,
 } as const;
 
 export const PUBLIC_SITE_PROBLEM = {
   eyebrow: "Alltag",
   title: "Wo heute Informationen verloren gehen",
   pains: [
-    { label: "Anrufe", detail: "ohne Kontext, ohne Übergabe" },
-    { label: "Bilder", detail: "auf privaten Geräten" },
-    { label: "Nachfragen", detail: "im Team, ohne Stand" },
-    { label: "Notizen", detail: "ohne klaren nächsten Schritt" },
+    { label: "Telefon", detail: "Informationen gehen zwischen Behandlungen verloren" },
+    { label: "Bilder", detail: "landen in privaten Chats oder E-Mails" },
+    { label: "Rückfragen", detail: "unterbrechen den laufenden Praxisbetrieb" },
+    { label: "Übergaben", detail: "sind nicht für alle sichtbar" },
   ],
+} as const;
+
+export const PUBLIC_SITE_PERSPECTIVE = {
+  title: "Einfach für Patient:innen.",
+  titleLine2: "Strukturiert für Praxen.",
+  patient: {
+    label: "Patient:innen",
+    items: ["Anliegen senden", "Bilder hinzufügen", "Rückmeldung erhalten"] as const,
+  },
+  practice: {
+    label: "Praxis",
+    items: ["Eingang prüfen", "Aufgabe verteilen", "Antwort vorbereiten"] as const,
+  },
 } as const;
 
 export const PUBLIC_SITE_ABLAUF = {
   eyebrow: "Ablauf",
   title: "Ein klarer Weg für jede Anfrage.",
   steps: [
-    { num: "01", phase: "Eingang", body: "Patient sendet Anliegen" },
-    { num: "02", phase: "Analyse", body: "Your Dentist strukturiert Informationen" },
-    { num: "03", phase: "Team", body: "Aufgabe wird übergeben" },
-    { num: "04", phase: "Antwort", body: "Patient erhält Rückmeldung" },
+    { num: "01", phase: "Eingang", body: "Patient sendet Anliegen und Bilder." },
+    { num: "02", phase: "Struktur", body: "Your Dentist ordnet Informationen." },
+    { num: "03", phase: "Übergabe", body: "Aufgabe oder Rückfrage landet beim Team." },
+    { num: "04", phase: "Antwort", body: "Patient erhält eine vorbereitete Rückmeldung." },
   ],
 } as const;
 
 export const PUBLIC_SITE_NUTZEN = {
   eyebrow: "Funktionen",
-  title: "Ein Workspace für den Praxisalltag",
-  lead: "Eine Anfrage kommt rein. Ihr Team weiß, was als Nächstes passiert.",
+  title: "Ein Arbeitsbereich für Eingang, Team und Antwort.",
   cards: [
     {
       id: "eingang",
-      title: "Anfragen und Fotos an einem Ort",
-      body: "Kein Suchen in E-Mail, Messenger oder privaten Handys.",
       label: "Eingang",
+      body: "Anfragen und Bilder an einem Ort — nicht verteilt über Telefon, E-Mail oder private Geräte.",
     },
     {
       id: "kommunikation",
-      title: "Abstimmung am Fall",
-      body: "Übergaben und Rückfragen bleiben beim Patientenfall — nicht im Chat-Chaos.",
       label: "Team",
+      body: "Rückfragen, Übergaben und Aufgaben bleiben am Fall.",
     },
     {
       id: "aufgaben",
-      title: "Aufgaben mit Verantwortung",
-      body: "Rückrufe, Routinen und Erinnerungen sind sichtbar zugeordnet.",
       label: "Aufgaben",
+      body: "Rückrufe, Erinnerungen und Routinen mit klarer Verantwortung.",
     },
     {
       id: "command",
-      title: "Nächste Schritte vorbereitet",
-      body: "Command AI bereitet Antworten und Aufgaben vor — Sie geben frei.",
       label: "Command AI",
+      body: "Antworten und nächste Schritte vorbereiten. Freigabe bleibt bei der Praxis.",
     },
   ],
 } as const;
 
 export const PUBLIC_SITE_COMMAND = {
   eyebrow: "Command AI",
-  title: "Kleine Schritte, bevor sie den Tag unterbrechen",
-  lead:
-    "Sie sagen, was passieren soll. Command AI bereitet Nachricht, Aufgabe und Teamhinweis vor — Freigabe bleibt bei Ihnen.",
-  exampleCommand: "Antwort vorbereiten",
-  examples: [
-    "Rückruf vorbereiten",
-    "Aufgabe übergeben",
-    "Nachricht formulieren",
-    "Fall zusammenfassen",
-  ] as const,
-  outcomes: [
+  title: "Leise Assistenz im Praxisfluss",
+  lead: "Befehle für Organisation und Kommunikation — keine Diagnosen, keine Behandlungsentscheidungen. Freigabe bleibt bei Ihnen.",
+  demos: [
     {
-      label: "Nachricht vorbereitet",
-      detail: "Entwurf zur Rückmeldung — kein automatischer Versand.",
+      command: "Bitte Patient wegen Termin antworten",
+      outcomes: [
+        "Nachricht vorbereitet",
+        "Rückfrage für Empfang erstellt",
+        "Erinnerung gesetzt",
+      ],
     },
     {
-      label: "Aufgabe erstellt",
-      detail: "Rückruf oder Termin im Team sichtbar.",
-    },
-    {
-      label: "Team informiert",
-      detail: "Übergabe bleibt am Fall nachvollziehbar.",
+      command: "Heutigen Eingang zusammenfassen",
+      outcomes: [
+        "Neue Anfragen geprüft",
+        "Rückrufe vorbereitet",
+        "Aufgaben erstellt",
+      ],
     },
   ],
 } as const;
 
+export const PUBLIC_SITE_RELAY = {
+  eyebrow: "Plattform",
+  title: "Relay — Kommunikation am Fall",
+  lead: "Interne Abstimmung am Fall — nicht in Messenger und E-Mail.",
+  capabilities: [
+    "Direktnachrichten",
+    "Gruppen",
+    "Fallbezogen",
+    "Übergaben",
+    "Wiederkehrende Aufgaben",
+  ] as const,
+} as const;
+
 export const PUBLIC_SITE_FUER_WEN = {
   eyebrow: "Für Praxen",
-  title: "Für jede Praxisgröße — gleiche Struktur",
+  title: "Für jede Praxisgröße",
   cards: [
     {
       title: "Einzelpraxis",
-      body: "Eingänge, Fotos und Rückfragen ohne verstreute Kanäle.",
+      body: "Mehr Struktur, ohne mehr Personal.",
     },
     {
       title: "Mehrbehandlerpraxis",
-      body: "Mehrere Behandler, ein klarer Stand pro Anfrage.",
+      body: "Ein gemeinsamer Stand für alle Beteiligten.",
     },
     {
       title: "MVZ",
-      body: "Übergaben und Verantwortung über Standorte hinweg nachvollziehbar.",
+      body: "Übergaben und Verantwortung über Standorte hinweg.",
     },
   ],
 } as const;
 
 export const PUBLIC_SITE_EINFUEHRUNG = {
   eyebrow: "Einführung",
-  title: "Schritt für Schritt in den Praxisbereich",
-  lead: "Kein komplexes Setup — ein klarer Weg zum geschützten Workspace.",
+  title: "Ruhig eingeführt. Klar nutzbar.",
   steps: [
-    {
-      num: "01",
-      title: "Praxisbereich anlegen",
-      body: "Geschützten Bereich vorbereiten.",
-    },
-    {
-      num: "02",
-      title: "Patienteneingang aktivieren",
-      body: "Strukturierten Upload-Weg bereitstellen.",
-    },
-    {
-      num: "03",
-      title: "Team einrichten",
-      body: "Rollen und Zuständigkeiten festlegen.",
-    },
-    {
-      num: "04",
-      title: "Im Alltag nutzen",
-      body: "Eingänge, Aufgaben und Übergaben im Tagesablauf.",
-    },
+    { num: "01", title: "Praxisbereich anlegen" },
+    { num: "02", title: "Patienteneingang aktivieren" },
+    { num: "03", title: "Team einrichten" },
+    { num: "04", title: "Im Alltag nutzen" },
   ],
 } as const;
 
@@ -192,15 +197,21 @@ export const PUBLIC_SITE_PRICING = {
   lead: "Nach Prüfung öffnet sich Ihr geschützter Praxisbereich.",
 } as const;
 
+/** CTA-Texte nur auf der öffentlichen Landing (#pricing) */
+export function getPublicPricingPlanCta(planId: RegisterPlanId): string {
+  return planId === "yearly" ? "Jährlichen Zugang anfordern" : "Zugang anfordern";
+}
+
 export const PUBLIC_SITE_DEMO = {
   eyebrow: "Live-Einblick",
   title: "Demo buchen",
-  lead: "Kurzer Einblick in Eingang, Team und Command AI — wir melden uns mit einem Terminvorschlag.",
-  submitLabel: "Anfrage absenden",
+  lead: "Eingang, Team und Command AI in einem kurzen Termin.",
+  trustNote: "Keine automatische Freischaltung — wir melden uns mit einem Terminvorschlag.",
+  submitLabel: "Demo anfragen",
   submitPending: "Wird gesendet …",
   note: "Ihre Angaben werden nur zur Terminvereinbarung genutzt.",
   successTitle: "Anfrage ist eingegangen",
-  successBody: "Vielen Dank — wir melden uns in Kürze per E-Mail mit einem Terminvorschlag.",
+  successBody: "Wir melden uns in Kürze per E-Mail.",
   successAnother: "Weitere Anfrage",
 } as const;
 

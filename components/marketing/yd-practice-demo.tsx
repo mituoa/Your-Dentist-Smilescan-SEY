@@ -23,7 +23,7 @@ export function YdPracticeDemo({ compact = false }: YdPracticeDemoProps) {
     >
       <header className="yd-practice-demo-head">
         <p className="yd-clinical-eyebrow">{PUBLIC_SITE_ABLAUF.eyebrow}</p>
-        <h2 id="yd-practice-demo-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+        <h2 id="yd-practice-demo-title" className="yd-clinical-act-title">
           {compact ? "So läuft jede Anfrage" : PUBLIC_SITE_ABLAUF.title}
         </h2>
       </header>
@@ -36,8 +36,14 @@ export function YdPracticeDemo({ compact = false }: YdPracticeDemoProps) {
               {i < steps.length - 1 ? <span className="yd-practice-demo-step-line" /> : null}
             </div>
             <div className="yd-practice-demo-step-body">
-              <span className="yd-practice-demo-step-phase">{step.phase}</span>
-              <p className="yd-practice-demo-step-title">{step.body}</p>
+              <p className="yd-practice-demo-step-title">
+                <span className="yd-practice-demo-step-phase">{step.phase}</span>
+                <span className="yd-practice-demo-step-sep" aria-hidden>
+                  {" "}
+                  —{" "}
+                </span>
+                {step.body}
+              </p>
             </div>
           </li>
         ))}

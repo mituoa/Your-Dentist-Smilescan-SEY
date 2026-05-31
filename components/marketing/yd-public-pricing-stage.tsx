@@ -4,7 +4,11 @@ import Link from "next/link";
 
 import { YdRegisterPricing } from "@/components/auth/yd-register-pricing";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
-import { PUBLIC_SITE_PRICING, PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
+import {
+  getPublicPricingPlanCta,
+  PUBLIC_SITE_PRICING,
+  PUBLIC_SITE_SECTIONS,
+} from "@/lib/marketing/public-site-ia";
 
 type YdPublicPricingStageProps = {
   initialPlan?: string | null;
@@ -33,7 +37,7 @@ export function YdPublicPricingStage({
     >
       <header className="yd-public-site-section-head">
         <p className="yd-clinical-eyebrow">{PUBLIC_SITE_PRICING.eyebrow}</p>
-        <h2 id="yd-clinical-access-title" className="yd-clinical-act-title yd-clinical-act-title--direct">
+        <h2 id="yd-clinical-access-title" className="yd-clinical-act-title">
           {PUBLIC_SITE_PRICING.title}
         </h2>
         <p className="yd-public-site-section-lead">{PUBLIC_SITE_PRICING.lead}</p>
@@ -52,6 +56,7 @@ export function YdPublicPricingStage({
           prefilledEmail={prefilledEmail}
           variant="access"
           embedded
+          planCta={getPublicPricingPlanCta}
         />
       </div>
     </section>

@@ -80,7 +80,10 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
             <YourDentistBrandLockup size="sm" tagline="Neutral Practice Platform" />
           </Link>
 
-          <nav className="yd-public-site-header-nav hidden lg:flex" aria-label="Hauptnavigation">
+          <nav
+            className="yd-public-site-header-nav hidden min-[900px]:flex"
+            aria-label="Hauptnavigation"
+          >
             {PUBLIC_SITE_NAV.map((item) => (
               <button
                 key={item.sectionId}
@@ -98,7 +101,7 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
               <Link
                 prefetch
                 href={dashboardHref}
-                className="yd-public-site-cta-dashboard hidden lg:inline-flex"
+                className="yd-public-site-cta-dashboard hidden min-[900px]:inline-flex"
               >
                 Zum Dashboard
               </Link>
@@ -110,12 +113,16 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
             >
               {PUBLIC_SITE_HERO.primaryCta}
             </button>
-            <Link prefetch href="/login" className="yd-public-site-cta-login hidden lg:inline-flex">
+            <Link
+              prefetch
+              href="/login"
+              className="yd-public-site-cta-login hidden min-[900px]:inline-flex"
+            >
               Anmelden
             </Link>
             <button
               type="button"
-              className="yd-public-site-menu-btn lg:hidden"
+              className="yd-public-site-menu-btn min-[900px]:hidden"
               aria-expanded={menuOpen}
               aria-controls="yd-public-site-mobile-nav"
               aria-label={menuOpen ? "Menü schließen" : "Menü öffnen"}
@@ -134,7 +141,7 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
       <div
         id="yd-public-site-mobile-nav"
         className={cn(
-          "yd-public-site-mobile-drawer lg:hidden",
+          "yd-public-site-mobile-drawer min-[900px]:hidden",
           menuOpen && "yd-public-site-mobile-drawer--open"
         )}
         aria-hidden={!menuOpen}

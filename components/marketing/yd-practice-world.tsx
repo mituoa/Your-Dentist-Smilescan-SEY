@@ -1,7 +1,7 @@
 import { PUBLIC_SITE_HERO_PREVIEW } from "@/lib/marketing/public-site-ia";
 
 /**
- * Abstrakte Produktvorschau — Eingang + Command AI als WOW-Moment.
+ * Abstrakte Produktvorschau — Eingang + Command AI.
  * Keine Patientendaten auf der öffentlichen Landing.
  */
 export function YdPracticeWorld() {
@@ -11,7 +11,7 @@ export function YdPracticeWorld() {
     <div
       className="yd-practice-world yd-practice-world--premium yd-practice-world--orchestrated yd-practice-world--abstract yd-practice-world--pipeline"
       role="img"
-      aria-label="Produktvorschau: Neue Anfrage strukturiert, Command AI bereitet Antwort vor"
+      aria-label="Produktvorschau: Patientenanfrage eingegangen, Command AI bereitet nächsten Schritt vor"
     >
       <p className="yd-practice-world-kicker">
         <span className="yd-practice-world-kicker-dot" aria-hidden />
@@ -21,7 +21,7 @@ export function YdPracticeWorld() {
       <div className="yd-practice-world-pipeline">
         <article className="yd-practice-world-pipeline-step">
           <p className="yd-practice-world-pipeline-title">{preview.intakeTitle}</p>
-          <ul className="yd-practice-world-abstract-flow" aria-label="Bearbeitungsstand">
+          <ul className="yd-practice-world-abstract-flow" aria-label="Eingang">
             {preview.intakeChecks.map((step) => (
               <li key={step} className="yd-practice-world-abstract-step">
                 <span className="yd-practice-world-abstract-check" aria-hidden>
@@ -40,7 +40,7 @@ export function YdPracticeWorld() {
         <article className="yd-practice-world-pipeline-step yd-practice-world-pipeline-step--command">
           <span className="yd-practice-world-label">{preview.commandLabel}</span>
           <p className="yd-practice-world-command-phrase">„{preview.commandPhrase}"</p>
-          <ul className="yd-practice-world-abstract-flow" aria-label="Command AI Ergebnis">
+          <ul className="yd-practice-world-abstract-flow" aria-label="Command AI">
             {preview.commandOutcomes.map((step) => (
               <li key={step} className="yd-practice-world-abstract-step">
                 <span className="yd-practice-world-abstract-check" aria-hidden>

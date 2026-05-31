@@ -202,6 +202,160 @@ html:has(.yd-public-site-page) {
   color: #8ba3b8;
 }
 
+.yd-public-command-stage--compact {
+  margin-top: 1rem;
+  padding: 1rem 1.125rem;
+}
+
+.yd-public-command-stage--compact .yd-public-command-input {
+  padding: 0.625rem 0.875rem;
+}
+
+.yd-public-command-outcomes--compact {
+  margin-top: 0.625rem;
+  display: grid;
+  gap: 0.375rem;
+}
+
+@media (min-width: 640px) {
+  .yd-public-command-outcomes--compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.yd-public-command-outcome--compact {
+  padding: 0.5rem 0.625rem;
+  align-items: center;
+  gap: 0.4375rem;
+}
+
+.yd-public-command-outcome-check {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.yd-public-command-outcome--compact .yd-public-command-outcome-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.yd-public-site-card--functional .yd-public-site-card-title,
+.yd-public-site-card--functional .yd-public-site-card-body,
+.yd-public-site-card--functional .yd-public-site-audience-card .yd-public-site-card-title {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.yd-public-site-card--functional .yd-public-site-card-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.yd-public-site-card--functional .yd-public-site-card-body {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #4a6278;
+}
+
+.yd-practice-world-priority-hint {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.625rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1a4f9c;
+  background: rgba(47, 128, 237, 0.08);
+  border: 1px solid rgba(47, 128, 237, 0.16);
+  list-style: none;
+}
+
+.yd-ecosystem--lean .yd-ecosystem-head {
+  margin-bottom: 1rem;
+}
+
+.yd-ecosystem--lean .yd-ecosystem-lead {
+  max-width: 36rem;
+}
+
+.yd-ecosystem-panel--lean {
+  padding: 1rem 1.125rem;
+}
+
+.yd-ecosystem-capabilities--lean {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4375rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-ecosystem-cap--lean {
+  padding: 0.4375rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(180, 198, 218, 0.28);
+}
+
+.yd-ecosystem-cap--lean .yd-ecosystem-cap-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3d5266;
+}
+
+.yd-public-site-section--demo-emphasis .yd-public-site-demo-panel {
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  border-radius: 22px;
+  border: 1px solid rgba(47, 128, 237, 0.18);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 253, 250, 0.96) 0%,
+    rgba(237, 244, 252, 0.92) 100%
+  );
+  box-shadow:
+    0 20px 48px rgba(47, 128, 237, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.yd-public-site-demo-trust {
+  margin: 0.375rem 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #6b849c;
+}
+
+.yd-public-site-step--title-only {
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.yd-public-site-step--title-only .yd-public-site-card-title {
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.yd-practice-demo-step-title {
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #3d5266;
+}
+
+.yd-practice-demo-step-phase {
+  font-weight: 600;
+  color: #0c1929;
+}
+
+.yd-practice-demo-step-sep {
+  color: #8ba3b8;
+}
+
 /* Produkt-Mockup — fünf Momente, keine UI-Collage */
 .yd-practice-world--essence {
   width: 100%;
@@ -1351,6 +1505,53 @@ button.yd-public-site-cta-register {
   font-size: 0.8125rem;
   line-height: 1.45;
   color: #4a6278;
+}
+
+.yd-public-site-perspective-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.yd-public-site-perspective-card {
+  padding: 1rem 1.125rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(180, 198, 218, 0.18);
+}
+
+.yd-public-site-perspective-label {
+  margin: 0 0 0.625rem;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0c1929;
+}
+
+.yd-public-site-perspective-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.375rem;
+}
+
+.yd-public-site-perspective-list li {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #4a6278;
+}
+
+.yd-public-command-demos {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .yd-public-command-demos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .yd-public-command-examples {

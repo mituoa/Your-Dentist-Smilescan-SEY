@@ -12,6 +12,7 @@ import {
   YdPublicSiteFuerWen,
   YdPublicSiteHero,
   YdPublicSiteNutzen,
+  YdPublicSitePerspective,
   YdPublicSiteProblem,
 } from "@/components/marketing/yd-public-site-sections";
 
@@ -36,6 +37,8 @@ export function YdHomeDesktop({
       <YdPublicSiteHero />
 
       <YdPublicSiteProblem />
+
+      <YdPublicSitePerspective />
 
       <YdPracticeDemo />
 

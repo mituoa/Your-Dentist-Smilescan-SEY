@@ -29,6 +29,8 @@ type YdRegisterPricingProps = {
   variant?: "full" | "compact" | "access";
   /** Inside YdPublicPricingStage — no duplicate intro, no outer section id. */
   embedded?: boolean;
+  /** Öffentliche Landing — einheitliche CTA-Texte ohne „registrieren“. */
+  planCta?: (planId: RegisterPlanId) => string;
 };
 
 function buildRegisterHref(plan: RegisterPlanId, inviteToken: string, prefilledEmail: string) {
@@ -47,6 +49,7 @@ export function YdRegisterPricing({
   sectionId = "pricing",
   variant = "full",
   embedded = false,
+  planCta,
 }: YdRegisterPricingProps) {
   const router = useRouter();
   const compact = variant === "compact";
@@ -127,13 +130,15 @@ export function YdRegisterPricing({
                   )}
                   onClick={() => router.push(buildRegisterHref(id, inviteToken, prefilledEmail))}
                 >
-                  {access
-                    ? active
-                      ? AUTH_ACCESS_COPY.pricingPlanCtaActive
-                      : AUTH_ACCESS_COPY.pricingPlanCtaSelect
-                    : active
-                      ? "Mit diesem Plan registrieren"
-                      : "Plan wählen"}
+                  {access && planCta
+                    ? planCta(id)
+                    : access
+                      ? active
+                        ? AUTH_ACCESS_COPY.pricingPlanCtaActive
+                        : AUTH_ACCESS_COPY.pricingPlanCtaSelect
+                      : active
+                        ? "Mit diesem Plan registrieren"
+                        : "Plan wählen"}
                 </button>
               </div>
             </article>
