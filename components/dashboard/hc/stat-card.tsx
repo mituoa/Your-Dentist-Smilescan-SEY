@@ -6,14 +6,11 @@ import {
   ClipboardList,
   ListTodo,
   Sparkles,
-  TrendingUp,
   UserPlus,
   type LucideIcon,
 } from "lucide-react";
 
 import { KpiHoverPreview } from "@/components/dashboard/hc/kpi-hover-preview";
-import { KpiReviewHoverPreview } from "@/components/dashboard/hc/kpi-review-hover-preview";
-import type { KpiReviewPatientLine } from "@/components/dashboard/hc/kpi-review-hover-preview";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 
@@ -40,15 +37,11 @@ type StatCardProps = {
   value: string | number;
   iconName: DashboardKpiIconName;
   footnote?: string;
-  footnotePositive?: boolean;
-  /** Primary KPI — stronger emphasis in the row */
-  primary?: boolean;
   href?: string;
-  inlinePreview?: StatCardInlinePreview;
+  /** Einzeiliger Hover-Hinweis (dezenter Tooltip) */
+  hoverHint?: string;
   hoverLines?: string[];
-  reviewPatients?: KpiReviewPatientLine[];
-  reviewCtaHref?: string;
-  /** @deprecated Prefer hoverLines / reviewPatients — kept for client-only usage */
+  /** @deprecated Prefer hoverHint — kept for client-only usage */
   hoverPreview?: ReactNode;
 };
 
@@ -57,103 +50,51 @@ export function HcStatCard({
   value,
   iconName,
   footnote,
-  footnotePositive = true,
-  primary = false,
   href,
-  inlinePreview,
+  hoverHint,
   hoverLines,
-  reviewPatients,
-  reviewCtaHref = "/inbox",
   hoverPreview,
 }: StatCardProps) {
   const Icon = KPI_ICON_BY_NAME[iconName] ?? ClipboardList;
 
   const resolvedHoverPreview =
     hoverPreview ??
-    (reviewPatients ? (
-      <KpiReviewHoverPreview patients={reviewPatients} ctaHref={reviewCtaHref} />
-    ) : hoverLines?.length ? (
-      <KpiHoverPreview lines={hoverLines} />
+    (hoverHint || hoverLines?.length ? (
+      <KpiHoverPreview hint={hoverHint} lines={hoverLines} />
     ) : null);
 
   const cardBody = (
     <div
       className={cn(
-        "yd-dash-surface yd-dash-kpi-card flex min-w-0 flex-col p-4 md:p-5",
-        href && "yd-dash-kpi-card--linked",
-        primary ? "yd-dash-kpi-card--primary min-h-[168px] md:min-h-[176px]" : "min-h-[142px] md:min-h-[148px]"
+        "yd-dash-surface yd-dash-kpi-card flex min-w-0 flex-col p-4 md:px-5 md:py-[1.125rem]",
+        href && "yd-dash-kpi-card--linked"
       )}
     >
-      <div className="mb-3 flex items-center gap-2.5">
-        <span
-          className={cn(
-            "flex shrink-0 items-center justify-center rounded-full text-white",
-            primary ? "h-10 w-10 md:h-11 md:w-11" : "h-9 w-9 md:h-10 md:w-10"
-          )}
-          style={{
-            background: YD.accent.iconGradient,
-            boxShadow: primary
-              ? "0 6px 16px rgba(47, 128, 237, 0.28)"
-              : "0 4px 12px rgba(47, 128, 237, 0.2)",
-          }}
-        >
-          <Icon
-            className={
-              primary ? "h-[18px] w-[18px] md:h-[19px] md:w-[19px]" : "h-[16px] w-[16px] md:h-[17px] md:w-[17px]"
-            }
-            strokeWidth={1.65}
-          />
+      <div className="mb-2.5 flex items-center gap-2.5">
+        <span className="yd-dash-kpi-card__icon flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-[2.375rem] md:w-[2.375rem]">
+          <Icon className="h-[16px] w-[16px] md:h-[17px] md:w-[17px]" strokeWidth={1.65} />
         </span>
         <p
-          className={cn(
-            "leading-snug",
-            primary ? "text-[14px] font-semibold" : "text-[13px] font-medium"
-          )}
-          style={{ color: primary ? YD.text.primary : YD.text.secondary }}
+          className="text-[13px] font-medium leading-snug tracking-[-0.01em]"
+          style={{ color: YD.text.secondary }}
         >
           {title}
         </p>
       </div>
-      <p
-        className={cn(
-          "yd-dash-kpi font-semibold",
-          primary && "yd-dash-kpi--primary",
-          !primary && "yd-dash-kpi-quiet text-[1.625rem]"
-        )}
-      >
-        {value}
-      </p>
+      <p className="yd-dash-kpi yd-dash-kpi--balanced font-semibold">{value}</p>
       {footnote ? (
         <p
-          className={cn(
-            "mt-2 inline-flex items-center gap-1 text-[11px] font-medium leading-snug",
-            primary && "text-[12px]"
-          )}
-          style={{ color: footnotePositive ? YD.trend.up : YD.text.muted }}
+          className="mt-1.5 text-[11px] font-medium leading-snug md:text-[12px]"
+          style={{ color: YD.text.muted }}
         >
-          {!primary && footnotePositive ? (
-            <TrendingUp className="h-3 w-3 shrink-0 opacity-80" strokeWidth={2} />
-          ) : null}
           {footnote}
         </p>
-      ) : null}
-      {inlinePreview && (inlinePreview.names.length > 0 || inlinePreview.moreLabel) ? (
-        <div className="yd-dash-kpi-inline-preview mt-3 border-t pt-3">
-          {inlinePreview.names.map((name) => (
-            <p key={name} className="yd-dash-kpi-inline-preview__name truncate">
-              {name}
-            </p>
-          ))}
-          {inlinePreview.moreLabel ? (
-            <p className="yd-dash-kpi-inline-preview__more">{inlinePreview.moreLabel}</p>
-          ) : null}
-        </div>
       ) : null}
     </div>
   );
 
   return (
-    <div className={cn("group relative min-w-0", primary && "z-[1]")}>
+    <div className="group relative min-w-0">
       {href ? (
         <Link href={href} className="block min-w-0 no-underline">
           {cardBody}

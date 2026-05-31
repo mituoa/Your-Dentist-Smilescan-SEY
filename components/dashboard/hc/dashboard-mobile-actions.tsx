@@ -145,9 +145,9 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
-          className="inline-flex h-11 min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-[#2F80ED] px-5 text-[14px] font-semibold text-white shadow-[0_4px_16px_rgba(47,128,237,0.24)]"
+          className="yd-dash-mobile-actions-btn inline-flex min-h-[44px] w-full items-center justify-center gap-2 px-5 transition-[transform,box-shadow] duration-200 touch-manipulation"
         >
-          <Plus className="h-4 w-4" strokeWidth={2} />
+          <Plus className="h-4 w-4 text-[#2F80ED]" strokeWidth={2} />
           Neu
         </button>
       </div>

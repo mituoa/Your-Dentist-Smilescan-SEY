@@ -6,9 +6,10 @@
 /* —— Native mobile drawer (100dvh, safe areas, scroll) —— */
 @media (max-width: 767px) {
   .yd-mobile-nav-backdrop {
-    background: rgba(12, 25, 41, 0.12) !important;
-    backdrop-filter: blur(16px) saturate(1.1);
-    -webkit-backdrop-filter: blur(16px) saturate(1.1);
+    background: rgba(12, 25, 41, 0.16) !important;
+    backdrop-filter: blur(12px) saturate(1.06);
+    -webkit-backdrop-filter: blur(12px) saturate(1.06);
+    cursor: default;
   }
 
   .yd-mobile-nav-panel {
@@ -112,14 +113,14 @@
 /* —— Dashboard mobile shell —— */
 @media (max-width: 767px) {
   .yd-dashboard {
-    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
     overflow-x: hidden;
   }
 
   .yd-awaken-canvas:has(.yd-dashboard--reference) {
-    padding: 0.625rem max(0.75rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom))
-      max(0.75rem, env(safe-area-inset-left)) !important;
-    border-radius: 28px !important;
+    padding: 0.5rem max(0.875rem, env(safe-area-inset-right)) max(1.25rem, env(safe-area-inset-bottom))
+      max(0.875rem, env(safe-area-inset-left)) !important;
+    border-radius: 24px !important;
   }
 
   main:has(.yd-dashboard--reference) {
@@ -129,94 +130,77 @@
   .yd-dash-mobile {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
     min-width: 0;
   }
 
   .yd-dash-mobile__header {
-    padding-top: 0.125rem;
+    padding-top: 0.25rem;
+  }
+
+  .yd-dash-mobile__eyebrow {
+    margin: 0;
+    color: #8ba3b8;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    line-height: 1.35;
+    text-transform: uppercase;
   }
 
   .yd-dash-mobile__title {
-    margin: 0;
+    margin: 0.375rem 0 0;
     color: #0a1628;
-    font-size: 1.375rem;
+    font-size: 1.3125rem;
     font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
+    letter-spacing: -0.032em;
+    line-height: 1.22;
   }
 
-  .yd-dash-mobile__priority {
+  .yd-dash-mobile__status-line {
     margin: 0.5rem 0 0;
-    color: #0c1929;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    letter-spacing: -0.015em;
+    color: #5e7389;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     line-height: 1.45;
   }
 
-  .yd-dash-mobile__status {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    min-width: 0;
-  }
-
-  .yd-dash-mobile__status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    min-height: 2rem;
-    padding: 0.25rem 0.625rem;
-    border-radius: 999px;
-    border: 1px solid rgba(180, 198, 218, 0.32);
-    background: rgba(255, 255, 255, 0.88);
-    color: #3d5266;
-    font-size: 0.6875rem;
+  .yd-dash-mobile__section-label {
+    margin: 0 0 0.5rem;
+    color: #8ba3b8;
+    font-size: 0.625rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+    text-transform: uppercase;
   }
 
-  .yd-dash-mobile__status-pill--active {
-    color: #166534;
-    border-color: rgba(134, 239, 172, 0.45);
-    background: rgba(220, 252, 231, 0.55);
-  }
-
-  .yd-dash-mobile__status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #22c55e;
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.14);
-  }
-
-  .yd-dash-mobile__kpis {
+  .yd-dash-mobile__kpi-stack {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 0.5rem;
     min-width: 0;
   }
 
   .yd-dash-mobile__kpi-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.625rem;
+    gap: 0.5rem;
     min-width: 0;
   }
 
   .yd-dash-mobile-kpi {
     display: flex;
-    min-height: 4.75rem;
+    min-height: 4.5rem;
     min-width: 0;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-radius: 20px;
-    border: 1px solid rgba(160, 178, 198, 0.38);
+    gap: 0.6875rem;
+    padding: 0.8125rem 0.875rem;
+    border-radius: 18px;
+    border: 1px solid rgba(160, 178, 198, 0.34);
     background: #ffffff;
-    box-shadow: 0 1px 2px rgba(15, 35, 58, 0.04), 0 8px 22px rgba(30, 91, 189, 0.07);
+    box-shadow: 0 1px 2px rgba(15, 35, 58, 0.03), 0 6px 18px rgba(30, 91, 189, 0.05);
     text-decoration: none;
     transition:
       box-shadow 200ms ease,
@@ -225,39 +209,40 @@
   }
 
   .yd-dash-mobile-kpi:active {
-    transform: scale(0.99);
+    transform: scale(0.992);
   }
 
   .yd-dash-mobile-kpi--emphasis {
-    border-color: rgba(47, 128, 237, 0.22);
-    box-shadow: 0 2px 4px rgba(15, 35, 58, 0.05), 0 12px 28px rgba(47, 128, 237, 0.1);
+    border-color: rgba(47, 128, 237, 0.18);
+    box-shadow: 0 1px 2px rgba(15, 35, 58, 0.04), 0 8px 22px rgba(47, 128, 237, 0.07);
   }
 
   .yd-dash-mobile-kpi__icon {
     display: flex;
-    height: 2.5rem;
-    width: 2.5rem;
+    height: 2.25rem;
+    width: 2.25rem;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    background: linear-gradient(145deg, #6ba8f5 0%, #2f80ed 42%, #1a4f9c 100%);
-    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.22);
+    color: #2f80ed;
+    background: rgba(47, 128, 237, 0.08);
+    box-shadow: none;
   }
 
   .yd-dash-mobile-kpi__title {
     margin: 0;
-    color: #5e7389;
-    font-size: 0.6875rem;
+    color: #64748b;
+    font-size: 0.625rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
     line-height: 1.3;
   }
 
   .yd-dash-mobile-kpi__value {
     margin: 0.125rem 0 0;
     color: #0a1628;
-    font-size: 1.375rem;
+    font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: -0.03em;
     line-height: 1.1;
@@ -265,8 +250,8 @@
   }
 
   .yd-dash-mobile-kpi__hint {
-    margin: 0.2rem 0 0;
-    color: #8ba3b8;
+    margin: 0.15rem 0 0;
+    color: #94a3b8;
     font-size: 0.625rem;
     font-weight: 500;
     line-height: 1.3;
@@ -276,10 +261,33 @@
     margin: 0;
   }
 
+  .yd-dash-mobile__today .yd-dash-section {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .yd-dash-mobile__today .yd-dash-today-count {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #7a92a8 !important;
+  }
+
+  .yd-dash-mobile__today .yd-dash-surface {
+    border-radius: 18px !important;
+    box-shadow: 0 1px 2px rgba(15, 35, 58, 0.03), 0 6px 18px rgba(30, 91, 189, 0.05) !important;
+  }
+
+  .yd-dash-mobile__today .yd-dash-patient-card > div {
+    gap: 0.875rem;
+  }
+
   .yd-dash-mobile__today .yd-dash-primary-action {
-    min-height: 2.75rem;
+    min-height: 2.625rem;
     width: 100%;
-    margin-top: 0.25rem;
+    margin-top: 0.125rem;
+    font-size: 0.8125rem;
+    box-shadow: 0 3px 12px rgba(47, 128, 237, 0.18);
   }
 
   @media (min-width: 400px) {
@@ -290,42 +298,56 @@
 
     .yd-dash-mobile__today .yd-dash-primary-action {
       width: auto;
-      min-width: 7.5rem;
+      min-width: 7.25rem;
     }
   }
 
+  .yd-dash-mobile-actions-trigger .yd-dash-mobile-actions-btn {
+    min-height: 2.75rem;
+    width: 100%;
+    border-radius: 999px;
+    border: 1px solid rgba(47, 128, 237, 0.22);
+    background: #ffffff;
+    color: #1a4f9c;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    box-shadow: 0 1px 3px rgba(15, 35, 58, 0.04);
+  }
+
+  .yd-dash-mobile-actions-trigger .yd-dash-mobile-actions-btn:active {
+    transform: scale(0.992);
+  }
+
   .yd-dash-mobile__fold {
-    margin-top: 0.25rem;
+    margin-top: 0.125rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid rgba(180, 198, 218, 0.14);
   }
 
   .yd-dash-mobile__fold-panel {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.625rem;
     min-width: 0;
   }
 
   .yd-dash-mobile__fold-panel .yd-dash-analytics-card {
     min-height: 0 !important;
+    border-radius: 18px !important;
   }
 
   .yd-mobile-topbar-grid {
     display: grid;
-    grid-template-columns: 2.75rem 1fr auto;
+    grid-template-columns: 2.75rem 1fr 2.75rem;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0;
     padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
     padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
   }
 
-  .yd-mobile-topbar-brand {
+  .yd-mobile-topbar-brand-spacer {
     min-height: 2.5rem;
-    align-items: center;
-  }
-
-  .yd-mobile-topbar-brand .yd-brand-lockup {
-    transform: scale(0.92);
-    transform-origin: center center;
   }
 
   html[data-mobile-nav-open] {

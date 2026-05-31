@@ -34,7 +34,7 @@ function NeuerFallLink({ pathname }: { pathname: string }) {
     <Link
       href={`/create-case?from=${from}`}
       title="Neuer Fall"
-      className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--primary inline-flex h-10 min-h-[40px] items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-white transition hover:brightness-[1.03] active:scale-[0.99]"
+      className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--primary inline-flex items-center gap-2"
     >
       <Plus className="h-4 w-4 shrink-0" strokeWidth={2} />
       <span>Neuer Fall</span>
@@ -57,7 +57,7 @@ export function TopbarContextActions({ role }: TopbarContextActionsProps) {
     <div className="flex shrink-0 items-center gap-2">
       {(variant === "both" || variant === "newTask") && (
         <NewTaskModalTrigger
-          className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--quiet inline-flex h-10 min-h-[40px] items-center gap-2 rounded-full border px-4 text-[13px] font-medium"
+          className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--secondary inline-flex items-center gap-2"
           label="Neue Aufgabe"
           showIcon
         />

@@ -11,7 +11,6 @@ type DashboardMobileShellProps = {
   greeting: string;
   displayName: string;
   pendingApprovals: number | null;
-  newCount: number | null;
   openTaskCount: number;
   weeklyCounts: number[] | null;
   unseenCount: number | null;
@@ -41,7 +40,7 @@ function MobileKpiCard({
       className={`yd-dash-mobile-kpi ${emphasis ? "yd-dash-mobile-kpi--emphasis" : ""}`}
     >
       <div className="yd-dash-mobile-kpi__icon" aria-hidden>
-        <Icon strokeWidth={1.65} className="h-[17px] w-[17px] text-white" />
+        <Icon strokeWidth={1.65} className="h-[16px] w-[16px]" />
       </div>
       <div className="yd-dash-mobile-kpi__body min-w-0">
         <p className="yd-dash-mobile-kpi__title">{title}</p>
@@ -56,7 +55,6 @@ export function DashboardMobileShell({
   greeting,
   displayName,
   pendingApprovals,
-  newCount,
   openTaskCount,
   weeklyCounts,
   unseenCount,
@@ -64,61 +62,62 @@ export function DashboardMobileShell({
   totalCount,
   priorityItems,
 }: DashboardMobileShellProps) {
-  const subtitle = "Praxis aktiv · Vorgänge und Patienten im Überblick";
+  const reviewCount = pendingApprovals ?? 0;
+  const statusLine =
+    reviewCount > 0 && openTaskCount > 0
+      ? `${reviewCount} zur Durchsicht · ${openTaskCount} Aufgaben`
+      : reviewCount > 0
+        ? `${reviewCount} ${reviewCount === 1 ? "Einsendung" : "Einsendungen"} zur Durchsicht`
+        : openTaskCount > 0
+          ? `${openTaskCount} ${openTaskCount === 1 ? "Aufgabe" : "Aufgaben"} offen`
+          : "Alles im Blick — keine offenen Punkte";
+
   return (
     <div className="yd-dash-mobile md:hidden">
       <header className="yd-dash-mobile__header">
+        <p className="yd-dash-mobile__eyebrow">Praxisüberblick</p>
         <h1 className="yd-dash-mobile__title">
           {greeting}, {displayName}
         </h1>
-        <p className="yd-dash-mobile__priority">{subtitle}</p>
+        <p className="yd-dash-mobile__status-line" role="status">
+          {statusLine}
+        </p>
       </header>
 
-      <DashboardMobileActions className="mb-1" />
+      <DashboardMobileActions />
 
-      <div className="yd-dash-mobile__status" role="status">
-        <span className="yd-dash-mobile__status-pill yd-dash-mobile__status-pill--active">
-          <span className="yd-dash-mobile__status-dot" aria-hidden />
-          Praxis aktiv
-        </span>
-        <span className="yd-dash-mobile__status-pill">
-          {pendingApprovals ?? 0}{" "}
-          {(pendingApprovals ?? 0) === 1 ? "Freigabe" : "Freigaben"}
-        </span>
-        <span className="yd-dash-mobile__status-pill">
-          {openTaskCount} {openTaskCount === 1 ? "Aufgabe" : "Aufgaben"}
-        </span>
-      </div>
-
-      <section className="yd-dash-mobile__kpis" aria-label="Prioritäten">
-        <MobileKpiCard
-          href="/inbox"
-          title="Bereit zur Prüfung"
-          value={unseenCount === null ? "—" : unseenCount}
-          hint="Antworten vorbereitet"
-          icon={ClipboardList}
-          emphasis
-        />
-        <div className="yd-dash-mobile__kpi-row">
-          <MobileKpiCard
-            href="/inbox"
-            title="Neue Fälle"
-            value={newCount === null ? "—" : newCount}
-            hint={newCount ? "Heute eingegangen" : "Keine neuen"}
-            icon={UserPlus}
-          />
-          <MobileKpiCard
-            href="/relay"
-            title="Offene Aufgaben"
-            value={openTaskCount}
-            hint={openTaskCount > 0 ? "Offen" : "Alles erledigt"}
-            icon={ListTodo}
-          />
-        </div>
+      <section className="yd-dash-mobile__today" aria-label="Heute wichtig">
+        <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
       </section>
 
-      <section className="yd-dash-mobile__today">
-        <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
+      <section className="yd-dash-mobile__kpis" aria-label="Kennzahlen">
+        <h2 className="yd-dash-mobile__section-label">Überblick</h2>
+        <div className="yd-dash-mobile__kpi-stack">
+          <MobileKpiCard
+            href="/inbox"
+            title="Neue Einsendungen"
+            value={unseenCount === null ? "—" : unseenCount}
+            hint="Patientenfälle zur Durchsicht"
+            icon={ClipboardList}
+            emphasis
+          />
+          <div className="yd-dash-mobile__kpi-row">
+            <MobileKpiCard
+              href="/inbox"
+              title="Aktive Fälle"
+              value={seenCount === null ? "—" : seenCount}
+              hint="In Bearbeitung"
+              icon={UserPlus}
+            />
+            <MobileKpiCard
+              href="/relay"
+              title="Offene Aufgaben"
+              value={openTaskCount}
+              hint="Praxisworkflow"
+              icon={ListTodo}
+            />
+          </div>
+        </div>
       </section>
 
       <details className="yd-dash-fold yd-dash-mobile__fold">
@@ -131,7 +130,7 @@ export function DashboardMobileShell({
         </summary>
         <div className="yd-dash-fold__panel yd-dash-mobile__fold-panel">
           <HcAnalyticsBars counts={weeklyCounts} totalLabel="Patientenanfragen · 7 Tage" />
-          <div className="mt-4">
+          <div className="mt-3">
             <HcDistributionArc unseen={unseenCount} seen={seenCount} total={totalCount} />
           </div>
         </div>

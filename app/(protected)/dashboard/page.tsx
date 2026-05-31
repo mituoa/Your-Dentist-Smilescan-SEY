@@ -16,9 +16,10 @@ import { HcMonthCalendar } from "@/components/dashboard/hc/month-calendar";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import {
-  buildHeroInlinePreview,
-  buildReviewHoverPatients,
-} from "@/lib/dashboard/kpi-preview-helpers";
+  kpiHoverAktiveFaelle,
+  kpiHoverAufgaben,
+  kpiHoverEinsendungen,
+} from "@/lib/dashboard/kpi-hover-copy";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
@@ -35,31 +36,6 @@ import {
 import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
-
-function buildNewCasesHover(newCount: number | null): string[] {
-  const n = newCount ?? 0;
-  return [
-    n > 0 ? `${n} neue Fälle` : "keine neuen Fälle",
-    "Patientenanfragen im Tracker",
-    n > 0 ? "Eingang heute" : "ruhiger Tagesverlauf",
-  ];
-}
-
-function buildReviewHover(openCount: number): string[] {
-  if (openCount === 0) return ["Keine Antworten warten auf Freigabe"];
-  return [
-    `${openCount} ${openCount === 1 ? "Fall" : "Fälle"} vorbereitet`,
-    "Im Tracker prüfen und freigeben",
-  ];
-}
-
-function buildTasksHover(openTasks: number): string[] {
-  if (openTasks === 0) return ["Keine offenen Aufgaben", "Relay ist auf Stand"];
-  return [
-    `${openTasks} offene Aufgaben`,
-    "Team und Relay koordinieren",
-  ];
-}
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -134,18 +110,6 @@ export default async function DashboardPage() {
 
   const subtitle = "Praxis aktiv · Vorgänge und Patienten im Überblick";
 
-  const newCasesFootnote =
-    newCount !== null && newCount > 0
-      ? `${newCount} neue Fälle`
-      : "Keine neuen Fälle";
-
-  const heroInline =
-    priorityItems && unseenCount !== null
-      ? buildHeroInlinePreview(priorityItems, unseenCount)
-      : { names: [] as string[], moreLabel: undefined as string | undefined };
-
-  const reviewHoverPatients = buildReviewHoverPatients(priorityItems ?? []);
-
   return (
     <div
       className="yd-dashboard yd-dashboard--reference relative mx-auto w-full min-w-0 pb-8"
@@ -158,7 +122,6 @@ export default async function DashboardPage() {
         greeting={greeting}
         displayName={doctorLabel}
         pendingApprovals={unseenCount}
-        newCount={newCount}
         openTaskCount={openTaskCount}
         weeklyCounts={weeklyCounts}
         unseenCount={unseenCount}
@@ -186,52 +149,46 @@ export default async function DashboardPage() {
           </p>
         ) : null}
 
+        <DashboardAmbientToday>
+          <div className="yd-dash-zone yd-dash-zone--today yd-dash-zone--today-first">
+            <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
+          </div>
+        </DashboardAmbientToday>
+
         <DashboardAmbientKpis>
           <div className="yd-dash-zone yd-dash-zone--kpis grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:gap-5">
-            <div className="min-w-0 order-1 sm:col-span-2 lg:col-span-6">
+            <div className="min-w-0 sm:col-span-1 lg:col-span-4">
               <HcStatCard
-                primary
                 href="/inbox"
-                title="Bereit zur Prüfung"
+                title="Neue Einsendungen"
                 value={unseenCount === null ? "—" : unseenCount}
                 iconName="clipboard-list"
-                footnote="Antworten vorbereitet"
-                footnotePositive={(unseenCount ?? 0) > 0}
-                inlinePreview={heroInline}
-                reviewPatients={reviewHoverPatients}
-                reviewCtaHref="/inbox"
+                footnote="Patientenfälle zur Durchsicht"
+                hoverHint={kpiHoverEinsendungen(unseenCount)}
               />
             </div>
-            <div className="min-w-0 order-2 sm:col-span-1 lg:col-span-3">
+            <div className="min-w-0 sm:col-span-1 lg:col-span-4">
               <HcStatCard
                 href="/inbox"
-                title="Neue Fälle"
-                value={newCount === null ? "—" : newCount}
+                title="Aktive Fälle"
+                value={seenCount === null ? "—" : seenCount}
                 iconName="user-plus"
-                footnote={newCasesFootnote}
-                footnotePositive={newCount === 0}
-                hoverLines={buildNewCasesHover(newCount)}
+                footnote="In Bearbeitung"
+                hoverHint={kpiHoverAktiveFaelle(seenCount)}
               />
             </div>
-            <div className="min-w-0 order-3 sm:col-span-1 lg:col-span-3">
+            <div className="min-w-0 sm:col-span-1 lg:col-span-4">
               <HcStatCard
                 href="/relay"
                 title="Offene Aufgaben"
                 value={openTaskCount}
                 iconName="list-todo"
-                footnote={openTaskCount > 0 ? "Im Relay bearbeiten" : "Alles erledigt"}
-                footnotePositive={openTaskCount === 0}
-                hoverLines={buildTasksHover(openTaskCount)}
+                footnote="Praxisworkflow"
+                hoverHint={kpiHoverAufgaben(openTaskCount)}
               />
             </div>
           </div>
         </DashboardAmbientKpis>
-
-        <DashboardAmbientToday>
-          <div className="yd-dash-zone yd-dash-zone--today">
-            <DashboardTodayPriority items={priorityItems} readyCount={unseenCount} />
-          </div>
-        </DashboardAmbientToday>
 
         <DashboardAmbientCharts>
           <div className="yd-dash-zone yd-dash-zone--charts yd-dash-zone--secondary grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">

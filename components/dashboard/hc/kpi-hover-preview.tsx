@@ -1,8 +1,20 @@
 type KpiHoverPreviewProps = {
-  lines: string[];
+  lines?: string[];
+  /** Einzeiliger Tooltip — bevorzugt für KPI-Karten */
+  hint?: string;
 };
 
-export function KpiHoverPreview({ lines }: KpiHoverPreviewProps) {
+export function KpiHoverPreview({ lines, hint }: KpiHoverPreviewProps) {
+  if (hint) {
+    return (
+      <p className="py-0.5 text-[11px] font-medium leading-snug" style={{ color: "#5e7389" }}>
+        {hint}
+      </p>
+    );
+  }
+
+  if (!lines?.length) return null;
+
   return (
     <ul className="space-y-1.5 py-0.5">
       {lines.map((line) => (

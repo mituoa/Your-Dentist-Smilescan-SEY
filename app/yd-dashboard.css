@@ -426,15 +426,19 @@
 }
 
 .yd-dashboard .yd-dash-zone {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.625rem;
 }
 
 .yd-dashboard .yd-dash-zone--kpis {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.625rem;
 }
 
 .yd-dashboard .yd-dash-zone--today {
-  margin-bottom: 1.625rem;
+  margin-bottom: 0;
+}
+
+.yd-dashboard .yd-dash-zone--today-first {
+  margin-top: 0;
 }
 
 .yd-dashboard .yd-dash-zone--charts,
@@ -477,17 +481,35 @@
 }
 
 .yd-dashboard .yd-dash-kpi-card {
+  min-height: 7.75rem;
   transition:
     box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 280ms ease;
 }
 
-.yd-dashboard .yd-dash-kpi-card--primary {
-  border-color: rgba(47, 128, 237, 0.22) !important;
-  box-shadow:
-    0 2px 4px rgba(15, 35, 58, 0.05),
-    0 12px 32px rgba(47, 128, 237, 0.12) !important;
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-kpi-card {
+    min-height: 8rem;
+  }
+}
+
+.yd-dashboard .yd-dash-kpi-card__icon {
+  color: #2f80ed;
+  background: rgba(47, 128, 237, 0.08);
+  box-shadow: none;
+}
+
+.yd-dashboard .yd-dash-kpi--balanced {
+  font-size: 1.875rem;
+  letter-spacing: -0.038em;
+  color: #0a1628;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-kpi--balanced {
+    font-size: 2rem;
+  }
 }
 
 .yd-dashboard .yd-dash-interactive-card {
@@ -501,14 +523,8 @@
   .yd-dashboard .yd-dash-interactive-card:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 4px 8px rgba(15, 35, 58, 0.06),
-      0 16px 36px rgba(30, 91, 189, 0.12) !important;
-  }
-
-  .yd-dashboard .yd-dash-kpi-card--primary:hover {
-    box-shadow:
-      0 6px 12px rgba(15, 35, 58, 0.07),
-      0 20px 40px rgba(47, 128, 237, 0.14) !important;
+      0 4px 8px rgba(15, 35, 58, 0.05),
+      0 14px 32px rgba(30, 91, 189, 0.1) !important;
   }
 }
 
@@ -528,15 +544,15 @@
 }
 
 .yd-dashboard .yd-dash-kpi-float-preview__panel {
-  border-radius: 16px;
-  border: 1px solid rgba(180, 198, 218, 0.38);
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 198, 218, 0.34);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  padding: 0.5rem 0.65rem;
   box-shadow:
-    0 8px 24px rgba(30, 91, 189, 0.1),
-    0 2px 6px rgba(15, 35, 58, 0.05);
+    0 6px 18px rgba(30, 91, 189, 0.08),
+    0 1px 4px rgba(15, 35, 58, 0.04);
 }
 
 @media (hover: hover) {

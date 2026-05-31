@@ -30,8 +30,9 @@ export function WorkspaceToolbar({
   inboxCount,
 }: WorkspaceToolbarProps) {
   return (
-    <header className="yd-workspace-toolbar hidden shrink-0 md:flex">
-      <div className="yd-workspace-toolbar__inner">
+    <header className="yd-workspace-toolbar hidden shrink-0 md:block">
+      <div className="yd-workspace-toolbar__shell">
+        <div className="yd-workspace-toolbar__inner">
         <WorkspacePageContext />
 
         <form action="/inbox" method="get" className="yd-workspace-toolbar__search relative min-w-0">
@@ -45,7 +46,7 @@ export function WorkspaceToolbar({
             type="search"
             name="q"
             placeholder="Patient oder Anfrage suchen …"
-            className="yd-workspace-toolbar__search-input h-11 w-full min-w-0 pl-11 pr-4 text-[13px] outline-none transition placeholder:text-[#8BA3B8] focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.14)]"
+            className="yd-workspace-toolbar__search-input w-full min-w-0 pl-11 pr-4 text-[13px] outline-none transition placeholder:text-[#8BA3B8] focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.14)]"
           />
         </form>
 
@@ -80,6 +81,7 @@ export function WorkspaceToolbar({
             avatarUrl={avatarUrl}
             displayName={displayName}
           />
+        </div>
         </div>
       </div>
     </header>

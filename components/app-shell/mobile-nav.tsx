@@ -112,17 +112,20 @@ function MobileDrawerShell({ children }: { children: ReactNode }) {
         className={cn(
           "yd-mobile-nav-backdrop fixed z-[44] border-0 md:hidden",
           "transition-[opacity,backdrop-filter] duration-[420ms] ease-[cubic-bezier(0.25,1,0.35,1)]",
-          open ? "opacity-100" : "pointer-events-none opacity-0"
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         )}
         aria-label="Navigation schließen"
         tabIndex={open ? 0 : -1}
         onClick={close}
+        onPointerDown={(event) => {
+          if (event.target === event.currentTarget) close();
+        }}
       />
       <div
         className={cn(
           "yd-mobile-nav-root fixed z-[45] md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
-          "max-md:pointer-events-none",
-          open && "yd-mobile-nav-root--open max-md:pointer-events-auto"
+          "max-md:pointer-events-none max-md:bottom-0 max-md:left-0 max-md:top-0 max-md:w-auto max-md:justify-start",
+          open && "yd-mobile-nav-root--open"
         )}
         style={
           {

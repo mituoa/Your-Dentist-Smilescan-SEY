@@ -68,9 +68,7 @@ export function Sidebar({
 
       <div className="relative shrink-0 md:px-0 md:pt-5 md:pb-2">
         <div className="yd-mobile-sidebar-drawer-head md:hidden">
-          <div className="yd-mobile-drawer-brand min-w-0">
-            <BrandMark compact />
-          </div>
+          <div className="yd-mobile-drawer-brand-spacer" aria-hidden />
           <button
             type="button"
             onClick={() => mobileNav?.close()}

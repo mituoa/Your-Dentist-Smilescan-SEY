@@ -1,7 +1,7 @@
 "use client";
 
-import { BrandMark } from "./brand-mark";
-import { MobileMenuButton, useMobileNav } from "./mobile-nav";
+import { MobileMenuButton } from "./mobile-nav";
+import { MobileWorkspaceBrandAnchor } from "./mobile-workspace-brand";
 import { UserMenu } from "./user-menu";
 import { WorkspaceToolbar } from "./workspace-toolbar";
 import { cn } from "@/lib/utils";
@@ -30,28 +30,18 @@ export function ProtectedTopbar({
   displayName,
   inboxCount,
 }: ProtectedTopbarProps) {
-  const mobileNav = useMobileNav();
-  const drawerOpen = mobileNav.open;
-
   return (
     <>
+      <MobileWorkspaceBrandAnchor />
       <header
         className={cn(
           "yd-protected-topbar yd-mobile-workspace-topbar sticky top-0 z-30 flex shrink-0 flex-col pt-[env(safe-area-inset-top,0px)] md:hidden",
           "border-b border-[rgba(180,198,218,0.22)] bg-white/78 backdrop-blur-[16px]"
         )}
       >
-        <div className="yd-mobile-topbar-grid flex h-[52px] w-full items-center gap-2 px-3">
+        <div className="yd-mobile-topbar-grid flex h-[52px] w-full items-center">
           <MobileMenuButton />
-          <div
-            className={cn(
-              "yd-mobile-topbar-brand flex min-w-0 flex-1 justify-center transition-opacity duration-200",
-              drawerOpen && "pointer-events-none opacity-0"
-            )}
-            aria-hidden={drawerOpen}
-          >
-            <BrandMark compact />
-          </div>
+          <div className="yd-mobile-topbar-brand-spacer min-w-0 flex-1" aria-hidden />
           <div className="flex shrink-0 justify-end">
             <UserMenu
               email={email}
