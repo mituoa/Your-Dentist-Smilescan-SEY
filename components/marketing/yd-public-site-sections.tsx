@@ -71,6 +71,9 @@ export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
           <h1 id="yd-public-hero-title" className="yd-public-site-hero-headline">
             {PUBLIC_SITE_HERO.title}
           </h1>
+          {PUBLIC_SITE_HERO.lead ? (
+            <p className="yd-public-site-hero-lead">{PUBLIC_SITE_HERO.lead}</p>
+          ) : null}
           <YdPublicSiteHeroCta showSignIn={showSignIn} />
         </div>
         <aside className="yd-public-site-hero-visual">
@@ -97,7 +100,7 @@ export function YdPublicSiteNutzen({ compact = false }: YdPublicSiteNutzenProps)
         "yd-public-site-section yd-public-site-section--nutzen yd-public-os-awaken-field yd-public-site-scroll-anchor",
         compact && "yd-public-site-section--nutzen-compact"
       )}
-      style={{ ["--yd-public-field-i" as string]: "2" }}
+      style={{ ["--yd-public-field-i" as string]: "2.5" }}
       aria-labelledby="yd-public-nutzen-title"
     >
       <header className="yd-public-site-section-head">
@@ -131,7 +134,7 @@ export function YdPublicSiteFuerWen() {
     <section
       id={PUBLIC_SITE_SECTIONS.fuerWen}
       className="yd-public-site-section yd-public-site-section--audience yd-public-os-awaken-field yd-public-site-scroll-anchor"
-      style={{ ["--yd-public-field-i" as string]: "3" }}
+      style={{ ["--yd-public-field-i" as string]: "5" }}
       aria-labelledby="yd-public-fuer-wen-title"
     >
       <header className="yd-public-site-section-head">
@@ -163,7 +166,7 @@ export function YdPublicSiteEinfuehrung() {
     <section
       id={PUBLIC_SITE_SECTIONS.einfuehrung}
       className="yd-public-site-section yd-public-site-section--intro yd-public-os-awaken-field yd-public-site-scroll-anchor"
-      style={{ ["--yd-public-field-i" as string]: "4" }}
+      style={{ ["--yd-public-field-i" as string]: "6" }}
       aria-labelledby="yd-public-einfuehrung-title"
     >
       <header className="yd-public-site-section-head">
@@ -198,7 +201,7 @@ export function YdPublicSiteDemo() {
     <section
       id={PUBLIC_SITE_SECTIONS.demo}
       className="yd-public-site-section yd-public-site-section--demo yd-public-os-awaken-field yd-public-site-scroll-anchor"
-      style={{ ["--yd-public-field-i" as string]: "6" }}
+      style={{ ["--yd-public-field-i" as string]: "8" }}
       aria-labelledby="yd-public-demo-title"
     >
       <div className="yd-public-site-demo-panel">

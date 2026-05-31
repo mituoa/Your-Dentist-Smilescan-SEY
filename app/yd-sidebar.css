@@ -53,6 +53,20 @@
   .yd-nav-active-trace {
     display: block;
   }
+
+  .yd-desktop-nav-rail {
+    align-self: stretch;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  #app-sidebar.yd-awaken-sidebar {
+    margin-top: 0;
+    margin-bottom: 0;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
 }
 
 .yd-nav-icon-shell {

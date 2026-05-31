@@ -77,8 +77,129 @@ html:has(.yd-public-site-page) {
   max-width: 22rem;
 }
 
+.yd-public-site-hero-lead {
+  margin: 0.625rem 0 0;
+  max-width: 32rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #5a6f84;
+}
+
 .yd-public-site-hero--landing .yd-public-site-hero-cta-stack {
-  margin-top: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+/* Command AI — zentrales Versprechen */
+.yd-public-site-section--command {
+  padding-top: clamp(2rem, 4vw, 3rem);
+}
+
+.yd-public-command-title {
+  max-width: 28rem;
+}
+
+.yd-public-command-stage {
+  margin-top: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border-radius: 20px;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  background: linear-gradient(
+    155deg,
+    rgba(255, 253, 250, 0.92) 0%,
+    rgba(248, 252, 255, 0.88) 45%,
+    rgba(236, 244, 252, 0.82) 100%
+  );
+  box-shadow: 0 12px 40px rgba(47, 128, 237, 0.07);
+}
+
+.yd-public-command-input {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(47, 128, 237, 0.22);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.yd-public-command-input-icon {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgba(167, 139, 250, 0.14) 0%, rgba(47, 128, 237, 0.12) 100%);
+  color: #5a6f84;
+}
+
+.yd-public-command-input-text {
+  margin: 0;
+  padding-top: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: #0c1929;
+}
+
+.yd-public-command-outcomes {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yd-public-command-outcome {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-public-command-outcome-icon {
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(47, 128, 237, 0.08);
+  color: #1a4f9c;
+}
+
+.yd-public-command-outcome-label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0c1929;
+}
+
+.yd-public-command-outcome-detail {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #6b849c;
+}
+
+.yd-public-command-outcome-arrow {
+  margin-left: auto;
+  margin-top: 0.25rem;
+  color: #8ba3b8;
+  opacity: 0.7;
+}
+
+.yd-public-command-foot {
+  margin: 0.875rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #8ba3b8;
 }
 
 /* Produkt-Mockup — fünf Momente, keine UI-Collage */
@@ -311,6 +432,9 @@ html:has(.yd-public-site-page) {
   right: max(0.75rem, env(safe-area-inset-right));
   bottom: max(0.75rem, env(safe-area-inset-bottom));
   width: min(18rem, 88vw);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.8);
   background: linear-gradient(
@@ -341,6 +465,13 @@ html:has(.yd-public-site-page) {
 
 .yd-public-site-mobile-link:active {
   background: rgba(47, 128, 237, 0.06);
+}
+
+.yd-public-site-mobile-panel nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* —— Hero CTAs — calm premium, not conversion-heavy —— */
@@ -795,6 +926,27 @@ html:has(.yd-public-site-page) {
   flex-direction: column;
   gap: 0;
   min-width: 0;
+}
+
+.yd-public-site-mobile-main > section,
+.yd-public-site-mobile-main > .yd-public-site-section {
+  margin-top: clamp(1.25rem, 4vw, 1.75rem);
+}
+
+.yd-public-site-mobile-main > .yd-public-site-mobile-ctas {
+  margin-top: 0.75rem;
+}
+
+.yd-public-site-mobile-main > .yd-public-site-hero-mobile {
+  margin-top: 0;
+}
+
+.yd-public-site-hero-mobile-lead {
+  margin: 0.5rem 0 0;
+  max-width: 22rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: #5a6f84;
 }
 
 .yd-public-site-mobile-page .yd-public-site-header {

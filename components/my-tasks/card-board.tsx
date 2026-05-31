@@ -198,8 +198,8 @@ export function CardBoard({
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
     >
-      <div className="overflow-x-auto pb-2">
-        <div className="grid min-w-[980px] grid-cols-3 gap-6">
+      <div className="max-md:overflow-x-hidden md:overflow-x-auto md:pb-2">
+        <div className="grid max-md:min-w-0 max-md:grid-cols-1 max-md:gap-4 md:min-w-[980px] md:grid-cols-3 md:gap-6">
           <BoardColumn
             id="open"
             title={columnTitles?.open ?? "Offen"}

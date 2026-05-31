@@ -142,7 +142,7 @@ function MobileDrawerShell({ children }: { children: ReactNode }) {
 
 function DesktopNavRail({ children }: { children: ReactNode }) {
   return (
-    <div className="flex h-full w-[108px] max-w-[108px] shrink-0 items-center justify-center py-2 pl-2">
+    <div className="yd-desktop-nav-rail flex h-full w-[108px] max-w-[108px] shrink-0 items-stretch self-stretch py-1 pl-2 pr-0">
       <div className="yd-mobile-nav-panel relative flex h-full w-full min-h-0 flex-col overflow-hidden">
         <div className="yd-mobile-nav-panel-scroll flex min-h-0 flex-1 flex-col overflow-hidden">
           {children}

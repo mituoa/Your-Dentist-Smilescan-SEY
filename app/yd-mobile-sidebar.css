@@ -1,44 +1,35 @@
 /**
- * Mobile sidebar / drawer — unter Topbar, content-hug, Premium-Spacing.
+ * Mobile drawer — full-height overlay, separate from desktop rail.
  */
 
 @media (max-width: 767px) {
   .yd-mobile-workspace-topbar {
     --yd-mobile-topbar-h: 52px;
-    --yd-mobile-topbar-offset: calc(
-      var(--yd-mobile-topbar-h) + env(safe-area-inset-top, 0px)
-    );
-    z-index: 50;
+    z-index: 60;
   }
 
   .yd-mobile-nav-portal {
     position: relative;
-    z-index: 45;
+    z-index: 55;
   }
 
   .yd-mobile-nav-backdrop {
-    top: var(--yd-mobile-topbar-offset) !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    background: rgba(12, 25, 41, 0.1) !important;
-    backdrop-filter: blur(12px) saturate(1.06);
-    -webkit-backdrop-filter: blur(12px) saturate(1.06);
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 54;
+    background: rgba(12, 25, 41, 0.18) !important;
+    backdrop-filter: blur(10px) saturate(1.04);
+    -webkit-backdrop-filter: blur(10px) saturate(1.04);
   }
 
   .yd-mobile-nav-root {
-    top: var(--yd-mobile-topbar-offset) !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    padding:
-      0.25rem
-      max(0.5rem, env(safe-area-inset-right, 0px))
-      max(0.375rem, env(safe-area-inset-bottom, 0px))
-      max(0.5rem, env(safe-area-inset-left, 0px));
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 55;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
     pointer-events: none;
   }
 
@@ -47,33 +38,34 @@
   }
 
   .yd-mobile-nav-panel {
-    width: min(86vw, 280px);
-    max-width: 280px;
-    height: auto;
-    max-height: calc(100dvh - var(--yd-mobile-topbar-offset) - 0.5rem);
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: min(88vw, 300px);
+    max-width: 300px;
+    height: 100dvh;
+    max-height: 100dvh;
     margin: 0;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.92);
+    border-radius: 0;
+    border: 0;
+    border-right: 1px solid rgba(180, 198, 218, 0.28);
     background: linear-gradient(
       168deg,
       rgba(255, 255, 255, 0.99) 0%,
-      rgba(250, 252, 255, 0.97) 100%
+      rgba(250, 252, 255, 0.98) 100%
     );
-    box-shadow:
-      0 16px 48px rgba(15, 35, 58, 0.1),
-      0 2px 12px rgba(47, 128, 237, 0.04),
-      inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px) saturate(1.08);
-    -webkit-backdrop-filter: blur(20px) saturate(1.08);
-    will-change: transform, opacity;
+    box-shadow: 12px 0 48px rgba(15, 35, 58, 0.12);
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
   }
 
   .yd-mobile-nav-panel-scroll {
-    min-height: 0;
-    flex: 0 1 auto;
     display: flex;
+    min-height: 0;
+    flex: 1;
     flex-direction: column;
+    overflow: hidden;
   }
 
   #app-sidebar.yd-mobile-nav-sidebar {
@@ -82,9 +74,9 @@
     box-shadow: none !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    height: auto;
+    height: 100%;
     min-height: 0;
-    max-height: inherit;
+    max-height: none;
   }
 
   #app-sidebar.yd-mobile-nav-sidebar .yd-glow-pulse {
@@ -95,24 +87,23 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.625rem;
-    padding: 0.625rem 0.75rem 0.5rem;
+    gap: 0.75rem;
+    padding: 0.75rem 0.875rem 0.625rem;
     border-bottom: 1px solid rgba(180, 198, 218, 0.16);
   }
 
-  .yd-mobile-sidebar-drawer-label {
-    margin: 0;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    text-transform: none;
-    color: #3d5266;
+  .yd-mobile-drawer-brand {
+    min-width: 0;
+  }
+
+  .yd-mobile-drawer-brand .yd-brand-lockup-tagline {
+    font-size: 0.625rem;
   }
 
   .yd-mobile-sidebar-close {
     display: inline-flex;
-    height: 2rem;
-    width: 2rem;
+    height: 2.25rem;
+    width: 2.25rem;
     align-items: center;
     justify-content: center;
     border-radius: 10px;
@@ -121,24 +112,20 @@
     color: #64748b;
   }
 
-  .yd-mobile-sidebar-close:active {
-    background: rgba(47, 128, 237, 0.05);
-  }
-
   .yd-mobile-sidebar-nav {
-    flex: 0 1 auto;
+    flex: 1;
     min-height: 0;
   }
 
   .yd-mobile-sidebar-scroll {
-    padding: 0.25rem 0.4375rem 0.375rem;
+    padding: 0.375rem 0.5rem 0.5rem;
     -webkit-overflow-scrolling: touch;
   }
 
   .yd-nav-primary-group::before {
-    content: "Arbeit";
+    content: "Praxis";
     display: block;
-    padding: 0.25rem 0.5625rem 0.3125rem;
+    padding: 0.375rem 0.5625rem 0.25rem;
     font-size: 0.625rem;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -147,13 +134,13 @@
   }
 
   .yd-nav-secondary-group {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
     border-top: 1px solid rgba(180, 198, 218, 0.14);
   }
 
   .yd-nav-secondary-group::before {
-    content: "Weitere";
+    content: "Verwaltung";
     display: block;
     padding: 0 0.5625rem 0.3125rem;
     font-size: 0.625rem;
@@ -163,23 +150,32 @@
     color: #94a3b8;
   }
 
-  .yd-nav-primary-group {
+  .yd-nav-primary-group,
+  .yd-nav-secondary-group {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
   }
 
-  .yd-nav-secondary-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.0625rem;
-  }
-
-  .yd-nav-primary-group .yd-ambient-nav-link {
+  .yd-nav-primary-group .yd-ambient-nav-link,
+  .yd-mobile-nav-command-row {
     min-height: 2.75rem;
     padding: 0.375rem 0.5625rem;
     border-radius: 12px;
     gap: 0.625rem;
+  }
+
+  .yd-mobile-nav-command-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  .yd-mobile-nav-command-row:active {
+    background: rgba(47, 128, 237, 0.04);
   }
 
   .yd-nav-primary-group .yd-nav-icon-shell {
@@ -187,15 +183,9 @@
     width: 2.25rem;
   }
 
-  .yd-nav-primary-group .yd-nav-icon-shell svg {
-    height: 1.0625rem;
-    width: 1.0625rem;
-  }
-
   .yd-nav-primary-group .yd-nav-label {
     font-size: 0.8125rem;
     font-weight: 500;
-    letter-spacing: -0.01em;
     color: #0c1929;
   }
 
@@ -205,91 +195,25 @@
     color: #7a92a8;
   }
 
-  .yd-nav-primary-group .yd-nav-link-active {
-    background: rgba(47, 128, 237, 0.04) !important;
-    box-shadow: none !important;
-  }
-
   .yd-nav-tier-secondary.yd-ambient-nav-link {
     min-height: 2.5rem;
     padding: 0.3125rem 0.5625rem;
     border-radius: 11px;
   }
 
-  .yd-nav-tier-secondary .yd-nav-label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #5a6f84;
-  }
-
-  .yd-nav-tier-secondary.yd-nav-link-active .yd-nav-label {
-    color: #2d5f9c;
-  }
-
   .yd-nav-tier-secondary .yd-nav-desc {
     display: none;
   }
 
-  .yd-nav-tier-secondary .yd-nav-icon-shell {
-    height: 2rem;
-    width: 2rem;
-  }
-
-  .yd-nav-tier-secondary .yd-nav-icon-shell svg {
-    height: 0.9375rem;
-    width: 0.9375rem;
-  }
-
   .yd-mobile-sidebar-footer {
-    padding:
-      0.4375rem 0.5rem
-      max(0.625rem, env(safe-area-inset-bottom, 0px));
+    padding: 0.625rem 0.75rem max(0.75rem, env(safe-area-inset-bottom, 0px));
     border-top: 1px solid rgba(180, 198, 218, 0.14);
-    background: transparent;
   }
 
-  .yd-mobile-sidebar-footer-actions {
+  .yd-mobile-sidebar-footer .yd-sidebar-rail-footer {
     display: flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-
-  .yd-mobile-sidebar-command {
-    display: inline-flex;
-    flex: 1;
-    min-width: 0;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    margin: 0;
-    padding: 0.4375rem 0.625rem;
-    border: 1px solid rgba(180, 198, 218, 0.18);
-    border-radius: 999px;
-    background: rgba(248, 252, 255, 0.7);
-    box-shadow: none;
-    color: #4a6278;
-  }
-
-  .yd-mobile-sidebar-command:active {
-    background: rgba(237, 244, 252, 0.92);
-  }
-
-  .yd-mobile-sidebar-command-label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #475569;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-  }
-
-  .yd-mobile-sidebar-footer-actions form {
-    flex-shrink: 0;
-  }
-
-  .yd-mobile-sidebar-footer-actions .yd-sidebar-rail-footer,
-  .yd-mobile-sidebar-footer-logout {
-    display: contents;
+    justify-content: flex-start;
+    padding: 0;
   }
 
   .yd-command-assist-fab {
@@ -297,7 +221,14 @@
   }
 
   html[data-mobile-nav-open] .yd-mobile-workspace-topbar {
-    z-index: 50;
+    z-index: 60;
+  }
+}
+
+@media (min-width: 768px) {
+  .yd-mobile-nav-panel {
+    height: 100%;
+    border-radius: 44px;
   }
 }
 

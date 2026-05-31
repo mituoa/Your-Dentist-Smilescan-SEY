@@ -5,18 +5,13 @@ import Link from "next/link";
 import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 import { PUBLIC_SITE_HERO, PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
 import { scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
-import type { RegisterPlanId } from "@/lib/auth/register-plans";
 
-type YdPublicSiteMobileCtasProps = {
-  selectedPlan: RegisterPlanId;
-};
-
-export function YdPublicSiteMobileCtas({ selectedPlan }: YdPublicSiteMobileCtasProps) {
+export function YdPublicSiteMobileCtas() {
   return (
     <section className="yd-public-site-mobile-ctas" aria-label="Zugang zur Praxis">
       <Link
         prefetch
-        href={buildRegisterEntryHref("", "", selectedPlan)}
+        href={buildRegisterEntryHref()}
         className="yd-clinical-cta-primary yd-public-site-cta-primary"
       >
         {PUBLIC_SITE_HERO.primaryCta}

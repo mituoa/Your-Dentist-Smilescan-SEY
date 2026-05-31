@@ -2,6 +2,7 @@
 
 import { COMMAND_AI_PUBLIC } from "@/lib/marketing/command-ai-public-copy";
 import { PUBLIC_ENTRY_COPY } from "@/lib/marketing/public-entry-copy";
+import { PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
 
 const REPLACES = [
   "WhatsApp-Chaos",
@@ -31,7 +32,12 @@ const COMMAND_ASSISTS = COMMAND_AI_PUBLIC.assists;
 /** Public positioning — Relay + Command AI as calm practice infrastructure. */
 export function YdEcosystemRelayCommand() {
   return (
-    <section className="yd-ecosystem" aria-labelledby="yd-ecosystem-title">
+    <section
+      id={PUBLIC_SITE_SECTIONS.plattform}
+      className="yd-ecosystem yd-public-site-section yd-public-site-scroll-anchor yd-public-os-awaken-field"
+      style={{ ["--yd-public-field-i" as string]: "4" }}
+      aria-labelledby="yd-ecosystem-title"
+    >
       <header className="yd-ecosystem-head">
         <p className="yd-clinical-eyebrow">{PUBLIC_ENTRY_COPY.ecosystem.eyebrow}</p>
         <h2 id="yd-ecosystem-title" className="yd-clinical-act-title yd-clinical-act-title--direct">

@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
 import { MobileCommandNavEntry } from "./mobile-command-nav-entry";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { NavItem } from "./nav-item";
 import { JournalNavGroup } from "./journal-nav-group";
@@ -34,7 +35,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-auto max-md:max-h-none max-md:bg-transparent max-md:shadow-none md:mt-3 md:mb-4 md:h-[calc(100dvh-1.75rem)] md:w-full md:overflow-visible md:rounded-[44px] md:border"
+      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-none max-md:bg-transparent max-md:shadow-none md:h-full md:w-full md:overflow-visible md:rounded-[44px] md:border md:self-stretch"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,
@@ -61,7 +62,9 @@ export function Sidebar({
       />
 
       <header className="yd-mobile-sidebar-drawer-head relative shrink-0 md:hidden">
-        <p className="yd-mobile-sidebar-drawer-label">Menü</p>
+        <div className="yd-mobile-drawer-brand min-w-0">
+          <YourDentistBrandLockup size="sm" tagline="Praxis Workspace" />
+        </div>
         <button
           type="button"
           onClick={() => mobileNav?.close()}
@@ -72,22 +75,22 @@ export function Sidebar({
         </button>
       </header>
 
-      <div className="relative hidden shrink-0 md:flex md:justify-center md:px-0 md:pb-2 md:pt-6">
+      <div className="relative hidden shrink-0 md:flex md:justify-center md:px-0 md:pb-3 md:pt-5">
         <BrandMark />
       </div>
 
       <nav
-        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-col overflow-hidden max-md:flex-none md:flex-1 md:items-center md:justify-center md:gap-3 md:overflow-y-auto md:overflow-x-hidden md:px-2 md:py-4"
+        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-1 flex-col overflow-hidden max-md:min-h-0 md:items-center md:justify-center md:gap-3 md:overflow-y-auto md:overflow-x-hidden md:px-2 md:py-3"
         aria-label="Hauptnavigation"
       >
-        <div className="yd-mobile-sidebar-scroll min-h-0 flex-none overflow-y-auto overflow-x-hidden overscroll-y-contain px-2 pb-1 pt-0.5 max-md:max-h-[min(52dvh,420px)] md:contents md:overflow-visible md:p-0">
+        <div className="yd-mobile-sidebar-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-2 pb-2 pt-1 max-md:px-3 md:contents md:overflow-visible md:p-0">
           <div className="yd-nav-primary-group flex flex-col md:contents">
             {role === "doctor" && (
               <NavItem
                 href="/dashboard"
                 iconName="dashboard"
                 label="Atlas"
-                description="Start"
+                description="Überblick"
                 ambientPreview={navAmbient?.dashboard}
                 tier="primary"
               />
@@ -97,7 +100,7 @@ export function Sidebar({
               href="/inbox"
               iconName="inbox"
               label="Tracker"
-              description="Einsendungen"
+              description="Eingänge"
               badge={inboxCount}
               ambientPreview={navAmbient?.inbox}
               tier="primary"
@@ -107,12 +110,26 @@ export function Sidebar({
               href="/relay"
               iconName="relay"
               label="Relay"
-              description="Aufgaben & Nachrichten"
+              description="Team & Übergaben"
               badge={myTasksCount}
               badgeUrgent={myTasksUrgent}
               ambientPreview={navAmbient?.relay}
               tier="primary"
             />
+
+            <div className="md:hidden">
+              <NavItem
+                href="/my-tasks"
+                iconName="tasks"
+                label="Aufgaben"
+                description="Offene Schritte"
+                tier="primary"
+              />
+            </div>
+
+            <div className="md:hidden">
+              <MobileCommandNavEntry />
+            </div>
           </div>
 
           {role === "doctor" && (
@@ -137,15 +154,12 @@ export function Sidebar({
         </div>
       </nav>
 
-      <div className="yd-sidebar-rail-footer relative hidden shrink-0 px-2 pb-6 pt-1 md:flex md:justify-center">
+      <div className="yd-sidebar-rail-footer relative hidden shrink-0 px-2 pb-5 pt-2 md:flex md:justify-center">
         <SignOutSidebarForm variant="rail" />
       </div>
 
       <footer className="yd-mobile-sidebar-footer relative shrink-0 md:hidden">
-        <div className="yd-mobile-sidebar-footer-actions">
-          <MobileCommandNavEntry />
-          <SignOutSidebarForm variant="rail" />
-        </div>
+        <SignOutSidebarForm variant="rail" />
       </footer>
     </aside>
   );

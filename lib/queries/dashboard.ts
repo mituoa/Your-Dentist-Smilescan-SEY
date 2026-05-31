@@ -96,6 +96,7 @@ export type SubmissionPreviewRow = {
   id: string;
   patient_name: string | null;
   patient_email: string | null;
+  patient_notes: string | null;
   created_at: string;
   seen_at: string | null;
 };
@@ -176,7 +177,7 @@ export const getRecentSubmissionsPreview = cache(
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("submissions")
-      .select("id, patient_name, patient_email, created_at, seen_at")
+      .select("id, patient_name, patient_email, patient_notes, created_at, seen_at")
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(5);
@@ -192,6 +193,7 @@ export const getRecentSubmissionsPreview = cache(
         id: row.id as string,
         patient_name: (row.patient_name as string | null) ?? null,
         patient_email: (row.patient_email as string | null) ?? null,
+        patient_notes: (row.patient_notes as string | null) ?? null,
         created_at: row.created_at as string,
         seen_at: (row.seen_at as string | null) ?? null,
       })),

@@ -56,8 +56,13 @@
     letter-spacing: -0.022em;
   }
 
-  .yd-dash-mobile-toolbar {
-    margin-bottom: 0.875rem;
+  .yd-dash-mobile-search-form {
+    position: relative;
+  }
+
+  .yd-dash-mobile-search-input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.14);
   }
 
   .yd-dash-flow-mobile-label {

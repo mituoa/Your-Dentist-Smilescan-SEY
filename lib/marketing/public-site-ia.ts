@@ -4,6 +4,9 @@
 
 export const PUBLIC_SITE_SECTIONS = {
   nutzen: "nutzen",
+  ablauf: "ablauf",
+  command: "command-ai",
+  plattform: "plattform",
   fuerWen: "fuer-wen",
   einfuehrung: "einfuehrung",
   /** Scroll target: pricing cards island (desktop) / compact block (mobile). */
@@ -13,24 +16,28 @@ export const PUBLIC_SITE_SECTIONS = {
 
 export const PUBLIC_SITE_NAV = [
   { label: "Nutzen", sectionId: PUBLIC_SITE_SECTIONS.nutzen },
+  { label: "Command AI", sectionId: PUBLIC_SITE_SECTIONS.command },
+  { label: "Relay", sectionId: PUBLIC_SITE_SECTIONS.plattform },
+  { label: "Für wen", sectionId: PUBLIC_SITE_SECTIONS.fuerWen },
+  { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
+  { label: "Demo", sectionId: PUBLIC_SITE_SECTIONS.demo },
+] as const;
+
+/** Mobile Landing — kompakte Scroll-IA (ohne Desktop-Only-Sektionen). */
+export const PUBLIC_SITE_NAV_MOBILE = [
+  { label: "Nutzen", sectionId: PUBLIC_SITE_SECTIONS.nutzen },
   { label: "Für wen", sectionId: PUBLIC_SITE_SECTIONS.fuerWen },
   { label: "Einführung", sectionId: PUBLIC_SITE_SECTIONS.einfuehrung },
   { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
-  { label: "Demo buchen", sectionId: PUBLIC_SITE_SECTIONS.demo },
-] as const;
-
-/** Mobile Drawer — Sektionen, die auf der Mobilseite vorhanden sind. */
-export const PUBLIC_SITE_NAV_MOBILE = [
-  { label: "Nutzen", sectionId: PUBLIC_SITE_SECTIONS.nutzen },
-  { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
-  { label: "Demo buchen", sectionId: PUBLIC_SITE_SECTIONS.demo },
+  { label: "Demo", sectionId: PUBLIC_SITE_SECTIONS.demo },
 ] as const;
 
 export const PUBLIC_SITE_HERO = {
   eyebrow: "Medizinische Praxisinfrastruktur",
   title: "Struktur für Eingang, Team und Fall.",
   titleLine2: "",
-  lead: "",
+  lead:
+    "Patient:innen senden Anliegen strukturiert ein. Ihr Team koordiniert am Fall — mit Relay, Aufgaben und Command AI, die den nächsten Schritt vorbereitet.",
   primaryCta: "Praxis registrieren",
   secondaryCta: "Live-Einblick ansehen",
   signInPrefix: "Bereits registriert?",
@@ -71,6 +78,28 @@ export const PUBLIC_SITE_NUTZEN = {
       title: "Leise Unterstützung im Hintergrund",
       body: "Command AI hilft bei Prioritäten, nächsten Schritten und vorbereiteten Antworten, ohne den Arbeitsfluss zu stören.",
       label: "Command AI",
+    },
+  ],
+} as const;
+
+export const PUBLIC_SITE_COMMAND = {
+  eyebrow: "Command AI",
+  title: "Ein Befehl. Der nächste Schritt ist vorbereitet.",
+  lead:
+    "Sie formulieren, was als Nächstes passieren soll — Command AI bereitet Nachricht, Aufgabe und Teamhinweis strukturiert vor. Freigabe und Versand bleiben bei Ihnen.",
+  exampleCommand: "Patient Müller Termin anbieten",
+  outcomes: [
+    {
+      label: "Nachricht vorbereitet",
+      detail: "Entwurf zur Patienten-Rückmeldung — kein automatischer Versand.",
+    },
+    {
+      label: "Aufgabe erstellt",
+      detail: "Rückruf oder Termin in Relay und Aufgaben sichtbar.",
+    },
+    {
+      label: "Team informiert",
+      detail: "Rezeption und Assistenz sehen die Übergabe am Fall.",
     },
   ],
 } as const;
@@ -139,7 +168,6 @@ export const PUBLIC_SITE_DEMO = {
     "Kurzer Einblick in Eingang, Relay, Aufgaben und Command AI — wir melden uns mit einem Terminvorschlag.",
   submitLabel: "Anfrage absenden",
   submitPending: "Wird gesendet …",
-  secondaryCta: "Impressum",
   note: "Für Praxisinhaber:innen und Teams, die Eingang und interne Abstimmung strukturieren möchten. Ihre Angaben werden nur zur Terminvereinbarung genutzt.",
   successTitle: "Anfrage ist eingegangen",
   successBody:

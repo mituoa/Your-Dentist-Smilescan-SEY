@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 
+import { AtlasMobileWorkspace } from "@/components/dashboard/hc/atlas-mobile-workspace";
 import { DashboardActivityStream } from "@/components/dashboard/hc/dashboard-activity-stream";
 import { DashboardCommandStrip } from "@/components/dashboard/hc/dashboard-command-strip";
 import { DashboardPracticeFlow } from "@/components/dashboard/hc/dashboard-practice-flow";
@@ -72,7 +73,19 @@ export function AtlasOperationalCore({
   });
 
   return (
-    <div className="yd-atlas-core">
+    <>
+      <AtlasMobileWorkspace
+        unseenCount={unseenCount}
+        previewRows={previewRows}
+        openTasks={openTasks}
+        routines={routines}
+        relayConversations={relayConversations}
+        relayUnread={relayUnread}
+        reminderCount={reminderCount}
+        activityEvents={activityEvents}
+      />
+
+      <div className="yd-atlas-core hidden md:block">
       <div className="yd-atlas-state-block" role="status">
         {waitingIntake ? (
           <p className="yd-atlas-state yd-atlas-state--pressure">
@@ -200,5 +213,6 @@ export function AtlasOperationalCore({
         </div>
       </div>
     </div>
+    </>
   );
 }

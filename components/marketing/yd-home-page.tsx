@@ -14,7 +14,7 @@ type YdHomePageProps = {
 };
 
 /**
- * Desktop: editorial narrative (scroll). Mobile: app-like entry (no marketing scroll).
+ * Öffentliche Landing — Desktop (editorial) und Mobile (eigene IA), getrennte Layouts.
  */
 export function YdHomePage({ initialPlan, inviteToken, prefilledEmail }: YdHomePageProps) {
   const [scroll, setScroll] = useState(false);

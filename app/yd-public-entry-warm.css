@@ -505,7 +505,19 @@
 
 /* —— Ecosystem: Relay + Command AI —— */
 .yd-ecosystem {
-  padding: clamp(2.5rem, 5vw, 4rem) 0;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1rem, 3vw, 1.75rem);
+}
+
+.yd-public-site-mobile-page .yd-ecosystem {
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.yd-public-site-mobile-page .yd-practice-demo {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .yd-ecosystem-head {

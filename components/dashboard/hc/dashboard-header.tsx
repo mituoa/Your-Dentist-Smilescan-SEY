@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Bell, MessageCircle, Search } from "lucide-react";
 
-import { DashboardMobileSearch } from "@/components/dashboard/hc/dashboard-mobile-search";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 type DashboardHeaderProps = {
@@ -23,13 +22,12 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   return (
     <header className="yd-dash-header-axis w-full min-w-0 max-w-full">
-      {/* Mobile: eine Zeile Begrüßung — Topbar hat bereits Menü · Marke · Avatar */}
       <div className="yd-dash-header-mobile md:hidden">
-        <h1 className="yd-dash-title yd-dash-title--mobile">{greeting}, {greetingName}</h1>
-        <DashboardMobileSearch inboxCount={inboxCount} />
+        <h1 className="yd-dash-title yd-dash-title--mobile">
+          {greeting}, {greetingName}
+        </h1>
       </div>
 
-      {/* Desktop */}
       <div className="hidden md:block">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
           <div className="min-w-0 lg:max-w-[48%]">
@@ -74,8 +72,8 @@ export function DashboardHeader({
                 className="yd-dash-control relative flex h-11 w-11 items-center justify-center rounded-full"
                 aria-label={
                   inboxCount && inboxCount > 0
-                    ? `Posteingang, ${inboxCount} ungelesen`
-                    : "Posteingang"
+                    ? `Tracker, ${inboxCount} ungelesen`
+                    : "Tracker"
                 }
               >
                 <Bell

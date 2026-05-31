@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import Link from "next/link";
-
 import { PUBLIC_SITE_DEMO } from "@/lib/marketing/public-site-ia";
 import { userFacingDemoRequestError } from "@/lib/marketing/demo-request";
 
@@ -97,7 +95,6 @@ export function YdPublicSiteDemoForm() {
             autoComplete="name"
             disabled={isPending}
             className="yd-public-site-demo-input"
-            placeholder="Dr. Beispiel"
           />
         </label>
         <label className="yd-public-site-demo-field">
@@ -109,7 +106,6 @@ export function YdPublicSiteDemoForm() {
             autoComplete="organization"
             disabled={isPending}
             className="yd-public-site-demo-input"
-            placeholder="Praxisname"
           />
         </label>
         <label className="yd-public-site-demo-field">
@@ -122,7 +118,6 @@ export function YdPublicSiteDemoForm() {
             inputMode="email"
             disabled={isPending}
             className="yd-public-site-demo-input"
-            placeholder="kontakt@praxis.de"
           />
         </label>
         <label className="yd-public-site-demo-field">
@@ -136,7 +131,6 @@ export function YdPublicSiteDemoForm() {
             inputMode="tel"
             disabled={isPending}
             className="yd-public-site-demo-input"
-            placeholder="+49 …"
           />
         </label>
       </div>
@@ -150,7 +144,6 @@ export function YdPublicSiteDemoForm() {
           rows={3}
           disabled={isPending}
           className="yd-public-site-demo-input yd-public-site-demo-textarea"
-          placeholder="Worum geht es im Einblick — Teamgröße, Schwerpunkte …"
         />
       </label>
 
@@ -174,9 +167,6 @@ export function YdPublicSiteDemoForm() {
         >
           {isPending ? PUBLIC_SITE_DEMO.submitPending : PUBLIC_SITE_DEMO.submitLabel}
         </button>
-        <Link href="/impressum" className="yd-clinical-cta-secondary">
-          {PUBLIC_SITE_DEMO.secondaryCta}
-        </Link>
       </div>
     </form>
   );

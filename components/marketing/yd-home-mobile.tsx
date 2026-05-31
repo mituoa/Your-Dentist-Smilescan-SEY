@@ -1,12 +1,14 @@
 "use client";
 
-import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
 import { coerceRegisterPlan, type RegisterPlanId } from "@/lib/auth/register-plans";
+import { YdEntryPricingCompact } from "@/components/auth/yd-entry-pricing-compact";
 import { YdPublicSiteFooter } from "@/components/marketing/yd-public-site-footer";
 import { YdPublicSiteHeader } from "@/components/marketing/yd-public-site-header";
 import { YdPublicSiteMobileCtas } from "@/components/marketing/yd-public-site-mobile-ctas";
 import {
   YdPublicSiteDemo,
+  YdPublicSiteEinfuehrung,
+  YdPublicSiteFuerWen,
   YdPublicSiteHeroMobile,
   YdPublicSiteNutzen,
 } from "@/components/marketing/yd-public-site-sections";
@@ -18,8 +20,8 @@ type YdHomeMobileProps = {
 };
 
 /**
- * Mobile Startseite — eigene IA, ein Dokument-Scroll:
- * Header → Hero → CTAs → Zugang → Nutzen → Demo → Footer
+ * Mobile Landing — eigene IA (kompakt, keine Desktop-Sektionen).
+ * Desktop bleibt editorial in YdHomeDesktop.
  */
 export function YdHomeMobile({
   initialPlan,
@@ -35,9 +37,13 @@ export function YdHomeMobile({
       <main className="yd-public-site-mobile-main" id="yd-public-mobile-main">
         <YdPublicSiteHeroMobile />
 
-        <YdPublicSiteMobileCtas selectedPlan={selectedPlan} />
+        <YdPublicSiteMobileCtas />
 
-        <section className="yd-public-site-mobile-pricing" aria-label="Praxiszugang und Preise">
+        <section
+          id="pricing"
+          className="yd-public-site-mobile-pricing scroll-mt-[5.5rem]"
+          aria-label="Praxiszugang und Preise"
+        >
           <YdEntryPricingCompact
             initialPlan={selectedPlan}
             inviteToken={inviteToken}
@@ -45,7 +51,11 @@ export function YdHomeMobile({
           />
         </section>
 
-        <YdPublicSiteNutzen compact />
+        <YdPublicSiteNutzen />
+
+        <YdPublicSiteFuerWen />
+
+        <YdPublicSiteEinfuehrung />
 
         <YdPublicSiteDemo />
       </main>
