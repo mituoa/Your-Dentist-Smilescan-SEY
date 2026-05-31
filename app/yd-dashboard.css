@@ -133,26 +133,8 @@
   margin-bottom: 0;
 }
 
-.yd-dashboard .yd-dash-zone--actions {
-  margin-top: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.yd-dashboard .yd-dash-action-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-@media (min-width: 768px) {
-  .yd-dashboard .yd-dash-action-row {
-    gap: 0.625rem;
-  }
-}
-
 .yd-dashboard .yd-dash-zone--kpis {
-  margin-top: 0;
+  margin-top: 1.5rem;
 }
 
 /* Legacy premium header (unused) */
@@ -448,7 +430,6 @@
 }
 
 .yd-dashboard .yd-dash-zone--kpis {
-  margin-top: 0;
   margin-bottom: 1.5rem;
 }
 

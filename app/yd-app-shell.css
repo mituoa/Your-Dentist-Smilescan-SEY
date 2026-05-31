@@ -42,16 +42,8 @@
     overflow: hidden;
   }
 
-  .yd-workspace .yd-app-shell-main > main {
-    padding: 0.75rem 1rem 1.25rem !important;
-  }
-
   .yd-workspace .yd-awaken-canvas:has(.yd-dashboard--reference) {
     padding: 1rem 1.25rem 1.5rem !important;
-  }
-
-  .yd-workspace .yd-dashboard--reference .yd-dash-header-axis {
-    padding-top: 0;
   }
 }
 

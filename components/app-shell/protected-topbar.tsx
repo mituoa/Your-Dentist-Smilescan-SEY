@@ -1,11 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-
 import { BrandMark } from "./brand-mark";
 import { MobileMenuButton, useMobileNav } from "./mobile-nav";
-import { TopbarContextActions } from "./topbar-context-actions";
 import { UserMenu } from "./user-menu";
+import { WorkspaceToolbar } from "./workspace-toolbar";
 import { cn } from "@/lib/utils";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -16,9 +14,13 @@ type ProtectedTopbarProps = {
   initialTheme: ThemePreference;
   avatarUrl?: string | null;
   displayName?: string | null;
+  inboxCount?: number;
 };
 
-/** Topbar — Dashboard: mobile shell bar; andere Seiten: Kontext + Profil. */
+/**
+ * App-Shell: Mobile-Topbar (Drawer) + Desktop-Workspace-Toolbar (global).
+ * Dashboard-Inhalt bleibt ohne eigene Aktionsleiste.
+ */
 export function ProtectedTopbar({
   email,
   workspaceName,
@@ -26,23 +28,19 @@ export function ProtectedTopbar({
   initialTheme,
   avatarUrl,
   displayName,
+  inboxCount,
 }: ProtectedTopbarProps) {
-  const pathname = usePathname();
-  const isDashboard = pathname === "/dashboard";
   const mobileNav = useMobileNav();
   const drawerOpen = mobileNav.open;
 
   return (
-    <header
-      className={cn(
-        "yd-protected-topbar sticky top-0 z-30 flex shrink-0 flex-col pt-[env(safe-area-inset-top,0px)]",
-        isDashboard && "yd-mobile-workspace-topbar",
-        isDashboard
-          ? "border-b border-[rgba(180,198,218,0.22)] bg-white/72 backdrop-blur-[16px] md:hidden"
-          : "border-b border-[rgba(180,198,218,0.22)] bg-white/72 backdrop-blur-[16px] md:border-0 md:bg-transparent md:backdrop-blur-none"
-      )}
-    >
-      {isDashboard ? (
+    <>
+      <header
+        className={cn(
+          "yd-protected-topbar yd-mobile-workspace-topbar sticky top-0 z-30 flex shrink-0 flex-col pt-[env(safe-area-inset-top,0px)] md:hidden",
+          "border-b border-[rgba(180,198,218,0.22)] bg-white/78 backdrop-blur-[16px]"
+        )}
+      >
         <div className="yd-mobile-topbar-grid flex h-[52px] w-full items-center gap-2 px-3">
           <MobileMenuButton />
           <div
@@ -65,22 +63,17 @@ export function ProtectedTopbar({
             />
           </div>
         </div>
-      ) : (
-        <div className="flex h-[52px] w-full items-center gap-2.5 px-3.5 md:h-16 md:gap-3 md:px-6">
-          <MobileMenuButton />
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-2 md:gap-3">
-            <TopbarContextActions />
-            <UserMenu
-              email={email}
-              workspaceName={workspaceName}
-              role={role}
-              initialTheme={initialTheme}
-              avatarUrl={avatarUrl}
-              displayName={displayName}
-            />
-          </div>
-        </div>
-      )}
-    </header>
+      </header>
+
+      <WorkspaceToolbar
+        email={email}
+        workspaceName={workspaceName}
+        role={role}
+        initialTheme={initialTheme}
+        avatarUrl={avatarUrl}
+        displayName={displayName}
+        inboxCount={inboxCount}
+      />
+    </>
   );
 }

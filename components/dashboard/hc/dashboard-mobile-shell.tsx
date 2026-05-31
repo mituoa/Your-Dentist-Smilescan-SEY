@@ -5,7 +5,6 @@ import { DashboardMobileActions } from "@/components/dashboard/hc/dashboard-mobi
 import { DashboardTodayPriority } from "@/components/dashboard/hc/dashboard-today-priority";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcDistributionArc } from "@/components/dashboard/hc/distribution-arc";
-import { buildDashboardSubtitle } from "@/lib/dashboard/dashboard-status-copy";
 import type { DashboardPriorityItem } from "@/lib/queries/dashboard";
 
 type DashboardMobileShellProps = {
@@ -65,7 +64,7 @@ export function DashboardMobileShell({
   totalCount,
   priorityItems,
 }: DashboardMobileShellProps) {
-  const subtitle = buildDashboardSubtitle(pendingApprovals, openTaskCount, newCount);
+  const subtitle = "Praxis aktiv · Vorgänge und Patienten im Überblick";
   return (
     <div className="yd-dash-mobile md:hidden">
       <header className="yd-dash-mobile__header">

@@ -150,6 +150,7 @@ export default async function ProtectedLayout({
                 initialTheme={theme}
                 avatarUrl={profileData?.photo_url ?? null}
                 displayName={profileData?.display_name ?? null}
+                inboxCount={inboxCount}
               />
 
               <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(3rem,env(safe-area-inset-bottom)+2rem)] md:p-5 md:pb-6">

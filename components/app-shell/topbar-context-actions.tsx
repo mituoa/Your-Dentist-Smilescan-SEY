@@ -9,10 +9,11 @@ import { NewTaskModalTrigger } from "@/components/my-tasks/new-task-modal";
 
 type ActionVariant = "both" | "newCase" | "newTask" | "none";
 
-function resolveVariant(pathname: string): ActionVariant {
-  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+function resolveVariant(pathname: string, role: "doctor" | "team"): ActionVariant {
+  if (role === "doctor") {
     return "both";
   }
+
   if (pathname.startsWith("/inbox")) {
     return "newCase";
   }
@@ -24,14 +25,6 @@ function resolveVariant(pathname: string): ActionVariant {
   ) {
     return "newTask";
   }
-  if (
-    pathname.startsWith("/profile") ||
-    pathname.startsWith("/journal") ||
-    pathname.startsWith("/settings") ||
-    pathname.startsWith("/admin")
-  ) {
-    return "none";
-  }
   return "none";
 }
 
@@ -41,29 +34,34 @@ function NeuerFallLink({ pathname }: { pathname: string }) {
     <Link
       href={`/create-case?from=${from}`}
       title="Neuer Fall"
-      className="inline-flex h-10 items-center gap-2 rounded-xl px-3 text-[13px] font-medium text-white transition-all hover:opacity-95 sm:px-4 md:px-5 md:text-[14px]"
-      style={{
-        borderRadius: "12px",
-        background: "#2F80ED",
-        boxShadow: "0 4px 12px rgba(47,128,237,0.28), 0 2px 4px rgba(47,128,237,0.18)",
-      }}
+      className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--primary inline-flex h-10 min-h-[40px] items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-white transition hover:brightness-[1.03] active:scale-[0.99]"
     >
-      <Plus className="h-4 w-4 shrink-0" />
-      <span className="hidden sm:inline">Neuer Fall</span>
+      <Plus className="h-4 w-4 shrink-0" strokeWidth={2} />
+      <span>Neuer Fall</span>
     </Link>
   );
 }
 
-/**
- * Kontextuelle Topbar-Aktionen — gleiche Button-Materialität, nur Sichtbarkeit je Route.
- */
-export function TopbarContextActions() {
+type TopbarContextActionsProps = {
+  role: "doctor" | "team";
+};
+
+/** Globale Schnellaktionen — Workspace-Toolbar, nicht Dashboard-Inhalt. */
+export function TopbarContextActions({ role }: TopbarContextActionsProps) {
   const pathname = usePathname() || "";
-  const variant = resolveVariant(pathname);
+  const variant = resolveVariant(pathname, role);
+
+  if (variant === "none") return null;
 
   return (
-    <div className="flex h-10 shrink-0 items-center gap-2 md:gap-3">
-      {(variant === "both" || variant === "newTask") && <NewTaskModalTrigger />}
+    <div className="flex shrink-0 items-center gap-2">
+      {(variant === "both" || variant === "newTask") && (
+        <NewTaskModalTrigger
+          className="yd-workspace-toolbar__cta yd-workspace-toolbar__cta--quiet inline-flex h-10 min-h-[40px] items-center gap-2 rounded-full border px-4 text-[13px] font-medium"
+          label="Neue Aufgabe"
+          showIcon
+        />
+      )}
       {(variant === "both" || variant === "newCase") && <NeuerFallLink pathname={pathname} />}
     </div>
   );

@@ -7,7 +7,6 @@ import {
   DashboardAmbientLower,
   DashboardAmbientToday,
 } from "@/components/dashboard/hc/dashboard-ambient-sections";
-import { DashboardActionRow } from "@/components/dashboard/hc/dashboard-action-row";
 import { DashboardHeader } from "@/components/dashboard/hc/dashboard-header";
 import { DashboardMobileShell } from "@/components/dashboard/hc/dashboard-mobile-shell";
 import { DashboardTodayPriority } from "@/components/dashboard/hc/dashboard-today-priority";
@@ -20,7 +19,6 @@ import {
   buildHeroInlinePreview,
   buildReviewHoverPatients,
 } from "@/lib/dashboard/kpi-preview-helpers";
-import { buildDashboardSubtitle } from "@/lib/dashboard/dashboard-status-copy";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
@@ -34,7 +32,6 @@ import {
   getDashboardPriorityItems,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
-import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +96,6 @@ export default async function DashboardPage() {
     tasksRes,
     weeklyRes,
     previewRes,
-    inboxBadgeRes,
     priorityRes,
   ] = await Promise.all([
     getNewSubmissionsCount(workspaceId),
@@ -108,7 +104,6 @@ export default async function DashboardPage() {
     getOpenTasks(workspaceId),
     getWeeklySubmissionCounts(workspaceId),
     getRecentSubmissionsPreview(workspaceId),
-    countUnseenInboxSubmissions(workspaceId),
     getDashboardPriorityItems(workspaceId, 5),
   ]);
 
@@ -124,8 +119,6 @@ export default async function DashboardPage() {
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
   const previewRows = previewRes.ok ? previewRes.rows : null;
   const priorityItems = priorityRes.ok ? priorityRes.items : null;
-  const inboxCount =
-    inboxBadgeRes.ok && inboxBadgeRes.count > 0 ? inboxBadgeRes.count : undefined;
 
   const dashboardOverviewIncomplete =
     !!profileError ||
@@ -139,7 +132,7 @@ export default async function DashboardPage() {
   const greeting =
     hour < 12 ? "Guten Morgen" : hour < 18 ? "Guten Tag" : "Guten Abend";
 
-  const subtitle = buildDashboardSubtitle(unseenCount, openTaskCount, newCount);
+  const subtitle = "Praxis aktiv · Vorgänge und Patienten im Überblick";
 
   const newCasesFootnote =
     newCount !== null && newCount > 0
@@ -180,17 +173,8 @@ export default async function DashboardPage() {
             greeting={greeting}
             displayName={doctorLabel}
             subtitle={subtitle}
-            email={user.email || ""}
-            workspaceName="Praxis"
-            avatarUrl={profileData?.photo_url ?? null}
-            profileDisplayName={profileData?.display_name ?? null}
-            inboxCount={inboxCount}
           />
         </DashboardAmbientHeader>
-
-        <div className="yd-dash-zone yd-dash-zone--actions">
-          <DashboardActionRow />
-        </div>
 
         {dashboardOverviewIncomplete ? (
           <p
