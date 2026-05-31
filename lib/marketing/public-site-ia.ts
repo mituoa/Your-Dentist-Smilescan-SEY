@@ -134,13 +134,17 @@ export const PUBLIC_SITE_PRICING = {
 
 export const PUBLIC_SITE_DEMO = {
   eyebrow: "Live-Einblick",
-  title: "Einen ruhigen Praxisablauf ansehen",
+  title: "Demo buchen",
   lead:
-    "Wir zeigen Ihnen in einem kurzen Einblick, wie Patienteneingänge, interne Rückfragen, Aufgaben und Command AI in einem Praxisbereich zusammenspielen.",
-  primaryCta: "Demo buchen",
-  secondaryCta: "Kontakt aufnehmen",
-  note: "Ideal für Praxisinhaber:innen, Praxismanagement und Teams, die ihre interne Kommunikation strukturieren möchten.",
-  contactHref: "/impressum",
+    "Kurzer Einblick in Eingang, Relay, Aufgaben und Command AI — wir melden uns mit einem Terminvorschlag.",
+  submitLabel: "Anfrage absenden",
+  submitPending: "Wird gesendet …",
+  secondaryCta: "Impressum",
+  note: "Für Praxisinhaber:innen und Teams, die Eingang und interne Abstimmung strukturieren möchten. Ihre Angaben werden nur zur Terminvereinbarung genutzt.",
+  successTitle: "Anfrage ist eingegangen",
+  successBody:
+    "Vielen Dank — wir melden uns in Kürze per E-Mail mit einem ruhigen Terminvorschlag für den Live-Einblick.",
+  successAnother: "Weitere Anfrage",
 } as const;
 
 export const PUBLIC_SITE_FOOTER = {

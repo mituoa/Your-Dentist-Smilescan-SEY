@@ -57,7 +57,7 @@ function SignOutRailSubmit() {
       aria-busy={pending}
       aria-label={pending ? "Abmeldung läuft" : "Abmelden"}
       title="Abmelden"
-      className="flex h-10 w-10 items-center justify-center rounded-full text-[#8BA3C7] transition hover:bg-white/50 hover:text-[#5C6F82] disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-[#94a8b8] transition hover:bg-white/45 hover:text-[#5a6f84] disabled:cursor-not-allowed disabled:opacity-60 md:h-10 md:w-10"
     >
       {pending ? (
         <AuthLoadingSpinner className="h-4 w-4 shrink-0 animate-spin motion-reduce:animate-none" />

@@ -37,7 +37,7 @@ export function DashboardRelayCommsPanel({
   const items = conversations?.slice(0, 5) ?? [];
 
   return (
-    <HcCard tone="default" className="yd-dash-panel flex min-h-[300px] flex-col p-0">
+    <HcCard tone="default" className="yd-dash-panel flex min-h-0 flex-col p-0 md:min-h-[280px]">
       <DashboardPanelChrome
         title="Interne Kommunikation"
         hint="Relay · Direkt, Gruppen, fallbezogen"

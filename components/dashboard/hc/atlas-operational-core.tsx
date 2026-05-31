@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 
+import { DashboardActivityStream } from "@/components/dashboard/hc/dashboard-activity-stream";
+import { DashboardCommandStrip } from "@/components/dashboard/hc/dashboard-command-strip";
+import { DashboardPracticeFlow } from "@/components/dashboard/hc/dashboard-practice-flow";
 import { DashboardRelayCommsPanel } from "@/components/dashboard/hc/dashboard-relay-comms-panel";
 import { DashboardRelayOpsPanel } from "@/components/dashboard/hc/dashboard-relay-ops-panel";
+import { DashboardWorkzone } from "@/components/dashboard/hc/dashboard-workzone";
+import { buildDashboardCommandHints } from "@/lib/dashboard/command-hints";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type {
   ActivityEvent,
@@ -10,7 +15,6 @@ import type {
   OpenTaskRow,
   SubmissionPreviewRow,
 } from "@/lib/queries/dashboard";
-import { YD } from "@/lib/design/yd-design-tokens";
 
 function formatRelative(iso: string): string {
   const diffMin = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -47,10 +51,8 @@ export function AtlasOperationalCore({
   activityEvents,
 }: AtlasOperationalCoreProps) {
   const openTaskCount = openTasks?.length ?? 0;
+  const routineCount = routines?.length ?? 0;
   const waitingIntake = unseenCount !== null && unseenCount > 0;
-  const hasRelayPressure = relayUnread > 0;
-  const hasTaskPressure = openTaskCount > 0;
-  const hasReminderPressure = reminderCount > 0;
 
   const intakeRows = [...(previewRows ?? [])].sort((a, b) => {
     if (!a.seen_at && b.seen_at) return -1;
@@ -61,7 +63,13 @@ export function AtlasOperationalCore({
   const unreadRows = intakeRows.filter((r) => !r.seen_at).slice(0, 8);
   const recentSeen = intakeRows.filter((r) => r.seen_at).slice(0, 3);
 
-  const continuityEvents = activityEvents?.slice(0, 5) ?? null;
+  const commandHints = buildDashboardCommandHints({
+    unseenCount,
+    openTaskCount,
+    relayUnread,
+    reminderCount,
+    routineCount,
+  });
 
   return (
     <div className="yd-atlas-core">
@@ -73,58 +81,38 @@ export function AtlasOperationalCore({
               klinische Sichtung.
             </span>
             <span className="yd-atlas-state-sub">
-              Verantwortung liegt im Eingang — Entscheidungen zuerst dort.
+              Eingang zuerst — Relay, Aufgaben und Routinen laufen parallel im Praxisbereich.
             </span>
           </p>
         ) : (
           <p className="yd-atlas-state yd-atlas-state--steady">
             <span className="yd-atlas-state-lead">Eingang ist auf dem aktuellen Stand.</span>
             <span className="yd-atlas-state-sub">
-              Betrieb läuft weiter in Relay, Aufgaben und Teamübergaben.
+              Relay, Aufgaben, Routinen und Command AI bleiben im Blick — ohne zusätzliche Lautstärke.
             </span>
           </p>
         )}
       </div>
 
-      <div className="yd-atlas-pressure-strip" aria-label="Operative Spannung">
-        {hasRelayPressure ? (
-          <Link href="/relay" className="yd-atlas-pressure-item yd-atlas-pressure-item--active">
-            <span className="yd-atlas-pressure-label">Relay</span>
-            <span className="yd-atlas-pressure-value">{relayUnread} ungelesen</span>
-          </Link>
-        ) : (
-          <span className="yd-atlas-pressure-item yd-atlas-pressure-item--idle">
-            <span className="yd-atlas-pressure-label">Relay</span>
-            <span className="yd-atlas-pressure-value">ruhig</span>
-          </span>
-        )}
-        {hasTaskPressure ? (
-          <Link href="/my-tasks" className="yd-atlas-pressure-item yd-atlas-pressure-item--active">
-            <span className="yd-atlas-pressure-label">Aufgaben</span>
-            <span className="yd-atlas-pressure-value">{openTaskCount} offen</span>
-          </Link>
-        ) : (
-          <span className="yd-atlas-pressure-item yd-atlas-pressure-item--idle">
-            <span className="yd-atlas-pressure-label">Aufgaben</span>
-            <span className="yd-atlas-pressure-value">keine offenen</span>
-          </span>
-        )}
-        {hasReminderPressure ? (
-          <Link href="/my-tasks" className="yd-atlas-pressure-item yd-atlas-pressure-item--active">
-            <span className="yd-atlas-pressure-label">Erinnerungen</span>
-            <span className="yd-atlas-pressure-value">{reminderCount} anstehend</span>
-          </Link>
-        ) : null}
-      </div>
+      <DashboardPracticeFlow
+        unseenCount={unseenCount}
+        openTaskCount={openTaskCount}
+        routineCount={routineCount}
+        relayUnread={relayUnread}
+        reminderCount={reminderCount}
+      />
 
-      <div className="yd-atlas-main-grid">
-        <section className="yd-atlas-primary" aria-labelledby="yd-atlas-intake-title">
+      <DashboardWorkzone
+        rail="Eingang"
+        title="Einsendungen"
+        hint="Patient:innen · Fotos und Anliegen strukturiert"
+        className="yd-atlas-zone yd-atlas-zone--intake"
+      >
+        <div className="yd-atlas-primary">
           <header className="yd-atlas-panel-head">
             <div>
-              <h2 id="yd-atlas-intake-title" className="yd-atlas-panel-title">
-                Wartende Einsendungen
-              </h2>
-              <p className="yd-atlas-panel-hint">Eingang · klinische Verantwortung</p>
+              <h2 className="yd-atlas-panel-title">Wartende & aktuelle Fälle</h2>
+              <p className="yd-atlas-panel-hint">Tracker · Sichtung und Weiterleitung</p>
             </div>
             <Link href="/inbox" className="yd-atlas-panel-action">
               Tracker öffnen
@@ -184,40 +172,33 @@ export function AtlasOperationalCore({
               </>
             )}
           </div>
-        </section>
+        </div>
+      </DashboardWorkzone>
 
-        <aside className="yd-atlas-secondary">
-          <div className="yd-atlas-secondary-stack">
+      <DashboardWorkzone
+        rail="Betrieb"
+        title="Relay, Aufgaben & Routinen"
+        hint="Interne Rückfragen, offene Schritte, wiederkehrende Abläufe"
+        className="yd-atlas-zone yd-atlas-zone--ops"
+      >
+        <div className="yd-atlas-ops-grid">
+          <div className="yd-atlas-ops-grid__relay">
             <DashboardRelayOpsPanel tasks={openTasks} routines={routines} />
+          </div>
+          <div className="yd-atlas-ops-grid__comms">
             <DashboardRelayCommsPanel conversations={relayConversations} />
           </div>
-        </aside>
-      </div>
+        </div>
+      </DashboardWorkzone>
 
-      {continuityEvents && continuityEvents.length > 0 ? (
-        <section className="yd-atlas-continuity" aria-labelledby="yd-atlas-continuity-title">
-          <h2 id="yd-atlas-continuity-title" className="yd-atlas-continuity-title">
-            Kontinuität
-          </h2>
-          <ul className="yd-atlas-continuity-list">
-            {continuityEvents.map((event) => (
-              <li key={`${event.type}-${event.id}`}>
-                {event.link ? (
-                  <Link href={event.link} className="yd-atlas-continuity-row">
-                    <span className="yd-atlas-continuity-time">{formatRelative(event.timestamp)}</span>
-                    <span className="yd-atlas-continuity-text">{event.text}</span>
-                  </Link>
-                ) : (
-                  <div className="yd-atlas-continuity-row">
-                    <span className="yd-atlas-continuity-time">{formatRelative(event.timestamp)}</span>
-                    <span className="yd-atlas-continuity-text">{event.text}</span>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <div className="yd-atlas-support-grid" aria-label="Assistenz und aktuelle Aktivität">
+        <div className="yd-atlas-support-cell yd-atlas-support-cell--command">
+          <DashboardCommandStrip hints={commandHints} />
+        </div>
+        <div className="yd-atlas-support-cell yd-atlas-support-cell--activity">
+          <DashboardActivityStream events={activityEvents} />
+        </div>
+      </div>
     </div>
   );
 }

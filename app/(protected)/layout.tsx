@@ -125,10 +125,10 @@ export default async function ProtectedLayout({
             <YdAwakenBootstrap />
           </Suspense>
           <div
-            className="yd-workspace yd-awaken-page relative flex h-[100dvh] flex-col overflow-hidden"
+            className="yd-workspace yd-awaken-page relative flex h-[100dvh] flex-col overflow-hidden max-md:overflow-x-hidden max-md:overflow-y-hidden"
             style={{ background: YD.atmosphere.pageGradient }}
           >
-            <div className="relative flex min-h-0 flex-1 flex-row overflow-hidden">
+            <div className="yd-workspace-body relative flex min-h-0 flex-1 flex-row max-md:overflow-visible md:overflow-hidden">
               <MobileSidebarFrame>
                 <Sidebar
                   role={role}
@@ -139,7 +139,7 @@ export default async function ProtectedLayout({
                 />
               </MobileSidebarFrame>
 
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div className="yd-workspace-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               <ProtectedTopbar
                 email={user.email || ""}
                 workspaceName={workspaceName}

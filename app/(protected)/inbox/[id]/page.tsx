@@ -242,11 +242,11 @@ export default async function InboxDetailPage({
       <CaseCreatedToast />
 
       {/* Mobil: eine Fläche. Desktop: Pane füllt Tracker-Detail, je Spalte eigener Scroll. */}
-      <div className="yd-inbox-detail-root flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden max-lg:overflow-y-auto max-lg:overscroll-y-contain max-lg:[-webkit-overflow-scrolling:touch] max-lg:min-h-0 max-lg:bg-[#EDF1F7] lg:flex-row lg:overflow-hidden lg:bg-transparent">
-        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-lg:mx-0 max-lg:flex-none max-lg:overflow-visible max-lg:rounded-b-2xl max-lg:shadow-[0_2px_12px_rgba(15,23,42,0.05)] lg:mx-0 lg:h-full lg:max-h-full lg:rounded-none lg:bg-[#F7F9FC] lg:shadow-none lg:overflow-hidden">
+      <div className="yd-inbox-detail-root flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden max-md:overflow-y-auto max-md:overscroll-y-contain max-md:[-webkit-overflow-scrolling:touch] max-md:min-h-0 max-md:bg-[#EDF1F7] md:overflow-hidden md:bg-transparent">
+        <div className="yd-inbox-detail-pane flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-md:mx-0 max-md:flex-none max-md:overflow-visible max-md:rounded-b-2xl max-md:shadow-[0_2px_12px_rgba(15,23,42,0.05)] md:mx-0 md:h-full md:max-h-full md:rounded-none md:bg-[#F7F9FC] md:shadow-none">
           {/* Detail-Header — mobil: kompakteres Padding, Sticky; Desktop: Figma-Abstände */}
           <div
-            className="z-[6] shrink-0 bg-white px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] max-lg:sticky max-lg:top-0 max-lg:border-b max-lg:border-[rgba(15,23,42,0.06)] max-lg:shadow-[0_1px_0_rgba(15,23,42,0.04)] sm:px-5 sm:pt-4 sm:pb-3 lg:static lg:border-b-0 lg:px-[clamp(20px,4vw,56px)] lg:pb-0 lg:pt-[clamp(28px,5vw,48px)] lg:shadow-none"
+            className="z-[6] shrink-0 bg-white px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:border-b max-md:border-[rgba(15,23,42,0.06)] max-md:shadow-[0_1px_0_rgba(15,23,42,0.04)] sm:px-5 sm:pt-4 sm:pb-3 md:static md:border-b-0 md:px-[clamp(20px,4vw,56px)] md:pb-0 md:pt-[clamp(28px,5vw,48px)] md:shadow-none"
           >
             <Suspense fallback={null}>
               <InboxMobileBack />
@@ -328,10 +328,10 @@ export default async function InboxDetailPage({
           </div>
 
           {/* Mobil: Triage + Hilfe untereinander, gemeinsamer Scroll (äußerer Container). Desktop: zwei Spalten, je Scroll. */}
-          <div className="flex min-h-0 w-full min-w-0 flex-col max-lg:flex-none lg:flex-1 lg:min-h-0 lg:flex-row lg:overflow-hidden">
-          {/* Scrollbarer Hauptinhalt — Desktop: eigener Scroll; Mobil: natürliche Höhe (kein flex-1). */}
+          <div className="yd-inbox-detail-body flex min-h-0 w-full min-w-0 flex-col max-md:flex-none md:flex-1 md:min-h-0 md:flex-row md:overflow-hidden">
+          {/* Hauptinhalt — Desktop: eigener Scroll; Mobil: Teil des Gesamt-Scrolls. */}
           <div
-            className="min-h-0 w-full min-w-0 max-lg:flex-none max-lg:overflow-visible bg-white px-4 pb-6 max-lg:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 max-lg:pb-8 lg:flex-1 lg:min-h-0 lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-y-contain lg:[-webkit-overflow-scrolling:touch] lg:px-[clamp(20px,4vw,56px)] lg:pb-24"
+            className="yd-inbox-detail-main-scroll min-h-0 w-full min-w-0 max-md:flex-none max-md:overflow-visible bg-white px-4 pb-6 max-md:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 max-md:pb-8 md:flex-1 md:min-h-0 md:px-[clamp(20px,4vw,56px)] md:pb-24"
             style={scrollPadStyle}
           >
             <div className="mb-6 md:mb-8">
@@ -401,7 +401,7 @@ export default async function InboxDetailPage({
 
           {/* Hilfsspalte: mobil unten in derselben weißen Fläche (Trennlinie); Desktop rechts mit eigenem Scroll. */}
           <aside
-            className="flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-white pb-[max(12px,var(--safe-area-bottom))] max-lg:mx-0 max-lg:mt-0 max-lg:min-h-0 max-lg:flex-none max-lg:overflow-visible max-lg:border-l-0 max-lg:bg-white max-lg:px-0 max-lg:pb-[max(1rem,var(--safe-area-bottom))] lg:mx-0 lg:mt-0 lg:min-h-0 lg:w-[min(100%,320px)] lg:max-w-[340px] lg:shrink-0 lg:overflow-y-auto lg:overscroll-y-contain lg:border-l lg:border-t-0 lg:border-[rgba(15,23,42,0.06)] lg:bg-[#F7F9FC] lg:pb-0 lg:[-webkit-overflow-scrolling:touch]"
+            className="yd-inbox-detail-aside-scroll flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-white pb-[max(12px,var(--safe-area-bottom))] max-md:mx-0 max-md:mt-0 max-md:min-h-0 max-md:flex-none max-md:overflow-visible max-md:border-l-0 max-md:bg-white max-md:px-0 max-md:pb-[max(1rem,var(--safe-area-bottom))] md:mx-0 md:mt-0 md:min-h-0 md:w-[min(100%,320px)] md:max-w-[340px] md:shrink-0 md:border-l md:border-t-0 md:border-[rgba(15,23,42,0.06)] md:bg-[#F7F9FC] md:pb-0"
           >
             <SubmissionActions
               submissionId={submission.id}

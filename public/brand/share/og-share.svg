@@ -17,14 +17,14 @@
   <g transform="translate(88 168)">
     <rect width="220" height="220" rx="52" fill="url(#panel)"/>
     <rect x="1.5" y="1.5" width="217" height="217" rx="50.5" stroke="#0284C7" stroke-opacity="0.22" stroke-width="1.5"/>
-    <g transform="translate(22 22) scale(0.686)">
+    <g transform="translate(34 34) scale(0.596)">
       <path d="M92 90C103 81.333 115 77 128 77C141 77 153 81.333 164 90" stroke="#0284C7" stroke-opacity="0.38" stroke-width="9" stroke-linecap="round"/>
       <path d="M99 103L128 131L157 103" stroke="#0369A1" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M128 130V157" stroke="#0369A1" stroke-width="11" stroke-linecap="round"/>
       <path d="M96 171C106.333 181 117 186 128 186C139 186 149.667 181 160 171" stroke="#0284C7" stroke-opacity="0.92" stroke-width="10" stroke-linecap="round"/>
     </g>
   </g>
-  <text x="340" y="268" font-family="system-ui, sans-serif" font-size="68" font-weight="600" fill="#0C1929" letter-spacing="-2">Your Dentist</text>
-  <text x="340" y="332" font-family="system-ui, sans-serif" font-size="34" font-weight="500" fill="#0284C7" letter-spacing="-0.5">Neutral Practice Platform</text>
-  <text x="340" y="400" font-family="system-ui, sans-serif" font-size="22" font-weight="400" fill="#5A6F84">Ruhige Infrastruktur f&#252;r moderne Zahnarztpraxen</text>
+  <text x="340" y="262" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="72" font-weight="600" fill="#0C1929" letter-spacing="-2.5">Your Dentist</text>
+  <text x="340" y="328" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="32" font-weight="500" fill="#0284C7" letter-spacing="-0.4">Neutral Practice Platform</text>
+  <text x="340" y="396" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" font-weight="400" fill="#5A6F84">Ruhige Infrastruktur f&#252;r moderne Zahnarztpraxen</text>
 </svg>

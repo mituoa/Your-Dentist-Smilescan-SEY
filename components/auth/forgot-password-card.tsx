@@ -80,8 +80,10 @@ export function ForgotPasswordCard(props: {
   errorRaw: string;
   inviteToken: string;
   prefilledEmail: string;
+  /** `minimal`: Kopfzeile kommt von der Public-OS-Shell (Login-Branding). */
+  shell?: "full" | "minimal";
 }) {
-  const { sent, errorRaw, inviteToken, prefilledEmail } = props;
+  const { sent, errorRaw, inviteToken, prefilledEmail, shell = "full" } = props;
   const errorDecoded = errorRaw ? safeDecodeError(errorRaw) : "";
   const errorDisplay = errorDecoded ? forgotPasswordErrorDisplay(errorDecoded) : "";
 
@@ -109,20 +111,22 @@ export function ForgotPasswordCard(props: {
 
   return (
     <>
-      <YdAuthIntro
-        title="Passwort sicher zurücksetzen"
-        subtitle={
-          sent ? (
-            <>
-              Bitte prüfen Sie Ihren Posteingang. Falls ein Konto gefunden wurde, erhalten Sie in wenigen
-              Minuten eine E-Mail mit dem Link zum Zurücksetzen.
-            </>
-          ) : (
-            <>Geben Sie Ihre E-Mail-Adresse ein. Sie erhalten einen geschützten Link zum Zurücksetzen.</>
-          )
-        }
-        fieldIndex={0}
-      />
+      {shell === "full" ? (
+        <YdAuthIntro
+          title="Passwort sicher zurücksetzen"
+          subtitle={
+            sent ? (
+              <>
+                Bitte prüfen Sie Ihren Posteingang. Falls ein Konto gefunden wurde, erhalten Sie in wenigen
+                Minuten eine E-Mail mit dem Link zum Zurücksetzen.
+              </>
+            ) : (
+              <>Geben Sie Ihre E-Mail-Adresse ein. Sie erhalten einen geschützten Link zum Zurücksetzen.</>
+            )
+          }
+          fieldIndex={0}
+        />
+      ) : null}
 
       {sent ? (
         <YdAuthSuccess title="Anfrage übermittelt" className="mb-6">
@@ -139,7 +143,11 @@ export function ForgotPasswordCard(props: {
         </YdAuthAlert>
       ) : null}
 
-      <form action={requestPasswordResetFromLogin} className="yd-auth-form-stack">
+      <form
+        action={requestPasswordResetFromLogin}
+        className="yd-auth-form-stack yd-auth-awaken-field"
+        style={shell === "minimal" ? ({ ["--yd-auth-field-i" as string]: "2" } as React.CSSProperties) : undefined}
+      >
         {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
         <ForgotPasswordEmailFieldset>
           <YdAuthFieldStack fieldIndex={1}>
@@ -160,7 +168,7 @@ export function ForgotPasswordCard(props: {
         <ForgotPasswordSubmitButton sent={sent} cooldownSec={cooldownSec} />
       </form>
 
-      <YdAuthLegalFooter loginHref={loginHref} className="mt-8" />
+      {shell === "full" ? <YdAuthLegalFooter loginHref={loginHref} className="mt-8" /> : null}
     </>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { Command } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { useAssistUiOptional } from "@/components/command-assist/assist-shell";
 import { useMobileNavOptional } from "@/components/app-shell/mobile-nav";
 
-/** Command AI in der mobilen Navigations-Fußzeile — kein isolierter FAB. */
+/** Command AI — kompakte Zeile in der mobilen Navigation. */
 export function MobileCommandNavEntry() {
   const assist = useAssistUiOptional();
   const mobileNav = useMobileNavOptional();
@@ -20,15 +20,10 @@ export function MobileCommandNavEntry() {
         mobileNav?.close();
         assist.openCommand();
       }}
-      aria-label="Command AI öffnen"
+      aria-label="Assistenz öffnen"
     >
-      <span className="yd-mobile-sidebar-command-icon" aria-hidden>
-        <Command className="h-[17px] w-[17px]" strokeWidth={1.75} />
-      </span>
-      <span className="min-w-0 flex-1 text-left">
-        <span className="yd-mobile-sidebar-command-label">Command</span>
-        <span className="yd-mobile-sidebar-command-hint">Assistenz im Arbeitsfluss</span>
-      </span>
+      <Sparkles className="h-4 w-4 shrink-0 opacity-70" strokeWidth={1.65} aria-hidden />
+      <span className="yd-mobile-sidebar-command-label">Assistenz</span>
     </button>
   );
 }

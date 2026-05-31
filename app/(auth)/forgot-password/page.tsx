@@ -1,6 +1,14 @@
-import { ForgotPasswordCard } from "@/components/auth/forgot-password-card";
-import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
+import type { Metadata } from "next";
+
+import { ForgotPasswordPageClient } from "@/components/auth/forgot-password-page-client";
 import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
+
+export const metadata: Metadata = {
+  title: "Passwort zurücksetzen",
+  description:
+    "Geschützter Link zum Zurücksetzen Ihres Praxis-Zugangs — Your Dentist, Neutral Practice Platform.",
+  robots: { index: false, follow: false },
+};
 
 interface ForgotPasswordPageProps {
   searchParams: Promise<{ sent?: string; error?: string; invite?: string; email?: string }>;
@@ -24,13 +32,11 @@ export default async function ForgotPasswordPage({ searchParams }: ForgotPasswor
   const prefilledEmail = clipQueryString(params.email, MAX_EMAIL_QUERY_LEN);
 
   return (
-    <YdAuthEnvironment>
-      <ForgotPasswordCard
-        sent={sent}
-        errorRaw={errorRaw}
-        inviteToken={inviteToken}
-        prefilledEmail={prefilledEmail}
-      />
-    </YdAuthEnvironment>
+    <ForgotPasswordPageClient
+      sent={sent}
+      errorRaw={errorRaw}
+      inviteToken={inviteToken}
+      prefilledEmail={prefilledEmail}
+    />
   );
 }

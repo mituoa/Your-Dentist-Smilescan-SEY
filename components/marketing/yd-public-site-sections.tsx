@@ -11,7 +11,9 @@ import {
   Headphones,
 } from "lucide-react";
 
+import { YdPracticeWorld } from "@/components/marketing/yd-practice-world";
 import { YdPublicSiteHeroCta } from "@/components/marketing/yd-public-site-hero-cta";
+import { YdPublicSiteDemoForm } from "@/components/marketing/yd-public-site-demo-form";
 import {
   PUBLIC_SITE_DEMO,
   PUBLIC_SITE_EINFUEHRUNG,
@@ -55,7 +57,7 @@ type YdPublicSiteHeroProps = {
   showSignIn?: boolean;
 };
 
-/** Desktop Startseite — kompakt, nutzenorientiert, ohne Editorial-Mockup. */
+/** Desktop Startseite — kompakt, Mockup zeigt den Ablauf in fünf Momenten. */
 export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
   return (
     <section
@@ -63,17 +65,17 @@ export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
       style={{ ["--yd-public-field-i" as string]: "1" }}
       aria-labelledby="yd-public-hero-title"
     >
-      <div className="yd-public-site-hero-inner">
-        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
-        <h1 id="yd-public-hero-title" className="yd-public-site-hero-headline">
-          {PUBLIC_SITE_HERO.title}
-        </h1>
-        <ul className="yd-public-site-hero-points">
-          {PUBLIC_SITE_HERO.bullets.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
-        <YdPublicSiteHeroCta showSignIn={showSignIn} />
+      <div className="yd-public-site-hero-layout">
+        <div className="yd-public-site-hero-inner">
+          <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
+          <h1 id="yd-public-hero-title" className="yd-public-site-hero-headline">
+            {PUBLIC_SITE_HERO.title}
+          </h1>
+          <YdPublicSiteHeroCta showSignIn={showSignIn} />
+        </div>
+        <aside className="yd-public-site-hero-visual">
+          <YdPracticeWorld />
+        </aside>
       </div>
     </section>
   );
@@ -205,14 +207,7 @@ export function YdPublicSiteDemo() {
           {PUBLIC_SITE_DEMO.title}
         </h2>
         <p className="yd-public-site-section-lead">{PUBLIC_SITE_DEMO.lead}</p>
-        <div className="yd-public-site-demo-actions">
-          <a href={`mailto:info@your-dentist.de?subject=${encodeURIComponent("Demo-Anfrage Your Dentist")}`} className="yd-clinical-cta-primary">
-            {PUBLIC_SITE_DEMO.primaryCta}
-          </a>
-          <Link href={PUBLIC_SITE_DEMO.contactHref} className="yd-clinical-cta-secondary">
-            {PUBLIC_SITE_DEMO.secondaryCta}
-          </Link>
-        </div>
+        <YdPublicSiteDemoForm />
         <p className="yd-public-site-demo-note">{PUBLIC_SITE_DEMO.note}</p>
       </div>
     </section>

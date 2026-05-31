@@ -2,12 +2,14 @@ import Link from "next/link";
 import { Bell, MessageCircle, Search } from "lucide-react";
 
 import { DashboardMobileSearch } from "@/components/dashboard/hc/dashboard-mobile-search";
-import { formatDoctorDisplayName } from "@/lib/format-doctor-display-name";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 type DashboardHeaderProps = {
   greeting: string;
+  /** Vollständiger Anzeigename (Desktop). */
   displayName: string;
+  /** Kurze Anrede für Mobile-Begrüßung (z. B. nur „Dr. Alamouti“). */
+  greetingName: string;
   subtitle: string;
   inboxCount?: number;
 };
@@ -15,24 +17,15 @@ type DashboardHeaderProps = {
 export function DashboardHeader({
   greeting,
   displayName,
+  greetingName,
   subtitle,
   inboxCount,
 }: DashboardHeaderProps) {
-  const doctorLabel = formatDoctorDisplayName(displayName);
-
   return (
     <header className="yd-dash-header-axis w-full min-w-0 max-w-full">
-      {/* Mobile: ein Workspace-Header — kein Band-Duplikat, kein zweiter Avatar */}
-      <div className="md:hidden">
-        <div className="yd-dash-mobile-greeting">
-          <p className="yd-dash-workspace-label">Praxisbereich</p>
-          <h1 className="yd-dash-title text-[1.25rem] leading-tight tracking-[-0.024em]">
-            {greeting}, {doctorLabel}
-          </h1>
-          <p className="yd-dash-subtitle mt-1.5 text-[13px] leading-snug text-[#5a6f84]">
-            {subtitle}
-          </p>
-        </div>
+      {/* Mobile: eine Zeile Begrüßung — Topbar hat bereits Menü · Marke · Avatar */}
+      <div className="yd-dash-header-mobile md:hidden">
+        <h1 className="yd-dash-title yd-dash-title--mobile">{greeting}, {greetingName}</h1>
         <DashboardMobileSearch inboxCount={inboxCount} />
       </div>
 
@@ -42,7 +35,7 @@ export function DashboardHeader({
           <div className="min-w-0 lg:max-w-[48%]">
             <p className="yd-dash-meta mb-0.5 uppercase">Praxisüberblick</p>
             <h1 className="yd-dash-title text-[1.65rem] lg:text-[1.75rem]">
-              {greeting}, {doctorLabel}
+              {greeting}, {displayName}
             </h1>
             <p className="yd-dash-subtitle mt-1.5 max-w-lg text-[13px]">{subtitle}</p>
           </div>
@@ -65,7 +58,7 @@ export function DashboardHeader({
                 className="yd-dash-search-input h-12 w-full min-w-0 pl-12 pr-5 text-[13px] font-normal outline-none transition-[box-shadow,filter] duration-700 placeholder:text-[#8BA3B8] focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.14)]"
                 style={{
                   background:
-                    "linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(236,244,252,0.95) 100%)",
+                    "linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(236, 244, 252, 0.95) 100%)",
                   border: "1px solid rgba(180, 198, 218, 0.42)",
                   borderRadius: YD.radius.pill,
                   color: YD.text.primary,

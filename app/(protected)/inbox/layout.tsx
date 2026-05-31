@@ -123,7 +123,10 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   const openCaseCount = submissions.filter((s) => !s.is_draft).length;
 
   const list = (
-    <HcCard className="flex h-full min-h-0 flex-col overflow-hidden md:mx-3 md:h-full md:max-h-full" glow>
+    <HcCard
+      className="yd-inbox-list-card flex h-full min-h-0 flex-col overflow-hidden md:mx-3 md:h-full md:max-h-full"
+      glow
+    >
       <div className="shrink-0 px-5 pb-4 pt-5 md:px-6 md:pt-6">
         <div className="mb-5 flex min-w-0 items-start justify-between gap-4">
           <div className="min-w-0 flex-1 pr-2">
@@ -162,7 +165,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
         </Suspense>
       </div>
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 [-webkit-overflow-scrolling:touch] md:px-5 md:pb-6 md:pt-2">
+      <div className="yd-inbox-list-scroll min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 overscroll-y-contain [-webkit-overflow-scrolling:touch] md:px-5 md:pb-6 md:pt-2">
         {listFailed ? (
           <div
             className="mx-1 rounded-xl px-4 py-5 text-[14px] leading-relaxed"

@@ -6,8 +6,8 @@ import {
   BookOpen,
   CalendarDays,
   Home,
-  MessageSquare,
   Settings,
+  UserRound,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -23,7 +23,7 @@ const ICON_BY_NAME: Record<string, LucideIcon> = {
   inbox: Users,
   tasks: CalendarDays,
   relay: CalendarDays,
-  profile: MessageSquare,
+  profile: UserRound,
   settings: Settings,
   journal: BookOpen,
 };
@@ -112,7 +112,7 @@ export function NavItem({
         <span
           className={cn(
             "yd-nav-label block truncate text-[13px] font-medium leading-snug transition-colors duration-700",
-            isActive ? "text-[#1A4F9C]" : "text-[#475569]"
+            isActive ? "text-[#2d5f9c]" : "text-[#475569]"
           )}
         >
           {label}

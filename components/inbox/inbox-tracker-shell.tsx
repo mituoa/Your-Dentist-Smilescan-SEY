@@ -16,7 +16,7 @@ type InboxTrackerShellProps = {
  * `/inbox` → mobil nur Liste; **Ausnahme:** aktive Suche (`q`) zeigt den Detail-Slot unter der Liste,
  * damit leere Such-/Index-Zustände (z. B. „Keine Treffer“) sichtbar bleiben (Punkt 7).
  * `/inbox/[id]` → mobil Vollbild-Fall.
- * **Punkt 9:** Desktop: **getrennte Scroll-Panes** (Liste ↔ Detail), kein gemeinsamer `main`-Scroll
+ * **Punkt 9:** Ab `md`: **getrennte Scroll-Panes** (Liste ↔ Detail), kein gemeinsamer `main`-Scroll
  * (`yd-inbox-workspace.css`); mobil Vollbild bzw. geteilte Liste bei aktivem `q`.
  */
 export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {

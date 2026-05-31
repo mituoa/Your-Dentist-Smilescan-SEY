@@ -13,6 +13,7 @@ import {
   SITE_DESCRIPTION,
   SITE_OG_DESCRIPTION,
   SITE_OG_IMAGE_ALT,
+  SITE_OG_TITLE,
   SITE_TITLE,
   SITE_TITLE_TEMPLATE,
 } from "@/lib/site-metadata";
@@ -24,6 +25,8 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
   weight: ["400", "500"],
+  display: "swap",
+  preload: true,
 });
 
 const fraunces = Fraunces({
@@ -31,12 +34,16 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   weight: ["300", "400", "500"],
   style: ["normal", "italic"],
+  display: "swap",
+  preload: false,
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
   weight: ["400", "500"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -85,9 +92,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "de_DE",
-    siteName: "Your Dentist",
+    siteName: SITE_OG_TITLE,
     url: "/",
-    title: SITE_TITLE,
+    title: SITE_OG_TITLE,
     description: SITE_OG_DESCRIPTION,
     images: [
       {
@@ -102,7 +109,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE_TITLE,
+    title: SITE_OG_TITLE,
     description: SITE_OG_DESCRIPTION,
     images: [
       {

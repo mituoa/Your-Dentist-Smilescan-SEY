@@ -34,7 +34,7 @@ export function DashboardRelayOpsPanel({ tasks, routines }: DashboardRelayOpsPan
     tasks?.filter((t) => t.recipient_type === "specific_person").slice(0, 3) ?? [];
 
   return (
-    <HcCard tone="primary" className="yd-dash-panel yd-dash-panel--primary flex min-h-[320px] flex-col p-0">
+    <HcCard tone="primary" className="yd-dash-panel yd-dash-panel--primary flex min-h-0 flex-col p-0 md:min-h-[280px]">
       <DashboardPanelChrome
         title="Relay · Aufgaben &amp; Routinen"
         hint="Offene Schritte, Übergaben, wiederkehrende Abläufe"

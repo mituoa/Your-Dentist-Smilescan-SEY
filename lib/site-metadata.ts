@@ -1,5 +1,8 @@
 /** Central copy for root metadata, OG/Twitter cards, and manifest (keep in sync). */
 
+/** Link previews (Open Graph, Twitter, iMessage, etc.). */
+export const SITE_OG_TITLE = "Your Dentist";
+
 /** Global browser tab title — single line, premium SaaS. */
 export const SITE_TITLE = "Your Dentist — Neutral Practice Platform";
 

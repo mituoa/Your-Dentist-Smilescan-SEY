@@ -1,10 +1,12 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+
+import { cn } from "@/lib/utils";
+import type { ThemePreference } from "@/lib/theme";
 import { MobileWorkspaceTopbar } from "./mobile-workspace-topbar";
 import { TopbarContextActions } from "./topbar-context-actions";
 import { UserMenu } from "./user-menu";
-import type { ThemePreference } from "@/lib/theme";
 
 type ProtectedTopbarProps = {
   email: string;
@@ -39,13 +41,14 @@ export function ProtectedTopbar({
       />
 
       <header
-        className={`yd-protected-topbar hidden shrink-0 flex-col md:flex ${
-          isDashboard ? "md:hidden" : ""
-        }`}
+        className={cn(
+          "yd-protected-topbar hidden shrink-0 flex-col md:flex",
+          isDashboard && "yd-protected-topbar--slim"
+        )}
       >
-        <div className="flex h-16 w-full items-center gap-3 px-6">
+        <div className="yd-protected-topbar-inner flex h-16 w-full items-center gap-3 px-6">
           <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
-            <TopbarContextActions />
+            {!isDashboard ? <TopbarContextActions /> : null}
             <UserMenu
               email={email}
               workspaceName={workspaceName}
@@ -53,6 +56,7 @@ export function ProtectedTopbar({
               initialTheme={initialTheme}
               avatarUrl={avatarUrl}
               displayName={displayName}
+              variant={isDashboard ? "avatar" : "full"}
             />
           </div>
         </div>

@@ -234,6 +234,12 @@
     background: transparent !important;
     border-bottom: 0 !important;
   }
+
+  .yd-workspace .yd-protected-topbar--slim .yd-protected-topbar-inner {
+    height: 3rem;
+    min-height: 3rem;
+    padding-right: 1.25rem;
+  }
 }
 
 @media (max-width: 767px) {

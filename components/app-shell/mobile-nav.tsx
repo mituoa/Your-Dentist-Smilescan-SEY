@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -78,8 +79,21 @@ export function useMobileNavOptional(): MobileNavContextValue | null {
   return useContext(MobileNavContext);
 }
 
-/** Premium iOS drawer on mobile; ambient rail on desktop. */
-export function MobileSidebarFrame({ children }: { children: ReactNode }) {
+function useIsDesktopNav() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return isDesktop;
+}
+
+function MobileDrawerShell({ children }: { children: ReactNode }) {
   const { open, close } = useMobileNav();
 
   return (
@@ -87,7 +101,7 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
       <button
         type="button"
         className={cn(
-          "yd-mobile-nav-backdrop fixed z-[34] border-0 md:hidden",
+          "yd-mobile-nav-backdrop fixed z-[44] border-0 md:hidden",
           "transition-[opacity,backdrop-filter] duration-[420ms] ease-[cubic-bezier(0.25,1,0.35,1)]",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
@@ -97,8 +111,8 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
       />
       <div
         className={cn(
-          "yd-mobile-nav-root md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
-          "max-md:fixed max-md:z-[36] max-md:pointer-events-none",
+          "yd-mobile-nav-root fixed z-[45] md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
+          "max-md:pointer-events-none",
           open && "yd-mobile-nav-root--open max-md:pointer-events-auto"
         )}
         style={
@@ -123,6 +137,43 @@ export function MobileSidebarFrame({ children }: { children: ReactNode }) {
         </div>
       </div>
     </>
+  );
+}
+
+function DesktopNavRail({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex h-full w-[108px] max-w-[108px] shrink-0 items-center justify-center py-2 pl-2">
+      <div className="yd-mobile-nav-panel relative flex h-full w-full min-h-0 flex-col overflow-hidden">
+        <div className="yd-mobile-nav-panel-scroll flex min-h-0 flex-1 flex-col overflow-hidden">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Premium iOS drawer on mobile (portaled); ambient rail on desktop — eine Sidebar-Instanz. */
+export function MobileSidebarFrame({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  const isDesktop = useIsDesktopNav();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <DesktopNavRail>{children}</DesktopNavRail>;
+  }
+
+  if (isDesktop) {
+    return <DesktopNavRail>{children}</DesktopNavRail>;
+  }
+
+  return createPortal(
+    <div className="yd-mobile-nav-portal">
+      <MobileDrawerShell>{children}</MobileDrawerShell>
+    </div>,
+    document.body
   );
 }
 

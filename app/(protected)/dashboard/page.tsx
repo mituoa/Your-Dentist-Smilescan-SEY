@@ -22,7 +22,10 @@ import {
 } from "@/lib/queries/dashboard";
 import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
-import { formatDoctorDisplayName } from "@/lib/format-doctor-display-name";
+import {
+  formatDoctorDisplayName,
+  greetingDoctorLabel,
+} from "@/lib/format-doctor-display-name";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +57,7 @@ export default async function DashboardPage() {
   const displayName =
     profileData?.display_name || user.email?.split("@")[0] || "Team";
   const doctorDisplayName = formatDoctorDisplayName(displayName);
+  const greetingDoctorName = greetingDoctorLabel(displayName);
 
   const [
     newRes,
@@ -120,7 +124,8 @@ export default async function DashboardPage() {
       <DashboardHeader
         greeting={greeting}
         displayName={doctorDisplayName}
-        subtitle="Eingänge, Relay und Aufgaben im Überblick"
+        greetingName={greetingDoctorName}
+        subtitle="Eingang, Relay, Aufgaben, Routinen und Aktivität — ruhig im Überblick"
         inboxCount={inboxCount}
       />
 

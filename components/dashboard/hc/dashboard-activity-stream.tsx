@@ -27,7 +27,7 @@ type DashboardActivityStreamProps = {
 
 export function DashboardActivityStream({ events }: DashboardActivityStreamProps) {
   return (
-    <HcCard tone="default" className="yd-dash-panel flex min-h-[300px] flex-col p-0">
+    <HcCard tone="default" className="yd-dash-panel flex min-h-0 flex-col p-0 md:min-h-[240px]">
       <DashboardPanelChrome
         title="Letzte Aktivität"
         hint="Eingang, Aufgaben, Abschlüsse — strukturierter Fluss"
