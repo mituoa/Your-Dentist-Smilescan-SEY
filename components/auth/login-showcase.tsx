@@ -1,98 +1,106 @@
-import Image from "next/image";
-import { HeartPulse, Microscope, Stethoscope, UserRound } from "lucide-react";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
+import { Activity, LayoutDashboard, Shield, Users } from "lucide-react";
 
-/** Dekorative linke Spalte — Referenz-Login (Phone, Bögen, Medical Blue). */
+const PREVIEW_ROWS = [
+  { name: "M. Keller", meta: "Einsendung · heute", status: "Neu" },
+  { name: "S. Berk", meta: "Rückfrage · Termin", status: "Vorbereitet" },
+  { name: "A. Nguyen", meta: "Relay · Aufgabe", status: "Offen" },
+] as const;
+
+/** Desktop-Showcase — Premium Medical OS (ohne Phone-Mockup). */
 export function LoginShowcase() {
   return (
     <div className="yd-login-showcase" aria-hidden>
-      <div className="yd-login-showcase__cross yd-login-showcase__cross--1" />
-      <div className="yd-login-showcase__cross yd-login-showcase__cross--2" />
-      <div className="yd-login-showcase__cross yd-login-showcase__cross--3" />
+      <div className="yd-login-showcase__mesh" />
+      <div className="yd-login-showcase__grid" />
+      <div className="yd-login-showcase__orb yd-login-showcase__orb--a" />
+      <div className="yd-login-showcase__orb yd-login-showcase__orb--b" />
+      <div className="yd-login-showcase__vignette" />
 
-      <svg
-        className="yd-login-showcase__arc yd-login-showcase__arc--tl"
-        viewBox="0 0 200 200"
-        fill="none"
-        aria-hidden
-      >
-        <path
-          d="M20 180 C 80 40, 140 20, 180 60"
-          stroke="url(#yd-login-arc-a)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <defs>
-          <linearGradient id="yd-login-arc-a" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(42,95,158,0.08)" />
-            <stop offset="100%" stopColor="rgba(42,95,158,0.35)" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <svg
-        className="yd-login-showcase__arc yd-login-showcase__arc--br"
-        viewBox="0 0 200 200"
-        fill="none"
-        aria-hidden
-      >
-        <path
-          d="M10 40 C 60 120, 120 160, 190 100"
-          stroke="url(#yd-login-arc-b)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <defs>
-          <linearGradient id="yd-login-arc-b" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(42,95,158,0.12)" />
-            <stop offset="100%" stopColor="rgba(42,95,158,0.4)" />
-          </linearGradient>
-        </defs>
-      </svg>
+      <div className="yd-login-showcase__inner">
+        <div className="yd-login-showcase__brand-panel">
+          <YourDentistBrandLockup size="md" tagline={PUBLIC_BRAND_TAGLINE} />
+        </div>
 
-      <div className="yd-login-showcase__float yd-login-showcase__float--1">
-        <div className="yd-login-showcase__float-inner">
-          <UserRound className="h-5 w-5 text-[#1a4f9c]" strokeWidth={1.75} aria-hidden />
-        </div>
-      </div>
-      <div className="yd-login-showcase__float yd-login-showcase__float--2">
-        <div className="yd-login-showcase__float-inner yd-login-showcase__float-inner--accent">
-          <Stethoscope className="h-5 w-5 text-white" strokeWidth={1.75} aria-hidden />
-        </div>
-      </div>
-      <div className="yd-login-showcase__float yd-login-showcase__float--3">
-        <div className="yd-login-showcase__float-inner yd-login-showcase__float-inner--scene">
-          <Microscope className="h-6 w-6 text-[#1a4f9c]/80" strokeWidth={1.5} aria-hidden />
-        </div>
-      </div>
-      <div className="yd-login-showcase__float yd-login-showcase__float--4">
-        <div className="yd-login-showcase__float-inner yd-login-showcase__float-inner--scene yd-login-showcase__float-inner--soft">
-          <HeartPulse className="h-5 w-5 text-[#163d7a]/75" strokeWidth={1.5} aria-hidden />
-        </div>
-      </div>
+        <p className="yd-login-showcase__eyebrow">Praxis-Betriebssystem</p>
+        <h2 className="yd-login-showcase__headline">
+          Klinische Klarheit.
+          <br />
+          Ein geschützter Arbeitsraum.
+        </h2>
+        <p className="yd-login-showcase__lead">
+          Atlas, Tracker und Relay — strukturiert wie Ihr Dashboard, gebaut für autorisierte
+          Praxisteams.
+        </p>
 
-      <div className="yd-login-showcase__orbit yd-login-showcase__orbit--1" />
-      <div className="yd-login-showcase__orbit yd-login-showcase__orbit--2" />
+        <div className="yd-login-showcase__composition">
+          <div className="yd-login-showcase__preview">
+            <div className="yd-login-showcase__preview-toolbar">
+              <span className="yd-login-showcase__preview-tab yd-login-showcase__preview-tab--active">
+                <LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+                Atlas
+              </span>
+              <span className="yd-login-showcase__preview-tab">
+                <Users className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+                Tracker
+              </span>
+              <span className="yd-login-showcase__preview-tab">
+                <Activity className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+                Relay
+              </span>
+            </div>
 
-      <div className="yd-login-showcase__phone">
-        <div className="yd-login-showcase__phone-notch" />
-        <div className="yd-login-showcase__phone-screen">
-          <div className="yd-login-showcase__phone-brand">
-            <Image
-              src="/brand/your-dentist/logo-mark.svg"
-              alt=""
-              width={28}
-              height={28}
-              className="h-7 w-7"
-            />
-            <span className="text-[11px] font-semibold tracking-[-0.02em] text-[#0f172a]">
-              Your Dentist
-            </span>
+            <div className="yd-login-showcase__kpis">
+              <div className="yd-login-showcase__kpi">
+                <span className="yd-login-showcase__kpi-label">Eingänge</span>
+                <span className="yd-login-showcase__kpi-value">12</span>
+              </div>
+              <div className="yd-login-showcase__kpi yd-login-showcase__kpi--accent">
+                <span className="yd-login-showcase__kpi-label">Vorbereitet</span>
+                <span className="yd-login-showcase__kpi-value">5</span>
+              </div>
+              <div className="yd-login-showcase__kpi">
+                <span className="yd-login-showcase__kpi-label">Entscheidungen</span>
+                <span className="yd-login-showcase__kpi-value">3</span>
+              </div>
+            </div>
+
+            <div className="yd-login-showcase__table">
+              <div className="yd-login-showcase__table-head">
+                <span>Patient</span>
+                <span>Status</span>
+              </div>
+              {PREVIEW_ROWS.map((row) => (
+                <div key={row.name} className="yd-login-showcase__table-row">
+                  <div className="yd-login-showcase__table-cell">
+                    <span className="yd-login-showcase__avatar" />
+                    <span>
+                      <span className="yd-login-showcase__row-name">{row.name}</span>
+                      <span className="yd-login-showcase__row-meta">{row.meta}</span>
+                    </span>
+                  </div>
+                  <span
+                    className={`yd-login-showcase__status yd-login-showcase__status--${row.status === "Neu" ? "new" : row.status === "Vorbereitet" ? "prep" : "open"}`}
+                  >
+                    {row.status}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="yd-login-showcase__phone-title">Anmelden</p>
-          <p className="yd-login-showcase__phone-lead">Geschützter Praxiszugang</p>
-          <div className="yd-login-showcase__phone-field" />
-          <div className="yd-login-showcase__phone-field" />
-          <div className="yd-login-showcase__phone-btn" />
+
+          <div className="yd-login-showcase__float-badge">
+            <Shield className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+            <span>Freigabe durch Sie — kein Auto-Versand</span>
+          </div>
         </div>
+
+        <ul className="yd-login-showcase__trust">
+          <li>Verschlüsselte Verbindung zum Praxiszugang</li>
+          <li>Einheitliches Design wie Dashboard &amp; Tracker</li>
+          <li>Nur für autorisierte Praxisteams</li>
+        </ul>
       </div>
     </div>
   );

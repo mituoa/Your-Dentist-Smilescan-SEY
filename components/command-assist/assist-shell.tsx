@@ -94,10 +94,10 @@ export function AssistShell({ children }: { children: ReactNode }) {
     ]
   );
 
-  return <AssistContext.Provider value={value}>{children}</AssistContext.Provider>;
-}
-
-/** Command-UI nur über dem Arbeitsbereich — Sidebar-Navigation bleibt klickbar. */
-export function AssistCommandLayer() {
-  return <CommandAssist />;
+  return (
+    <AssistContext.Provider value={value}>
+      {children}
+      <CommandAssist />
+    </AssistContext.Provider>
+  );
 }

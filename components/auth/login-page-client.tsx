@@ -187,7 +187,8 @@ export function LoginPageClient({
 
   return (
     <LoginSplitShell>
-      <div className="yd-login-form-card">
+      <div className="yd-login-form-shell">
+        <div className="yd-login-form-card">
         <div className="yd-login-form-brand">
           <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
         </div>
@@ -345,6 +346,7 @@ export function LoginPageClient({
             </Link>
           </nav>
         </footer>
+        </div>
       </div>
     </LoginSplitShell>
   );

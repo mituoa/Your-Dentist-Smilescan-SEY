@@ -84,7 +84,7 @@ export function Sidebar({
       </div>
 
       <nav
-        className="yd-mobile-sidebar-nav relative z-[2] flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 py-1.5 md:items-center md:gap-3 md:px-2 md:py-5"
+        className="yd-mobile-sidebar-nav relative z-[20] flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 py-1.5 md:items-center md:gap-3 md:px-2 md:py-5"
         aria-label="Hauptnavigation"
       >
         <div className="yd-nav-primary-group flex w-full flex-col gap-0.5 md:w-full md:items-center md:gap-3">

@@ -123,7 +123,7 @@ function MobileDrawerShell({ children }: { children: ReactNode }) {
       />
       <div
         className={cn(
-          "yd-mobile-nav-root fixed z-[45] md:static md:z-20 md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
+          "yd-mobile-nav-root fixed z-[45] md:static md:z-[100] md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",
           "max-md:pointer-events-none max-md:bottom-0 max-md:left-0 max-md:top-0 max-md:w-auto max-md:justify-start",
           open && "yd-mobile-nav-root--open"
         )}

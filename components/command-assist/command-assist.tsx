@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Command, Mic, ChevronRight } from "lucide-react";
 
 import {
@@ -184,11 +185,16 @@ export function CommandAssist() {
   const [text, setText] = useState("");
   const [prepareHint, setPrepareHint] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
+  const [portalMounted, setPortalMounted] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const fabRef = useRef<HTMLButtonElement | null>(null);
 
   const hidden = pathname.startsWith("/login");
+
+  useEffect(() => {
+    setPortalMounted(true);
+  }, []);
 
   const zone = detectAssistZone(pathname);
 
@@ -400,8 +406,6 @@ export function CommandAssist() {
     };
   }, [open]);
 
-  if (hidden) return null;
-
   const routeHints = suggestRoutes(text, pathname);
   const deepHints = suggestInboxDeepLinks(text, inboxCase?.submissionId ?? null);
   const hints = [...deepHints, ...routeHints].slice(0, 5);
@@ -585,11 +589,13 @@ export function CommandAssist() {
     </>
   );
 
-  return (
-    <div className="yd-command-assist-layer pointer-events-none absolute inset-0 z-[40]">
+  if (hidden || !portalMounted) return null;
+
+  return createPortal(
+    <div className="yd-command-assist-root" data-command-open={open ? "true" : "false"}>
       {open ? (
         <div
-          className="yd-command-assist-backdrop pointer-events-auto absolute inset-0 z-[40] bg-slate-950/[0.22] opacity-100 backdrop-blur-[8px] transition-[opacity,backdrop-filter] duration-200 ease-out motion-reduce:transition-none md:bg-slate-950/[0.15] md:backdrop-blur-[6px]"
+          className="yd-command-assist-backdrop"
           aria-hidden={false}
           aria-live="polite"
           onClick={() => {
@@ -607,24 +613,17 @@ export function CommandAssist() {
           aria-modal="true"
           aria-label="Command — Praxis"
           className={cn(
-            "yd-command-assist-sheet pointer-events-auto absolute z-[41] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
-            "left-3 right-3 bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))] w-auto max-w-none md:left-auto md:right-8",
+            "yd-command-assist-sheet transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
             clinicalCommandSheetWidthMd,
-            "md:bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))]",
             SHEET,
-            "pointer-events-auto translate-y-0 opacity-100"
+            "translate-y-0 opacity-100"
           )}
         >
           {sheetBody}
         </div>
       ) : null}
 
-      <div
-        className={cn(
-          "yd-command-assist-fab-host pointer-events-none absolute z-[42]",
-          "bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 md:bottom-8 md:right-8"
-        )}
-      >
+      <div className="yd-command-assist-fab-host">
         <button
           ref={fabRef}
           type="button"
@@ -632,7 +631,7 @@ export function CommandAssist() {
             setOpen(!open);
             if (open) setPreparedWork(null);
           }}
-          className={cn(FAB, "pointer-events-auto")}
+          className={FAB}
           aria-expanded={open}
           aria-controls="command-assist-panel"
           aria-label={open ? "Command schließen" : "Command öffnen (⌘K)"}
@@ -641,6 +640,7 @@ export function CommandAssist() {
           <Command className="h-[22px] w-[22px] shrink-0" strokeWidth={2} aria-hidden />
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

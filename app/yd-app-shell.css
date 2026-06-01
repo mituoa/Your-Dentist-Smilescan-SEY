@@ -11,15 +11,30 @@
     gap: 0;
   }
 
+  .yd-workspace {
+    --yd-shell-sidebar-w: 116px;
+  }
+
+  html:has(.yd-workspace) {
+    --yd-shell-sidebar-w: 116px;
+  }
+
   .yd-workspace .yd-desktop-nav-rail {
     position: relative;
-    z-index: 60;
+    z-index: 100;
     display: flex;
     width: 108px;
     max-width: 108px;
     flex-shrink: 0;
     align-self: stretch;
     padding: 0 0 0 0.25rem;
+    pointer-events: auto;
+  }
+
+  .yd-workspace .yd-desktop-nav-rail nav,
+  .yd-workspace .yd-desktop-nav-rail a,
+  .yd-workspace .yd-desktop-nav-rail button {
+    pointer-events: auto;
   }
 
   .yd-workspace .yd-desktop-nav-rail .yd-mobile-nav-panel {
@@ -38,7 +53,6 @@
   .yd-workspace .yd-app-shell-main {
     position: relative;
     z-index: 1;
-    isolation: isolate;
     display: flex;
     min-height: 0;
     min-width: 0;
@@ -49,6 +63,74 @@
 
   .yd-workspace .yd-awaken-canvas:has(.yd-dashboard--reference) {
     padding: 1rem 1.25rem 1.5rem !important;
+  }
+}
+
+/* —— Command AI: fixed FAB (scrollt nicht mit), Sidebar bleibt darüber klickbar —— */
+.yd-command-assist-root {
+  pointer-events: none;
+}
+
+.yd-command-assist-backdrop {
+  position: fixed;
+  z-index: 35;
+  inset: 0;
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+@media (min-width: 768px) {
+  .yd-command-assist-backdrop {
+    /* Sidebar-Rail bleibt klickbar (z-index 100), Backdrop nur über Arbeitsfläche */
+    left: var(--yd-shell-sidebar-w, 116px);
+    background: rgba(15, 23, 42, 0.15);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+}
+
+.yd-command-assist-sheet {
+  position: fixed;
+  z-index: 36;
+  pointer-events: auto;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  width: auto;
+  max-width: none;
+}
+
+@media (min-width: 768px) {
+  .yd-command-assist-sheet {
+    left: auto;
+    right: 2rem;
+    bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+    width: min(100vw - var(--yd-shell-sidebar-w, 116px) - 3rem, 32rem);
+    max-width: 32rem;
+  }
+}
+
+.yd-command-assist-fab-host {
+  position: fixed;
+  z-index: 37;
+  pointer-events: auto;
+  right: 0.75rem;
+  bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .yd-command-assist-fab-host {
+    right: 2rem;
+    bottom: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-command-assist-sheet {
+    transition: none;
   }
 }
 

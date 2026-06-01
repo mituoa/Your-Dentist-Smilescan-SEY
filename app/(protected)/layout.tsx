@@ -22,7 +22,7 @@ import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
 import { CommandWorkspaceHydration } from "@/components/command-ai/command-workspace-hydration";
-import { AssistCommandLayer, AssistShell } from "@/components/command-assist/assist-shell";
+import { AssistShell } from "@/components/command-assist/assist-shell";
 import { HcAppCanvas } from "@/components/design/hc-app-canvas";
 import { YD } from "@/lib/design/yd-design-tokens";
 
@@ -196,7 +196,6 @@ export default async function ProtectedLayout({
                   />
                   {children}
                 </HcAppCanvas>
-                <AssistCommandLayer />
               </main>
             </div>
           </div>
