@@ -63,9 +63,23 @@ export function PreparedWorkPreview({
 
       {work.messageDraft ? (
         <div className="mt-3 rounded-lg border border-[rgba(15,23,42,0.06)] bg-white px-3 py-2.5 dark:border-white/[0.08] dark:bg-[rgb(18_20_24/0.9)]">
-          <p className="text-[11px] font-medium text-[#94A3B8]">Entwurf</p>
-          <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-[12px] leading-relaxed text-[#334155] dark:text-slate-300">
+          <p className="text-[11px] font-medium text-[#94A3B8]">
+            {work.intent.kind === "create_task" ? "Aufgabenentwurf" : "Patientennachricht"}
+          </p>
+          <p className="mt-1 line-clamp-6 whitespace-pre-wrap text-[12px] leading-relaxed text-[#334155] dark:text-slate-300">
             {work.messageDraft}
+          </p>
+        </div>
+      ) : null}
+
+      {work.relayTaskDraft ? (
+        <div className="mt-3 rounded-lg border border-[rgba(43,111,232,0.12)] bg-[#F4F8FF] px-3 py-2.5 dark:border-[rgba(59,130,246,0.2)] dark:bg-[rgba(43,111,232,0.08)]">
+          <p className="text-[11px] font-medium text-[#64748B]">Relay-Aufgabe (Vorbefüllung)</p>
+          <p className="mt-1 text-[13px] font-semibold text-[#0F172A] dark:text-slate-100">
+            {work.relayTaskDraft.title}
+          </p>
+          <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-[12px] leading-relaxed text-[#475569] dark:text-slate-400">
+            {work.relayTaskDraft.notes}
           </p>
         </div>
       ) : null}

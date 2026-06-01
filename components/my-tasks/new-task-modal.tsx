@@ -79,12 +79,19 @@ function fieldCls() {
   return "w-full rounded-lg border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 text-[14px] text-[#0F172A] placeholder:text-[#94A3B8] shadow-none transition-colors focus:border-[rgba(15,23,42,0.14)] focus:outline-none focus:ring-2 focus:ring-[rgba(15,23,42,0.06)] disabled:cursor-not-allowed disabled:opacity-50";
 }
 
+export type NewTaskInitialDraft = {
+  title: string;
+  notes?: string;
+  dueDate?: string | null;
+};
+
 type NewTaskModalProps = {
   open: boolean;
   onClose: () => void;
   initialRecurrenceType?: string;
   dialogTitle?: string;
   dialogHint?: string;
+  initialDraft?: NewTaskInitialDraft | null;
 };
 
 export function NewTaskModal({
@@ -93,6 +100,7 @@ export function NewTaskModal({
   initialRecurrenceType = "once",
   dialogTitle = "Neue Aufgabe",
   dialogHint = "Kurz erfassen — Details können Sie später im Aufgabendetail ergänzen.",
+  initialDraft = null,
 }: NewTaskModalProps) {
   const router = useRouter();
   const titleId = useId();
@@ -117,6 +125,18 @@ export function NewTaskModal({
     setAssignMode("self");
     setSelectedIds([]);
     setMemberPickerOpen(false);
+
+    if (initialDraft && panelRef.current) {
+      const form = panelRef.current.querySelector("form");
+      if (form) {
+        const titleEl = form.elements.namedItem("title") as HTMLInputElement | null;
+        const descEl = form.elements.namedItem("description") as HTMLTextAreaElement | null;
+        const dueEl = form.elements.namedItem("due_date") as HTMLInputElement | null;
+        if (titleEl) titleEl.value = initialDraft.title;
+        if (descEl) descEl.value = initialDraft.notes ?? "";
+        if (dueEl && initialDraft.dueDate) dueEl.value = initialDraft.dueDate;
+      }
+    }
     let cancelled = false;
     (async () => {
       const res = await fetchAssignableMembersForTaskCreate();
@@ -132,7 +152,7 @@ export function NewTaskModal({
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, initialRecurrenceType, initialDraft]);
 
   useEffect(() => {
     if (!open) return;

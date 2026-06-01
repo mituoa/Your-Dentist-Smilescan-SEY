@@ -29,12 +29,27 @@ export type PreparedAction = {
   href?: string;
 };
 
+export type CommandMessageSignals = {
+  wantsPhoto: boolean;
+  wantsAppointment: boolean;
+  wantsThisWeek: boolean;
+  wantsTeamHandoff: boolean;
+};
+
+export type CommandRelayTaskDraft = {
+  title: string;
+  notes: string;
+  dueDate: string | null;
+  assigneeHint: string | null;
+};
+
 export type CommandIntent = {
   kind: CommandIntentKind;
   rawText: string;
   patientName: string | null;
   submissionId: string | null;
   confidence: "high" | "medium" | "low";
+  messageSignals?: CommandMessageSignals;
 };
 
 export type PreparedWorkStatus = "draft" | "ready_for_review" | "approved" | "dismissed";
@@ -50,6 +65,7 @@ export type PreparedWorkItem = {
   situationSummary: string;
   suggestionSummary: string;
   messageDraft: string | null;
+  relayTaskDraft: CommandRelayTaskDraft | null;
   actions: PreparedAction[];
   checks: { id: string; label: string; done: boolean }[];
 };

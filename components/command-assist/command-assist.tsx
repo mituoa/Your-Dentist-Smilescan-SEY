@@ -13,6 +13,8 @@ import { createCaseFromQuery } from "@/lib/create-case-return";
 import { stashCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
 import { resolveCommandIntent } from "@/lib/command-ai/intent-resolver";
 import { prepareWorkFromIntent } from "@/lib/command-ai/preparation-engine";
+import { stashCommandTaskDraft } from "@/lib/command-ai/task-draft-bridge";
+import { mergeCommandWorkspaceHints } from "@/lib/command-ai/workspace-context";
 import { COMMAND_AI_NO_AUTO_SEND } from "@/lib/command-ai/safety-copy";
 import { COMMAND_AI_EXAMPLES } from "@/lib/product/workflow";
 import {
@@ -180,6 +182,7 @@ export function CommandAssist() {
   const setPreparedWork = assistCtx?.setPreparedWork ?? (() => {});
 
   const [text, setText] = useState("");
+  const [prepareHint, setPrepareHint] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
@@ -216,17 +219,42 @@ export function CommandAssist() {
     [draftParams, setPreparedWork]
   );
 
+  const mergedHints = useMemo(() => {
+    const active =
+      inboxCase != null
+        ? {
+            submissionId: inboxCase.submissionId,
+            patientName: inboxCase.patientName,
+            concernLine: inboxCase.concernLine,
+            practicePhone: inboxCase.practicePhone,
+            appointmentUrl: inboxCase.appointmentUrl,
+          }
+        : null;
+    return mergeCommandWorkspaceHints(assistCtx?.workspaceHints ?? null, active);
+  }, [assistCtx?.workspaceHints, inboxCase]);
+
   const runPrepare = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    const intent = resolveCommandIntent(trimmed, assistCtx?.workspaceHints ?? null);
-    const work = prepareWorkFromIntent(intent, assistCtx?.workspaceHints ?? null);
+    const activeCase = inboxCase
+      ? {
+          submissionId: inboxCase.submissionId,
+          patientName: inboxCase.patientName,
+          concernLine: inboxCase.concernLine,
+        }
+      : null;
+    const intent = resolveCommandIntent(trimmed, mergedHints, activeCase);
+    const work = prepareWorkFromIntent(intent, mergedHints);
     if (work) {
+      setPrepareHint(null);
       setPreparedWork(work);
       return;
     }
     setPreparedWork(null);
-  }, [text, assistCtx?.workspaceHints, setPreparedWork]);
+    setPrepareHint(
+      "Konnte nicht vorbereitet werden. Bitte Patientennamen nennen (z. B. Berk Basal) oder einen Tracker-Fall öffnen."
+    );
+  }, [text, mergedHints, inboxCase, setPreparedWork]);
 
   const handleApprovePrepared = useCallback(() => {
     if (!preparedWork) return;
@@ -237,7 +265,25 @@ export function CommandAssist() {
         savedAt: new Date().toISOString(),
       });
     }
-    const href = preparedWork.actions.find((a) => a.enabled && a.href)?.href;
+    if (preparedWork.relayTaskDraft) {
+      stashCommandTaskDraft({
+        title: preparedWork.relayTaskDraft.title,
+        notes: preparedWork.relayTaskDraft.notes,
+        dueDate: preparedWork.relayTaskDraft.dueDate,
+        assigneeHint: preparedWork.relayTaskDraft.assigneeHint,
+        savedAt: new Date().toISOString(),
+      });
+    }
+    const messageHref = preparedWork.actions.find(
+      (a) => a.enabled && a.kind === "send_message" && a.href
+    )?.href;
+    const relayHref = preparedWork.actions.find(
+      (a) => a.enabled && (a.kind === "create_task" || a.kind === "create_reminder") && a.href
+    )?.href;
+    const href =
+      messageHref ??
+      relayHref ??
+      preparedWork.actions.find((a) => a.enabled && a.href)?.href;
     setPreparedWork(null);
     setOpen(false);
     if (href) router.push(href);
@@ -319,6 +365,8 @@ export function CommandAssist() {
       if (!n) return false;
       if (fabRef.current?.contains(n)) return true;
       if (sheetRef.current?.contains(n)) return true;
+      const sidebar = document.getElementById("app-sidebar");
+      if (sidebar?.contains(n)) return true;
       return false;
     };
 
@@ -459,6 +507,7 @@ export function CommandAssist() {
             onChange={(e) => {
               setText(e.target.value);
               if (preparedWork) setPreparedWork(null);
+              if (prepareHint) setPrepareHint(null);
             }}
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -485,6 +534,12 @@ export function CommandAssist() {
               {listening ? "Hört zu …" : "Diktat"}
             </button>
           </div>
+
+          {prepareHint ? (
+            <p className="text-[13px] leading-relaxed text-[#B45309]" role="status">
+              {prepareHint}
+            </p>
+          ) : null}
 
           {!preparedWork && COMMAND_AI_EXAMPLES.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -531,10 +586,10 @@ export function CommandAssist() {
   );
 
   return (
-    <>
+    <div className="yd-command-assist-layer pointer-events-none absolute inset-0 z-[40]">
       {open ? (
         <div
-          className="fixed inset-0 z-[44] bg-slate-950/[0.22] opacity-100 backdrop-blur-[8px] transition-[opacity,backdrop-filter] duration-200 ease-out motion-reduce:transition-none md:bg-slate-950/[0.15] md:backdrop-blur-[6px]"
+          className="yd-command-assist-backdrop pointer-events-auto absolute inset-0 z-[40] bg-slate-950/[0.22] opacity-100 backdrop-blur-[8px] transition-[opacity,backdrop-filter] duration-200 ease-out motion-reduce:transition-none md:bg-slate-950/[0.15] md:backdrop-blur-[6px]"
           aria-hidden={false}
           aria-live="polite"
           onClick={() => {
@@ -544,30 +599,29 @@ export function CommandAssist() {
         />
       ) : null}
 
-      <div
-        ref={sheetRef}
-        id="command-assist-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-hidden={!open}
-        aria-label="Command — Praxis"
-        className={cn(
-          "fixed z-[45] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
-          "left-3 right-3 bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))] w-auto max-w-none md:left-auto md:right-8",
-          clinicalCommandSheetWidthMd,
-          "md:bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))]",
-          SHEET,
-          open
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none invisible translate-y-[calc(100%+1.5rem)] opacity-0 md:translate-y-3"
-        )}
-      >
-        {open ? sheetBody : null}
-      </div>
+      {open ? (
+        <div
+          ref={sheetRef}
+          id="command-assist-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Command — Praxis"
+          className={cn(
+            "yd-command-assist-sheet pointer-events-auto absolute z-[41] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
+            "left-3 right-3 bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))] w-auto max-w-none md:left-auto md:right-8",
+            clinicalCommandSheetWidthMd,
+            "md:bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))]",
+            SHEET,
+            "pointer-events-auto translate-y-0 opacity-100"
+          )}
+        >
+          {sheetBody}
+        </div>
+      ) : null}
 
       <div
         className={cn(
-          "fixed z-[46]",
+          "yd-command-assist-fab-host pointer-events-none absolute z-[42]",
           "bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 md:bottom-8 md:right-8"
         )}
       >
@@ -578,7 +632,7 @@ export function CommandAssist() {
             setOpen(!open);
             if (open) setPreparedWork(null);
           }}
-          className={FAB}
+          className={cn(FAB, "pointer-events-auto")}
           aria-expanded={open}
           aria-controls="command-assist-panel"
           aria-label={open ? "Command schließen" : "Command öffnen (⌘K)"}
@@ -587,6 +641,6 @@ export function CommandAssist() {
           <Command className="h-[22px] w-[22px] shrink-0" strokeWidth={2} aria-hidden />
         </button>
       </div>
-    </>
+    </div>
   );
 }

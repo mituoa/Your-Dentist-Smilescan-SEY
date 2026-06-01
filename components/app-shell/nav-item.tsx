@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { useMobileNavOptional } from "@/components/app-shell/mobile-nav";
 import {
   BookOpen,
   CalendarDays,
@@ -51,6 +53,7 @@ export function NavItem({
   tier = "primary",
 }: NavItemProps) {
   const pathname = usePathname();
+  const mobileNav = useMobileNavOptional();
   const Icon = ICON_BY_NAME[iconName] ?? Home;
   const isRelayNav = href === "/relay";
   const isSettingsNav = href === "/settings";
@@ -71,8 +74,9 @@ export function NavItem({
       href={href}
       title={label}
       data-active={isActive ? "true" : "false"}
+      onClick={() => mobileNav?.close()}
       className={cn(
-        "yd-ambient-nav-link group relative z-[1] flex w-full touch-manipulation items-center transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.18)]",
+        "yd-ambient-nav-link group relative z-[2] flex w-full touch-manipulation items-center transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.18)]",
         "min-h-[44px] gap-2.5 rounded-[14px] px-2.5 py-1.5",
         "md:min-h-[3.25rem] md:w-full md:max-w-[4.75rem] md:flex-col md:justify-center md:gap-0 md:rounded-2xl md:px-1 md:py-1.5",
         tier === "secondary" && "yd-nav-tier-secondary",

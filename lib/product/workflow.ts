@@ -16,10 +16,10 @@ export const PRODUCT_WORKFLOW_STEPS = [
 
 /** Command AI — intent examples surfaced in ⌘K palette. */
 export const COMMAND_AI_EXAMPLES = [
-  "Bitte Berk Baysal schreiben, dass er diese Woche kommen soll und Terminlink senden",
+  "Bitte Berk Basal eine Nachricht schicken: erneutes Bild oder Terminlink, diese Woche noch kommen",
+  "Erstelle eine Reminder-Aufgabe für morgen: Implantat-DV an die Rezeption weiterleiten",
   "Alle neuen Patienten zusammenfassen",
   "Was ist heute wichtig?",
-  "Neue Aufgabe für Team erstellen",
 ] as const;
 
 /** Schnellaktionen im Atlas-Cockpit. */

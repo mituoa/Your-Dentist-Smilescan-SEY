@@ -21,7 +21,8 @@ import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
-import { AssistShell } from "@/components/command-assist/assist-shell";
+import { CommandWorkspaceHydration } from "@/components/command-ai/command-workspace-hydration";
+import { AssistCommandLayer, AssistShell } from "@/components/command-assist/assist-shell";
 import { HcAppCanvas } from "@/components/design/hc-app-canvas";
 import { YD } from "@/lib/design/yd-design-tokens";
 
@@ -44,7 +45,12 @@ export default async function ProtectedLayout({
   let myTasksCount = 0;
   let myTasksOverdueCount = 0;
   let inboxCount: number | undefined;
-  type ProfileHeader = { photo_url: string | null; display_name: string | null };
+  type ProfileHeader = {
+    photo_url: string | null;
+    display_name: string | null;
+    practice_phone: string | null;
+    appointment_link: string | null;
+  };
   const headerState = { profileData: null as ProfileHeader | null };
 
   await Promise.all([
@@ -79,7 +85,7 @@ export default async function ProtectedLayout({
         const supabase = await createClient();
         const res = await supabase
           .from("profile_data")
-          .select("photo_url, display_name")
+          .select("photo_url, display_name, practice_phone, appointment_link")
           .eq("workspace_id", workspace.workspace_id)
           .maybeSingle();
         headerState.profileData = res.data as ProfileHeader | null;
@@ -105,12 +111,26 @@ export default async function ProtectedLayout({
     role,
   });
 
+  let commandPatients: {
+    id: string;
+    patient_name: string | null;
+    patient_notes: string | null;
+  }[] = [];
+
   if (workspace) {
     const [inboxRes, tasksRes, journals] = await Promise.all([
       getInboxSubmissions(workspace.workspace_id),
       getOpenTasks(workspace.workspace_id),
       role === "doctor" ? listJournalForWorkspace(workspace.workspace_id) : Promise.resolve([]),
     ]);
+
+    if (inboxRes.ok) {
+      commandPatients = inboxRes.items.map((item) => ({
+        id: item.id,
+        patient_name: item.patient_name,
+        patient_notes: item.patient_notes,
+      }));
+    }
 
     navAmbient = buildNavAmbientPreviews({
       inboxItems: inboxRes.ok ? inboxRes.items : [],
@@ -124,6 +144,11 @@ export default async function ProtectedLayout({
 
   return (
     <AssistShell>
+      <CommandWorkspaceHydration
+        patients={commandPatients}
+        practicePhone={profileData?.practice_phone ?? null}
+        appointmentUrl={profileData?.appointment_link ?? null}
+      />
       <YdWorkspaceAwakening>
         <MobileNavProvider>
           <Suspense fallback={null}>
@@ -171,6 +196,7 @@ export default async function ProtectedLayout({
                   />
                   {children}
                 </HcAppCanvas>
+                <AssistCommandLayer />
               </main>
             </div>
           </div>

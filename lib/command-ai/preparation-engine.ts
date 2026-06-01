@@ -1,9 +1,15 @@
-import { buildFollowUpDraft } from "@/lib/clinical/message-templates";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 
+import { buildCommandMessageDraft } from "./build-command-message-draft";
 import { frameNextStep, frameSituation, frameSuggestion } from "./safety-copy";
+import { dueDateForHint } from "./task-draft-bridge";
 import { formatDueLabel, parseTaskFromVoice } from "./task-intent";
-import type { CommandIntent, CommandWorkspaceHints, PreparedWorkItem } from "./types";
+import type {
+  CommandIntent,
+  CommandRelayTaskDraft,
+  CommandWorkspaceHints,
+  PreparedWorkItem,
+} from "./types";
 
 function suggestNextStepFromNotes(notes: string | null): string {
   const t = (notes ?? "").toLowerCase();
@@ -19,10 +25,43 @@ function suggestNextStepFromNotes(notes: string | null): string {
   return "Rückmeldung mit nächstem Praxisschritt senden";
 }
 
-function urgencyFromNotes(notes: string | null): "today" | "this_week" | "not_urgent" {
-  const t = (notes ?? "").toLowerCase();
-  if (/schmerz|schwell|fieber|akut|notfall|dringend/.test(t)) return "this_week";
-  return "not_urgent";
+function buildRelayTaskDraftFromIntent(intent: CommandIntent): CommandRelayTaskDraft {
+  const parsed = parseTaskFromVoice(intent.rawText);
+  const patientName = intent.patientName ?? parsed.patientHint;
+  const notes = [
+    patientName ? `Patient: ${patientName}` : null,
+    parsed.assigneeHint ? `Team: ${parsed.assigneeHint}` : null,
+    `Arzt-Notiz: ${parsed.rawSummary}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return {
+    title: parsed.taskTitle,
+    notes,
+    dueDate: dueDateForHint(parsed.dueHint),
+    assigneeHint: parsed.assigneeHint,
+  };
+}
+
+function buildTeamHandoffTask(
+  intent: CommandIntent,
+  patientName: string,
+  hints: CommandWorkspaceHints | null
+): CommandRelayTaskDraft {
+  const parsed = parseTaskFromVoice(intent.rawText);
+  return {
+    title: parsed.assigneeHint ? `Hinweis an ${parsed.assigneeHint}` : "Hinweis an Rezeption",
+    notes: [
+      `Patient: ${patientName}`,
+      `Arzt-Notiz: ${intent.rawText}`,
+      hints?.appointmentUrl ? `Terminlink: ${hints.appointmentUrl}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    dueDate: dueDateForHint(parsed.dueHint ?? "tomorrow"),
+    assigneeHint: parsed.assigneeHint ?? "rezeption",
+  };
 }
 
 function buildPatientMessageWork(
@@ -36,19 +75,24 @@ function buildPatientMessageWork(
 
   const patientName = intent.patientName ?? patient?.name ?? "Patient";
   const concernLine = patient?.concernLine ?? null;
-  const wantsAppointment = /termin|link|einlad|kommen|diese woche|woche/.test(
-    intent.rawText.toLowerCase()
-  );
+  const signals = intent.messageSignals ?? {
+    wantsPhoto: false,
+    wantsAppointment: false,
+    wantsThisWeek: false,
+    wantsTeamHandoff: false,
+  };
 
-  const urgency = urgencyFromNotes(concernLine);
-  const messageDraft = buildFollowUpDraft({
+  const messageDraft = buildCommandMessageDraft({
     patientName,
-    urgency: wantsAppointment ? "this_week" : urgency,
     practicePhone: hints?.practicePhone ?? "",
-    appointmentUrl: wantsAppointment ? hints?.appointmentUrl ?? null : hints?.appointmentUrl ?? null,
+    appointmentUrl: hints?.appointmentUrl ?? null,
+    signals,
   });
 
   const nextStep = suggestNextStepFromNotes(concernLine);
+  const relayTaskDraft = signals.wantsTeamHandoff
+    ? buildTeamHandoffTask(intent, patientName, hints)
+    : null;
 
   return {
     id: `prep-${intent.submissionId ?? patientName}-${Date.now()}`,
@@ -58,36 +102,51 @@ function buildPatientMessageWork(
     patientName,
     submissionId: intent.submissionId ?? patient?.submissionId ?? null,
     situationSummary: frameSituation(concernLine, patientName),
-    suggestionSummary: frameSuggestion(nextStep),
+    suggestionSummary: frameSuggestion(
+      relayTaskDraft
+        ? `${nextStep} — zusätzlich Team-Hinweis in Relay vorbereitet.`
+        : nextStep
+    ),
     messageDraft,
+    relayTaskDraft,
     checks: [
       { id: "context", label: "Fallkontext geladen", done: Boolean(intent.submissionId) },
       { id: "draft", label: "Antwortentwurf erstellt", done: true },
-      { id: "link", label: "Terminlink vorbereitet", done: Boolean(hints?.appointmentUrl) && wantsAppointment },
+      {
+        id: "photo",
+        label: "Bildanforderung im Entwurf",
+        done: signals.wantsPhoto,
+      },
+      {
+        id: "link",
+        label: "Terminlink vorbereitet",
+        done: Boolean(hints?.appointmentUrl) && signals.wantsAppointment,
+      },
+      { id: "team", label: "Team-Hinweis vorbereitet", done: Boolean(relayTaskDraft) },
     ],
     actions: [
       {
         id: "send_message",
         kind: "send_message",
-        label: "Nachricht senden",
-        description: "Entwurf im Tracker prüfen — Versand erst nach Freigabe",
+        label: "Nachricht prüfen",
+        description: "Entwurf im Tracker — Versand erst nach Freigabe",
         enabled: true,
         href: intent.submissionId ? `/inbox/${intent.submissionId}#tracker-korrespondenz` : undefined,
       },
       {
         id: "appointment_link",
         kind: "add_appointment_link",
-        label: "Terminlink hinzufügen",
-        description: "Terminlink in der Patientenkommunikation ergänzen",
-        enabled: wantsAppointment,
+        label: "Terminlink prüfen",
+        description: "Terminbereich im Fall öffnen",
+        enabled: signals.wantsAppointment,
         href: intent.submissionId ? `/inbox/${intent.submissionId}#tracker-termin` : undefined,
       },
       {
         id: "create_task",
         kind: "create_task",
-        label: "Aufgabe erstellen",
-        description: "Interne Relay-Aufgabe für das Team vorbereiten",
-        enabled: true,
+        label: "Relay-Aufgabe prüfen",
+        description: "Interne Aufgabe anlegen oder zuweisen",
+        enabled: Boolean(relayTaskDraft),
         href: "/relay",
       },
     ],
@@ -116,6 +175,7 @@ function buildSummarizeInboxWork(
         : "Keine offenen Einsendungen — Posteingang ist auf dem aktuellen Stand."
     ),
     messageDraft: null,
+    relayTaskDraft: null,
     checks: [
       { id: "reviewed", label: `${count} Fälle gesichtet`, done: count > 0 },
       { id: "summaries", label: "Zusammenfassungen erstellt", done: count > 0 },
@@ -147,13 +207,28 @@ function buildSummarizeDayWork(intent: CommandIntent): PreparedWorkItem {
       "Prioritäten: neue Einsendungen, vorbereitete Antworten, offene Teamaufgaben."
     ),
     messageDraft: null,
+    relayTaskDraft: null,
     checks: [
       { id: "inbox", label: "Einsendungen geprüft", done: true },
       { id: "tasks", label: "Aufgaben eingeordnet", done: true },
     ],
     actions: [
-      { id: "dashboard", kind: "navigate", label: "Atlas öffnen", description: "Überblick prüfen", enabled: true, href: "/dashboard" },
-      { id: "relay", kind: "navigate", label: "Relay öffnen", description: "Teamaufgaben prüfen", enabled: true, href: "/relay" },
+      {
+        id: "dashboard",
+        kind: "navigate",
+        label: "Atlas öffnen",
+        description: "Überblick prüfen",
+        enabled: true,
+        href: "/dashboard",
+      },
+      {
+        id: "relay",
+        kind: "navigate",
+        label: "Relay öffnen",
+        description: "Teamaufgaben prüfen",
+        enabled: true,
+        href: "/relay",
+      },
     ],
   };
 }
@@ -181,6 +256,7 @@ function buildSummarizePatientWork(
     situationSummary: frameSituation(concernLine, patientName),
     suggestionSummary: frameSuggestion(nextStep),
     messageDraft: null,
+    relayTaskDraft: null,
     checks: [
       { id: "timeline", label: "Verlauf zusammengefasst", done: Boolean(concernLine) },
       { id: "context", label: "Fallkontext geladen", done: Boolean(intent.submissionId) },
@@ -208,10 +284,13 @@ function buildCreateTaskWork(intent: CommandIntent): PreparedWorkItem {
     : null;
 
   const isCallNote = /anruf|telefon|telefonat|rückruf/.test(intent.rawText.toLowerCase());
+  const relayTaskDraft = buildRelayTaskDraftFromIntent(intent);
 
-  const situationSummary = isCallNote
-    ? "Telefonnotiz strukturiert — Fallzusammenfassung und Follow-up vorbereitet."
-    : "Aufgabe für das Praxisteam vorbereitet.";
+  const situationSummary = parsed.isReminder
+    ? "Erinnerung für das Praxisteam vorbereitet."
+    : isCallNote
+      ? "Telefonnotiz strukturiert — Follow-up vorbereitet."
+      : "Aufgabe für das Praxisteam vorbereitet.";
 
   const draftLines = [
     `Aufgabe: ${parsed.taskTitle}`,
@@ -231,8 +310,10 @@ function buildCreateTaskWork(intent: CommandIntent): PreparedWorkItem {
     situationSummary,
     suggestionSummary: frameSuggestion("Entwurf in Relay prüfen und zuweisen."),
     messageDraft: draftLines.join("\n"),
+    relayTaskDraft,
     checks: [
       { id: "task_draft", label: "Aufgabenentwurf erstellt", done: true },
+      { id: "due", label: `Fälligkeit: ${dueLabel}`, done: Boolean(parsed.dueHint) },
       ...(isCallNote
         ? [
             { id: "case_note", label: "Patientennotiz vorbereitet", done: true },
@@ -244,8 +325,8 @@ function buildCreateTaskWork(intent: CommandIntent): PreparedWorkItem {
       {
         id: "relay",
         kind: "create_task",
-        label: "In Relay prüfen",
-        description: "Aufgabe anlegen oder zuweisen",
+        label: "In Relay anlegen",
+        description: "Vorbefüllte Aufgabe prüfen und speichern",
         enabled: true,
         href: "/relay",
       },

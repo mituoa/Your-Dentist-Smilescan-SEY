@@ -6,3 +6,6 @@ export * from "./submission-preparation";
 export * from "./photo-workflow";
 export * from "./practice-intelligence";
 export * from "./draft-bridge";
+export * from "./task-draft-bridge";
+export * from "./patient-match";
+export * from "./workspace-context";

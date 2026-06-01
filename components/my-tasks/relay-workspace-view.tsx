@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 
 import { CardBoard } from "@/components/my-tasks/card-board";
 import { RelayAssistHint } from "@/components/command-ai/relay-assist-hint";
+import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
 import { RelayMessagesPanel } from "@/components/my-tasks/relay-messages-panel";
 import { RelayQuickCreate } from "@/components/my-tasks/relay-quick-create";
 import type { MyTask } from "@/lib/queries/my-tasks";
@@ -112,6 +113,7 @@ export function RelayWorkspaceView({
 
   return (
     <div className="min-h-0 flex-1" style={{ background: "#F7F9FC" }}>
+      <RelayCommandTaskPrefill />
       <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>

@@ -3,13 +3,15 @@
 import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
+import { Mail } from "lucide-react";
 
 import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
+import { LoginPasswordField } from "@/components/auth/login-password-field";
+import { LoginSplitShell } from "@/components/auth/login-split-shell";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
 import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-button";
 import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirmation-submit-button";
 import { YdAuthPending } from "@/components/auth/yd-auth-ui";
-import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { LoginRegisterCta } from "@/components/auth/login-register-cta";
@@ -48,9 +50,7 @@ function LoginPasswordControlsFieldset({
 interface LoginPageClientProps {
   queryError?: string;
   resent?: boolean;
-  /** Server-seitig abgeleiteter Schlüssel — bei geändertem Login-Feedback Sperre der parallelen Kanäle lösen. */
   authFlowResetKey: string;
-  /** After server/client sign-out: clear pricing-return flag and keep viewport at top. */
   signedOut?: boolean;
   inviteToken?: string;
   prefilledEmail?: string;
@@ -181,32 +181,33 @@ export function LoginPageClient({
 
   const shouldShowResend = normalizedQueryError === "email_not_confirmed";
 
-  return (
-    <YdPublicOsEnvironment mode="focus">
-      <div className="yd-clinical-entry yd-clinical-entry--login">
-        <div className="yd-clinical-entry-panel yd-clinical-entry-panel--login-entrance">
-          <div className="yd-auth-login-brand yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "0" }}>
-            <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
-          </div>
+  const forgotHref = inviteToken
+    ? `/forgot-password?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
+    : "/forgot-password";
 
-          <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>
-            <h1 className="yd-public-entry-title yd-public-entry-title--login">Ihr geschützter Arbeitsbereich</h1>
-            <p className="yd-public-entry-lead yd-public-entry-lead--login">
-              Ihr Zugang zu Fällen, Aufgaben und Teamabläufen.
-            </p>
-          </div>
+  return (
+    <LoginSplitShell>
+      <div className="yd-login-form-card">
+        <div className="yd-login-form-brand">
+          <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
+        </div>
+
+        <header className="yd-login-form-header">
+          <h1 className="yd-login-form-title">Anmelden</h1>
+          <p className="yd-login-form-lead">
+            Willkommen zurück — melden Sie sich mit Ihrem Praxiszugang an.
+          </p>
+        </header>
 
         {parsedError ? (
           parsedError.tone === "pending" ? (
-            <YdAuthPending title={parsedError.title} className="mb-6 min-w-0 break-words">
+            <YdAuthPending title={parsedError.title} className="mb-5 min-w-0 break-words">
               {parsedError.body}
             </YdAuthPending>
           ) : (
             <div
-              className={`yd-auth-alert mb-6 min-w-0 break-words ${
-                parsedError.tone === "warning"
-                  ? "yd-auth-alert--warning"
-                  : "yd-auth-alert--info"
+              className={`yd-auth-alert mb-5 min-w-0 break-words ${
+                parsedError.tone === "warning" ? "yd-auth-alert--warning" : "yd-auth-alert--info"
               }`}
               role="alert"
             >
@@ -223,7 +224,7 @@ export function LoginPageClient({
         ) : null}
 
         {resent ? (
-          <p className="yd-auth-alert yd-auth-alert--success mb-6" role="status">
+          <p className="yd-auth-alert yd-auth-alert--success mb-5" role="status">
             Bestätigungs‑E‑Mail wurde erneut versendet. Bitte prüfen Sie auch den Spam‑Ordner.
           </p>
         ) : null}
@@ -237,7 +238,7 @@ export function LoginPageClient({
           {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
 
           <LoginPasswordControlsFieldset otherChannelActive={passwordBlockedByOthers}>
-            <div className="yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "0" }}>
+            <div className="yd-login-field-wrap">
               <input
                 id="email"
                 name="email"
@@ -246,34 +247,20 @@ export function LoginPageClient({
                 placeholder="E-Mail-Adresse"
                 autoComplete="email"
                 onChange={(e) => setResendEmail(e.target.value)}
-                className="yd-auth-input"
+                className="yd-login-field yd-login-field--with-icon"
                 required
               />
+              <span className="yd-login-field-icon-btn yd-login-field-icon-btn--static" aria-hidden>
+                <Mail className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              </span>
             </div>
 
-            <div className="yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>
-              <div className="mb-1.5 flex items-center justify-end">
-                <Link
-                  prefetch
-                  href={
-                    inviteToken
-                      ? `/forgot-password?invite=${encodeURIComponent(inviteToken)}${prefilledEmail ? `&email=${encodeURIComponent(prefilledEmail)}` : ""}`
-                      : "/forgot-password"
-                  }
-                  className="yd-auth-link inline-flex min-h-[44px] items-center max-md:py-2 md:min-h-0 md:py-0"
-                >
-                  Passwort vergessen?
-                </Link>
-              </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Passwort"
-                autoComplete="current-password"
-                className="yd-auth-input"
-                required
-              />
+            <LoginPasswordField disabled={passwordBlockedByOthers} />
+
+            <div className="yd-login-form-row">
+              <Link prefetch href={forgotHref} className="yd-login-forgot">
+                Passwort vergessen?
+              </Link>
             </div>
           </LoginPasswordControlsFieldset>
 
@@ -303,10 +290,7 @@ export function LoginPageClient({
 
         {googleLoginEnabled ? (
           <>
-            <div
-              className="yd-auth-divider yd-auth-divider--subtle yd-auth-awaken-field"
-              style={{ ["--yd-auth-field-i" as string]: "3" }}
-            >
+            <div className="yd-auth-divider yd-auth-divider--subtle">
               <span>oder</span>
             </div>
 
@@ -314,8 +298,6 @@ export function LoginPageClient({
               action={signInWithGoogle}
               onSubmit={() => setLoginChannelLock("google")}
               aria-busy={loginChannelLock === "google"}
-              className="yd-auth-awaken-field"
-              style={{ ["--yd-auth-field-i" as string]: "4" }}
             >
               {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
               <fieldset
@@ -353,7 +335,7 @@ export function LoginPageClient({
 
         <LoginRegisterCta inviteToken={inviteToken} prefilledEmail={prefilledEmail} />
 
-        <footer className="yd-auth-legal-minimal yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "6" }}>
+        <footer className="yd-auth-legal-minimal">
           <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
             <Link href="/datenschutz" className="yd-auth-legal-minimal-link">
               Datenschutz
@@ -363,9 +345,7 @@ export function LoginPageClient({
             </Link>
           </nav>
         </footer>
-        </div>
       </div>
-    </YdPublicOsEnvironment>
+    </LoginSplitShell>
   );
 }
-
