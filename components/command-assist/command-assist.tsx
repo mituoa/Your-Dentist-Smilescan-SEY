@@ -532,22 +532,24 @@ export function CommandAssist() {
 
   return (
     <>
-      <div
-        className={cn(
-          "fixed inset-0 z-[44] transition-[opacity,backdrop-filter] duration-200 ease-out motion-reduce:transition-none",
-          open
-            ? "bg-slate-950/[0.22] opacity-100 backdrop-blur-[8px] md:bg-slate-950/[0.15] md:backdrop-blur-[6px]"
-            : "pointer-events-none opacity-0"
-        )}
-        aria-hidden={!open}
-        aria-live="polite"
-      />
+      {open ? (
+        <div
+          className="fixed inset-0 z-[44] bg-slate-950/[0.22] opacity-100 backdrop-blur-[8px] transition-[opacity,backdrop-filter] duration-200 ease-out motion-reduce:transition-none md:bg-slate-950/[0.15] md:backdrop-blur-[6px]"
+          aria-hidden={false}
+          aria-live="polite"
+          onClick={() => {
+            setOpen(false);
+            setPreparedWork(null);
+          }}
+        />
+      ) : null}
 
       <div
         ref={sheetRef}
         id="command-assist-panel"
         role="dialog"
         aria-modal="true"
+        aria-hidden={!open}
         aria-label="Command — Praxis"
         className={cn(
           "fixed z-[45] transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
@@ -557,10 +559,10 @@ export function CommandAssist() {
           SHEET,
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-[calc(100%+1.5rem)] opacity-0 md:translate-y-3 md:opacity-0"
+            : "pointer-events-none invisible translate-y-[calc(100%+1.5rem)] opacity-0 md:translate-y-3"
         )}
       >
-        {sheetBody}
+        {open ? sheetBody : null}
       </div>
 
       <div

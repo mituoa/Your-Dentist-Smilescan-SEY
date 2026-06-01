@@ -33,10 +33,10 @@ export function WorkspaceIntegratedHeader({
     <header className="yd-dash-header-premium yd-workspace-integrated-header w-full min-w-0 max-w-full">
       <div className="yd-dash-header-premium__grid">
         <div className="yd-dash-header-premium__identity">
-          <p className="yd-dash-header-premium__headline">{eyebrow}</p>
-          <h1 className="yd-dash-header-premium__greeting">
+          <h1 className="yd-dash-header-premium__headline">{eyebrow}</h1>
+          <p className="yd-dash-header-premium__greeting">
             {greeting}, {displayName}
-          </h1>
+          </p>
           <p className="yd-dash-header-premium__subtitle">{subtitle}</p>
         </div>
 

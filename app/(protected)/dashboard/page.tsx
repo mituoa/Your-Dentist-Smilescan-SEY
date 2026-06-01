@@ -215,37 +215,31 @@ export default async function DashboardPage() {
         {briefing ? <MorningBriefing briefing={briefing} /> : null}
 
         <DashboardAmbientKpis>
-          <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-            <div className="flex min-w-0">
-              <HcStatCard
-                href="/inbox"
-                title="Neue Einsendungen"
-                value={unseenCount === null ? "—" : unseenCount}
-                iconName="clipboard-list"
-                footnote="Patientenfälle zur Sichtung"
-                workContext={newSubmissionsContext}
-              />
-            </div>
-            <div className="flex min-w-0">
-              <HcStatCard
-                href="/inbox"
-                title="AI vorbereitet"
-                value={preparedAwaitingCount === null ? "—" : preparedAwaitingCount}
-                iconName="sparkles"
-                footnote="Antworten & nächste Schritte bereit"
-                hoverHint="Assistenz hat Entwürfe und nächste Schritte vorbereitet — zur Freigabe im Tracker prüfen."
-              />
-            </div>
-            <div className="flex min-w-0">
-              <HcStatCard
-                href="/relay"
-                title="Offene Entscheidungen"
-                value={tasksNeedingDecision === null ? openTaskCount : tasksNeedingDecision}
-                iconName="list-todo"
-                footnote="Freigabe durch Sie erforderlich"
-                workContext={openTasksContext}
-              />
-            </div>
+          <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+            <HcStatCard
+              href="/inbox"
+              title="Neue Einsendungen"
+              value={unseenCount === null ? "—" : unseenCount}
+              iconName="clipboard-list"
+              footnote="Patientenfälle zur Sichtung"
+              workContext={newSubmissionsContext}
+            />
+            <HcStatCard
+              href="/inbox"
+              title="AI vorbereitet"
+              value={preparedAwaitingCount === null ? "—" : preparedAwaitingCount}
+              iconName="sparkles"
+              footnote="Antworten & nächste Schritte bereit"
+              hoverHint="Assistenz hat Entwürfe und nächste Schritte vorbereitet — zur Freigabe im Tracker prüfen."
+            />
+            <HcStatCard
+              href="/relay"
+              title="Offene Entscheidungen"
+              value={tasksNeedingDecision === null ? openTaskCount : tasksNeedingDecision}
+              iconName="list-todo"
+              footnote="Freigabe durch Sie erforderlich"
+              workContext={openTasksContext}
+            />
           </div>
         </DashboardAmbientKpis>
 

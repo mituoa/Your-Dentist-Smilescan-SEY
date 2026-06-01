@@ -5,8 +5,13 @@
   --yd-header-border: rgba(180, 198, 218, 0.28);
   --yd-header-search-bg: #eef2f6;
   --yd-header-action-bg: #ffffff;
-  --yd-header-focus: rgba(26, 79, 156, 0.12);
+  --yd-header-focus: rgba(22, 61, 122, 0.14);
   --yd-header-accent: #1a4f9c;
+  /* Luxuriöses Medical Blue — etwas dunkler, weniger „Digital-SaaS“ */
+  --yd-medical-blue-deep: #163d7a;
+  --yd-medical-blue-mid: #1a4f9c;
+  --yd-medical-blue-bright: #2a5f9e;
+  --yd-medical-blue-glow: rgba(22, 61, 122, 0.22);
 
   margin-bottom: 0;
   padding: 0.25rem 0 1.5rem;
@@ -48,45 +53,43 @@
 
 .yd-workspace .yd-dash-header-premium__headline {
   margin: 0;
-  color: #64748b;
-  font-size: 0.6875rem;
+  color: #152a45;
+  font-size: 1.375rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: -0.03em;
   line-height: 1.2;
-  text-transform: uppercase;
 }
 
 @media (min-width: 768px) {
   .yd-workspace .yd-dash-header-premium__headline {
-    font-size: 0.71875rem;
-  }
-}
-
-.yd-workspace .yd-dash-header-premium__greeting {
-  margin: 0.4375rem 0 0;
-  color: var(--yd-header-title);
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: -0.032em;
-  line-height: 1.2;
-}
-
-@media (min-width: 768px) {
-  .yd-workspace .yd-dash-header-premium__greeting {
-    margin-top: 0.5rem;
-    font-size: 1.625rem;
-    line-height: 1.18;
+    font-size: 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
+  .yd-workspace .yd-dash-header-premium__headline {
+    font-size: 1.625rem;
+  }
+}
+
+.yd-workspace .yd-dash-header-premium__greeting {
+  margin: 0.375rem 0 0;
+  color: #5e7389;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+@media (min-width: 768px) {
   .yd-workspace .yd-dash-header-premium__greeting {
-    font-size: 1.75rem;
+    margin-top: 0.4375rem;
+    font-size: 1rem;
   }
 }
 
 .yd-workspace .yd-dash-header-premium__subtitle {
-  margin: 0.375rem 0 0;
+  margin: 0.3125rem 0 0;
   max-width: 32rem;
   color: var(--yd-header-subtitle);
   font-size: 0.8125rem;
@@ -163,34 +166,52 @@
 
 .yd-workspace .yd-dash-header-premium__cta--primary {
   color: #ffffff;
-  background: linear-gradient(180deg, #1a1d21 0%, #0a0c0f 100%);
+  background: linear-gradient(
+    168deg,
+    var(--yd-medical-blue-bright) 0%,
+    var(--yd-medical-blue-mid) 48%,
+    var(--yd-medical-blue-deep) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.14),
-    0 4px 12px rgba(0, 0, 0, 0.12);
+    0 1px 2px var(--yd-medical-blue-glow),
+    0 4px 14px rgba(22, 61, 122, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 @media (hover: hover) {
   .yd-workspace .yd-dash-header-premium__cta--primary:hover {
-    background: linear-gradient(180deg, #22262b 0%, #121418 100%);
+    background: linear-gradient(
+      168deg,
+      #3270b0 0%,
+      #1f5aa8 46%,
+      #184878 100%
+    );
     box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.16),
-      0 6px 16px rgba(0, 0, 0, 0.14);
+      0 2px 4px rgba(22, 61, 122, 0.24),
+      0 8px 20px rgba(22, 61, 122, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 }
 
 .yd-workspace .yd-dash-header-premium__cta--secondary {
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: rgba(255, 255, 255, 0.96);
-  color: #1e293b;
+  border: 1px solid rgba(22, 61, 122, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 255, 0.96) 100%);
+  color: var(--yd-medical-blue-deep);
   font-weight: 600;
-  box-shadow: none;
+  box-shadow:
+    0 1px 2px rgba(22, 61, 122, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 @media (hover: hover) {
   .yd-workspace .yd-dash-header-premium__cta--secondary:hover {
-    border-color: rgba(15, 23, 42, 0.2);
-    background: #f8fafc;
-    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+    border-color: rgba(22, 61, 122, 0.32);
+    background: linear-gradient(180deg, #ffffff 0%, #f0f6fc 100%);
+    color: var(--yd-medical-blue-mid);
+    box-shadow:
+      0 3px 12px rgba(22, 61, 122, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 }
 
@@ -253,7 +274,7 @@
 
 .yd-workspace .yd-dash-header-premium__search-input:focus-visible {
   background: #ffffff;
-  border-color: rgba(26, 79, 156, 0.28);
+  border-color: rgba(22, 61, 122, 0.3);
   box-shadow:
     0 0 0 3px var(--yd-header-focus),
     inset 0 1px 2px rgba(15, 35, 58, 0.03);
@@ -297,9 +318,10 @@
 
 @media (hover: hover) {
   .yd-workspace .yd-dash-header-premium__action:hover {
-    border-color: rgba(26, 79, 156, 0.24);
-    color: var(--yd-header-accent);
-    box-shadow: 0 4px 12px rgba(26, 79, 156, 0.1);
+    border-color: rgba(22, 61, 122, 0.26);
+    color: var(--yd-medical-blue-mid);
+    background: linear-gradient(180deg, #ffffff 0%, #f4f8fc 100%);
+    box-shadow: 0 4px 12px rgba(22, 61, 122, 0.12);
   }
 }
 

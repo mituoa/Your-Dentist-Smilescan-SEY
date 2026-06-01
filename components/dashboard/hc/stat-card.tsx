@@ -71,8 +71,8 @@ export function HcStatCard({
       )}
     >
       <div className="yd-dash-kpi-card__head flex min-w-0 items-center gap-3">
-        <span className="yd-dash-kpi-card__icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full md:h-11 md:w-11">
-          <Icon className="h-[18px] w-[18px] md:h-[19px] md:w-[19px]" strokeWidth={1.85} />
+        <span className="yd-dash-kpi-card__icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+          <Icon className="h-[17px] w-[17px]" strokeWidth={1.9} />
         </span>
         <p className="yd-dash-kpi-card__title min-w-0 text-[13px] font-semibold leading-snug tracking-[-0.015em] md:text-[14px]">
           {title}

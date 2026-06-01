@@ -4,6 +4,19 @@
 
 .yd-ambient-nav-link {
   position: relative;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .yd-ambient-nav-link {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .yd-mobile-sidebar-nav .yd-nav-primary-group,
+  .yd-mobile-sidebar-nav .yd-nav-secondary-group {
+    width: 100%;
+    align-items: center;
+  }
 }
 
 /* —— Active: radial halo only (no white panel) —— */

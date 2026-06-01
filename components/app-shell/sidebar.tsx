@@ -84,10 +84,10 @@ export function Sidebar({
       </div>
 
       <nav
-        className="yd-mobile-sidebar-nav relative flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 py-1.5 md:items-center md:gap-4 md:px-2 md:py-5"
+        className="yd-mobile-sidebar-nav relative z-[2] flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 py-1.5 md:items-center md:gap-3 md:px-2 md:py-5"
         aria-label="Hauptnavigation"
       >
-        <div className="yd-nav-primary-group flex flex-col gap-0.5 md:contents">
+        <div className="yd-nav-primary-group flex w-full flex-col gap-0.5 md:w-full md:items-center md:gap-3">
           {role === "doctor" && (
             <NavItem
               href="/dashboard"
@@ -122,7 +122,7 @@ export function Sidebar({
         </div>
 
         {role === "doctor" && (
-          <div className="yd-nav-secondary-group mt-2 flex flex-col gap-0.5 pt-2 md:contents md:mt-0 md:pt-0">
+          <div className="yd-nav-secondary-group mt-2 flex w-full flex-col gap-0.5 pt-2 md:mt-4 md:w-full md:items-center md:gap-3 md:pt-0">
             <NavItem
               href="/profile/editor"
               iconName="profile"

@@ -12,6 +12,8 @@
   }
 
   .yd-workspace .yd-desktop-nav-rail {
+    position: relative;
+    z-index: 50;
     display: flex;
     width: 108px;
     max-width: 108px;
@@ -34,6 +36,8 @@
   }
 
   .yd-workspace .yd-app-shell-main {
+    position: relative;
+    z-index: 1;
     display: flex;
     min-height: 0;
     min-width: 0;

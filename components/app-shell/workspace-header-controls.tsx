@@ -53,7 +53,8 @@ export function WorkspaceHeaderControls({
         <Link
           href="/relay?panel=messages"
           className="yd-dash-header-premium__action"
-          aria-label="Relay Nachrichten"
+          aria-label="Team-Nachrichten in Relay"
+          title="Team-Nachrichten (Relay)"
         >
           <MessageCircle strokeWidth={1.65} />
         </Link>
@@ -62,9 +63,10 @@ export function WorkspaceHeaderControls({
           className="yd-dash-header-premium__action relative"
           aria-label={
             inboxCount && inboxCount > 0
-              ? `Benachrichtigungen, ${inboxCount} neu`
-              : "Benachrichtigungen"
+              ? `Neue Einsendungen im Tracker, ${inboxCount} offen`
+              : "Neue Einsendungen im Tracker"
           }
+          title="Neue Einsendungen (Tracker)"
         >
           <Bell strokeWidth={1.65} />
           {inboxCount && inboxCount > 0 ? (

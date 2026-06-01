@@ -30,7 +30,7 @@ import {
   shouldStripInboxSearchParamFromUrl,
 } from "@/lib/inbox-search-q";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
-import { InboxDesktopAutoSelect } from "@/components/inbox/inbox-desktop-auto-select";
+import { TrackerIndexPlaceholder } from "@/components/inbox/tracker-index-placeholder";
 
 interface InboxPageProps {
   searchParams: Promise<{ q?: string | string[] }>;
@@ -77,12 +77,8 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
 
   const submissions = listResult.items;
 
-  if (submissions.length > 0) {
-    const desktopHref = qTrimmed
-      ? `/inbox/${submissions[0].id}?q=${encodeURIComponent(qTrimmed)}`
-      : `/inbox/${submissions[0].id}`;
-
-    return <InboxDesktopAutoSelect href={desktopHref} />;
+  if (submissions.length > 0 && !qTrimmed) {
+    return <TrackerIndexPlaceholder />;
   }
 
   if (qTrimmed) {
