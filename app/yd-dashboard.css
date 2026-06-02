@@ -503,6 +503,25 @@
   }
 }
 
+/* Recent table: show preparation details on hover only (desktop) */
+.yd-dashboard .yd-dash-prep-details {
+  display: block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .yd-dashboard .yd-dash-prep-details {
+    display: none;
+  }
+
+  .yd-dashboard .group:hover .yd-dash-prep-details {
+    display: block;
+  }
+
+  .yd-dashboard .group:hover .yd-dash-prep-summary {
+    display: none;
+  }
+}
+
 .yd-dashboard .yd-dash-kpi-card--linked {
   cursor: pointer;
 }

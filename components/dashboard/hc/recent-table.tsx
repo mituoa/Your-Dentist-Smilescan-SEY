@@ -32,7 +32,7 @@ type RecentTableProps = {
 };
 
 export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) {
-  const columns = ["Patient", "Anliegen", "Assistenz", "Status", "Datum", "Aktion"] as const;
+  const columns = ["Patient", "Anliegen", "Vorbereitung", "Status", "Datum", "Aktion"] as const;
   const orderedRows =
     rows === null
       ? null
@@ -60,11 +60,12 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
         <div>
           <p className="yd-dash-section yd-dash-section--primary">Aktuelle Einsendungen</p>
           <p className="mt-1 text-[11px] font-medium leading-snug" style={{ color: YD.text.muted }}>
-            Assistenz bereitet Zusammenfassungen und Antworten vor — Sie prüfen und geben frei.
+            Vorbereitung wird automatisch erstellt — Sie prüfen und geben frei.
           </p>
         </div>
         <Link
           href="/inbox"
+          prefetch
           className="shrink-0 text-[12px] font-medium transition hover:opacity-80"
           style={{ color: YD.accent.core }}
         >
@@ -129,6 +130,14 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
                 const preparation = preparationById[row.id];
                 const status = resolveSubmissionStatus(row, preparation);
                 const actionLabel = preparation?.readyForReview ? "Prüfen" : "Fall öffnen";
+                const doneChecks = preparation?.checks?.filter((c) => c.done).length ?? 0;
+                const prepSummary = preparation
+                  ? preparation.readyForReview
+                    ? "Vorbereitet · Freigabe ausstehend"
+                    : doneChecks > 0
+                      ? `Vorarbeit vorhanden · ${doneChecks} ${doneChecks === 1 ? "Schritt" : "Schritte"}`
+                      : "Noch keine Vorarbeit"
+                  : "Noch keine Vorarbeit";
 
                 return (
                   <tr
@@ -152,13 +161,16 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
                       {issue}
                     </td>
                     <td className="min-w-[168px] max-w-[220px] px-5 py-3.5 md:px-6">
-                      {preparation ? (
-                        <PreparationStatusBlock preparation={preparation} compact />
-                      ) : (
-                        <span className="text-[11px]" style={{ color: YD.text.faint }}>
-                          Noch keine Vorarbeit
+                      <div className="yd-dash-prep-cell min-w-0">
+                        <span className="yd-dash-prep-summary text-[11px]" style={{ color: YD.text.faint }}>
+                          {prepSummary}
                         </span>
-                      )}
+                        {preparation ? (
+                          <div className="yd-dash-prep-details mt-1">
+                            <PreparationStatusBlock preparation={preparation} compact />
+                          </div>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 md:px-6">
                       <YdStatusPill
@@ -176,6 +188,7 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
                     <td className="whitespace-nowrap px-5 py-3.5 md:px-6">
                       <Link
                         href={`/inbox/${row.id}`}
+                        prefetch
                         className="yd-dash-table-action text-[12px] font-medium no-underline transition hover:opacity-75"
                         style={{
                           color: preparation?.readyForReview ? YD.accent.core : YD.text.secondary,
