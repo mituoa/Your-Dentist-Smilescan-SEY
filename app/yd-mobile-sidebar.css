@@ -10,13 +10,14 @@
 
   .yd-mobile-nav-portal {
     position: relative;
-    z-index: 55;
+    /* Keep drawer above any fixed workspace layers */
+    z-index: 1000;
   }
 
   .yd-mobile-nav-backdrop {
     position: fixed !important;
     inset: 0 !important;
-    z-index: 54;
+    z-index: 999;
     background: rgba(12, 25, 41, 0.18) !important;
     backdrop-filter: blur(10px) saturate(1.04);
     -webkit-backdrop-filter: blur(10px) saturate(1.04);
@@ -30,7 +31,7 @@
     bottom: 0 !important;
     width: min(88vw, 300px) !important;
     max-width: 300px !important;
-    z-index: 55;
+    z-index: 1000;
     display: flex !important;
     align-items: stretch !important;
     justify-content: flex-start !important;

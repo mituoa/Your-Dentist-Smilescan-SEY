@@ -223,6 +223,7 @@ export default async function DashboardPage() {
               iconName="clipboard-list"
               footnote="Patientenfälle zur Sichtung"
               workContext={newSubmissionsContext}
+              hoverHint="Patientenfälle, die noch geprüft werden müssen."
             />
             <HcStatCard
               href="/inbox"
@@ -239,6 +240,7 @@ export default async function DashboardPage() {
               iconName="list-todo"
               footnote="Freigabe durch Sie erforderlich"
               workContext={openTasksContext}
+              hoverHint="Vorgänge, die Ihre Freigabe oder Entscheidung benötigen."
             />
           </div>
         </DashboardAmbientKpis>

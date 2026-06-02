@@ -21,7 +21,8 @@
 
   .yd-workspace .yd-desktop-nav-rail {
     position: relative;
-    z-index: 100;
+    /* Must always stay clickable above any workspace overlays */
+    z-index: 1000;
     display: flex;
     width: 108px;
     max-width: 108px;

@@ -171,7 +171,7 @@
 }
 
 .yd-dashboard .yd-dash-zone--secondary {
-  opacity: 0.94;
+  opacity: 0.92;
 }
 
 .yd-dashboard .yd-dash-section--secondary {
@@ -205,9 +205,11 @@
 }
 
 .yd-dashboard .yd-dash-kpi-card.yd-dash-surface {
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border: 1px solid rgba(180, 198, 218, 0.28) !important;
   border-radius: 20px !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+  box-shadow:
+    0 4px 20px rgba(15, 23, 42, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
 }
 
 .yd-dashboard .yd-dash-kpi-card {
@@ -245,7 +247,7 @@
 }
 
 .yd-dashboard .yd-dash-kpi-card__title {
-  color: #334155;
+  color: #1f2d3a;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -263,19 +265,19 @@
 }
 
 .yd-dashboard .yd-dash-kpi-card__footnote {
-  color: #64748b;
+  color: #5e7389;
 }
 
 .yd-dashboard .yd-dash-kpi--balanced {
-  font-size: 2rem;
+  font-size: 2.35rem;
   letter-spacing: -0.04em;
-  color: #0f172a;
+  color: #0b1828;
   line-height: 1;
 }
 
 @media (min-width: 768px) {
   .yd-dashboard .yd-dash-kpi--balanced {
-    font-size: 2.125rem;
+    font-size: 2.55rem;
   }
 }
 
@@ -324,14 +326,14 @@
 
 .yd-dashboard .yd-dash-kpi-float-preview__panel {
   border-radius: 14px;
-  border: 1px solid rgba(180, 198, 218, 0.32);
-  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(180, 198, 218, 0.3);
+  background: rgba(255, 255, 255, 0.985);
   backdrop-filter: blur(14px) saturate(1.12);
   -webkit-backdrop-filter: blur(14px) saturate(1.12);
   padding: 0.65rem 0.75rem;
   box-shadow:
-    0 8px 24px rgba(30, 91, 189, 0.09),
-    0 2px 6px rgba(15, 35, 58, 0.04);
+    0 10px 26px rgba(15, 35, 58, 0.1),
+    0 2px 8px rgba(30, 91, 189, 0.06);
 }
 
 .yd-dashboard .yd-dash-kpi-work-preview__heading {

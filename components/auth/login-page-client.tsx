@@ -196,7 +196,7 @@ export function LoginPageClient({
         <header className="yd-login-form-header">
           <h1 className="yd-login-form-title">Anmelden</h1>
           <p className="yd-login-form-lead">
-            Willkommen zurück — melden Sie sich mit Ihrem Praxiszugang an.
+            Melden Sie sich mit Ihrem Praxiszugang an.
           </p>
         </header>
 
@@ -335,6 +335,10 @@ export function LoginPageClient({
         ) : null}
 
         <LoginRegisterCta inviteToken={inviteToken} prefilledEmail={prefilledEmail} />
+
+        <p className="mt-3 text-center text-[12px] font-medium text-[#64748B]">
+          Für autorisierte Praxisteams
+        </p>
 
         <footer className="yd-auth-legal-minimal">
           <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
