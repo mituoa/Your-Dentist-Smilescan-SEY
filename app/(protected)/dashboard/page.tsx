@@ -221,7 +221,7 @@ export default async function DashboardPage() {
               title="Neue Einsendungen"
               value={unseenCount === null ? "—" : unseenCount}
               iconName="clipboard-list"
-              footnote="Patientenfälle zur Sichtung"
+              footnote="Neue Patientenfälle zur Sichtung"
               workContext={newSubmissionsContext}
               hoverHint="Patientenfälle, die noch geprüft werden müssen."
             />
@@ -230,15 +230,15 @@ export default async function DashboardPage() {
               title="AI vorbereitet"
               value={preparedAwaitingCount === null ? "—" : preparedAwaitingCount}
               iconName="sparkles"
-              footnote="Antworten & nächste Schritte bereit"
-              hoverHint="Assistenz hat Entwürfe und nächste Schritte vorbereitet — zur Freigabe im Tracker prüfen."
+              footnote="Antworten & nächste Schritte vorbereitet"
+              hoverHint="Vorbereitete Entwürfe und nächste Schritte — zur Freigabe im Tracker."
             />
             <HcStatCard
               href="/relay"
               title="Offene Entscheidungen"
               value={tasksNeedingDecision === null ? openTaskCount : tasksNeedingDecision}
               iconName="list-todo"
-              footnote="Freigabe durch Sie erforderlich"
+              footnote="Freigaben durch Sie erforderlich"
               workContext={openTasksContext}
               hoverHint="Vorgänge, die Ihre Freigabe oder Entscheidung benötigen."
             />

@@ -58,80 +58,31 @@ type YdPublicSiteHeroProps = {
 export function YdPublicSiteHero({ showSignIn = true }: YdPublicSiteHeroProps) {
   return (
     <section
-      className="yd-public-site-hero yd-public-site-hero--ref yd-clinical-hero yd-clinical-hero--premium yd-clinical-hero--orchestrated yd-public-os-awaken-field"
+      className="yd-public-site-hero yd-clinical-hero yd-clinical-hero--premium yd-clinical-hero--orchestrated yd-public-os-awaken-field"
       style={{ ["--yd-public-field-i" as string]: "1" }}
       aria-labelledby="yd-public-hero-title"
     >
       <div className="yd-clinical-hero-lights" aria-hidden />
       <div className="yd-clinical-hero-vignette" aria-hidden />
-      <div className="yd-public-ref-hero-grid">
-        <div className="yd-public-ref-hero-left">
-          <div className="yd-public-ref-hero-card" role="presentation">
-            <div className="yd-public-ref-hero-card-top">
-              <p className="yd-public-ref-hero-brand">Your Dentist</p>
-              <div className="yd-public-ref-hero-mini-nav" aria-hidden>
-                <span>Atlas</span>
-                <span>Tracker</span>
-                <span>Relay</span>
-              </div>
-              <span className="yd-public-ref-hero-pill" aria-hidden>
-                Praxisbereich
+      <div className="yd-clinical-hero-stage">
+        <div className="yd-clinical-hero-grid">
+          <div className="yd-clinical-hero-copy">
+            <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
+            <h1 id="yd-public-hero-title" className="yd-clinical-display yd-clinical-display--hero">
+              <span className="yd-clinical-display-line yd-clinical-display-line--serif">
+                {PUBLIC_SITE_HERO.title}
               </span>
-            </div>
-
-            <div className="yd-public-ref-hero-card-body">
-              <div className="yd-public-ref-hero-copy">
-                <p className="yd-clinical-eyebrow">{PUBLIC_SITE_HERO.eyebrow}</p>
-                <h1 id="yd-public-hero-title" className="yd-public-ref-hero-title">
-                  {PUBLIC_SITE_HERO.title}{" "}
-                  <span className="yd-public-ref-hero-title-accent">{PUBLIC_SITE_HERO.titleLine2}</span>
-                </h1>
-                <p className="yd-public-ref-hero-lead">{PUBLIC_SITE_HERO.lead}</p>
-                <YdPublicSiteHeroCta showSignIn={showSignIn} />
-              </div>
-
-              <div className="yd-public-ref-hero-visual" aria-hidden>
-                <div className="yd-public-ref-hero-image">
-                  <YdPracticeWorld />
-                </div>
-                <div className="yd-public-ref-hero-metrics">
-                  <div className="yd-public-ref-hero-metric">
-                    <p className="yd-public-ref-hero-metric-value">150+</p>
-                    <p className="yd-public-ref-hero-metric-label">Eingänge/Monat</p>
-                  </div>
-                  <div className="yd-public-ref-hero-metric">
-                    <p className="yd-public-ref-hero-metric-value">20+</p>
-                    <p className="yd-public-ref-hero-metric-label">Team‑Aufgaben</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              <span className="yd-clinical-display-line yd-clinical-display-line--accent">
+                {PUBLIC_SITE_HERO.titleLine2}
+              </span>
+            </h1>
+            <p className="yd-clinical-lead">{PUBLIC_SITE_HERO.lead}</p>
+            <YdPublicSiteHeroCta showSignIn={showSignIn} />
+          </div>
+          <div className="yd-clinical-hero-world">
+            <YdPracticeWorld />
           </div>
         </div>
-
-        <aside className="yd-public-ref-hero-right" aria-label="Praxis-Team">
-          <div className="yd-public-ref-team-head">
-            <h2 className="yd-public-ref-team-title">Praxis‑Team</h2>
-            <p className="yd-public-ref-team-lead">Übergaben, Aufgaben und Antworten bleiben im Fallkontext.</p>
-          </div>
-          <div className="yd-public-ref-team-grid" role="presentation">
-            {["Empfang", "Assistenz", "Behandler:in"].map((role) => (
-              <div key={role} className="yd-public-ref-team-card">
-                <div className="yd-public-ref-team-avatar" aria-hidden>
-                  <span />
-                </div>
-                <div className="min-w-0">
-                  <p className="yd-public-ref-team-role">{role}</p>
-                  <p className="yd-public-ref-team-meta">Freigabe & Status</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="yd-public-ref-team-feature">
-            <p className="yd-public-ref-team-feature-title">Ruhige Einführung</p>
-            <p className="yd-public-ref-team-feature-body">Ein gemeinsamer Stand, ohne neue Kanäle im Alltag.</p>
-          </div>
-        </aside>
       </div>
     </section>
   );

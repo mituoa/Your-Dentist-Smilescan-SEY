@@ -113,6 +113,8 @@
   gap: 0.625rem 0.75rem;
   flex-shrink: 0;
   width: 100%;
+  position: relative;
+  z-index: 20;
 }
 
 @media (min-width: 1024px) {

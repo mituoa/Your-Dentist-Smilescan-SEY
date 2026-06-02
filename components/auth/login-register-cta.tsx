@@ -25,7 +25,6 @@ export function LoginRegisterCta({
           {AUTH_ACCESS_COPY.loginRegisterLink}
         </Link>
       </p>
-      <p className="yd-auth-login-trust">Für autorisierte Praxisteams</p>
     </div>
   );
 }

@@ -55,7 +55,7 @@ export function buildPracticeBriefing(input: {
 }): PracticeBriefing {
   const casesAnalyzed = input.priorityItems.length;
   const responsesPrepared = input.preparedAwaitingCount;
-  const tasksRecognized = input.openTaskCount;
+  const tasksRecognized = input.tasksNeedingDecision;
   const staleUnseenCount = countStaleUnseen(input.previewRows);
   const criticalDelays = staleUnseenCount;
   const calmPractice = criticalDelays === 0 && input.tasksNeedingDecision === 0;
@@ -64,12 +64,12 @@ export function buildPracticeBriefing(input: {
     {
       id: "cases",
       label: `${casesAnalyzed} Patientenfälle analysiert`,
-      done: casesAnalyzed > 0 || responsesPrepared === 0,
+      done: casesAnalyzed > 0,
     },
     {
       id: "responses",
       label: `${responsesPrepared} Antworten vorbereitet`,
-      done: responsesPrepared > 0 || casesAnalyzed === 0,
+      done: responsesPrepared > 0,
     },
     {
       id: "tasks",
@@ -89,8 +89,8 @@ export function buildPracticeBriefing(input: {
   return {
     headline: `${input.greeting}, ${input.displayName}`,
     subline: calmPractice
-      ? "Ihre Praxis ist vorbereitet."
-      : "Assistenz hat den Überblick — einige Freigaben stehen an.",
+      ? "Assistenz hat den Überblick — aktuell keine Freigaben offen."
+      : `Assistenz hat vorbereitet: ${responsesPrepared} Entwürfe · ${tasksRecognized} Entscheidungen offen.`,
     checks,
     calmPractice,
     casesAnalyzed,

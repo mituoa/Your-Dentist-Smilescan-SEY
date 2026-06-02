@@ -13,20 +13,19 @@ export function buildSubmissionPreparation(
 
   const photoChecks = buildPhotoWorkflowChecks(input.photo_count);
 
-  const checks = hasPhotos
-    ? [
-        { id: "images", label: "Fotos geprüft", done: true },
-        { id: "summary", label: "Angaben zusammengefasst", done: hasNotes },
-        { id: "response", label: "Antwort vorbereitet", done: isUnseen && hasNotes },
-      ]
-    : [
-        { id: "summary", label: "Angaben zusammengefasst", done: hasNotes },
-        { id: "response", label: "Antwort vorbereitet", done: isUnseen && hasNotes },
-      ];
+  const nextStep = suggestNextStepFromNotes(input.patient_notes);
+  const suggestsAppointment = /termin/i.test(nextStep);
+
+  // Keep a stable scan order: most valuable work first.
+  const checks = [
+    { id: "response", label: "Antwort vorbereitet", done: isUnseen && hasNotes },
+    { id: "summary", label: "Angaben zusammengefasst", done: hasNotes },
+    ...(hasPhotos ? [{ id: "images", label: "Fotos geprüft", done: true } as const] : []),
+    { id: "appointment", label: "Termin empfohlen", done: suggestsAppointment },
+  ];
 
   const readyForReview = isUnseen && hasNotes;
 
-  const nextStep = suggestNextStepFromNotes(input.patient_notes);
   const name = input.patient_name?.trim() || "Patient";
   const summaryLine = hasNotes
     ? input.patient_notes!.trim().slice(0, 72) + (input.patient_notes!.length > 72 ? "…" : "")

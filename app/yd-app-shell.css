@@ -22,8 +22,8 @@
   .yd-workspace .yd-desktop-nav-rail {
     position: relative;
     isolation: isolate;
-    /* Above workspace overlays (Command AI ~37), below portaled modals */
-    z-index: 80;
+    /* Must always stay clickable above any workspace overlays */
+    z-index: 2147483647;
     display: flex;
     width: 108px;
     max-width: 108px;

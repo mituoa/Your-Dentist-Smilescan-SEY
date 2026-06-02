@@ -18,7 +18,7 @@ function resolveSubmissionStatus(
   preparation?: SubmissionPreparation
 ): SubmissionStatus {
   if (preparation?.readyForReview) {
-    return { label: "Bereit zur Prüfung", variant: "pending" };
+    return { label: "Freigabe ausstehend", variant: "pending" };
   }
   if (!row.seen_at) {
     return { label: "Neu", variant: "active" };
@@ -33,6 +33,20 @@ type RecentTableProps = {
 
 export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) {
   const columns = ["Patient", "Anliegen", "Assistenz", "Status", "Datum", "Aktion"] as const;
+  const orderedRows =
+    rows === null
+      ? null
+      : [...rows].sort((a, b) => {
+          const pa = preparationById[a.id];
+          const pb = preparationById[b.id];
+          const aNeeds = pa?.readyForReview ? 1 : 0;
+          const bNeeds = pb?.readyForReview ? 1 : 0;
+          if (aNeeds !== bNeeds) return bNeeds - aNeeds;
+          const aUnseen = !a.seen_at ? 1 : 0;
+          const bUnseen = !b.seen_at ? 1 : 0;
+          if (aUnseen !== bUnseen) return bUnseen - aUnseen;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
 
   return (
     <HcCard tone="primary" ambient={false} className="yd-dash-surface yd-dash-recent-table max-w-full overflow-hidden p-0">
@@ -74,7 +88,7 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
             </tr>
           </thead>
           <tbody>
-            {rows === null ? (
+            {orderedRows === null ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12">
                   <div className="yd-dash-empty-state mx-auto max-w-sm text-center">
@@ -87,7 +101,7 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
                   </div>
                 </td>
               </tr>
-            ) : rows.length === 0 ? (
+            ) : orderedRows.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12">
                   <div className="yd-dash-empty-state mx-auto max-w-sm text-center">
@@ -101,7 +115,7 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
                 </td>
               </tr>
             ) : (
-              rows.map((row) => {
+              orderedRows.map((row) => {
                 const name = row.patient_name?.trim() || "Patient";
                 const issue = deriveSubmissionIssueShortLine(row.patient_notes, row.patient_name, {
                   maxLen: 52,
@@ -142,7 +156,7 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
                         <PreparationStatusBlock preparation={preparation} compact />
                       ) : (
                         <span className="text-[11px]" style={{ color: YD.text.faint }}>
-                          —
+                          Noch keine Vorarbeit
                         </span>
                       )}
                     </td>
