@@ -107,20 +107,21 @@ function MobileDrawerShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <button
-        type="button"
-        className={cn(
-          "yd-mobile-nav-backdrop fixed z-[44] border-0 md:hidden",
-          "transition-[opacity,backdrop-filter] duration-[420ms] ease-[cubic-bezier(0.25,1,0.35,1)]",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        )}
-        aria-label="Navigation schließen"
-        tabIndex={open ? 0 : -1}
-        onClick={close}
-        onPointerDown={(event) => {
-          if (event.target === event.currentTarget) close();
-        }}
-      />
+      {open ? (
+        <button
+          type="button"
+          className={cn(
+            "yd-mobile-nav-backdrop fixed z-[44] border-0 md:hidden",
+            "pointer-events-auto opacity-100",
+            "transition-[opacity,backdrop-filter] duration-[420ms] ease-[cubic-bezier(0.25,1,0.35,1)]"
+          )}
+          aria-label="Navigation schließen"
+          onClick={close}
+          onPointerDown={(event) => {
+            if (event.target === event.currentTarget) close();
+          }}
+        />
+      ) : null}
       <div
         className={cn(
           "yd-mobile-nav-root fixed z-[45] md:static md:z-[100] md:flex md:h-full md:w-[108px] md:max-w-[108px] md:shrink-0 md:items-center md:justify-center md:py-2 md:pl-2",

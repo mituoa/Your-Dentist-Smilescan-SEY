@@ -435,14 +435,14 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
     <>
       {/* Nur Mobile: Dim + Tap außerhalb schließt — Desktop nutzt Shell-Hintergrund (#F7F9FC), kein Modal-Canvas */}
       <div
-        className="create-case-backdrop pointer-events-none fixed inset-0 z-[998] hidden bg-slate-900/45 backdrop-blur-md motion-reduce:backdrop-blur-sm max-md:block"
+        className="create-case-backdrop pointer-events-none fixed inset-0 z-[998] bg-slate-900/45 backdrop-blur-md motion-reduce:backdrop-blur-sm max-md:block md:hidden"
         aria-hidden
       />
       <button
         type="button"
         aria-label="Schließen"
         disabled={busy}
-        className={`fixed inset-0 z-[999] hidden border-0 bg-transparent p-0 max-md:block ${busy ? "pointer-events-none cursor-default" : "cursor-default"}`}
+        className={`fixed inset-0 z-[999] border-0 bg-transparent p-0 max-md:block md:hidden ${busy ? "pointer-events-none cursor-default" : "cursor-default"}`}
         onClick={() => {
           if (!busy) close();
         }}

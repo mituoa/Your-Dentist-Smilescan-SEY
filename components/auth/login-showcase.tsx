@@ -10,27 +10,31 @@ export function LoginShowcase() {
       <div className="yd-login-showcase__vignette" />
 
       <div className="yd-login-showcase__inner">
-        <div className="yd-login-showcase__brand-panel">
-          <YourDentistBrandLockup size="md" tagline={PUBLIC_BRAND_TAGLINE} />
+        <div className="yd-login-showcase__surface">
+          <div className="yd-login-showcase__brand-panel">
+            <YourDentistBrandLockup size="md" tagline={PUBLIC_BRAND_TAGLINE} />
+          </div>
+
+          <p className="yd-login-showcase__kicker">Neutral Practice Platform</p>
+
+          <h2 className="yd-login-showcase__headline">
+            Praxis‑Betriebssystem
+            <br />
+            für moderne Zahnarztpraxen.
+          </h2>
+
+          <p className="yd-login-showcase__lead">Atlas · Tracker · Relay</p>
+
+          <p className="yd-login-showcase__access">
+            Sicherer Zugang für autorisierte Praxisteams.
+          </p>
+
+          <ul className="yd-login-showcase__trust">
+            <li>Verschlüsselte Verbindung</li>
+            <li>Strukturierte Praxisabläufe</li>
+            <li>Freigabe durch Zahnärzt:innen</li>
+          </ul>
         </div>
-
-        <p className="yd-login-showcase__kicker">Neutral Practice Platform</p>
-
-        <h2 className="yd-login-showcase__headline">
-          Praxis‑Betriebssystem
-          <br />
-          für moderne Zahnarztpraxen.
-        </h2>
-
-        <p className="yd-login-showcase__lead">Atlas · Tracker · Relay</p>
-
-        <p className="yd-login-showcase__access">Sicherer Zugang für autorisierte Praxisteams.</p>
-
-        <ul className="yd-login-showcase__trust">
-          <li>Verschlüsselte Verbindung</li>
-          <li>Strukturierte Praxisabläufe</li>
-          <li>Freigabe durch Zahnärzt:innen</li>
-        </ul>
       </div>
     </div>
   );

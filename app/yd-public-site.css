@@ -109,7 +109,10 @@ html:has(.yd-public-site-page) {
     rgba(248, 252, 255, 0.88) 45%,
     rgba(236, 244, 252, 0.82) 100%
   );
-  box-shadow: 0 12px 40px rgba(47, 128, 237, 0.07);
+  box-shadow:
+    0 2px 4px rgba(15, 35, 58, 0.03),
+    0 12px 36px rgba(30, 91, 189, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
 }
 
 .yd-public-command-input {

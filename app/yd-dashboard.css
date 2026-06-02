@@ -171,13 +171,44 @@
 }
 
 .yd-dashboard .yd-dash-zone--secondary {
-  opacity: 0.92;
+  opacity: 0.88;
 }
 
 .yd-dashboard .yd-dash-section--secondary {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #334155;
+  color: #475569;
+}
+
+.yd-dashboard .yd-dash-section--primary {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  color: var(--yd-dash-title);
+}
+
+.yd-dashboard .yd-dash-recent-table.yd-dash-surface {
+  border-color: rgba(160, 178, 198, 0.42) !important;
+  box-shadow:
+    0 2px 4px rgba(15, 35, 58, 0.045),
+    0 14px 40px rgba(30, 91, 189, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+.yd-dashboard .yd-dash-recent-table thead th {
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.yd-dashboard .yd-dash-recent-table tbody tr {
+  transition: background-color 220ms ease;
+}
+
+@media (hover: hover) {
+  .yd-dashboard .yd-dash-recent-table tbody tr:hover {
+    background: rgba(248, 252, 255, 0.92);
+  }
 }
 
 .yd-dashboard .yd-dash-analytics-card {
@@ -281,10 +312,16 @@
   }
 }
 
-.yd-dashboard .yd-dash-recent-table .yd-dash-section--secondary {
-  font-size: 0.9375rem;
+.yd-dashboard .yd-dash-recent-table .yd-dash-section--primary {
+  font-size: 1.0625rem;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.028em;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-recent-table .yd-dash-section--primary {
+    font-size: 1.125rem;
+  }
 }
 
 .yd-dashboard .yd-dash-table-action {

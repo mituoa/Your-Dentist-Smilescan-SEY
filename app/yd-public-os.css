@@ -321,18 +321,18 @@
 }
 
 .yd-os-btn--primary {
-  border-color: rgba(140, 195, 220, 0.5);
+  border-color: rgba(255, 255, 255, 0.14);
   background: linear-gradient(
-    155deg,
-    #8ec5eb 0%,
-    #6aade4 32%,
-    #5a9fd6 58%,
-    #4d8fc4 100%
+    168deg,
+    #2a5f9e 0%,
+    #1a4f9c 48%,
+    #163d7a 100%
   );
   color: #fff;
   box-shadow:
-    0 4px 20px rgba(74, 130, 170, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 1px 2px rgba(22, 61, 122, 0.18),
+    0 4px 14px rgba(22, 61, 122, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .yd-os-btn--ghost {
@@ -351,8 +351,9 @@
 
   .yd-os-btn--primary:hover {
     box-shadow:
-      0 8px 24px rgba(74, 130, 170, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.38);
+      0 2px 4px rgba(22, 61, 122, 0.2),
+      0 8px 20px rgba(22, 61, 122, 0.26),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 
   .yd-os-btn:active {
@@ -406,8 +407,8 @@
   -webkit-backdrop-filter: blur(28px);
   border: 1px solid rgba(255, 255, 255, 0.52);
   box-shadow:
-    0 24px 80px rgba(26, 79, 156, 0.18),
-    0 0 120px rgba(34, 211, 238, 0.15),
+    0 16px 48px rgba(26, 79, 156, 0.1),
+    0 0 64px rgba(34, 211, 238, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
@@ -1116,8 +1117,8 @@
 .yd-public-hero-cinema {
   position: relative;
   margin: 0 0 3rem;
-  padding: clamp(2rem, 6vw, 3.5rem) 0 clamp(2.5rem, 7vw, 4rem);
-  min-height: min(88vh, 820px);
+  padding: clamp(2rem, 5vw, 3rem) 0 clamp(2rem, 6vw, 3.25rem);
+  min-height: min(78vh, 720px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1187,7 +1188,7 @@
   background: rgba(255, 255, 255, 0.42);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 12px 36px rgba(26, 79, 156, 0.15);
+  box-shadow: 0 8px 28px rgba(26, 79, 156, 0.1);
 }
 
 .yd-public-hero-glass-note-label {
@@ -1682,10 +1683,11 @@
 /* Single island surface (dashboard canvas tone) */
 .yd-public-island {
   border-radius: clamp(28px, 4vw, 40px);
-  border: 1px solid rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(180, 198, 218, 0.38);
   background: linear-gradient(168deg, #fffcfa 0%, #f6fafe 42%, #eef4f9 100%);
   box-shadow:
-    0 16px 48px rgba(50, 80, 105, 0.07),
+    0 2px 4px rgba(15, 35, 58, 0.03),
+    0 16px 48px rgba(30, 91, 189, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.92);
   padding: clamp(1.25rem, 3vw, 1.75rem);
 }

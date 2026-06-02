@@ -21,8 +21,9 @@
 
   .yd-workspace .yd-desktop-nav-rail {
     position: relative;
-    /* Must always stay clickable above any workspace overlays */
-    z-index: 1000;
+    isolation: isolate;
+    /* Above workspace overlays (Command AI ~37), below portaled modals */
+    z-index: 80;
     display: flex;
     width: 108px;
     max-width: 108px;
@@ -35,6 +36,12 @@
   .yd-workspace .yd-desktop-nav-rail nav,
   .yd-workspace .yd-desktop-nav-rail a,
   .yd-workspace .yd-desktop-nav-rail button {
+    pointer-events: auto;
+  }
+
+  /* Absolute last-resort: sidebar itself must stay interactable */
+  .yd-workspace #app-sidebar,
+  .yd-workspace #app-sidebar * {
     pointer-events: auto;
   }
 
@@ -70,6 +77,10 @@
 /* —— Command AI: fixed FAB (scrollt nicht mit), Sidebar bleibt darüber klickbar —— */
 .yd-command-assist-root {
   pointer-events: none;
+}
+
+.yd-command-assist-root[data-command-open="false"] .yd-command-assist-fab-host {
+  pointer-events: auto;
 }
 
 .yd-command-assist-backdrop {

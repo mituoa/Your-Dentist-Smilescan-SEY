@@ -152,6 +152,15 @@
   box-shadow: var(--yd-ws-shadow-lift) !important;
 }
 
+.yd-workspace .yd-dashboard .yd-dash-zone--submissions {
+  margin-bottom: 2.75rem;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-zone--charts,
+.yd-workspace .yd-dashboard .yd-dash-zone--secondary {
+  opacity: 0.9;
+}
+
 /* Search — softer, disappears into work */
 .yd-workspace .yd-dashboard .yd-dash-search-input {
   background: linear-gradient(

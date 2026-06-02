@@ -44,7 +44,7 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
         }}
       >
         <div>
-          <p className="yd-dash-section yd-dash-section--secondary">Aktuelle Einsendungen</p>
+          <p className="yd-dash-section yd-dash-section--primary">Aktuelle Einsendungen</p>
           <p className="mt-1 text-[11px] font-medium leading-snug" style={{ color: YD.text.muted }}>
             Assistenz bereitet Zusammenfassungen und Antworten vor — Sie prüfen und geben frei.
           </p>

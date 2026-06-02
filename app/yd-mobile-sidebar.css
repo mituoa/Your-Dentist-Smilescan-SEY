@@ -10,14 +10,19 @@
 
   .yd-mobile-nav-portal {
     position: relative;
-    /* Keep drawer above any fixed workspace layers */
-    z-index: 1000;
+    z-index: 70;
+  }
+
+  html:not([data-mobile-nav-open]) .yd-mobile-nav-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
   }
 
   .yd-mobile-nav-backdrop {
     position: fixed !important;
     inset: 0 !important;
-    z-index: 999;
+    z-index: 69;
     background: rgba(12, 25, 41, 0.18) !important;
     backdrop-filter: blur(10px) saturate(1.04);
     -webkit-backdrop-filter: blur(10px) saturate(1.04);
@@ -31,7 +36,7 @@
     bottom: 0 !important;
     width: min(88vw, 300px) !important;
     max-width: 300px !important;
-    z-index: 1000;
+    z-index: 70;
     display: flex !important;
     align-items: stretch !important;
     justify-content: flex-start !important;
@@ -40,6 +45,11 @@
   }
 
   .yd-mobile-nav-root .yd-mobile-nav-panel {
+    pointer-events: auto;
+  }
+
+  #app-sidebar,
+  #app-sidebar * {
     pointer-events: auto;
   }
 
