@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { createCaseFromQuery } from "@/lib/create-case-return";
 import { NewTaskModalTrigger } from "@/components/my-tasks/new-task-modal";
@@ -47,18 +47,16 @@ function NeuerFallLink({
   pathname: string;
   variant?: "toolbar" | "dashboard";
 }) {
-  const router = useRouter();
   const from = createCaseFromQuery(pathname);
   return (
-    <button
-      type="button"
+    <a
       title="Neuer Fall"
       className={actionClasses(variant, "primary")}
-      onClick={() => router.push(`/create-case?from=${from}`)}
+      href={`/create-case?from=${from}`}
     >
       <Plus className="h-4 w-4 shrink-0" strokeWidth={2} />
       <span>Neuer Fall</span>
-    </button>
+    </a>
   );
 }
 

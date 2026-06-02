@@ -5,6 +5,7 @@
 .yd-ambient-nav-link {
   position: relative;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 @media (min-width: 768px) {

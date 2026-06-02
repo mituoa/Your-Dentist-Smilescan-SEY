@@ -19,21 +19,21 @@ export function LoginPasswordField({
   const [visible, setVisible] = useState(false);
 
   return (
-    <div className="yd-login-field-wrap">
+    <div className="relative">
       <input
         id={id}
         name={name}
         type={visible ? "text" : "password"}
         placeholder="Passwort"
         autoComplete="current-password"
-        className="yd-login-field yd-login-field--with-icon"
+        className="yd-auth-input pr-10"
         required
         disabled={disabled}
         defaultValue={defaultValue}
       />
       <button
         type="button"
-        className="yd-login-field-icon-btn"
+        className="absolute right-3.5 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-full text-[#94A3B8] transition hover:text-[#1a4f9c] disabled:opacity-60"
         onClick={() => setVisible((v) => !v)}
         disabled={disabled}
         aria-label={visible ? "Passwort verbergen" : "Passwort anzeigen"}

@@ -2,6 +2,8 @@ import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "@/components/auth/login-page-client";
+import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
+import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { isGoogleLoginEnabled } from "@/lib/auth-google-login";
 import { isBlockingAuthError } from "@/lib/auth-blocking-errors";
 import { isAdminAllowlistUser } from "@/lib/auth-helpers";
@@ -74,14 +76,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <LoginPageClient
-      queryError={queryError}
-      resent={resent}
-      authFlowResetKey={authFlowResetKey}
-      signedOut={signedOut}
-      inviteToken={inviteToken}
-      prefilledEmail={prefilledEmail}
-      googleLoginEnabled={isGoogleLoginEnabled()}
-    />
+    <YdPublicOsEnvironment mode="focus">
+      <YdProductChrome variant="entry" />
+      <main className="yd-product-entry">
+        <section className="yd-product-entry-card yd-clinical-entry--login yd-clinical-entry-panel--login-entrance">
+          <LoginPageClient
+            queryError={queryError}
+            resent={resent}
+            authFlowResetKey={authFlowResetKey}
+            signedOut={signedOut}
+            inviteToken={inviteToken}
+            prefilledEmail={prefilledEmail}
+            googleLoginEnabled={isGoogleLoginEnabled()}
+          />
+        </section>
+      </main>
+    </YdPublicOsEnvironment>
   );
 }

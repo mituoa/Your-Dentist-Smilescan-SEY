@@ -7,7 +7,6 @@ import { Mail } from "lucide-react";
 
 import { resendSignupConfirmation, signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import { LoginPasswordField } from "@/components/auth/login-password-field";
-import { LoginSplitShell } from "@/components/auth/login-split-shell";
 import { LoginSubmitButton } from "@/components/auth/login-submit-button";
 import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-button";
 import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirmation-submit-button";
@@ -186,19 +185,17 @@ export function LoginPageClient({
     : "/forgot-password";
 
   return (
-    <LoginSplitShell>
-      <div className="yd-login-form-shell">
-        <div className="yd-login-form-card">
-        <div className="yd-login-form-brand">
+    <div className="min-w-0">
+      <div className="yd-auth-login-brand">
           <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
         </div>
 
-        <header className="yd-login-form-header">
-          <h1 className="yd-login-form-title">Anmelden</h1>
-          <p className="yd-login-form-lead">
-            Melden Sie sich mit Ihrem Praxiszugang an.
-          </p>
-        </header>
+      <header className="yd-auth-intro">
+        <h1 className="yd-public-entry-title yd-public-entry-title--login">Anmelden</h1>
+        <p className="yd-public-entry-lead yd-public-entry-lead--login">
+          Melden Sie sich mit Ihrem Praxiszugang an.
+        </p>
+      </header>
 
         {parsedError ? (
           parsedError.tone === "pending" ? (
@@ -239,7 +236,7 @@ export function LoginPageClient({
           {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
 
           <LoginPasswordControlsFieldset otherChannelActive={passwordBlockedByOthers}>
-            <div className="yd-login-field-wrap">
+            <div className="relative">
               <input
                 id="email"
                 name="email"
@@ -248,18 +245,18 @@ export function LoginPageClient({
                 placeholder="E-Mail-Adresse"
                 autoComplete="email"
                 onChange={(e) => setResendEmail(e.target.value)}
-                className="yd-login-field yd-login-field--with-icon"
+                className="yd-auth-input pr-10"
                 required
               />
-              <span className="yd-login-field-icon-btn yd-login-field-icon-btn--static" aria-hidden>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" aria-hidden>
                 <Mail className="h-[18px] w-[18px]" strokeWidth={1.75} />
               </span>
             </div>
 
             <LoginPasswordField disabled={passwordBlockedByOthers} />
 
-            <div className="yd-login-form-row">
-              <Link prefetch href={forgotHref} className="yd-login-forgot">
+            <div className="flex items-center justify-end">
+              <Link prefetch href={forgotHref} className="text-[12px] font-medium text-[#1a4f9c] hover:underline">
                 Passwort vergessen?
               </Link>
             </div>
@@ -346,8 +343,6 @@ export function LoginPageClient({
             </Link>
           </nav>
         </footer>
-        </div>
       </div>
-    </LoginSplitShell>
   );
 }

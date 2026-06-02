@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { useMobileNavOptional } from "@/components/app-shell/mobile-nav";
 import {
@@ -52,7 +52,6 @@ export function NavItem({
   tier = "primary",
 }: NavItemProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const mobileNav = useMobileNavOptional();
   const Icon = ICON_BY_NAME[iconName] ?? Home;
   const isRelayNav = href === "/relay";
@@ -70,14 +69,11 @@ export function NavItem({
         : pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <button
-      type="button"
+    <a
+      href={href}
       title={label}
       data-active={isActive ? "true" : "false"}
-      onClick={() => {
-        mobileNav?.close();
-        router.push(href);
-      }}
+      onClick={() => mobileNav?.close()}
       className={cn(
         "yd-ambient-nav-link group relative z-[10] flex w-full touch-manipulation items-center transition-[filter] duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.18)]",
         "min-h-[44px] gap-2.5 rounded-[14px] px-2.5 py-1.5",
@@ -136,6 +132,6 @@ export function NavItem({
       ) : null}
 
       {ambientPreview ? <YdNavAmbientPanel preview={ambientPreview} /> : null}
-    </button>
+    </a>
   );
 }

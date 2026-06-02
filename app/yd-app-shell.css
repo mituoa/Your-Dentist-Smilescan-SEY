@@ -42,7 +42,12 @@
   /* Absolute last-resort: sidebar itself must stay interactable */
   .yd-workspace #app-sidebar,
   .yd-workspace #app-sidebar * {
-    pointer-events: auto;
+    pointer-events: auto !important;
+  }
+
+  .yd-workspace #app-sidebar a,
+  .yd-workspace #app-sidebar button {
+    pointer-events: auto !important;
   }
 
   .yd-workspace .yd-desktop-nav-rail .yd-mobile-nav-panel {

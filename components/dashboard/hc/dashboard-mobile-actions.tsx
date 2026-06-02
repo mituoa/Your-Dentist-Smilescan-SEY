@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   BellRing,
   ClipboardCheck,
@@ -20,7 +20,6 @@ type DashboardMobileActionsProps = {
 };
 
 export function DashboardMobileActions({ className }: DashboardMobileActionsProps) {
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
@@ -78,17 +77,14 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
               </div>
               <ul className="flex flex-col gap-2">
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenu();
-                      router.push(createCaseHref);
-                    }}
+                  <a
+                    href={createCaseHref}
+                    onClick={closeMenu}
                     className="flex min-h-[48px] items-center gap-3 rounded-2xl bg-[#2F80ED] px-4 text-[14px] font-semibold text-white"
                   >
                     <Plus className="h-4 w-4" strokeWidth={2} />
                     Neuer Fall
-                  </button>
+                  </a>
                 </li>
                 <li>
                   <button
@@ -104,17 +100,14 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
                   </button>
                 </li>
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenu();
-                      router.push("/relay?panel=messages");
-                    }}
+                  <a
+                    href="/relay?panel=messages"
+                    onClick={closeMenu}
                     className="flex min-h-[48px] items-center gap-3 rounded-2xl border border-[rgba(180,198,218,0.35)] bg-white px-4 text-[14px] font-medium text-[#0c1929]"
                   >
                     <MessageSquarePlus className="h-4 w-4 text-[#2F80ED]" strokeWidth={1.75} />
                     Relay Nachricht
-                  </button>
+                  </a>
                 </li>
                 <li>
                   <button
@@ -130,17 +123,14 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
                   </button>
                 </li>
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenu();
-                      router.push("/inbox");
-                    }}
+                  <a
+                    href="/inbox"
+                    onClick={closeMenu}
                     className="flex min-h-[48px] items-center gap-3 rounded-2xl border border-[rgba(180,198,218,0.35)] bg-white px-4 text-[14px] font-medium text-[#0c1929]"
                   >
                     <ClipboardCheck className="h-4 w-4 text-[#2F80ED]" strokeWidth={1.75} />
                     Antwort vorbereiten
-                  </button>
+                  </a>
                 </li>
               </ul>
             </div>
