@@ -336,14 +336,6 @@ export function LoginPageClient({
 
         <LoginRegisterCta inviteToken={inviteToken} prefilledEmail={prefilledEmail} />
 
-        <p className="yd-login-form-hint">
-          Für autorisierte Praxisteams
-        </p>
-
-        <p className="yd-login-footer-trust">
-          Verschlüsselte Verbindung · Zugriff nur für freigegebene Praxisteams
-        </p>
-
         <footer className="yd-auth-legal-minimal">
           <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
             <Link href="/datenschutz" className="yd-auth-legal-minimal-link">

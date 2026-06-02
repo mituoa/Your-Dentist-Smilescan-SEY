@@ -28,6 +28,8 @@
 
   position: relative;
   display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 100dvh;
   width: 100%;
   overflow: hidden;
@@ -70,14 +72,7 @@
 
 @media (min-width: 1024px) {
   .yd-login-split__showcase-col {
-    position: relative;
-    display: flex;
-    flex: 0 0 48%;
-    min-width: 0;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: transparent;
+    display: none;
   }
 }
 
@@ -266,8 +261,9 @@
 
 @media (min-width: 1024px) {
   .yd-login-split__form-col {
-    flex: 0 0 52%;
-    padding: 3.5rem clamp(2rem, 3vw, 4rem);
+    flex: 0 0 auto;
+    width: min(100%, 34rem);
+    padding: 4rem clamp(2rem, 3vw, 4rem);
   }
 }
 
@@ -275,13 +271,13 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 26rem;
+  max-width: 28rem;
 }
 
 @media (min-width: 1024px) {
   .yd-login-form-shell {
-    padding: 2rem 2.25rem 2.25rem;
-    border-radius: 24px;
+    padding: 2.25rem 2.5rem 2.5rem;
+    border-radius: 26px;
     background: var(--yd-login-card-bg);
     border: 1px solid var(--yd-login-border);
     box-shadow: var(--yd-login-card-shadow);
@@ -295,13 +291,7 @@
 .yd-login-form-brand {
   display: flex;
   justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .yd-login-form-brand {
-    display: none;
-  }
+  margin-bottom: 1.25rem;
 }
 
 .yd-login-form-header {
@@ -311,11 +301,11 @@
 
 .yd-login-form-title {
   margin: 0 0 0.5rem;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.75rem;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--yd-login-ink);
 }
 

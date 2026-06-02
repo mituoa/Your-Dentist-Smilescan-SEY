@@ -41,7 +41,7 @@
     align-items: stretch !important;
     justify-content: flex-start !important;
     padding: 0 !important;
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   .yd-mobile-nav-root .yd-mobile-nav-panel {

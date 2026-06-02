@@ -34,12 +34,12 @@ export const PUBLIC_SITE_NAV_MOBILE = [
 ] as const;
 
 export const PUBLIC_SITE_HERO = {
-  eyebrow: "Intelligente Praxiskommunikation",
-  title: "Weniger Chaos im Praxisalltag.",
-  titleLine2: "Jede Anfrage an einem Ort.",
-  titleMobile: "Weniger Chaos im Praxisalltag. Jede Anfrage an einem Ort.",
+  eyebrow: "Praxis-Kommunikation. Strukturiert.",
+  title: "Weniger Unterbrechungen",
+  titleLine2: "im Praxisalltag.",
+  titleMobile: "Weniger Unterbrechungen im Praxisalltag.",
   lead:
-    "Patient:innen übermitteln Anliegen und Bilder direkt an die Praxis. Your Dentist strukturiert den Eingang, erkennt nächste Schritte und hält Team, Aufgaben und Kommunikation zusammen.",
+    "Patient:innen übermitteln Anliegen und Bilder direkt an die Praxis. Your Dentist bündelt den Eingang, strukturiert Informationen und hält Übergaben, Aufgaben und Antworten am Fall — mit Freigabe durch die Praxis.",
   primaryCta: "Demo buchen",
   secondaryCta: "Zugang anfordern",
   signInPrefix: "Bereits registriert?",
@@ -67,10 +67,10 @@ export const PUBLIC_SITE_PROBLEM = {
   eyebrow: "Alltag",
   title: "Wo heute Informationen verloren gehen",
   pains: [
-    { label: "Telefon", detail: "Informationen gehen zwischen Behandlungen verloren" },
-    { label: "Bilder", detail: "landen in privaten Chats oder E-Mails" },
-    { label: "Rückfragen", detail: "unterbrechen den laufenden Praxisbetrieb" },
-    { label: "Übergaben", detail: "sind nicht für alle sichtbar" },
+    { label: "Telefon", detail: "Details fehlen, wenn es im Behandlungszimmer schnell gehen muss." },
+    { label: "Bilder", detail: "Verlaufen sich in E‑Mails, Messenger oder auf einzelnen Geräten." },
+    { label: "Rückfragen", detail: "Kommen zu spät oder erreichen nicht die richtige Person." },
+    { label: "Übergaben", detail: "Kontext fehlt — wer macht was bis wann?" },
   ],
 } as const;
 
@@ -83,7 +83,7 @@ export const PUBLIC_SITE_PERSPECTIVE = {
   },
   practice: {
     label: "Praxis",
-    items: ["Eingang prüfen", "Aufgabe verteilen", "Antwort vorbereiten"] as const,
+    items: ["Eingang prüfen", "Aufgabe verteilen", "Antwort freigeben"] as const,
   },
 } as const;
 
@@ -92,9 +92,9 @@ export const PUBLIC_SITE_ABLAUF = {
   title: "Ein klarer Weg für jede Anfrage.",
   steps: [
     { num: "01", phase: "Eingang", body: "Patient sendet Anliegen und Bilder." },
-    { num: "02", phase: "Struktur", body: "Your Dentist ordnet Informationen." },
-    { num: "03", phase: "Übergabe", body: "Aufgabe oder Rückfrage landet beim Team." },
-    { num: "04", phase: "Antwort", body: "Patient erhält eine vorbereitete Rückmeldung." },
+    { num: "02", phase: "Struktur", body: "Informationen werden geordnet und nachvollziehbar gemacht." },
+    { num: "03", phase: "Übergabe", body: "Aufgaben und Rückfragen landen beim richtigen Team‑Slot." },
+    { num: "04", phase: "Antwort", body: "Antwort wird vorbereitet und von der Praxis freigegeben." },
   ],
 } as const;
 
@@ -105,17 +105,17 @@ export const PUBLIC_SITE_NUTZEN = {
     {
       id: "eingang",
       label: "Eingang",
-      body: "Anfragen und Bilder an einem Ort — nicht verteilt über Telefon, E-Mail oder private Geräte.",
+      body: "Anfragen und Bilder an einem Ort — nicht verteilt über Telefon, E‑Mail oder private Geräte.",
     },
     {
       id: "kommunikation",
       label: "Team",
-      body: "Rückfragen, Übergaben und Aufgaben bleiben am Fall.",
+      body: "Rückfragen, Übergaben und Entscheidungen bleiben am Fall — für alle sichtbar.",
     },
     {
       id: "aufgaben",
       label: "Aufgaben",
-      body: "Rückrufe, Erinnerungen und Routinen mit klarer Verantwortung.",
+      body: "Rückrufe, Erinnerungen und Routinen mit klarer Verantwortung — ohne Zettelwirtschaft.",
     },
     {
       id: "command",
@@ -128,22 +128,22 @@ export const PUBLIC_SITE_NUTZEN = {
 export const PUBLIC_SITE_COMMAND = {
   eyebrow: "Command AI",
   title: "Leise Assistenz im Praxisfluss",
-  lead: "Befehle für Organisation und Kommunikation — keine Diagnosen, keine Behandlungsentscheidungen. Freigabe bleibt bei Ihnen.",
+  lead: "Befehle für Organisation und Kommunikation — keine Diagnosen, keine Behandlungsentscheidungen. Freigabe bleibt bei der Praxis.",
   demos: [
     {
       command: "Bitte Patient wegen Termin antworten",
       outcomes: [
-        "Nachricht vorbereitet",
-        "Rückfrage für Empfang erstellt",
+        "Antwortentwurf vorbereitet",
+        "Rückfrage an Empfang erzeugt",
         "Erinnerung gesetzt",
       ],
     },
     {
       command: "Heutigen Eingang zusammenfassen",
       outcomes: [
-        "Neue Anfragen geprüft",
-        "Rückrufe vorbereitet",
-        "Aufgaben erstellt",
+        "Neue Anfragen zusammengefasst",
+        "Rückrufe markiert",
+        "Aufgaben verteilt",
       ],
     },
   ],
@@ -152,7 +152,7 @@ export const PUBLIC_SITE_COMMAND = {
 export const PUBLIC_SITE_RELAY = {
   eyebrow: "Plattform",
   title: "Relay — Kommunikation am Fall",
-  lead: "Interne Abstimmung am Fall — nicht in Messenger und E-Mail.",
+  lead: "Interne Abstimmung am Fall — ohne Kontextverlust zwischen Telefon, Messenger und E‑Mail.",
   capabilities: [
     "Direktnachrichten",
     "Gruppen",
@@ -168,15 +168,15 @@ export const PUBLIC_SITE_FUER_WEN = {
   cards: [
     {
       title: "Einzelpraxis",
-      body: "Mehr Struktur, ohne mehr Personal.",
+      body: "Mehr Struktur, ohne mehr Personal — der Eingang bleibt übersichtlich.",
     },
     {
       title: "Mehrbehandlerpraxis",
-      body: "Ein gemeinsamer Stand für alle Beteiligten.",
+      body: "Ein gemeinsamer Stand für Ärzt:innen, Assistenz und Empfang.",
     },
     {
       title: "MVZ",
-      body: "Übergaben und Verantwortung über Standorte hinweg.",
+      body: "Übergaben und Verantwortung über Teams und Standorte hinweg.",
     },
   ],
 } as const;
@@ -195,7 +195,7 @@ export const PUBLIC_SITE_EINFUEHRUNG = {
 export const PUBLIC_SITE_PRICING = {
   eyebrow: "Praxiszugang",
   title: "Transparente Praxiszugänge",
-  lead: "Nach Prüfung öffnet sich Ihr geschützter Praxisbereich.",
+  lead: "Nach kurzer Prüfung öffnet sich Ihr geschützter Praxisbereich.",
 } as const;
 
 /** CTA-Texte nur auf der öffentlichen Landing (#pricing) */
