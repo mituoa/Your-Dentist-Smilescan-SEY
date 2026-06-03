@@ -23,6 +23,12 @@ export type RelayAssistSummary = {
   approvalCount: number;
 };
 
+export type RelayCommandStep = {
+  id: string;
+  label: string;
+  state: "done" | "active" | "pending";
+};
+
 export type RelayTeamDetailRow = RelayTeamRow & {
   readSummary: string;
   overdueCount: number;
@@ -148,6 +154,41 @@ export function buildRelayKpiStats(
     pendingApprovals: pending.length,
     routinesToday,
   };
+}
+
+export function buildRelayCommandFlow(
+  open: MyTask[],
+  pending: MyTask[],
+  conversations: RelayConversationRow[]
+): RelayCommandStep[] {
+  const unreadHandoffs = conversations.reduce((sum, c) => sum + c.unread_count, 0);
+  const hasTasks = open.length > 0;
+  const needsApproval = pending.length > 0;
+  const handoffsActive = unreadHandoffs > 0;
+
+  return [
+    { id: "intake", label: "Eingang / Diktat", state: "done" },
+    {
+      id: "process",
+      label: "KI verarbeitet",
+      state: hasTasks || needsApproval ? "done" : "active",
+    },
+    {
+      id: "task",
+      label: "Aufgabe erstellt",
+      state: hasTasks ? "done" : needsApproval ? "active" : "pending",
+    },
+    {
+      id: "handoff",
+      label: "Übergabe bereit",
+      state: handoffsActive ? "active" : hasTasks ? "done" : "pending",
+    },
+    {
+      id: "approval",
+      label: "Freigabe wartet",
+      state: needsApproval ? "active" : "pending",
+    },
+  ];
 }
 
 export function buildRelayAssistSummary(

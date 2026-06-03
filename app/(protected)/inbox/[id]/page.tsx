@@ -3,8 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
-import { SubmissionActions } from "@/components/inbox/submission-actions";
-import { TrackerCaseOverview } from "@/components/inbox/tracker-case-overview";
+import { TrackerWorkspace } from "@/components/inbox/tracker-workspace";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
 import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
@@ -105,72 +104,49 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
       />
       <CaseCreatedToast />
 
-      <div className="yd-inbox-detail-root flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden max-md:overflow-y-auto max-md:overscroll-y-contain max-md:[-webkit-overflow-scrolling:touch] max-md:min-h-0 max-md:bg-[#EDF1F7] md:overflow-hidden md:bg-transparent">
-        <div className="yd-inbox-detail-pane flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-md:mx-0 max-md:flex-none max-md:overflow-visible max-md:rounded-b-2xl max-md:shadow-[0_2px_12px_rgba(15,23,42,0.05)] md:mx-0 md:h-full md:max-h-full md:rounded-none md:bg-[#F7F9FC] md:shadow-none">
-          <div className="z-[6] shrink-0 bg-white px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:border-b max-md:border-[rgba(15,23,42,0.06)] md:static md:border-b-0 md:px-[clamp(20px,4vw,48px)] md:pt-[clamp(20px,4vw,32px)]">
-            <Suspense fallback={null}>
-              <InboxMobileBack />
-            </Suspense>
-          </div>
+      <div className="yd-tracker-v4-detail flex h-full min-h-0 flex-1 flex-col overflow-hidden max-md:overflow-y-auto max-md:overscroll-y-contain max-md:bg-[#EDF1F7] md:bg-[#F7F9FC]">
+        <div className="shrink-0 bg-white px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:z-[6] max-md:border-b max-md:border-[rgba(15,23,42,0.06)] md:px-6 md:pt-4">
+          <Suspense fallback={null}>
+            <InboxMobileBack />
+          </Suspense>
+        </div>
 
-          <div className="yd-inbox-detail-body flex min-h-0 w-full min-w-0 flex-col max-md:flex-none md:flex-1 md:min-h-0 md:flex-row md:overflow-hidden">
-            <div className="yd-inbox-detail-main-scroll min-h-0 w-full min-w-0 max-md:flex-none max-md:overflow-visible bg-white px-4 pb-6 max-md:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 max-md:pb-8 md:flex-1 md:min-h-0 md:px-[clamp(20px,4vw,48px)] md:pb-20 md:pt-0">
-              <TrackerCaseOverview
-                submission={{
-                  id: submission.id,
-                  patient_name: submission.patient_name,
-                  patient_email: submission.patient_email,
-                  patient_phone: submission.patient_phone,
-                  patient_notes: submission.patient_notes,
-                  patient_birth_date: submission.patient_birth_date,
-                  patient_external_id: submission.patient_external_id,
-                  urgency: submission.urgency,
-                  created_at: submission.created_at,
-                  is_draft: submission.is_draft,
-                  seen_at: submission.seen_at,
-                  intake_channel: submission.intake_channel,
-                  photos: submission.photos.map(
-                    ({ id: photoId, sort_order, created_at, signed_url }) => ({
-                      id: photoId,
-                      sort_order,
-                      created_at,
-                      signed_url,
-                    })
-                  ),
-                }}
-                status={status}
-              />
-            </div>
-
-            <aside className="yd-inbox-detail-aside-scroll flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-md:min-h-0 max-md:flex-none max-md:overflow-visible max-md:px-0 max-md:pb-[max(1rem,var(--safe-area-bottom))] md:mt-0 md:min-h-0 md:w-[min(100%,300px)] md:max-w-[320px] md:shrink-0 md:border-l md:border-t-0 md:pb-0">
-              <SubmissionActions
-                submissionId={submission.id}
-                patientName={submission.patient_name}
-                patientEmail={submission.patient_email}
-                patientPhone={submission.patient_phone}
-                createdAt={submission.created_at}
-                patientBirthDate={submission.patient_birth_date}
-                patientExternalId={submission.patient_external_id}
-                urgency={submission.urgency}
-                isDraft={submission.is_draft}
-                seenAt={submission.seen_at}
-                updatedAt={submission.updated_at}
-                photoCount={submission.photos.length}
-                canSendAppointmentLink={isDoctor}
-                practicePhone={practicePhone}
-                appointmentUrl={appointmentUrl}
-                isDoctor={isDoctor}
-                messageDraftsAvailable={messageDraftLoad.available}
-                editableMessageDraft={
-                  messageDraftLoad.available ? messageDraftLoad.editableDraft : null
-                }
-                historyMessageDraft={
-                  messageDraftLoad.available ? messageDraftLoad.historyDraft : null
-                }
-                intakeChannel={submission.intake_channel}
-              />
-            </aside>
-          </div>
+        <div className="yd-tracker-v4-detail__scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-[max(1.25rem,var(--safe-area-bottom))] md:px-6 md:pb-8 md:pt-2">
+          <TrackerWorkspace
+            submission={{
+              id: submission.id,
+              patient_name: submission.patient_name,
+              patient_email: submission.patient_email,
+              patient_phone: submission.patient_phone,
+              patient_notes: submission.patient_notes,
+              patient_birth_date: submission.patient_birth_date,
+              urgency: submission.urgency,
+              created_at: submission.created_at,
+              is_draft: submission.is_draft,
+              intake_channel: submission.intake_channel,
+              photos: submission.photos.map(
+                ({ id: photoId, sort_order, created_at, signed_url }) => ({
+                  id: photoId,
+                  sort_order,
+                  created_at,
+                  signed_url,
+                })
+              ),
+            }}
+            status={status}
+            messageDraftStatus={messageDraftStatus}
+            messageDraftsAvailable={messageDraftLoad.available}
+            editableMessageDraft={
+              messageDraftLoad.available ? messageDraftLoad.editableDraft : null
+            }
+            historyMessageDraft={
+              messageDraftLoad.available ? messageDraftLoad.historyDraft : null
+            }
+            isDoctor={isDoctor}
+            practicePhone={practicePhone}
+            appointmentUrl={appointmentUrl}
+            canSendAppointmentLink={isDoctor}
+          />
         </div>
       </div>
     </>

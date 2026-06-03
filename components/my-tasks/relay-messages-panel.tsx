@@ -106,7 +106,7 @@ export function RelayMessagesPanel({
   };
 
   return (
-    <div className="relay-messages">
+    <div className="relay-messages yd-relay-v4-messages">
       <aside className="relay-messages-list" aria-label="Nachrichten">
         <div className="relay-messages-list-head">
           <div>

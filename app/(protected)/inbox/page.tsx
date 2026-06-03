@@ -30,7 +30,8 @@ import {
   shouldStripInboxSearchParamFromUrl,
 } from "@/lib/inbox-search-q";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
-import { TrackerIndexPlaceholder } from "@/components/inbox/tracker-index-placeholder";
+import { sortTrackerInboxItems } from "@/lib/inbox/tracker-inbox-logic";
+import type { EnrichedSubmissionListItem } from "@/lib/inbox/tracker-inbox-logic";
 
 interface InboxPageProps {
   searchParams: Promise<{ q?: string | string[] }>;
@@ -78,7 +79,8 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   const submissions = listResult.items;
 
   if (submissions.length > 0 && !qTrimmed) {
-    return <TrackerIndexPlaceholder />;
+    const sorted = sortTrackerInboxItems(submissions as EnrichedSubmissionListItem[]);
+    redirect(`/inbox/${sorted[0]!.id}`);
   }
 
   if (qTrimmed) {

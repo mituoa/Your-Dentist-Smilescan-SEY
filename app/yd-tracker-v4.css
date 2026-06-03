@@ -1,0 +1,455 @@
+/**
+ * Tracker V4 — Premium Medical Inbox (Dashboard-Designsprache)
+ */
+
+.yd-tracker-v4-inbox {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.yd-tracker-v4-inbox__toolbar {
+  flex-shrink: 0;
+  padding: 0.875rem 1rem 0.75rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.yd-tracker-v4-inbox__toolbar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.625rem;
+}
+
+.yd-tracker-v4-new-case {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(43, 111, 232, 0.2);
+  background: #eef6ff;
+  color: #1d4ed8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 160ms ease;
+}
+
+.yd-tracker-v4-new-case:hover {
+  background: #dbeafe;
+}
+
+.yd-tracker-v4-inbox__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem 0;
+}
+
+.yd-tracker-v4-inbox-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  background: transparent;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.yd-tracker-v4-inbox-card:hover {
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.yd-tracker-v4-inbox-card--active {
+  background: linear-gradient(90deg, rgba(239, 246, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+  box-shadow: inset 3px 0 0 #2563eb;
+}
+
+.yd-tracker-v4-inbox-card--unseen .yd-tracker-v4-inbox-card__name {
+  font-weight: 700;
+}
+
+.yd-tracker-v4-inbox-card__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.yd-tracker-v4-inbox-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1d4ed8;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.yd-tracker-v4-inbox-card__name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.yd-tracker-v4-inbox-card__concern {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.yd-tracker-v4-inbox-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding-left: 2.875rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-inbox-card__priority {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.yd-tracker-v4-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.yd-tracker-v4-status--lg {
+  font-size: 0.6875rem;
+  padding: 0.2rem 0.625rem;
+}
+
+.yd-tracker-v4-status__dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.yd-tracker-v4-detail__scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+.yd-tracker-v4-workspace {
+  max-width: 72rem;
+}
+
+.yd-tracker-v4-patient-header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.yd-tracker-v4-patient-header__name {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.yd-tracker-v4-patient-header__concern {
+  margin: 0.35rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.yd-tracker-v4-patient-header__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.875rem 0 0;
+  padding: 0;
+}
+
+.yd-tracker-v4-patient-header__meta > div {
+  min-width: 0;
+}
+
+.yd-tracker-v4-patient-header__meta dt {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-patient-header__meta dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.yd-tracker-v4-patient-header__contact {
+  margin: 0.625rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-tracker-v4-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.yd-tracker-v4-workspace__grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-tracker-v4-workspace__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+    align-items: start;
+  }
+}
+
+.yd-tracker-v4-workspace__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.yd-tracker-v4-workspace__rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.yd-tracker-v4-rail-card {
+  min-width: 0;
+}
+
+.yd-tracker-v4-photo-stage__viewer {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+}
+
+.yd-tracker-v4-photo-stage__viewer img {
+  max-height: min(48vh, 440px) !important;
+  width: 100%;
+  object-fit: cover;
+}
+
+.yd-tracker-v4-photo-stage__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  border-radius: 16px;
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.yd-tracker-v4-photo-stage__timeline {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yd-tracker-v4-photo-day__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yd-tracker-v4-photo-day__thumbs {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.yd-tracker-v4-photo-thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #f8fafc;
+}
+
+.yd-tracker-v4-timeline__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #fff;
+  overflow: hidden;
+}
+
+.yd-tracker-v4-timeline__item {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+.yd-tracker-v4-timeline__item:last-child {
+  border-bottom: none;
+}
+
+.yd-tracker-v4-timeline__date {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2563eb;
+  padding-top: 0.1rem;
+}
+
+.yd-tracker-v4-timeline__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.yd-tracker-v4-timeline__detail {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.yd-tracker-v4-note__text {
+  margin: 0;
+  padding: 1rem 1.125rem;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #fff;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.yd-tracker-v4-draft__hint {
+  margin: -0.35rem 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-tracker-v4-draft__surface {
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #fff;
+  padding: 1rem 1.125rem 1.25rem;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.05);
+}
+
+.yd-tracker-v4-draft__surface textarea {
+  min-height: 220px !important;
+}
+
+.yd-tracker-v4-command-flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.yd-tracker-v4-command-flow__step {
+  display: flex;
+  gap: 0.625rem;
+  position: relative;
+}
+
+.yd-tracker-v4-command-flow__node {
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
+}
+
+.yd-tracker-v4-command-flow__node--done {
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.yd-tracker-v4-command-flow__node--active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.yd-tracker-v4-command-flow__connector {
+  position: absolute;
+  left: 0.3rem;
+  top: 1.1rem;
+  bottom: 0;
+  width: 1px;
+  background: rgba(203, 213, 225, 0.9);
+}
+
+@media (max-width: 1023px) {
+  .yd-tracker-v4-workspace__rail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .yd-tracker-v4-workspace__rail > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 639px) {
+  .yd-tracker-v4-workspace__rail {
+    grid-template-columns: 1fr;
+  }
+}

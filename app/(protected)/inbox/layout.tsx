@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { InboxTrackerShell } from "@/components/inbox/inbox-tracker-shell";
-import { TrackerTable } from "@/components/inbox/tracker-table";
+import { TrackerInboxPanel } from "@/components/inbox/tracker-inbox-panel";
 
 interface InboxLayoutProps {
   children: React.ReactNode;
@@ -46,7 +46,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
           </p>
         </div>
       ) : (
-        <TrackerTable items={submissions} showCreateCase={role === "doctor"} />
+        <TrackerInboxPanel items={submissions} showCreateCase={role === "doctor"} />
       )}
     </div>
   );
