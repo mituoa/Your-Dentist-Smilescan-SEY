@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { HcCard } from "@/components/design/hc-card";
 import type { RelayRoutineRow } from "@/lib/relay/build-relay-snapshot";
 import { YD } from "@/lib/design/yd-design-tokens";
 
@@ -11,27 +12,33 @@ type RelayPracticeRoutinesProps = {
 
 export function RelayPracticeRoutines({ routines }: RelayPracticeRoutinesProps) {
   return (
-    <section className="yd-relay-side-card" aria-labelledby="yd-relay-routines-title">
-      <h2 id="yd-relay-routines-title" className="yd-relay-section-title">
-        Praxisroutinen
+    <section className="min-w-0" aria-labelledby="yd-relay-routines-title">
+      <h2 id="yd-relay-routines-title" className="yd-dash-section mb-3 text-[1.0625rem] md:text-[1.125rem]">
+        Wiederkehrende Routinen
       </h2>
       {routines.length === 0 ? (
-        <p className="mt-3 text-[13px]" style={{ color: YD.text.muted }}>
-          Keine wiederkehrenden Aufgaben offen.
-        </p>
+        <HcCard tone="default" className="yd-dash-surface p-4">
+          <p className="text-[13px]" style={{ color: YD.text.muted }}>
+            Keine wiederkehrenden Aufgaben offen.
+          </p>
+        </HcCard>
       ) : (
-        <ul className="mt-3 space-y-2">
+        <ul className="flex flex-col gap-2">
           {routines.map((row) => (
             <li key={row.id}>
-              <Link
-                href={row.href}
-                className="block rounded-lg border border-[rgba(226,232,240,0.85)] bg-[rgba(248,250,252,0.6)] px-3 py-2.5 transition-colors hover:border-[rgba(43,111,232,0.2)] hover:bg-white"
-              >
-                <p className="text-[14px] font-medium text-[#0F172A]">{row.title}</p>
-                <p className="mt-0.5 text-[12px] font-medium" style={{ color: YD.text.muted }}>
-                  {row.rhythmLabel}
-                  {row.nextLabel ? ` · ${row.nextLabel}` : ""}
-                </p>
+              <Link href={row.href} className="block no-underline">
+                <HcCard
+                  tone="default"
+                  className="yd-dash-surface yd-dash-interactive-card px-3.5 py-2.5"
+                >
+                  <p className="text-[14px] font-medium" style={{ color: YD.text.primary }}>
+                    {row.title}
+                  </p>
+                  <p className="mt-0.5 text-[12px] font-medium" style={{ color: YD.text.muted }}>
+                    {row.rhythmLabel}
+                    {row.nextLabel ? ` · ${row.nextLabel}` : ""}
+                  </p>
+                </HcCard>
               </Link>
             </li>
           ))}

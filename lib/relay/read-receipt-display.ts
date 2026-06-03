@@ -42,6 +42,48 @@ function formatTimeShort(iso: string): string {
   }
 }
 
+export function formatRelayReadReceiptBlock(
+  receipts: RelayReadReceiptRow[],
+  isGroup: boolean
+): { summary: string; lines: { name: string; read: boolean }[] } {
+  const lines = receipts.map((r) => ({
+    name: displayName(r.email),
+    read: Boolean(r.read_at),
+  }));
+  const readers = receipts.filter((r) => r.read_at);
+  const unread = receipts.filter((r) => !r.read_at);
+
+  let summary: string;
+  if (readers.length === 0) {
+    summary = isGroup
+      ? `Noch ungelesen (${receipts.length} im Team)`
+      : unread.length === 1
+        ? `Noch ungelesen von ${displayName(unread[0]!.email)}`
+        : "Zugestellt";
+  } else if (isGroup && readers.length < receipts.length) {
+    summary = `Gelesen von ${readers.length} von ${receipts.length}`;
+  } else if (!isGroup && readers.length === 1) {
+    summary = `Gelesen von ${displayName(readers[0]!.email)}`;
+  } else {
+    summary = `Gelesen von ${readers.length} von ${receipts.length}`;
+  }
+
+  return { summary, lines };
+}
+
+export function formatRelayMessageTimestamp(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
 export function formatRelayReadReceiptDetail(receipt: RelayReadReceiptRow): string {
   const name = displayName(receipt.email);
   if (receipt.read_at) {

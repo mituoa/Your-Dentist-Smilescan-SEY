@@ -1,43 +1,55 @@
 "use client";
 
-import type { RelayTeamRow } from "@/lib/relay/build-relay-snapshot";
+import { HcCard } from "@/components/design/hc-card";
+import type { RelayTeamDetailRow } from "@/lib/relay/build-relay-snapshot";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 type RelayTeamOverviewProps = {
-  rows: RelayTeamRow[];
+  rows: RelayTeamDetailRow[];
 };
 
 export function RelayTeamOverview({ rows }: RelayTeamOverviewProps) {
   return (
-    <section className="yd-relay-side-card" aria-labelledby="yd-relay-team-title">
-      <h2 id="yd-relay-team-title" className="yd-relay-section-title">
-        Teamübersicht
+    <section className="min-w-0" aria-labelledby="yd-relay-team-title">
+      <h2 id="yd-relay-team-title" className="yd-dash-section mb-3 text-[1.0625rem] md:text-[1.125rem]">
+        Teamstatus
       </h2>
       {rows.length === 0 ? (
-        <p className="mt-3 text-[13px]" style={{ color: YD.text.muted }}>
-          Keine offenen Zuweisungen.
-        </p>
+        <HcCard tone="default" className="yd-dash-surface p-4">
+          <p className="text-[13px]" style={{ color: YD.text.muted }}>
+            Keine offenen Zuweisungen.
+          </p>
+        </HcCard>
       ) : (
-        <ul className="mt-3 space-y-2">
-          {rows.map((row) => (
-            <li
-              key={row.key}
-              className="flex items-center justify-between gap-3 border-b border-[rgba(226,232,240,0.7)] py-2 last:border-0"
-            >
-              <span className="min-w-0">
-                <span className="block text-[14px] font-medium text-[#0F172A]">{row.label}</span>
-                {row.hint ? (
-                  <span className="block text-[12px] font-medium" style={{ color: YD.text.muted }}>
-                    {row.hint}
-                  </span>
-                ) : null}
-              </span>
-              <span className="shrink-0 tabular-nums text-[13px] font-semibold" style={{ color: YD.text.secondary }}>
-                {row.count}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <HcCard tone="default" className="yd-dash-surface divide-y divide-[rgba(226,232,240,0.85)] p-0">
+          <ul>
+            {rows.map((row) => (
+              <li
+                key={row.key}
+                className="flex items-start justify-between gap-3 px-4 py-3 first:pt-3.5 last:pb-3.5"
+              >
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold tracking-[-0.01em]" style={{ color: YD.text.primary }}>
+                    {row.label}
+                  </p>
+                  {row.hint ? (
+                    <p className="text-[11px] font-medium" style={{ color: YD.text.muted }}>
+                      {row.hint}
+                    </p>
+                  ) : null}
+                  <p className="mt-1 text-[12px] font-medium leading-snug" style={{ color: YD.text.secondary }}>
+                    {row.count === 1 ? "1 Aufgabe" : `${row.count} Aufgaben`}
+                    {" · "}
+                    {row.readSummary}
+                    {row.overdueCount > 0
+                      ? ` · ${row.overdueCount} überfällig`
+                      : ""}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </HcCard>
       )}
     </section>
   );

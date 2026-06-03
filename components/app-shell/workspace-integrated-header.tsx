@@ -4,6 +4,7 @@ import type { ThemePreference } from "@/lib/theme";
 export type WorkspaceIntegratedHeaderProps = {
   eyebrow: string;
   greeting: string;
+  hideGreeting?: boolean;
   displayName: string;
   subtitle: string;
   email: string;
@@ -19,6 +20,7 @@ export type WorkspaceIntegratedHeaderProps = {
 export function WorkspaceIntegratedHeader({
   eyebrow,
   greeting,
+  hideGreeting = false,
   displayName,
   subtitle,
   email,
@@ -34,9 +36,11 @@ export function WorkspaceIntegratedHeader({
       <div className="yd-dash-header-premium__grid">
         <div className="yd-dash-header-premium__identity">
           <h1 className="yd-dash-header-premium__headline">{eyebrow}</h1>
-          <p className="yd-dash-header-premium__greeting">
-            {greeting}, {displayName}
-          </p>
+          {hideGreeting ? null : (
+            <p className="yd-dash-header-premium__greeting">
+              {greeting}, {displayName}
+            </p>
+          )}
           <p className="yd-dash-header-premium__subtitle">{subtitle}</p>
         </div>
 

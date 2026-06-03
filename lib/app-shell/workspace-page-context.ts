@@ -13,7 +13,7 @@ export function resolveWorkspacePageContext(pathname: string): WorkspacePageCont
     return { title: "Tracker", hint: "Patientenfälle" };
   }
   if (pathname === "/relay" || pathname.startsWith("/relay/")) {
-    return { title: "Relay", hint: "Aufgaben & Nachrichten" };
+    return { title: "Relay", hint: "Interne Praxisorganisation" };
   }
   if (pathname === "/my-tasks" || pathname.startsWith("/my-tasks/")) {
     return { title: "Relay", hint: "Meine Aufgaben" };

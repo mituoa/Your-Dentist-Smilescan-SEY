@@ -13,10 +13,8 @@ import {
 import { NewRelayMessageModal } from "@/components/my-tasks/new-relay-message-modal";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayConversationRow, RelayMessageRow } from "@/lib/queries/relay-messages";
-import {
-  formatRelayReadReceiptDetail,
-  formatRelayReadReceiptSummary,
-} from "@/lib/relay/read-receipt-display";
+import { RelayHandoffReadBlock } from "@/components/my-tasks/relay-handoff-read-block";
+import { formatRelayMessageTimestamp } from "@/lib/relay/read-receipt-display";
 import { cn } from "@/lib/utils";
 
 type RelayMessagesPanelProps = {
@@ -25,18 +23,12 @@ type RelayMessagesPanelProps = {
   currentUserId: string;
 };
 
-function formatTime(iso: string | null) {
-  if (!iso) return "";
-  try {
-    return new Intl.DateTimeFormat("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(iso));
-  } catch {
-    return "";
-  }
+function senderDisplayName(email: string | null): string {
+  if (!email) return "Team";
+  const local = email.split("@")[0] ?? email;
+  const part = local.split(/[._-]/)[0];
+  if (!part) return "Team";
+  return part.charAt(0).toUpperCase() + part.slice(1);
 }
 
 function conversationLabel(c: RelayConversationRow) {
@@ -118,8 +110,8 @@ export function RelayMessagesPanel({
       <aside className="relay-messages-list" aria-label="Nachrichten">
         <div className="relay-messages-list-head">
           <div>
-            <p className="relay-messages-list-title">Übergaben</p>
-            <p className="relay-messages-list-sub">Intern · Praxis</p>
+            <p className="relay-messages-list-title">Praxisübergaben</p>
+            <p className="relay-messages-list-sub">Intern · mit Lesebestätigung</p>
           </div>
           <button
             type="button"
@@ -223,40 +215,21 @@ export function RelayMessagesPanel({
                 </p>
               ) : (
                 <ul className="relay-messages-handoffs">
-                  {messages.map((m) => {
-                    const senderLabel = m.sender_email
-                      ? m.sender_email.split("@")[0]!.replace(/[._-]/g, " ").trim() || "Team"
-                      : "Team";
-                    const readSummary = m.is_own
-                      ? formatRelayReadReceiptSummary(
-                          m.read_receipts,
-                          m.is_group_thread
-                        )
-                      : null;
-                    return (
-                      <li
-                        key={m.id}
-                        className={cn(
-                          "relay-handoff-entry",
-                          m.is_own && "relay-handoff-entry--own"
-                        )}
-                      >
-                        <span className="relay-handoff-entry__label">
-                          {m.is_own ? "Ihre Übergabe" : senderLabel}
-                        </span>
-                        <p className="relay-handoff-entry__body">{m.body}</p>
-                        <div className="relay-handoff-entry__footer">
-                          {m.is_own ? (
-                            <RelayMessageReadStatus message={m} />
-                          ) : (
-                            <span className="relay-message-status">
-                              {formatTime(m.created_at)}
-                            </span>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  })}
+                  {messages.map((m) => (
+                    <li key={m.id} className="relay-handoff-entry">
+                      <p className="relay-handoff-entry__author">
+                        {m.is_own ? "Ihre Übergabe" : senderDisplayName(m.sender_email)}
+                      </p>
+                      <p className="relay-handoff-entry__body">{m.body}</p>
+                      <RelayHandoffReadBlock
+                        receipts={m.read_receipts}
+                        isGroup={m.is_group_thread}
+                      />
+                      <p className="relay-handoff-entry__time">
+                        {formatRelayMessageTimestamp(m.created_at)}
+                      </p>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
@@ -271,7 +244,7 @@ export function RelayMessagesPanel({
                   onChange={(e) => setComposer(e.target.value)}
                   disabled={isPending}
                   rows={2}
-                  placeholder="Interne Nachricht …"
+                  placeholder="Praxisübergabe formulieren …"
                   className="relay-messages-input"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
@@ -301,31 +274,5 @@ export function RelayMessagesPanel({
         currentUserId={currentUserId}
       />
     </div>
-  );
-}
-
-function RelayMessageReadStatus({ message }: { message: RelayMessageRow }) {
-  const summary = formatRelayReadReceiptSummary(
-    message.read_receipts,
-    message.is_group_thread
-  );
-  if (message.read_receipts.length === 0) {
-    return (
-      <span className="relay-message-status" aria-label="Zustellstatus">
-        Zugestellt
-      </span>
-    );
-  }
-  return (
-    <details className="relay-message-read-details">
-      <summary className="relay-message-status cursor-pointer list-none">
-        {summary}
-      </summary>
-      <ul className="relay-message-read-list">
-        {message.read_receipts.map((r) => (
-          <li key={r.user_id}>{formatRelayReadReceiptDetail(r)}</li>
-        ))}
-      </ul>
-    </details>
   );
 }

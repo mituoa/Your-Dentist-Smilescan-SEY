@@ -245,6 +245,76 @@
   background: linear-gradient(165deg, #fafcff 0%, #eff6ff 100%);
 }
 
+.relay-handoff-entry__author {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+
+.relay-handoff-entry__time {
+  margin: 0.5rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.relay-handoff-read {
+  margin-top: 0.625rem;
+}
+
+.relay-handoff-read__label {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.relay-handoff-read__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.relay-handoff-read__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.relay-handoff-read__check {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.relay-handoff-read__pending {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  flex-shrink: 0;
+}
+
+.relay-handoff-read__unread-name {
+  color: #94a3b8;
+}
+
+.relay-handoff-read__summary {
+  margin: 0.25rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
 .relay-handoff-entry__label {
   display: block;
   margin-bottom: 0.35rem;

@@ -43,6 +43,7 @@ export function WorkspaceIntegratedHeaderBridge({
       <WorkspaceIntegratedHeader
         eyebrow={ctx.eyebrow}
         greeting={greeting}
+        hideGreeting={ctx.hideGreeting}
         displayName={displayName}
         subtitle={ctx.subtitle}
         email={email}

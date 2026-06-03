@@ -44,6 +44,28 @@
   letter-spacing: -0.025em;
 }
 
+.yd-tracker-table-toolbar__meta {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.yd-tracker-table__date {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.yd-tracker-table__tasks-hint--table {
+  display: block;
+  margin-top: 0.25rem;
+  color: #64748b;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
 .yd-tracker-table-toolbar__filters {
   display: flex;
   align-items: center;

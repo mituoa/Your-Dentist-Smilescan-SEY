@@ -22,6 +22,8 @@ type NewTaskModalTriggerProps = {
   showIcon?: boolean;
   preset?: "task" | "reminder";
   icon?: LucideIcon;
+  /** Relay: schlankes Formular, erweiterte Felder unter „Weitere Optionen“. */
+  compactMode?: boolean;
 };
 
 export function NewTaskModalTrigger({
@@ -30,6 +32,7 @@ export function NewTaskModalTrigger({
   showIcon = true,
   preset = "task",
   icon: Icon = Plus,
+  compactMode = false,
 }: NewTaskModalTriggerProps) {
   const [open, setOpen] = useState(false);
   const isReminder = preset === "reminder";
@@ -60,11 +63,14 @@ export function NewTaskModalTrigger({
         open={open}
         onClose={() => setOpen(false)}
         initialRecurrenceType={isReminder ? "weekly" : "once"}
+        compactMode={compactMode}
         dialogTitle={isReminder ? "Erinnerung" : undefined}
         dialogHint={
           isReminder
             ? "Rückruf oder Kontrolle — Rhythmus und Termin nach Bedarf."
-            : undefined
+            : compactMode
+              ? "Kurz erfassen — für die tägliche Praxisorganisation."
+              : undefined
         }
       />
     </>
@@ -89,6 +95,7 @@ type NewTaskModalProps = {
   open: boolean;
   onClose: () => void;
   initialRecurrenceType?: string;
+  compactMode?: boolean;
   dialogTitle?: string;
   dialogHint?: string;
   initialDraft?: NewTaskInitialDraft | null;
@@ -98,6 +105,7 @@ export function NewTaskModal({
   open,
   onClose,
   initialRecurrenceType = "once",
+  compactMode = false,
   dialogTitle = "Neue Aufgabe",
   dialogHint = "Kurz erfassen — Details können Sie später im Aufgabendetail ergänzen.",
   initialDraft = null,
@@ -115,6 +123,7 @@ export function NewTaskModal({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState(initialRecurrenceType);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -125,6 +134,7 @@ export function NewTaskModal({
     setAssignMode("self");
     setSelectedIds([]);
     setMemberPickerOpen(false);
+    setShowAdvanced(false);
 
     if (initialDraft && panelRef.current) {
       const form = panelRef.current.querySelector("form");
@@ -300,19 +310,23 @@ export function NewTaskModal({
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="nt-due" className={labelCls()}>
-                  Fällig am <span className="font-normal text-[#94A3B8]">(optional)</span>
+                  Fällig {compactMode ? null : <span className="font-normal text-[#94A3B8]">(optional)</span>}
                 </label>
                 <input id="nt-due" name="due_date" type="date" className={fieldCls()} />
               </div>
               <div>
                 <span className={labelCls()}>Priorität</span>
                 <div className="flex flex-wrap gap-3 pt-0.5">
-                  {(
-                    [
-                      { v: "low", l: "Niedrig" },
-                      { v: "medium", l: "Mittel" },
-                      { v: "high", l: "Hoch" },
-                    ] as const
+                  {(compactMode
+                    ? ([
+                        { v: "medium", l: "Normal" },
+                        { v: "high", l: "Wichtig" },
+                      ] as const)
+                    : ([
+                        { v: "low", l: "Niedrig" },
+                        { v: "medium", l: "Mittel" },
+                        { v: "high", l: "Hoch" },
+                      ] as const)
                   ).map(({ v, l }) => (
                     <label
                       key={v}
@@ -332,117 +346,194 @@ export function NewTaskModal({
               </div>
             </div>
 
-            <div>
-              <span className={labelCls()}>Zugewiesen an</span>
-              <div className="space-y-2 rounded-lg border border-[rgba(15,23,42,0.06)] bg-white p-3">
-                <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-[#334155]">
-                  <input
-                    type="radio"
-                    name="assign_mode_ui"
-                    value="self"
-                    checked={assignMode === "self"}
-                    onChange={() => {
+            {compactMode ? (
+              <div>
+                <label htmlFor="nt-assignee" className={labelCls()}>
+                  Zuständig
+                </label>
+                <select
+                  id="nt-assignee"
+                  className={fieldCls()}
+                  value={
+                    assignMode === "all"
+                      ? "__all__"
+                      : assignMode === "self"
+                        ? "__self__"
+                        : selectedIds[0] ?? ""
+                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "__self__") {
                       setAssignMode("self");
                       setSelectedIds([]);
-                    }}
-                    className="h-4 w-4"
-                  />
-                  Sich selbst zuweisen
-                </label>
-                <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-[#334155]">
-                  <input
-                    type="radio"
-                    name="assign_mode_ui"
-                    value="all"
-                    checked={assignMode === "all"}
-                    onChange={() => {
+                    } else if (v === "__all__") {
                       setAssignMode("all");
                       setSelectedIds([]);
-                    }}
-                    className="h-4 w-4"
-                  />
-                  An alle Mitarbeitenden
-                </label>
-                <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-[#334155]">
-                  <input
-                    type="radio"
-                    name="assign_mode_ui"
-                    value="specific"
-                    checked={assignMode === "specific"}
-                    onChange={() => setAssignMode("specific")}
-                    className="h-4 w-4"
-                  />
-                  Bestimmte Personen
-                </label>
-                {assignMode === "specific" ? (
-                  <div className="mt-2 border-t border-[rgba(15,23,42,0.05)] pt-3">
-                    <button
-                      type="button"
-                      onClick={() => setMemberPickerOpen((o) => !o)}
-                      className="flex w-full items-center justify-between rounded-lg border border-[rgba(15,23,42,0.08)] bg-[#F8FAFC] px-3 py-2 text-left text-[13px] text-[#475569]"
-                    >
-                      <span className="truncate">
-                        {selectedIds.length === 0
-                          ? "Personen wählen …"
-                          : `${selectedIds.length} ausgewählt`}
-                      </span>
-                      <span className="text-[#94A3B8]">{memberPickerOpen ? "▴" : "▾"}</span>
-                    </button>
-                    {memberPickerOpen ? (
-                      <ul
-                        className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-lg border border-[rgba(15,23,42,0.06)] bg-white p-2"
-                        role="listbox"
-                        aria-label="Teammitglieder"
+                    } else {
+                      setAssignMode("specific");
+                      setSelectedIds(v ? [v] : []);
+                    }
+                  }}
+                >
+                  <option value="__self__">Sich selbst</option>
+                  <option value="__all__">Gesamtes Team</option>
+                  {members.map((m) => (
+                    <option key={m.user_id} value={m.user_id}>
+                      {m.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <span className={labelCls()}>Zugewiesen an</span>
+                <div className="space-y-2 rounded-lg border border-[rgba(15,23,42,0.06)] bg-white p-3">
+                  <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-[#334155]">
+                    <input
+                      type="radio"
+                      name="assign_mode_ui"
+                      value="self"
+                      checked={assignMode === "self"}
+                      onChange={() => {
+                        setAssignMode("self");
+                        setSelectedIds([]);
+                      }}
+                      className="h-4 w-4"
+                    />
+                    Sich selbst zuweisen
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-[#334155]">
+                    <input
+                      type="radio"
+                      name="assign_mode_ui"
+                      value="all"
+                      checked={assignMode === "all"}
+                      onChange={() => {
+                        setAssignMode("all");
+                        setSelectedIds([]);
+                      }}
+                      className="h-4 w-4"
+                    />
+                    An alle Mitarbeitenden
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-[#334155]">
+                    <input
+                      type="radio"
+                      name="assign_mode_ui"
+                      value="specific"
+                      checked={assignMode === "specific"}
+                      onChange={() => setAssignMode("specific")}
+                      className="h-4 w-4"
+                    />
+                    Bestimmte Personen
+                  </label>
+                  {assignMode === "specific" ? (
+                    <div className="mt-2 border-t border-[rgba(15,23,42,0.05)] pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setMemberPickerOpen((o) => !o)}
+                        className="flex w-full items-center justify-between rounded-lg border border-[rgba(15,23,42,0.08)] bg-[#F8FAFC] px-3 py-2 text-left text-[13px] text-[#475569]"
                       >
-                        {members.length === 0 ? (
-                          <li className="px-2 py-2 text-[12px] text-[#94A3B8]">
-                            {membersError ?? "Keine Mitarbeitenden geladen."}
-                          </li>
-                        ) : (
-                          members.map((m) => {
-                            const checked = selectedIds.includes(m.user_id);
-                            return (
-                              <li key={m.user_id}>
-                                <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-[#F8FAFC]">
-                                  <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    onChange={() => toggleMember(m.user_id)}
-                                    className="h-4 w-4 rounded border-[rgba(15,23,42,0.15)]"
-                                  />
-                                  <span className="min-w-0 truncate">{m.email}</span>
-                                </label>
-                              </li>
-                            );
-                          })
-                        )}
-                      </ul>
-                    ) : null}
+                        <span className="truncate">
+                          {selectedIds.length === 0
+                            ? "Personen wählen …"
+                            : `${selectedIds.length} ausgewählt`}
+                        </span>
+                        <span className="text-[#94A3B8]">{memberPickerOpen ? "▴" : "▾"}</span>
+                      </button>
+                      {memberPickerOpen ? (
+                        <ul
+                          className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-lg border border-[rgba(15,23,42,0.06)] bg-white p-2"
+                          role="listbox"
+                          aria-label="Teammitglieder"
+                        >
+                          {members.length === 0 ? (
+                            <li className="px-2 py-2 text-[12px] text-[#94A3B8]">
+                              {membersError ?? "Keine Mitarbeitenden geladen."}
+                            </li>
+                          ) : (
+                            members.map((m) => {
+                              const checked = selectedIds.includes(m.user_id);
+                              return (
+                                <li key={m.user_id}>
+                                  <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-[#F8FAFC]">
+                                    <input
+                                      type="checkbox"
+                                      checked={checked}
+                                      onChange={() => toggleMember(m.user_id)}
+                                      className="h-4 w-4 rounded border-[rgba(15,23,42,0.15)]"
+                                    />
+                                    <span className="min-w-0 truncate">{m.email}</span>
+                                  </label>
+                                </li>
+                              );
+                            })
+                          )}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {compactMode ? (
+              <div>
+                <button
+                  type="button"
+                  className="text-[13px] font-medium text-[#2563EB] hover:underline"
+                  onClick={() => setShowAdvanced((v) => !v)}
+                  aria-expanded={showAdvanced}
+                >
+                  {showAdvanced ? "Weniger Optionen" : "Weitere Optionen"}
+                </button>
+                {showAdvanced ? (
+                  <div className="mt-4 space-y-4 border-t border-[rgba(15,23,42,0.06)] pt-4">
+                    <TaskRoutineFields
+                      disabled={isPending}
+                      recurrenceValue={recurrenceType}
+                      onRecurrenceChange={setRecurrenceType}
+                      showCustomInterval
+                    />
+                    <div>
+                      <label htmlFor="nt-tags" className={labelCls()}>
+                        Tags <span className="font-normal text-[#94A3B8]">(optional)</span>
+                      </label>
+                      <input
+                        id="nt-tags"
+                        name="tags"
+                        type="text"
+                        className={fieldCls()}
+                        placeholder="z. B. Labor, Rückfrage"
+                        autoComplete="off"
+                      />
+                    </div>
                   </div>
                 ) : null}
               </div>
-            </div>
-
-            <TaskRoutineFields
-              disabled={isPending}
-              recurrenceValue={recurrenceType}
-              onRecurrenceChange={setRecurrenceType}
-              showCustomInterval
-            />
-
-            <div>
-              <label htmlFor="nt-tags" className={labelCls()}>
-                Tags <span className="font-normal text-[#94A3B8]">(optional, durch Komma getrennt)</span>
-              </label>
-              <input
-                id="nt-tags"
-                name="tags"
-                type="text"
-                className={fieldCls()}
-                placeholder="z. B. Labor, Rückfrage"
-                autoComplete="off"
-              />
-            </div>
+            ) : (
+              <>
+                <TaskRoutineFields
+                  disabled={isPending}
+                  recurrenceValue={recurrenceType}
+                  onRecurrenceChange={setRecurrenceType}
+                  showCustomInterval
+                />
+                <div>
+                  <label htmlFor="nt-tags" className={labelCls()}>
+                    Tags <span className="font-normal text-[#94A3B8]">(optional, durch Komma getrennt)</span>
+                  </label>
+                  <input
+                    id="nt-tags"
+                    name="tags"
+                    type="text"
+                    className={fieldCls()}
+                    placeholder="z. B. Labor, Rückfrage"
+                    autoComplete="off"
+                  />
+                </div>
+              </>
+            )}
 
             {error ? (
               <p className="text-sm leading-snug text-danger" role="alert">

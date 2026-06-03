@@ -77,10 +77,17 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
+.yd-relay-v4 {
+  min-width: 0;
+}
+
+.yd-relay-toolbar {
+  min-width: 0;
+}
+
 .yd-relay-secondary-grid {
   display: grid;
   gap: 0.75rem;
-  margin-top: 1.25rem;
 }
 
 @media (min-width: 900px) {

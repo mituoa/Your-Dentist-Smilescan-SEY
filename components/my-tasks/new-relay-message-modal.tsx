@@ -7,15 +7,19 @@ import { useRouter } from "next/navigation";
 
 import { sendRelayMessageToRecipient } from "@/app/(protected)/my-tasks/messages-actions";
 import type { AssignableMember } from "@/lib/queries/team-members";
-import { cn } from "@/lib/utils";
-
 type AssignMode = "person" | "all";
 
 type NewRelayMessageModalTriggerProps = {
   className?: string;
+  assignableMembers?: AssignableMember[];
+  currentUserId?: string;
 };
 
-export function NewRelayMessageModalTrigger({ className }: NewRelayMessageModalTriggerProps) {
+export function NewRelayMessageModalTrigger({
+  className,
+  assignableMembers,
+  currentUserId,
+}: NewRelayMessageModalTriggerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,9 +33,14 @@ export function NewRelayMessageModalTrigger({ className }: NewRelayMessageModalT
         }
       >
         <MessageSquarePlus className="h-4 w-4 shrink-0 text-[#2F80ED]" strokeWidth={2} />
-        <span>Neue Nachricht</span>
+        <span>Neue Übergabe</span>
       </button>
-      <NewRelayMessageModal open={open} onClose={() => setOpen(false)} />
+      <NewRelayMessageModal
+        open={open}
+        onClose={() => setOpen(false)}
+        assignableMembers={assignableMembers}
+        currentUserId={currentUserId}
+      />
     </>
   );
 }
@@ -115,11 +124,8 @@ export function NewRelayMessageModal({
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 id={titleId} className="text-[17px] font-semibold text-[#0F172A]">
-              Neue Nachricht
+              Neue Übergabe
             </h2>
-            <p className="mt-1 text-[13px] text-[#64748B]">
-              Interne Übergabe — nur für Ihr Praxisteam.
-            </p>
           </div>
           <button
             type="button"
@@ -131,51 +137,35 @@ export function NewRelayMessageModal({
           </button>
         </div>
 
-        <label className="mb-1.5 block text-[12px] font-medium text-[#64748B]">Empfänger</label>
-        <div className="mb-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={cn(
-              "rounded-lg border px-3 py-2 text-[13px] font-medium",
-              assignMode === "person"
-                ? "border-[rgba(43,111,232,0.3)] bg-[#EEF6FF] text-[#1D4ED8]"
-                : "border-[rgba(15,23,42,0.08)] text-[#475569]"
-            )}
-            onClick={() => setAssignMode("person")}
-          >
-            Person
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "rounded-lg border px-3 py-2 text-[13px] font-medium",
-              assignMode === "all"
-                ? "border-[rgba(43,111,232,0.3)] bg-[#EEF6FF] text-[#1D4ED8]"
-                : "border-[rgba(15,23,42,0.08)] text-[#475569]"
-            )}
-            onClick={() => setAssignMode("all")}
-          >
-            Gesamtes Team
-          </button>
-        </div>
-
-        {assignMode === "person" ? (
-          <select
-            value={recipientId}
-            onChange={(e) => setRecipientId(e.target.value)}
-            disabled={isPending}
-            className="mb-4 w-full rounded-lg border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 text-[14px] text-[#0F172A]"
-          >
-            <option value="">Person wählen …</option>
-            {members
-              .filter((m) => m.user_id !== currentUserId)
-              .map((m) => (
-                <option key={m.user_id} value={m.user_id}>
-                  {m.email || "Teammitglied"}
-                </option>
-              ))}
-          </select>
-        ) : null}
+        <label htmlFor="relay-recipient" className="mb-1.5 block text-[12px] font-medium text-[#64748B]">
+          Empfänger
+        </label>
+        <select
+          id="relay-recipient"
+          value={assignMode === "all" ? "__all__" : recipientId}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === "__all__") {
+              setAssignMode("all");
+              setRecipientId("");
+            } else {
+              setAssignMode("person");
+              setRecipientId(v);
+            }
+          }}
+          disabled={isPending}
+          className="mb-4 w-full rounded-lg border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 text-[14px] text-[#0F172A]"
+        >
+          <option value="">Empfänger wählen …</option>
+          <option value="__all__">Gesamtes Team</option>
+          {members
+            .filter((m) => m.user_id !== currentUserId)
+            .map((m) => (
+              <option key={m.user_id} value={m.user_id}>
+                {m.email || "Teammitglied"}
+              </option>
+            ))}
+        </select>
 
         <label className="mb-1.5 block text-[12px] font-medium text-[#64748B]">Nachricht</label>
         <textarea
@@ -208,7 +198,7 @@ export function NewRelayMessageModal({
             onClick={submit}
             className="min-h-[2.75rem] rounded-xl bg-[#2563EB] px-4 text-[14px] font-semibold text-white disabled:opacity-50"
           >
-            {isPending ? "Wird gesendet …" : "Nachricht senden"}
+            {isPending ? "Wird gesendet …" : "Senden"}
           </button>
         </div>
       </div>

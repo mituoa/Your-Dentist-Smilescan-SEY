@@ -4,6 +4,8 @@ export type WorkspaceIntegratedHeaderContext = {
   eyebrow: string;
   subtitle: string;
   showSearch: boolean;
+  /** Keine Begrüßung mit Namen (z. B. Relay — ruhiger Kopf). */
+  hideGreeting?: boolean;
   /** Desktop: integrierte Headline ausblenden (eigene Mobile-UI). */
   hideOnDesktop?: boolean;
 };
@@ -28,8 +30,9 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname === "/relay" || pathname.startsWith("/relay/")) {
     return {
       eyebrow: "Relay",
-      subtitle: "Aufgaben, Übergaben und Teamkoordination",
+      subtitle: "Interne Praxisorganisation",
       showSearch: false,
+      hideGreeting: true,
     };
   }
   if (pathname === "/my-tasks" || pathname.startsWith("/my-tasks/")) {

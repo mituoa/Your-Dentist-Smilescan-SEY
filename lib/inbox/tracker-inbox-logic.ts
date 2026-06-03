@@ -33,18 +33,13 @@ export type TrackerFilterChip = {
   label: string;
 };
 
+/** Praxis-Inbox — alle Filter als Chips (Count 0 bleibt sichtbar). */
 export const TRACKER_FILTER_CHIPS: TrackerFilterChip[] = [
   { id: "all", label: "Alle" },
-  { id: "new_submissions", label: "Neu" },
-  { id: "approval_pending", label: "Freigabe" },
-  { id: "draft_prepared", label: "In Bearbeitung" },
-  { id: "completed", label: "Abgeschlossen" },
-];
-
-/** Erweiterte Filter — nur in der Auswahl, nicht als Chip-Leiste. */
-export const TRACKER_FILTER_EXTENDED: TrackerFilterChip[] = [
+  { id: "new_submissions", label: "Neue Einsendungen" },
+  { id: "draft_prepared", label: "Antwort vorbereitet" },
+  { id: "approval_pending", label: "Freigabe ausstehend" },
   { id: "open_tasks", label: "Offene Aufgaben" },
-  { id: "photo_trail", label: "Fotoverlauf" },
   { id: "follow_up", label: "Nachsorge" },
   { id: "practice_cases", label: "Praxisfälle" },
 ];
@@ -90,7 +85,7 @@ export function matchesTrackerFilter(
     case "new_submissions":
       return !item.seen_at && !item.is_draft && item.intake_channel === "patient_upload";
     case "draft_prepared":
-      return item.message_draft_status === "draft" || item.message_draft_status === "approved";
+      return item.message_draft_status === "draft";
     case "approval_pending":
       return isApprovalPending(item);
     case "open_tasks":
@@ -170,6 +165,7 @@ function isArchivedCompleted(item: EnrichedSubmissionListItem): boolean {
   return item.message_draft_status === "sent" && Boolean(item.seen_at);
 }
 
+/** Tagesliste: Handlungsbedarf oben, ältere bearbeitete Fälle unten. */
 function priorityTier(item: EnrichedSubmissionListItem): number {
   if (!item.seen_at && !item.is_draft && item.intake_channel === "patient_upload") {
     return 1;
@@ -178,7 +174,12 @@ function priorityTier(item: EnrichedSubmissionListItem): number {
   if (item.open_task_count > 0) return 3;
   if (item.urgency === "today") return 4;
   if (item.urgency === "this_week") return 5;
-  if (hasPhotoTrail(item)) return 6;
+  if (
+    hasPhotoTrail(item) ||
+    (item.intake_channel === "patient_upload" && Boolean(item.seen_at))
+  ) {
+    return 6;
+  }
   return 7;
 }
 
@@ -298,6 +299,27 @@ export function photoTrailSummary(item: EnrichedSubmissionListItem): string | nu
   }
 
   return doc.photoCount === 1 ? "1 Foto" : `${doc.photoCount} Fotos`;
+}
+
+/** Relatives Datum für die Listen-Spalte (Eingang). */
+export function formatTrackerListDate(iso: string): string {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return "—";
+  const now = new Date();
+  const todayKey = now.toISOString().slice(0, 10);
+  const key = iso.slice(0, 10);
+  if (key === todayKey) return "Heute";
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (key === yesterday.toISOString().slice(0, 10)) return "Gestern";
+  const diffDays = Math.floor((now.getTime() - then.getTime()) / 86400000);
+  if (diffDays < 7) return `Vor ${diffDays} Tagen`;
+  return then.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
+}
+
+export function openTasksHintLabel(count: number): string | null {
+  if (count <= 0) return null;
+  return count === 1 ? "1 Aufgabe offen" : `${count} Aufgaben offen`;
 }
 
 export function intakeChannelLabel(channel: IntakeChannel): string {

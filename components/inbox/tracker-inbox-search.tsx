@@ -38,7 +38,7 @@ export function TrackerInboxSearch() {
         type="search"
         value={value}
         onChange={handleChange}
-        placeholder="Patient suchen…"
+        placeholder="Patient oder Anliegen suchen…"
         className="yd-tracker-search__input"
         aria-label="Patientenfälle durchsuchen"
       />
