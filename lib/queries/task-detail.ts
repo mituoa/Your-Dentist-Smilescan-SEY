@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { summarizeTaskReceipts, type TaskDeliveryAggregate } from "@/lib/tasks/receipts";
+import { parseRecurrenceType, type TaskRecurrenceType } from "@/lib/tasks/recurrence";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
 
 export interface TaskDetail {
@@ -28,6 +29,9 @@ export interface TaskDetail {
   reviewed_by_email: string | null;
   rejection_reason: string | null;
   done_at: string | null;
+  done_by: string | null;
+  done_by_email: string | null;
+  recurrence_type: TaskRecurrenceType;
   due_date: string | null;
   delivery_status: TaskDeliveryAggregate;
   receipt_summary: {
@@ -69,7 +73,7 @@ export async function getTaskWithComments(
       id, title, content, description, status, priority, recipient_type, specific_recipient_id,
       submission_id, created_at, created_by,
       submitted_for_review_at, submitted_by_user_id,
-      reviewed_at, reviewed_by_user_id, rejection_reason, done_at, due_date,
+      reviewed_at, reviewed_by_user_id, rejection_reason, done_at, done_by, recurrence_type, due_date,
       submissions(patient_name, workspace_id),
       task_assignees(user_id),
       task_delivery_receipts(sent_at, delivered_at, read_at)
@@ -125,6 +129,7 @@ export async function getTaskWithComments(
         taskRow.submitted_by_user_id,
         taskRow.reviewed_by_user_id,
         taskRow.specific_recipient_id,
+        taskRow.done_by,
         ...assigneeUserIds,
       ].filter(Boolean) as string[]
     )
@@ -183,6 +188,11 @@ export async function getTaskWithComments(
       : null,
     rejection_reason: taskRow.rejection_reason,
     done_at: taskRow.done_at,
+    done_by: (taskRow.done_by as string | null) ?? null,
+    done_by_email: taskRow.done_by
+      ? emailMap[taskRow.done_by as string] || null
+      : null,
+    recurrence_type: parseRecurrenceType(taskRow.recurrence_type as string | undefined),
     due_date: taskRow.due_date,
     delivery_status: receiptSummary.aggregate,
     receipt_summary: {

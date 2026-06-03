@@ -2,6 +2,8 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import { attachInboxListEnrichment } from "@/lib/inbox/attach-inbox-list-enrichment";
+import type { PhotoDocumentationHint } from "@/lib/inbox/tracker-inbox-logic";
 import { attachMessageDraftStatusToRows } from "@/lib/queries/message-drafts";
 import {
   normalizeIntakeChannel,
@@ -37,6 +39,10 @@ export interface SubmissionListItem {
   message_draft_status: MessageDraftListStatus;
   /** Eingangskanal — `unknown` wenn Spalte in DB noch fehlt. */
   intake_channel: IntakeChannel;
+  /** Offene Relay-Aufgaben zu diesem Fall. */
+  open_task_count: number;
+  /** Foto-Dokumentation innerhalb des Falls / per Patienten-ID. */
+  photo_documentation: PhotoDocumentationHint | null;
 }
 
 export type InboxSubmissionsResult =
@@ -100,7 +106,16 @@ function mapInboxRow(
     intake_channel: defaultsForMissingIntakeChannel
       ? "unknown"
       : normalizeIntakeChannel(s.intake_channel),
+    open_task_count: 0,
+    photo_documentation: null,
   };
+}
+
+async function enrichInboxListItems(
+  workspaceId: string,
+  items: SubmissionListItem[]
+): Promise<SubmissionListItem[]> {
+  return attachInboxListEnrichment(workspaceId, items);
 }
 
 type FetchRowsResult =
@@ -182,7 +197,8 @@ async function getInboxSubmissionsInner(
 
   if (first.ok) {
     const withDrafts = await attachMessageDraftStatusToRows(workspaceId, first.items);
-    return { ok: true, items: withDrafts };
+    const enriched = await enrichInboxListItems(workspaceId, withDrafts);
+    return { ok: true, items: enriched };
   }
 
   if (isLikelyMissingDbColumnError(first.err)) {
@@ -213,7 +229,8 @@ async function getInboxSubmissionsInner(
           workspaceId,
           intakeRetry.items
         );
-        return { ok: true, items: withDrafts };
+        const enriched = await enrichInboxListItems(workspaceId, withDrafts);
+        return { ok: true, items: enriched };
       }
     }
 
@@ -229,7 +246,8 @@ async function getInboxSubmissionsInner(
     );
     if (second.ok) {
       const withDrafts = await attachMessageDraftStatusToRows(workspaceId, second.items);
-      return { ok: true, items: withDrafts };
+      const enriched = await enrichInboxListItems(workspaceId, withDrafts);
+      return { ok: true, items: enriched };
     }
     logInboxQueryFailure("getInboxSubmissions fallback failed", second.err);
     return { ok: false };

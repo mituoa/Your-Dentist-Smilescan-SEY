@@ -222,6 +222,64 @@ export async function sendRelayMessage(
   return { ok: true };
 }
 
+/** Neue interne Nachricht: Direktgespräch starten oder fortsetzen und erste Nachricht senden. */
+export async function sendRelayMessageToRecipient(input: {
+  recipientUserId?: string;
+  assignAllTeam?: boolean;
+  body: string;
+  submissionId?: string | null;
+}): Promise<{ ok?: boolean; conversationId?: string; error?: string }> {
+  const actor = await resolveActor();
+  if (!actor.ok) return { error: actor.error };
+  const trimmed = input.body.trim();
+  if (!trimmed) return { error: "Bitte schreiben Sie eine Nachricht." };
+
+  const { supabase, user, workspace } = actor;
+
+  if (input.assignAllTeam) {
+    const { data: members } = await supabase
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspace.workspace_id);
+
+    const memberIds = (members || [])
+      .map((m) => m.user_id as string)
+      .filter((id) => id !== user.id);
+    if (memberIds.length === 0) {
+      return { error: "Keine weiteren Teammitglieder gefunden." };
+    }
+
+    const fd = new FormData();
+    fd.set("title", "Team");
+    for (const id of memberIds) {
+      fd.append("member_ids[]", id);
+    }
+    if (input.submissionId) fd.set("submission_id", input.submissionId);
+
+    const group = await createGroupConversation(fd);
+    if (group.error || !group.conversationId) {
+      return { error: group.error ?? "Nachricht konnte nicht gesendet werden." };
+    }
+    const sent = await sendRelayMessage(group.conversationId, trimmed);
+    if (sent.error) return { error: sent.error };
+    return { ok: true, conversationId: group.conversationId };
+  }
+
+  const recipientId = input.recipientUserId?.trim();
+  if (!recipientId) {
+    return { error: "Bitte wählen Sie einen Empfänger." };
+  }
+
+  const direct = await createDirectConversation(recipientId);
+  if (direct.error || !direct.conversationId) {
+    return { error: direct.error ?? "Nachricht konnte nicht gesendet werden." };
+  }
+
+  const sent = await sendRelayMessage(direct.conversationId, trimmed);
+  if (sent.error) return { error: sent.error };
+  return { ok: true, conversationId: direct.conversationId };
+}
+
 export async function markRelayConversationRead(conversationId: string): Promise<void> {
   const actor = await resolveActor();
   if (!actor.ok) return;

@@ -28,6 +28,8 @@ import {
   reorderTasksInColumn,
 } from "@/app/(protected)/my-tasks/actions";
 import type { MyTask } from "@/lib/queries/my-tasks";
+import { formatTaskCompletionLine } from "@/lib/tasks/format-task-completion";
+import { recurrenceBadgeLabel } from "@/lib/tasks/recurrence";
 import { clinicalCorePanel } from "@/lib/pilot-surface";
 import {
   canMoveTask,
@@ -360,6 +362,14 @@ function TaskMiniCard({
         : null;
 
   const isMine = task.assignee_ids.includes(currentUserId) || task.specific_recipient_id === currentUserId;
+  const completionLine =
+    doneColumn && task.done_at
+      ? formatTaskCompletionLine({
+          doneAt: task.done_at,
+          doneByEmail: task.done_by_email,
+        })
+      : null;
+  const routineLabel = recurrenceBadgeLabel(task.recurrence_type);
 
   return (
     <div
@@ -390,13 +400,21 @@ function TaskMiniCard({
             <div className="flex items-start justify-between gap-2">
               <h3
                 className={`line-clamp-2 text-[14px] font-medium leading-snug ${
-                  doneColumn ? "text-[#94A3B8] line-through decoration-[#94A3B8]" : "text-[#1E293B]"
+                  doneColumn ? "text-[#64748B]" : "text-[#1E293B]"
                 }`}
               >
                 {task.title}
               </h3>
               <ReceiptMark task={task} />
             </div>
+            {completionLine ? (
+              <p className="mt-1 text-[11px] font-medium text-[#64748B]">{completionLine}</p>
+            ) : null}
+            {routineLabel && !doneColumn ? (
+              <span className="mt-1 inline-flex rounded-full border border-[rgba(43,111,232,0.12)] bg-[#EEF6FF] px-2 py-0.5 text-[10px] font-semibold text-[#1D4ED8]">
+                {routineLabel}
+              </span>
+            ) : null}
             {contextLine ? (
               <p className={`mt-1 text-[12px] ${doneColumn ? "text-[#CBD5E1]" : "text-[#94A3B8]"}`}>{contextLine}</p>
             ) : null}

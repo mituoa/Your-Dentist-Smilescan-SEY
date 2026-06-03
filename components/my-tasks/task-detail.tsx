@@ -2,6 +2,8 @@ import { ArrowLeft, Calendar, Clock, FileText, User } from "lucide-react";
 import Link from "next/link";
 
 import type { TaskComment, TaskDetail } from "@/lib/queries/task-detail";
+import { formatTaskCompletionLine } from "@/lib/tasks/format-task-completion";
+import { recurrenceBadgeLabel } from "@/lib/tasks/recurrence";
 import { clinicalCorePanel, clinicalDividerBorder } from "@/lib/pilot-surface";
 import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/clinical-ui";
 
@@ -103,6 +105,23 @@ export function TaskDetailView({
               {task.description}
             </p>
           )}
+
+          {task.status === "done" ? (
+            <p className="mb-4 text-[13px] font-medium text-[#475569]">
+              {formatTaskCompletionLine({
+                doneAt: task.done_at,
+                doneByEmail: task.done_by_email,
+              }) ?? "Erledigt"}
+            </p>
+          ) : null}
+
+          {recurrenceBadgeLabel(task.recurrence_type) ? (
+            <p className="mb-4">
+              <span className="inline-flex rounded-full border border-[rgba(43,111,232,0.14)] bg-[#EEF6FF] px-2.5 py-0.5 text-[11px] font-semibold text-[#1D4ED8]">
+                {recurrenceBadgeLabel(task.recurrence_type)}
+              </span>
+            </p>
+          ) : null}
 
           <div
             className={`grid min-w-0 grid-cols-1 gap-2 break-words border-t pt-4 text-sm leading-5 text-[#64748B] sm:grid-cols-2 xl:grid-cols-3 ${clinicalDividerBorder}`}

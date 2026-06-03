@@ -1,0 +1,279 @@
+import { isSubmissionReadyForReview } from "@/lib/message-drafts/list-status";
+import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import type { IntakeChannel } from "@/lib/submissions/intake-channel";
+import type { SubmissionListItem } from "@/lib/queries/inbox";
+
+export type PhotoDocumentationHint = {
+  kind: "single" | "timeline" | "linked";
+  photoCount: number;
+  dayCount: number;
+  dayLabels: string[];
+  /** Nur bei `patient_external_id` — mehrere Fälle, kein Namens-Matching. */
+  linkedSubmissionCount: number;
+};
+
+export type EnrichedSubmissionListItem = SubmissionListItem & {
+  open_task_count: number;
+  photo_documentation: PhotoDocumentationHint | null;
+};
+
+export type TrackerInboxFilter =
+  | "all"
+  | "new_submissions"
+  | "draft_prepared"
+  | "approval_pending"
+  | "open_tasks"
+  | "photo_trail"
+  | "follow_up"
+  | "practice_cases";
+
+export type TrackerFilterChip = {
+  id: TrackerInboxFilter;
+  label: string;
+};
+
+export const TRACKER_FILTER_CHIPS: TrackerFilterChip[] = [
+  { id: "all", label: "Alle" },
+  { id: "new_submissions", label: "Neue Einsendungen" },
+  { id: "draft_prepared", label: "Antwort vorbereitet" },
+  { id: "approval_pending", label: "Freigabe ausstehend" },
+  { id: "open_tasks", label: "Offene Aufgaben" },
+  { id: "photo_trail", label: "Fotoverlauf" },
+  { id: "follow_up", label: "Nachsorge" },
+  { id: "practice_cases", label: "Praxisfälle" },
+];
+
+export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
+  all: "Keine Fälle in der Praxis-Inbox.",
+  new_submissions: "Keine neuen Patienteneingänge.",
+  draft_prepared: "Keine vorbereiteten Antworten offen.",
+  approval_pending: "Keine Antworten warten auf Freigabe.",
+  open_tasks: "Keine offenen Aufgaben zu Fällen.",
+  photo_trail: "Keine aktiven Fotoverläufe.",
+  follow_up: "Keine aktiven Nachsorge-Einsendungen.",
+  practice_cases: "Keine manuell angelegten Praxisfälle.",
+};
+
+export function isApprovalPending(item: EnrichedSubmissionListItem): boolean {
+  return (
+    item.message_draft_status === "draft" && isSubmissionReadyForReview(item)
+  );
+}
+
+export function hasPhotoTrail(item: EnrichedSubmissionListItem): boolean {
+  if (item.photo_documentation?.kind === "timeline") return true;
+  if (item.photo_documentation?.kind === "linked") return true;
+  if (
+    item.photo_documentation &&
+    item.photo_documentation.photoCount >= 2 &&
+    item.photo_documentation.dayCount >= 2
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function matchesTrackerFilter(
+  item: EnrichedSubmissionListItem,
+  filter: TrackerInboxFilter
+): boolean {
+  switch (filter) {
+    case "all":
+      return true;
+    case "new_submissions":
+      return !item.seen_at && !item.is_draft && item.intake_channel === "patient_upload";
+    case "draft_prepared":
+      return item.message_draft_status === "draft" || item.message_draft_status === "approved";
+    case "approval_pending":
+      return isApprovalPending(item);
+    case "open_tasks":
+      return item.open_task_count > 0;
+    case "photo_trail":
+      return hasPhotoTrail(item);
+    case "follow_up":
+      return (
+        item.intake_channel === "follow_up" ||
+        (item.photo_documentation?.linkedSubmissionCount ?? 0) > 1
+      );
+    case "practice_cases":
+      return item.intake_channel === "practice_manual";
+    default:
+      return true;
+  }
+}
+
+export function countByTrackerFilter(
+  items: EnrichedSubmissionListItem[],
+  filter: TrackerInboxFilter
+): number {
+  if (filter === "all") return items.length;
+  return items.filter((item) => matchesTrackerFilter(item, filter)).length;
+}
+
+/** Clientseitige Suche (gleiche Felder wie Tracker-Liste). */
+export function matchesTrackerSearch(
+  item: EnrichedSubmissionListItem,
+  qLower: string
+): boolean {
+  if (!qLower) return true;
+  const haystack = [
+    item.patient_name,
+    item.patient_email,
+    item.patient_notes,
+    item.patient_external_id,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(qLower);
+}
+
+/** Abgeschlossene, gesehene Fälle — innerhalb einer Stufe nach unten sortieren. */
+function isArchivedCompleted(item: EnrichedSubmissionListItem): boolean {
+  return item.message_draft_status === "sent" && Boolean(item.seen_at);
+}
+
+function priorityTier(item: EnrichedSubmissionListItem): number {
+  if (!item.seen_at && !item.is_draft && item.intake_channel === "patient_upload") {
+    return 1;
+  }
+  if (isApprovalPending(item)) return 2;
+  if (item.open_task_count > 0) return 3;
+  if (item.urgency === "today") return 4;
+  if (item.urgency === "this_week") return 5;
+  if (hasPhotoTrail(item)) return 6;
+  return 7;
+}
+
+/** Handlungsbedarf zuerst, innerhalb der Stufe neueste zuerst. */
+export function sortTrackerInboxItems(
+  items: EnrichedSubmissionListItem[]
+): EnrichedSubmissionListItem[] {
+  return [...items].sort((a, b) => {
+    const tierDiff = priorityTier(a) - priorityTier(b);
+    if (tierDiff !== 0) return tierDiff;
+    const archivedDiff = Number(isArchivedCompleted(a)) - Number(isArchivedCompleted(b));
+    if (archivedDiff !== 0) return archivedDiff;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
+
+export type TrackerAssistHint = {
+  id: string;
+  label: string;
+  variant: "blue" | "amber" | "slate" | "green";
+};
+
+const ASSIST_PRIORITY = {
+  approval: 1,
+  draft: 2,
+  tasks: 3,
+  photos: 4,
+} as const;
+
+export function buildTrackerAssistHints(
+  item: EnrichedSubmissionListItem
+): TrackerAssistHint[] {
+  const ranked: { priority: number; hint: TrackerAssistHint }[] = [];
+
+  if (isApprovalPending(item)) {
+    ranked.push({
+      priority: ASSIST_PRIORITY.approval,
+      hint: { id: "approval", label: "Freigabe ausstehend", variant: "amber" },
+    });
+  } else if (item.message_draft_status === "draft") {
+    ranked.push({
+      priority: ASSIST_PRIORITY.draft,
+      hint: { id: "draft", label: "Antwort vorbereitet", variant: "blue" },
+    });
+  }
+
+  if (item.open_task_count > 0) {
+    ranked.push({
+      priority: ASSIST_PRIORITY.tasks,
+      hint: {
+        id: "tasks",
+        label:
+          item.open_task_count === 1 ? "Aufgabe offen" : `${item.open_task_count} Aufgaben`,
+        variant: "slate",
+      },
+    });
+  }
+
+  if (hasPhotoTrail(item)) {
+    ranked.push({
+      priority: ASSIST_PRIORITY.photos,
+      hint: {
+        id: "photos",
+        label:
+          item.photo_documentation?.kind === "linked" ? "Fotoverlauf" : "Foto-Dokumentation",
+        variant: "slate",
+      },
+    });
+  }
+
+  return ranked
+    .sort((a, b) => a.priority - b.priority)
+    .slice(0, 2)
+    .map((entry) => entry.hint);
+}
+
+export type TrackerStatusDisplay = {
+  label: string;
+  className: string;
+};
+
+export function trackerStatusForRow(item: EnrichedSubmissionListItem): TrackerStatusDisplay {
+  if (item.is_draft) {
+    return { label: "Entwurf", className: "yd-tracker-table__status--draft" };
+  }
+  if (isApprovalPending(item)) {
+    return {
+      label: "Freigabe ausstehend",
+      className: "yd-tracker-table__status--pending",
+    };
+  }
+  if (!item.seen_at) {
+    return { label: "Neu", className: "yd-tracker-table__status--new" };
+  }
+  if (item.message_draft_status === "sent") {
+    return { label: "Abgeschlossen", className: "yd-tracker-table__status--done" };
+  }
+  if (item.urgency === "today") {
+    return { label: "Zeitnah", className: "yd-tracker-table__status--urgent" };
+  }
+  return { label: "In Bearbeitung", className: "yd-tracker-table__status--progress" };
+}
+
+export function photoTrailSummary(item: EnrichedSubmissionListItem): string | null {
+  const doc = item.photo_documentation;
+  if (!doc || doc.photoCount === 0) return null;
+
+  const dayPart =
+    doc.dayLabels.length > 0 ? doc.dayLabels.join(" · ") : `${doc.dayCount} Tage`;
+
+  const isMultiDayTrail =
+    doc.kind === "timeline" || (doc.photoCount >= 2 && doc.dayCount >= 2);
+  const isLinkedTrail = doc.kind === "linked" && doc.linkedSubmissionCount > 1;
+
+  if (isLinkedTrail || isMultiDayTrail) {
+    return `Fotoverlauf · ${doc.photoCount} Fotos · ${dayPart}`;
+  }
+
+  return doc.photoCount === 1 ? "1 Foto" : `${doc.photoCount} Fotos`;
+}
+
+export function intakeChannelLabel(channel: IntakeChannel): string {
+  switch (channel) {
+    case "patient_upload":
+      return "Patienteneingang";
+    case "practice_manual":
+      return "Praxisfall";
+    case "follow_up":
+      return "Nachsorge";
+    case "recall":
+      return "Recall";
+    default:
+      return "Eingang";
+  }
+}

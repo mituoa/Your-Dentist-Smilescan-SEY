@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { RelayReadReceiptRow } from "@/lib/relay/read-receipt-display";
 import { createClient } from "@/lib/supabase/server";
 
 export type RelayConversationKind = "direct" | "group";
@@ -26,6 +27,8 @@ export type RelayMessageRow = {
   created_at: string;
   is_own: boolean;
   read_by_others: boolean;
+  read_receipts: RelayReadReceiptRow[];
+  is_group_thread: boolean;
 };
 
 export async function getRelayConversationsForUser(
@@ -145,31 +148,67 @@ export async function getRelayMessages(
     .order("created_at", { ascending: true })
     .limit(200);
 
+  const { data: convMembers } = await supabase
+    .from("relay_conversation_members")
+    .select("user_id")
+    .eq("conversation_id", conversationId);
+
+  const memberIds = (convMembers || []).map((m) => m.user_id as string);
+  const isGroupThread = conv.kind === "group" || memberIds.length > 2;
+
   const admin = await import("@/lib/supabase/admin").then((m) => m.createAdminClient());
+
+  const emailByUserId: Record<string, string | null> = {};
+  for (const mid of memberIds) {
+    const { data: u } = await admin.auth.admin.getUserById(mid);
+    emailByUserId[mid] = u?.user?.email ?? null;
+  }
+
+  const messageIds = (msgs || []).map((m) => m.id as string);
+  const readsByMessage = new Map<string, Map<string, string>>();
+
+  if (messageIds.length > 0) {
+    const { data: reads } = await supabase
+      .from("relay_message_reads")
+      .select("message_id, user_id, read_at")
+      .in("message_id", messageIds);
+
+    for (const row of reads || []) {
+      const mid = row.message_id as string;
+      const map = readsByMessage.get(mid) ?? new Map<string, string>();
+      map.set(row.user_id as string, row.read_at as string);
+      readsByMessage.set(mid, map);
+    }
+  }
 
   const messages: RelayMessageRow[] = [];
   for (const m of msgs || []) {
-    const { data: u } = await admin.auth.admin.getUserById(m.sender_id);
-    const { data: reads } = await supabase
-      .from("relay_message_reads")
-      .select("user_id")
-      .eq("message_id", m.id)
-      .neq("user_id", m.sender_id);
+    const senderId = m.sender_id as string;
+    const readMap = readsByMessage.get(m.id as string) ?? new Map<string, string>();
+    const recipients = memberIds.filter((id) => id !== senderId);
+    const read_receipts: RelayReadReceiptRow[] = recipients.map((uid) => ({
+      user_id: uid,
+      email: emailByUserId[uid] ?? null,
+      read_at: readMap.get(uid) ?? null,
+    }));
+    const readCount = read_receipts.filter((r) => r.read_at).length;
 
     messages.push({
-      id: m.id,
-      sender_id: m.sender_id,
-      sender_email: u?.user?.email ?? null,
-      body: m.body,
-      created_at: m.created_at,
-      is_own: m.sender_id === userId,
-      read_by_others: (reads?.length ?? 0) > 0,
+      id: m.id as string,
+      sender_id: senderId,
+      sender_email: emailByUserId[senderId] ?? null,
+      body: m.body as string,
+      created_at: m.created_at as string,
+      is_own: senderId === userId,
+      read_by_others: readCount > 0,
+      read_receipts,
+      is_group_thread: isGroupThread,
     });
   }
 
   const displayTitle =
     conv.title ||
-    (conv.kind === "direct" ? "Direktnachricht" : "Gruppe");
+    (conv.kind === "direct" ? "Nachricht" : "Gruppe");
 
   return { messages, title: displayTitle };
 }

@@ -7,6 +7,8 @@ import { CardBoard } from "@/components/my-tasks/card-board";
 import { RelayAssistHint } from "@/components/command-ai/relay-assist-hint";
 import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
 import { RelayMessagesPanel } from "@/components/my-tasks/relay-messages-panel";
+import { NewRelayMessageModalTrigger } from "@/components/my-tasks/new-relay-message-modal";
+import { NewTaskModalTrigger } from "@/components/my-tasks/new-task-modal";
 import { RelayQuickCreate } from "@/components/my-tasks/relay-quick-create";
 import type { MyTask } from "@/lib/queries/my-tasks";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
@@ -139,6 +141,15 @@ export function RelayWorkspaceView({
         </div>
 
         <div className="flex flex-col gap-3 sm:items-end">
+          {isRelay ? (
+            <div className="flex flex-wrap gap-2 sm:justify-end">
+              {panel === "tasks" ? (
+                <NewTaskModalTrigger />
+              ) : (
+                <NewRelayMessageModalTrigger />
+              )}
+            </div>
+          ) : null}
           {isRelay ? (
             <div
               className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"

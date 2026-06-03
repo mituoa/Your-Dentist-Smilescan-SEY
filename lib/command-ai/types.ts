@@ -5,6 +5,7 @@
 
 export type CommandIntentKind =
   | "patient_message"
+  | "relay_message"
   | "summarize_inbox"
   | "summarize_day"
   | "create_task"

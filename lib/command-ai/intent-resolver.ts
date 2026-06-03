@@ -1,6 +1,7 @@
 import { findPatientInCommandText } from "./patient-match";
 import { parseMessageSignals } from "./message-signals";
-import { parseTaskFromVoice } from "./task-intent";
+import { isRelayInternalMessageCommand } from "./relay-message-intent";
+import { isCommandTaskCommand, parseTaskFromVoice } from "./task-intent";
 import type { CommandIntent, CommandIntentKind, CommandWorkspaceHints } from "./types";
 
 type ActiveCaseHint = {
@@ -22,11 +23,18 @@ function detectKind(text: string): CommandIntentKind {
   }
 
   if (
-    /(rückruf|rueckruf).*(vorbereit|anlegen)/.test(t) ||
-    (/(empfang|rezeption).*(rückruf|rueckruf|zurückruf)/.test(t) &&
-      /(vorbereit|bitte|patient)/.test(t))
+    /(rückruf|rueckruf).*(vorbereit|anlegen)/.test(t) &&
+    !/\b[a-zäöüß]{2,}\s+soll\s+/.test(t)
   ) {
     return "patient_message";
+  }
+
+  if (isCommandTaskCommand(text)) {
+    return "create_task";
+  }
+
+  if (isRelayInternalMessageCommand(text)) {
+    return "relay_message";
   }
 
   const hasPatientComms =
@@ -47,6 +55,7 @@ function detectKind(text: string): CommandIntentKind {
     return "create_task";
   }
   if (/(rezeption|empfang).*(inform|durchgeb|weiterleit|schick|geben)/.test(t)) {
+    if (isRelayInternalMessageCommand(text)) return "relay_message";
     return "create_task";
   }
   if (/(durchgeb|weiterleit).*(team|rezeption|empfang|zfa)/.test(t)) {

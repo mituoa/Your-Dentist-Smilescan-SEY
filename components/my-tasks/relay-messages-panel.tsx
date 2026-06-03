@@ -12,8 +12,13 @@ import {
   sendRelayMessage,
 } from "@/app/(protected)/my-tasks/messages-actions";
 import { RelayGroupCreateModal } from "@/components/my-tasks/relay-group-create-modal";
+import { NewRelayMessageModal } from "@/components/my-tasks/new-relay-message-modal";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayConversationRow, RelayMessageRow } from "@/lib/queries/relay-messages";
+import {
+  formatRelayReadReceiptDetail,
+  formatRelayReadReceiptSummary,
+} from "@/lib/relay/read-receipt-display";
 import { cn } from "@/lib/utils";
 
 type RelayMessagesPanelProps = {
@@ -55,6 +60,7 @@ export function RelayMessagesPanel({
   const activeId = searchParams.get("conversation");
   const [groupOpen, setGroupOpen] = useState(false);
   const [directOpen, setDirectOpen] = useState(false);
+  const [newMessageOpen, setNewMessageOpen] = useState(false);
   const [messages, setMessages] = useState<RelayMessageRow[]>([]);
   const [threadTitle, setThreadTitle] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -128,17 +134,25 @@ export function RelayMessagesPanel({
 
   return (
     <div className="relay-messages">
-      <aside className="relay-messages-list" aria-label="Unterhaltungen">
+      <aside className="relay-messages-list" aria-label="Nachrichten">
         <div className="relay-messages-list-head">
           <p className="relay-messages-list-title">Interne Nachrichten</p>
           <div className="relay-messages-list-actions">
             <button
               type="button"
-              className="relay-messages-icon-btn"
-              title="Direktnachricht"
-              onClick={() => setDirectOpen((o) => !o)}
+              className="relay-messages-icon-btn relay-messages-icon-btn--primary"
+              title="Neue Nachricht"
+              onClick={() => setNewMessageOpen(true)}
             >
               <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              className="relay-messages-icon-btn"
+              title="An Person"
+              onClick={() => setDirectOpen((o) => !o)}
+            >
+              <span className="text-[11px] font-semibold">1:1</span>
             </button>
             <button
               type="button"
@@ -177,8 +191,7 @@ export function RelayMessagesPanel({
           <div className="relay-messages-empty">
             <p className="text-[14px] font-medium text-[#0F172A]">Noch keine Nachrichten</p>
             <p className="mt-2 text-[13px] leading-relaxed text-[#64748B]">
-              Starten Sie eine ruhige interne Unterhaltung — gebunden an Ihre Praxis, ohne
-              Nebenkanäle.
+              Übergaben und Hinweise fürs Team — intern in Relay, ohne externe Kanäle.
             </p>
           </div>
         ) : (
@@ -235,10 +248,9 @@ export function RelayMessagesPanel({
       <section className="relay-messages-thread-pane" aria-label="Nachrichtenverlauf">
         {!activeConversation ? (
           <div className="relay-messages-thread-empty">
-            <p className="text-[15px] font-medium text-[#0F172A]">Unterhaltung wählen</p>
+            <p className="text-[15px] font-medium text-[#0F172A]">Nachricht wählen</p>
             <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-[#64748B]">
-              Wählen Sie links eine Nachricht oder legen Sie eine neue Gruppe an — ruhig, im
-              Kontext Ihrer Praxis.
+              Wählen Sie links einen Verlauf oder starten Sie eine neue interne Nachricht.
             </p>
           </div>
         ) : (
@@ -282,9 +294,7 @@ export function RelayMessagesPanel({
                       <div className="relay-message-meta">
                         <time dateTime={m.created_at}>{formatTime(m.created_at)}</time>
                         {m.is_own ? (
-                          <span className="relay-message-status" aria-label="Zustellstatus">
-                            {m.read_by_others ? "Gelesen" : "Zugestellt"}
-                          </span>
+                          <RelayMessageReadStatus message={m} />
                         ) : null}
                       </div>
                     </li>
@@ -332,6 +342,38 @@ export function RelayMessagesPanel({
         members={assignableMembers}
         currentUserId={currentUserId}
       />
+      <NewRelayMessageModal
+        open={newMessageOpen}
+        onClose={() => setNewMessageOpen(false)}
+        assignableMembers={assignableMembers}
+        currentUserId={currentUserId}
+      />
     </div>
+  );
+}
+
+function RelayMessageReadStatus({ message }: { message: RelayMessageRow }) {
+  const summary = formatRelayReadReceiptSummary(
+    message.read_receipts,
+    message.is_group_thread
+  );
+  if (message.read_receipts.length === 0) {
+    return (
+      <span className="relay-message-status" aria-label="Zustellstatus">
+        Zugestellt
+      </span>
+    );
+  }
+  return (
+    <details className="relay-message-read-details">
+      <summary className="relay-message-status cursor-pointer list-none">
+        {summary}
+      </summary>
+      <ul className="relay-message-read-list">
+        {message.read_receipts.map((r) => (
+          <li key={r.user_id}>{formatRelayReadReceiptDetail(r)}</li>
+        ))}
+      </ul>
+    </details>
   );
 }

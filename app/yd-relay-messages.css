@@ -297,3 +297,50 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.relay-messages-icon-btn--primary {
+  background: rgba(43, 111, 232, 0.08);
+  color: #2563eb;
+}
+
+.relay-message-read-details {
+  display: inline-block;
+  text-align: right;
+}
+
+.relay-message-read-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.relay-message-read-list {
+  margin: 0.35rem 0 0;
+  padding: 0.35rem 0.5rem;
+  list-style: none;
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: #64748b;
+  text-align: left;
+}
+
+.relay-message-read-list li + li {
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 899px) {
+  .relay-messages-icon-btn,
+  .relay-messages-send {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+
+  .relay-messages-composer-row {
+    flex-wrap: wrap;
+  }
+
+  .relay-messages-send {
+    width: 100%;
+  }
+}

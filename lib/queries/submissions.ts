@@ -14,13 +14,13 @@ const SUBMISSION_DETAIL_SELECT_FULL = `
       id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
       patient_birth_date, patient_external_id, urgency, is_draft, intake_channel,
       created_at, updated_at, seen_at, seen_by,
-      submission_photos (id, storage_path, sort_order)
+      submission_photos (id, storage_path, sort_order, created_at)
     `;
 
 const SUBMISSION_DETAIL_SELECT_BASE = `
       id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
       created_at, updated_at, seen_at, seen_by,
-      submission_photos (id, storage_path, sort_order)
+      submission_photos (id, storage_path, sort_order, created_at)
     `;
 
 export interface SubmissionDetail {
@@ -43,6 +43,7 @@ export interface SubmissionDetail {
     id: string;
     storage_path: string;
     sort_order: number;
+    created_at: string;
     signed_url: string | null;
   }>;
 }
@@ -52,6 +53,7 @@ async function signSubmissionPhotos(
     id: string;
     storage_path: string;
     sort_order: number;
+    created_at: string;
   }>
 ) {
   // Admin nur für Sign — storage_path stammt aus workspace-gefilterter Submission-Abfrage.
@@ -65,6 +67,7 @@ async function signSubmissionPhotos(
         id: photo.id,
         storage_path: photo.storage_path,
         sort_order: photo.sort_order,
+        created_at: photo.created_at,
         signed_url: signed?.signedUrl ?? null,
       };
     })

@@ -9,6 +9,13 @@ export const RECURRENCE_LABELS: Record<TaskRecurrenceType, string> = {
   custom: "Eigener Rhythmus",
 };
 
+/** Kurz-Badge in Listen (Relay-Karten). */
+export function recurrenceBadgeLabel(type: TaskRecurrenceType): string | null {
+  if (type === "once") return null;
+  if (type === "custom") return "Wiederkehrend";
+  return RECURRENCE_LABELS[type].toLowerCase();
+}
+
 export function parseRecurrenceType(raw: string | null | undefined): TaskRecurrenceType {
   const v = (raw || "once").trim().toLowerCase();
   if (v === "daily" || v === "weekly" || v === "monthly" || v === "custom") return v;

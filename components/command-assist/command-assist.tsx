@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -12,9 +13,16 @@ import {
 import { PreparedWorkPreview } from "@/components/command-ai/prepared-work-preview";
 import { createCaseFromQuery } from "@/lib/create-case-return";
 import { persistMessageDraftFromCommand } from "@/app/(protected)/inbox/command-draft-actions";
+import { createRelayMessageFromCommandAction } from "@/app/(protected)/my-tasks/command-relay-message-actions";
+import {
+  createTaskFromCommand,
+  createTaskFromCommandRelay,
+} from "@/app/(protected)/inbox/command-task-actions";
+import { isRelayInternalMessageCommand } from "@/lib/command-ai/relay-message-intent";
 import { stashCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
 import { resolveCommandIntent } from "@/lib/command-ai/intent-resolver";
 import { isSummarizeOnlyCommand } from "@/lib/command-ai/reply-intent";
+import { isCommandTaskCommand } from "@/lib/command-ai/task-intent";
 import { prepareWorkFromIntent } from "@/lib/command-ai/preparation-engine";
 import { stashCommandTaskDraft } from "@/lib/command-ai/task-draft-bridge";
 import { mergeCommandWorkspaceHints } from "@/lib/command-ai/workspace-context";
@@ -188,6 +196,7 @@ export function CommandAssist() {
   const [prepareHint, setPrepareHint] = useState<string | null>(null);
   const [prepareHintTone, setPrepareHintTone] = useState<"neutral" | "success" | "error">("neutral");
   const [persistBusy, setPersistBusy] = useState(false);
+  const [taskRelayHref, setTaskRelayHref] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
@@ -260,6 +269,7 @@ export function CommandAssist() {
     if (intent.kind === "patient_message" && !isSummarizeOnlyCommand(trimmed)) {
       if (!inboxCase?.submissionId) {
         setPreparedWork(null);
+        setTaskRelayHref(null);
         setPrepareHintTone("error");
         setPrepareHint("Bitte öffnen Sie zuerst einen Patientenfall.");
         return;
@@ -267,6 +277,7 @@ export function CommandAssist() {
 
       setPersistBusy(true);
       setPrepareHint(null);
+      setTaskRelayHref(null);
       try {
         const persisted = await persistMessageDraftFromCommand({
           submissionId: inboxCase.submissionId,
@@ -287,6 +298,70 @@ export function CommandAssist() {
       }
     }
 
+    if (intent.kind === "relay_message" || isRelayInternalMessageCommand(trimmed)) {
+      setPersistBusy(true);
+      setPrepareHint(null);
+      setTaskRelayHref(null);
+      try {
+        const sent = await createRelayMessageFromCommandAction({
+          rawText: trimmed,
+          submissionId: inboxCase?.submissionId ?? null,
+        });
+        if (sent.ok) {
+          setPreparedWork(null);
+          setPrepareHintTone("success");
+          setPrepareHint(sent.message);
+          setTaskRelayHref(sent.relayHref);
+          router.refresh();
+          return;
+        }
+        setPrepareHintTone("error");
+        setPrepareHint(sent.error);
+        return;
+      } finally {
+        setPersistBusy(false);
+      }
+    }
+
+    if (intent.kind === "create_task" || isCommandTaskCommand(trimmed)) {
+      setPersistBusy(true);
+      setPrepareHint(null);
+      setTaskRelayHref(null);
+      try {
+        const created = inboxCase?.submissionId
+          ? await createTaskFromCommand({
+              submissionId: inboxCase.submissionId,
+              rawText: trimmed,
+            })
+          : zone === "relay"
+            ? await createTaskFromCommandRelay({ rawText: trimmed })
+            : null;
+
+        if (!created) {
+          setPreparedWork(null);
+          setPrepareHintTone("error");
+          setPrepareHint(
+            "Bitte öffnen Sie einen Patientenfall oder wechseln Sie zu Relay für interne Aufgaben."
+          );
+          return;
+        }
+
+        if (created.ok) {
+          setPreparedWork(null);
+          setPrepareHintTone("success");
+          setPrepareHint(created.message);
+          setTaskRelayHref(created.relayHref);
+          router.refresh();
+          return;
+        }
+        setPrepareHintTone("error");
+        setPrepareHint(created.error);
+        return;
+      } finally {
+        setPersistBusy(false);
+      }
+    }
+
     const work = prepareWorkFromIntent(intent, mergedHints);
     if (work) {
       setPrepareHint(null);
@@ -296,10 +371,13 @@ export function CommandAssist() {
     }
     setPreparedWork(null);
     setPrepareHintTone("error");
+    setTaskRelayHref(null);
     setPrepareHint(
       intent.kind === "patient_message"
         ? "Ich konnte daraus noch keine passende Aktion vorbereiten."
-        : "Konnte nicht vorbereitet werden. Bitte Patientennamen nennen oder einen Tracker-Fall öffnen."
+        : isCommandTaskCommand(trimmed)
+          ? "Ich konnte daraus noch keine Aufgabe erstellen."
+          : "Konnte nicht vorbereitet werden. Bitte Patientennamen nennen oder einen Tracker-Fall öffnen."
     );
   }, [text, mergedHints, inboxCase, router, setPreparedWork]);
 
@@ -307,6 +385,29 @@ export function CommandAssist() {
     if (!preparedWork) return;
 
     if (
+      preparedWork.submissionId &&
+      (preparedWork.intent.kind === "create_task" || isCommandTaskCommand(preparedWork.intent.rawText))
+    ) {
+      setPersistBusy(true);
+      try {
+        const created = await createTaskFromCommand({
+          submissionId: preparedWork.submissionId,
+          rawText: preparedWork.intent.rawText,
+        });
+        if (!created.ok) {
+          setPrepareHintTone("error");
+          setPrepareHint(created.error);
+          return;
+        }
+        setPreparedWork(null);
+        setOpen(false);
+        router.refresh();
+        router.push(created.relayHref);
+        return;
+      } finally {
+        setPersistBusy(false);
+      }
+    } else if (
       preparedWork.messageDraft &&
       preparedWork.submissionId &&
       preparedWork.intent.kind === "patient_message"
@@ -579,6 +680,7 @@ export function CommandAssist() {
               if (prepareHint) {
                 setPrepareHint(null);
                 setPrepareHintTone("neutral");
+                setTaskRelayHref(null);
               }
             }}
             onKeyDown={(e) => {
@@ -610,19 +712,29 @@ export function CommandAssist() {
           </div>
 
           {prepareHint ? (
-            <p
-              className={cn(
-                "text-[13px] leading-relaxed",
-                prepareHintTone === "success"
-                  ? "text-[#166534]"
-                  : prepareHintTone === "error"
-                    ? "text-[#B45309]"
-                    : "text-[#64748B]"
-              )}
-              role="status"
-            >
-              {prepareHint}
-            </p>
+            <div className="space-y-2" role="status">
+              <p
+                className={cn(
+                  "text-[13px] leading-relaxed",
+                  prepareHintTone === "success"
+                    ? "text-[#166534]"
+                    : prepareHintTone === "error"
+                      ? "text-[#B45309]"
+                      : "text-[#64748B]"
+                )}
+              >
+                {prepareHint}
+              </p>
+              {taskRelayHref && prepareHintTone === "success" ? (
+                <Link
+                  href={taskRelayHref}
+                  onClick={() => setOpen(false)}
+                  className="inline-flex text-[13px] font-medium text-[#2563EB] underline-offset-2 hover:underline"
+                >
+                  Aufgabe in Relay öffnen
+                </Link>
+              ) : null}
+            </div>
           ) : null}
 
           {!preparedWork && COMMAND_AI_EXAMPLES.length > 0 ? (

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
+import { PhotoDocumentationSection } from "@/components/inbox/photo-documentation-section";
 import { PhotoViewer } from "@/components/inbox/photo-viewer";
 import { SubmissionActions } from "@/components/inbox/submission-actions";
 import { TrackerAiSummary } from "@/components/inbox/tracker-ai-summary";
@@ -350,6 +351,17 @@ export default async function InboxDetailPage({
                   signed_url,
                 }))}
                 patientName={submission.patient_name || "Patient"}
+              />
+              <PhotoDocumentationSection
+                photos={submission.photos.map(
+                  ({ id, sort_order, created_at, signed_url }) => ({
+                    id,
+                    sort_order,
+                    created_at,
+                    signed_url,
+                  })
+                )}
+                patientNotes={submission.patient_notes}
               />
             </div>
 

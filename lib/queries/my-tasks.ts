@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { summarizeTaskReceipts, type TaskDeliveryAggregate } from "@/lib/tasks/receipts";
+import { parseRecurrenceType, type TaskRecurrenceType } from "@/lib/tasks/recurrence";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
 
 export interface MyTask {
@@ -18,6 +19,9 @@ export interface MyTask {
   created_by: string;
   status: "open" | "pending_review" | "done";
   done_at: string | null;
+  done_by: string | null;
+  done_by_email: string | null;
+  recurrence_type: TaskRecurrenceType;
   submitted_for_review_at: string | null;
   sort_order: number;
   completed: boolean;
@@ -54,7 +58,8 @@ export async function getMyTasks(
     .from("tasks")
     .select(
       `
-      id, title, content, description, due_date, status, done_at, created_at, priority, sort_order,
+      id, title, content, description, due_date, status, done_at, done_by, recurrence_type,
+      created_at, priority, sort_order,
       submitted_for_review_at, submission_id, created_by, recipient_type, specific_recipient_id,
       submissions(patient_name, created_at),
       task_assignees(user_id),
@@ -85,6 +90,9 @@ export async function getMyTasks(
     console.error("[getMyTasks]", (error as { code?: string }).code ?? "unknown");
     return [];
   }
+
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminClient();
 
   const mapped = (data || []).map((t: Record<string, unknown>) => {
     const submissions = t.submissions as {
@@ -119,6 +127,9 @@ export async function getMyTasks(
       created_by: t.created_by as string,
       status: st,
       done_at: (t.done_at as string | null) ?? null,
+      done_by: (t.done_by as string | null) ?? null,
+      done_by_email: null as string | null,
+      recurrence_type: parseRecurrenceType(t.recurrence_type as string | undefined),
       submitted_for_review_at:
         (t.submitted_for_review_at as string | null) ?? null,
       sort_order: Number((t.sort_order as number | string | null) ?? 0),
@@ -136,6 +147,22 @@ export async function getMyTasks(
       },
     };
   });
+
+  const doneByIds = [
+    ...new Set(
+      mapped.map((t) => t.done_by).filter((id): id is string => Boolean(id))
+    ),
+  ];
+  const doneByEmail: Record<string, string> = {};
+  for (const id of doneByIds) {
+    const { data: u } = await admin.auth.admin.getUserById(id);
+    if (u?.user?.email) doneByEmail[id] = u.user.email;
+  }
+  for (const task of mapped) {
+    if (task.done_by) {
+      task.done_by_email = doneByEmail[task.done_by] ?? null;
+    }
+  }
 
   return mapped.filter((task) => {
     const isSpecificallyAssigned =
