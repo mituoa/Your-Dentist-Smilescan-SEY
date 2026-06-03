@@ -39,6 +39,7 @@ import {
   buildPracticeHealth,
 } from "@/lib/command-ai/practice-intelligence";
 import { YD } from "@/lib/design/yd-design-tokens";
+import { attachMessageDraftStatusToRows } from "@/lib/queries/message-drafts";
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +91,9 @@ export default async function DashboardPage() {
   const openTaskCount = openTasks?.length ?? 0;
   const tasksNeedingDecision = openTasks ? countTasksNeedingDecision(openTasks) : null;
   const weeklyCounts = weeklyRes.ok ? weeklyRes.counts : null;
-  const previewRows = previewRes.ok ? previewRes.rows : null;
+  const previewRows = previewRes.ok
+    ? await attachMessageDraftStatusToRows(workspaceId, previewRes.rows)
+    : null;
   const priorityItems = priorityRes.ok ? priorityRes.items : null;
 
   const newSubmissionsContext = buildNewSubmissionsWorkContext(priorityItems, previewRows);

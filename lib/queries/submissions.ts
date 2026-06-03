@@ -1,6 +1,10 @@
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import {
+  normalizeIntakeChannel,
+  type IntakeChannel,
+} from "@/lib/submissions/intake-channel";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 
@@ -8,7 +12,7 @@ const SIGNED_PHOTO_URL_TTL_SEC = 3600;
 
 const SUBMISSION_DETAIL_SELECT_FULL = `
       id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
-      patient_birth_date, patient_external_id, urgency, is_draft,
+      patient_birth_date, patient_external_id, urgency, is_draft, intake_channel,
       created_at, updated_at, seen_at, seen_by,
       submission_photos (id, storage_path, sort_order)
     `;
@@ -30,6 +34,7 @@ export interface SubmissionDetail {
   patient_external_id: string | null;
   urgency: string | null;
   is_draft: boolean;
+  intake_channel: IntakeChannel;
   created_at: string;
   updated_at: string;
   seen_at: string | null;
@@ -80,17 +85,44 @@ async function getSubmissionByIdInner(
     .single();
 
   let extendedCaseFields = true;
+  let hasIntakeChannel = true;
   if (res.error && isLikelyMissingDbColumnError(res.error)) {
-    console.warn(
-      "[submissions] detail: case columns missing — retrying without migration-023 fields."
-    );
-    extendedCaseFields = false;
-    res = await supabase
-      .from("submissions")
-      .select(SUBMISSION_DETAIL_SELECT_BASE)
-      .eq("id", submissionId)
-      .eq("workspace_id", workspaceId)
-      .single();
+    const errMsg = (res.error.message ?? "").toLowerCase();
+    const intakeOnlyMissing =
+      errMsg.includes("intake_channel") &&
+      !errMsg.includes("patient_birth_date") &&
+      !errMsg.includes("patient_external_id") &&
+      !errMsg.includes("is_draft") &&
+      !errMsg.includes("urgency");
+
+    if (intakeOnlyMissing) {
+      console.warn(
+        "[submissions] detail: intake_channel missing — retrying without migration-036 field."
+      );
+      hasIntakeChannel = false;
+      const withoutIntake = SUBMISSION_DETAIL_SELECT_FULL.replace(
+        ", intake_channel",
+        ""
+      );
+      res = await supabase
+        .from("submissions")
+        .select(withoutIntake)
+        .eq("id", submissionId)
+        .eq("workspace_id", workspaceId)
+        .single();
+    } else {
+      console.warn(
+        "[submissions] detail: case columns missing — retrying without migration-023 fields."
+      );
+      extendedCaseFields = false;
+      hasIntakeChannel = false;
+      res = await supabase
+        .from("submissions")
+        .select(SUBMISSION_DETAIL_SELECT_BASE)
+        .eq("id", submissionId)
+        .eq("workspace_id", workspaceId)
+        .single();
+    }
   }
 
   const { data, error } = res;
@@ -124,6 +156,9 @@ async function getSubmissionByIdInner(
       : null,
     urgency: extendedCaseFields ? ((data.urgency as string | null) ?? null) : null,
     is_draft: extendedCaseFields ? Boolean(data.is_draft) : false,
+    intake_channel: hasIntakeChannel
+      ? normalizeIntakeChannel(data.intake_channel)
+      : "unknown",
     created_at: data.created_at,
     updated_at: data.updated_at as string,
     seen_at: data.seen_at,

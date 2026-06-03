@@ -11,6 +11,7 @@ import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
 import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+import { loadMessageDraftDetailForSubmission } from "@/lib/queries/message-drafts";
 import { markSubmissionSeen } from "./actions";
 
 /**
@@ -222,6 +223,11 @@ export default async function InboxDetailPage({
   const practicePhone = profileRow?.practice_phone ?? null;
   const appointmentUrl = profileRow?.appointment_link ?? null;
 
+  const messageDraftLoad = await loadMessageDraftDetailForSubmission(
+    submission.id,
+    workspace.workspace_id
+  );
+
   const issueTitle =
     concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
 
@@ -430,6 +436,15 @@ export default async function InboxDetailPage({
               canSendAppointmentLink={isDoctor}
               practicePhone={practicePhone}
               appointmentUrl={appointmentUrl}
+              isDoctor={isDoctor}
+              messageDraftsAvailable={messageDraftLoad.available}
+              editableMessageDraft={
+                messageDraftLoad.available ? messageDraftLoad.editableDraft : null
+              }
+              historyMessageDraft={
+                messageDraftLoad.available ? messageDraftLoad.historyDraft : null
+              }
+              intakeChannel={submission.intake_channel}
             />
           </aside>
           </div>

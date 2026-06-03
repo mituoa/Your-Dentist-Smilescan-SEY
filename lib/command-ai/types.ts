@@ -34,6 +34,7 @@ export type CommandMessageSignals = {
   wantsAppointment: boolean;
   wantsThisWeek: boolean;
   wantsTeamHandoff: boolean;
+  wantsCallback?: boolean;
 };
 
 export type CommandRelayTaskDraft = {

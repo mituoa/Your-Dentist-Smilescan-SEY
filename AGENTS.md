@@ -4,6 +4,57 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Function Buildout — Arbeitsmodus (Your Dentist)
+
+Gilt ab Function-Buildout-Phase für **jeden** Produkt-Schritt. Ergänzt den Medical-/Enterprise-Standard unten; bei Konflikt gilt: **kein Redesign, keine neue Navigation, bestehende Module**.
+
+### Produktkern (unverändert)
+
+```text
+Patient → KI-Vorbereitung → Praxisentscheidung → Teamumsetzung
+```
+
+Jede neue Funktion muss mindestens eines erfüllen: weniger Telefonate · weniger interne Rückfragen · weniger organisatorischer Aufwand · schnellere Bearbeitung · bessere Nachverfolgung · mehr Automatisierung bei gleichbleibender ärztlicher Kontrolle.
+
+**Erfolgstest:** Praxen fühlen sich entlastet („digitale Mitarbeiterin“), nicht verwaltet („noch ein Dashboard“).
+
+### Feste Modul-Struktur (nicht erweitern)
+
+| Modul | Route(n) | Rolle |
+|--------|----------|--------|
+| **Atlas** | `/dashboard` | Überblick, Prioritäten, Entscheidungen |
+| **Tracker** | `/inbox`, `/inbox/[id]` | Patientenfälle, Einsendungen, Fotos, Verlauf |
+| **Relay** | `/relay`, `/my-tasks` | Aufgaben, Team, Umsetzung, Erinnerungen |
+| **Journals** | `/journal`, … | Praxiswissen für Patient:innen |
+| **Command AI** | Assistenzschicht (⌘K / FAB) | Über allem; **kein** eigener großer Workspace |
+
+Neue Funktionen **nur** in diese Struktur einhängen — **keine** neuen Sidebar-Module, **keine** Architektur-Neuerfindung.
+
+### Explizit verboten in diesem Modus
+
+- Große Redesigns, UI-Experimente, Template-SaaS-Optik
+- Zusätzliche Analytics/Charts/Verwaltungsflächen ohne Workflow-Gewinn
+- Tote Buttons, Fake-Funktionen, MVP-Rohzustände in kritischen Pfaden
+- Roh-Technikfehler in der UI; automatische **medizinische** Entscheidung oder Versand ohne Freigabe
+
+### Arbeitsweise pro Schritt
+
+1. **Nur einen Schritt** umsetzen (ein klar abgrenzbares Ziel).
+2. **Vorher** bestehende Datenstrukturen/Queries/RLS prüfen — nichts doppelt erfinden.
+3. **Nur nötige Dateien** ändern; bestehende UI-Komponenten und Copy-Ton respektieren.
+4. Nach Umsetzung: **Build/Typecheck** (`npm run build` oder projektüblicher Check).
+5. Keine Neben-Refactors „nebenbei“.
+
+### Prioritäten-Reihenfolge (Function-Backlog)
+
+1. Tracker/Inbox als zentrale Arbeitsliste (innerhalb bestehender Struktur)
+2. Command AI (Sprache, automatische Aufgaben — Assistenzschicht)
+3. Fotoverlauf (Nachsorge / Telemonitoring am Fall)
+4. Praxiswissen / Antwortbibliothek (Journals-Ökosystem)
+5. Recall- und Nachsorge-Automationen (Relay)
+6. Morning Briefing (Atlas, entscheidungsorientiert)
+7. Praxisgedächtnis (fallübergreifender Kontext)
+
 ## Medical / Enterprise SaaS — globaler Produktstandard
 
 Dieser Abschnitt gilt **dauerhaft für das gesamte Programm**: neue Features, Refactorings, UI-Polish, Uploads, Auth, Dashboard, Inbox/Relay, Create-Case, Billing, Settings, E-Mail-Flows, Mobile, Error-/Loading-/Pending-Zustände, Security/Storage sowie **rechtliche und Trust-/Compliance-Kommunikation** — einschließlich **Security-, Datenschutz- und Registrierungs-Flows** nach Medical-/Health-SaaS-Qualität.

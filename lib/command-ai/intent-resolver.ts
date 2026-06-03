@@ -17,6 +17,18 @@ function detectKind(text: string): CommandIntentKind {
   const t = normalize(text);
   if (!t) return "unknown";
 
+  if (/(antwort|patientenantwort).*(vorbereit|erstell|schreib)/.test(t)) {
+    return "patient_message";
+  }
+
+  if (
+    /(rückruf|rueckruf).*(vorbereit|anlegen)/.test(t) ||
+    (/(empfang|rezeption).*(rückruf|rueckruf|zurückruf)/.test(t) &&
+      /(vorbereit|bitte|patient)/.test(t))
+  ) {
+    return "patient_message";
+  }
+
   const hasPatientComms =
     /(schreib|send|schick|schicken|nachricht|mail|rückmeld).*(an|für|fur)/.test(t) ||
     /bitte\s+[a-zäöüß]{2,}\s+(schreib|schick|send)/.test(t);
@@ -53,8 +65,9 @@ function detectKind(text: string): CommandIntentKind {
 
   const taskParsed = parseTaskFromVoice(text);
   const looksLikeTaskOnly =
-    /(aufgabe|task|reminder|erinnerung|memo|notiz|anruf|telefon|rückruf|diktat)/.test(t) &&
-    !/(schreib|send|nachricht|mail|patienten).*(an|für|fur)/.test(t);
+    /(aufgabe|task|reminder|erinnerung|memo|notiz|anruf|telefon|diktat)/.test(t) &&
+    !/(schreib|send|nachricht|mail|patienten).*(an|für|fur)/.test(t) &&
+    !/(rückruf|rueckruf).*(vorbereit|anlegen)/.test(t);
   if (looksLikeTaskOnly || (taskParsed.assigneeHint && /(aufgabe|task|reminder)/.test(t))) {
     return "create_task";
   }

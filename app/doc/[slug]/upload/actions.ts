@@ -5,6 +5,8 @@ import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effor
 import { buildUploadConfirmationEmail } from "@/lib/mail/upload-confirmation-patient-email";
 import { buildNewSubmissionPractitionerEmail } from "@/lib/mail/new-submission-practitioner-email";
 import { getAppBaseUrl } from "@/lib/env";
+import { INTAKE_CHANNEL_PATIENT_UPLOAD } from "@/lib/submissions/intake-channel";
+import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 import { MAX_PHOTOS } from "@/lib/upload/validation";
 
 const BASIC_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -113,17 +115,35 @@ export async function submitUpload(
   const practiceName =
     profile?.practice_name || profile?.display_name || workspace.name;
 
-  const { data: submission, error: subError } = await admin
+  const submissionBase = {
+    workspace_id: workspace.id,
+    patient_name: patientName,
+    patient_email: patientEmail,
+    patient_phone: patientPhone,
+    patient_notes: patientNotes,
+  };
+
+  let submissionRes = await admin
     .from("submissions")
     .insert({
-      workspace_id: workspace.id,
-      patient_name: patientName,
-      patient_email: patientEmail,
-      patient_phone: patientPhone,
-      patient_notes: patientNotes,
+      ...submissionBase,
+      intake_channel: INTAKE_CHANNEL_PATIENT_UPLOAD,
     })
     .select("id")
     .single();
+
+  if (
+    submissionRes.error &&
+    isLikelyMissingDbColumnError(submissionRes.error)
+  ) {
+    submissionRes = await admin
+      .from("submissions")
+      .insert(submissionBase)
+      .select("id")
+      .single();
+  }
+
+  const { data: submission, error: subError } = submissionRes;
 
   if (subError || !submission) {
     console.error("[upload] submission insert failed:", subError);

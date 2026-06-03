@@ -1,6 +1,7 @@
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 
 import { buildCommandMessageDraft } from "./build-command-message-draft";
+import { resolveCommandReplyIntent } from "./reply-intent";
 import { frameNextStep, frameSituation, frameSuggestion } from "./safety-copy";
 import { dueDateForHint } from "./task-draft-bridge";
 import { formatDueLabel, parseTaskFromVoice } from "./task-intent";
@@ -75,11 +76,12 @@ function buildPatientMessageWork(
 
   const patientName = intent.patientName ?? patient?.name ?? "Patient";
   const concernLine = patient?.concernLine ?? null;
-  const signals = intent.messageSignals ?? {
-    wantsPhoto: false,
-    wantsAppointment: false,
-    wantsThisWeek: false,
-    wantsTeamHandoff: false,
+  const signals = {
+    wantsPhoto: intent.messageSignals?.wantsPhoto ?? false,
+    wantsAppointment: intent.messageSignals?.wantsAppointment ?? false,
+    wantsThisWeek: intent.messageSignals?.wantsThisWeek ?? false,
+    wantsTeamHandoff: intent.messageSignals?.wantsTeamHandoff ?? false,
+    wantsCallback: intent.messageSignals?.wantsCallback ?? false,
   };
 
   const messageDraft = buildCommandMessageDraft({
@@ -87,6 +89,7 @@ function buildPatientMessageWork(
     practicePhone: hints?.practicePhone ?? "",
     appointmentUrl: hints?.appointmentUrl ?? null,
     signals,
+    replyIntent: resolveCommandReplyIntent(intent.rawText, signals),
   });
 
   const nextStep = suggestNextStepFromNotes(concernLine);

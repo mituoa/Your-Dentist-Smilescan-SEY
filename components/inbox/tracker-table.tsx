@@ -5,7 +5,10 @@ import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Check, ChevronDown, Plus, Star } from "lucide-react";
 
+import { IntakeChannelBadge } from "@/components/inbox/intake-channel-badge";
+import { MessageDraftStatusBadge } from "@/components/inbox/message-draft-status-badge";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+import { isSubmissionReadyForReview } from "@/lib/message-drafts/list-status";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
 import { cn } from "@/lib/utils";
 
@@ -193,6 +196,7 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
                 emptyLabel: "Ohne Angabe",
               });
               const status = statusForRow(item);
+              const readyForReview = isSubmissionReadyForReview(item);
               const email = item.patient_email?.trim() || "Keine E-Mail hinterlegt";
 
               return (
@@ -241,6 +245,7 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
                           {item.patient_name?.trim() || "Unbekannter Patient"}
                         </span>
                         <span className="yd-tracker-table__patient-email">{email}</span>
+                        <IntakeChannelBadge channel={item.intake_channel} className="mt-0.5" />
                       </span>
                     </div>
                   </td>
@@ -251,16 +256,22 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
                     <span className="yd-tracker-table__concern">{concern}</span>
                   </td>
                   <td>
-                    <span className={cn("yd-tracker-table__status", status.className)}>
-                      {status.icon === "star" ? (
-                        <Star className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
-                      ) : status.icon === "plus" ? (
-                        <Plus className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
-                      ) : status.icon === "check" ? (
-                        <Check className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
-                      ) : null}
-                      {status.label}
-                    </span>
+                    <div className="flex max-w-[11rem] flex-col items-start gap-1">
+                      <span className={cn("yd-tracker-table__status", status.className)}>
+                        {status.icon === "star" ? (
+                          <Star className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+                        ) : status.icon === "plus" ? (
+                          <Plus className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
+                        ) : status.icon === "check" ? (
+                          <Check className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
+                        ) : null}
+                        {status.label}
+                      </span>
+                      <MessageDraftStatusBadge
+                        draftStatus={item.message_draft_status}
+                        readyForReview={readyForReview}
+                      />
+                    </div>
                   </td>
                 </tr>
               );

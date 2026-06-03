@@ -11,8 +11,10 @@ import {
 } from "@/lib/clinical/message-templates";
 import { PreparedWorkPreview } from "@/components/command-ai/prepared-work-preview";
 import { createCaseFromQuery } from "@/lib/create-case-return";
+import { persistMessageDraftFromCommand } from "@/app/(protected)/inbox/command-draft-actions";
 import { stashCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
 import { resolveCommandIntent } from "@/lib/command-ai/intent-resolver";
+import { isSummarizeOnlyCommand } from "@/lib/command-ai/reply-intent";
 import { prepareWorkFromIntent } from "@/lib/command-ai/preparation-engine";
 import { stashCommandTaskDraft } from "@/lib/command-ai/task-draft-bridge";
 import { mergeCommandWorkspaceHints } from "@/lib/command-ai/workspace-context";
@@ -184,6 +186,8 @@ export function CommandAssist() {
 
   const [text, setText] = useState("");
   const [prepareHint, setPrepareHint] = useState<string | null>(null);
+  const [prepareHintTone, setPrepareHintTone] = useState<"neutral" | "success" | "error">("neutral");
+  const [persistBusy, setPersistBusy] = useState(false);
   const [listening, setListening] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const recRef = useRef<{ stop: () => void } | null>(null);
@@ -239,9 +243,10 @@ export function CommandAssist() {
     return mergeCommandWorkspaceHints(assistCtx?.workspaceHints ?? null, active);
   }, [assistCtx?.workspaceHints, inboxCase]);
 
-  const runPrepare = useCallback(() => {
+  const runPrepare = useCallback(async () => {
     const trimmed = text.trim();
     if (!trimmed) return;
+
     const activeCase = inboxCase
       ? {
           submissionId: inboxCase.submissionId,
@@ -249,22 +254,79 @@ export function CommandAssist() {
           concernLine: inboxCase.concernLine,
         }
       : null;
+
     const intent = resolveCommandIntent(trimmed, mergedHints, activeCase);
+
+    if (intent.kind === "patient_message" && !isSummarizeOnlyCommand(trimmed)) {
+      if (!inboxCase?.submissionId) {
+        setPreparedWork(null);
+        setPrepareHintTone("error");
+        setPrepareHint("Bitte öffnen Sie zuerst einen Patientenfall.");
+        return;
+      }
+
+      setPersistBusy(true);
+      setPrepareHint(null);
+      try {
+        const persisted = await persistMessageDraftFromCommand({
+          submissionId: inboxCase.submissionId,
+          rawText: trimmed,
+        });
+        if (persisted.ok) {
+          setPreparedWork(null);
+          setPrepareHintTone("success");
+          setPrepareHint("Antwortentwurf vorbereitet.");
+          router.refresh();
+          return;
+        }
+        setPrepareHintTone("error");
+        setPrepareHint(persisted.error);
+        return;
+      } finally {
+        setPersistBusy(false);
+      }
+    }
+
     const work = prepareWorkFromIntent(intent, mergedHints);
     if (work) {
       setPrepareHint(null);
+      setPrepareHintTone("neutral");
       setPreparedWork(work);
       return;
     }
     setPreparedWork(null);
+    setPrepareHintTone("error");
     setPrepareHint(
-      "Konnte nicht vorbereitet werden. Bitte Patientennamen nennen (z. B. Berk Basal) oder einen Tracker-Fall öffnen."
+      intent.kind === "patient_message"
+        ? "Ich konnte daraus noch keine passende Aktion vorbereiten."
+        : "Konnte nicht vorbereitet werden. Bitte Patientennamen nennen oder einen Tracker-Fall öffnen."
     );
-  }, [text, mergedHints, inboxCase, setPreparedWork]);
+  }, [text, mergedHints, inboxCase, router, setPreparedWork]);
 
-  const handleApprovePrepared = useCallback(() => {
+  const handleApprovePrepared = useCallback(async () => {
     if (!preparedWork) return;
-    if (preparedWork.messageDraft && preparedWork.submissionId) {
+
+    if (
+      preparedWork.messageDraft &&
+      preparedWork.submissionId &&
+      preparedWork.intent.kind === "patient_message"
+    ) {
+      setPersistBusy(true);
+      try {
+        const persisted = await persistMessageDraftFromCommand({
+          submissionId: preparedWork.submissionId,
+          rawText: preparedWork.intent.rawText,
+        });
+        if (!persisted.ok) {
+          setPrepareHintTone("error");
+          setPrepareHint(persisted.error);
+          return;
+        }
+        router.refresh();
+      } finally {
+        setPersistBusy(false);
+      }
+    } else if (preparedWork.messageDraft && preparedWork.submissionId) {
       stashCommandDraftForSubmission({
         submissionId: preparedWork.submissionId,
         body: preparedWork.messageDraft,
@@ -483,8 +545,11 @@ export function CommandAssist() {
           {preparedWork ? (
             <PreparedWorkPreview
               work={preparedWork}
-              onApprove={handleApprovePrepared}
+              onApprove={() => {
+                void handleApprovePrepared();
+              }}
               onDismiss={() => setPreparedWork(null)}
+              busy={persistBusy}
             />
           ) : null}
 
@@ -511,7 +576,10 @@ export function CommandAssist() {
             onChange={(e) => {
               setText(e.target.value);
               if (preparedWork) setPreparedWork(null);
-              if (prepareHint) setPrepareHint(null);
+              if (prepareHint) {
+                setPrepareHint(null);
+                setPrepareHintTone("neutral");
+              }
             }}
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -527,11 +595,13 @@ export function CommandAssist() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={runPrepare}
-              disabled={!text.trim()}
+              onClick={() => {
+                void runPrepare();
+              }}
+              disabled={!text.trim() || persistBusy}
               className="inline-flex h-11 shrink-0 items-center rounded-xl bg-[#0F172A] px-4 text-[14px] font-semibold text-white transition hover:bg-[#1E293B] disabled:opacity-45 dark:bg-[#E2E8F0] dark:text-[#0F172A]"
             >
-              Vorbereiten
+              {persistBusy ? "Wird vorbereitet …" : "Vorbereiten"}
             </button>
             <button type="button" onClick={startDictation} disabled={listening} className={BTN_SECONDARY}>
               <Mic className="h-4 w-4 text-[#2563EB]" strokeWidth={1.75} />
@@ -540,7 +610,17 @@ export function CommandAssist() {
           </div>
 
           {prepareHint ? (
-            <p className="text-[13px] leading-relaxed text-[#B45309]" role="status">
+            <p
+              className={cn(
+                "text-[13px] leading-relaxed",
+                prepareHintTone === "success"
+                  ? "text-[#166534]"
+                  : prepareHintTone === "error"
+                    ? "text-[#B45309]"
+                    : "text-[#64748B]"
+              )}
+              role="status"
+            >
               {prepareHint}
             </p>
           ) : null}

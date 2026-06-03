@@ -38,6 +38,8 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { INTAKE_CHANNEL_PRACTICE_MANUAL } from "@/lib/submissions/intake-channel";
+import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 import { MAX_PHOTOS } from "@/lib/upload/validation";
 
 export type PracticeCaseUrgency = "not_urgent" | "this_week" | "today" | null;
@@ -298,21 +300,38 @@ export async function createPracticeCase(input: {
 
   let insertedRow: { id: string } | null = null;
 
-  const fullInsert = await supabase
+  const caseInsertBase = {
+    workspace_id: workspaceId,
+    patient_name: nameTrim || null,
+    patient_email: emailTrim,
+    patient_phone: phoneTrim,
+    patient_notes: notesTrim,
+    patient_birth_date: birth,
+    patient_external_id: extIdTrim,
+    urgency: input.urgency,
+    is_draft: input.isDraft,
+  };
+
+  let fullInsert = await supabase
     .from("submissions")
     .insert({
-      workspace_id: workspaceId,
-      patient_name: nameTrim || null,
-      patient_email: emailTrim,
-      patient_phone: phoneTrim,
-      patient_notes: notesTrim,
-      patient_birth_date: birth,
-      patient_external_id: extIdTrim,
-      urgency: input.urgency,
-      is_draft: input.isDraft,
+      ...caseInsertBase,
+      intake_channel: INTAKE_CHANNEL_PRACTICE_MANUAL,
     })
     .select("id")
     .single();
+
+  if (
+    fullInsert.error &&
+    isLikelyMissingDbColumnError(fullInsert.error) &&
+    !looksLikeMissingCaseColumnsError(fullInsert.error)
+  ) {
+    fullInsert = await supabase
+      .from("submissions")
+      .insert(caseInsertBase)
+      .select("id")
+      .single();
+  }
 
   if (fullInsert.error || !fullInsert.data?.id) {
     console.error(
@@ -334,17 +353,28 @@ export async function createPracticeCase(input: {
         urgency: input.urgency,
         isDraft: input.isDraft,
       });
-      const legacy = await supabase
+      const legacyBase = {
+        workspace_id: workspaceId,
+        patient_name: nameTrim || null,
+        patient_email: emailTrim,
+        patient_phone: phoneTrim,
+        patient_notes: legacyNotes,
+      };
+      let legacy = await supabase
         .from("submissions")
         .insert({
-          workspace_id: workspaceId,
-          patient_name: nameTrim || null,
-          patient_email: emailTrim,
-          patient_phone: phoneTrim,
-          patient_notes: legacyNotes,
+          ...legacyBase,
+          intake_channel: INTAKE_CHANNEL_PRACTICE_MANUAL,
         })
         .select("id")
         .single();
+      if (legacy.error && isLikelyMissingDbColumnError(legacy.error)) {
+        legacy = await supabase
+          .from("submissions")
+          .insert(legacyBase)
+          .select("id")
+          .single();
+      }
       if (legacy.error || !legacy.data?.id) {
         console.error(
           "[createPracticeCase] legacy insert",

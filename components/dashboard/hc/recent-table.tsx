@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { MessageDraftStatusBadge } from "@/components/inbox/message-draft-status-badge";
 import { PreparationStatusBlock } from "@/components/command-ai/preparation-status-block";
+import { isSubmissionReadyForReview } from "@/lib/message-drafts/list-status";
 import { HcCard } from "@/components/design/hc-card";
 import { YdStatusPill } from "@/components/design-system/yd-status-pill";
 import type { SubmissionPreparation } from "@/lib/command-ai/types";
@@ -162,9 +164,17 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
                     </td>
                     <td className="min-w-[168px] max-w-[220px] px-5 py-3.5 md:px-6">
                       <div className="yd-dash-prep-cell min-w-0">
-                        <span className="yd-dash-prep-summary text-[11px]" style={{ color: YD.text.faint }}>
-                          {prepSummary}
-                        </span>
+                        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                          <span className="yd-dash-prep-summary text-[11px]" style={{ color: YD.text.faint }}>
+                            {prepSummary}
+                          </span>
+                          <MessageDraftStatusBadge
+                            draftStatus={row.message_draft_status ?? "none"}
+                            readyForReview={
+                              preparation?.readyForReview ?? isSubmissionReadyForReview(row)
+                            }
+                          />
+                        </div>
                         {preparation ? (
                           <div className="yd-dash-prep-details mt-1">
                             <PreparationStatusBlock preparation={preparation} compact />

@@ -1,6 +1,12 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
+import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import { attachMessageDraftStatusToRows } from "@/lib/queries/message-drafts";
+import {
+  normalizeIntakeChannel,
+  type IntakeChannel,
+} from "@/lib/submissions/intake-channel";
 
 /**
  * Posteingangsliste (`submissions`) für den **App-Workspace** (`getCurrentWorkspace`).
@@ -27,6 +33,10 @@ export interface SubmissionListItem {
   created_at: string;
   seen_at: string | null;
   photo_count: number;
+  /** Persistenter Antwortentwurf — `none` wenn Tabelle fehlt oder kein Entwurf. */
+  message_draft_status: MessageDraftListStatus;
+  /** Eingangskanal — `unknown` wenn Spalte in DB noch fehlt. */
+  intake_channel: IntakeChannel;
 }
 
 export type InboxSubmissionsResult =
@@ -45,6 +55,7 @@ const INBOX_SELECT_WITH_CASE_FIELDS = [
   "patient_external_id",
   "urgency",
   "is_draft",
+  "intake_channel",
   "created_at",
   "seen_at",
   "submission_photos(count)",
@@ -63,7 +74,8 @@ const INBOX_SELECT_BASE = [
 
 function mapInboxRow(
   s: Record<string, unknown>,
-  defaultsForMissingCaseFields: boolean
+  defaultsForMissingCaseFields: boolean,
+  defaultsForMissingIntakeChannel: boolean
 ): SubmissionListItem {
   return {
     id: s.id as string,
@@ -84,6 +96,10 @@ function mapInboxRow(
     seen_at: s.seen_at as string | null,
     photo_count:
       (s.submission_photos as { count: number }[] | undefined)?.[0]?.count || 0,
+    message_draft_status: "none",
+    intake_channel: defaultsForMissingIntakeChannel
+      ? "unknown"
+      : normalizeIntakeChannel(s.intake_channel),
   };
 }
 
@@ -120,7 +136,8 @@ async function fetchInboxRowsOnce(
   workspaceId: string,
   searchQuery: string | undefined,
   select: string,
-  defaultsForMissingCaseFields: boolean
+  defaultsForMissingCaseFields: boolean,
+  defaultsForMissingIntakeChannel: boolean
 ): Promise<FetchRowsResult> {
   const supabase = await createClient();
 
@@ -144,7 +161,9 @@ async function fetchInboxRowsOnce(
   }
 
   const rows = (data ?? []) as unknown as Record<string, unknown>[];
-  const items = rows.map((row) => mapInboxRow(row, defaultsForMissingCaseFields));
+  const items = rows.map((row) =>
+    mapInboxRow(row, defaultsForMissingCaseFields, defaultsForMissingIntakeChannel)
+  );
 
   return { ok: true, items };
 }
@@ -157,12 +176,47 @@ async function getInboxSubmissionsInner(
     workspaceId,
     searchQuery,
     INBOX_SELECT_WITH_CASE_FIELDS,
+    false,
     false
   );
 
-  if (first.ok) return { ok: true, items: first.items };
+  if (first.ok) {
+    const withDrafts = await attachMessageDraftStatusToRows(workspaceId, first.items);
+    return { ok: true, items: withDrafts };
+  }
 
   if (isLikelyMissingDbColumnError(first.err)) {
+    const errMsg = (first.err?.message ?? "").toLowerCase();
+    const intakeOnlyMissing =
+      errMsg.includes("intake_channel") &&
+      !errMsg.includes("patient_birth_date") &&
+      !errMsg.includes("patient_external_id") &&
+      !errMsg.includes("is_draft") &&
+      !errMsg.includes("urgency");
+
+    if (intakeOnlyMissing) {
+      console.warn(
+        "[inbox] intake_channel missing — retrying list without migration-036 field."
+      );
+      const withoutIntake = INBOX_SELECT_WITH_CASE_FIELDS.split(", ")
+        .filter((f) => f !== "intake_channel")
+        .join(", ");
+      const intakeRetry = await fetchInboxRowsOnce(
+        workspaceId,
+        searchQuery,
+        withoutIntake,
+        false,
+        true
+      );
+      if (intakeRetry.ok) {
+        const withDrafts = await attachMessageDraftStatusToRows(
+          workspaceId,
+          intakeRetry.items
+        );
+        return { ok: true, items: withDrafts };
+      }
+    }
+
     console.warn(
       "[inbox] submissions case columns missing in DB — retrying list without migration-023 fields. Apply migration 023 for full fields."
     );
@@ -170,9 +224,13 @@ async function getInboxSubmissionsInner(
       workspaceId,
       searchQuery,
       INBOX_SELECT_BASE,
+      true,
       true
     );
-    if (second.ok) return { ok: true, items: second.items };
+    if (second.ok) {
+      const withDrafts = await attachMessageDraftStatusToRows(workspaceId, second.items);
+      return { ok: true, items: withDrafts };
+    }
     logInboxQueryFailure("getInboxSubmissions fallback failed", second.err);
     return { ok: false };
   }

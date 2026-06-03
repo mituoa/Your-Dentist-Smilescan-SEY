@@ -1,3 +1,8 @@
+import {
+  getIntakeChannelLabel,
+  type IntakeChannel,
+} from "@/lib/submissions/intake-channel";
+
 /**
  * Kompakte Fallmetadaten (Hilfsspalte). **Punkt 7 — Empty:** „Einordnung (Zeitraum)“ immer sichtbar
  * mit **„Noch nicht gewählt“** wenn null; Kontakt **„Nicht hinterlegt“** wenn weder E-Mail noch Telefon.
@@ -14,6 +19,7 @@ interface SubmissionMetaProps {
   seenAt?: string | null;
   updatedAt?: string | null;
   photoCount?: number;
+  intakeChannel?: IntakeChannel;
 }
 
 function formatDeDate(iso: string) {
@@ -53,6 +59,7 @@ export function SubmissionMeta({
   seenAt,
   updatedAt,
   photoCount,
+  intakeChannel = "unknown",
 }: SubmissionMetaProps) {
   const formattedCreated = formatDeDate(createdAt);
   const birth =
@@ -86,6 +93,13 @@ export function SubmissionMeta({
         <div style={lab}>Status</div>
         <div className="mt-1" style={val}>
           {statusLine}
+        </div>
+      </div>
+
+      <div>
+        <div style={lab}>Eingang</div>
+        <div className="mt-1" style={{ ...val, fontWeight: 400 }}>
+          {getIntakeChannelLabel(intakeChannel)}
         </div>
       </div>
 

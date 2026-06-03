@@ -1,6 +1,11 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
+import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import {
+  normalizeIntakeChannel,
+  type IntakeChannel,
+} from "@/lib/submissions/intake-channel";
 
 /**
  * Lesequeries für die **Arzt-Startseite** (`/dashboard`): Tagesüberblick, unbearbeitete Einsendungen,
@@ -87,6 +92,8 @@ export type SubmissionPreviewRow = {
   patient_notes: string | null;
   created_at: string;
   seen_at: string | null;
+  message_draft_status?: MessageDraftListStatus;
+  intake_channel?: IntakeChannel;
 };
 
 export type DashboardPriorityItem = {
@@ -240,12 +247,31 @@ export const getRecentSubmissionsPreview = cache(
       return { ok: false };
     }
     const supabase = await createClient();
-    const { data, error } = await supabase
+    const previewSelect =
+      "id, patient_name, patient_email, patient_notes, created_at, seen_at, intake_channel";
+    const previewRes = await supabase
       .from("submissions")
-      .select("id, patient_name, patient_email, patient_notes, created_at, seen_at")
+      .select(previewSelect)
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(5);
+
+    let intakeKnown = true;
+    let rows: Array<Record<string, unknown>> | null =
+      (previewRes.data as Array<Record<string, unknown>> | null) ?? null;
+    let error = previewRes.error;
+
+    if (error && isLikelyMissingDbColumnError(error)) {
+      intakeKnown = false;
+      const fallback = await supabase
+        .from("submissions")
+        .select("id, patient_name, patient_email, patient_notes, created_at, seen_at")
+        .eq("workspace_id", workspaceId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      rows = (fallback.data as Array<Record<string, unknown>> | null) ?? null;
+      error = fallback.error;
+    }
 
     if (error) {
       logDashboardDbFailure("submission_preview_failed", error);
@@ -254,7 +280,7 @@ export const getRecentSubmissionsPreview = cache(
 
     return {
       ok: true,
-      rows: (data || []).map((row) => {
+      rows: (rows || []).map((row) => {
         const r = row as {
           id: string;
           patient_name: string | null;
@@ -262,6 +288,7 @@ export const getRecentSubmissionsPreview = cache(
           patient_notes: string | null;
           created_at: string;
           seen_at: string | null;
+          intake_channel?: string | null;
         };
         return {
           id: r.id,
@@ -270,6 +297,9 @@ export const getRecentSubmissionsPreview = cache(
           patient_notes: r.patient_notes ?? null,
           created_at: r.created_at,
           seen_at: r.seen_at ?? null,
+          intake_channel: intakeKnown
+            ? normalizeIntakeChannel(r.intake_channel)
+            : ("unknown" as const),
         };
       }),
     };

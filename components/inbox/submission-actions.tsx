@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 import { AppointmentLinkButton } from "./appointment-link-button";
-import { FollowUpMessageDraft } from "./follow-up-message-draft";
+import { SubmissionMessageDraftPanel } from "./submission-message-draft-panel";
 import { SubmissionMeta } from "./submission-meta";
+import type { MessageDraftRow } from "@/lib/queries/message-drafts";
+import type { IntakeChannel } from "@/lib/submissions/intake-channel";
 
 interface SubmissionActionsProps {
   submissionId: string;
@@ -23,6 +25,11 @@ interface SubmissionActionsProps {
   canSendAppointmentLink: boolean;
   practicePhone?: string | null;
   appointmentUrl?: string | null;
+  isDoctor: boolean;
+  messageDraftsAvailable: boolean;
+  editableMessageDraft: MessageDraftRow | null;
+  historyMessageDraft: MessageDraftRow | null;
+  intakeChannel?: IntakeChannel;
 }
 
 const sectionPad = "px-4 py-4 sm:px-5 sm:py-4";
@@ -46,6 +53,11 @@ export function SubmissionActions({
   canSendAppointmentLink,
   practicePhone,
   appointmentUrl,
+  isDoctor,
+  messageDraftsAvailable,
+  editableMessageDraft,
+  historyMessageDraft,
+  intakeChannel = "unknown",
 }: SubmissionActionsProps) {
   return (
     <div className="flex min-h-0 max-lg:flex-none touch-manipulation flex-col px-4 py-3 lg:min-h-0 lg:flex-1 lg:px-3 lg:py-2">
@@ -53,14 +65,18 @@ export function SubmissionActions({
         <div className="min-h-0 overscroll-y-contain pb-[max(0.75rem,var(--safe-area-bottom))] max-lg:h-auto max-lg:flex-none max-lg:overflow-visible max-lg:pb-[max(1rem,var(--safe-area-bottom))] max-lg:scroll-pb-28 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div id="tracker-korrespondenz" className={`scroll-mt-6 border-b border-[rgba(15,23,42,0.06)] ${sectionPad}`}>
             <p className="mb-4 text-[13px] font-semibold leading-snug tracking-tight text-slate-800">
-              Entwurf für die Rückmeldung
+              {editableMessageDraft ? "Antwortentwurf" : "Rückmeldung vorbereiten"}
             </p>
-            <FollowUpMessageDraft
+            <SubmissionMessageDraftPanel
               submissionId={submissionId}
               patientName={patientName}
-              urgency={(urgency as "today" | "this_week" | "not_urgent") || null}
+              urgency={urgency ?? null}
               practicePhone={practicePhone ?? null}
               appointmentUrl={appointmentUrl ?? null}
+              isDoctor={isDoctor}
+              draftsAvailable={messageDraftsAvailable}
+              initialEditableDraft={editableMessageDraft}
+              initialHistoryDraft={historyMessageDraft}
             />
           </div>
 
@@ -87,6 +103,7 @@ export function SubmissionActions({
               seenAt={seenAt}
               updatedAt={updatedAt}
               photoCount={photoCount}
+              intakeChannel={intakeChannel}
             />
             <p className="mt-5 text-[12px] text-slate-500">
               Teamaufgaben:{" "}
