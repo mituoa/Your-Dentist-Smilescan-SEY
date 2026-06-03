@@ -59,13 +59,12 @@ export function PhotoDocumentationSection({
   if (photos.length === 0) {
     return (
       <section
-        className="yd-photo-doc mt-6 max-w-full overflow-hidden"
+        className="yd-photo-doc yd-photo-doc--premium mt-6 max-w-full overflow-hidden"
         aria-labelledby="photo-doc-heading"
       >
         <h3 id="photo-doc-heading" className="yd-photo-doc__title">
-          Foto-Dokumentation
+          Fotoverlauf
         </h3>
-        <p className="yd-photo-doc__lead">Verlauf zur klinischen Prüfung</p>
         <p className="mt-3 text-[14px] text-[#64748B]">Noch keine Fotos zu diesem Fall.</p>
       </section>
     );
@@ -76,16 +75,15 @@ export function PhotoDocumentationSection({
 
   return (
     <section
-      className="yd-photo-doc mt-6 max-w-full overflow-hidden"
+      className="yd-photo-doc yd-photo-doc--premium mt-6 max-w-full overflow-hidden"
       aria-labelledby="photo-doc-heading"
     >
       <h3 id="photo-doc-heading" className="yd-photo-doc__title">
-        Foto-Dokumentation
+        Fotoverlauf
       </h3>
-      <p className="yd-photo-doc__lead">
-        Verlauf zur klinischen Prüfung
-        {multiDay ? ` · ${groups.length} Tage` : ""}
-      </p>
+      {multiDay ? (
+        <p className="yd-photo-doc__lead">{groups.length} Tage</p>
+      ) : null}
 
       <ol className="yd-photo-doc__timeline mt-4 space-y-4">
         {groups.map((group) => (

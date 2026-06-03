@@ -2,12 +2,17 @@
 export function TrackerIndexPlaceholder() {
   return (
     <div
-      className="yd-inbox-detail-root yd-inbox-index-placeholder flex h-full min-h-0 flex-1 flex-col"
+      className="yd-inbox-detail-root yd-inbox-index-placeholder flex h-full min-h-0 flex-1 flex-col items-center justify-center px-6"
       role="status"
     >
-      <p className="yd-inbox-index-placeholder__title">Fall auswählen</p>
+      <div className="yd-inbox-index-placeholder__card" aria-hidden>
+        <span className="yd-inbox-index-placeholder__line yd-inbox-index-placeholder__line--wide" />
+        <span className="yd-inbox-index-placeholder__line" />
+        <span className="yd-inbox-index-placeholder__line yd-inbox-index-placeholder__line--short" />
+      </div>
+      <p className="yd-inbox-index-placeholder__title">Patient wählen</p>
       <p className="yd-inbox-index-placeholder__text">
-        Wählen Sie in der Tabelle links einen Patientenfall — die Detailansicht öffnet sich hier.
+        In der Liste links tippen — Fotos, Anliegen und Zeitraum erscheinen hier.
       </p>
     </div>
   );

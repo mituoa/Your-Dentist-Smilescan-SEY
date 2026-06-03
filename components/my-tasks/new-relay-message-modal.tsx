@@ -109,7 +109,7 @@ export function NewRelayMessageModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="max-h-[min(92dvh,640px)] w-full overflow-y-auto rounded-t-[20px] border border-[rgba(15,23,42,0.08)] bg-white p-5 shadow-xl sm:max-w-lg sm:rounded-2xl"
+        className="yd-clinical-control max-h-[min(92dvh,640px)] w-full overflow-y-auto rounded-t-[20px] border border-[rgba(15,23,42,0.08)] bg-white p-5 shadow-xl sm:max-w-lg sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-3">

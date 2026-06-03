@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { AppointmentLinkButton } from "./appointment-link-button";
 import { SubmissionMessageDraftPanel } from "./submission-message-draft-panel";
-import { SubmissionMeta } from "./submission-meta";
+import { TrackerCaseSidebarMeta } from "./tracker-case-sidebar-meta";
 import type { MessageDraftRow } from "@/lib/queries/message-drafts";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
 
@@ -64,8 +64,8 @@ export function SubmissionActions({
       <div className="flex min-h-0 min-w-0 max-lg:flex-none flex-col overflow-hidden max-lg:overflow-visible lg:min-h-0 lg:flex-1">
         <div className="min-h-0 overscroll-y-contain pb-[max(0.75rem,var(--safe-area-bottom))] max-lg:h-auto max-lg:flex-none max-lg:overflow-visible max-lg:pb-[max(1rem,var(--safe-area-bottom))] max-lg:scroll-pb-28 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div id="tracker-korrespondenz" className={`scroll-mt-6 border-b border-[rgba(15,23,42,0.06)] ${sectionPad}`}>
-            <p className="mb-4 text-[13px] font-semibold leading-snug tracking-tight text-slate-800">
-              {editableMessageDraft ? "Antwortentwurf" : "Rückmeldung vorbereiten"}
+            <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
+              Entwurf
             </p>
             <SubmissionMessageDraftPanel
               submissionId={submissionId}
@@ -81,7 +81,9 @@ export function SubmissionActions({
           </div>
 
           <div id="tracker-termin" className={`scroll-mt-6 border-b border-[rgba(15,23,42,0.06)] ${sectionPad}`}>
-            <p className="mb-3 text-[13px] font-semibold text-slate-800">Terminlink</p>
+            <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
+              Termin
+            </p>
             <AppointmentLinkButton
               submissionId={submissionId}
               hasPatientEmail={!!patientEmail}
@@ -90,25 +92,19 @@ export function SubmissionActions({
           </div>
 
           <div className={sectionPad}>
-            <p className="mb-3 text-[13px] font-semibold text-slate-800">Fallangaben</p>
-            <SubmissionMeta
-              patientName={patientName}
-              patientEmail={patientEmail}
-              patientPhone={patientPhone}
-              createdAt={createdAt}
-              patientBirthDate={patientBirthDate}
-              patientExternalId={patientExternalId}
-              urgency={urgency}
+            <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
+              Kurzinfo
+            </p>
+            <TrackerCaseSidebarMeta
+              intakeChannel={intakeChannel}
+              photoCount={photoCount ?? 0}
+              urgency={urgency ?? null}
               isDraft={isDraft}
               seenAt={seenAt}
-              updatedAt={updatedAt}
-              photoCount={photoCount}
-              intakeChannel={intakeChannel}
             />
-            <p className="mt-5 text-[12px] text-slate-500">
-              Teamaufgaben:{" "}
-              <Link href="/relay" className="font-medium text-[#2563EB] underline-offset-2 hover:underline">
-                Relay öffnen
+            <p className="mt-4 text-[12px] text-[#94A3B8]">
+              <Link href="/relay" className="font-medium text-[#2563EB] hover:underline">
+                Relay
               </Link>
             </p>
           </div>

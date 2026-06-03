@@ -19,7 +19,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, CheckCheck, CircleDot, Users } from "lucide-react";
+import { Check, CheckCheck, CircleDot } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useRef, useState, useTransition } from "react";
 
@@ -28,7 +28,12 @@ import {
   reorderTasksInColumn,
 } from "@/app/(protected)/my-tasks/actions";
 import type { MyTask } from "@/lib/queries/my-tasks";
-import { formatTaskCompletionLine } from "@/lib/tasks/format-task-completion";
+import type { AssignableMember } from "@/lib/queries/team-members";
+import { RelayCompactTaskBoard } from "@/components/my-tasks/relay-compact-task-board";
+import {
+  assigneeLabelForTask,
+  formatRelayDoneLine,
+} from "@/lib/relay/build-relay-snapshot";
 import { recurrenceBadgeLabel } from "@/lib/tasks/recurrence";
 import { clinicalCorePanel } from "@/lib/pilot-surface";
 import {
@@ -49,8 +54,10 @@ interface CardBoardProps {
   isDoctor: boolean;
   columnTitles?: Partial<Record<BoardColumnId, string>>;
   columnSurfaceClass?: Partial<Record<BoardColumnId, string>>;
-  /** user_id → initials + color for assignee chips */
   avatarByUserId?: Record<string, { initials: string; color: string }>;
+  assignableMembers?: AssignableMember[];
+  /** Kompaktes Board unter „Heute wichtig“ (Relay). */
+  compact?: boolean;
 }
 
 export function CardBoard({
@@ -60,7 +67,13 @@ export function CardBoard({
   columnTitles,
   columnSurfaceClass,
   avatarByUserId,
+  assignableMembers = [],
+  compact = false,
 }: CardBoardProps) {
+  const membersById = useMemo(
+    () => new Map(assignableMembers.map((m) => [m.user_id, m])),
+    [assignableMembers]
+  );
   const [board, setBoard] = useState(columns);
   const [activeTask, setActiveTask] = useState<MyTask | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -192,6 +205,20 @@ export function CardBoard({
     });
   };
 
+  if (compact) {
+    return (
+      <RelayCompactTaskBoard
+        board={board}
+        membersById={membersById}
+        titles={{
+          open: columnTitles?.open,
+          pending: columnTitles?.pending,
+          done: columnTitles?.done,
+        }}
+      />
+    );
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -200,8 +227,14 @@ export function CardBoard({
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
     >
-      <div className="max-md:overflow-x-hidden md:overflow-x-auto md:pb-2">
-        <div className="grid max-md:min-w-0 max-md:grid-cols-1 max-md:gap-4 md:min-w-[980px] md:grid-cols-3 md:gap-6">
+      <div className={compact ? "max-md:overflow-x-hidden" : "max-md:overflow-x-hidden md:overflow-x-auto md:pb-2"}>
+        <div
+          className={
+            compact
+              ? "grid max-md:min-w-0 max-md:grid-cols-1 max-md:gap-3 md:grid-cols-3 md:gap-3"
+              : "grid max-md:min-w-0 max-md:grid-cols-1 max-md:gap-4 md:min-w-[980px] md:grid-cols-3 md:gap-6"
+          }
+        >
           <BoardColumn
             id="open"
             title={columnTitles?.open ?? "Offen"}
@@ -215,6 +248,8 @@ export function CardBoard({
             currentUserId={currentUserId}
             isDoctor={isDoctor}
             avatarByUserId={avatarByUserId}
+            compact={compact}
+            membersById={membersById}
           />
           <BoardColumn
             id="pending"
@@ -229,6 +264,8 @@ export function CardBoard({
             currentUserId={currentUserId}
             isDoctor={isDoctor}
             avatarByUserId={avatarByUserId}
+            compact={compact}
+            membersById={membersById}
           />
           <BoardColumn
             id="done"
@@ -243,6 +280,8 @@ export function CardBoard({
             currentUserId={currentUserId}
             isDoctor={isDoctor}
             avatarByUserId={avatarByUserId}
+            compact={compact}
+            membersById={membersById}
           />
         </div>
       </div>
@@ -264,6 +303,8 @@ function BoardColumn({
   currentUserId,
   isDoctor,
   avatarByUserId,
+  compact,
+  membersById,
 }: {
   id: BoardColumnId;
   title: string;
@@ -277,6 +318,8 @@ function BoardColumn({
   currentUserId: string;
   isDoctor: boolean;
   avatarByUserId?: Record<string, { initials: string; color: string }>;
+  compact?: boolean;
+  membersById: Map<string, AssignableMember>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const activeFromColumn = activeTask ? taskStatusToColumn(activeTask.status) : null;
@@ -291,8 +334,8 @@ function BoardColumn({
     <section
       id={id}
       ref={setNodeRef}
-      className={`max-h-[72vh] overflow-y-auto rounded-xl border border-[rgba(15,23,42,0.06)] p-4 sm:p-5 ${surfaceClassName ?? ""} ${
-        clinicalCorePanel
+      className={`${compact ? "yd-relay-kanban-col" : "max-h-[72vh]"} overflow-y-auto rounded-xl border border-[rgba(15,23,42,0.06)] ${compact ? "" : "p-4 sm:p-5"} ${surfaceClassName ?? ""} ${
+        compact ? "" : clinicalCorePanel
       } ${isOver && canDropActiveTask ? "ring-2 ring-[rgba(43,111,232,0.32)]" : ""}`}
     >
       <header className="sticky top-0 z-10 mb-4 flex items-center justify-between border-b border-[rgba(15,23,42,0.06)] bg-white/95 pb-3 backdrop-blur-sm">
@@ -315,8 +358,8 @@ function BoardColumn({
               key={task.id}
               task={task}
               doneColumn={id === "done"}
-              currentUserId={currentUserId}
-              avatarByUserId={avatarByUserId}
+              membersById={membersById}
+              compact={compact}
             />
           ))}
         </div>
@@ -329,13 +372,13 @@ function BoardColumn({
 function TaskMiniCard({
   task,
   doneColumn,
-  currentUserId,
-  avatarByUserId,
+  membersById,
+  compact,
 }: {
   task: MyTask;
   doneColumn?: boolean;
-  currentUserId: string;
-  avatarByUserId?: Record<string, { initials: string; color: string }>;
+  membersById: Map<string, AssignableMember>;
+  compact?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `card-${task.id}`,
@@ -345,31 +388,23 @@ function TaskMiniCard({
     transition,
   };
 
-  const assigneeIds =
-    task.assignee_ids.length > 0
-      ? task.assignee_ids
-      : task.specific_recipient_id
-        ? [task.specific_recipient_id]
-        : [task.created_by];
-  const uniqueAssignees = Array.from(new Set(assigneeIds)).slice(0, 4);
-  const multi = uniqueAssignees.length > 1;
-
-  const contextLine =
+  const patientLine =
     task.submission_patient_name != null && String(task.submission_patient_name).trim().length > 0
       ? task.submission_patient_name
-      : task.submission_id
-        ? "Patienten-Item"
-        : null;
-
-  const isMine = task.assignee_ids.includes(currentUserId) || task.specific_recipient_id === currentUserId;
-  const completionLine =
-    doneColumn && task.done_at
-      ? formatTaskCompletionLine({
-          doneAt: task.done_at,
-          doneByEmail: task.done_by_email,
-        })
       : null;
-  const routineLabel = recurrenceBadgeLabel(task.recurrence_type);
+
+  const assignee = assigneeLabelForTask(task, membersById);
+  const due =
+    task.due_date &&
+    new Date(`${task.due_date}T12:00:00`).toLocaleDateString("de-DE", {
+      day: "numeric",
+      month: "short",
+    });
+  const completionLine = doneColumn ? formatRelayDoneLine(task) : null;
+  const routineLabel = !doneColumn ? recurrenceBadgeLabel(task.recurrence_type) : null;
+  let statusLabel = "Offen";
+  if (task.status === "pending_review") statusLabel = "Freigabe";
+  else if (doneColumn) statusLabel = "Erledigt";
 
   return (
     <div
@@ -384,62 +419,40 @@ function TaskMiniCard({
         onClick={(event) => {
           if (isDragging) event.preventDefault();
         }}
-        className={`block rounded-lg border px-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F80ED]/30 ${
-          isMine
-            ? "border-[rgba(47,128,237,0.15)] bg-[rgba(47,128,237,0.02)] hover:bg-[rgba(47,128,237,0.04)]"
-            : "border-[rgba(15,23,42,0.06)] bg-white hover:border-[rgba(43,111,232,0.15)] hover:bg-[#F4F7FB]"
-        }`}
+        className={compact ? "yd-relay-task-card block" : "block rounded-lg border border-[rgba(15,23,42,0.06)] bg-white px-4 py-3.5 transition-colors hover:border-[rgba(43,111,232,0.15)] hover:bg-[#F4F7FB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F80ED]/30"}
       >
-        <div className="mb-2 flex items-start gap-2">
-          {task.priority === "important" ? (
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#DC2626]" aria-hidden />
-          ) : (
-            <span className="mt-1.5 w-1.5 shrink-0" aria-hidden />
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <h3
-                className={`line-clamp-2 text-[14px] font-medium leading-snug ${
-                  doneColumn ? "text-[#64748B]" : "text-[#1E293B]"
-                }`}
-              >
-                {task.title}
-              </h3>
-              <ReceiptMark task={task} />
-            </div>
-            {completionLine ? (
-              <p className="mt-1 text-[11px] font-medium text-[#64748B]">{completionLine}</p>
-            ) : null}
-            {routineLabel && !doneColumn ? (
-              <span className="mt-1 inline-flex rounded-full border border-[rgba(43,111,232,0.12)] bg-[#EEF6FF] px-2 py-0.5 text-[10px] font-semibold text-[#1D4ED8]">
-                {routineLabel}
-              </span>
-            ) : null}
-            {contextLine ? (
-              <p className={`mt-1 text-[12px] ${doneColumn ? "text-[#CBD5E1]" : "text-[#94A3B8]"}`}>{contextLine}</p>
-            ) : null}
-          </div>
+        <div className="flex items-start justify-between gap-2">
+          <h3
+            className={
+              compact
+                ? "yd-relay-task-card__title line-clamp-2"
+                : `line-clamp-2 text-[14px] font-semibold leading-snug ${doneColumn ? "text-[#64748B]" : "text-[#0F172A]"}`
+            }
+          >
+            {task.title}
+          </h3>
+          {!compact ? <ReceiptMark task={task} /> : null}
         </div>
-
-        <div className="mt-1 flex items-center gap-1.5 pl-3.5">
-          {multi ? <Users className="h-3 w-3 shrink-0 text-[#94A3B8]" aria-hidden /> : null}
-          {uniqueAssignees.map((uid) => {
-            const chip = avatarByUserId?.[uid];
-            return (
-              <div
-                key={uid}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                style={{
-                  background: chip?.color ?? "#64748B",
-                  boxShadow: uid === currentUserId ? "0 0 0 2px rgba(47,128,237,0.2)" : undefined,
-                }}
-                title={uid}
-              >
-                {chip?.initials ?? "?"}
-              </div>
-            );
-          })}
-        </div>
+        {patientLine ? (
+          <p className={compact ? "yd-relay-task-card__meta" : "mt-1 text-[12px] text-[#64748B]"}>
+            Patient: {patientLine}
+          </p>
+        ) : null}
+        <p className={compact ? "yd-relay-task-card__meta" : "mt-1 text-[12px] text-[#64748B]"}>
+          Zuständig: {assignee}
+          {due ? ` · Fällig ${due}` : ""}
+          {!compact ? ` · ${statusLabel}` : ""}
+        </p>
+        {completionLine ? (
+          <p className={compact ? "yd-relay-task-card__done" : "mt-1 text-[11px] font-medium text-[#64748B]"}>
+            {completionLine}
+          </p>
+        ) : null}
+        {routineLabel ? (
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#1D4ED8]">
+            {routineLabel}
+          </p>
+        ) : null}
       </Link>
     </div>
   );

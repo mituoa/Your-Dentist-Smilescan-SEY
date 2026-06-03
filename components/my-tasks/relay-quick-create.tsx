@@ -86,6 +86,7 @@ export function RelayQuickCreate({
       ref={wrapRef}
       id="relay-quick-create"
       className={cn(
+        "yd-clinical-control",
         "mb-8 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow",
         focused
           ? "border-[#2B6FE8] shadow-[0_0_0_3px_rgba(43,111,232,0.08),0_4px_24px_-12px_rgba(43,111,232,0.1)]"

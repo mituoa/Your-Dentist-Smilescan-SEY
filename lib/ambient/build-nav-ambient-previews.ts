@@ -33,7 +33,7 @@ export function buildNavAmbientPreviews(input: {
   const unread = inboxUnseen ?? openCases.filter((s) => !s.seen_at).length;
 
   map.inbox = {
-    title: "Einsendungen",
+    title: "Tracker",
     lines: [
       { label: "Offen", value: String(openCases.length) },
       { label: "Ungelesen", value: String(unread), tone: unread > 0 ? "urgent" : "default" },

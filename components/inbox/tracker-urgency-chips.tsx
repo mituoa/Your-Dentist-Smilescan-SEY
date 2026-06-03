@@ -51,17 +51,8 @@ export function TrackerUrgencyChips({
 
   return (
     <div className="tracker-mobile-chip-targets" aria-busy={pending}>
-      <p
-        id="tracker-urgency-label"
-        className="text-[12px]"
-        style={{
-          color: "#94A3B8",
-          marginBottom: "8px",
-          fontWeight: 500,
-          letterSpacing: "0.01em",
-        }}
-      >
-        Zeitraum setzen
+      <p id="tracker-urgency-label" className="sr-only">
+        Zeitraum
       </p>
       <div
         className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-2"

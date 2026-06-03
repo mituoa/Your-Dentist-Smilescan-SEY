@@ -3,15 +3,13 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
-import { MessageSquarePlus, Users } from "lucide-react";
+import { MessageSquarePlus } from "lucide-react";
 
 import {
-  createDirectConversation,
   loadRelayMessagesState,
   markRelayConversationRead,
   sendRelayMessage,
 } from "@/app/(protected)/my-tasks/messages-actions";
-import { RelayGroupCreateModal } from "@/components/my-tasks/relay-group-create-modal";
 import { NewRelayMessageModal } from "@/components/my-tasks/new-relay-message-modal";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayConversationRow, RelayMessageRow } from "@/lib/queries/relay-messages";
@@ -58,8 +56,6 @@ export function RelayMessagesPanel({
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeId = searchParams.get("conversation");
-  const [groupOpen, setGroupOpen] = useState(false);
-  const [directOpen, setDirectOpen] = useState(false);
   const [newMessageOpen, setNewMessageOpen] = useState(false);
   const [messages, setMessages] = useState<RelayMessageRow[]>([]);
   const [threadTitle, setThreadTitle] = useState("");
@@ -102,21 +98,6 @@ export function RelayMessagesPanel({
     router.replace(`/relay?panel=messages&conversation=${id}`, { scroll: false });
   };
 
-  const handleDirectStart = (recipientId: string) => {
-    startTransition(async () => {
-      const res = await createDirectConversation(recipientId);
-      if (res.error) {
-        setSendError(res.error);
-        return;
-      }
-      if (res.conversationId) {
-        setDirectOpen(false);
-        router.replace(`/relay?panel=messages&conversation=${res.conversationId}`);
-        router.refresh();
-      }
-    });
-  };
-
   const handleSend = () => {
     if (!activeId || !composer.trim() || isPending) return;
     setSendError(null);
@@ -136,62 +117,25 @@ export function RelayMessagesPanel({
     <div className="relay-messages">
       <aside className="relay-messages-list" aria-label="Nachrichten">
         <div className="relay-messages-list-head">
-          <p className="relay-messages-list-title">Interne Nachrichten</p>
-          <div className="relay-messages-list-actions">
-            <button
-              type="button"
-              className="relay-messages-icon-btn relay-messages-icon-btn--primary"
-              title="Neue Nachricht"
-              onClick={() => setNewMessageOpen(true)}
-            >
-              <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} />
-            </button>
-            <button
-              type="button"
-              className="relay-messages-icon-btn"
-              title="An Person"
-              onClick={() => setDirectOpen((o) => !o)}
-            >
-              <span className="text-[11px] font-semibold">1:1</span>
-            </button>
-            <button
-              type="button"
-              className="relay-messages-icon-btn"
-              title="Gruppe anlegen"
-              onClick={() => setGroupOpen(true)}
-            >
-              <Users className="h-4 w-4" strokeWidth={1.75} />
-            </button>
+          <div>
+            <p className="relay-messages-list-title">Übergaben</p>
+            <p className="relay-messages-list-sub">Intern · Praxis</p>
           </div>
+          <button
+            type="button"
+            className="relay-messages-new-btn"
+            onClick={() => setNewMessageOpen(true)}
+          >
+            <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+            Neu
+          </button>
         </div>
-
-        {directOpen ? (
-          <div className="relay-messages-direct-picker">
-            <p className="text-[12px] font-medium text-[#64748B]">An Teammitglied</p>
-            <ul className="mt-2 max-h-[160px] space-y-0.5 overflow-y-auto">
-              {assignableMembers
-                .filter((m) => m.user_id !== currentUserId)
-                .map((m) => (
-                  <li key={m.user_id}>
-                    <button
-                      type="button"
-                      disabled={isPending}
-                      className="w-full truncate rounded-md px-2 py-2 text-left text-[13px] text-[#334155] hover:bg-[rgba(43,111,232,0.06)]"
-                      onClick={() => handleDirectStart(m.user_id)}
-                    >
-                      {m.email || "Teammitglied"}
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          </div>
-        ) : null}
 
         {conversations.length === 0 ? (
           <div className="relay-messages-empty">
             <p className="text-[14px] font-medium text-[#0F172A]">Noch keine Nachrichten</p>
             <p className="mt-2 text-[13px] leading-relaxed text-[#64748B]">
-              Übergaben und Hinweise fürs Team — intern in Relay, ohne externe Kanäle.
+              Kurze interne Hinweise fürs Team — keine externen Kanäle.
             </p>
           </div>
         ) : (
@@ -203,7 +147,10 @@ export function RelayMessagesPanel({
                   <button
                     type="button"
                     onClick={() => openConversation(c.id)}
-                    className={cn("relay-messages-thread", active && "relay-messages-thread--active")}
+                    className={cn(
+                      "relay-messages-thread relay-messages-thread-preview-card",
+                      active && "relay-messages-thread--active"
+                    )}
                   >
                     <span className="relay-messages-thread-top">
                       <span className="relay-messages-thread-name">{conversationLabel(c)}</span>
@@ -220,9 +167,6 @@ export function RelayMessagesPanel({
                         Noch keine Nachricht
                       </span>
                     )}
-                    {c.last_message_at ? (
-                      <span className="relay-messages-thread-time">{formatTime(c.last_message_at)}</span>
-                    ) : null}
                     {(c.task_id || c.submission_id) && (
                       <span className="relay-messages-context">
                         {c.task_id ? (
@@ -248,9 +192,9 @@ export function RelayMessagesPanel({
       <section className="relay-messages-thread-pane" aria-label="Nachrichtenverlauf">
         {!activeConversation ? (
           <div className="relay-messages-thread-empty">
-            <p className="text-[15px] font-medium text-[#0F172A]">Nachricht wählen</p>
+            <p className="text-[15px] font-medium text-[#0F172A]">Übergabe wählen</p>
             <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-[#64748B]">
-              Wählen Sie links einen Verlauf oder starten Sie eine neue interne Nachricht.
+              Links einen Verlauf öffnen oder „Neu“ für eine interne Übergabe.
             </p>
           </div>
         ) : (
@@ -278,27 +222,41 @@ export function RelayMessagesPanel({
                   Noch keine Nachrichten in dieser Unterhaltung.
                 </p>
               ) : (
-                <ul className="relay-messages-bubbles">
-                  {messages.map((m) => (
-                    <li
-                      key={m.id}
-                      className={cn(
-                        "relay-message",
-                        m.is_own && "relay-message--own"
-                      )}
-                    >
-                      {!m.is_own && m.sender_email ? (
-                        <span className="relay-message-sender">{m.sender_email}</span>
-                      ) : null}
-                      <div className="relay-message-body">{m.body}</div>
-                      <div className="relay-message-meta">
-                        <time dateTime={m.created_at}>{formatTime(m.created_at)}</time>
-                        {m.is_own ? (
-                          <RelayMessageReadStatus message={m} />
-                        ) : null}
-                      </div>
-                    </li>
-                  ))}
+                <ul className="relay-messages-handoffs">
+                  {messages.map((m) => {
+                    const senderLabel = m.sender_email
+                      ? m.sender_email.split("@")[0]!.replace(/[._-]/g, " ").trim() || "Team"
+                      : "Team";
+                    const readSummary = m.is_own
+                      ? formatRelayReadReceiptSummary(
+                          m.read_receipts,
+                          m.is_group_thread
+                        )
+                      : null;
+                    return (
+                      <li
+                        key={m.id}
+                        className={cn(
+                          "relay-handoff-entry",
+                          m.is_own && "relay-handoff-entry--own"
+                        )}
+                      >
+                        <span className="relay-handoff-entry__label">
+                          {m.is_own ? "Ihre Übergabe" : senderLabel}
+                        </span>
+                        <p className="relay-handoff-entry__body">{m.body}</p>
+                        <div className="relay-handoff-entry__footer">
+                          {m.is_own ? (
+                            <RelayMessageReadStatus message={m} />
+                          ) : (
+                            <span className="relay-message-status">
+                              {formatTime(m.created_at)}
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -336,12 +294,6 @@ export function RelayMessagesPanel({
         )}
       </section>
 
-      <RelayGroupCreateModal
-        open={groupOpen}
-        onClose={() => setGroupOpen(false)}
-        members={assignableMembers}
-        currentUserId={currentUserId}
-      />
       <NewRelayMessageModal
         open={newMessageOpen}
         onClose={() => setNewMessageOpen(false)}

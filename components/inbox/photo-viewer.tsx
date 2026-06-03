@@ -280,8 +280,8 @@ export function PhotoViewer({
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[13px]" style={{ color: "#64748B" }}>
-          Bild {idx + 1} von {photos.length}
+        <p className="text-[12px] font-medium" style={{ color: "#94A3B8" }}>
+          {photos.length > 1 ? `${idx + 1} / ${photos.length}` : null}
         </p>
         {enableZipDownload ? (
         <button

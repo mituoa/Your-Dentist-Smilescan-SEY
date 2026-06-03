@@ -25,7 +25,8 @@ export type TrackerInboxFilter =
   | "open_tasks"
   | "photo_trail"
   | "follow_up"
-  | "practice_cases";
+  | "practice_cases"
+  | "completed";
 
 export type TrackerFilterChip = {
   id: TrackerInboxFilter;
@@ -34,9 +35,14 @@ export type TrackerFilterChip = {
 
 export const TRACKER_FILTER_CHIPS: TrackerFilterChip[] = [
   { id: "all", label: "Alle" },
-  { id: "new_submissions", label: "Neue Einsendungen" },
-  { id: "draft_prepared", label: "Antwort vorbereitet" },
-  { id: "approval_pending", label: "Freigabe ausstehend" },
+  { id: "new_submissions", label: "Neu" },
+  { id: "approval_pending", label: "Freigabe" },
+  { id: "draft_prepared", label: "In Bearbeitung" },
+  { id: "completed", label: "Abgeschlossen" },
+];
+
+/** Erweiterte Filter — nur in der Auswahl, nicht als Chip-Leiste. */
+export const TRACKER_FILTER_EXTENDED: TrackerFilterChip[] = [
   { id: "open_tasks", label: "Offene Aufgaben" },
   { id: "photo_trail", label: "Fotoverlauf" },
   { id: "follow_up", label: "Nachsorge" },
@@ -52,6 +58,7 @@ export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
   photo_trail: "Keine aktiven Fotoverläufe.",
   follow_up: "Keine aktiven Nachsorge-Einsendungen.",
   practice_cases: "Keine manuell angelegten Praxisfälle.",
+  completed: "Keine abgeschlossenen Fälle.",
 };
 
 export function isApprovalPending(item: EnrichedSubmissionListItem): boolean {
@@ -97,9 +104,39 @@ export function matchesTrackerFilter(
       );
     case "practice_cases":
       return item.intake_channel === "practice_manual";
+    case "completed":
+      return item.message_draft_status === "sent";
     default:
       return true;
   }
+}
+
+/** Kurzreferenz in der Tabelle (Figma: Fall-Nr.). */
+export function formatTrackerCaseRef(
+  id: string,
+  externalId: string | null
+): string {
+  const ext = externalId?.trim();
+  if (ext) return ext.length > 12 ? ext.slice(0, 12) : ext;
+  const compact = id.replace(/-/g, "").slice(0, 6).toUpperCase();
+  return `F${compact}`;
+}
+
+/** Alter in Jahren für die Listenansicht. */
+export function formatPatientAgeYears(birthDate: string | null): string | null {
+  if (!birthDate) return null;
+  const part = birthDate.split("T")[0];
+  const [y, m, d] = part.split("-").map((x) => parseInt(x, 10));
+  if (!y || !m || !d) return null;
+  const born = new Date(Date.UTC(y, m - 1, d));
+  const now = new Date();
+  let age = now.getUTCFullYear() - born.getUTCFullYear();
+  const monthDiff = now.getUTCMonth() - born.getUTCMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getUTCDate() < born.getUTCDate())) {
+    age -= 1;
+  }
+  if (age < 0 || age > 130) return null;
+  return age === 1 ? "1 Jahr" : `${age} Jahre`;
 }
 
 export function countByTrackerFilter(

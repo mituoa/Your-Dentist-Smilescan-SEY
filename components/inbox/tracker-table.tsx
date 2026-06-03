@@ -3,19 +3,19 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
-import { TrackerAssistBadge } from "@/components/inbox/tracker-assist-badge";
+import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
-  buildTrackerAssistHints,
+  TRACKER_FILTER_EXTENDED,
   countByTrackerFilter,
-  intakeChannelLabel,
+  formatPatientAgeYears,
+  formatTrackerCaseRef,
   matchesTrackerFilter,
   matchesTrackerSearch,
-  photoTrailSummary,
   sortTrackerInboxItems,
   trackerStatusForRow,
   type EnrichedSubmissionListItem,
@@ -24,7 +24,7 @@ import {
 import type { SubmissionListItem } from "@/lib/queries/inbox";
 import { cn } from "@/lib/utils";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 function initials(name: string | null): string {
   const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
@@ -33,62 +33,19 @@ function initials(name: string | null): string {
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
+function patientSubline(item: EnrichedSubmissionListItem): string {
+  const email = item.patient_email?.trim();
+  if (email) return email;
+  return deriveSubmissionIssueShortLine(item.patient_notes, item.patient_name, {
+    maxLen: 48,
+    emptyLabel: "Ohne Angabe",
+  });
+}
+
 type TrackerTableProps = {
   items: SubmissionListItem[];
   showCreateCase?: boolean;
 };
-
-function TrackerRowContent({
-  item,
-  concern,
-  isActive,
-}: {
-  item: EnrichedSubmissionListItem;
-  concern: string;
-  isActive: boolean;
-}) {
-  const status = trackerStatusForRow(item);
-  const assistHints = buildTrackerAssistHints(item);
-  const photoLine = photoTrailSummary(item);
-  const intakeLabel = intakeChannelLabel(item.intake_channel);
-
-  return (
-    <>
-      <div className="yd-tracker-row__main">
-        <span className="yd-tracker-table__avatar" aria-hidden>
-          {initials(item.patient_name)}
-        </span>
-        <div className="min-w-0 flex-1">
-          <span className="yd-tracker-table__patient-name">
-            {item.patient_name?.trim() || "Unbekannter Patient"}
-          </span>
-          <span className="yd-tracker-table__concern-inline">{concern}</span>
-          {photoLine ? (
-            <span className="yd-tracker-table__photo-line">{photoLine}</span>
-          ) : null}
-        </div>
-      </div>
-      <div className="yd-tracker-row__meta">
-        <span className="yd-tracker-table__intake-pill">{intakeLabel}</span>
-        <div className="yd-tracker-row__assist">
-          {assistHints.map((hint) => (
-            <TrackerAssistBadge key={hint.id} hint={hint} />
-          ))}
-        </div>
-        <span className={cn("yd-tracker-table__status", status.className)}>{status.label}</span>
-        <span
-          className={cn(
-            "yd-tracker-row__action",
-            isActive && "yd-tracker-row__action--active"
-          )}
-        >
-          Fall öffnen
-          <ChevronRight className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
-        </span>
-      </div>
-    </>
-  );
-}
 
 export function TrackerTable({ items, showCreateCase = false }: TrackerTableProps) {
   const router = useRouter();
@@ -143,48 +100,66 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
       : TRACKER_FILTER_EMPTY[filter];
 
   return (
-    <div className="yd-tracker-table-card flex h-full min-h-0 flex-col">
+    <div className="yd-tracker-table-card yd-clinical-control flex h-full min-h-0 flex-col">
       <div className="yd-tracker-table-toolbar">
-        <div className="min-w-0">
-          <h2 className="yd-tracker-table-toolbar__title">Praxis-Inbox</h2>
+        <div className="yd-tracker-table-toolbar__head">
+          <h2 className="yd-tracker-table-toolbar__title">Patienten</h2>
+          {showCreateCase ? (
+            <Link href="/create-case?from=inbox" className="yd-tracker-new-case-btn">
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
+              Neuer Fall
+            </Link>
+          ) : null}
         </div>
-        {showCreateCase ? (
-          <Link href="/create-case?from=inbox" className="yd-tracker-new-case-btn">
-            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
-            Neuer Fall
-          </Link>
-        ) : null}
-      </div>
-
-      <div className="yd-tracker-filter-scroll">
-        <div className="yd-tracker-filter-chips" role="tablist" aria-label="Inbox filtern">
-          {TRACKER_FILTER_CHIPS.map((chip) => {
-            const count = countByTrackerFilter(searchScoped, chip.id);
-            const active = filter === chip.id;
-            return (
-              <button
-                key={chip.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
-                onClick={() => {
-                  setFilter(chip.id);
-                  setPage(1);
-                }}
-              >
-                <span>{chip.label}</span>
-                <span
+        <TrackerInboxSearch />
+        <div className="yd-tracker-table-toolbar__filters">
+          <div className="yd-tracker-primary-filters" role="tablist" aria-label="Schnellfilter">
+            {TRACKER_FILTER_CHIPS.map((chip) => {
+              const count = countByTrackerFilter(searchScoped, chip.id);
+              const active = filter === chip.id;
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
                   className={cn(
-                    "yd-tracker-filter-chip__count",
-                    count === 0 && "yd-tracker-filter-chip__count--zero"
+                    "yd-tracker-primary-filter",
+                    active && "yd-tracker-primary-filter--active"
                   )}
+                  onClick={() => {
+                    setFilter(chip.id);
+                    setPage(1);
+                  }}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+                  {chip.label}
+                  <span className="yd-tracker-primary-filter__count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+          <label className="yd-tracker-filter-more-wrap">
+            <span className="sr-only">Weitere Filter</span>
+            <select
+              className="yd-tracker-filter-more"
+              value={TRACKER_FILTER_EXTENDED.some((x) => x.id === filter) ? filter : ""}
+              onChange={(e) => {
+                const v = e.target.value as TrackerInboxFilter;
+                if (v) {
+                  setFilter(v);
+                  setPage(1);
+                }
+              }}
+              aria-label="Weitere Filter"
+            >
+              <option value="">Mehr …</option>
+              {TRACKER_FILTER_EXTENDED.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label} ({countByTrackerFilter(searchScoped, opt.id)})
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </div>
 
@@ -198,11 +173,7 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
             <div className="yd-tracker-mobile-list md:hidden">
               {pageItems.map((item) => {
                 const isActive = pathname === `/inbox/${item.id}`;
-                const concern = deriveSubmissionIssueShortLine(
-                  item.patient_notes,
-                  item.patient_name,
-                  { maxLen: 72, emptyLabel: "Ohne Angabe" }
-                );
+                const status = trackerStatusForRow(item);
                 return (
                   <button
                     key={item.id}
@@ -213,7 +184,23 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
                     )}
                     onClick={() => goToCase(item.id)}
                   >
-                    <TrackerRowContent item={item} concern={concern} isActive={isActive} />
+                    <div className="yd-tracker-mobile-card__row">
+                      <span className="yd-tracker-table__avatar" aria-hidden>
+                        {initials(item.patient_name)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <span className="yd-tracker-table__patient-name">
+                          {item.patient_name?.trim() || "Unbekannter Patient"}
+                        </span>
+                        <span className="yd-tracker-table__patient-email">
+                          {patientSubline(item)}
+                        </span>
+                      </div>
+                      <span className={cn("yd-tracker-table__status", status.className)}>
+                        <span className="yd-tracker-table__status-dot" aria-hidden />
+                        {status.label}
+                      </span>
+                    </div>
                   </button>
                 );
               })}
@@ -222,26 +209,17 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
             <table className="yd-tracker-table max-md:hidden">
               <thead>
                 <tr>
-                  <th scope="col">Patient / Anliegen</th>
-                  <th scope="col">Eingang</th>
-                  <th scope="col">Assistenz</th>
+                  <th scope="col">Fall-Nr.</th>
+                  <th scope="col">Patient</th>
+                  <th scope="col">Alter</th>
                   <th scope="col">Status</th>
-                  <th scope="col" className="text-right">
-                    Aktion
-                  </th>
                 </tr>
               </thead>
               <tbody>
                 {pageItems.map((item) => {
                   const isActive = pathname === `/inbox/${item.id}`;
-                  const concern = deriveSubmissionIssueShortLine(
-                    item.patient_notes,
-                    item.patient_name,
-                    { maxLen: 64, emptyLabel: "Ohne Angabe" }
-                  );
                   const status = trackerStatusForRow(item);
-                  const assistHints = buildTrackerAssistHints(item);
-                  const photoLine = photoTrailSummary(item);
+                  const age = formatPatientAgeYears(item.patient_birth_date);
 
                   return (
                     <tr
@@ -259,42 +237,32 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
                       aria-current={isActive ? "page" : undefined}
                     >
                       <td>
+                        <span className="yd-tracker-table__case-id">
+                          {formatTrackerCaseRef(item.id, item.patient_external_id)}
+                        </span>
+                      </td>
+                      <td>
                         <div className="yd-tracker-table__patient">
                           <span className="yd-tracker-table__avatar" aria-hidden>
                             {initials(item.patient_name)}
                           </span>
-                          <div className="min-w-0">
+                          <div className="yd-tracker-table__patient-text">
                             <span className="yd-tracker-table__patient-name">
                               {item.patient_name?.trim() || "Unbekannter Patient"}
                             </span>
-                            <span className="yd-tracker-table__concern">{concern}</span>
-                            {photoLine ? (
-                              <span className="yd-tracker-table__photo-line">{photoLine}</span>
-                            ) : null}
+                            <span className="yd-tracker-table__patient-email">
+                              {patientSubline(item)}
+                            </span>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span className="yd-tracker-table__intake-pill">
-                          {intakeChannelLabel(item.intake_channel)}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="yd-tracker-row__assist yd-tracker-row__assist--table">
-                          {assistHints.map((hint) => (
-                            <TrackerAssistBadge key={hint.id} hint={hint} />
-                          ))}
-                        </div>
+                        <span className="yd-tracker-table__age">{age ?? "—"}</span>
                       </td>
                       <td>
                         <span className={cn("yd-tracker-table__status", status.className)}>
+                          <span className="yd-tracker-table__status-dot" aria-hidden />
                           {status.label}
-                        </span>
-                      </td>
-                      <td className="text-right">
-                        <span className="yd-tracker-row__action">
-                          Fall öffnen
-                          <ChevronRight className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
                         </span>
                       </td>
                     </tr>
@@ -309,8 +277,8 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
       <div className="yd-tracker-table-footer">
         <p className="yd-tracker-table-footer__meta">
           {filtered.length === 0
-            ? "Keine Einträge"
-            : `${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} von ${filtered.length}`}
+            ? ""
+            : `Einträge ${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} von ${filtered.length}`}
         </p>
         {filtered.length > PAGE_SIZE ? (
           <div className="yd-tracker-table-pagination">
@@ -322,6 +290,9 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
             >
               Zurück
             </button>
+            <span className="yd-tracker-table-pagination__page" aria-current="page">
+              {safePage} / {totalPages}
+            </span>
             <button
               type="button"
               className="yd-tracker-table-pagination__btn"

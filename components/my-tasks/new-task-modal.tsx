@@ -242,7 +242,7 @@ export function NewTaskModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[min(92dvh,920px)] w-full max-w-lg flex-col rounded-t-2xl border border-[rgba(15,23,42,0.06)] bg-[#FAFBFC] shadow-[0_8px_40px_-16px_rgba(15,23,42,0.18)] sm:rounded-2xl"
+        className="yd-clinical-control flex max-h-[min(92dvh,920px)] w-full max-w-lg flex-col rounded-t-2xl border border-[rgba(15,23,42,0.06)] bg-[#FAFBFC] shadow-[0_8px_40px_-16px_rgba(15,23,42,0.18)] sm:rounded-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[rgba(15,23,42,0.06)] px-5 py-4 sm:px-6">

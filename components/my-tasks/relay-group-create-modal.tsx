@@ -82,7 +82,7 @@ export function RelayGroupCreateModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[min(90dvh,720px)] w-full max-w-md flex-col rounded-t-2xl border border-[rgba(43,111,232,0.1)] bg-[#FAFBFC] shadow-[0_12px_48px_-20px_rgba(43,111,232,0.2)] sm:rounded-2xl"
+        className="yd-clinical-control flex max-h-[min(90dvh,720px)] w-full max-w-md flex-col rounded-t-2xl border border-[rgba(43,111,232,0.1)] bg-[#FAFBFC] shadow-[0_12px_48px_-20px_rgba(43,111,232,0.2)] sm:rounded-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 border-b border-[rgba(15,23,42,0.06)] px-5 py-4">

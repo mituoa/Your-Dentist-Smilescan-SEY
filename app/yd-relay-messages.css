@@ -39,10 +39,36 @@
 }
 
 .relay-messages-list-title {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
   color: #0f172a;
+}
+
+.relay-messages-list-sub {
+  margin-top: 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.relay-messages-new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 197, 253, 0.75);
+  background: #eef6ff;
+  color: #1d4ed8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: background-color 160ms ease;
+}
+
+.relay-messages-new-btn:hover {
+  background: #dbeafe;
 }
 
 .relay-messages-list-actions {
@@ -198,53 +224,53 @@
   padding: 1rem 0;
 }
 
-.relay-messages-bubbles {
+.relay-messages-handoffs {
   list-style: none;
   margin: 0;
-  padding: 0 1.25rem;
+  padding: 0.75rem 1.25rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.625rem;
 }
 
-.relay-message {
-  max-width: min(92%, 520px);
-  padding: 0.75rem 1rem;
+.relay-handoff-entry {
+  padding: 0.875rem 1rem;
   border-radius: 12px;
-  background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(165deg, #ffffff 0%, #f8fbfe 100%);
 }
 
-.relay-message--own {
-  margin-left: auto;
-  background: rgba(43, 111, 232, 0.06);
-  border-color: rgba(43, 111, 232, 0.12);
+.relay-handoff-entry--own {
+  border-color: rgba(191, 219, 254, 0.75);
+  background: linear-gradient(165deg, #fafcff 0%, #eff6ff 100%);
 }
 
-.relay-message-sender {
+.relay-handoff-entry__label {
   display: block;
   margin-bottom: 0.35rem;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #64748b;
+  color: #475569;
 }
 
-.relay-message-body {
+.relay-handoff-entry__body {
   font-size: 0.875rem;
-  line-height: 1.55;
+  line-height: 1.5;
   color: #0f172a;
   white-space: pre-wrap;
 }
 
-.relay-message-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.relay-handoff-entry__footer {
   margin-top: 0.5rem;
   font-size: 0.6875rem;
-  color: #94a3b8;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.relay-messages-thread-preview-card .relay-messages-thread-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .relay-message-status {

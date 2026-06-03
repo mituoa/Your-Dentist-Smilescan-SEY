@@ -1,0 +1,47 @@
+/**
+ * Medical Enterprise — einheitliche Form Controls (kein Browser-Schwarz)
+ */
+
+.yd-clinical-control input[type="checkbox"],
+.yd-clinical-control input[type="radio"] {
+  height: 1rem;
+  width: 1rem;
+  margin: 0;
+  accent-color: #2f80ed;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.yd-clinical-control input[type="radio"] {
+  border-radius: 999px;
+}
+
+.yd-clinical-control select,
+.yd-clinical-control textarea,
+.yd-clinical-control input[type="text"],
+.yd-clinical-control input[type="email"],
+.yd-clinical-control input[type="search"],
+.yd-clinical-control input[type="date"] {
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.875rem;
+  box-shadow: none;
+}
+
+.yd-clinical-control select:focus,
+.yd-clinical-control textarea:focus,
+.yd-clinical-control input:focus {
+  outline: none;
+  border-color: rgba(147, 197, 253, 0.95);
+  box-shadow: 0 0 0 3px rgba(43, 111, 232, 0.1);
+}
+
+.yd-clinical-control select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  padding-right: 2rem;
+}

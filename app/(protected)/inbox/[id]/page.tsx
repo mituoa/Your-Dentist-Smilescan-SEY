@@ -3,190 +3,37 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
-import { PhotoDocumentationSection } from "@/components/inbox/photo-documentation-section";
-import { PhotoViewer } from "@/components/inbox/photo-viewer";
 import { SubmissionActions } from "@/components/inbox/submission-actions";
-import { TrackerAiSummary } from "@/components/inbox/tracker-ai-summary";
-import { TrackerPrimaryActions } from "@/components/inbox/tracker-primary-actions";
-import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
+import { TrackerCaseOverview } from "@/components/inbox/tracker-case-overview";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
 import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+import {
+  trackerStatusForRow,
+  type EnrichedSubmissionListItem,
+} from "@/lib/inbox/tracker-inbox-logic";
+import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import { loadMessageDraftDetailForSubmission } from "@/lib/queries/message-drafts";
 import { markSubmissionSeen } from "./actions";
 
-/**
- * **`/inbox/[id]` — Punkt 1 (Zweck):** **Fall-Detail** zur **Triage** einer Einsendung im aktuellen
- * Workspace: Fotos, Patientennotiz, **Einordnung** (vom Team gesetzter Zeitraum) und **Arbeitsschritte**.
- * **Kein** CRM, **kein** Chat, **keine** vollständige Patientenakte, **kein**
- * Marketing-/Messaging-Center — nur das, was für die **Pilot-Intake-Kette** nötig ist
- * (**Triage + kontrollierte Praxis-Kommunikation**).
- *
- * **Kommunikation:** Rechte Spalte = **Hilfsbereich** (Textentwürfe kopieren, Terminlink per expliziter
- * Aktion) — **kein** Kanalpostfach, **kein** Auto-SMS; Versand nur dort, wo die UI eine **bewusste**
- * Aktion auslöst (z. B. Terminlink-E-Mail durch Klick). **Command** (systemweite Leiste): Entwürfe
- * und Navigation, **ohne** automatischen Versand — s. `components/command-assist/command-assist.tsx`.
- *
- * **Workspace:** Fremde oder nicht zugeordnete Submissions → `notFound()` (Filter in
- * `getSubmissionById` + RLS).
- *
- * **Punkt 2 — Status (Stabilität / working → final):** Route ist **final nutzbar**, solange
- * Submission zum Workspace gehört. **Server-Page** lädt Daten **atomar** pro Request (kein
- * clientseitiges „Falschen Fall“ aus Cache-Konflikten mit der URL). **Loading:** `loading.tsx` zeigt
- * `ClinicalInboxDetailSkeleton` für Streaming/Navigation. **Mobil:** Vollbild-Detail mit
- * `InboxMobileBack` → Liste; `q` aus der Liste bleibt über normalisierte Query erhalten.
- * **Leere Teilzustände:** keine Fotos = sachlicher Hinweis; fehlende `signed_url` = Hinweis im Viewer
- * (kein harter Fehlerzustand); Notiz leer = **„Keine Patientennotiz.“** — s. Punkt 7. **ZIP-Download** nutzt dieselbe
- * `submissionId` wie die Page. Transiente DB-Fehler bei `getSubmissionById` sind aktuell wie
- * „nicht gefunden“ behandelt (`notFound`) — bewusst simpel; Monitoring über Server-Logs.
- *
- * **Punkt 3 — Supabase/Auth:** Daten nur über **Session-Client** + explizite **`workspace_id`**-Filter
- * (`getSubmissionById`, `getProfileData`). **RLS** ergänzt die App-Guards (Migration **030** für
- * `current_workspace_id()` — s. `lib/auth-helpers.ts`). **Server-Actions** in `./actions.ts`:
- * `markSubmissionSeen` / `updateSubmissionUrgency` / `createTask` / `downloadSubmissionPhotos` /
- * `sendAppointmentLink` prüfen **Workspace** (und wo nötig **Rolle**); `createTask` verifiziert
- * zusätzlich, dass die **Submission** zum Workspace gehört (RLS-INSERT auf `tasks` allein reicht nicht).
- * `submitInboxTaskForReview` prüft **Task + Submission + Workspace** vor dem Statuswechsel.
- * **Signed URLs** / Storage-ZIP: nur Pfade aus der zuvor workspace-gefilterten Abfrage; Admin-Client
- * nur für Sign/Download, nicht für breitere Reads. **UI:** keine rohen DB-Fehlertexte.
- *
- * **Punkt 4 — Aktionen:** **Echte** Schritte: Dringlichkeit speichern (`TrackerUrgencyChips`), Navigation
- * zu Entwurf/Terminlink (`TrackerPrimaryActions`), ZIP-Export (`PhotoViewer`), Terminlink-E-Mail
- * (`AppointmentLinkButton`, nur Arzt), Entwurf kopieren (`FollowUpMessageDraft`). **Command:** FAB +
- * Schnelltexte = **Entwurfshilfe**, keine Autonomie (s. `command-assist.tsx`). Keine toten CTAs ohne
- * Wirkung — Primärbuttons scrollen bewusst zu Zielankern; kein Auto-Versand.
- *
- * **Punkt 5 — Tot/Fake:** Keine **automatische** klinische Bewertung — Kopfzeilen-Texte zur Dringlichkeit
- * beziehen sich auf die **von der Praxis gewählte Einstufung**, nicht auf KI-Diagnostik. Leere Notiz =
- * sachlicher Hinweis, kein „Platzhalter-Inhalt“. Command: **Entwurfsbausteine** und Navigation, keine
- * **Schnellaktions-/Ops-Center**-Sprache.
- *
- * **Punkt 6 — Loading:** `loading.tsx` + `ClinicalInboxDetailSkeleton` — **statische** Balken, **kein**
- * Puls, keine Chat-/CRM-Gerüste; Desktop **Hilfsspalte** als schmales Platzhalter-Segment gegen Layout-Sprung.
- *
- * **Punkt 7 — Empty:** Leer ist **normal**, nicht fehlerhaft: keine Fotos / keine Patientennotiz /
- * fehlende Kontaktdaten / **Einordnung (Zeitraum) noch nicht gewählt** sind klar beschriftet (s.
- * `PhotoViewer`, Haupttext, `SubmissionMeta`). **Kein** Chat-Verlauf — die Spalte rechts ist immer
- * **Entwurf + Terminlink**, nie eine leere „Konversation“.
- *
- * **Punkt 8 — Error:** **Fremder oder nicht zugehöriger Fall** → `notFound()` (kein Leak fremder
- * Daten). **Page-Load-DB-Fehler** werden bewusst wie „nicht gefunden“ behandelt (`notFound`) — ruhig,
- * **ohne** rohe PostgREST-/SQL-Texte in der UI (Monitoring über Server-Logs). **Server-Actions**
- * (`./actions.ts`) liefern nur **feste deutsche Kurzmeldungen**; technische Details nur serverseitig
- * (`logPostgrest`). ZIP-Kurzmeldungen zusätzlich zentral in `lib/inbox/submission-photo-download-errors.ts`.
- * **`markSubmissionSeen`:** stiller Best-Effort — bei Fehlern **kein** UI-Banner
- * (Lesemarkierung ist unkritisch). **Teilfehler:** z. B. fehlende Foto-Vorschau oder fehlgeschlagener
- * ZIP-/E-Mail-/Zeitraum-Schritt je **lokal** am jeweiligen Control mit sachlicher Meldung und
- * `aria-live` wo nötig — kein globaler Alarm. **Empty vs. Error:** Leere Listen/Texte = Punkt 7;
- * Fehler nur, wenn eine **konkrete Nutzeraktion** fehlschlägt.
- *
- * **Punkt 9 — Mobile (`/inbox/[id]`):** Vollbild-Detail in `InboxTrackerShell` — **eine Spalte**,
- * **Sticky-Kopf** (`max-lg:`) mit **`min-w-0` / `break-words`**; **unteres Scroll-Padding** + **`scroll-padding`**
- * (FAB/Safe-Area). **Touch:** Schnellnavigation & ZIP **≥44px**. Hilfsspalte: **`overscroll-y-contain`**,
- * Safe-Area unten, **`scroll-padding`** im inneren Scroll. **Final:** Entwurf **16px** Schrift (kein iOS-Zoom),
- * bei Fokus **`scrollIntoView`** (`FollowUpMessageDraft`).
- *
- * **Punkt 10 — Security (`/inbox/[id]`):** **Workspace:** `getSubmissionById(id, workspace_id)` +
- * `notFound` bei Fremdfall; `getProfileData(workspace_id)` nur aus Server-Workspace.
- * **RLS** (u. a. `submission_photos` über Submission) ergänzt App-Queries. **Actions** (`./actions.ts`):
- * `workspace_id`-Filter bzw. vorherige **Submission-Zugehörigkeit** (`createTask`, `sendAppointmentLink`,
- * `downloadSubmissionPhotos`); `submitInboxTaskForReview` bindet **`taskId` + `submissionId`** +
- * Workspace vor `submitTaskForReview`. **ZIP/Sign:** Pfade nur serverseitig nach workspace-geprüfter
- * Submission; **Client** erhält Fotos ohne `storage_path` (nur `id`, `sort_order`, `signed_url`).
- * **Fehlersemantik:** feste deutsche Kurzmeldungen, kein Roh-PostgREST in UI; Server-Logs ohne
- * PostgREST-Message-Body in `getSubmissionById` / `getTasksForSubmission` (nur `code`). **Layout:**
- * `dynamic = "force-dynamic"` im Inbox-Layout — kein statischer Cache der Shell über Mandanten.
- * **Command:** `InboxAssistHydration` setzt Kontext bei Unmount zurück — kein Nachziehen fremder
- * Fälle in die Leiste nach Navigation.
- *
- * **Punkt 11 — MVP / Pilot (`/inbox/[id]`):** **Im Scope:** Triage (Fotos, Notiz, **vom Team gewählter**
- * Zeitraum), **interne** Arbeitsschritte, **Hilfe** zur Patienten-Rückmeldung (**nur Entwurf + Kopie**;
- * Terminlink **nur** nach explizitem Klick durch Ärztin/Arzt). **Command:** Textbausteine & Navigation,
- * **kein** Versand, **keine** KI-Einordnung. **Bewusst nicht im MVP:** vollständige Patientenakte,
- * CRM-/Supportdesk-Postfach, Audit-Log-Produkt, automatisierte klinische Bewertung, Messaging-Pipeline,
- * KI-Autonomie — s. auch `layout.tsx` Punkt 12. **Pilot-Reife:** keine toten Kernpfade; leere Zustände
- * sachlich (Punkt 7); Erwartung „kein Auto-Versand“ mehrfach klar (Hilfsspalte + Entwurf-Bereich).
- *
- * **Punkt 12 — Nice / Future / Non-MVP (`/inbox/[id]`):** Deckungsgleich mit **`layout.tsx` Punkt 12**
- * (Liste + Detail). **Nice** hier besonders: Geräte-QA auf Entwurf/Scroll, PhotoViewer-/ZIP-Polish,
- * `aria-live`/Fokus-Feinschliff. **Future** hier besonders: Thread-Historie, Akte, KI-Einordnung,
- * Versand-Pipeline — nur mit Roadmap. **Non-MVP** hier besonders: alles Postfach-/CRM-/Auto-KI-nahe;
- * bei Zweifel **MVP-Grenze** (Punkt 11) schützen.
- *
- * **Punkt 13 — Priorität (`/inbox/[id]`):** Vollständiger **P0-/Stabilisierungs-Vertrag** s.
- * **`layout.tsx` Punkt 13** — Detail ist **kein** separater niedrigerer Prio-Track, sondern **Teil
- * desselben Intake-P0** wie die Liste. **Hier besonders schützen:** Workspace-Isolation (`notFound`,
- * Actions), **Entwurf ≠ Versand**, keine UI, die Kanal/CRM vortäuscht, **ruhige** Fehler/Empty,
- * Mobile-Kernpfade. **Kein aktives Feature-Weiterbauen** ohne Auftrag; Regressionen aus Punkt 13
- * Layout gelten **1:1** für diese Route. Konflikt: **Stabilität vor Plattform** (s. Layout).
- */
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-/** Horizontales Padding Desktop — Figma: bis 56px; mobil getrennt per Tailwind (`px-4` / `sm:px-5`). */
-
-function formatRelativeTime(timestamp: string): string {
-  const now = new Date();
-  const then = new Date(timestamp);
-  const diffMs = now.getTime() - then.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMin / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMin < 1) return "Vor wenigen Sekunden";
-  if (diffMin < 60) return `Vor ${diffMin} Minuten`;
-  if (diffHours < 24) return `Vor ${diffHours} Stunden`;
-  if (diffDays === 1) return "Gestern";
-  if (diffDays < 7) return `Vor ${diffDays} Tagen`;
-  return then.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
+function messageDraftStatusFromDetail(
+  editable: { status: string } | null,
+  history: { status: string } | null,
+  available: boolean
+): MessageDraftListStatus {
+  if (!available) return "none";
+  if (editable) return "draft";
+  if (history?.status === "sent") return "sent";
+  if (history?.status === "approved") return "approved";
+  if (history) return "approved";
+  return "none";
 }
 
-function formatBirthDe(value: string | null): string | null {
-  if (!value) return null;
-  const part = value.split("T")[0];
-  const [y, m, d] = part.split("-").map((x) => parseInt(x, 10));
-  if (!y || !m || !d) return null;
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("de-DE", {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-  });
-}
-
-/** Kopfzeile: bezieht sich auf die **vom Team gesetzte** Dringlichkeit — keine automatische KI-Bewertung. */
-function urgencyHeadline(urgency: string | null): {
-  text: string;
-} | null {
-  switch (urgency) {
-    case "today":
-      return { text: "Praxis-Einstufung: zeitnah bearbeiten (Heute)" };
-    case "this_week":
-      return { text: "Praxis-Einstufung: innerhalb weniger Tage" };
-    case "not_urgent":
-      return { text: "Praxis-Einstufung: nicht dringend" };
-    default:
-      return null;
-  }
-}
-
-/** Kurz-Hinweis unter der Einordnung — Orientierung, ärztliche Entscheidung bleibt bei der Praxis. */
-function urgencyGuidanceShort(urgency: string | null): string {
-  switch (urgency) {
-    case "today":
-      return "Kurzfristiger Termin ist oft sinnvoll — bitte ärztlich entscheiden.";
-    case "this_week":
-      return "Termin in wenigen Tagen oft angemessen — individuell prüfen.";
-    case "not_urgent":
-      return "Regulärer Terminabstand meist ausreichend.";
-    default:
-      return "Zeitraum unten wählen — keine automatische Bewertung.";
-  }
-}
-
-export default async function InboxDetailPage({
-  params,
-}: InboxDetailPageProps) {
+export default async function InboxDetailPage({ params }: InboxDetailPageProps) {
   const { id } = await params;
   const workspace = await getCurrentWorkspace();
 
@@ -212,15 +59,6 @@ export default async function InboxDetailPage({
     submission.patient_name,
     { maxLen: 120, emptyLabel: "Einsendung" }
   );
-  const patientLabel = submission.patient_name || "Unbekannter Patient";
-  const birthStr = formatBirthDe(submission.patient_birth_date);
-  const idStr = submission.patient_external_id?.trim() || null;
-  const patientMetaParts: string[] = [];
-  if (birthStr) patientMetaParts.push(birthStr);
-  if (idStr) patientMetaParts.push(`ID: ${idStr}`);
-  const patientMeta = patientMetaParts.join(" · ");
-  const urgencyLine = urgencyHeadline(submission.urgency);
-  const guidanceShort = urgencyGuidanceShort(submission.urgency);
   const practicePhone = profileRow?.practice_phone ?? null;
   const appointmentUrl = profileRow?.appointment_link ?? null;
 
@@ -229,13 +67,31 @@ export default async function InboxDetailPage({
     workspace.workspace_id
   );
 
-  const issueTitle =
-    concernPreview && concernPreview !== patientLabel ? concernPreview : patientLabel;
+  const messageDraftStatus = messageDraftStatusFromDetail(
+    messageDraftLoad.available ? messageDraftLoad.editableDraft : null,
+    messageDraftLoad.available ? messageDraftLoad.historyDraft : null,
+    messageDraftLoad.available
+  );
 
-  const scrollPadTop = urgencyLine ? "24px" : "32px";
-  const scrollPadStyle = {
-    paddingTop: scrollPadTop,
+  const statusRow: EnrichedSubmissionListItem = {
+    id: submission.id,
+    patient_name: submission.patient_name,
+    patient_email: submission.patient_email,
+    patient_notes: submission.patient_notes,
+    patient_birth_date: submission.patient_birth_date,
+    patient_external_id: submission.patient_external_id,
+    urgency: submission.urgency,
+    is_draft: submission.is_draft,
+    created_at: submission.created_at,
+    seen_at: submission.seen_at,
+    photo_count: submission.photos.length,
+    message_draft_status: messageDraftStatus,
+    intake_channel: submission.intake_channel,
+    open_task_count: 0,
+    photo_documentation: null,
   };
+
+  const status = trackerStatusForRow(statusRow);
 
   return (
     <>
@@ -249,219 +105,73 @@ export default async function InboxDetailPage({
       />
       <CaseCreatedToast />
 
-      {/* Mobil: eine Fläche. Desktop: Pane füllt Tracker-Detail, je Spalte eigener Scroll. */}
       <div className="yd-inbox-detail-root flex h-full min-h-0 flex-1 touch-manipulation flex-col overflow-x-hidden max-md:overflow-y-auto max-md:overscroll-y-contain max-md:[-webkit-overflow-scrolling:touch] max-md:min-h-0 max-md:bg-[#EDF1F7] md:overflow-hidden md:bg-transparent">
         <div className="yd-inbox-detail-pane flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white max-md:mx-0 max-md:flex-none max-md:overflow-visible max-md:rounded-b-2xl max-md:shadow-[0_2px_12px_rgba(15,23,42,0.05)] md:mx-0 md:h-full md:max-h-full md:rounded-none md:bg-[#F7F9FC] md:shadow-none">
-          {/* Detail-Header — mobil: kompakteres Padding, Sticky; Desktop: Figma-Abstände */}
-          <div
-            className="z-[6] shrink-0 bg-white px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:border-b max-md:border-[rgba(15,23,42,0.06)] max-md:shadow-[0_1px_0_rgba(15,23,42,0.04)] sm:px-5 sm:pt-4 sm:pb-3 md:static md:border-b-0 md:px-[clamp(20px,4vw,56px)] md:pb-0 md:pt-[clamp(28px,5vw,48px)] md:shadow-none"
-          >
+          <div className="z-[6] shrink-0 bg-white px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:border-b max-md:border-[rgba(15,23,42,0.06)] md:static md:border-b-0 md:px-[clamp(20px,4vw,48px)] md:pt-[clamp(20px,4vw,32px)]">
             <Suspense fallback={null}>
               <InboxMobileBack />
             </Suspense>
-            <h2
-              className="min-w-0 break-words text-[22px] sm:text-[24px]"
-              style={{
-                color: "#0F172A",
-                fontWeight: 600,
-                letterSpacing: "-0.02em",
-                marginBottom: "8px",
-                lineHeight: 1.3,
-              }}
-            >
-              {issueTitle}
-            </h2>
-
-            <p
-              className="min-w-0 break-words text-[14px]"
-              style={{
-                color: "#64748B",
-                fontWeight: 500,
-                letterSpacing: "-0.005em",
-              }}
-            >
-              {patientLabel} · Eingang {formatRelativeTime(submission.created_at)}
-              {submission.is_draft ? (
-                <span className="ml-2 text-[12px]" style={{ color: "#B45309" }}>
-                  Entwurf
-                </span>
-              ) : null}
-            </p>
-
-            {patientMeta ? (
-              <p
-                className="text-[13px] break-words"
-                style={{
-                  color: "#94A3B8",
-                  fontWeight: 400,
-                  letterSpacing: "-0.003em",
-                  marginTop: "4px",
-                }}
-              >
-                {patientMeta}
-              </p>
-            ) : null}
-
-            {submission.patient_email || submission.patient_phone ? (
-              <p
-                className="mt-3 min-w-0 break-words text-[13px] leading-relaxed"
-                style={{ color: "#64748B", fontWeight: 400 }}
-              >
-                {submission.patient_email ? (
-                  <span className="block break-words md:mr-3 md:inline-block">
-                    {submission.patient_email}
-                  </span>
-                ) : null}
-                {submission.patient_phone ? (
-                  <span className="block break-words max-md:mt-1 md:inline">{submission.patient_phone}</span>
-                ) : null}
-              </p>
-            ) : null}
-
-            {urgencyLine ? (
-              <div className="mt-3 pb-3 lg:mt-6 lg:pb-6">
-                <p
-                  className="text-[14px]"
-                  style={{
-                    color: "#2563EB",
-                    lineHeight: 1.5,
-                    letterSpacing: "-0.005em",
-                    fontWeight: 500,
-                  }}
-                >
-                  {urgencyLine.text}
-                </p>
-              </div>
-            ) : null}
           </div>
 
-          {/* Mobil: Triage + Hilfe untereinander, gemeinsamer Scroll (äußerer Container). Desktop: zwei Spalten, je Scroll. */}
           <div className="yd-inbox-detail-body flex min-h-0 w-full min-w-0 flex-col max-md:flex-none md:flex-1 md:min-h-0 md:flex-row md:overflow-hidden">
-          {/* Hauptinhalt — Desktop: eigener Scroll; Mobil: Teil des Gesamt-Scrolls. */}
-          <div
-            className="yd-inbox-detail-main-scroll min-h-0 w-full min-w-0 max-md:flex-none max-md:overflow-visible bg-white px-4 pb-6 max-md:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 max-md:pb-8 md:flex-1 md:min-h-0 md:px-[clamp(20px,4vw,56px)] md:pb-24"
-            style={scrollPadStyle}
-          >
-            <div className="mb-6 md:mb-8">
-              <PhotoViewer
-                submissionId={submission.id}
-                photos={submission.photos.map(({ id, sort_order, signed_url }) => ({
-                  id,
-                  sort_order,
-                  signed_url,
-                }))}
-                patientName={submission.patient_name || "Patient"}
-              />
-              <PhotoDocumentationSection
-                photos={submission.photos.map(
-                  ({ id, sort_order, created_at, signed_url }) => ({
-                    id,
-                    sort_order,
-                    created_at,
-                    signed_url,
-                  })
-                )}
-                patientNotes={submission.patient_notes}
-              />
-            </div>
-
-            <div className="mb-5 min-w-0 max-w-[600px] md:mb-8 lg:mb-10">
-              <p
-                className="text-[15px] leading-normal max-lg:text-[16px] max-lg:leading-relaxed"
-                style={{
-                  color: "#1E293B",
-                  letterSpacing: "-0.008em",
+            <div className="yd-inbox-detail-main-scroll min-h-0 w-full min-w-0 max-md:flex-none max-md:overflow-visible bg-white px-4 pb-6 max-md:scroll-pb-[max(6.5rem,var(--safe-area-bottom))] sm:px-5 max-md:pb-8 md:flex-1 md:min-h-0 md:px-[clamp(20px,4vw,48px)] md:pb-20 md:pt-0">
+              <TrackerCaseOverview
+                submission={{
+                  id: submission.id,
+                  patient_name: submission.patient_name,
+                  patient_email: submission.patient_email,
+                  patient_phone: submission.patient_phone,
+                  patient_notes: submission.patient_notes,
+                  patient_birth_date: submission.patient_birth_date,
+                  patient_external_id: submission.patient_external_id,
+                  urgency: submission.urgency,
+                  created_at: submission.created_at,
+                  is_draft: submission.is_draft,
+                  seen_at: submission.seen_at,
+                  intake_channel: submission.intake_channel,
+                  photos: submission.photos.map(
+                    ({ id: photoId, sort_order, created_at, signed_url }) => ({
+                      id: photoId,
+                      sort_order,
+                      created_at,
+                      signed_url,
+                    })
+                  ),
                 }}
-              >
-                {submission.patient_notes?.trim()
-                  ? submission.patient_notes
-                  : "Keine Patientennotiz."}
-              </p>
+                status={status}
+              />
             </div>
 
-            <div className="mt-4 min-w-0 max-w-[520px]">
-              <TrackerAiSummary
+            <aside className="yd-inbox-detail-aside-scroll flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-[#F7F9FC] pb-[max(12px,var(--safe-area-bottom))] max-md:min-h-0 max-md:flex-none max-md:overflow-visible max-md:px-0 max-md:pb-[max(1rem,var(--safe-area-bottom))] md:mt-0 md:min-h-0 md:w-[min(100%,300px)] md:max-w-[320px] md:shrink-0 md:border-l md:border-t-0 md:pb-0">
+              <SubmissionActions
                 submissionId={submission.id}
                 patientName={submission.patient_name}
-                patientNotes={submission.patient_notes}
-                photoCount={submission.photos.length}
+                patientEmail={submission.patient_email}
+                patientPhone={submission.patient_phone}
+                createdAt={submission.created_at}
+                patientBirthDate={submission.patient_birth_date}
+                patientExternalId={submission.patient_external_id}
+                urgency={submission.urgency}
+                isDraft={submission.is_draft}
                 seenAt={submission.seen_at}
+                updatedAt={submission.updated_at}
+                photoCount={submission.photos.length}
+                canSendAppointmentLink={isDoctor}
+                practicePhone={practicePhone}
+                appointmentUrl={appointmentUrl}
+                isDoctor={isDoctor}
+                messageDraftsAvailable={messageDraftLoad.available}
+                editableMessageDraft={
+                  messageDraftLoad.available ? messageDraftLoad.editableDraft : null
+                }
+                historyMessageDraft={
+                  messageDraftLoad.available ? messageDraftLoad.historyDraft : null
+                }
+                intakeChannel={submission.intake_channel}
               />
-            </div>
-
-            <div id="tracker-empfehlung" className="min-w-0 max-w-[520px] scroll-mt-16 md:scroll-mt-24">
-              <div style={{ marginBottom: "16px" }}>
-                <p
-                  className="text-[13px]"
-                  style={{
-                    color: "#0A0F1A",
-                    fontWeight: 700,
-                    letterSpacing: "-0.01em",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Einordnung & nächste Schritte
-                </p>
-                {!submission.urgency ? (
-                  <p
-                    className="text-[14px]"
-                    style={{
-                      color: "#64748B",
-                      letterSpacing: "-0.005em",
-                    }}
-                  >
-                    {guidanceShort}
-                  </p>
-                ) : null}
-              </div>
-
-              <div
-                className="rounded-[10px] bg-[#F8FAFC] p-4 max-lg:p-5 max-lg:rounded-xl"
-              >
-                <TrackerPrimaryActions />
-
-                <TrackerUrgencyChips
-                  submissionId={submission.id}
-                  initialUrgency={submission.urgency}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Hilfsspalte: mobil unten in derselben weißen Fläche (Trennlinie); Desktop rechts mit eigenem Scroll. */}
-          <aside
-            className="yd-inbox-detail-aside-scroll flex w-full shrink-0 flex-col overflow-hidden border-t border-[rgba(15,23,42,0.06)] bg-white pb-[max(12px,var(--safe-area-bottom))] max-md:mx-0 max-md:mt-0 max-md:min-h-0 max-md:flex-none max-md:overflow-visible max-md:border-l-0 max-md:bg-white max-md:px-0 max-md:pb-[max(1rem,var(--safe-area-bottom))] md:mx-0 md:mt-0 md:min-h-0 md:w-[min(100%,320px)] md:max-w-[340px] md:shrink-0 md:border-l md:border-t-0 md:border-[rgba(15,23,42,0.06)] md:bg-[#F7F9FC] md:pb-0"
-          >
-            <SubmissionActions
-              submissionId={submission.id}
-              patientName={submission.patient_name}
-              patientEmail={submission.patient_email}
-              patientPhone={submission.patient_phone}
-              createdAt={submission.created_at}
-              patientBirthDate={submission.patient_birth_date}
-              patientExternalId={submission.patient_external_id}
-              urgency={submission.urgency}
-              isDraft={submission.is_draft}
-              seenAt={submission.seen_at}
-              updatedAt={submission.updated_at}
-              photoCount={submission.photos.length}
-              canSendAppointmentLink={isDoctor}
-              practicePhone={practicePhone}
-              appointmentUrl={appointmentUrl}
-              isDoctor={isDoctor}
-              messageDraftsAvailable={messageDraftLoad.available}
-              editableMessageDraft={
-                messageDraftLoad.available ? messageDraftLoad.editableDraft : null
-              }
-              historyMessageDraft={
-                messageDraftLoad.available ? messageDraftLoad.historyDraft : null
-              }
-              intakeChannel={submission.intake_channel}
-            />
-          </aside>
+            </aside>
           </div>
         </div>
-
       </div>
     </>
   );

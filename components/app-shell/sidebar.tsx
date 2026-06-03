@@ -103,7 +103,7 @@ export function Sidebar({
             href="/inbox"
             iconName="inbox"
             label="Tracker"
-            description="Einsendungen"
+            description="Patientenfälle"
             badge={inboxCount}
             ambientPreview={navAmbient?.inbox}
             tier="primary"
