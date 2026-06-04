@@ -64,7 +64,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
     filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
 
   return (
-    <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-clinical-control flex h-full min-h-0 flex-col">
+    <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-tracker-v12-inbox yd-clinical-control flex h-full min-h-0 flex-col">
       <div className="yd-tracker-v4-inbox__toolbar yd-tracker-v8-inbox__toolbar">
         <div className="yd-tracker-v8-inbox__head">
           <p className="yd-tracker-v4-inbox__eyebrow">Arbeitsliste</p>
@@ -101,7 +101,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
       </div>
 
       <ul
-        className="yd-tracker-v4-inbox__list yd-tracker-v8-inbox__list yd-tracker-v9-inbox__list yd-tracker-v10-inbox__list yd-tracker-v11-inbox__list min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+        className="yd-tracker-v4-inbox__list yd-tracker-v8-inbox__list yd-tracker-v9-inbox__list yd-tracker-v10-inbox__list yd-tracker-v12-inbox__list min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
         aria-label="Arbeit in der Praxis-Inbox"
       >
         {filtered.length === 0 ? (
@@ -128,28 +128,36 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                     "yd-tracker-v8-inbox-card",
                     "yd-tracker-v9-inbox-card",
                     "yd-tracker-v10-inbox-card",
-                    "yd-tracker-v11-inbox-card",
+                    "yd-tracker-v12-inbox-card",
                     isActive && "yd-tracker-v4-inbox-card--active",
                     isActive && "yd-tracker-v8-inbox-card--active",
                     isActive && "yd-tracker-v10-inbox-card--active",
-                    isActive && "yd-tracker-v11-inbox-card--active",
+                    isActive && "yd-tracker-v12-inbox-card--active",
                     !item.seen_at && !isActive && "yd-tracker-v4-inbox-card--unseen"
                   )}
                 >
                   <button
                     type="button"
-                    className="yd-tracker-v10-inbox-card__body"
+                    className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body"
                     onClick={() => goToCase(item.id)}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    <div className="yd-tracker-v10-inbox-card__text">
-                      <span className="yd-tracker-v10-inbox-card__name" title={patientName}>
+                    <div className="yd-tracker-v10-inbox-card__text yd-tracker-v12-inbox-card__text">
+                      <span
+                        className="yd-tracker-v10-inbox-card__name yd-tracker-v12-inbox-card__name"
+                        title={patientName}
+                      >
                         {patientName}
                       </span>
-                      <span className="yd-tracker-v10-inbox-card__concern" title={concern}>
+                      <span
+                        className="yd-tracker-v10-inbox-card__concern yd-tracker-v12-inbox-card__concern"
+                        title={concern}
+                      >
                         {concern}
                       </span>
-                      <span className="yd-tracker-v10-inbox-card__time">{timeLabel}</span>
+                      <span className="yd-tracker-v10-inbox-card__time yd-tracker-v12-inbox-card__time">
+                        {timeLabel}
+                      </span>
                     </div>
                   </button>
                   <TrackerInboxStatusPill

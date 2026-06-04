@@ -73,7 +73,7 @@ export function TrackerInboxStatusPill({
   return (
     <div
       ref={rootRef}
-      className="yd-tracker-v10-inbox-status"
+      className="yd-tracker-v10-inbox-status yd-tracker-v12-inbox-status"
       aria-busy={pending}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}

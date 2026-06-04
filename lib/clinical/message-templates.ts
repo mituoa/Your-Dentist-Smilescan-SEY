@@ -141,21 +141,48 @@ export const PHOTO_VIEW_SNIPPETS: { id: string; label: string; requestLine: stri
     requestLine:
       "Bitte senden Sie eine gut ausgeleuchtete Aufnahme des betroffenen Bereichs aus einem für Sie passenden Blickwinkel.",
   },
+  {
+    id: "swelling",
+    label: "Schwellung",
+    requestLine:
+      "Bitte senden Sie eine gut ausgeleuchtete Aufnahme der geschwollenen Region aus Nah- und Übersichtsperspektive.",
+  },
+  {
+    id: "wound",
+    label: "Wunde",
+    requestLine:
+      "Bitte senden Sie eine Nahaufnahme der Wunde bei guter Beleuchtung, damit wir den Befund sicher einordnen können.",
+  },
 ];
 
 export type RuckfrageTopicId = (typeof FOLLOW_UP_SNIPPETS)[number]["id"];
 
-/** V10+ — Arzt-Auswahl im Rückfrage-Flow (kurze klinische Labels). */
+/** Assistenz-Flow — Rückfrage-Themen (IDs → FOLLOW_UP_SNIPPETS). */
 export const CLINICAL_RUCKFRAGE_TOPICS: {
   id: RuckfrageTopicId;
   label: string;
 }[] = [
-  { id: "pain", label: "Schmerzen" },
-  { id: "course", label: "Dauer" },
+  { id: "pain", label: "Schmerzstärke" },
+  { id: "course", label: "Dauer der Beschwerden" },
   { id: "swelling", label: "Schwellung" },
+  { id: "fever", label: "Temperatur/Fieber" },
   { id: "meds", label: "Medikamente" },
-  { id: "fever", label: "Temperatur" },
+  { id: "bleeding", label: "Blutung" },
+  { id: "cold", label: "Empfindlichkeit" },
+  { id: "photo", label: "Weiteres Foto" },
   { id: "custom", label: "Sonstiges" },
+];
+
+/** Assistenz-Flow — Fotoanforderung (UI-Labels, IDs → PHOTO_VIEW_SNIPPETS). */
+export const ASSIST_PHOTO_OPTIONS: { id: string; label: string }[] = [
+  { id: "upper", label: "Übersicht Oberkiefer" },
+  { id: "lower", label: "Übersicht Unterkiefer" },
+  { id: "closeup", label: "Nahaufnahme" },
+  { id: "right", label: "Seitenansicht" },
+  { id: "affected", label: "Frontansicht" },
+  { id: "swelling", label: "Schwellung" },
+  { id: "wound", label: "Wunde" },
+  { id: "free", label: "Sonstiges" },
 ];
 
 const timingLine = (urgency: UrgencyKey): string => {
@@ -279,10 +306,13 @@ export function buildPhotoRequestDraft(params: {
   const core = view.requestLine;
 
   return (
-    `Sehr geehrte/r ${name},\n\n` +
-    `vielen Dank für Ihre Einsendung. ${core}\n\n` +
-    `Sie erreichen uns bei Rückfragen unter ${tel}.\n\n` +
-    `Mit freundlichen Grüßen\n` +
+    `Guten Tag,\n\n` +
+    `vielen Dank für Ihre Nachricht.\n\n` +
+    `Für eine genauere Einschätzung bitten wir Sie um eine weitere Aufnahme:\n\n` +
+    `${core}\n\n` +
+    `Bitte fotografieren Sie die betroffene Region möglichst nah und bei guter Beleuchtung.\n\n` +
+    `Bei Rückfragen erreichen Sie uns unter ${tel}.\n\n` +
+    `Vielen Dank.\n` +
     `Ihr Praxisteam`
   );
 }

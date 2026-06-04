@@ -46,7 +46,14 @@ type ActionNotice = {
   message: string;
 };
 
-/** V10+ — Handlung → Dringlichkeit → Vorbereitet. */
+const MORE_OPTION_IDS = ["rueckfrage", "foto", "aufgabe"] as const;
+const MORE_OPTION_LABELS: Record<(typeof MORE_OPTION_IDS)[number], string> = {
+  rueckfrage: "Rückfrage",
+  foto: "Foto",
+  aufgabe: "Praxisaufgabe",
+};
+
+/** V12 — Entscheidung: Empfehlung → Handlung → Dringlichkeit → Vorbereitet. */
 export function TrackerPraxisAssistent({
   submissionId,
   isDoctor,
@@ -109,6 +116,13 @@ export function TrackerPraxisAssistent({
 
   const { primary, secondary } = clinical.actionPlan;
 
+  const moreOptions = useMemo(() => {
+    const pool = [...secondary];
+    return MORE_OPTION_IDS.map((id) => pool.find((item) => item.id === id)).filter(
+      (item): item is TrackerNextStepItem => Boolean(item)
+    );
+  }, [secondary]);
+
   const runStep = (item: TrackerNextStepItem) => {
     setActionNotice(null);
     if (item.intent) {
@@ -130,38 +144,28 @@ export function TrackerPraxisAssistent({
     }
   };
 
-  const sheetOpen = sheetIntent !== null;
-
   return (
     <>
       <aside
         id="tracker-klinische-voranalyse"
-        className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v10-rail yd-tracker-v11-rail"
-        aria-label="Klinische Voranalyse"
+        className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail"
+        aria-label="Klinische Entscheidung"
       >
-        <header className="yd-tracker-v11-rail__head">
-          <h2 className="yd-tracker-v11-rail__title">Klinische Voranalyse</h2>
-        </header>
-
-        <section className="yd-tracker-v11-rail__block yd-tracker-v11-rail__block--hero">
-          <h3 className="yd-tracker-v11-rail__label">Empfehlung</h3>
-          <p className="yd-tracker-v11-recommendation-text">
-            {clinical.recommendationLabel}
-          </p>
+        <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--empfehlung">
+          <h2 className="yd-tracker-v12-rail__label">Empfehlung</h2>
+          <p className="yd-tracker-v12-rail__headline">{clinical.recommendationLabel}</p>
           <button
             id="tracker-v10-primary-action"
             type="button"
-            className="yd-tracker-v11-primary-action"
-            disabled={sheetOpen}
-            aria-busy={sheetOpen && primary.intent != null}
+            className="yd-tracker-v12-primary-action"
             onClick={() => runStep(primary)}
           >
             {primary.label}
           </button>
         </section>
 
-        <section className="yd-tracker-v11-rail__block">
-          <h3 className="yd-tracker-v11-rail__label">Dringlichkeit</h3>
+        <section className="yd-tracker-v12-rail__block">
+          <h2 className="yd-tracker-v12-rail__label">Dringlichkeit</h2>
           <TrackerClinicalUrgency
             submissionId={submissionId}
             initialUrgency={urgency}
@@ -170,18 +174,18 @@ export function TrackerPraxisAssistent({
           />
         </section>
 
-        <section className="yd-tracker-v11-rail__block">
-          <h3 className="yd-tracker-v11-rail__label">Vorbereitet</h3>
-          <ul className="yd-tracker-v11-status-list">
+        <section className="yd-tracker-v12-rail__block">
+          <h2 className="yd-tracker-v12-rail__label">Vorbereitet</h2>
+          <ul className="yd-tracker-v12-status-list">
             {clinical.statusLines.map((line) => (
               <li
                 key={line.label}
                 className={cn(
-                  "yd-tracker-v11-status-line",
-                  line.kind === "warn" && "yd-tracker-v11-status-line--warn"
+                  "yd-tracker-v12-status-line",
+                  line.kind === "warn" && "yd-tracker-v12-status-line--warn"
                 )}
               >
-                <span className="yd-tracker-v11-status-line__mark" aria-hidden>
+                <span className="yd-tracker-v12-status-line__mark" aria-hidden>
                   {line.kind === "done" ? "✓" : "⚠"}
                 </span>
                 {line.label}
@@ -190,21 +194,21 @@ export function TrackerPraxisAssistent({
           </ul>
         </section>
 
-        {secondary.length > 0 ? (
-          <section className="yd-tracker-v11-rail__block yd-tracker-v11-rail__block--more">
-            <h3 className="yd-tracker-v11-rail__label yd-tracker-v11-rail__label--muted">
+        {moreOptions.length > 0 ? (
+          <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--more">
+            <h2 className="yd-tracker-v12-rail__label yd-tracker-v12-rail__label--muted">
               Weitere Optionen
-            </h3>
-            <ul className="yd-tracker-v11-secondary-list">
-              {secondary.map((item) => (
+            </h2>
+            <ul className="yd-tracker-v12-more-list">
+              {moreOptions.map((item) => (
                 <li key={item.id}>
                   <button
                     type="button"
-                    className="yd-tracker-v11-secondary-action"
-                    disabled={sheetOpen}
+                    className="yd-tracker-v12-more-action"
                     onClick={() => runStep(item)}
                   >
-                    {item.label}
+                    {MORE_OPTION_LABELS[item.id as (typeof MORE_OPTION_IDS)[number]] ??
+                      item.label}
                   </button>
                 </li>
               ))}
@@ -215,8 +219,8 @@ export function TrackerPraxisAssistent({
         {actionNotice ? (
           <p
             className={cn(
-              "yd-tracker-v11-rail-notice",
-              actionNotice.type === "error" && "yd-tracker-v11-rail-notice--error"
+              "yd-tracker-v12-rail-notice",
+              actionNotice.type === "error" && "yd-tracker-v12-rail-notice--error"
             )}
             role="status"
             aria-live="polite"

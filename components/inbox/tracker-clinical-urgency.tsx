@@ -61,12 +61,9 @@ export function TrackerClinicalUrgency({
   const showSuggestedBadge = !normalizeClinicalUrgency(initialUrgency);
 
   return (
-    <div className="yd-tracker-v11-urgency" aria-busy={pending}>
-      {showSuggestedBadge ? (
-        <p className="yd-tracker-v11-urgency__ki">KI-Vorschlag</p>
-      ) : null}
+    <div className="yd-tracker-v12-urgency" aria-busy={pending}>
       <div
-        className="yd-tracker-v11-urgency__segmented"
+        className="yd-tracker-v12-urgency__segmented"
         role="radiogroup"
         aria-label="Dringlichkeit"
       >
@@ -81,26 +78,26 @@ export function TrackerClinicalUrgency({
               aria-checked={isActive}
               disabled={pending}
               className={cn(
-                "yd-tracker-v11-urgency__option",
-                isActive && "yd-tracker-v11-urgency__option--active"
+                "yd-tracker-v12-urgency__option",
+                isActive && "yd-tracker-v12-urgency__option--active"
               )}
               onClick={() => select(opt.id)}
             >
-              <span className="yd-tracker-v11-urgency__option-label">{opt.label}</span>
+              <span className="yd-tracker-v12-urgency__option-label">{opt.label}</span>
               {isRecommended ? (
-                <span className="yd-tracker-v11-urgency__badge">Empfohlen</span>
+                <span className="yd-tracker-v12-urgency__badge">KI empfohlen</span>
               ) : null}
             </button>
           );
         })}
       </div>
       {pending ? (
-        <p className="yd-tracker-v11-urgency__pending" role="status">
+        <p className="yd-tracker-v12-urgency__pending" role="status">
           Wird gespeichert…
         </p>
       ) : null}
       {error ? (
-        <p className="yd-tracker-v11-urgency__error" role="status" aria-live="polite">
+        <p className="yd-tracker-v12-urgency__error" role="status" aria-live="polite">
           {error}
         </p>
       ) : null}

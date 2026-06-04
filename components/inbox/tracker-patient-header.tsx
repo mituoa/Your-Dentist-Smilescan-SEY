@@ -1,5 +1,4 @@
 import { formatPatientAgeYears } from "@/lib/inbox/tracker-inbox-logic";
-import { cn } from "@/lib/utils";
 
 type TrackerPatientHeaderProps = {
   patientName: string | null;
@@ -25,7 +24,7 @@ function formatPhoneCompact(phone: string): string {
   return t.length > 18 ? `${t.slice(0, 16)}…` : t;
 }
 
-/** V10+ — Wer → Problem → Kontakt (3 Ebenen). */
+/** V12 — Wer → Problem → Kontakt (Patient vor jeder System-Info). */
 export function TrackerPatientHeader({
   patientName,
   birthDate,
@@ -53,13 +52,17 @@ export function TrackerPatientHeader({
   if (isDraft) metaParts.push("Entwurf");
 
   return (
-    <header className="yd-tracker-v6-hero yd-tracker-v8-hero yd-tracker-v10-hero yd-tracker-v11-hero">
-      <h1 className="yd-tracker-v11-hero__name">{displayName}</h1>
-      <p className={cn("yd-tracker-v11-hero__concern")}>{caseHeadline}</p>
-      <p className="yd-tracker-v11-hero__meta" title={metaParts.join(" · ")}>
+    <header className="yd-tracker-v6-hero yd-tracker-v8-hero yd-tracker-v12-hero">
+      <h1 className="yd-tracker-v6-hero__name yd-tracker-v8-hero__name yd-tracker-v12-hero__name">
+        {displayName}
+      </h1>
+      <p className="yd-tracker-v6-hero__fallgrund yd-tracker-v8-hero__fallgrund yd-tracker-v12-hero__concern">
+        {caseHeadline}
+      </p>
+      <p className="yd-tracker-v6-hero__meta yd-tracker-v12-hero__meta" title={metaParts.join(" · ")}>
         {metaParts.map((part, i) => (
           <span key={`${part}-${i}`}>
-            {i > 0 ? <span className="yd-tracker-v11-hero__sep" aria-hidden> · </span> : null}
+            {i > 0 ? <span className="yd-tracker-v6-hero__sep" aria-hidden> · </span> : null}
             {part}
           </span>
         ))}

@@ -123,7 +123,7 @@ export function TrackerWorkspace({
     editableMessageDraft?.body?.trim() || historyMessageDraft?.body?.trim() || null;
 
   return (
-    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v11-workspace">
+    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v12-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
         birthDate={submission.patient_birth_date}
@@ -133,21 +133,7 @@ export function TrackerWorkspace({
         isDraft={submission.is_draft}
       />
 
-      <div className="yd-tracker-v8-clinical-row">
-        <section
-          id="tracker-beweise"
-          className="yd-tracker-v6-evidence yd-tracker-v7-evidence yd-tracker-v8-evidence"
-          aria-label="Klinische Dokumentation"
-        >
-          <h2 className="yd-tracker-v6-section-label">Klinische Dokumentation</h2>
-          <TrackerPhotoStage
-            submissionId={submission.id}
-            photos={submission.photos}
-            patientName={patientLabel}
-            dominant
-          />
-        </section>
-
+      <div className="yd-tracker-v8-clinical-row yd-tracker-v12-clinical-row">
         <TrackerPraxisAssistent
           submissionId={submission.id}
           isDoctor={isDoctor}
@@ -169,6 +155,19 @@ export function TrackerWorkspace({
           editableDraftId={editableMessageDraft?.id ?? null}
           initialDraftBody={draftBodyForAssist}
         />
+
+        <section
+          id="tracker-beweise"
+          className="yd-tracker-v6-evidence yd-tracker-v7-evidence yd-tracker-v8-evidence yd-tracker-v12-evidence"
+          aria-label="Klinische Bilder"
+        >
+          <TrackerPhotoStage
+            submissionId={submission.id}
+            photos={submission.photos}
+            patientName={patientLabel}
+            dominant
+          />
+        </section>
       </div>
 
       <div className="yd-tracker-v8-workspace__below">
