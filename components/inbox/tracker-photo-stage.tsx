@@ -25,6 +25,14 @@ function dayIndexLabel(index: number): string {
   return `Tag ${index + 1}`;
 }
 
+function scrollToPhotoRequest() {
+  const el = document.getElementById("tracker-v10-primary-action");
+  el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (el instanceof HTMLButtonElement) {
+    window.setTimeout(() => el.focus(), 280);
+  }
+}
+
 export function TrackerPhotoStage({
   submissionId,
   photos,
@@ -55,24 +63,32 @@ export function TrackerPhotoStage({
 
   const stageClass = cn(
     "yd-tracker-v4-photo-stage",
-    dominant && "yd-tracker-v4-photo-stage--dominant"
+    "yd-tracker-v11-photo-stage",
+    dominant && "yd-tracker-v4-photo-stage--dominant yd-tracker-v11-photo-stage--dominant"
   );
-  const title = "Foto-Dokumentation";
+  const title = "Klinische Bilder";
 
   if (sorted.length === 0) {
     return (
-      <section className={stageClass} aria-label="Foto-Dokumentation">
+      <section className={stageClass} aria-label="Klinische Bilder">
         <header className="yd-tracker-v4-photo-stage__head">
           <h3 className="yd-tracker-workspace-section__title">{title}</h3>
         </header>
-        <div className="yd-tracker-v4-photo-stage__empty">
+        <div className="yd-tracker-v4-photo-stage__empty yd-tracker-v11-photo-empty">
           <ImageIcon className="h-9 w-9 text-[#94A3B8]/40" strokeWidth={1.25} aria-hidden />
-          <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[#334155]">
-            Es liegen noch keine klinischen Bilder vor.
+          <p className="yd-tracker-v11-photo-empty__title">
+            Noch keine klinischen Bilder vorhanden.
           </p>
-          <p className="mt-1.5 max-w-md text-[13px] leading-relaxed text-[#64748B]">
-            Nach Eingang erscheinen die Aufnahmen hier mit klinischem Viewer und Tagesverlauf.
+          <p className="yd-tracker-v11-photo-empty__hint">
+            Nach Eingang erscheinen die Aufnahmen hier zur klinischen Beurteilung.
           </p>
+          <button
+            type="button"
+            className="yd-tracker-v11-photo-empty__cta"
+            onClick={scrollToPhotoRequest}
+          >
+            Bild anfordern
+          </button>
         </div>
       </section>
     );
@@ -84,14 +100,15 @@ export function TrackerPhotoStage({
       : `${sorted.length} Bilder · ${dayGroups.length} ${dayGroups.length === 1 ? "Tag" : "Tage"}`;
 
   return (
-    <section className={stageClass} aria-label="Foto-Dokumentation">
+    <section className={stageClass} aria-label="Klinische Bilder">
       <header className="yd-tracker-v4-photo-stage__head">
         <h3 className="yd-tracker-workspace-section__title">{title}</h3>
         <p className="yd-tracker-v4-photo-stage__meta">{photoMeta}</p>
       </header>
-      <div className="yd-tracker-v4-photo-stage__viewer">
+      <div className="yd-tracker-v4-photo-stage__viewer yd-tracker-v11-photo-stage__viewer">
         <PhotoViewer
           submissionId={submissionId}
+          className="yd-tracker-v11-photo-viewer"
           photos={sorted.map(({ id, sort_order, signed_url }) => ({
             id,
             sort_order,
@@ -103,7 +120,7 @@ export function TrackerPhotoStage({
 
       {dayGroups.length > 0 ? (
         <div
-          className="yd-tracker-v4-photo-stage__timeline"
+          className="yd-tracker-v4-photo-stage__timeline yd-tracker-v11-photo-timeline"
           role="list"
           aria-label="Fotoverlauf nach Tagen"
         >

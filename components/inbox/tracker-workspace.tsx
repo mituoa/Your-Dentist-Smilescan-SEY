@@ -5,10 +5,7 @@ import { TrackerPhotoStage } from "@/components/inbox/tracker-photo-stage";
 import { TrackerPraxisAssistent } from "@/components/inbox/tracker-praxis-assistent";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
-import {
-  buildTrackerCaseTimeline,
-  buildTrackerPraxisAssistent,
-} from "@/lib/inbox/build-tracker-workspace";
+import { buildTrackerCaseTimeline } from "@/lib/inbox/build-tracker-workspace";
 import {
   isApprovalPending,
   type EnrichedSubmissionListItem,
@@ -117,23 +114,6 @@ export function TrackerWorkspace({
         : draftBody
       : null;
 
-  const praxisAssistent = buildTrackerPraxisAssistent({
-    patientName: patientLabel,
-    patientNotes: submission.patient_notes,
-    intakeChannel: submission.intake_channel,
-    photoCount: submission.photos.length,
-    hasMultiDayPhotos: hasMultiDayPhotos(submission.photos),
-    messageDraftStatus,
-    draftsAvailable: messageDraftsAvailable,
-    status,
-    isApprovalPending: approvalPending,
-    isDoctor,
-    openTaskCount,
-    urgency: submission.urgency,
-    hasPhotoTrail: photoTrail,
-    draftPreview,
-  });
-
   const showCommunication =
     messageDraftsAvailable ||
     Boolean(draftPreview) ||
@@ -143,7 +123,7 @@ export function TrackerWorkspace({
     editableMessageDraft?.body?.trim() || historyMessageDraft?.body?.trim() || null;
 
   return (
-    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace">
+    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v11-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
         birthDate={submission.patient_birth_date}
@@ -164,11 +144,11 @@ export function TrackerWorkspace({
             submissionId={submission.id}
             photos={submission.photos}
             patientName={patientLabel}
+            dominant
           />
         </section>
 
         <TrackerPraxisAssistent
-          model={praxisAssistent}
           submissionId={submission.id}
           isDoctor={isDoctor}
           openTaskCount={openTaskCount}

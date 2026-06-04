@@ -102,12 +102,12 @@ export function buildTrackerCaseTimeline(input: {
     events.push({
       id: "ki-analysis",
       dateLabel: "Heute",
-      title: "KI hat Anliegen strukturiert",
+      title: "Patientenanliegen erfasst",
     });
     events.push({
       id: "draft-ready",
       dateLabel: "Heute",
-      title: "Antwort vorbereitet",
+      title: "Entwurf bereit",
     });
   }
 

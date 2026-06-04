@@ -145,6 +145,19 @@ export const PHOTO_VIEW_SNIPPETS: { id: string; label: string; requestLine: stri
 
 export type RuckfrageTopicId = (typeof FOLLOW_UP_SNIPPETS)[number]["id"];
 
+/** V10+ — Arzt-Auswahl im Rückfrage-Flow (kurze klinische Labels). */
+export const CLINICAL_RUCKFRAGE_TOPICS: {
+  id: RuckfrageTopicId;
+  label: string;
+}[] = [
+  { id: "pain", label: "Schmerzen" },
+  { id: "course", label: "Dauer" },
+  { id: "swelling", label: "Schwellung" },
+  { id: "meds", label: "Medikamente" },
+  { id: "fever", label: "Temperatur" },
+  { id: "custom", label: "Sonstiges" },
+];
+
 const timingLine = (urgency: UrgencyKey): string => {
   if (urgency === "today") {
     return "Wir möchten Ihr Anliegen zeitnah mit Ihnen klären.";

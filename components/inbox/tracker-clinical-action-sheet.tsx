@@ -18,7 +18,7 @@ import {
   buildRuckfrageDraftForSnippet,
   buildTaskSuggestionFromCase,
   buildTerminOfferDraft,
-  FOLLOW_UP_SNIPPETS,
+  CLINICAL_RUCKFRAGE_TOPICS,
   PHOTO_VIEW_SNIPPETS,
   type RuckfrageTopicId,
   type UrgencyKey,
@@ -35,6 +35,8 @@ export type TrackerClinicalActionSheetProps = {
   open: boolean;
   intent: TrackerActionIntent | null;
   onClose: () => void;
+  /** V10 — Rückmeldung in der rechten Spalte nach Abschluss. */
+  onOutcome?: (outcome: { type: "success" | "error"; message: string }) => void;
   submissionId: string;
   patientName: string;
   patientEmail: string | null;
@@ -54,6 +56,17 @@ export type TrackerClinicalActionSheetProps = {
 };
 
 type FlowStep = "choose" | "review" | "preview";
+
+function pendingButtonLabel(
+  intent: TrackerActionIntent,
+  flowStep: FlowStep
+): string {
+  if (flowStep === "choose") return "Wird vorbereitet…";
+  if (intent === "rueckfrage") return "Nachricht wird erstellt…";
+  if (intent === "termin") return "Termin wird vorbereitet…";
+  if (intent === "foto") return "Anfrage wird erstellt…";
+  return "Wird gespeichert…";
+}
 
 const TERMIN_OPTIONS: { id: Exclude<UrgencyKey, null>; label: string }[] =
   CLINICAL_URGENCY_OPTIONS.map((o) => ({
@@ -87,6 +100,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     open,
     intent,
     onClose,
+    onOutcome,
     submissionId,
     patientName,
     patientEmail,
@@ -124,13 +138,13 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
   };
 
   const orderedRuckfrageTopics = useMemo(() => {
-    const byId = new Map(FOLLOW_UP_SNIPPETS.map((s) => [s.id, s]));
-    const out: typeof FOLLOW_UP_SNIPPETS = [];
+    const byId = new Map(CLINICAL_RUCKFRAGE_TOPICS.map((s) => [s.id, s]));
+    const out: typeof CLINICAL_RUCKFRAGE_TOPICS = [];
     for (const id of prioritizedRuckfrageTopics) {
-      const row = byId.get(id);
+      const row = byId.get(id as RuckfrageTopicId);
       if (row) out.push(row);
     }
-    for (const s of FOLLOW_UP_SNIPPETS) {
+    for (const s of CLINICAL_RUCKFRAGE_TOPICS) {
       if (!out.some((o) => o.id === s.id)) out.push(s);
     }
     return out;
@@ -212,9 +226,12 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
       const res = await ensureDraftAndSave();
       if (!res.ok) {
         setError(res.error);
+        onOutcome?.({ type: "error", message: res.error });
         return;
       }
-      setStatus("Nachricht übernommen — Freigabe erfolgt in der Kommunikation.");
+      const successMsg = "Nachricht übernommen — weiter in der Kommunikation.";
+      setStatus(successMsg);
+      onOutcome?.({ type: "success", message: successMsg });
       router.refresh();
       onClose();
       window.setTimeout(scrollToCommunication, 120);
@@ -223,7 +240,9 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
 
   const handleApprove = () => {
     if (!isDoctor) {
-      setError("Nur Zahnärzt:innen können Antworten freigeben.");
+      const msg = "Nur Zahnärzt:innen können Antworten freigeben.";
+      setError(msg);
+      onOutcome?.({ type: "error", message: msg });
       return;
     }
     setError(null);
@@ -231,11 +250,14 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
       const ensured = await ensureDraftAndSave();
       if (!ensured.ok) {
         setError(ensured.error);
+        onOutcome?.({ type: "error", message: ensured.error });
         return;
       }
       router.refresh();
       if (!editableDraftId) {
-        setStatus("Entwurf vorbereitet — bitte in der Kommunikation freigeben.");
+        const msg = "Entwurf vorbereitet — Freigabe in der Kommunikation.";
+        setStatus(msg);
+        onOutcome?.({ type: "success", message: msg });
         onClose();
         window.setTimeout(scrollToCommunication, 120);
         return;
@@ -246,9 +268,12 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
       });
       if (!res.ok) {
         setError(res.error);
+        onOutcome?.({ type: "error", message: res.error });
         return;
       }
-      setStatus("Antwort freigegeben.");
+      const msg = "Antwort freigegeben.";
+      setStatus(msg);
+      onOutcome?.({ type: "success", message: msg });
       router.refresh();
       onClose();
       window.setTimeout(scrollToCommunication, 120);
@@ -326,7 +351,11 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
   const lead =
     intent === "rueckfrage" && flowStep === "choose"
       ? "Was möchten Sie klären?"
-      : intent === "foto" && flowStep === "choose"
+      : intent === "rueckfrage" && flowStep === "review"
+        ? "Entwurf wurde erstellt — bitte prüfen und anpassen."
+        : intent === "rueckfrage" && flowStep === "preview"
+          ? "Letzte Prüfung vor der Übernahme in die Kommunikation."
+          : intent === "foto" && flowStep === "choose"
         ? "Welche Aufnahme fehlt?"
         : intent === "termin" && flowStep === "choose"
           ? "Welche Dringlichkeit gilt für den Terminvorschlag?"
@@ -392,17 +421,24 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
           >
             {intent === "rueckfrage" && flowStep === "choose" ? (
               <div className="yd-tracker-v8-action-flow-block">
-                <div className="yd-tracker-v8-action-topic-grid">
+                <div
+                  className="yd-tracker-v11-action-radios"
+                  role="radiogroup"
+                  aria-label="Thema der Rückfrage"
+                >
                   {orderedRuckfrageTopics.map((topic) => (
                     <button
                       key={topic.id}
                       type="button"
+                      role="radio"
+                      aria-checked={ruckfrageTopic === topic.id}
                       className={cn(
-                        "yd-tracker-v8-action-topic-btn",
-                        ruckfrageTopic === topic.id && "yd-tracker-v8-action-topic-btn--active"
+                        "yd-tracker-v11-action-radio",
+                        ruckfrageTopic === topic.id && "yd-tracker-v11-action-radio--active"
                       )}
-                      onClick={() => setRuckfrageTopic(topic.id as RuckfrageTopicId)}
+                      onClick={() => setRuckfrageTopic(topic.id)}
                     >
+                      <span className="yd-tracker-v11-action-radio__dot" aria-hidden />
                       {topic.label}
                     </button>
                   ))}
@@ -446,7 +482,11 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
             {flowStep !== "choose" ? (
               <div className="yd-tracker-v8-action-flow-block">
                 <label htmlFor={`${titleId}-body`} className="yd-tracker-v8-action-sheet__label">
-                  {intent === "freigabe" ? "Antwortentwurf" : "KI-Vorschlag (bearbeitbar)"}
+                  {intent === "freigabe"
+                    ? "Antwortentwurf"
+                    : flowStep === "review"
+                      ? "Nachrichtentwurf — bitte prüfen"
+                      : "Nachrichtentwurf"}
                 </label>
                 <textarea
                   id={`${titleId}-body`}
@@ -520,7 +560,9 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
             }
             onClick={onPrimary}
           >
-            {isPending ? "Wird übernommen…" : primaryLabel}
+            {isPending
+              ? pendingButtonLabel(intent, flowStep)
+              : primaryLabel}
           </button>
         </footer>
       </div>

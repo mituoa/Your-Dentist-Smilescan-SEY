@@ -18,6 +18,8 @@ import {
 } from "@/lib/clinical/message-templates";
 import { consumeCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
 import type { MessageDraftRow } from "@/lib/queries/message-drafts";
+import { formatTrackerRelativeIngress } from "@/lib/inbox/tracker-v9-clinical";
+import { cn } from "@/lib/utils";
 
 type SubmissionMessageDraftPanelProps = {
   submissionId: string;
@@ -42,6 +44,23 @@ function historyStatusLabel(status: MessageDraftRow["status"]): string {
   if (status === "approved") return "Antwort freigegeben";
   if (status === "sent") return "Als versendet markiert";
   return "Verlauf";
+}
+
+function draftUpdatedLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const rel = formatTrackerRelativeIngress(iso);
+  if (rel === "Gerade eben") return "Letzte Änderung gerade eben";
+  if (rel.startsWith("Vor ")) return `Letzte Änderung ${rel.toLowerCase()}`;
+  return `Letzte Änderung ${rel}`;
+}
+
+function draftPreviewTwoLines(body: string): string {
+  const lines = body
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+  return lines.join(" ") || "—";
 }
 
 export function SubmissionMessageDraftPanel({
@@ -227,9 +246,11 @@ export function SubmissionMessageDraftPanel({
   if (!editableDraft) {
     return (
       <div className="touch-manipulation space-y-3">
-        <p className="text-[13px] leading-relaxed text-slate-600">
-          Noch kein Antwortentwurf vorbereitet.
-        </p>
+        <div className="yd-tracker-v11-comm-empty">
+          <p className="yd-tracker-v11-comm-empty__title">
+            Es wurde noch keine Nachricht vorbereitet.
+          </p>
+        </div>
         <PrepareDraftButton
           submissionId={submissionId}
           isPending={isPending}
@@ -247,18 +268,39 @@ export function SubmissionMessageDraftPanel({
     );
   }
 
+  const updatedMeta = draftUpdatedLabel(editableDraft.updated_at);
+  const previewText = draftPreviewTwoLines(body);
+
   return (
     <div className="touch-manipulation space-y-3 lg:space-y-4">
-      <p className="text-[13px] font-semibold text-slate-800">Antwortentwurf vorbereitet</p>
+      <div className="yd-tracker-v11-comm-card">
+        <div className="yd-tracker-v11-comm-card__copy">
+          <p className="yd-tracker-v11-comm-card__title">Entwurf bereit</p>
+          {updatedMeta ? (
+            <p className="yd-tracker-v11-comm-card__meta">{updatedMeta}</p>
+          ) : null}
+          <p className="yd-tracker-v11-comm-card__preview">{previewText}</p>
+        </div>
+        <button
+          type="button"
+          className="yd-tracker-v11-comm-card__open"
+          disabled={isPending}
+          onClick={scrollDraftIntoView}
+        >
+          Öffnen
+        </button>
+      </div>
 
       <div
-        className="bg-[#FAFBFC] transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none max-lg:bg-white"
+        className={cn(
+          "yd-tracker-v11-comm-editor bg-[#FAFBFC] transition-[box-shadow] duration-200 ease-out motion-reduce:transition-none max-lg:bg-white",
+          isPending && "opacity-[0.92]"
+        )}
         style={{
           borderRadius: "10px",
           boxShadow: flash
             ? "inset 0 0 0 1px rgba(43,111,232,0.12)"
             : "inset 0 0 0 1px rgba(226, 232, 240, 1)",
-          opacity: isPending ? 0.92 : 1,
         }}
       >
         <textarea
@@ -479,7 +521,7 @@ function PrepareDraftButton({
         boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
       }}
     >
-      {isPending ? "Antwort wird vorbereitet …" : "Antwort vorbereiten"}
+      {isPending ? "Nachricht wird vorbereitet…" : "Nachricht erstellen"}
     </button>
   );
 }

@@ -21,7 +21,7 @@ type TrackerClinicalUrgencyProps = {
   onUrgencyChange?: (urgency: ClinicalUrgencyId) => void;
 };
 
-/** V9 — Dringlichkeit in der Klinischen Voranalyse (steuert Folgeaktionen). */
+/** V10+ — Klinische Dringlichkeit mit „Empfohlen“ unter der KI-Option. */
 export function TrackerClinicalUrgency({
   submissionId,
   initialUrgency,
@@ -40,6 +40,7 @@ export function TrackerClinicalUrgency({
   }, [initialUrgency, suggestedUrgency]);
 
   const select = (id: ClinicalUrgencyId) => {
+    if (pending) return;
     setError(null);
     startTransition(async () => {
       const res = await updateSubmissionUrgency(
@@ -57,21 +58,21 @@ export function TrackerClinicalUrgency({
   };
 
   const active = urgency ?? suggestedUrgency;
+  const showSuggestedBadge = !normalizeClinicalUrgency(initialUrgency);
 
   return (
-    <div className="yd-tracker-v9-urgency" aria-busy={pending}>
-      <p className="yd-tracker-v9-urgency__hint">
-        KI-Vorschlag:{" "}
-        {CLINICAL_URGENCY_OPTIONS.find((o) => o.id === suggestedUrgency)?.label}
-      </p>
+    <div className="yd-tracker-v11-urgency" aria-busy={pending}>
+      {showSuggestedBadge ? (
+        <p className="yd-tracker-v11-urgency__ki">KI-Vorschlag</p>
+      ) : null}
       <div
-        className="yd-tracker-v9-urgency__grid"
+        className="yd-tracker-v11-urgency__segmented"
         role="radiogroup"
         aria-label="Dringlichkeit"
       >
         {CLINICAL_URGENCY_OPTIONS.map((opt) => {
           const isActive = active === opt.id;
-          const isSuggested = suggestedUrgency === opt.id && !initialUrgency;
+          const isRecommended = showSuggestedBadge && suggestedUrgency === opt.id;
           return (
             <button
               key={opt.id}
@@ -80,20 +81,26 @@ export function TrackerClinicalUrgency({
               aria-checked={isActive}
               disabled={pending}
               className={cn(
-                "yd-tracker-v9-urgency__btn",
-                isActive && "yd-tracker-v9-urgency__btn--active",
-                isSuggested && !isActive && "yd-tracker-v9-urgency__btn--suggested"
+                "yd-tracker-v11-urgency__option",
+                isActive && "yd-tracker-v11-urgency__option--active"
               )}
               onClick={() => select(opt.id)}
             >
-              <span className="yd-tracker-v9-urgency__radio" aria-hidden />
-              {opt.label}
+              <span className="yd-tracker-v11-urgency__option-label">{opt.label}</span>
+              {isRecommended ? (
+                <span className="yd-tracker-v11-urgency__badge">Empfohlen</span>
+              ) : null}
             </button>
           );
         })}
       </div>
+      {pending ? (
+        <p className="yd-tracker-v11-urgency__pending" role="status">
+          Wird gespeichert…
+        </p>
+      ) : null}
       {error ? (
-        <p className="yd-tracker-v9-urgency__error" role="status">
+        <p className="yd-tracker-v11-urgency__error" role="status" aria-live="polite">
           {error}
         </p>
       ) : null}

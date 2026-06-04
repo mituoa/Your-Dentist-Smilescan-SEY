@@ -14,6 +14,7 @@ import {
   safeSubmissionPhotoDownloadErrorMessage,
   submissionPhotoDownloadErrors,
 } from "@/lib/inbox/submission-photo-download-errors";
+import { cn } from "@/lib/utils";
 
 interface Photo {
   id: string;
@@ -26,6 +27,8 @@ interface PhotoViewerProps {
   submissionId: string;
   photos: Photo[];
   patientName: string;
+  /** Zusätzliche Klassen am Wurzel-Container (z. B. Tracker V11). */
+  className?: string;
   /** Standard `true`. In Demo-Ansichten ohne echte Submission `false` (kein Server-ZIP). */
   enableZipDownload?: boolean;
   /** Optionales `alt` für das Hauptbild (z. B. Vorschau mit neutralem Beispielbild). */
@@ -118,6 +121,7 @@ export function PhotoViewer({
   submissionId,
   photos,
   patientName,
+  className,
   enableZipDownload = true,
   primaryImageAlt,
   noPhotosPrimaryText,
@@ -217,7 +221,10 @@ export function PhotoViewer({
     imageUnavailableText?.trim() || "Für dieses Bild liegt keine Vorschau vor.";
 
   return (
-    <div className="space-y-4 overflow-x-hidden" aria-label={`Fotos: ${patientName}`}>
+    <div
+      className={cn("space-y-4 overflow-x-hidden", className)}
+      aria-label={`Fotos: ${patientName}`}
+    >
       <div
         className={enableZipDownload ? "relative cursor-pointer" : "relative cursor-default"}
         onMouseEnter={() => setHoverImage(true)}
@@ -312,7 +319,7 @@ export function PhotoViewer({
               ? "Download gestartet"
               : downloadStatus === "error"
                 ? "Erneut versuchen"
-                : "Fotos als ZIP exportieren"}
+                : "ZIP exportieren"}
         </button>
         ) : null}
       </div>

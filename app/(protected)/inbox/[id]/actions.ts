@@ -220,7 +220,7 @@ export async function updateSubmissionPracticeStatus(
 
   const { data: row, error: fetchError } = await supabase
     .from("submissions")
-    .select("message_draft_status, seen_at")
+    .select("seen_at")
     .eq("id", submissionId)
     .eq("workspace_id", workspace.workspace_id)
     .maybeSingle();
@@ -231,7 +231,21 @@ export async function updateSubmissionPracticeStatus(
   }
 
   if (status === "freigegeben") {
-    if (row.message_draft_status !== "sent") {
+    const { data: sentDraft, error: draftError } = await supabase
+      .from("message_drafts")
+      .select("id")
+      .eq("submission_id", submissionId)
+      .eq("workspace_id", workspace.workspace_id)
+      .eq("status", "sent")
+      .limit(1)
+      .maybeSingle();
+
+    if (draftError) {
+      logPostgrest("updateSubmissionPracticeStatus/sentDraft", draftError);
+      return { error: "Status konnte nicht geprüft werden." };
+    }
+
+    if (!sentDraft) {
       return {
         error:
           "Freigegeben ist erst nach versendeter Patientenantwort möglich.",

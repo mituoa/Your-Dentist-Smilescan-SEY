@@ -56,15 +56,131 @@ export type TrackerNextStepGroup = {
   items: TrackerNextStepItem[];
 };
 
+export type ClinicalStatusLine = {
+  kind: "done" | "warn";
+  label: string;
+};
+
+export type TrackerActionPlan = {
+  primary: TrackerNextStepItem;
+  secondary: TrackerNextStepItem[];
+};
+
 export type TrackerV9ClinicalModel = {
   decision: TrackerClinicalDecision;
-  /** 2–3 Sätze — ärztliche Einschätzung, keine Checkliste. */
-  assessment: string;
+  /** V10 — maximal 3 kurze Statuszeilen (✓ / ⚠). */
+  statusLines: ClinicalStatusLine[];
+  /** V10 — eine Zeile, z. B. „Foto ergänzen“. */
+  recommendationLabel: string;
   suggestedUrgency: ClinicalUrgencyId;
   prioritizedRuckfrageTopics: string[];
   suggestedPhotoViewId: string | null;
+  /** @deprecated V10 UI nutzt actionPlan */
+  assessment: string;
   nextStepGroups: TrackerNextStepGroup[];
+  actionPlan: TrackerActionPlan;
 };
+
+/** V10 — Status statt Fließtext (max. 3 Zeilen). */
+export function buildClinicalStatusLines(
+  input: TrackerClinicalDecisionInput
+): ClinicalStatusLine[] {
+  const lines: ClinicalStatusLine[] = [];
+
+  if (input.patientNotes?.trim()) {
+    lines.push({ kind: "done", label: "Patientenanliegen erfasst" });
+  } else {
+    lines.push({ kind: "warn", label: "Patientenanliegen fehlt" });
+  }
+
+  if (input.photoCount === 0) {
+    lines.push({ kind: "warn", label: "Kein klinisches Bild" });
+  } else if (input.photoCount === 1) {
+    lines.push({ kind: "done", label: "Klinisches Bild vorhanden" });
+    lines.push({ kind: "warn", label: "Weitere Aufnahme empfohlen" });
+  } else {
+    lines.push({
+      kind: "done",
+      label:
+        input.photoCount === 2
+          ? "Klinische Bilder vorhanden"
+          : `${input.photoCount} klinische Bilder`,
+    });
+  }
+
+  if (input.isApprovalPending && lines.length < 3) {
+    lines.push({ kind: "warn", label: "Freigabe ausstehend" });
+  } else if (
+    input.draftsAvailable &&
+    input.messageDraftStatus === "draft" &&
+    !input.isApprovalPending &&
+    lines.length < 3
+  ) {
+    lines.push({ kind: "done", label: "Entwurf bereit" });
+  }
+
+  return lines.slice(0, 3);
+}
+
+/** V10 — eine Empfehlungszeile für die rechte Spalte. */
+export function buildShortRecommendationLabel(
+  primaryAction: string,
+  photoCount: number
+): string {
+  if (/freigeben/i.test(primaryAction)) return "Antwort freigeben";
+  if (/foto|bild/i.test(primaryAction)) {
+    if (photoCount === 0) return "Foto ergänzen";
+    if (photoCount === 1) return "Weiteres Foto";
+    return "Weitere Fotos";
+  }
+  if (/rückfrage/i.test(primaryAction)) return "Rückfrage stellen";
+  if (/termin/i.test(primaryAction)) return "Termin anbieten";
+  if (/verlauf|beobachten/i.test(primaryAction)) return "Verlauf beobachten";
+  if (/aufgabe/i.test(primaryAction)) return "Praxisaufgabe";
+  return "Fall prüfen";
+}
+
+function primaryActionToItemId(primaryAction: string): string {
+  if (/freigeben|antwort/i.test(primaryAction)) return "freigabe";
+  if (/foto|bild/i.test(primaryAction)) return "foto";
+  if (/rückfrage/i.test(primaryAction)) return "rueckfrage";
+  if (/termin/i.test(primaryAction)) return "termin";
+  if (/aufgabe/i.test(primaryAction)) return "aufgabe";
+  return "foto";
+}
+
+/** V10 — eine dominante Handlung + sekundäre Optionen. */
+export function buildTrackerActionPlan(opts: {
+  submissionId: string;
+  isDoctor: boolean;
+  messageDraftStatus: MessageDraftListStatus;
+  draftsAvailable: boolean;
+  isApprovalPending: boolean;
+  photoCount: number;
+  primaryAction: string;
+}): TrackerActionPlan {
+  const groups = buildTrackerNextStepGroups(opts);
+  const all = groups.flatMap((g) => g.items);
+  const preferredId = primaryActionToItemId(opts.primaryAction);
+
+  const primary =
+    all.find((i) => i.emphasized) ??
+    all.find((i) => i.id === preferredId) ??
+    all[0] ?? {
+      id: "foto",
+      label: "Foto ergänzen",
+      intent: "foto" as const,
+    };
+
+  const secondaryOrder = ["rueckfrage", "termin", "aufgabe", "freigabe", "antwort", "foto"];
+  const secondary = all
+    .filter((i) => i.id !== primary.id)
+    .sort(
+      (a, b) => secondaryOrder.indexOf(a.id) - secondaryOrder.indexOf(b.id)
+    );
+
+  return { primary, secondary };
+}
 
 function noteMentionsPain(notes: string | null): boolean {
   return /schmerz|weh|druck|pochend/i.test(notes ?? "");
@@ -296,21 +412,29 @@ export function buildTrackerV9ClinicalModel(
   const decision = buildTrackerClinicalDecision(input);
   const suggestedUrgency = suggestClinicalUrgency(input);
 
+  const planOpts = {
+    submissionId: input.submissionId,
+    isDoctor: input.isDoctor,
+    messageDraftStatus: input.messageDraftStatus,
+    draftsAvailable: input.draftsAvailable,
+    isApprovalPending: input.isApprovalPending,
+    photoCount: input.photoCount,
+    primaryAction: decision.primaryAction,
+  };
+
   return {
     decision,
-    assessment: buildAssessment(input, decision, suggestedUrgency),
+    statusLines: buildClinicalStatusLines(input),
+    recommendationLabel: buildShortRecommendationLabel(
+      decision.primaryAction,
+      input.photoCount
+    ),
     suggestedUrgency,
     prioritizedRuckfrageTopics: prioritizeRuckfrageTopics(input, decision),
     suggestedPhotoViewId: suggestPhotoViewId(input),
-    nextStepGroups: buildTrackerNextStepGroups({
-      submissionId: input.submissionId,
-      isDoctor: input.isDoctor,
-      messageDraftStatus: input.messageDraftStatus,
-      draftsAvailable: input.draftsAvailable,
-      isApprovalPending: input.isApprovalPending,
-      photoCount: input.photoCount,
-      primaryAction: decision.primaryAction,
-    }),
+    assessment: buildAssessment(input, decision, suggestedUrgency),
+    nextStepGroups: buildTrackerNextStepGroups(planOpts),
+    actionPlan: buildTrackerActionPlan(planOpts),
   };
 }
 
@@ -344,21 +468,29 @@ export function buildTrackerV9FromListItem(
   const decision = buildTrackerClinicalDecision(input);
   const suggestedUrgency = suggestClinicalUrgency(input);
 
+  const planOpts = {
+    submissionId: opts.submissionId,
+    isDoctor: input.isDoctor,
+    messageDraftStatus: input.messageDraftStatus,
+    draftsAvailable: input.draftsAvailable,
+    isApprovalPending: input.isApprovalPending,
+    photoCount: input.photoCount,
+    primaryAction: decision.primaryAction,
+  };
+
   return {
     decision,
-    assessment: buildAssessment(input, decision, suggestedUrgency),
+    statusLines: buildClinicalStatusLines(input),
+    recommendationLabel: buildShortRecommendationLabel(
+      decision.primaryAction,
+      input.photoCount
+    ),
     suggestedUrgency,
     prioritizedRuckfrageTopics: prioritizeRuckfrageTopics(input, decision),
     suggestedPhotoViewId: suggestPhotoViewId(input),
-    nextStepGroups: buildTrackerNextStepGroups({
-      submissionId: opts.submissionId,
-      isDoctor: input.isDoctor,
-      messageDraftStatus: input.messageDraftStatus,
-      draftsAvailable: input.draftsAvailable,
-      isApprovalPending: input.isApprovalPending,
-      photoCount: input.photoCount,
-      primaryAction: decision.primaryAction,
-    }),
+    assessment: buildAssessment(input, decision, suggestedUrgency),
+    nextStepGroups: buildTrackerNextStepGroups(planOpts),
+    actionPlan: buildTrackerActionPlan(planOpts),
   };
 }
 

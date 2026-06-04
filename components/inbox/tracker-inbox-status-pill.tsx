@@ -20,6 +20,7 @@ type TrackerInboxStatusPillProps = {
   messageDraftStatus: MessageDraftListStatus;
 };
 
+/** V10 — Dezente Segment-Auswahl für den Praxisstatus. */
 export function TrackerInboxStatusPill({
   submissionId,
   status,
@@ -54,7 +55,7 @@ export function TrackerInboxStatusPill({
       return;
     }
     if (next === "freigegeben" && !canMarkFreigegeben) {
-      setError("Freigegeben ist erst nach versendeter Patientenantwort möglich.");
+      setError("Erst nach versendeter Antwort möglich.");
       return;
     }
     setError(null);
@@ -72,7 +73,7 @@ export function TrackerInboxStatusPill({
   return (
     <div
       ref={rootRef}
-      className="yd-tracker-v9-inbox-status"
+      className="yd-tracker-v10-inbox-status"
       aria-busy={pending}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
@@ -80,57 +81,55 @@ export function TrackerInboxStatusPill({
       <button
         type="button"
         className={cn(
-          "yd-tracker-v9-inbox-status__pill",
-          `yd-tracker-v9-inbox-status__pill--${status}`,
-          open && "yd-tracker-v9-inbox-status__pill--open",
-          pending && "yd-tracker-v9-inbox-status__pill--pending"
+          "yd-tracker-v10-inbox-status__trigger",
+          `yd-tracker-v10-inbox-status__trigger--${status}`,
+          open && "yd-tracker-v10-inbox-status__trigger--open",
+          pending && "yd-tracker-v10-inbox-status__trigger--pending"
         )}
         aria-haspopup="listbox"
         aria-expanded={open}
         disabled={pending}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="yd-tracker-v9-inbox-status__dot" aria-hidden />
         {pending ? "…" : label}
       </button>
       {open ? (
-        <ul className="yd-tracker-v9-inbox-status__menu" role="listbox">
+        <div
+          className="yd-tracker-v10-inbox-status__segments"
+          role="listbox"
+          aria-label="Praxisstatus"
+        >
           {INBOX_PRACTICE_STATUS_OPTIONS.map((opt) => {
             const disabledFreigegeben =
               opt.id === "freigegeben" && !canMarkFreigegeben;
+            const isActive = opt.id === status;
             return (
-              <li key={opt.id} role="option" aria-selected={opt.id === status}>
-                <button
-                  type="button"
-                  className={cn(
-                    "yd-tracker-v9-inbox-status__option",
-                    opt.id === status && "yd-tracker-v9-inbox-status__option--active",
-                    disabledFreigegeben && "yd-tracker-v9-inbox-status__option--disabled"
-                  )}
-                  disabled={pending || disabledFreigegeben}
-                  title={
-                    disabledFreigegeben
-                      ? "Erst nach versendeter Patientenantwort möglich."
-                      : undefined
-                  }
-                  onClick={() => apply(opt.id)}
-                >
-                  <span
-                    className={cn(
-                      "yd-tracker-v9-inbox-status__dot",
-                      `yd-tracker-v9-inbox-status__dot--${opt.id}`
-                    )}
-                    aria-hidden
-                  />
-                  {opt.label}
-                </button>
-              </li>
+              <button
+                key={opt.id}
+                type="button"
+                role="option"
+                aria-selected={isActive}
+                className={cn(
+                  "yd-tracker-v10-inbox-status__segment",
+                  isActive && "yd-tracker-v10-inbox-status__segment--active",
+                  disabledFreigegeben && "yd-tracker-v10-inbox-status__segment--disabled"
+                )}
+                disabled={pending || disabledFreigegeben}
+                title={
+                  disabledFreigegeben
+                    ? "Erst nach versendeter Antwort möglich."
+                    : undefined
+                }
+                onClick={() => apply(opt.id)}
+              >
+                {opt.label}
+              </button>
             );
           })}
-        </ul>
+        </div>
       ) : null}
       {error ? (
-        <p className="yd-tracker-v9-inbox-status__error" role="status" aria-live="polite">
+        <p className="yd-tracker-v10-inbox-status__error" role="status" aria-live="polite">
           {error}
         </p>
       ) : null}
