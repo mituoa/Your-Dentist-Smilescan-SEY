@@ -111,6 +111,24 @@ Netlify **Environment variables**:
 
 Danach **Clear cache and deploy**. Ohne Workspace-Freischaltung könnt ihr so trotzdem ins Dashboard, wenn der Code die Allowlist nutzt.
 
+## Patienten-E-Mails (Tracker / SMTP)
+
+Für **„An Patient senden“**, Terminangebote und Rückfragen braucht Netlify dieselben SMTP-Variablen wie lokal in `.env.local`:
+
+| Key | Beschreibung |
+|-----|----------------|
+| `SMTP_HOST` | SMTP-Server |
+| `SMTP_PORT` | z. B. `587` |
+| `SMTP_USER` | Login |
+| `SMTP_PASS` | Passwort |
+| `SMTP_FROM` | Absender-Adresse |
+| `SMTP_SECURE` | Optional: `true` für Port 465 |
+| `SMTP_REPLY_TO` | Optional |
+
+Ohne diese Variablen erscheint: *„E-Mail-Versand ist derzeit nicht eingerichtet …“* — auch wenn die Datenbank-Migrationen (035/038) bereits laufen.
+
+Zusätzlich: Migration **038** (`outbound_messages`) und für **Neuer Fall** die Migrationen **023** + **036** (siehe unten) in Supabase ausführen.
+
 ## Stripe / mail webhooks
 
 - Stripe webhook calls `getStripeServer()` — if `STRIPE_SECRET_KEY` is missing, the route returns **503** (does not crash the app).

@@ -6,10 +6,12 @@ export function isLikelyMissingDbColumnError(
   const msg = (err.message ?? "").toLowerCase();
   return (
     err.code === "42703" ||
+    err.code === "PGRST204" ||
     (msg.includes("column") &&
       (msg.includes("does not exist") ||
         msg.includes("unknown") ||
-        msg.includes("not found")))
+        msg.includes("not found") ||
+        msg.includes("schema cache")))
   );
 }
 

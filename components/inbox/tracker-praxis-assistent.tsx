@@ -154,6 +154,9 @@ export function TrackerPraxisAssistent({
         <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--empfehlung">
           <h2 className="yd-tracker-v12-rail__label">Empfehlung</h2>
           <p className="yd-tracker-v12-rail__headline">{clinical.recommendationLabel}</p>
+        </section>
+
+        <section className="yd-tracker-v12-rail__block yd-tracker-v14-rail__block--action">
           <button
             id="tracker-v10-primary-action"
             type="button"

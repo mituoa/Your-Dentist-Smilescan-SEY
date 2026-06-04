@@ -120,6 +120,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
             const concernTitle = item.patient_notes?.trim() || concern;
             const practiceStatus = resolveInboxPracticeStatus(item);
             const timeLabel = formatTrackerRelativeIngress(item.created_at);
+            const isFresh = !item.seen_at && !isActive;
 
             return (
               <li key={item.id}>
@@ -135,7 +136,8 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                     isActive && "yd-tracker-v8-inbox-card--active",
                     isActive && "yd-tracker-v10-inbox-card--active",
                     isActive && "yd-tracker-v12-inbox-card--active",
-                    !item.seen_at && !isActive && "yd-tracker-v4-inbox-card--unseen"
+                    isFresh && "yd-tracker-v4-inbox-card--unseen",
+                    isFresh && "yd-tracker-v14-inbox-card--fresh"
                   )}
                 >
                   <button
@@ -146,10 +148,28 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                   >
                     <div className="yd-tracker-v10-inbox-card__text yd-tracker-v12-inbox-card__text">
                       <span
-                        className="yd-tracker-v10-inbox-card__name yd-tracker-v12-inbox-card__name"
+                        className="yd-tracker-v14-inbox-card__name-row"
                         title={patientName}
                       >
-                        {patientName}
+                        {isFresh ? (
+                          <span
+                            className="yd-tracker-v14-inbox-card__fresh-dot"
+                            aria-hidden
+                          />
+                        ) : null}
+                        <span
+                          className={cn(
+                            "yd-tracker-v10-inbox-card__name yd-tracker-v12-inbox-card__name",
+                            isFresh && "yd-tracker-v14-inbox-card__name--fresh"
+                          )}
+                        >
+                          {patientName}
+                        </span>
+                        {isFresh ? (
+                          <span className="yd-tracker-v14-inbox-card__fresh-badge">
+                            Neu
+                          </span>
+                        ) : null}
                       </span>
                       <span
                         className="yd-tracker-v10-inbox-card__concern yd-tracker-v12-inbox-card__concern yd-tracker-v14-inbox-card__concern"

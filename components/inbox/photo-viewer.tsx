@@ -303,7 +303,7 @@ export function PhotoViewer({
                 ? "Bilderexport erneut versuchen"
                 : "Klinische Bilder als ZIP exportieren"
           }
-          className="yd-tracker-v14-photo__export inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 self-start rounded-md border-0 bg-transparent px-2 py-1 text-[12px] font-medium text-[rgba(12,25,41,0.45)] underline-offset-2 transition hover:text-[#1A4F9C] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.12)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+          className="yd-tracker-v14-photo__export inline-flex min-h-8 shrink-0 items-center justify-center gap-1.5 self-start rounded-md border-0 bg-transparent px-2 py-0.5 text-[12px] font-medium text-[rgba(12,25,41,0.38)] underline-offset-2 transition hover:text-[rgba(12,25,41,0.58)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.12)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
         >
           {isLoading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.75} />
