@@ -8,17 +8,30 @@ import {
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
 
+export type TrackerPreparedItem = {
+  label: string;
+  status: "done" | "warn";
+};
+
 export type TrackerClinicalDecision = {
-  /** Frage 1 — Kurzfassung, 2–3 Sätze, kein Originaltext. */
   patientReport: string;
-  /** Frage 2 — Was spricht dafür. */
   speaksFor: string[];
-  /** Frage 3 — Was fehlt noch. */
   missing: string[];
-  /** Frage 4 — Eine Haupthandlung. */
   primaryAction: string;
-  /** Natürliche Sicherheitseinschätzung. */
   confidenceNote: string;
+  clinicalBrief: string[];
+  /** V7 — erledigte Vorarbeit (✓ / ⚠ im Block „Vorbereitet“). */
+  prepared: TrackerPreparedItem[];
+  /** V7 — maximal 2 kurze Lücken für die Entscheidung. */
+  stillNeed: string[];
+};
+
+export type TrackerDecisionAction = {
+  id: string;
+  label: string;
+  href?: string;
+  scrollToId?: string;
+  primary?: boolean;
 };
 
 export type TrackerClinicalDecisionInput = {
@@ -262,23 +275,19 @@ function buildPrimaryAction(input: TrackerClinicalDecisionInput): string {
   }
 
   if (input.messageDraftStatus === "draft" && input.isDoctor) {
-    return "Antwort prüfen und freigeben";
+    return "Antwort freigeben";
   }
 
   if (input.photoCount === 0) {
-    return "Rückfrage stellen";
+    return "Rückfrage senden";
   }
 
   if (input.photoCount < 2 && !input.hasPhotoTrail) {
-    return "Foto nachfordern";
+    return "Weitere Fotos anfordern";
   }
 
   if (input.urgency === "today" || input.urgency === "this_week") {
     return "Termin anbieten";
-  }
-
-  if (input.openTaskCount > 0) {
-    return "Praxisaufgabe bearbeiten";
   }
 
   if (
@@ -288,26 +297,216 @@ function buildPrimaryAction(input: TrackerClinicalDecisionInput): string {
     (input.photoDocumentation?.kind === "linked" &&
       (input.photoDocumentation?.linkedSubmissionCount ?? 0) > 1)
   ) {
-    return "Verlauf in der Akte sichten";
+    return "Verlauf beobachten";
   }
 
   if (input.photoCount > 0 && hasDraftReady(input)) {
     return "Antwort freigeben";
   }
 
-  return "Fall kurz sichten und entscheiden";
+  if (input.photoCount > 0) {
+    return "Rückfrage senden";
+  }
+
+  return "Weitere Fotos anfordern";
+}
+
+function shortenMissingLabel(raw: string): string {
+  if (/schmerzskala|intensität/i.test(raw)) return "Schmerzintensität fehlt";
+  if (/dauer/i.test(raw)) return "Schmerzdauer fehlt";
+  if (/zeitraum|behandlungszeitraum/i.test(raw)) return "Zeitraum unklar";
+  if (/zusätzliche foto|blickwinkel/i.test(raw)) return "Weitere klinische Fotos empfohlen";
+  if (/klinische bilder/i.test(raw)) return "Klinische Fotos fehlen";
+  if (/patientenantwort|entwurf/i.test(raw)) return "Antwortentwurf fehlt";
+  if (/temperatur|wärme/i.test(raw)) return "Temperaturverlauf fehlt";
+  const t = raw.replace(/\.$/, "").trim();
+  return t.length > 48 ? `${t.slice(0, 45)}…` : `${t.charAt(0).toUpperCase()}${t.slice(1)}`;
+}
+
+function buildStillNeed(input: TrackerClinicalDecisionInput, missing: string[]): string[] {
+  const out: string[] = [];
+  for (const m of missing) {
+    if (/keine zwingenden/i.test(m)) continue;
+    const short = shortenMissingLabel(m);
+    if (!out.includes(short)) out.push(short);
+    if (out.length >= 2) break;
+  }
+  if (out.length === 0 && !input.urgency) {
+    out.push("Zeitraum unklar");
+  }
+  return out.slice(0, 2);
+}
+
+function buildPrepared(input: TrackerClinicalDecisionInput): TrackerPreparedItem[] {
+  const items: TrackerPreparedItem[] = [];
+
+  if (input.patientNotes?.trim()) {
+    items.push({ label: "Anliegen strukturiert", status: "done" });
+  } else {
+    items.push({ label: "Anliegen strukturiert", status: "warn" });
+  }
+
+  if (input.photoCount > 0) {
+    items.push({ label: "Bilder analysierbar vorhanden", status: "done" });
+  } else {
+    items.push({ label: "Bilder analysierbar vorhanden", status: "warn" });
+  }
+
+  const chronologyReady =
+    input.hasPhotoTrail ||
+    input.hasMultiDayPhotos ||
+    input.intakeChannel === "follow_up" ||
+    (input.photoDocumentation?.kind === "linked" &&
+      (input.photoDocumentation?.linkedSubmissionCount ?? 0) > 1);
+
+  if (chronologyReady) {
+    items.push({ label: "Fall chronologisch eingeordnet", status: "done" });
+  }
+
+  if (input.isApprovalPending || hasDraftReady(input)) {
+    items.push({ label: "Antwort vorbereitet", status: "done" });
+  } else if (input.draftsAvailable && input.photoCount > 0) {
+    items.push({ label: "Antwort vorbereitet", status: "warn" });
+  }
+
+  return items;
+}
+
+function firstSentence(text: string): string {
+  const t = text.trim();
+  if (!t) return "";
+  const m = t.match(/^(.+?[.!?])(?:\s|$)/);
+  return (m?.[1] ?? t).trim();
+}
+
+function buildClinicalBrief(
+  input: TrackerClinicalDecisionInput,
+  decision: {
+    patientReport: string;
+    missing: string[];
+    confidenceNote: string;
+  }
+): string[] {
+  const lines: string[] = [];
+
+  const lead = firstSentence(decision.patientReport);
+  if (lead) lines.push(lead.endsWith(".") ? lead : `${lead}.`);
+
+  if (input.photoCount === 0) {
+    lines.push("Es liegen noch keine klinischen Bilder vor.");
+  } else if (input.photoCount === 1) {
+    lines.push("Ein klinisches Bild liegt vor.");
+  } else {
+    lines.push(`${input.photoCount} klinische Bilder liegen vor.`);
+  }
+
+  if (input.urgency === "today") {
+    lines.push("Der Fall wirkt zeitnah zu klären.");
+  } else if (input.urgency === "this_week") {
+    lines.push("Eine Einordnung in dieser Woche ist gewünscht.");
+  } else {
+    lines.push("Der Fall wirkt aktuell nicht akut.");
+  }
+
+  const gap = decision.missing.find((m) => !/keine zwingenden/i.test(m));
+  if (gap) {
+    const g = gap.endsWith(".") ? gap : `${gap}.`;
+    lines.push(
+      /fehlt|fehlen|würde|könnte/i.test(g)
+        ? g
+        : `Für eine sichere Einschätzung fehlen noch Angaben (${g.replace(/\.$/, "")}).`
+    );
+  } else {
+    lines.push(decision.confidenceNote);
+  }
+
+  return lines.slice(0, 4);
+}
+
+function primaryActionToButtonId(primaryAction: string, isDoctor: boolean): string {
+  if (/freigeben/i.test(primaryAction) && isDoctor) return "freigabe";
+  if (/termin/i.test(primaryAction)) return "termin";
+  if (/foto/i.test(primaryAction)) return "foto";
+  if (/verlauf|beobachten/i.test(primaryAction)) return "verlauf";
+  return "rueckfrage";
+}
+
+/** V7 — eine Hauptaktion, maximal zwei Nebenaktionen; Praxisaufgabe nur sekundär. */
+export function buildTrackerDecisionActions(opts: {
+  primaryAction: string;
+  submissionId: string;
+  isDoctor: boolean;
+  openTaskCount?: number;
+}): TrackerDecisionAction[] {
+  const { primaryAction, submissionId, isDoctor } = opts;
+  const taskHref = `/my-tasks/new?submission_id=${submissionId}&from=inbox`;
+  const comm = "tracker-kommunikation";
+
+  const catalog: Record<string, TrackerDecisionAction> = {
+    termin: { id: "termin", label: "Termin anbieten", scrollToId: comm },
+    freigabe: { id: "freigabe", label: "Antwort freigeben", scrollToId: comm },
+    rueckfrage: { id: "rueckfrage", label: "Rückfrage senden", scrollToId: comm },
+    foto: { id: "foto", label: "Weitere Fotos anfordern", scrollToId: comm },
+    aufgabe: { id: "aufgabe", label: "Praxisaufgabe erstellen", href: taskHref },
+    verlauf: { id: "verlauf", label: "Verlauf beobachten", scrollToId: "tracker-beweise" },
+  };
+
+  let primaryId = primaryActionToButtonId(primaryAction, isDoctor);
+
+  const secondaryOrder: Record<string, string[]> = {
+    freigabe: ["rueckfrage", "termin"],
+    rueckfrage: ["foto", "termin"],
+    foto: ["rueckfrage", "termin"],
+    termin: ["rueckfrage", "foto"],
+    verlauf: ["rueckfrage", "termin"],
+    aufgabe: ["rueckfrage", "termin"],
+  };
+
+  const out: TrackerDecisionAction[] = [];
+  const primary = catalog[primaryId];
+  if (primary) out.push({ ...primary, primary: true });
+
+  for (const id of secondaryOrder[primaryId] ?? ["rueckfrage", "termin"]) {
+    if (out.length >= 3) break;
+    if (id === primaryId) continue;
+    const row = catalog[id];
+    if (row && !out.some((a) => a.id === row.id)) out.push(row);
+  }
+
+  if (
+    (opts.openTaskCount ?? 0) > 0 &&
+    primaryId !== "aufgabe" &&
+    out.length < 3 &&
+    !out.some((a) => a.id === "aufgabe")
+  ) {
+    out.push(catalog.aufgabe!);
+  }
+
+  return out.slice(0, 3);
 }
 
 /** Zentrale klinische Entscheidungslogik — Tracker & Inbox. */
 export function buildTrackerClinicalDecision(
   input: TrackerClinicalDecisionInput
 ): TrackerClinicalDecision {
+  const patientReport = buildPatientReport(input.patientNotes, input.patientName);
+  const speaksFor = buildSpeaksFor(input);
+  const missing = buildMissing(input);
+  const confidenceNote = buildConfidenceNote(input);
+  const primaryAction = buildPrimaryAction(input);
+
+  const prepared = buildPrepared(input);
+  const stillNeed = buildStillNeed(input, missing);
+
   return {
-    patientReport: buildPatientReport(input.patientNotes, input.patientName),
-    speaksFor: buildSpeaksFor(input),
-    missing: buildMissing(input),
-    primaryAction: buildPrimaryAction(input),
-    confidenceNote: buildConfidenceNote(input),
+    patientReport,
+    speaksFor,
+    missing,
+    primaryAction,
+    confidenceNote,
+    clinicalBrief: buildClinicalBrief(input, { patientReport, missing, confidenceNote }),
+    prepared,
+    stillNeed,
   };
 }
 
@@ -358,8 +557,8 @@ export function clinicalPrimaryActionToInboxHeadline(action: string): string {
   if (action === "Antwort freigeben" || action.startsWith("Antwort prüfen")) {
     return "Antwort freigeben";
   }
-  if (action === "Rückfrage stellen") return "Rückfrage offen";
-  if (action === "Foto nachfordern") return "Rückfrage offen";
+  if (action === "Rückfrage senden" || action === "Rückfrage stellen") return "Rückfrage offen";
+  if (action === "Weitere Fotos anfordern" || action === "Foto nachfordern") return "Rückfrage offen";
   if (action === "Termin anbieten") return "Neue Anfrage";
   if (action.startsWith("Praxisaufgabe")) return "Praxisaufgabe";
   if (action.startsWith("Verlauf")) return "Verlaufskontrolle";

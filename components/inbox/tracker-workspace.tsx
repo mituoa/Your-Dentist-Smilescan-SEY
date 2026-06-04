@@ -1,10 +1,8 @@
-import { AppointmentLinkButton } from "@/components/inbox/appointment-link-button";
 import { TrackerCaseTimeline } from "@/components/inbox/tracker-case-timeline";
 import { TrackerDraftWorkspace } from "@/components/inbox/tracker-draft-workspace";
 import { TrackerPatientHeader } from "@/components/inbox/tracker-patient-header";
 import { TrackerPhotoStage } from "@/components/inbox/tracker-photo-stage";
 import { TrackerPraxisAssistent } from "@/components/inbox/tracker-praxis-assistent";
-import { TaskForm } from "@/components/inbox/task-form";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
@@ -20,6 +18,7 @@ import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { MessageDraftRow } from "@/lib/queries/message-drafts";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
+import { getIntakeChannelLabel } from "@/lib/submissions/intake-channel";
 
 type TrackerWorkspaceProps = {
   submission: {
@@ -29,6 +28,7 @@ type TrackerWorkspaceProps = {
     patient_phone: string | null;
     patient_notes: string | null;
     patient_birth_date: string | null;
+    patient_external_id?: string | null;
     urgency: string | null;
     created_at: string;
     is_draft: boolean;
@@ -70,17 +70,12 @@ export function TrackerWorkspace({
   appointmentUrl,
   canSendAppointmentLink,
   openTaskCount = 0,
-  assignableMembers,
 }: TrackerWorkspaceProps) {
   const patientLabel = submission.patient_name?.trim() || "Unbekannter Patient";
   const concern = deriveSubmissionIssueShortLine(
     submission.patient_notes,
     submission.patient_name,
-    {
-      maxLen: 220,
-      emptyLabel:
-        "Eingang ohne dokumentiertes Anliegen — bitte Verlauf und Bilder prüfen.",
-    }
+    { maxLen: 120, emptyLabel: "" }
   );
   const note = submission.patient_notes?.trim();
   const statusRow: EnrichedSubmissionListItem = {
@@ -89,7 +84,7 @@ export function TrackerWorkspace({
     patient_email: submission.patient_email,
     patient_notes: submission.patient_notes,
     patient_birth_date: submission.patient_birth_date,
-    patient_external_id: null,
+    patient_external_id: submission.patient_external_id ?? null,
     urgency: submission.urgency,
     is_draft: submission.is_draft,
     created_at: submission.created_at,
@@ -139,10 +134,14 @@ export function TrackerWorkspace({
     draftPreview,
   });
 
+  const showCommunication =
+    messageDraftsAvailable ||
+    Boolean(draftPreview) ||
+    canSendAppointmentLink;
+
   return (
-    <div className="yd-tracker-v4-workspace yd-tracker-v4-workspace--hierarchy">
+    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace">
       <TrackerPatientHeader
-        submissionId={submission.id}
         patientName={patientLabel}
         status={status}
         birthDate={submission.patient_birth_date}
@@ -150,84 +149,94 @@ export function TrackerWorkspace({
         photoCount={submission.photos.length}
         concern={concern || null}
         isDraft={submission.is_draft}
-        patientEmail={submission.patient_email}
-        patientPhone={submission.patient_phone}
       />
 
-      <div className="yd-tracker-v4-workspace__grid">
-        <div className="yd-tracker-v4-workspace__main">
-          <TrackerPhotoStage
-            submissionId={submission.id}
-            photos={submission.photos}
-            patientName={patientLabel}
-            dominant
-          />
-          <TrackerDraftWorkspace
-            submissionId={submission.id}
-            patientName={submission.patient_name}
-            urgency={submission.urgency}
-            practicePhone={practicePhone}
-            appointmentUrl={appointmentUrl}
-            isDoctor={isDoctor}
-            draftsAvailable={messageDraftsAvailable}
-            editableMessageDraft={editableMessageDraft}
-            historyMessageDraft={historyMessageDraft}
-          />
-          <TrackerCaseTimeline events={timeline} className="yd-tracker-v4-timeline--deferred" />
-          {note ? (
-            <details className="yd-tracker-v4-note yd-tracker-v4-note--original">
-              <summary className="yd-tracker-v4-note__summary">
-                Originalanliegen des Patienten
-              </summary>
-              <p className="yd-tracker-v4-note__text">{note}</p>
-            </details>
-          ) : null}
-          <section
-            className="yd-tracker-v4-tasks yd-tracker-v4-urgency--quiet"
-            aria-labelledby="tracker-v4-tasks-label"
-          >
-            <h3
-              id="tracker-v4-tasks-label"
-              className="yd-tracker-v4-section-title yd-tracker-v4-section-title--quiet"
-            >
-              Praxisaufgabe
-            </h3>
-            <TaskForm
-              submissionId={submission.id}
-              assignableMembers={assignableMembers}
-            />
-          </section>
-          <section
-            id="tracker-zeitraum"
-            className="yd-tracker-v4-urgency yd-tracker-v4-urgency--quiet yd-tracker-v4-urgency--interactive"
-            aria-labelledby="tracker-v4-urgency-label"
-          >
-            <h3
-              id="tracker-v4-urgency-label"
-              className="yd-tracker-v4-section-title yd-tracker-v4-section-title--quiet"
-            >
-              Zeitraum
-            </h3>
-            <TrackerUrgencyChips
-              submissionId={submission.id}
-              initialUrgency={submission.urgency}
-            />
-          </section>
-        </div>
+      <div className="yd-tracker-v6-workspace__grid yd-tracker-v7-workspace__flow">
+        <TrackerPraxisAssistent
+          model={praxisAssistent}
+          submissionId={submission.id}
+          isDoctor={isDoctor}
+          openTaskCount={openTaskCount}
+        />
 
-        <aside className="yd-tracker-v4-workspace__rail">
-          <TrackerPraxisAssistent model={praxisAssistent} />
-          {canSendAppointmentLink ? (
-            <section className="yd-tracker-v4-rail-card yd-dash-surface rounded-[14px] border border-[rgba(226,232,240,0.95)] p-4 md:p-5">
-              <h3 className="yd-tracker-v4-section-title">Termin</h3>
-              <AppointmentLinkButton
+        <div className="yd-tracker-v6-workspace__main yd-tracker-v7-workspace__main">
+          <section id="tracker-beweise" className="yd-tracker-v6-evidence yd-tracker-v7-evidence" aria-label="Klinische Dokumentation">
+            <h2 className="yd-tracker-v6-section-label">Klinische Dokumentation</h2>
+            <TrackerPhotoStage
+              submissionId={submission.id}
+              photos={submission.photos}
+              patientName={patientLabel}
+            />
+          </section>
+
+          {showCommunication ? (
+            <section
+              id="tracker-kommunikation"
+              className="yd-tracker-v6-communication"
+              aria-label="Kommunikation"
+            >
+              <h2 className="yd-tracker-v6-section-label">Kommunikation</h2>
+              <TrackerDraftWorkspace
                 submissionId={submission.id}
-                hasPatientEmail={Boolean(submission.patient_email?.trim())}
-                canSend={canSendAppointmentLink}
+                patientName={submission.patient_name}
+                urgency={submission.urgency}
+                practicePhone={practicePhone}
+                appointmentUrl={appointmentUrl}
+                isDoctor={isDoctor}
+                draftsAvailable={messageDraftsAvailable}
+                editableMessageDraft={editableMessageDraft}
+                historyMessageDraft={historyMessageDraft}
               />
             </section>
           ) : null}
-        </aside>
+
+          <details className="yd-tracker-v6-docs" open={false}>
+            <summary>Dokumentation & Verlauf</summary>
+            <div className="yd-tracker-v6-docs__body">
+              <TrackerCaseTimeline events={timeline} className="yd-tracker-v4-timeline--deferred" />
+              {note ? (
+                <details className="yd-tracker-v4-note yd-tracker-v4-note--original">
+                  <summary>Originalanliegen</summary>
+                  <p className="yd-tracker-v4-note__text">{note}</p>
+                </details>
+              ) : null}
+              <details className="yd-tracker-v6-docs__group">
+                <summary>Stammdaten & Kontakt</summary>
+                <dl className="yd-tracker-v6-docs__dl">
+                  {submission.patient_external_id ? (
+                    <>
+                      <dt>Patienten-ID</dt>
+                      <dd>{submission.patient_external_id}</dd>
+                    </>
+                  ) : null}
+                  {submission.patient_email ? (
+                    <>
+                      <dt>E-Mail</dt>
+                      <dd>{submission.patient_email}</dd>
+                    </>
+                  ) : null}
+                  {submission.patient_phone ? (
+                    <>
+                      <dt>Telefon</dt>
+                      <dd>{submission.patient_phone}</dd>
+                    </>
+                  ) : null}
+                  <dt>Kanal</dt>
+                  <dd>{getIntakeChannelLabel(submission.intake_channel)}</dd>
+                </dl>
+              </details>
+              <details className="yd-tracker-v6-docs__group">
+                <summary>Zeitraum</summary>
+                <div className="pt-2">
+                  <TrackerUrgencyChips
+                    submissionId={submission.id}
+                    initialUrgency={submission.urgency}
+                  />
+                </div>
+              </details>
+            </div>
+          </details>
+        </div>
       </div>
     </div>
   );

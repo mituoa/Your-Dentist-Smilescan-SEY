@@ -83,7 +83,7 @@ export function TopbarContextActions({ role, variant = "toolbar" }: TopbarContex
       {(actionVariant === "both" || actionVariant === "newTask") && (
         <NewTaskModalTrigger
           className={actionClasses(variant, "secondary")}
-          label="Neue Aufgabe"
+          label="Praxisaufgabe erstellen"
           showIcon
         />
       )}

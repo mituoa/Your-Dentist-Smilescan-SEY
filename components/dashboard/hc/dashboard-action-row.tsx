@@ -41,7 +41,7 @@ export function DashboardActionRow({ className }: DashboardActionRowProps) {
 
       <NewTaskModalTrigger
         className={cn(PILL_BASE, PILL_QUIET)}
-        label="Neue Aufgabe"
+        label="Praxisaufgabe erstellen"
         showIcon
       />
 

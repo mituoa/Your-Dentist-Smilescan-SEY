@@ -11,8 +11,8 @@ import {
   X,
 } from "lucide-react";
 
-import { NewTaskModal } from "@/components/my-tasks/new-task-modal";
 import { createCaseFromQuery } from "@/lib/create-case-return";
+import { createTaskFromQuery } from "@/lib/create-task-return";
 import { cn } from "@/lib/utils";
 
 type DashboardMobileActionsProps = {
@@ -21,8 +21,6 @@ type DashboardMobileActionsProps = {
 
 export function DashboardMobileActions({ className }: DashboardMobileActionsProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [taskOpen, setTaskOpen] = useState(false);
-  const [reminderOpen, setReminderOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const titleId = useId();
 
@@ -44,6 +42,8 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const createCaseHref = `/create-case?from=${createCaseFromQuery("/dashboard")}`;
+  const newTaskHref = `/my-tasks/new?from=${createTaskFromQuery("/dashboard")}`;
+  const reminderHref = `/my-tasks/new?from=${createTaskFromQuery("/dashboard")}&title=${encodeURIComponent("Erinnerung")}`;
 
   const sheet =
     mounted && menuOpen
@@ -87,17 +87,14 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
                   </a>
                 </li>
                 <li>
-                  <button
-                    type="button"
-                    className="flex w-full min-h-[48px] items-center gap-3 rounded-2xl border border-[rgba(180,198,218,0.35)] bg-white px-4 text-left text-[14px] font-medium text-[#0c1929]"
-                    onClick={() => {
-                      closeMenu();
-                      setTaskOpen(true);
-                    }}
+                  <Link
+                    href={newTaskHref}
+                    onClick={closeMenu}
+                    className="flex min-h-[48px] items-center gap-3 rounded-2xl border border-[rgba(180,198,218,0.35)] bg-white px-4 text-[14px] font-medium text-[#0c1929]"
                   >
                     <Plus className="h-4 w-4 text-[#2F80ED]" strokeWidth={2} />
-                    Neue Aufgabe
-                  </button>
+                    Praxisaufgabe erstellen
+                  </Link>
                 </li>
                 <li>
                   <a
@@ -110,17 +107,14 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
                   </a>
                 </li>
                 <li>
-                  <button
-                    type="button"
-                    className="flex w-full min-h-[48px] items-center gap-3 rounded-2xl border border-[rgba(180,198,218,0.35)] bg-white px-4 text-left text-[14px] font-medium text-[#0c1929]"
-                    onClick={() => {
-                      closeMenu();
-                      setReminderOpen(true);
-                    }}
+                  <Link
+                    href={reminderHref}
+                    onClick={closeMenu}
+                    className="flex min-h-[48px] items-center gap-3 rounded-2xl border border-[rgba(180,198,218,0.35)] bg-white px-4 text-[14px] font-medium text-[#0c1929]"
                   >
                     <BellRing className="h-4 w-4 text-[#2F80ED]" strokeWidth={1.75} />
                     Erinnerung
-                  </button>
+                  </Link>
                 </li>
                 <li>
                   <a
@@ -152,14 +146,6 @@ export function DashboardMobileActions({ className }: DashboardMobileActionsProp
         </button>
       </div>
       {sheet}
-      <NewTaskModal open={taskOpen} onClose={() => setTaskOpen(false)} />
-      <NewTaskModal
-        open={reminderOpen}
-        onClose={() => setReminderOpen(false)}
-        initialRecurrenceType="weekly"
-        dialogTitle="Erinnerung"
-        dialogHint="Rückruf oder Kontrolle — Rhythmus und Termin nach Bedarf."
-      />
     </>
   );
 }

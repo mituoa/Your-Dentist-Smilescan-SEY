@@ -1,158 +1,126 @@
-import { Check, Sparkles } from "lucide-react";
+"use client";
 
-import { HcCard } from "@/components/design/hc-card";
+import Link from "next/link";
+
 import type { TrackerPraxisAssistentModel } from "@/lib/inbox/build-tracker-workspace";
-import { YD } from "@/lib/design/yd-design-tokens";
+import {
+  buildTrackerDecisionActions,
+  type TrackerDecisionAction,
+} from "@/lib/inbox/tracker-clinical-decision";
 import { cn } from "@/lib/utils";
 
 type TrackerPraxisAssistentProps = {
   model: TrackerPraxisAssistentModel;
+  submissionId: string;
+  isDoctor: boolean;
+  openTaskCount?: number;
 };
 
-export function TrackerPraxisAssistent({ model }: TrackerPraxisAssistentProps) {
-  const { decision } = model;
+function scrollToSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function DecisionButton({ action }: { action: TrackerDecisionAction }) {
+  const className = cn(
+    "yd-tracker-v7-decision-btn",
+    action.primary && "yd-tracker-v7-decision-btn--primary"
+  );
+
+  if (action.href) {
+    return (
+      <Link href={action.href} className={className}>
+        {action.label}
+      </Link>
+    );
+  }
 
   return (
-    <HcCard
-      tone="default"
-      ambient
-      className="yd-tracker-v4-praxis-assistent yd-tracker-v4-praxis-assistent--phase2 yd-dash-surface yd-tracker-v4-rail-card p-4 md:p-5"
+    <button
+      type="button"
+      className={className}
+      onClick={() => action.scrollToId && scrollToSection(action.scrollToId)}
     >
-      <div className="yd-tracker-v4-praxis-assistent__head">
-        <span
-          className="yd-tracker-v4-praxis-assistent__icon"
-          style={{ background: "rgba(239,246,255,0.95)", color: YD.accent.core }}
-        >
-          <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.9} aria-hidden />
-        </span>
-        <div className="min-w-0">
-          <h3
-            className="text-[14px] font-semibold tracking-[-0.015em] md:text-[15px]"
-            style={{ color: YD.text.primary }}
-          >
-            Klinische Voranalyse
-          </h3>
-          <p className="mt-0.5 text-[12px] font-medium" style={{ color: YD.text.muted }}>
-            {decision.confidenceNote}
-          </p>
-        </div>
-      </div>
+      {action.label}
+    </button>
+  );
+}
 
-      <div className="yd-tracker-v4-praxis-assistent__ki-body" aria-label="Klinische Entscheidungsunterstützung">
-        <section className="yd-tracker-v4-praxis-assistent__ki-section">
-          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was berichtet der Patient?</h4>
-          <p
-            className="yd-tracker-v4-praxis-assistent__report"
-            style={{ color: YD.text.primary }}
-          >
-            {decision.patientReport}
-          </p>
-        </section>
+/** V7 — Assistenz: vorbereitete Arbeit, Lücken, klare Handlung, CTAs. */
+export function TrackerPraxisAssistent({
+  model,
+  submissionId,
+  isDoctor,
+  openTaskCount = 0,
+}: TrackerPraxisAssistentProps) {
+  const { decision } = model;
+  const actions = buildTrackerDecisionActions({
+    primaryAction: decision.primaryAction,
+    submissionId,
+    isDoctor,
+    openTaskCount,
+  });
+  const primary = actions.find((a) => a.primary);
+  const secondary = actions.filter((a) => !a.primary);
 
-        <section className="yd-tracker-v4-praxis-assistent__ki-section">
-          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was spricht dafür?</h4>
-          <ul className="yd-tracker-v4-praxis-assistent__bullets">
-            {decision.speaksFor.map((point) => (
-              <li key={point} style={{ color: YD.text.secondary }}>
-                {point}
-              </li>
-            ))}
-          </ul>
-        </section>
+  return (
+    <aside className="yd-tracker-v7-rail" aria-label="Klinische Voranalyse">
+      <header className="yd-tracker-v7-rail__head">
+        <h2 className="yd-tracker-v7-rail__title">Klinische Voranalyse</h2>
+        <p className="yd-tracker-v7-rail__subtitle">Vorbereitet für Ihre Entscheidung</p>
+      </header>
 
-        <section className="yd-tracker-v4-praxis-assistent__ki-section">
-          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was fehlt noch?</h4>
-          <ul className="yd-tracker-v4-praxis-assistent__bullets yd-tracker-v4-praxis-assistent__bullets--muted">
-            {decision.missing.map((point) => (
-              <li key={point} style={{ color: YD.text.muted }}>
-                {point}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="yd-tracker-v4-praxis-assistent__ki-section yd-tracker-v4-praxis-assistent__ki-section--action">
-          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was sollte jetzt passieren?</h4>
-          <p className="yd-tracker-v4-praxis-assistent__primary-action" style={{ color: YD.accent.core }}>
-            {decision.primaryAction}
-          </p>
-        </section>
-      </div>
-
-      <section
-        className="yd-tracker-v4-praxis-assistent__response"
-        aria-label="Vorbereitete Antwort"
-      >
-        <p className="yd-tracker-v4-praxis-assistent__label yd-tracker-v4-praxis-assistent__label--quiet">
-          Vorbereitete Antwort
-        </p>
-        <p
-          className="yd-tracker-v4-praxis-assistent__response-copy"
-          style={{ color: YD.text.secondary }}
-        >
-          {model.preparation}
-        </p>
-        {model.draftPreview ? (
-          <p
-            className="yd-tracker-v4-praxis-assistent__draft-preview"
-            style={{ color: YD.text.muted }}
-          >
-            {model.draftPreview}
-          </p>
-        ) : null}
-      </section>
-
-      <details className="yd-tracker-v4-praxis-assistent__tertiary">
-        <summary className="yd-tracker-v4-praxis-assistent__tertiary-summary">
-          Automatisch erfasster Stand
-        </summary>
-        <ul className="yd-tracker-v4-praxis-assistent__checks" aria-label="Fallstand">
-          {model.prepChecks.map((item) => (
-            <li key={item.id}>
-              <Check
-                className={cn("h-3.5 w-3.5 shrink-0", !item.done && "opacity-35")}
-                strokeWidth={2.5}
-                style={{ color: item.done ? YD.accent.core : YD.text.muted }}
-                aria-hidden
-              />
-              <span style={{ color: item.done ? YD.text.secondary : YD.text.muted }}>
-                {item.label}
+      <section className="yd-tracker-v7-rail__block" aria-labelledby="tracker-v7-prepared">
+        <h3 id="tracker-v7-prepared" className="yd-tracker-v7-rail__label">
+          Vorbereitet
+        </h3>
+        <ul className="yd-tracker-v7-prepared-list">
+          {decision.prepared.map((item) => (
+            <li
+              key={item.label}
+              className={cn(
+                "yd-tracker-v7-prepared-list__item",
+                item.status === "done"
+                  ? "yd-tracker-v7-prepared-list__item--done"
+                  : "yd-tracker-v7-prepared-list__item--warn"
+              )}
+            >
+              <span className="yd-tracker-v7-prepared-list__mark" aria-hidden>
+                {item.status === "done" ? "✓" : "⚠"}
               </span>
+              <span>{item.label}</span>
             </li>
           ))}
         </ul>
+      </section>
 
-        <ol
-          className="yd-tracker-v4-command-flow yd-tracker-v4-praxis-assistent__flow"
-          aria-label="Bearbeitungsverlauf"
-        >
-          {model.flowSteps.map((step, index) => (
-            <li key={step.id} className="yd-tracker-v4-command-flow__step">
-              <span
-                className={cn(
-                  "yd-tracker-v4-command-flow__node",
-                  step.state === "done" && "yd-tracker-v4-command-flow__node--done",
-                  step.state === "active" && "yd-tracker-v4-command-flow__node--active"
-                )}
-                aria-hidden
-              />
-              <div className="min-w-0 flex-1 pb-2.5">
-                <p
-                  className={cn(
-                    "text-[12px] font-medium",
-                    step.state === "pending" ? "text-[#94A3B8]" : "text-[#334155]"
-                  )}
-                >
-                  {step.label}
-                </p>
-                {index < model.flowSteps.length - 1 ? (
-                  <span className="yd-tracker-v4-command-flow__connector" aria-hidden />
-                ) : null}
-              </div>
-            </li>
+      {decision.stillNeed.length > 0 ? (
+        <section className="yd-tracker-v7-rail__block" aria-labelledby="tracker-v7-gaps">
+          <h3 id="tracker-v7-gaps" className="yd-tracker-v7-rail__label">
+            Was fehlt noch?
+          </h3>
+          <ul className="yd-tracker-v7-gap-list">
+            {decision.stillNeed.map((gap) => (
+              <li key={gap}>{gap}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section
+        className="yd-tracker-v7-rail__block yd-tracker-v7-rail__block--decision"
+        aria-labelledby="tracker-v7-action"
+      >
+        <h3 id="tracker-v7-action" className="yd-tracker-v7-rail__label">
+          Empfohlene nächste Handlung
+        </h3>
+        <p className="yd-tracker-v7-rail__recommendation">{decision.primaryAction}</p>
+        <div className="yd-tracker-v7-rail__actions">
+          {primary ? <DecisionButton action={primary} /> : null}
+          {secondary.map((action) => (
+            <DecisionButton key={action.id} action={action} />
           ))}
-        </ol>
-      </details>
-    </HcCard>
+        </div>
+      </section>
+    </aside>
   );
 }

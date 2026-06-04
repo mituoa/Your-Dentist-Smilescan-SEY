@@ -155,6 +155,7 @@ export async function createMyTask(formData: FormData): Promise<{
 }> {
   const taskFormVariant = ((formData.get("task_form") as string) || "").trim();
   const isModalForm = taskFormVariant === "modal";
+  const isPageForm = taskFormVariant === "page";
 
   const titleTrim = ((formData.get("title") as string) || "").trim();
   const contentField = ((formData.get("content") as string) || "").trim();
@@ -168,10 +169,27 @@ export async function createMyTask(formData: FormData): Promise<{
     .map((t) => t.trim())
     .filter(Boolean);
   let descriptionForRow: string | null = descriptionBody || null;
+
+  const taskContextRaw = ((formData.get("task_context") as string) || "").trim();
+  const TASK_CONTEXT_LABELS: Record<string, string> = {
+    case: "Patientenfall",
+    org: "Praxisorganisation",
+    material: "Material / Befund",
+    other: "Sonstiges",
+  };
+  const contextLabel = TASK_CONTEXT_LABELS[taskContextRaw];
+  if (contextLabel) {
+    const contextLine = `Kontext: ${contextLabel}`;
+    descriptionForRow = descriptionForRow ? `${contextLine}\n\n${descriptionForRow}` : contextLine;
+  }
+
   if (tagParts.length > 0) {
     const tagLine = `Tags: ${tagParts.join(", ")}`;
     descriptionForRow = descriptionForRow ? `${descriptionForRow}\n\n${tagLine}` : tagLine;
   }
+
+  const submissionIdRaw = ((formData.get("submission_id") as string) || "").trim();
+  let submissionIdForInsert: string | null = submissionIdRaw || null;
 
   let dueDateIso: string | null = null;
   if (dueDateRaw.length > 0) {
@@ -189,11 +207,13 @@ export async function createMyTask(formData: FormData): Promise<{
   const content =
     contentField.length > 0
       ? contentField
-      : titleTrim.length > 0
-        ? descriptionBody
-          ? `${titleTrim}\n\n${descriptionBody}`
-          : titleTrim
-        : "";
+      : isPageForm
+        ? descriptionBody || titleTrim
+        : titleTrim.length > 0
+          ? descriptionBody
+            ? `${titleTrim}\n\n${descriptionBody}`
+            : titleTrim
+          : "";
   const assignAllTeam = formData.get("assign_all_team") === "true";
   const assignToMe = formData.get("assign_to_me") === "true";
   const specificRecipientId =
@@ -207,17 +227,31 @@ export async function createMyTask(formData: FormData): Promise<{
     )
   );
 
-  if (isModalForm && titleTrim.length === 0) {
+  if ((isModalForm || isPageForm) && titleTrim.length === 0) {
     return { error: "Bitte geben Sie einen Titel ein." };
   }
 
-  if (!content.trim()) {
+  if (!content.trim() && !isPageForm) {
     return { error: "Bitte geben Sie eine Aufgabe ein." };
   }
 
   const actor = await resolveActorWorkspace();
   if (!actor.ok) return actor.error;
   const { workspace, user, supabase } = actor;
+
+  if (submissionIdForInsert) {
+    const { data: ownedSubmission, error: ownedSubmissionError } = await supabase
+      .from("submissions")
+      .select("id")
+      .eq("id", submissionIdForInsert)
+      .eq("workspace_id", workspace.workspace_id)
+      .maybeSingle();
+    if (ownedSubmissionError || !ownedSubmission) {
+      return { error: "Der Patientenfall ist in diesem Arbeitsbereich nicht verfügbar." };
+    }
+  } else {
+    submissionIdForInsert = null;
+  }
   const sortOrder = Date.now();
 
   if (assignAllTeam && specificRecipientIds.length > 0) {
@@ -286,7 +320,7 @@ export async function createMyTask(formData: FormData): Promise<{
     .from("tasks")
     .insert({
       workspace_id: workspace.workspace_id,
-      submission_id: null,
+      submission_id: submissionIdForInsert,
       title: titleForInsert,
       content: content.trim(),
       description: descriptionForRow,

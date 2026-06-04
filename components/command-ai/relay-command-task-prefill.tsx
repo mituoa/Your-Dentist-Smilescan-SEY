@@ -1,34 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-import { NewTaskModal } from "@/components/my-tasks/new-task-modal";
 import { consumeCommandTaskDraft } from "@/lib/command-ai/task-draft-bridge";
-import type { PendingCommandTaskDraft } from "@/lib/command-ai/task-draft-bridge";
 
-/** Öffnet Relay-Aufgabe mit Command-Vorbefüllung nach Freigabe. */
+/** Leitet Command-Vorbefüllung zur Praxisaufgaben-Maske (Registrierungsniveau) um. */
 export function RelayCommandTaskPrefill() {
-  const [draft, setDraft] = useState<PendingCommandTaskDraft | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const pending = consumeCommandTaskDraft();
-    if (pending) setDraft(pending);
-  }, []);
+    if (!pending) return;
 
-  if (!draft) return null;
+    const params = new URLSearchParams({ from: "relay" });
+    params.set("title", pending.title);
+    if (pending.notes?.trim()) params.set("description", pending.notes.trim());
+    if (pending.dueDate) params.set("due_date", pending.dueDate);
 
-  return (
-    <NewTaskModal
-      open
-      onClose={() => setDraft(null)}
-      initialRecurrenceType={/erinnerung|reminder/i.test(draft.title) ? "weekly" : "once"}
-      dialogTitle={/erinnerung|reminder/i.test(draft.title) ? "Erinnerung" : "Neue Aufgabe"}
-      dialogHint="Von Command vorbereitet — bitte prüfen und speichern."
-      initialDraft={{
-        title: draft.title,
-        notes: draft.notes,
-        dueDate: draft.dueDate,
-      }}
-    />
-  );
+    router.replace(`/my-tasks/new?${params.toString()}`);
+  }, [router]);
+
+  return null;
 }

@@ -8,7 +8,6 @@ import { Plus } from "lucide-react";
 import { TrackerInboxPulse } from "@/components/inbox/tracker-inbox-pulse";
 import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
-import { trackerInboxPriorityLabel } from "@/lib/inbox/build-tracker-workspace";
 import { buildTrackerInboxPulse } from "@/lib/inbox/tracker-inbox-metrics";
 import {
   TRACKER_FILTER_CHIPS,
@@ -135,15 +134,13 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
             const isActive = pathname === `/inbox/${item.id}`;
             const work = trackerInboxWorkType(item);
             const patientName = item.patient_name?.trim() || "Unbekannter Patient";
-            const concern =
-              work.kind === "neue_anfrage"
-                ? deriveSubmissionIssueShortLine(item.patient_notes, item.patient_name, {
-                    maxLen: 56,
-                    emptyLabel: "",
-                  })
-                : "";
-            const contextLine = work.context || concern || null;
-            const priority = trackerInboxPriorityLabel(item);
+            const contextLine =
+              work.context ||
+              deriveSubmissionIssueShortLine(item.patient_notes, item.patient_name, {
+                maxLen: 72,
+                emptyLabel: "",
+              }) ||
+              null;
             const photoLabel =
               item.photo_count === 0
                 ? "Keine Bilder"
@@ -178,15 +175,9 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
                     ) : null}
                   </div>
                   <div className="yd-tracker-v4-inbox-card__meta">
-                    <span>{photoLabel}</span>
-                    <span aria-hidden>·</span>
                     <span>{formatTrackerListDate(item.created_at)}</span>
-                    {priority ? (
-                      <>
-                        <span aria-hidden>·</span>
-                        <span className="yd-tracker-v4-inbox-card__priority">{priority}</span>
-                      </>
-                    ) : null}
+                    <span aria-hidden> · </span>
+                    <span>{photoLabel}</span>
                   </div>
                 </button>
               </li>

@@ -31,7 +31,10 @@ export function resolveWorkspacePageContext(pathname: string): WorkspacePageCont
     return { title: "Profil", hint: "Praxis" };
   }
   if (pathname.startsWith("/create-case")) {
-    return { title: "Neuer Fall", hint: "Tracker" };
+    return { title: "Neuen Patientenfall anlegen", hint: "Tracker" };
+  }
+  if (pathname === "/my-tasks/new") {
+    return { title: "Praxisaufgabe erstellen", hint: "Relay" };
   }
   return { title: "Arbeitsbereich" };
 }
@@ -41,6 +44,7 @@ export function resolveWorkspaceSearchVisible(pathname: string): boolean {
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) return true;
   if (pathname.startsWith("/inbox")) return true;
   if (pathname.startsWith("/create-case")) return true;
+  if (pathname === "/my-tasks/new") return false;
   if (pathname.startsWith("/journal")) return true;
   return false;
 }
