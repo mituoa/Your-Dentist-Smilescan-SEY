@@ -54,7 +54,7 @@
   display: block;
   width: 100%;
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   border: none;
   border-bottom: 1px solid rgba(241, 245, 249, 0.95);
   background: transparent;
@@ -97,9 +97,20 @@
   letter-spacing: 0.02em;
 }
 
+.yd-tracker-v4-inbox-card__case-type {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: #475569;
+  line-height: 1.25;
+}
+
 .yd-tracker-v4-inbox-card__name {
   display: block;
-  font-size: 0.875rem;
+  margin-top: 0.1rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: -0.015em;
   color: #0f172a;
@@ -183,12 +194,63 @@
   color: #0f172a;
 }
 
+.yd-tracker-v4-patient-header__firstname {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-tracker-v4-patient-header__concern-block {
+  margin-top: 0.875rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+.yd-tracker-v4-patient-header__concern-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
 .yd-tracker-v4-patient-header__concern {
-  margin: 0.35rem 0 0;
+  margin: 0;
   font-size: 0.9375rem;
   font-weight: 500;
   color: #475569;
   line-height: 1.45;
+}
+
+.yd-tracker-v4-patient-header__contact-grid {
+  display: grid;
+  gap: 0.5rem 1.25rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+@media (min-width: 480px) {
+  .yd-tracker-v4-patient-header__contact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.yd-tracker-v4-patient-header__contact-grid dt {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-patient-header__contact-grid dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+  word-break: break-word;
 }
 
 .yd-tracker-v4-patient-header__meta {
@@ -218,10 +280,10 @@
   color: #334155;
 }
 
-.yd-tracker-v4-patient-header__contact {
-  margin: 0.625rem 0 0;
+.yd-tracker-v4-urgency__lead {
+  margin: -0.35rem 0 0.75rem;
   font-size: 0.8125rem;
-  font-weight: 500;
+  line-height: 1.45;
   color: #64748b;
 }
 
@@ -451,5 +513,473 @@
 @media (max-width: 639px) {
   .yd-tracker-v4-workspace__rail {
     grid-template-columns: 1fr;
+  }
+}
+
+/* —— Patientenverzeichnis (Enterprise / Referenz-Dribbble) —— */
+
+.yd-tracker-directory {
+  background: transparent;
+  overflow: hidden;
+}
+
+.yd-tracker-directory:not(.yd-tracker-directory--full) {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.yd-tracker-directory--full {
+  background: linear-gradient(165deg, #f4f8fc 0%, #eef4fb 42%, #f8fafc 100%);
+}
+
+.yd-inbox-tracker--directory-only .yd-tracker-directory--full {
+  height: 100%;
+  border-radius: 0;
+}
+
+.yd-inbox-tracker--directory-only {
+  min-height: 0;
+}
+
+.yd-tracker-directory__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+@media (min-width: 768px) {
+  .yd-tracker-directory__title {
+    font-size: 1.75rem;
+  }
+}
+
+.yd-tracker-directory__subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-tracker-directory__toolbar {
+  flex-shrink: 0;
+  padding: 1.25rem 1.5rem 0.875rem;
+}
+
+.yd-tracker-directory--full .yd-tracker-directory__toolbar {
+  padding-bottom: 0.5rem;
+}
+
+.yd-tracker-directory__toolbar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.yd-tracker-directory__search-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.875rem;
+  padding: 0 0.25rem;
+}
+
+.yd-tracker-directory__search-row .yd-tracker-search--directory {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.yd-tracker-directory__new-case {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(43, 111, 232, 0.18);
+  background: rgba(255, 255, 255, 0.88);
+  color: #1d4ed8;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(43, 111, 232, 0.08);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.yd-tracker-directory__new-case:hover {
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(43, 111, 232, 0.12);
+}
+
+.yd-tracker-directory__body {
+  padding: 0 1rem 1rem;
+}
+
+.yd-tracker-directory--full .yd-tracker-directory__body {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.yd-tracker-directory__card-shell {
+  padding: 0.25rem;
+}
+
+.yd-tracker-directory__card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 8px 32px rgba(43, 111, 232, 0.06),
+    0 24px 48px -12px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+
+.yd-tracker-directory__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yd-tracker-directory__table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.yd-tracker-directory__table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(248, 250, 252, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.yd-tracker-directory__table th {
+  padding: 0.875rem 1.5rem;
+  text-align: left;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.75);
+}
+
+.yd-tracker-directory__row {
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.yd-tracker-directory__row:hover {
+  background: rgba(248, 250, 252, 0.98);
+}
+
+.yd-tracker-directory__row--active {
+  background: linear-gradient(90deg, rgba(239, 246, 255, 0.98) 0%, rgba(255, 255, 255, 1) 100%);
+  box-shadow: inset 4px 0 0 #3b82f6;
+}
+
+.yd-tracker-directory__row--unseen .yd-tracker-directory__name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.yd-tracker-directory__row td {
+  padding: 1.125rem 1.5rem;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.9);
+  vertical-align: middle;
+}
+
+.yd-tracker-directory__row:last-child td {
+  border-bottom: none;
+}
+
+.yd-tracker-directory__patient {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.yd-tracker-directory__patient-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.yd-tracker-directory__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 55%, #e0f2fe 100%);
+  color: #1d4ed8;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.yd-tracker-directory__name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.yd-tracker-directory__email {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yd-tracker-directory__email--muted {
+  color: #94a3b8;
+  font-style: normal;
+}
+
+.yd-tracker-directory__cell-muted {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.yd-tracker-directory__patient-id {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+}
+
+.yd-tracker-directory__status {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.yd-tracker-directory__empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  margin: 0 0.25rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px dashed rgba(203, 213, 225, 0.9);
+}
+
+.yd-tracker-directory__empty p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.yd-tracker-directory__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.875rem 1.5rem 1.125rem;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+  background: rgba(248, 250, 252, 0.5);
+}
+
+.yd-tracker-directory__range {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.yd-tracker-directory__pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.yd-tracker-directory__page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.65rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.yd-tracker-directory__page-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+}
+
+.yd-tracker-directory__page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.yd-tracker-directory__page-list {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-tracker-directory__page-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.35rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.yd-tracker-directory__page-num:hover {
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+}
+
+.yd-tracker-directory__page-num--active {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.yd-tracker-directory__page-num--active:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+.yd-tracker-directory__sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem 0;
+}
+
+.yd-tracker-directory__sidebar-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  background: transparent;
+  transition: background-color 140ms ease;
+}
+
+.yd-tracker-directory__sidebar-card:hover {
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.yd-tracker-directory__sidebar-card--active {
+  background: linear-gradient(90deg, rgba(239, 246, 255, 0.95) 0%, #fff 100%);
+  box-shadow: inset 3px 0 0 #2563eb;
+}
+
+.yd-tracker-directory__sidebar-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.yd-tracker-directory__sidebar-meta dt {
+  color: #94a3b8;
+  display: inline;
+  margin-right: 0.2rem;
+}
+
+.yd-tracker-directory__sidebar-meta dd {
+  display: inline;
+  color: #475569;
+  font-weight: 600;
+}
+
+/* Mobil: Tabelle als Karten (nur Stammdaten) */
+@media (max-width: 767px) {
+  .yd-tracker-directory__table thead {
+    display: none;
+  }
+
+  .yd-tracker-directory__table,
+  .yd-tracker-directory__table tbody,
+  .yd-tracker-directory__table tr,
+  .yd-tracker-directory__table td {
+    display: block;
+    width: 100%;
+  }
+
+  .yd-tracker-directory__row {
+    padding: 0.25rem 0;
+    border-bottom: 8px solid rgba(241, 245, 249, 0.95);
+  }
+
+  .yd-tracker-directory__row td {
+    padding: 0.35rem 1rem;
+    border: none;
+  }
+
+  .yd-tracker-directory__row td:first-child {
+    padding-top: 0.875rem;
+  }
+
+  .yd-tracker-directory__row td:last-child {
+    padding-bottom: 0.875rem;
+  }
+
+  .yd-tracker-directory__row td:not(:first-child)::before {
+    content: attr(data-label);
+    display: inline-block;
+    min-width: 6.5rem;
+    margin-right: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
   }
 }

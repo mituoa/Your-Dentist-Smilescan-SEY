@@ -4,7 +4,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { Search } from "lucide-react";
 
-export function TrackerInboxSearch() {
+import { cn } from "@/lib/utils";
+
+type TrackerInboxSearchProps = {
+  className?: string;
+};
+
+export function TrackerInboxSearch({ className }: TrackerInboxSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -32,13 +38,13 @@ export function TrackerInboxSearch() {
   };
 
   return (
-    <label className="yd-tracker-search">
+    <label className={cn("yd-tracker-search", className)}>
       <Search className="yd-tracker-search__icon" strokeWidth={2} aria-hidden />
       <input
         type="search"
         value={value}
         onChange={handleChange}
-        placeholder="Patient oder Anliegen suchen…"
+        placeholder="Patienten suchen…"
         className="yd-tracker-search__input"
         aria-label="Patientenfälle durchsuchen"
       />

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
-import { useAssistContextOptional } from "@/components/command-assist/assist-shell";
+import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import { buildConcernLine } from "@/lib/command-ai/preparation-engine";
 import { hintsFromInboxItems } from "@/lib/command-ai/workspace-context";
 
@@ -22,19 +22,22 @@ export function CommandWorkspaceHydration({
   practicePhone,
   appointmentUrl,
 }: CommandWorkspaceHydrationProps) {
-  const ctx = useAssistContextOptional();
+  const setWorkspaceHints = useAssistDispatchOptional()?.setWorkspaceHints;
+
+  const patientsKey = useMemo(
+    () =>
+      patients
+        .map((p) => `${p.id}:${p.patient_name ?? ""}:${(p.patient_notes ?? "").slice(0, 40)}`)
+        .join("|"),
+    [patients]
+  );
 
   useEffect(() => {
-    if (!ctx) return;
-    const hints = hintsFromInboxItems(
-      patients,
-      practicePhone,
-      appointmentUrl,
-      buildConcernLine
+    if (!setWorkspaceHints) return;
+    setWorkspaceHints(
+      hintsFromInboxItems(patients, practicePhone, appointmentUrl, buildConcernLine)
     );
-    ctx.setWorkspaceHints(hints);
-    return () => ctx.setWorkspaceHints(null);
-  }, [ctx, patients, practicePhone, appointmentUrl]);
+  }, [setWorkspaceHints, patientsKey, practicePhone, appointmentUrl, patients]);
 
   return null;
 }

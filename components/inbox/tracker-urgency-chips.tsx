@@ -17,15 +17,18 @@ const OPTIONS: { id: SubmissionUrgencyValue; label: string }[] = [
 interface TrackerUrgencyChipsProps {
   submissionId: string;
   initialUrgency: string | null;
+  /** Sofortiges UI-Update in übergeordneten Flows (z. B. Freischaltung Antwort/Termin). */
+  onUrgencyChange?: (urgency: SubmissionUrgencyValue) => void;
 }
 
 /**
- * Zeitraum-Chips — **persistente Einordnung** (`updateSubmissionUrgency`), kein reines Styling.
+ * Dringlichkeit — **persistente Einordnung** (`updateSubmissionUrgency`), kein reines Styling.
  * Gleich hohe Flächen: Desktop 3-Spalten-Raster, mobil gestapelt.
  */
 export function TrackerUrgencyChips({
   submissionId,
   initialUrgency,
+  onUrgencyChange,
 }: TrackerUrgencyChipsProps) {
   const router = useRouter();
   const [urgency, setUrgency] = useState<string | null>(initialUrgency);
@@ -45,6 +48,7 @@ export function TrackerUrgencyChips({
         return;
       }
       setUrgency(id);
+      onUrgencyChange?.(id);
       router.refresh();
     });
   };
@@ -52,7 +56,7 @@ export function TrackerUrgencyChips({
   return (
     <div className="tracker-mobile-chip-targets" aria-busy={pending}>
       <p id="tracker-urgency-label" className="sr-only">
-        Zeitraum
+        Dringlichkeit
       </p>
       <div
         className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-2"
@@ -68,7 +72,7 @@ export function TrackerUrgencyChips({
               disabled={pending}
               aria-pressed={active}
               onClick={() => select(opt.id)}
-              className="min-h-10 w-full cursor-pointer text-[13px] font-medium transition duration-150 ease-out disabled:opacity-50"
+              className="relative z-[1] min-h-10 w-full cursor-pointer touch-manipulation text-[13px] font-medium transition duration-150 ease-out disabled:opacity-50"
               style={{
                 padding: "0 10px",
                 borderRadius: "8px",

@@ -1,0 +1,1432 @@
+/**
+ * Tracker Queue — Referenz-Arbeitsoberfläche (Medical Enterprise)
+ * Tokens: Workspace #EAF1F7 · Queue #F5F8FB · Card #FFFFFF · Border #DCE5EF · Text #152538
+ */
+
+.yd-tracker-queue-root {
+  justify-content: flex-start;
+  /* Ebene 1 — Workspace */
+  --tq-bg: #c5d2df;
+  /* Ebene 2 — Tracker Container */
+  --tq-container: #dce6f0;
+  /* Ebene 3 — Queue Surface */
+  --tq-surface: #e8eff6;
+  /* Ebene 4 — Patient Row */
+  --tq-row: #ffffff;
+  --tq-row-hover: #f4f8fc;
+  --tq-row-active: #eaf3fb;
+  --tq-workspace: #dce6f0;
+  --tq-queue: #e8eff6;
+  --tq-card: #ffffff;
+  --tq-border: #c5d4e3;
+  --tq-border-strong: #b0c3d6;
+  --tq-text: #0f1f33;
+  --tq-text-muted: #4a6278;
+  --tq-text-faint: #7a92a8;
+  --tq-text-secondary: #5e758a;
+  --tq-accent: #2563a8;
+  --tq-shadow-shell: 0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 6px 20px rgba(15, 31, 51, 0.07);
+  --tq-shadow-row: 0 1px 2px rgba(15, 31, 51, 0.04);
+
+  background: var(--tq-bg);
+}
+
+.yd-tracker-queue-root > * {
+  flex: 0 1 auto;
+  width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.yd-tracker-queue-root .yd-awaken-canvas {
+  background: var(--tq-bg) !important;
+  padding: 0.45rem 0.65rem 0.5rem !important;
+}
+
+@media (min-width: 768px) {
+  .yd-tracker-queue-root .yd-awaken-canvas {
+    padding: 0.55rem 0.85rem 0.55rem !important;
+  }
+}
+
+.yd-tq-workspace {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  gap: 0.625rem;
+  color: var(--tq-text);
+}
+
+.yd-tq-workspace--premium,
+.yd-tq-workspace--ops {
+  gap: 0.65rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.35rem;
+  max-width: 54rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Ebene 2 — Page header (außerhalb Shell) */
+.yd-tq-layer-header {
+  padding: 0.15rem 0.1rem 0.25rem;
+}
+
+.yd-tq-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  flex-shrink: 0;
+}
+
+.yd-tq-header__eyebrow {
+  margin: 0 0 0.15rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tq-accent);
+}
+
+.yd-tq-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  color: var(--tq-text);
+}
+
+.yd-tq-header__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--tq-text-muted);
+  line-height: 1.4;
+}
+
+.yd-tq-header__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+  min-width: min(100%, 20rem);
+}
+
+.yd-tq-header__search {
+  flex: 1;
+  min-width: 0;
+  max-width: 22rem;
+}
+
+.yd-tq-header__search input {
+  min-height: 2.5rem !important;
+  border-radius: 999px !important;
+  border-color: var(--tq-border) !important;
+  background: var(--tq-card) !important;
+  color: var(--tq-text) !important;
+  font-size: 0.875rem !important;
+}
+
+.yd-tq-header__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border-radius: 10px;
+  border: 1px solid var(--tq-border);
+  background: var(--tq-card);
+  color: var(--tq-accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Ebene 2 — Operations Center Container */
+.yd-tq-ops-center,
+.yd-tq-tracker-shell {
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.7rem 0.75rem 0.7rem;
+  border-radius: 14px;
+  background: var(--tq-container);
+  border: 1px solid var(--tq-border-strong);
+  box-shadow: var(--tq-shadow-shell);
+}
+
+@media (min-width: 768px) {
+  .yd-tq-ops-center,
+  .yd-tq-tracker-shell {
+    padding: 0.85rem 0.95rem 0.8rem;
+    border-radius: 16px;
+    gap: 0.75rem;
+  }
+}
+
+/* Ebene 1 im Center — Praxisstatus */
+.yd-tq-praxis-status {
+  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 251, 254, 0.98) 55%,
+    var(--tq-surface) 100%
+  );
+  border: 1px solid rgba(176, 195, 214, 0.75);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.yd-tq-praxis-status__title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-praxis-status__lead {
+  margin: 0.35rem 0 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--tq-text);
+}
+
+.yd-tq-praxis-status__orientation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-tq-praxis-status__line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--tq-text-secondary);
+}
+
+.yd-tq-praxis-status__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: var(--tq-text-faint);
+}
+
+.yd-tq-praxis-status__line--schmerzfall .yd-tq-praxis-status__dot {
+  background: #d4735a;
+}
+
+.yd-tq-praxis-status__line--neue_anfrage .yd-tq-praxis-status__dot {
+  background: #c9956a;
+}
+
+.yd-tq-praxis-status__line--verlaufskontrolle .yd-tq-praxis-status__dot,
+.yd-tq-praxis-status__line--nachsorge .yd-tq-praxis-status__dot {
+  background: #5a94c4;
+}
+
+.yd-tq-praxis-status__line--antwortfreigabe .yd-tq-praxis-status__dot {
+  background: #8f86c4;
+}
+
+.yd-tq-praxis-status__line--aufgabe .yd-tq-praxis-status__dot {
+  background: #6fa892;
+}
+
+/* Ops-Abschnitte */
+.yd-tq-ops-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.yd-tq-ops-section__title {
+  margin: 0;
+  padding: 0 0.1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-ops-section__hint {
+  margin: -0.15rem 0 0;
+  padding: 0 0.1rem;
+  font-size: 0.75rem;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-worklist--priority {
+  background: linear-gradient(180deg, #f3f7fb 0%, var(--tq-surface) 100%);
+}
+
+/* Ebene 3 — Queue Surface */
+.yd-tq-worklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.4rem;
+  border-radius: 11px;
+  background: var(--tq-surface);
+  border: 1px solid var(--tq-border);
+}
+
+/* Ebene 4 — Patient Row */
+.yd-tq-work-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem 1rem;
+  padding: 0.9rem 1rem 0.9rem 0.95rem;
+  border-radius: 10px;
+  background: var(--tq-row);
+  border: 1px solid rgba(197, 212, 227, 0.85);
+  box-shadow: var(--tq-shadow-row);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.yd-tq-work-row:hover {
+  background: var(--tq-row-hover);
+  border-color: #a8bdd2;
+  box-shadow: 0 2px 8px rgba(15, 31, 51, 0.06);
+}
+
+.yd-tq-work-row:focus-visible {
+  outline: 2px solid rgba(37, 99, 168, 0.45);
+  outline-offset: 2px;
+}
+
+.yd-tq-work-row:active {
+  background: var(--tq-row-active);
+  transform: scale(0.998);
+}
+
+.yd-tq-work-row--urgent {
+  border-left: 3px solid #c9956a;
+}
+
+.yd-tq-work-row--follow {
+  border-left: 3px solid #6a9cc8;
+}
+
+.yd-tq-work-row--approval {
+  border-left: 3px solid #8f86c4;
+}
+
+.yd-tq-work-row--task {
+  border-left: 3px solid #6fa892;
+}
+
+.yd-tq-work-row__avatar {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  border-radius: 999px;
+  background: linear-gradient(155deg, #5f94c4 0%, #356089 100%);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 6px rgba(53, 96, 137, 0.2);
+}
+
+.yd-tq-work-row__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+  align-self: center;
+}
+
+.yd-tq-work-row__workline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+}
+
+.yd-tq-work-row__work-detail {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-work-row__patient {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-work-row--priority {
+  padding: 1rem 1.05rem 1rem 1rem;
+  border-color: rgba(176, 195, 214, 0.95);
+  box-shadow: 0 2px 10px rgba(15, 31, 51, 0.05);
+}
+
+.yd-tq-work-row--priority .yd-tq-status--headline {
+  font-size: 0.8125rem;
+  padding: 0.22rem 0.6rem 0.22rem 0.5rem;
+}
+
+.yd-tq-status--headline {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Ebene 5 — Status */
+.yd-tq-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.55rem 0.18rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.yd-tq-status::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.yd-tq-status--neue_anfrage {
+  color: #7a4e12;
+  background: #faf3eb;
+  border-color: #edd9c4;
+}
+
+.yd-tq-status--neue_anfrage::before {
+  background: #c9956a;
+}
+
+.yd-tq-status--schmerzfall {
+  color: #8b3a24;
+  background: #fdf0ec;
+  border-color: #f0d0c8;
+}
+
+.yd-tq-status--schmerzfall::before {
+  background: #d4735a;
+}
+
+.yd-tq-status--nachsorge {
+  color: #1e4f7a;
+  background: #edf4fb;
+  border-color: #cddded;
+}
+
+.yd-tq-status--nachsorge::before {
+  background: #5a94c4;
+}
+
+.yd-tq-status--kontrollverlauf {
+  color: #1a5560;
+  background: #ecf6f8;
+  border-color: #c5e3ea;
+}
+
+.yd-tq-status--kontrollverlauf::before {
+  background: #4a9aaa;
+}
+
+.yd-tq-status--ki_freigabe {
+  color: #4a3f7a;
+  background: #f3f1fa;
+  border-color: #ddd8ef;
+}
+
+.yd-tq-status--ki_freigabe::before {
+  background: #8f86c4;
+}
+
+.yd-tq-status--praxisaufgabe {
+  color: #2d5c48;
+  background: #eff6f2;
+  border-color: #cfe0d6;
+}
+
+.yd-tq-status--praxisaufgabe::before {
+  background: #6fa892;
+}
+
+.yd-tq-work-row__context {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.38;
+  color: var(--tq-text-secondary);
+}
+
+.yd-tq-work-row__detail {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-work-row__signals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  margin-top: 0.12rem;
+  font-size: 0.71875rem;
+  line-height: 1.3;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-work-row__ingress {
+  font-weight: 500;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-work-row__time::before {
+  content: "·";
+  margin-right: 0.3rem;
+  color: var(--tq-border-strong);
+}
+
+.yd-tq-work-row__time:first-child::before {
+  content: none;
+  margin: 0;
+}
+
+.yd-tq-work-row__priority {
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--tq-border);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-work-row__priority--hoch {
+  color: #9a3412;
+  background: #fdf6f3;
+  border-color: #f0ddd4;
+}
+
+.yd-tq-work-row__priority--mittel {
+  color: #1a4f9c;
+  background: #f0f6fc;
+  border-color: #d4e4f4;
+}
+
+.yd-tq-work-row__trail {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.yd-tq-work-row__action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--tq-accent);
+  background: rgba(37, 99, 168, 0.07);
+  border: 1px solid rgba(37, 99, 168, 0.16);
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.yd-tq-work-row:hover .yd-tq-work-row__action {
+  background: rgba(37, 99, 168, 0.12);
+  border-color: rgba(37, 99, 168, 0.28);
+}
+
+.yd-tq-worklist__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.15rem 0;
+  font-size: 0.75rem;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-worklist__pager {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.yd-tq-worklist__pager button {
+  min-height: 1.65rem;
+  padding: 0 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--tq-border);
+  background: var(--tq-row);
+  font-size: 0.75rem;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-ops-closure {
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px dashed var(--tq-border);
+}
+
+.yd-tq-ops-closure__title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-ops-closure__text {
+  margin: 0.3rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-empty-state {
+  margin: 0;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--tq-text-muted);
+  border-radius: 12px;
+  background: var(--tq-container);
+  border: 1px solid var(--tq-border);
+}
+
+@media (max-width: 640px) {
+  .yd-tq-work-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    padding: 0.85rem 0.8rem;
+    gap: 0.55rem 0.7rem;
+  }
+
+  .yd-tq-work-row__trail {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    padding-left: 2.85rem;
+  }
+
+  .yd-tq-work-row__action {
+    width: 100%;
+    justify-content: center;
+    max-width: 12rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-tq-work-row,
+  .yd-tq-work-row__action {
+    transition: none;
+  }
+
+  .yd-tq-work-row:active {
+    transform: none;
+  }
+}
+
+/* Orientation KPI strip (legacy) */
+.yd-tq-orientation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  flex-shrink: 0;
+  padding: 0.4rem 0.15rem;
+}
+
+.yd-tq-orientation__waiting {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tq-accent);
+}
+
+.yd-tq-orientation__kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-tq-orientation__kpis li {
+  font-size: 0.75rem;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-orientation__kpis strong {
+  font-weight: 700;
+  color: var(--tq-text);
+  margin-right: 0.2rem;
+}
+
+.yd-tq-orientation__quiet {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--tq-text-faint);
+}
+
+/* Panel */
+.yd-tq-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 16px;
+  background: var(--tq-card);
+  border: 1px solid var(--tq-border);
+  box-shadow: 0 1px 3px rgba(21, 37, 56, 0.04);
+  overflow: hidden;
+}
+
+.yd-tq-panel__head {
+  display: none;
+  grid-template-columns: minmax(200px, 1.5fr) 0.95fr 1.1fr 0.75fr 0.95fr;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid var(--tq-border);
+  background: var(--tq-queue);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tq-text-faint);
+}
+
+@media (min-width: 900px) {
+  .yd-tq-panel__head {
+    display: grid;
+  }
+}
+
+.yd-tq-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--tq-queue);
+}
+
+.yd-tq-panel__empty {
+  margin: 0;
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--tq-text-muted);
+}
+
+/* Row — grid, not table */
+.yd-tq-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--tq-border);
+  background: var(--tq-card);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+
+@media (min-width: 900px) {
+  .yd-tq-row {
+    grid-template-columns: minmax(200px, 1.5fr) 0.95fr 1.1fr 0.75fr 0.95fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
+  }
+}
+
+.yd-tq-row:hover {
+  background: #f8fbfe;
+}
+
+.yd-tq-row--active {
+  background: #eef5fc;
+  box-shadow: inset 3px 0 0 var(--tq-accent);
+}
+
+.yd-tq-row__patient {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.yd-tq-row__avatar {
+  display: flex;
+  height: 2.125rem;
+  width: 2.125rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #6a9cc8 0%, #3d6f9c 100%);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.yd-tq-row__patient-text {
+  min-width: 0;
+}
+
+.yd-tq-row__name {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--tq-text);
+  line-height: 1.25;
+}
+
+.yd-tq-row__demographics {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--tq-text-muted);
+  line-height: 1.3;
+}
+
+.yd-tq-row__activity {
+  font-size: 0.8125rem;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-row__falltyp-primary {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tq-text);
+  line-height: 1.3;
+}
+
+.yd-tq-row__falltyp-category {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-row__priority-pill {
+  display: inline-flex;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--tq-queue);
+  border: 1px solid var(--tq-border);
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-row__priority-pill--hoch {
+  color: #9a3412;
+  background: #fdf6f3;
+  border-color: #f0ddd4;
+}
+
+.yd-tq-row__priority-pill--mittel {
+  color: #1a4f9c;
+  background: #f0f6fc;
+  border-color: #d4e4f4;
+}
+
+.yd-tq-row__priority-pill--niedrig {
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-row__action {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tq-accent);
+  justify-self: end;
+}
+
+@media (max-width: 899px) {
+  .yd-tq-row__action {
+    justify-self: start;
+    margin-top: 0.25rem;
+  }
+}
+
+.yd-tq-panel__footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  border-top: 1px solid var(--tq-border);
+  background: var(--tq-card);
+  font-size: 0.75rem;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-panel__pager {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yd-tq-panel__pager button {
+  min-height: 1.75rem;
+  padding: 0 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--tq-border);
+  background: var(--tq-queue);
+  font-size: 0.75rem;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-overview {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-overview--centered {
+  text-align: center;
+}
+
+/* Zustand 2 — Patientenakte (volle Breite, Queue ausgeblendet) */
+.yd-tq-record {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--tq-workspace);
+  color: var(--tq-text);
+}
+
+.yd-tq-record__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0.75rem 0.75rem 2rem;
+}
+
+.yd-tq-record__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tq-text-muted);
+  text-decoration: none;
+}
+
+.yd-tq-record__name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--tq-text);
+}
+
+.yd-tq-record__meta {
+  margin: 0.3rem 0 0;
+  font-size: 0.875rem;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-record__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.85rem 0 0;
+}
+
+.yd-tq-record__facts dt {
+  margin: 0;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-record__facts dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tq-text);
+}
+
+.yd-tq-concern {
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: var(--tq-card);
+  border: 1px solid var(--tq-border);
+}
+
+.yd-tq-concern p {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-section-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-record__workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-tq-record__workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 34%);
+  }
+}
+
+.yd-tq-record__clinical .yd-tracker-v7-photos__stage {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .yd-tq-record__clinical .yd-tracker-v7-photos__stage {
+    width: min(72%, 680px);
+    max-width: 72%;
+  }
+}
+
+.yd-tq-draft,
+.yd-tq-record__aside .yd-tracker-v7-ki {
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: var(--tq-card);
+  border: 1px solid var(--tq-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-tq-row {
+    transition: none;
+  }
+}
+
+/* =============================================================================
+   Tracker Operations Center — Entscheidungen (Dashboard-Niveau)
+   ============================================================================= */
+
+.yd-tq-workspace--decisions {
+  gap: 0.75rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 0.5rem;
+}
+
+.yd-tq-decision-center {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.85rem 0.9rem 0.9rem;
+  border-radius: 20px;
+  background: var(--tq-container);
+  border: 1px solid rgba(160, 178, 198, 0.42);
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.07);
+}
+
+@media (min-width: 768px) {
+  .yd-tq-decision-center {
+    padding: 1rem 1.1rem 1.05rem;
+    border-radius: 24px;
+    gap: 1rem;
+  }
+}
+
+/* Hero — Entscheidungsfrage */
+.yd-tq-decision-hero {
+  padding: 0.15rem 0.05rem 0.1rem;
+}
+
+.yd-tq-decision-hero__text {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.8vw, 1.625rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.22;
+  color: #0b1828;
+}
+
+/* KPI Chips — Dashboard-Stil */
+.yd-tq-decision-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .yd-tq-decision-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+}
+
+.yd-tq-decision-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  box-shadow:
+    0 4px 16px rgba(15, 23, 42, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.yd-tq-decision-kpi__value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #0b1828;
+}
+
+.yd-tq-decision-kpi__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #5e7389;
+}
+
+.yd-tq-decision-kpi--neue_anfragen .yd-tq-decision-kpi__value {
+  color: #1a4f9c;
+}
+
+.yd-tq-decision-kpi--verlaufskontrollen .yd-tq-decision-kpi__value {
+  color: #2d6a8f;
+}
+
+.yd-tq-decision-kpi--freigaben .yd-tq-decision-kpi__value {
+  color: #4a3f7a;
+}
+
+.yd-tq-decision-kpi--aufgaben .yd-tq-decision-kpi__value {
+  color: #2d5c48;
+}
+
+/* Entscheidungs-Queue */
+.yd-tq-decision-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-top: 0.15rem;
+}
+
+.yd-tq-decision-queue__title {
+  margin: 0;
+  padding: 0 0.1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-decision-queue__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.yd-tq-decision-queue__empty {
+  padding: 1.35rem 1.1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px dashed rgba(176, 195, 214, 0.65);
+  text-align: center;
+}
+
+.yd-tq-decision-queue__empty p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--tq-text-muted);
+}
+
+.yd-tq-decision-queue__empty-hint {
+  margin-top: 0.35rem !important;
+  font-size: 0.8125rem !important;
+  color: var(--tq-text-faint) !important;
+}
+
+/* Entscheidungs-Card */
+.yd-tq-decision-card {
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(160, 178, 198, 0.38);
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 8px 22px rgba(30, 91, 189, 0.06);
+  overflow: hidden;
+  transition:
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms ease,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.yd-tq-decision-card:hover {
+  border-color: rgba(130, 158, 188, 0.55);
+  box-shadow:
+    0 2px 4px rgba(15, 35, 58, 0.05),
+    0 14px 32px rgba(30, 91, 189, 0.1);
+}
+
+.yd-tq-decision-card__hit {
+  display: block;
+  width: 100%;
+  padding: 1.1rem 1.15rem 1.05rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.yd-tq-decision-card__head {
+  margin: 0;
+}
+
+.yd-tq-decision-card__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.yd-tq-decision-card__status {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  line-height: 1.25;
+  color: #0b1828;
+}
+
+.yd-tq-decision-card__status--neue_anfrage,
+.yd-tq-decision-card__status--schmerzfall {
+  color: #1a4f9c;
+}
+
+.yd-tq-decision-card__status--nachsorge,
+.yd-tq-decision-card__status--kontrollverlauf {
+  color: #2d6a8f;
+}
+
+.yd-tq-decision-card__status--ki_freigabe {
+  color: #4a3f7a;
+}
+
+.yd-tq-decision-card__status--praxisaufgabe {
+  color: #2d5c48;
+}
+
+.yd-tq-decision-card__patient {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #7a92a8;
+  letter-spacing: 0.01em;
+}
+
+.yd-tq-decision-card__subject {
+  margin: 0.55rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #4a6278;
+}
+
+.yd-tq-decision-card__evidence {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.yd-tq-decision-card__evidence li {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #5e758a;
+}
+
+.yd-tq-decision-card__evidence li::before {
+  content: "·";
+  margin-right: 0.35rem;
+  color: #b0c3d6;
+}
+
+.yd-tq-decision-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(220, 229, 239, 0.9);
+}
+
+.yd-tq-decision-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  color: #8a9aad;
+}
+
+.yd-tq-decision-card__priority--hoch {
+  color: #9a3412;
+}
+
+.yd-tq-decision-card__priority--mittel {
+  color: #1a4f9c;
+}
+
+.yd-tq-decision-card__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  min-width: 6.5rem;
+  padding: 0 1rem;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  background: linear-gradient(160deg, #4a8fd4 0%, #1a4f9c 52%, #163d7a 100%);
+  box-shadow:
+    0 2px 8px rgba(22, 61, 122, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.yd-tq-decision-card:hover .yd-tq-decision-card__cta {
+  box-shadow:
+    0 4px 14px rgba(22, 61, 122, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.yd-tq-decision-card--urgent {
+  border-left: 3px solid #c9956a;
+}
+
+.yd-tq-decision-card--follow {
+  border-left: 3px solid #6a9cc8;
+}
+
+.yd-tq-decision-card--approval {
+  border-left: 3px solid #8f86c4;
+}
+
+.yd-tq-decision-card--task {
+  border-left: 3px solid #6fa892;
+}
+
+.yd-tq-decision-queue__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.1rem 0;
+  font-size: 0.75rem;
+  color: var(--tq-text-faint);
+}
+
+.yd-tq-decision-queue__pager {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.yd-tq-decision-queue__pager button {
+  min-height: 1.75rem;
+  padding: 0 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--tq-border);
+  background: #fff;
+  font-size: 0.75rem;
+  color: var(--tq-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-tq-decision-card {
+    transition: none;
+  }
+}

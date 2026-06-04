@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { ImageIcon } from "lucide-react";
 
 import { PhotoViewer } from "@/components/inbox/photo-viewer";
+import { cn } from "@/lib/utils";
 
 type TrackerPhoto = {
   id: string;
@@ -16,6 +17,8 @@ type TrackerPhotoStageProps = {
   submissionId: string;
   photos: TrackerPhoto[];
   patientName: string;
+  /** Große Foto-Bühne — Kern der Arbeitsfläche. */
+  dominant?: boolean;
 };
 
 function dayIndexLabel(index: number): string {
@@ -26,6 +29,7 @@ export function TrackerPhotoStage({
   submissionId,
   photos,
   patientName,
+  dominant = false,
 }: TrackerPhotoStageProps) {
   const sorted = useMemo(
     () =>
@@ -49,14 +53,23 @@ export function TrackerPhotoStage({
     return groups;
   }, [sorted]);
 
+  const stageClass = cn(
+    "yd-tracker-v4-photo-stage",
+    dominant && "yd-tracker-v4-photo-stage--dominant"
+  );
+  const title = dominant ? "Fotos" : "Foto-Dokumentation";
+
   if (sorted.length === 0) {
     return (
-      <section className="yd-tracker-v4-photo-stage" aria-label="Foto-Dokumentation">
-        <h3 className="yd-tracker-v4-section-title">Foto-Dokumentation</h3>
+      <section className={stageClass} aria-label="Fotos">
+        <h3 className="yd-tracker-workspace-section__title">{title}</h3>
         <div className="yd-tracker-v4-photo-stage__empty">
-          <ImageIcon className="h-10 w-10 text-[#94A3B8]/50" strokeWidth={1.25} aria-hidden />
-          <p className="mt-2 text-[14px] font-medium text-[#64748B]">
-            Noch keine Fotos — Heilungsverlauf erscheint hier.
+          <ImageIcon className="h-10 w-10 text-[#94A3B8]/45" strokeWidth={1.25} aria-hidden />
+          <p className="mt-2 text-[14px] font-semibold text-[#475569]">
+            Noch keine klinische Dokumentation
+          </p>
+          <p className="mt-1 max-w-sm text-[13px] leading-relaxed text-[#64748B]">
+            Sobald der Patient Fotos sendet, erscheinen sie hier mit Verlauf und Tageszuordnung.
           </p>
         </div>
       </section>
@@ -64,8 +77,8 @@ export function TrackerPhotoStage({
   }
 
   return (
-    <section className="yd-tracker-v4-photo-stage" aria-label="Foto-Dokumentation">
-      <h3 className="yd-tracker-v4-section-title">Foto-Dokumentation</h3>
+    <section className={stageClass} aria-label="Fotos">
+      <h3 className="yd-tracker-workspace-section__title">{title}</h3>
       <div className="yd-tracker-v4-photo-stage__viewer">
         <PhotoViewer
           submissionId={submissionId}

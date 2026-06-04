@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { useAssistContextOptional, type InboxAssistCasePayload } from "./assist-shell";
+import { useAssistDispatchOptional, type InboxAssistCasePayload } from "./assist-shell";
 
 type InboxAssistHydrationProps = Omit<InboxAssistCasePayload, "kind">;
 
@@ -19,8 +19,7 @@ export function InboxAssistHydration({
   appointmentUrl,
   concernLine,
 }: InboxAssistHydrationProps) {
-  const ctx = useAssistContextOptional();
-  const setCasePayload = ctx?.setCasePayload;
+  const setCasePayload = useAssistDispatchOptional()?.setCasePayload;
 
   useEffect(() => {
     if (!setCasePayload) return;

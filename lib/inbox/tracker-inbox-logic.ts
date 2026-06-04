@@ -261,6 +261,18 @@ export type TrackerStatusDisplay = {
   className: string;
 };
 
+/**
+ * Falltyp für Inbox — neutral wenn unklar, keine Pauschallabels.
+ */
+export function trackerCaseTypeLabel(item: EnrichedSubmissionListItem): string {
+  if (item.is_draft) return "Entwurf";
+  if (isApprovalPending(item)) return "KI-Freigabe";
+  if (item.open_task_count > 0) return "Praxisaufgabe";
+  if (item.intake_channel === "follow_up") return "Nachsorge";
+  if (!item.seen_at) return "Neue Anfrage";
+  return "In Bearbeitung";
+}
+
 export function trackerStatusForRow(item: EnrichedSubmissionListItem): TrackerStatusDisplay {
   if (item.is_draft) {
     return { label: "Entwurf", className: "yd-tracker-table__status--draft" };
@@ -302,6 +314,26 @@ export function photoTrailSummary(item: EnrichedSubmissionListItem): string | nu
 }
 
 /** Relatives Datum für die Listen-Spalte (Eingang). */
+/** Priorität für Inbox-Karten (Arbeitskontext, keine Verwaltungs-ID). */
+export function trackerPriorityForRow(item: EnrichedSubmissionListItem): {
+  label: string;
+  className: string;
+} {
+  if (item.urgency === "today") {
+    return { label: "Heute", className: "yd-tracker-inbox-card__priority--high" };
+  }
+  if (item.urgency === "this_week") {
+    return { label: "Diese Woche", className: "yd-tracker-inbox-card__priority--mid" };
+  }
+  if (item.urgency === "not_urgent") {
+    return { label: "Ruhig einplanen", className: "yd-tracker-inbox-card__priority--low" };
+  }
+  if (!item.seen_at) {
+    return { label: "Einordnen", className: "yd-tracker-inbox-card__priority--open" };
+  }
+  return { label: "Normal", className: "yd-tracker-inbox-card__priority--low" };
+}
+
 export function formatTrackerListDate(iso: string): string {
   const then = new Date(iso);
   if (Number.isNaN(then.getTime())) return "—";

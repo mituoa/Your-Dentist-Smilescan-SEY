@@ -27,7 +27,6 @@ import {
   getDashboardPriorityItems,
   logDashboardDbFailure,
 } from "@/lib/queries/dashboard";
-import { DashboardAssistHydration } from "@/components/command-ai/dashboard-assist-hydration";
 import {
   buildSubmissionPreparation,
   countPreparedAwaitingReview,
@@ -182,16 +181,6 @@ export default async function DashboardPage() {
     >
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--a" aria-hidden />
       <div className="yd-dash-ambient-orb yd-dash-ambient-orb--b" aria-hidden />
-
-      <DashboardAssistHydration
-        patients={(priorityItems ?? previewRows ?? []).map((p) => ({
-          id: p.id,
-          patient_name: p.patient_name,
-          patient_notes: p.patient_notes,
-        }))}
-        practicePhone={practicePhone}
-        appointmentUrl={appointmentUrl}
-      />
 
       <DashboardMobileShell
         greeting={greeting}

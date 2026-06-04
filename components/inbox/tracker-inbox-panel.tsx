@@ -16,6 +16,7 @@ import {
   matchesTrackerFilter,
   matchesTrackerSearch,
   sortTrackerInboxItems,
+  trackerCaseTypeLabel,
   trackerStatusForRow,
   type EnrichedSubmissionListItem,
   type TrackerInboxFilter,
@@ -130,6 +131,7 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
         ) : (
           filtered.map((item) => {
             const isActive = pathname === `/inbox/${item.id}`;
+            const caseType = trackerCaseTypeLabel(item);
             const status = trackerStatusForRow(item);
             const concern = deriveSubmissionIssueShortLine(
               item.patient_notes,
@@ -161,6 +163,7 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
                       {initials(item.patient_name)}
                     </span>
                     <div className="min-w-0 flex-1">
+                      <span className="yd-tracker-v4-inbox-card__case-type">{caseType}</span>
                       <span className="yd-tracker-v4-inbox-card__name">
                         {item.patient_name?.trim() || "Unbekannter Patient"}
                       </span>

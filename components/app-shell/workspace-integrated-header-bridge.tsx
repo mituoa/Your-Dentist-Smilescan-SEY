@@ -38,6 +38,10 @@ export function WorkspaceIntegratedHeaderBridge({
     return resolveWorkspaceGreeting(new Date().getHours());
   }, []);
 
+  if (ctx.hideOnDesktop) {
+    return null;
+  }
+
   return (
     <div className="hidden md:block">
       <WorkspaceIntegratedHeader

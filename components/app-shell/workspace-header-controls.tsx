@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Bell, MessageCircle, Search } from "lucide-react";
 
 import { TopbarContextActions } from "@/components/app-shell/topbar-context-actions";
@@ -29,12 +30,17 @@ export function WorkspaceHeaderControls({
   inboxCount,
   showSearch = true,
 }: WorkspaceHeaderControlsProps) {
+  const pathname = usePathname() || "";
+  const searchParams = useSearchParams();
+  const searchQ = searchParams.get("q") ?? "";
+  const searchAction = pathname.startsWith("/inbox") ? pathname.split("?")[0] || "/inbox" : "/inbox";
+
   return (
     <div className="yd-dash-header-premium__toolbar">
       <TopbarContextActions role={role} variant="dashboard" />
 
       {showSearch ? (
-        <form action="/inbox" method="get" className="yd-dash-header-premium__search relative min-w-0">
+        <form action={searchAction} method="get" className="yd-dash-header-premium__search relative min-w-0">
           <Search
             className="yd-dash-header-premium__search-icon pointer-events-none absolute top-1/2 -translate-y-1/2"
             strokeWidth={1.75}
@@ -43,8 +49,11 @@ export function WorkspaceHeaderControls({
           <input
             type="search"
             name="q"
+            key={searchQ}
+            defaultValue={searchQ}
             placeholder="Patient oder Anfrage suchen …"
             className="yd-dash-header-premium__search-input"
+            aria-label="Patient oder Anfrage suchen"
           />
         </form>
       ) : null}

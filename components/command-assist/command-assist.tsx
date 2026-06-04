@@ -35,7 +35,7 @@ import {
 
 import { clinicalCommandSheetWidthMd } from "@/lib/clinical-ui";
 import { cn } from "@/lib/utils";
-import { useAssistCaseOptional } from "./assist-shell";
+import { useAssistCaseOptional, useAssistStateOptional } from "./assist-shell";
 
 /** Navigation — nur Seiten öffnen, keine Serveraktion. */
 function suggestRoutes(text: string, pathname: string): { label: string; href: string }[] {
@@ -184,12 +184,13 @@ export function CommandAssist() {
   const pathname = usePathname();
   const router = useRouter();
   const assistCtx = useAssistCaseOptional();
+  const assistState = useAssistStateOptional();
   const inboxCase =
-    assistCtx?.casePayload?.kind === "inbox" ? assistCtx.casePayload : null;
+    assistState?.casePayload?.kind === "inbox" ? assistState.casePayload : null;
 
-  const open = assistCtx?.commandOpen ?? false;
+  const open = assistState?.commandOpen ?? false;
   const setOpen = assistCtx?.setCommandOpen ?? (() => {});
-  const preparedWork = assistCtx?.preparedWork ?? null;
+  const preparedWork = assistState?.preparedWork ?? null;
   const setPreparedWork = assistCtx?.setPreparedWork ?? (() => {});
 
   const [text, setText] = useState("");
@@ -249,8 +250,8 @@ export function CommandAssist() {
             appointmentUrl: inboxCase.appointmentUrl,
           }
         : null;
-    return mergeCommandWorkspaceHints(assistCtx?.workspaceHints ?? null, active);
-  }, [assistCtx?.workspaceHints, inboxCase]);
+    return mergeCommandWorkspaceHints(assistState?.workspaceHints ?? null, active);
+  }, [assistState?.workspaceHints, inboxCase]);
 
   const runPrepare = useCallback(async () => {
     const trimmed = text.trim();

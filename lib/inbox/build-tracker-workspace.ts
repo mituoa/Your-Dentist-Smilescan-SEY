@@ -38,6 +38,8 @@ export function buildTrackerCaseTimeline(input: {
   createdAt: string;
   photos: { id: string; created_at: string }[];
   patientNotes: string | null;
+  messageDraftStatus?: MessageDraftListStatus;
+  isApprovalPending?: boolean;
 }): TrackerTimelineEvent[] {
   const events: TrackerTimelineEvent[] = [
     {
@@ -78,6 +80,35 @@ export function buildTrackerCaseTimeline(input: {
       dateLabel: formatTimelineDate(input.createdAt),
       title: "Anliegen dokumentiert",
       detail: note.length > 80 ? `${note.slice(0, 80)}…` : note,
+    });
+  }
+
+  if (input.messageDraftStatus === "draft" || input.messageDraftStatus === "approved") {
+    events.push({
+      id: "ki-summary",
+      dateLabel: "Heute",
+      title: "KI-Zusammenfassung erstellt",
+    });
+    events.push({
+      id: "draft-ready",
+      dateLabel: "Heute",
+      title: "Antwort vorbereitet",
+    });
+  }
+
+  if (input.isApprovalPending) {
+    events.push({
+      id: "approval-wait",
+      dateLabel: "Heute",
+      title: "Freigabe ausstehend",
+    });
+  }
+
+  if (input.messageDraftStatus === "sent") {
+    events.push({
+      id: "sent",
+      dateLabel: "Heute",
+      title: "Antwort gesendet",
     });
   }
 
@@ -141,9 +172,9 @@ export function buildTrackerNextSteps(input: {
   const steps: string[] = [];
 
   if (input.isApprovalPending && input.isDoctor) {
-    steps.push("Antwort prüfen und freigeben");
+    steps.push("Antwort freigeben");
   } else if (input.messageDraftStatus === "draft" && input.isDoctor) {
-    steps.push("Vorbereiteten Entwurf lesen und anpassen");
+    steps.push("Entwurf prüfen");
   }
 
   if (input.urgency === "this_week" || input.urgency === "today") {
@@ -151,14 +182,14 @@ export function buildTrackerNextSteps(input: {
   }
 
   if (input.photoCount < 2 && !input.hasPhotoTrail) {
-    steps.push("Schärferes oder zusätzliches Foto anfordern");
+    steps.push("Schärferes Foto anfordern");
   }
 
   if (input.hasPhotoTrail) {
-    steps.push("Verlauf in 3 Tagen erneut prüfen");
+    steps.push("Verlauf in 3 Tagen prüfen");
   }
 
-  steps.push("Aufgabe an Team in Relay erstellen");
+  steps.push("Aufgabe an Empfang erstellen");
 
   return steps.slice(0, 5);
 }

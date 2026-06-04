@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
-import { useAssistContextOptional } from "@/components/command-assist/assist-shell";
+import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import { buildConcernLine } from "@/lib/command-ai/preparation-engine";
 import type { CommandWorkspaceHints } from "@/lib/command-ai/types";
 
@@ -16,16 +16,21 @@ type DashboardAssistHydrationProps = {
   appointmentUrl: string | null;
 };
 
-/** Supplies Command AI with patient directory from Atlas — no autonomous actions. */
+/** @deprecated Layout liefert bereits CommandWorkspaceHydration — nur noch für Spezialfälle. */
 export function DashboardAssistHydration({
   patients,
   practicePhone,
   appointmentUrl,
 }: DashboardAssistHydrationProps) {
-  const ctx = useAssistContextOptional();
+  const setWorkspaceHints = useAssistDispatchOptional()?.setWorkspaceHints;
+
+  const patientsKey = useMemo(
+    () => patients.map((p) => p.id).join("|"),
+    [patients]
+  );
 
   useEffect(() => {
-    if (!ctx) return;
+    if (!setWorkspaceHints) return;
     const hints: CommandWorkspaceHints = {
       patients: patients.map((p) => ({
         name: p.patient_name?.trim() || "Patient",
@@ -35,9 +40,8 @@ export function DashboardAssistHydration({
       practicePhone,
       appointmentUrl,
     };
-    ctx.setWorkspaceHints(hints);
-    return () => ctx.setWorkspaceHints(null);
-  }, [ctx, patients, practicePhone, appointmentUrl]);
+    setWorkspaceHints(hints);
+  }, [setWorkspaceHints, patientsKey, patients, practicePhone, appointmentUrl]);
 
   return null;
 }

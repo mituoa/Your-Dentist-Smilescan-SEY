@@ -15,26 +15,18 @@ type TrackerDraftWorkspaceProps = {
 
 export function TrackerDraftWorkspace(props: TrackerDraftWorkspaceProps) {
   return (
-    <section className="yd-tracker-v4-draft" aria-labelledby="tracker-v4-draft-title">
-      <h3 id="tracker-v4-draft-title" className="yd-tracker-v4-section-title">
-        Antwortentwurf
-      </h3>
-      <p className="yd-tracker-v4-draft__hint">
-        Lesen, anpassen und freigeben — die Hauptarbeit für diesen Fall.
-      </p>
-      <div className="yd-tracker-v4-draft__surface">
-        <SubmissionMessageDraftPanel
-          submissionId={props.submissionId}
-          patientName={props.patientName}
-          urgency={props.urgency}
-          practicePhone={props.practicePhone}
-          appointmentUrl={props.appointmentUrl}
-          isDoctor={props.isDoctor}
-          draftsAvailable={props.draftsAvailable}
-          initialEditableDraft={props.editableMessageDraft}
-          initialHistoryDraft={props.historyMessageDraft}
-        />
-      </div>
-    </section>
+    <div className="yd-tracker-v4-draft__surface">
+      <SubmissionMessageDraftPanel
+        submissionId={props.submissionId}
+        patientName={props.patientName}
+        urgency={props.urgency}
+        practicePhone={props.practicePhone}
+        appointmentUrl={props.appointmentUrl}
+        isDoctor={props.isDoctor}
+        draftsAvailable={props.draftsAvailable}
+        initialEditableDraft={props.editableMessageDraft}
+        initialHistoryDraft={props.historyMessageDraft}
+      />
+    </div>
   );
 }

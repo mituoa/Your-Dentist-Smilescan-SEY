@@ -1,15 +1,20 @@
 import type { TrackerTimelineEvent } from "@/lib/inbox/build-tracker-workspace";
+import { cn } from "@/lib/utils";
 
 type TrackerCaseTimelineProps = {
   events: TrackerTimelineEvent[];
+  className?: string;
 };
 
-export function TrackerCaseTimeline({ events }: TrackerCaseTimelineProps) {
+export function TrackerCaseTimeline({ events, className }: TrackerCaseTimelineProps) {
   if (events.length === 0) return null;
 
   return (
-    <section className="yd-tracker-v4-timeline" aria-labelledby="tracker-v4-timeline-title">
-      <h3 id="tracker-v4-timeline-title" className="yd-tracker-v4-section-title">
+    <section
+      className={cn("yd-tracker-workspace-section yd-tracker-v4-timeline", className)}
+      aria-labelledby="tracker-v4-timeline-title"
+    >
+      <h3 id="tracker-v4-timeline-title" className="yd-tracker-workspace-section__title">
         Verlauf
       </h3>
       <ol className="yd-tracker-v4-timeline__list">

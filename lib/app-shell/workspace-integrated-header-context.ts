@@ -23,7 +23,7 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname.startsWith("/inbox")) {
     return {
       eyebrow: "Tracker",
-      subtitle: "Patientenfälle · Einsendungen und Triage",
+      subtitle: "Praxis-Inbox und Fallakte",
       showSearch: true,
     };
   }

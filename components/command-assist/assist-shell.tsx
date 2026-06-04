@@ -25,27 +25,78 @@ export type InboxAssistCasePayload = {
 
 type AssistCasePayload = InboxAssistCasePayload | null;
 
-type AssistContextValue = {
-  casePayload: AssistCasePayload;
+type AssistDispatchValue = {
   setCasePayload: (p: AssistCasePayload) => void;
-  workspaceHints: CommandWorkspaceHints | null;
   setWorkspaceHints: (hints: CommandWorkspaceHints | null) => void;
-  preparedWork: PreparedWorkItem | null;
   setPreparedWork: (work: PreparedWorkItem | null) => void;
-  commandOpen: boolean;
   setCommandOpen: (open: boolean) => void;
   openCommand: () => void;
 };
 
-const AssistContext = createContext<AssistContextValue | null>(null);
+type AssistStateValue = {
+  casePayload: AssistCasePayload;
+  workspaceHints: CommandWorkspaceHints | null;
+  preparedWork: PreparedWorkItem | null;
+  commandOpen: boolean;
+};
+
+export type AssistContextValue = AssistStateValue & AssistDispatchValue;
+
+const AssistDispatchContext = createContext<AssistDispatchValue | null>(null);
+const AssistStateContext = createContext<AssistStateValue | null>(null);
+
+function workspaceHintsEqual(
+  a: CommandWorkspaceHints | null,
+  b: CommandWorkspaceHints | null
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  if (a.practicePhone !== b.practicePhone || a.appointmentUrl !== b.appointmentUrl) {
+    return false;
+  }
+  if (a.patients.length !== b.patients.length) return false;
+  return a.patients.every((p, i) => {
+    const q = b.patients[i];
+    return (
+      p.submissionId === q.submissionId &&
+      p.name === q.name &&
+      p.concernLine === q.concernLine
+    );
+  });
+}
+
+function casePayloadEqual(a: AssistCasePayload, b: AssistCasePayload): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.kind === b.kind &&
+    a.submissionId === b.submissionId &&
+    a.patientName === b.patientName &&
+    a.urgency === b.urgency &&
+    a.practicePhone === b.practicePhone &&
+    a.appointmentUrl === b.appointmentUrl &&
+    a.concernLine === b.concernLine
+  );
+}
+
+export function useAssistDispatchOptional(): AssistDispatchValue | null {
+  return useContext(AssistDispatchContext);
+}
+
+export function useAssistStateOptional(): AssistStateValue | null {
+  return useContext(AssistStateContext);
+}
 
 export function useAssistContextOptional(): AssistContextValue | null {
-  return useContext(AssistContext);
+  const dispatch = useContext(AssistDispatchContext);
+  const state = useContext(AssistStateContext);
+  if (!dispatch || !state) return null;
+  return { ...state, ...dispatch };
 }
 
 /** @deprecated use useAssistContextOptional */
 export function useAssistCaseOptional(): AssistContextValue | null {
-  return useContext(AssistContext);
+  return useAssistContextOptional();
 }
 
 export function AssistShell({ children }: { children: ReactNode }) {
@@ -55,49 +106,50 @@ export function AssistShell({ children }: { children: ReactNode }) {
   const [commandOpen, setCommandOpen] = useState(false);
 
   const setCasePayload = useCallback((p: AssistCasePayload) => {
-    setCasePayloadState(p);
+    setCasePayloadState((prev) => (casePayloadEqual(prev, p) ? prev : p));
   }, []);
 
   const setWorkspaceHints = useCallback((hints: CommandWorkspaceHints | null) => {
-    setWorkspaceHintsState(hints);
+    setWorkspaceHintsState((prev) =>
+      workspaceHintsEqual(prev, hints) ? prev : hints
+    );
   }, []);
 
   const setPreparedWork = useCallback((work: PreparedWorkItem | null) => {
-    setPreparedWorkState(work);
+    setPreparedWorkState((prev) => (prev === work ? prev : work));
   }, []);
 
   const openCommand = useCallback(() => {
     setCommandOpen(true);
   }, []);
 
-  const value = useMemo(
+  const dispatchValue = useMemo<AssistDispatchValue>(
     () => ({
-      casePayload,
       setCasePayload,
-      workspaceHints,
       setWorkspaceHints,
-      preparedWork,
       setPreparedWork,
-      commandOpen,
       setCommandOpen,
       openCommand,
     }),
-    [
+    [setCasePayload, setWorkspaceHints, setPreparedWork, openCommand]
+  );
+
+  const stateValue = useMemo<AssistStateValue>(
+    () => ({
       casePayload,
-      setCasePayload,
       workspaceHints,
-      setWorkspaceHints,
       preparedWork,
-      setPreparedWork,
       commandOpen,
-      openCommand,
-    ]
+    }),
+    [casePayload, workspaceHints, preparedWork, commandOpen]
   );
 
   return (
-    <AssistContext.Provider value={value}>
-      {children}
-      <CommandAssist />
-    </AssistContext.Provider>
+    <AssistDispatchContext.Provider value={dispatchValue}>
+      <AssistStateContext.Provider value={stateValue}>
+        {children}
+        <CommandAssist />
+      </AssistStateContext.Provider>
+    </AssistDispatchContext.Provider>
   );
 }

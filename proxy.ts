@@ -30,6 +30,13 @@ const PROTECTED_PATHS = [
   "/create-case",
 ];
 
+/** Exakt `/inbox` oder `/inbox/…` — nicht `/inbox-preview` (Demo-UI ohne Session). */
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+}
+
 // Routen, die NICHT für eingeloggte User sichtbar sind (redirect zu App-Home)
 const AUTH_PATHS = ["/login", "/register"];
 
@@ -68,7 +75,7 @@ export async function proxy(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
     // Wenn nicht eingeloggt und auf geschützter Route → /login
-    if (!user && PROTECTED_PATHS.some((p) => pathname.startsWith(p))) {
+    if (!user && isProtectedPath(pathname)) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url);

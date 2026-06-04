@@ -12,6 +12,7 @@ import {
   type EnrichedSubmissionListItem,
 } from "@/lib/inbox/tracker-inbox-logic";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { loadMessageDraftDetailForSubmission } from "@/lib/queries/message-drafts";
 import { markSubmissionSeen } from "./actions";
 
@@ -72,6 +73,11 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
     messageDraftLoad.available
   );
 
+  const listResult = await getInboxSubmissions(workspace.workspace_id);
+  const openTaskCount = listResult.ok
+    ? (listResult.items.find((i) => i.id === id)?.open_task_count ?? 0)
+    : 0;
+
   const statusRow: EnrichedSubmissionListItem = {
     id: submission.id,
     patient_name: submission.patient_name,
@@ -86,7 +92,7 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
     photo_count: submission.photos.length,
     message_draft_status: messageDraftStatus,
     intake_channel: submission.intake_channel,
-    open_task_count: 0,
+    open_task_count: openTaskCount,
     photo_documentation: null,
   };
 
@@ -146,6 +152,7 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
             practicePhone={practicePhone}
             appointmentUrl={appointmentUrl}
             canSendAppointmentLink={isDoctor}
+            openTaskCount={openTaskCount}
           />
         </div>
       </div>

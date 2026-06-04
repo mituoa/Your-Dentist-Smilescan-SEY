@@ -105,6 +105,8 @@ export function TrackerWorkspace({
     createdAt: submission.created_at,
     photos: submission.photos,
     patientNotes: submission.patient_notes,
+    messageDraftStatus,
+    isApprovalPending: approvalPending,
   });
 
   const assist = buildTrackerAssistChecklist({
@@ -135,6 +137,7 @@ export function TrackerWorkspace({
   return (
     <div className="yd-tracker-v4-workspace">
       <TrackerPatientHeader
+        submissionId={submission.id}
         patientName={patientLabel}
         status={status}
         birthDate={submission.patient_birth_date}
@@ -153,6 +156,7 @@ export function TrackerWorkspace({
             submissionId={submission.id}
             photos={submission.photos}
             patientName={patientLabel}
+            dominant
           />
           <TrackerCaseTimeline events={timeline} />
           {note ? (
