@@ -3,7 +3,6 @@
 import { Check, Sparkles } from "lucide-react";
 
 import type { RelayAssistSummary } from "@/lib/relay/build-relay-snapshot";
-import { YD } from "@/lib/design/yd-design-tokens";
 
 type RelayAssistCardProps = {
   summary: RelayAssistSummary;
@@ -23,32 +22,20 @@ export function RelayAssistCard({ summary }: RelayAssistCardProps) {
   ].filter(Boolean) as string[];
 
   return (
-    <div className="yd-relay-v4-assist-inner flex items-start gap-3">
-      <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-        style={{ background: "rgba(239,246,255,0.95)", color: YD.accent.core }}
-      >
-        <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.9} aria-hidden />
+    <div className="yd-relay-v4-assist-inner flex items-start gap-2.5">
+      <span className="yd-relay-v4-assist-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+        <Sparkles className="h-4 w-4" strokeWidth={1.85} aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
         {lines.length === 0 ? (
-          <p className="text-[13px] font-medium" style={{ color: YD.text.secondary }}>
+          <p className="text-[12px] font-medium text-[#64748B]">
             Keine offenen Vorbereitungen — alles im Blick.
           </p>
         ) : (
           <ul className="space-y-1.5">
             {lines.map((line) => (
-              <li
-                key={line}
-                className="flex items-center gap-2 text-[13px] font-medium"
-                style={{ color: YD.text.secondary }}
-              >
-                <Check
-                  className="h-3.5 w-3.5 shrink-0"
-                  strokeWidth={2.5}
-                  style={{ color: YD.accent.core }}
-                  aria-hidden
-                />
+              <li key={line} className="flex items-center gap-2 text-[12px] font-medium text-[#64748B]">
+                <Check className="h-3.5 w-3.5 shrink-0 text-[#1e3a8a]" strokeWidth={2.5} aria-hidden />
                 {line}
               </li>
             ))}

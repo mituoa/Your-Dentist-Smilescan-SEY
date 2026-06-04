@@ -34,6 +34,8 @@ export type RelayTeamDetailRow = RelayTeamRow & {
   overdueCount: number;
 };
 
+export type RelayStatusTone = "new" | "critical" | "overdue" | "pending" | "open" | "done";
+
 export type RelayTaskListItem = {
   id: string;
   href: string;
@@ -42,6 +44,9 @@ export type RelayTaskListItem = {
   assigneeLabel: string;
   dueLabel: string | null;
   statusLabel: string;
+  statusTone: RelayStatusTone;
+  sourceLabel: string | null;
+  submissionId: string | null;
   completionLine: string | null;
   isDone: boolean;
 };
@@ -53,6 +58,7 @@ export type RelayPriorityTask = {
   assigneeLabel: string;
   dueLabel: string | null;
   statusLabel: string;
+  statusTone: RelayStatusTone;
   href: string;
 };
 
@@ -131,11 +137,36 @@ function isOverdue(task: MyTask): boolean {
   return task.due_date.slice(0, 10) < new Date().toISOString().slice(0, 10);
 }
 
+function isRecentlyCreated(createdAt: string): boolean {
+  const created = new Date(createdAt).getTime();
+  if (Number.isNaN(created)) return false;
+  return Date.now() - created < 48 * 60 * 60 * 1000;
+}
+
+export function relayStatusMeta(
+  task: MyTask,
+  isDone: boolean
+): { label: string; tone: RelayStatusTone } {
+  if (isDone || task.status === "done") {
+    return { label: "Erledigt", tone: "done" };
+  }
+  if (task.status === "pending_review") {
+    return { label: "Freigabe offen", tone: "pending" };
+  }
+  if (isOverdue(task)) {
+    return { label: "Überfällig", tone: "overdue" };
+  }
+  if (task.priority === "important") {
+    return { label: "Kritisch", tone: "critical" };
+  }
+  if (isRecentlyCreated(task.created_at)) {
+    return { label: "Neu", tone: "new" };
+  }
+  return { label: "Offen", tone: "open" };
+}
+
 function taskStatusLabel(task: MyTask): string {
-  if (task.status === "done") return "Erledigt";
-  if (task.status === "pending_review") return "Freigabe ausstehend";
-  if (task.priority === "important") return "Wichtig";
-  return "Offen";
+  return relayStatusMeta(task, task.status === "done").label;
 }
 
 export function buildRelayKpiStats(
@@ -230,9 +261,7 @@ export function buildRelayPriorityTasks(
 
   return active.slice(0, limit).map((task) => {
     const patientLabel = task.submission_patient_name?.trim() || null;
-    let statusLabel = "Offen";
-    if (task.status === "pending_review") statusLabel = "Freigabe ausstehend";
-    else if (task.priority === "important") statusLabel = "Wichtig";
+    const status = relayStatusMeta(task, false);
 
     return {
       id: task.id,
@@ -240,7 +269,8 @@ export function buildRelayPriorityTasks(
       patientLabel,
       assigneeLabel: assigneeLabelForTask(task, membersById),
       dueLabel: dueLabel(task.due_date),
-      statusLabel,
+      statusLabel: status.label,
+      statusTone: status.tone,
       href: `/my-tasks/${task.id}`,
     };
   });
@@ -352,17 +382,23 @@ export function buildRelayTaskList(
     })
     .slice(0, doneLimit);
 
-  const mapTask = (task: MyTask, isDone: boolean): RelayTaskListItem => ({
-    id: task.id,
-    href: `/my-tasks/${task.id}`,
-    title: task.title,
-    patientLabel: task.submission_patient_name?.trim() || null,
-    assigneeLabel: assigneeLabelForTask(task, membersById),
-    dueLabel: dueLabel(task.due_date),
-    statusLabel: taskStatusLabel(task),
-    completionLine: isDone ? formatRelayDoneLine(task) : null,
-    isDone,
-  });
+  const mapTask = (task: MyTask, isDone: boolean): RelayTaskListItem => {
+    const status = relayStatusMeta(task, isDone);
+    return {
+      id: task.id,
+      href: `/my-tasks/${task.id}`,
+      title: task.title,
+      patientLabel: task.submission_patient_name?.trim() || null,
+      assigneeLabel: assigneeLabelForTask(task, membersById),
+      dueLabel: dueLabel(task.due_date),
+      statusLabel: status.label,
+      statusTone: status.tone,
+      sourceLabel: task.submission_id ? "Tracker" : "Intern",
+      submissionId: task.submission_id,
+      completionLine: isDone ? formatRelayDoneLine(task) : null,
+      isDone,
+    };
+  };
 
   return [...active.map((t) => mapTask(t, false)), ...recentDone.map((t) => mapTask(t, true))];
 }

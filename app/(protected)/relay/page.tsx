@@ -18,6 +18,7 @@ export default async function RelayPage({ searchParams }: RelayPageProps) {
       counts={data.counts}
       assignableMembers={data.assignableMembers}
       conversations={data.conversations}
+      submissionDraftStatus={data.submissionDraftStatus}
     />
   );
 }

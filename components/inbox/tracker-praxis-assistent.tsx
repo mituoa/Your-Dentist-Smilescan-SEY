@@ -147,7 +147,7 @@ export function TrackerPraxisAssistent({
     <>
       <aside
         id="tracker-entscheidung"
-        className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail yd-tracker-v14-rail"
+        className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail yd-tracker-v14-rail yd-tracker-v15-rail"
         aria-label="Entscheidung"
         aria-busy={sheetIntent !== null}
       >
@@ -160,7 +160,7 @@ export function TrackerPraxisAssistent({
           <button
             id="tracker-v10-primary-action"
             type="button"
-            className="yd-tracker-v12-primary-action yd-tracker-v14-primary-action"
+            className="yd-tracker-v12-primary-action yd-tracker-v14-primary-action yd-tracker-v15-primary-action"
             aria-haspopup="dialog"
             onClick={() => runStep(primary)}
           >

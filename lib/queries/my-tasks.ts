@@ -204,10 +204,17 @@ export const countMyOpenTasks = cache(
       )
     );
     const total = tasksByStatus.reduce((sum, items) => sum + items.length, 0);
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const overdue = tasksByStatus
+      .flat()
+      .filter(
+        (task) =>
+          task.due_date != null && task.due_date.slice(0, 10) < todayKey
+      ).length;
 
     return {
       total,
-      overdue: 0,
+      overdue,
     };
   }
 );

@@ -16,12 +16,14 @@ import { cn } from "@/lib/utils";
 type TrackerInboxStatusPillProps = {
   submissionId: string;
   status: InboxPracticeStatusId;
+  className?: string;
 };
 
 /** V10 — Dezente Segment-Auswahl für den Praxisstatus. */
 export function TrackerInboxStatusPill({
   submissionId,
   status,
+  className,
 }: TrackerInboxStatusPillProps) {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -64,7 +66,7 @@ export function TrackerInboxStatusPill({
   return (
     <div
       ref={rootRef}
-      className="yd-tracker-v10-inbox-status yd-tracker-v12-inbox-status"
+      className={cn("yd-tracker-v10-inbox-status yd-tracker-v12-inbox-status", className)}
       aria-busy={pending}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}

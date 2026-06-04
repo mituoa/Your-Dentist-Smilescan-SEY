@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getMyTasks } from "@/lib/queries/my-tasks";
 import type { TaskCounts } from "@/lib/queries/task-counts";
+import { getMessageDraftStatusMapForSubmissions } from "@/lib/queries/message-drafts";
+import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
 import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { createClient } from "@/lib/supabase/server";
@@ -69,6 +71,20 @@ export async function loadRelayWorkspaceData(searchParams: Promise<Record<string
     done: doneTasks.length,
   };
 
+  const submissionIds = [
+    ...new Set(
+      [...openTasks, ...pendingTasks, ...doneTasks]
+        .map((t) => t.submission_id)
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  const draftMapResult = await getMessageDraftStatusMapForSubmissions(
+    workspace.workspace_id,
+    submissionIds
+  );
+  const submissionDraftStatus: Record<string, MessageDraftListStatus> =
+    draftMapResult.available ? draftMapResult.statusBySubmissionId : {};
+
   return {
     userId: user.id,
     userEmail: user.email ?? null,
@@ -77,5 +93,6 @@ export async function loadRelayWorkspaceData(searchParams: Promise<Record<string
     counts,
     assignableMembers,
     conversations,
+    submissionDraftStatus,
   };
 }

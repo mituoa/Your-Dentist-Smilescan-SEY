@@ -10,7 +10,7 @@ type RelayKpiRowProps = {
 export function RelayKpiRow({ stats }: RelayKpiRowProps) {
   return (
     <div
-      className="yd-dash-zone yd-dash-kpi-row grid min-w-0 grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+      className="yd-dash-zone yd-dash-kpi-row yd-relay-v4-kpi-zone grid min-w-0 grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4"
       aria-label="Relay Kennzahlen"
     >
       <HcStatCard

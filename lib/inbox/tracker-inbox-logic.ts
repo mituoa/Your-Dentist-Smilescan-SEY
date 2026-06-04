@@ -502,6 +502,28 @@ export function photoTrailSummary(item: EnrichedSubmissionListItem): string | nu
   return doc.photoCount === 1 ? "1 Foto" : `${doc.photoCount} Fotos`;
 }
 
+/** Visuelle Dringlichkeits-Stufe für Inbox-Zeilen (ohne Zusatztext). */
+export type InboxUrgencyVisualTier =
+  | "today"
+  | "within_24h"
+  | "this_week"
+  | "not_urgent"
+  | "none";
+
+export function inboxUrgencyVisualTier(
+  urgency: string | null | undefined
+): InboxUrgencyVisualTier {
+  if (
+    urgency === "today" ||
+    urgency === "within_24h" ||
+    urgency === "this_week" ||
+    urgency === "not_urgent"
+  ) {
+    return urgency;
+  }
+  return "none";
+}
+
 /** Relatives Datum für die Listen-Spalte (Eingang). */
 /** Priorität für Inbox-Karten (Arbeitskontext, keine Verwaltungs-ID). */
 export function trackerPriorityForRow(item: EnrichedSubmissionListItem): {

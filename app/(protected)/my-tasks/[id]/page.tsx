@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { TaskDetailView } from "@/components/my-tasks/task-detail";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { getMessageDraftStatusMapForSubmissions } from "@/lib/queries/message-drafts";
 import { getTaskWithComments } from "@/lib/queries/task-detail";
 import { createClient } from "@/lib/supabase/server";
 import { markTaskAsRead } from "@/lib/tasks/receipts";
@@ -168,6 +169,16 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   const listHref = isDoctor ? "/relay" : "/my-tasks";
   const doctorSelfTask = isDoctor && task.created_by === user.id;
 
+  let messageDraftStatus: "draft" | "approved" | "sent" | "none" = "none";
+  if (task.submission_id) {
+    const draftMap = await getMessageDraftStatusMapForSubmissions(workspace.workspace_id, [
+      task.submission_id,
+    ]);
+    if (draftMap.available) {
+      messageDraftStatus = draftMap.statusBySubmissionId[task.submission_id] ?? "none";
+    }
+  }
+
   return (
     <TaskDetailView
       task={task}
@@ -177,6 +188,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
       isMyTask={isMyTask}
       doctorSelfTask={doctorSelfTask}
       listHref={listHref}
+      messageDraftStatus={messageDraftStatus}
     />
   );
 }

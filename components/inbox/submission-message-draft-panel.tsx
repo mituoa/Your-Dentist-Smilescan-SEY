@@ -410,7 +410,7 @@ export function SubmissionMessageDraftPanel({
           }}
           className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] px-4 text-[14px] font-semibold text-white transition disabled:opacity-60"
           style={{
-            background: "#0C1929",
+            background: "linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 48%, #163d7a 100%)",
             boxShadow: "0 1px 2px rgba(12,25,41,0.08)",
           }}
         >
@@ -532,7 +532,7 @@ function PrepareDraftButton({
       }}
       className="inline-flex min-h-11 w-full items-center justify-center rounded-[9px] px-4 text-[14px] font-semibold text-white transition disabled:opacity-60"
       style={{
-        background: "#0C1929",
+        background: "linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 48%, #163d7a 100%)",
         boxShadow: "0 1px 2px rgba(12,25,41,0.08)",
       }}
     >

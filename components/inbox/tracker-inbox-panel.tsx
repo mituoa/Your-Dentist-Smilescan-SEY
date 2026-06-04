@@ -9,6 +9,7 @@ import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
   countByTrackerFilter,
+  inboxUrgencyVisualTier,
   matchesTrackerFilter,
   matchesTrackerSearch,
   sortTrackerInboxItems,
@@ -16,6 +17,7 @@ import {
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
 import {
+  CLINICAL_URGENCY_OPTIONS,
   formatTrackerRelativeIngress,
   resolveInboxPracticeStatus,
 } from "@/lib/inbox/tracker-v9-clinical";
@@ -26,7 +28,7 @@ type TrackerInboxPanelProps = {
   items: SubmissionListItem[];
 };
 
-/** V9 — Arbeitsliste: Name · Anliegen · Zeit · Status-Pill. */
+/** V15 — Enterprise-Worklist: Name → Dringlichkeit → Status → Zeit → Anliegen (1 Zeile). */
 export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
@@ -64,7 +66,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
     filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
 
   return (
-    <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-tracker-v12-inbox yd-tracker-v14-inbox yd-clinical-control flex h-full min-h-0 flex-col">
+    <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-tracker-v12-inbox yd-tracker-v14-inbox yd-tracker-v15-inbox yd-clinical-control flex h-full min-h-0 flex-col">
       <div className="yd-tracker-v4-inbox__toolbar yd-tracker-v8-inbox__toolbar">
         <div className="yd-tracker-v8-inbox__head">
           <p className="yd-tracker-v4-inbox__eyebrow">Arbeitsliste</p>
@@ -115,12 +117,16 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
             const concern = deriveSubmissionConcernDisplay(
               item.patient_notes,
               item.patient_name,
-              "Anliegen ohne Kurztext"
+              ""
             );
             const concernTitle = item.patient_notes?.trim() || concern;
             const practiceStatus = resolveInboxPracticeStatus(item);
             const timeLabel = formatTrackerRelativeIngress(item.created_at);
             const isFresh = !item.seen_at && !isActive;
+            const urgencyTier = inboxUrgencyVisualTier(item.urgency);
+            const urgencyAria =
+              CLINICAL_URGENCY_OPTIONS.find((o) => o.id === urgencyTier)?.label ??
+              "Dringlichkeit nicht gesetzt";
 
             return (
               <li key={item.id}>
@@ -132,60 +138,72 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                     "yd-tracker-v10-inbox-card",
                     "yd-tracker-v12-inbox-card",
                     "yd-tracker-v14-inbox-card",
+                    "yd-tracker-v15-inbox-card",
+                    `yd-tracker-v15-inbox-card--urgency-${urgencyTier}`,
                     isActive && "yd-tracker-v4-inbox-card--active",
                     isActive && "yd-tracker-v8-inbox-card--active",
                     isActive && "yd-tracker-v10-inbox-card--active",
                     isActive && "yd-tracker-v12-inbox-card--active",
                     isFresh && "yd-tracker-v4-inbox-card--unseen",
-                    isFresh && "yd-tracker-v14-inbox-card--fresh"
+                    isFresh && "yd-tracker-v15-inbox-card--fresh"
                   )}
                 >
                   <button
                     type="button"
-                    className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body"
+                    className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body"
                     onClick={() => goToCase(item.id)}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    <div className="yd-tracker-v10-inbox-card__text yd-tracker-v12-inbox-card__text">
-                      <span
-                        className="yd-tracker-v14-inbox-card__name-row"
-                        title={patientName}
-                      >
-                        {isFresh ? (
+                    <span
+                      className="yd-tracker-v15-inbox-card__urgency-rail"
+                      aria-hidden
+                    />
+                    <span className="yd-tracker-v15-inbox-card__scan">
+                      <span className="yd-tracker-v15-inbox-card__top">
+                        <span className="yd-tracker-v15-inbox-card__name-wrap">
+                          {isFresh ? (
+                            <span
+                              className="yd-tracker-v15-inbox-card__fresh-pip"
+                              aria-label="Neu"
+                            />
+                          ) : null}
                           <span
-                            className="yd-tracker-v14-inbox-card__fresh-dot"
-                            aria-hidden
-                          />
-                        ) : null}
+                            className={cn(
+                              "yd-tracker-v10-inbox-card__name yd-tracker-v12-inbox-card__name",
+                              isFresh && "yd-tracker-v15-inbox-card__name--fresh"
+                            )}
+                          >
+                            {patientName}
+                          </span>
+                        </span>
+                        <span className="yd-tracker-v15-inbox-card__time">
+                          {timeLabel}
+                        </span>
+                      </span>
+                      <span className="yd-tracker-v15-inbox-card__meta">
                         <span
                           className={cn(
-                            "yd-tracker-v10-inbox-card__name yd-tracker-v12-inbox-card__name",
-                            isFresh && "yd-tracker-v14-inbox-card__name--fresh"
+                            "yd-tracker-v15-inbox-card__urgency-signal",
+                            `yd-tracker-v15-inbox-card__urgency-signal--${urgencyTier}`
                           )}
+                          aria-label={`Dringlichkeit: ${urgencyAria}`}
+                        />
+                        <TrackerInboxStatusPill
+                          submissionId={item.id}
+                          status={practiceStatus}
+                          className="yd-tracker-v15-inbox-status"
+                        />
+                      </span>
+                      {concern ? (
+                        <span
+                          className="yd-tracker-v10-inbox-card__concern yd-tracker-v12-inbox-card__concern yd-tracker-v15-inbox-card__concern"
+                          title={concernTitle}
                         >
-                          {patientName}
+                          {concern}
                         </span>
-                        {isFresh ? (
-                          <span className="yd-tracker-v14-inbox-card__fresh-badge">
-                            Neu
-                          </span>
-                        ) : null}
-                      </span>
-                      <span
-                        className="yd-tracker-v10-inbox-card__concern yd-tracker-v12-inbox-card__concern yd-tracker-v14-inbox-card__concern"
-                        title={concernTitle}
-                      >
-                        {concern}
-                      </span>
-                      <span className="yd-tracker-v10-inbox-card__time yd-tracker-v12-inbox-card__time">
-                        {timeLabel}
-                      </span>
-                    </div>
+                      ) : null}
+                    </span>
                   </button>
-                  <TrackerInboxStatusPill
-                    submissionId={item.id}
-                    status={practiceStatus}
-                  />
                 </div>
               </li>
             );

@@ -3,18 +3,29 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
 
-import { CardBoard } from "@/components/my-tasks/card-board";
-import { RelayAssistHint } from "@/components/command-ai/relay-assist-hint";
 import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
 import { RelayMessagesPanel } from "@/components/my-tasks/relay-messages-panel";
+import { RelayOpsFocusPanel } from "@/components/my-tasks/relay-ops-focus-panel";
+import { RelayOpsTodayBandView } from "@/components/my-tasks/relay-ops-today-band";
+import { RelayOpsWorkList } from "@/components/my-tasks/relay-ops-work-list";
 import { RelayQuickCreate } from "@/components/my-tasks/relay-quick-create";
+import { RelaySectionBox } from "@/components/my-tasks/relay-section-box";
+import { RelayWorkloadPanel } from "@/components/my-tasks/relay-workload-panel";
 import type { MyTask } from "@/lib/queries/my-tasks";
+import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type { AssignableMember } from "@/lib/queries/team-members";
+import {
+  buildRelayOpsFocusList,
+  buildRelayOpsToday,
+  buildRelayOpsWorkList,
+  buildSubmissionEnrichmentMap,
+} from "@/lib/relay/build-relay-ops-snapshot";
+import { buildRelayTeamOverview } from "@/lib/relay/build-relay-snapshot";
 import type { RelayScope } from "@/lib/tasks/relay-helpers";
-import { buildMemberAvatarMap, emailInitials, filterColumnTasks } from "@/lib/tasks/relay-helpers";
+import { filterColumnTasks } from "@/lib/tasks/relay-helpers";
 import { cn } from "@/lib/utils";
-import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/clinical-ui";
+import { clinicalWorkspaceFrame } from "@/lib/clinical-ui";
 
 /** Mirrors `TaskCounts` from task-counts (client-safe). */
 export interface RelayTaskCounts {
@@ -38,6 +49,7 @@ interface RelayWorkspaceViewProps {
   counts: RelayTaskCounts;
   assignableMembers: AssignableMember[];
   conversations?: RelayConversationRow[];
+  submissionDraftStatus?: Record<string, MessageDraftListStatus>;
 }
 
 export function RelayWorkspaceView({
@@ -49,6 +61,7 @@ export function RelayWorkspaceView({
   counts,
   assignableMembers,
   conversations = [],
+  submissionDraftStatus = {},
 }: RelayWorkspaceViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,13 +89,45 @@ export function RelayWorkspaceView({
     [columns, userId, scope]
   );
 
-  const avatarByUserId = useMemo(() => {
-    const m = buildMemberAvatarMap(assignableMembers);
-    if (userEmail) {
-      m[userId] = { initials: emailInitials(userEmail), color: "#2F80ED" };
-    }
-    return m;
-  }, [assignableMembers, userEmail, userId]);
+  const enrichments = useMemo(
+    () => buildSubmissionEnrichmentMap(submissionDraftStatus),
+    [submissionDraftStatus]
+  );
+
+  const ops = useMemo(
+    () => ({
+      today: buildRelayOpsToday(filtered.open, filtered.pending, filtered.done, enrichments),
+      work: buildRelayOpsWorkList(
+        filtered.open,
+        filtered.pending,
+        filtered.done,
+        assignableMembers,
+        enrichments,
+        120
+      ),
+      waitingPatient: buildRelayOpsFocusList(
+        filtered.open,
+        filtered.pending,
+        assignableMembers,
+        enrichments,
+        "patient",
+        6
+      ),
+      waitingDoctor: buildRelayOpsFocusList(
+        filtered.open,
+        filtered.pending,
+        assignableMembers,
+        enrichments,
+        "doctor",
+        6
+      ),
+      workload: buildRelayTeamOverview(filtered.open, filtered.pending, assignableMembers, isDoctor),
+    }),
+    [filtered, assignableMembers, isDoctor, enrichments]
+  );
+
+  const hasActiveWork =
+    filtered.open.length > 0 || filtered.pending.length > 0 || filtered.done.length > 0;
 
   const setScopeNav = (next: RelayScope) => {
     const qs = new URLSearchParams();
@@ -104,139 +149,126 @@ export function RelayWorkspaceView({
   };
 
   const toggleBtn = (active: boolean) =>
-    cn(
-      "rounded-lg px-4 py-2.5 text-[13px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.28)]",
-      active
-        ? "bg-white text-[#0F172A] shadow-[0_1px_3px_rgba(43,111,232,0.12)] ring-1 ring-[rgba(43,111,232,0.14)]"
-        : "bg-transparent text-[#64748B] hover:bg-[rgba(43,111,232,0.05)] hover:text-[#334155]"
-    );
+    cn("yd-relay-tab-btn", active && "yd-relay-tab-btn--active");
 
   return (
-    <div className="min-h-0 flex-1" style={{ background: "#F7F9FC" }}>
+    <div className="min-h-0 flex-1 yd-relay-v4" style={{ background: "#F7F9FC" }}>
       <RelayCommandTaskPrefill />
-      <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1
-            className="text-[26px] font-semibold leading-tight tracking-[-0.02em] sm:text-[28px]"
-            style={{ color: "#0F172A" }}
-          >
-            {isRelay ? "Relay" : "Meine Aufgaben"}
-          </h1>
-          {isRelay ? (
-            <p className="mt-2 max-w-[560px] text-[14px] font-normal leading-relaxed" style={{ color: "#475569" }}>
-              Internes Koordinationszentrum — Aufgaben, Nachrichten, Übergaben und ruhige
-              Praxisroutinen an einem Ort.
-            </p>
-          ) : (
-            <p
-              className="mt-2 max-w-[640px] text-[14px] font-normal leading-relaxed"
-              style={{ color: "#475569" }}
-            >
-              Ihre zugewiesenen und geteilten Aufgaben — dieselbe Datengrundlage wie unter Relay.
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3 sm:items-end">
-          {isRelay ? (
-            <div
-              className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"
-              style={{ background: "rgba(43, 111, 232, 0.06)" }}
-              role="tablist"
-              aria-label="Relay Bereiche"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={panel === "tasks"}
-                className={toggleBtn(panel === "tasks")}
-                onClick={() => setPanelNav("tasks")}
-              >
-                Aufgaben
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={panel === "messages"}
-                className={toggleBtn(panel === "messages")}
-                onClick={() => setPanelNav("messages")}
-              >
-                Nachrichten
-              </button>
+      <div className={`${clinicalWorkspaceFrame} yd-relay-v4-page yd-relay-ops-page py-3 md:py-4`}>
+        <header className="yd-relay-page-header yd-relay-ops-header">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="yd-relay-page-title">{isRelay ? "Relay" : "Meine Aufgaben"}</h1>
+              <p className="yd-relay-page-subtitle">
+                {isRelay
+                  ? "Was muss die Praxis jetzt tun?"
+                  : "Ihre Aufgaben — dieselbe Betriebsübersicht wie Relay."}
+              </p>
             </div>
-          ) : null}
-          {panel === "tasks" ? (
-            <div
-              className="inline-flex rounded-[10px] p-1 ring-1 ring-[rgba(43,111,232,0.1)]"
-              style={{ background: "rgba(43, 111, 232, 0.06)" }}
-              role="group"
-              aria-label="Aufgaben filtern"
-            >
-              <button type="button" className={toggleBtn(scope === "all")} onClick={() => setScopeNav("all")}>
-                Alle Aufgaben
-              </button>
-              <button type="button" className={toggleBtn(scope === "mine")} onClick={() => setScopeNav("mine")}>
-                Meine Aufgaben
-              </button>
+            <div className="yd-relay-header-actions">
+              {isRelay ? (
+                <div className="yd-relay-tab-strip" role="tablist" aria-label="Relay Bereiche">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={panel === "tasks"}
+                    className={toggleBtn(panel === "tasks")}
+                    onClick={() => setPanelNav("tasks")}
+                  >
+                    Betrieb
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={panel === "messages"}
+                    className={toggleBtn(panel === "messages")}
+                    onClick={() => setPanelNav("messages")}
+                  >
+                    Übergaben
+                  </button>
+                </div>
+              ) : null}
+              {panel === "tasks" ? (
+                <div className="yd-relay-tab-strip" role="group" aria-label="Aufgaben filtern">
+                  <button type="button" className={toggleBtn(scope === "all")} onClick={() => setScopeNav("all")}>
+                    Alle
+                  </button>
+                  <button type="button" className={toggleBtn(scope === "mine")} onClick={() => setScopeNav("mine")}>
+                    Meine
+                  </button>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
-      </div>
+          </div>
+        </header>
 
-      {isRelay && isDoctor && panel === "tasks" ? <RelayAssistHint /> : null}
-
-      {isRelay && panel === "messages" ? (
-        <RelayMessagesPanel
-          conversations={conversations}
-          assignableMembers={assignableMembers}
-          currentUserId={userId}
-        />
-      ) : null}
-
-      {panel === "tasks" ? (
-        <>
-      <div className="mb-6 flex flex-wrap gap-2 text-[11px] font-medium">
-        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          Offen: <strong className="tabular-nums text-[#0F172A]">{counts.open}</strong>
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          In Bearbeitung: <strong className="tabular-nums text-[#0F172A]">{counts.pending}</strong>
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-[rgba(43,111,232,0.14)] bg-white px-3 py-1.5 text-[#64748B] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          Erledigt: <strong className="tabular-nums text-[#0F172A]">{counts.done}</strong>
-        </span>
-        {scope === "mine" ? (
-          <span className="inline-flex items-center rounded-md border border-[rgba(43,111,232,0.22)] bg-[#EEF6FF] px-3 py-1.5 text-[#1E3A8A]">
-            Gefiltert: nur Einträge, an denen du beteiligt bist
-          </span>
+        {isRelay && panel === "messages" ? (
+          <RelaySectionBox title="" hideTitle noPadding bodyClassName="yd-relay-v4-messages-wrap">
+            <RelayMessagesPanel
+              conversations={conversations}
+              assignableMembers={assignableMembers}
+              currentUserId={userId}
+            />
+          </RelaySectionBox>
         ) : null}
-      </div>
 
-      <RelayQuickCreate
-        assignableMembers={assignableMembers}
-        currentUserId={userId}
-        currentUserEmail={userEmail}
-      />
+        {panel === "tasks" ? (
+          <div className="yd-relay-ops-stack">
+            <RelayOpsTodayBandView band={ops.today} />
 
-      <CardBoard
-        columns={filtered}
-        currentUserId={userId}
-        isDoctor={isDoctor}
-        avatarByUserId={avatarByUserId}
-        columnTitles={{
-          open: "Offen",
-          pending: "In Bearbeitung",
-          done: "Erledigt",
-        }}
-        columnSurfaceClass={{
-          open: "bg-white/[0.98]",
-          pending: "bg-[rgba(43,111,232,0.045)]",
-          done: "bg-[rgba(71,85,105,0.04)]",
-        }}
-      />
-        </>
-      ) : null}
+            <div className="yd-relay-ops-focus-grid">
+              <RelayOpsFocusPanel
+                title="Wartet auf Patient"
+                subtitle="Antwort, Foto oder Termin ausstehend"
+                items={ops.waitingPatient}
+                emptyTitle="Keine Patienten-Rückstände"
+                emptyText="Aktuell wartet kein Vorgang auf Patient:innen in dieser Ansicht."
+              />
+              <RelayOpsFocusPanel
+                title="Wartet auf Arzt"
+                subtitle="Freigaben und Entscheidungen"
+                items={ops.waitingDoctor}
+                emptyTitle="Keine Arzt-Freigaben offen"
+                emptyText="Alles liegt bei der Praxis — keine ausstehenden Freigaben."
+              />
+            </div>
+
+            <RelaySectionBox title="" hideTitle noPadding bodyClassName="yd-relay-quick-create-wrap">
+              <RelayQuickCreate
+                assignableMembers={assignableMembers}
+                currentUserId={userId}
+                currentUserEmail={userEmail}
+              />
+            </RelaySectionBox>
+
+            {!hasActiveWork ? (
+              <div className="yd-relay-empty-state yd-relay-empty-state--hero">
+                <p className="yd-relay-empty-state__title">Praxisbetrieb unter Kontrolle</p>
+                <p className="yd-relay-empty-state__text">
+                  Alle Aufgaben erledigt — heute keine offenen Vorgänge in dieser Ansicht.
+                </p>
+                <p className="yd-relay-empty-state__meta">
+                  Offen {counts.open} · Freigaben {counts.pending} · Erledigt (90 T.) {counts.done}
+                </p>
+              </div>
+            ) : null}
+
+            <div className="yd-relay-ops-main">
+              <RelaySectionBox
+                id="relay-work"
+                title="Arbeit"
+                subtitle={`${ops.work.filter((w) => !w.isDone).length} aktiv · ${ops.work.filter((w) => w.isDone).length} kürzlich erledigt`}
+                bodyClassName="yd-relay-v4-box__body--flush yd-relay-v4-box__body--scroll yd-relay-ops-work-scroll"
+              >
+                <RelayOpsWorkList items={ops.work} />
+              </RelaySectionBox>
+
+              <RelaySectionBox title="Arbeitslast" subtitle="Offene Zuweisungen im Team">
+                <RelayWorkloadPanel rows={ops.workload} />
+              </RelaySectionBox>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

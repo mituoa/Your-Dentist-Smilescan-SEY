@@ -17,21 +17,28 @@
 }
 
 .yd-relay-page-header {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .yd-relay-page-title {
   margin: 0;
-  font-size: 1.375rem;
+  font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: #0f172a;
 }
 
+@media (min-width: 768px) {
+  .yd-relay-page-title {
+    font-size: 1.375rem;
+  }
+}
+
 .yd-relay-page-subtitle {
-  margin: 0.35rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 0.8125rem;
   font-weight: 500;
+  line-height: 1.45;
   color: #64748b;
 }
 
@@ -531,4 +538,907 @@
 
 .yd-relay-compact-section--done {
   opacity: 0.92;
+}
+
+/* —— Relay V2 polish: tabs, density, task table, status, empty —— */
+
+.yd-relay-tab-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    box-shadow 140ms ease-out;
+}
+
+.yd-relay-tab-btn:hover {
+  color: #334155;
+  background: rgba(43, 111, 232, 0.05);
+}
+
+.yd-relay-tab-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(43, 111, 232, 0.28);
+}
+
+.yd-relay-tab-btn:active {
+  transform: scale(0.98);
+}
+
+.yd-relay-tab-btn--active {
+  color: #0f172a;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(43, 111, 232, 0.1);
+}
+
+.yd-relay-v4-kpi-zone .yd-dash-kpi-row {
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .yd-relay-v4-kpi-zone .yd-dash-kpi-row {
+    gap: 0.625rem;
+  }
+}
+
+.yd-relay-v4-kpi-zone .yd-dash-kpi-card {
+  padding: 0.75rem 0.875rem;
+  min-height: 0;
+}
+
+.yd-relay-v4-kpi-zone .yd-dash-kpi-card__body {
+  padding-top: 0.5rem;
+}
+
+.yd-relay-v4-kpi-zone .yd-dash-kpi {
+  font-size: 1.375rem;
+}
+
+.yd-relay-v4-kpi-zone .yd-dash-kpi-card__title {
+  font-size: 0.6875rem;
+}
+
+.yd-relay-v4-kpi-zone .yd-dash-kpi-card__icon {
+  width: 2rem;
+  height: 2rem;
+}
+
+.yd-relay-v4-assist-icon {
+  background: rgba(239, 246, 255, 0.95);
+  color: #1e3a8a;
+}
+
+.yd-relay-quick-create-wrap .yd-relay-v4-box__body {
+  padding: 0;
+}
+
+.yd-relay-quick-create {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0.75rem 1rem 0.875rem;
+  transition: background-color 140ms ease-out;
+}
+
+.yd-relay-quick-create--focused {
+  background: rgba(239, 246, 255, 0.35);
+}
+
+.yd-relay-quick-create__input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: #1e293b;
+}
+
+.yd-relay-quick-create__input::placeholder {
+  color: #94a3b8;
+}
+
+.yd-relay-quick-create__input:focus {
+  outline: none;
+}
+
+.yd-relay-quick-create__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+@media (min-width: 640px) {
+  .yd-relay-quick-create__options {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.yd-relay-quick-create__priority {
+  display: inline-flex;
+  height: 2.25rem;
+  shrink: 0;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 8px;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  background: #fff;
+  transition:
+    border-color 140ms ease-out,
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.yd-relay-quick-create__priority:hover {
+  border-color: rgba(43, 111, 232, 0.18);
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.yd-relay-quick-create__priority--on {
+  color: #1e3a8a;
+  border-color: rgba(43, 111, 232, 0.22);
+  background: rgba(239, 246, 255, 0.65);
+}
+
+.yd-relay-quick-create__priority-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+.yd-relay-quick-create__priority--on .yd-relay-quick-create__priority-dot {
+  background: #1e3a8a;
+}
+
+.yd-relay-v4-box__head {
+  padding: 0.75rem 1rem 0.5rem;
+}
+
+.yd-relay-v4-box__body {
+  padding: 0.625rem 1rem 0.75rem;
+}
+
+.yd-relay-v4-box__body--scroll {
+  max-height: min(58vh, 680px);
+}
+
+.yd-relay-today__summary {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-relay-today__summary--inline {
+  margin: 0 0 0.625rem;
+}
+
+.yd-relay-priority-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yd-relay-priority-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 10px;
+  border: 1px solid rgba(241, 245, 249, 0.95);
+  background: #fff;
+  text-decoration: none;
+  transition:
+    border-color 140ms ease-out,
+    background-color 140ms ease-out;
+}
+
+.yd-relay-priority-row:hover {
+  border-color: rgba(191, 219, 254, 0.55);
+  background: rgba(248, 250, 252, 0.85);
+}
+
+.yd-relay-priority-row:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(43, 111, 232, 0.24);
+}
+
+.yd-relay-priority-row__main {
+  min-width: 0;
+  flex: 1;
+}
+
+.yd-relay-priority-row__title {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-relay-priority-row__meta {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-relay-priority-row__status {
+  flex-shrink: 0;
+}
+
+.yd-relay-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.yd-relay-status__dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.yd-relay-status__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.yd-relay-status--new .yd-relay-status__dot {
+  background: #2563eb;
+}
+
+.yd-relay-status--new .yd-relay-status__label {
+  color: #1d4ed8;
+}
+
+.yd-relay-status--critical .yd-relay-status__dot {
+  background: #1e3a8a;
+}
+
+.yd-relay-status--critical .yd-relay-status__label {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.yd-relay-status--overdue .yd-relay-status__dot {
+  background: #475569;
+}
+
+.yd-relay-status--overdue .yd-relay-status__label {
+  color: #334155;
+  font-weight: 600;
+}
+
+.yd-relay-status--pending .yd-relay-status__dot {
+  background: #64748b;
+}
+
+.yd-relay-status--pending .yd-relay-status__label {
+  color: #475569;
+}
+
+.yd-relay-status--open .yd-relay-status__dot {
+  background: #e2e8f0;
+}
+
+.yd-relay-status--done .yd-relay-status__dot {
+  background: #cbd5e1;
+}
+
+.yd-relay-status--done .yd-relay-status__label {
+  color: #94a3b8;
+}
+
+.yd-relay-task-table__head {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .yd-relay-task-table__head {
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) 6.5rem 5.5rem 4.5rem minmax(0, 1fr) 4rem;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem 0.25rem;
+    border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+}
+
+.yd-relay-v4-task-list {
+  gap: 0;
+}
+
+.yd-relay-task-table__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.15rem 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  background: transparent;
+  text-decoration: none;
+  transition: background-color 140ms ease-out;
+}
+
+@media (min-width: 900px) {
+  .yd-relay-task-table__row {
+    grid-template-columns: minmax(0, 2.2fr) 6.5rem 5.5rem 4.5rem minmax(0, 1fr) 4rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+  }
+}
+
+.yd-relay-task-table__row:hover {
+  background: rgba(248, 250, 252, 0.92);
+  border-color: rgba(241, 245, 249, 0.95);
+  box-shadow: none;
+}
+
+.yd-relay-task-table__row:focus-visible {
+  outline: none;
+  background: rgba(239, 246, 255, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(43, 111, 232, 0.18);
+}
+
+.yd-relay-task-table--dense .yd-relay-task-table__row {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.yd-relay-task-table__title {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+
+.yd-relay-task-table__title--emphasis {
+  color: #1e3a8a;
+}
+
+.yd-relay-task-table__title--overdue {
+  color: #334155;
+}
+
+.yd-relay-task-table__col {
+  min-width: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+@media (max-width: 899px) {
+  .yd-relay-task-table__col--status,
+  .yd-relay-task-table__col--assignee,
+  .yd-relay-task-table__col--due,
+  .yd-relay-task-table__col--patient,
+  .yd-relay-task-table__col--source {
+    display: inline;
+  }
+
+  .yd-relay-task-table__col--title {
+    grid-column: 1 / -1;
+  }
+
+  .yd-relay-task-table__col--status {
+    margin-right: 0.35rem;
+  }
+
+  .yd-relay-task-table__col--assignee::before {
+    content: "· ";
+    color: #cbd5e1;
+  }
+
+  .yd-relay-task-table__col--due::before {
+    content: "· ";
+    color: #cbd5e1;
+  }
+
+  .yd-relay-task-table__col--patient::before {
+    content: "· ";
+    color: #cbd5e1;
+  }
+
+  .yd-relay-task-table__col--source {
+    display: none;
+  }
+
+  .yd-relay-task-table__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15rem 0.25rem;
+  }
+}
+
+.yd-relay-task-table__due--overdue {
+  color: #334155;
+  font-weight: 600;
+}
+
+.yd-relay-v4-task-row--done .yd-relay-task-table__title {
+  color: #64748b;
+  font-weight: 550;
+}
+
+.yd-relay-empty-state {
+  padding: 1rem 0.875rem;
+  border-radius: 10px;
+  border: 1px dashed rgba(203, 213, 225, 0.85);
+  background: rgba(248, 250, 252, 0.65);
+}
+
+.yd-relay-empty-state--compact {
+  padding: 0.75rem 0.875rem;
+}
+
+.yd-relay-empty-state--hero {
+  padding: 1.125rem 1rem;
+  border-style: solid;
+  border-color: rgba(226, 232, 240, 0.95);
+  background: linear-gradient(165deg, #ffffff 0%, #f8fbfe 100%);
+}
+
+.yd-relay-empty-state__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.yd-relay-empty-state__text {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.yd-relay-empty-state__meta {
+  margin: 0.5rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+}
+
+@media (max-width: 1023px) {
+  .yd-relay-v4-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .yd-relay-v4-main-col #relay-today {
+    order: -1;
+  }
+}
+
+/* —— Relay Ops Center (V2) —— */
+
+.yd-relay-ops-page {
+  gap: 0.625rem;
+}
+
+.yd-relay-ops-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.yd-relay-ops-header {
+  margin-bottom: 0.25rem;
+}
+
+.yd-relay-ops-today {
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #fff;
+  padding: 0.5rem 0.625rem;
+}
+
+.yd-relay-ops-today__clear {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-relay-ops-today__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .yd-relay-ops-today__grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.yd-relay-ops-today__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0.25rem 0.15rem;
+}
+
+.yd-relay-ops-today__value {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: #334155;
+  line-height: 1.1;
+}
+
+.yd-relay-ops-today__value[data-tone="emphasis"] {
+  color: #1e3a8a;
+}
+
+.yd-relay-ops-today__value[data-tone="muted"] {
+  color: #94a3b8;
+}
+
+.yd-relay-ops-today__label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+  line-height: 1.25;
+}
+
+.yd-relay-ops-focus-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 900px) {
+  .yd-relay-ops-focus-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yd-relay-ops-focus {
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #fff;
+  padding: 0.625rem 0.75rem;
+  min-width: 0;
+}
+
+.yd-relay-ops-focus__head {
+  margin-bottom: 0.5rem;
+}
+
+.yd-relay-ops-focus__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.yd-relay-ops-focus__subtitle {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.yd-relay-ops-focus__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.yd-relay-ops-focus__row {
+  display: block;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 140ms ease-out;
+}
+
+.yd-relay-ops-focus__row:hover {
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.yd-relay-ops-focus__row-title {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-relay-ops-focus__row-meta {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-relay-ops-main {
+  display: grid;
+  gap: 0.625rem;
+}
+
+@media (min-width: 1100px) {
+  .yd-relay-ops-main {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
+    align-items: start;
+  }
+}
+
+.yd-relay-ops-work-scroll {
+  max-height: min(62vh, 720px);
+}
+
+.yd-relay-ops-work__head {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .yd-relay-ops-work__head {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 2fr) minmax(0, 1fr) 5.5rem 3.5rem 4.5rem;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem 0.25rem;
+    border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+}
+
+.yd-relay-ops-work__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.yd-relay-ops-work__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.2rem;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  text-decoration: none;
+  transition: background-color 140ms ease-out;
+}
+
+@media (min-width: 960px) {
+  .yd-relay-ops-work__row {
+    grid-template-columns: 7.5rem minmax(0, 2fr) minmax(0, 1fr) 5.5rem 3.5rem 4.5rem;
+    align-items: start;
+    gap: 0.5rem;
+  }
+}
+
+.yd-relay-ops-work__row:hover {
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.yd-relay-ops-work__row--done {
+  opacity: 0.88;
+}
+
+.yd-relay-ops-work__title {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.yd-relay-ops-work__desc,
+.yd-relay-ops-work__rec,
+.yd-relay-ops-work__ref,
+.yd-relay-ops-work__done-line {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.yd-relay-ops-work__rec {
+  color: #475569;
+}
+
+.yd-relay-ops-work__col {
+  min-width: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+@media (max-width: 959px) {
+  .yd-relay-ops-work__col--status {
+    grid-column: 1 / -1;
+  }
+
+  .yd-relay-ops-work__col--task {
+    grid-column: 1 / -1;
+  }
+
+  .yd-relay-ops-work__col--patient,
+  .yd-relay-ops-work__col--assignee,
+  .yd-relay-ops-work__col--due,
+  .yd-relay-ops-work__col--activity {
+    display: inline;
+  }
+
+  .yd-relay-ops-work__col--patient::before,
+  .yd-relay-ops-work__col--assignee::before,
+  .yd-relay-ops-work__col--due::before {
+    content: " · ";
+    color: #cbd5e1;
+  }
+}
+
+.yd-relay-ops-work__due--overdue {
+  color: #334155;
+  font-weight: 600;
+}
+
+.yd-relay-ops-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.yd-relay-ops-status__dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.yd-relay-ops-status__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.yd-relay-ops-status--badge.yd-relay-ops-status--md .yd-relay-ops-status__label {
+  font-size: 0.75rem;
+}
+
+.yd-relay-ops-status--new .yd-relay-ops-status__dot {
+  background: #2563eb;
+}
+
+.yd-relay-ops-status--progress .yd-relay-ops-status__dot {
+  background: #94a3b8;
+}
+
+.yd-relay-ops-status--patient .yd-relay-ops-status__dot {
+  background: #64748b;
+}
+
+.yd-relay-ops-status--practice .yd-relay-ops-status__dot {
+  background: #475569;
+}
+
+.yd-relay-ops-status--overdue .yd-relay-ops-status__dot {
+  background: #334155;
+}
+
+.yd-relay-ops-status--done .yd-relay-ops-status__dot {
+  background: #cbd5e1;
+}
+
+.yd-relay-ops-status--critical .yd-relay-ops-status__label {
+  color: #1e3a8a;
+}
+
+.yd-relay-workload {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.yd-relay-workload__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  font-size: 0.8125rem;
+}
+
+.yd-relay-workload__row:last-child {
+  border-bottom: none;
+}
+
+.yd-relay-workload__name {
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-relay-workload__dots {
+  color: #cbd5e1;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  overflow: hidden;
+  max-width: 4rem;
+}
+
+.yd-relay-workload__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.yd-relay-ops-provenance dt {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.yd-relay-ops-provenance dd {
+  margin: 0.1rem 0 0;
 }

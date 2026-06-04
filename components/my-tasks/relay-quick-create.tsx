@@ -86,11 +86,8 @@ export function RelayQuickCreate({
       ref={wrapRef}
       id="relay-quick-create"
       className={cn(
-        "yd-clinical-control",
-        "mb-8 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow",
-        focused
-          ? "border-[#2B6FE8] shadow-[0_0_0_3px_rgba(43,111,232,0.08),0_4px_24px_-12px_rgba(43,111,232,0.1)]"
-          : "hover:border-[rgba(43,111,232,0.12)]"
+        "yd-clinical-control yd-relay-quick-create",
+        focused && "yd-relay-quick-create--focused"
       )}
     >
       <input
@@ -109,11 +106,11 @@ export function RelayQuickCreate({
         }}
         disabled={isPending}
         placeholder="Was steht als Nächstes an?"
-        className="w-full border-0 bg-transparent p-0 text-[15px] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:ring-0"
+        className="yd-relay-quick-create__input"
       />
 
       {showOptions ? (
-        <div className="mt-4 flex flex-col gap-3 border-t border-[rgba(15,23,42,0.06)] pt-4 sm:flex-row sm:items-stretch">
+        <div className="yd-relay-quick-create__options">
           <div className="relative min-w-0 flex-1">
             <button
               type="button"
@@ -226,17 +223,12 @@ export function RelayQuickCreate({
             type="button"
             onClick={() => setImportant((v) => !v)}
             className={cn(
-              "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 transition-colors sm:self-start",
-              important ? "bg-[rgba(220,38,38,0.06)]" : "hover:border-[rgba(43,111,232,0.12)] hover:bg-[#F4F7FB]"
+              "yd-relay-quick-create__priority",
+              important && "yd-relay-quick-create__priority--on"
             )}
           >
-            <span
-              className="h-1.5 w-1.5 shrink-0 rounded-full"
-              style={{ background: important ? "#DC2626" : "#CBD5E1" }}
-            />
-            <span className={cn("text-[13px]", important ? "font-medium text-[#DC2626]" : "text-[#64748B]")}>
-              Als wichtig markieren
-            </span>
+            <span className="yd-relay-quick-create__priority-dot" aria-hidden />
+            <span>Wichtig</span>
           </button>
         </div>
       ) : null}

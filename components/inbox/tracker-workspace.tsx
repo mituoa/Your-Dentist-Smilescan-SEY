@@ -140,7 +140,7 @@ export function TrackerWorkspace({
     editableMessageDraft?.body?.trim() || historyMessageDraft?.body?.trim() || null;
 
   return (
-    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v12-workspace yd-tracker-v14-workspace">
+    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v12-workspace yd-tracker-v14-workspace yd-tracker-v15-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
         birthDate={submission.patient_birth_date}
