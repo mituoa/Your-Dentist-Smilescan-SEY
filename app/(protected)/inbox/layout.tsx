@@ -5,7 +5,6 @@ import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { InboxTrackerShell } from "@/components/inbox/inbox-tracker-shell";
 import { TrackerEmptyState } from "@/components/inbox/tracker-empty-state";
 import { TrackerInboxPanel } from "@/components/inbox/tracker-inbox-panel";
-import { WorkspaceMobileShortcutsBar } from "@/components/workspace/workspace-mobile-shortcuts-bar";
 
 interface InboxLayoutProps {
   children: React.ReactNode;
@@ -43,7 +42,6 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
 
   return (
     <div className="yd-tracker-page yd-tracker-page--clinical yd-inbox-workspace relative flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-      <WorkspaceMobileShortcutsBar />
       <InboxTrackerShell list={list} detail={children} />
     </div>
   );

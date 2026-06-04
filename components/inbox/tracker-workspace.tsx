@@ -1,8 +1,4 @@
 import { TrackerFallakte } from "@/components/inbox/tracker-fallakte";
-import {
-  TrackerDesktopCaseLayout,
-  TrackerMobileCaseShell,
-} from "@/components/inbox/tracker-mobile-case-shell";
 import { TrackerPraxisAssistent } from "@/components/inbox/tracker-praxis-assistent";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
@@ -53,7 +49,6 @@ type TrackerWorkspaceProps = {
   canSendAppointmentLink: boolean;
   openTaskCount?: number;
   photoDocumentation?: EnrichedSubmissionListItem["photo_documentation"];
-  mobileBackHref?: string;
 };
 
 function hasMultiDayPhotos(photos: { created_at: string }[]): boolean {
@@ -74,7 +69,6 @@ export function TrackerWorkspace({
   canSendAppointmentLink,
   openTaskCount = 0,
   photoDocumentation = null,
-  mobileBackHref = "/inbox",
 }: TrackerWorkspaceProps) {
   const patientLabel = submission.patient_name?.trim() || "Unbekannter Patient";
 
@@ -131,55 +125,42 @@ export function TrackerWorkspace({
 
   const productStatus: YdCaseProductStatus = decision.productStatus;
 
-  const fallakte = (
-    <TrackerFallakte
-      submissionId={submission.id}
-      patientName={patientLabel}
-      productStatus={productStatus}
-      concernLine={concernLine || null}
-      photos={submission.photos}
-      showPhotoTrailHint={photoTrail}
-      timeline={timeline}
-      status={status}
-      birthDate={submission.patient_birth_date}
-      createdAt={submission.created_at}
-      urgency={submission.urgency}
-      intakeChannel={submission.intake_channel}
-      isDraft={submission.is_draft}
-      patientEmail={submission.patient_email}
-      patientPhone={submission.patient_phone}
-      hidePatientHeaderOnMobile
-    />
-  );
-
-  const assistentPanel = (
-    <TrackerPraxisAssistent
-      model={assistent}
-      submissionId={submission.id}
-      patientName={submission.patient_name}
-      urgency={submission.urgency}
-      practicePhone={practicePhone}
-      appointmentUrl={appointmentUrl}
-      isDoctor={isDoctor}
-      draftsAvailable={messageDraftsAvailable}
-      editableMessageDraft={editableMessageDraft}
-      historyMessageDraft={historyMessageDraft}
-      canSendAppointmentLink={canSendAppointmentLink}
-      hasPatientEmail={Boolean(submission.patient_email?.trim())}
-    />
-  );
-
   return (
-    <>
-      <TrackerMobileCaseShell
-        fallakte={fallakte}
-        assistent={assistentPanel}
-        actions={assistent.actions}
-        statusLabel={productStatus.shortLabel}
-        patientName={patientLabel}
-        backHref={mobileBackHref}
+    <div className="yd-tracker-triage">
+      <div className="yd-tracker-triage__fallakte">
+        <TrackerFallakte
+          submissionId={submission.id}
+          patientName={patientLabel}
+          productStatus={productStatus}
+          concernLine={concernLine || null}
+          photos={submission.photos}
+          showPhotoTrailHint={photoTrail}
+          timeline={timeline}
+          status={status}
+          birthDate={submission.patient_birth_date}
+          createdAt={submission.created_at}
+          urgency={submission.urgency}
+          intakeChannel={submission.intake_channel}
+          isDraft={submission.is_draft}
+          patientEmail={submission.patient_email}
+          patientPhone={submission.patient_phone}
+        />
+      </div>
+
+      <TrackerPraxisAssistent
+        model={assistent}
+        submissionId={submission.id}
+        patientName={submission.patient_name}
+        urgency={submission.urgency}
+        practicePhone={practicePhone}
+        appointmentUrl={appointmentUrl}
+        isDoctor={isDoctor}
+        draftsAvailable={messageDraftsAvailable}
+        editableMessageDraft={editableMessageDraft}
+        historyMessageDraft={historyMessageDraft}
+        canSendAppointmentLink={canSendAppointmentLink}
+        hasPatientEmail={Boolean(submission.patient_email?.trim())}
       />
-      <TrackerDesktopCaseLayout fallakte={fallakte} assistent={assistentPanel} />
-    </>
+    </div>
   );
 }

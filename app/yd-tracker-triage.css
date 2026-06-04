@@ -884,7 +884,33 @@
   color: #94a3b8;
 }
 
-/* Mobile Fall-Shell: s. yd-workspace-mobile.css (.yd-tracker-mobile-case) */
+/* Mobile: Fallakte und Assistent untereinander, ein Scroll */
+
+@media (max-width: 899px) {
+  .yd-tracker-triage {
+    flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .yd-tracker-triage__fallakte {
+    flex: none;
+    overflow: visible;
+    padding-bottom: 1.25rem;
+  }
+
+  .yd-tracker-assistent {
+    flex: none;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .yd-tracker-fallakte .yd-tracker-v4-photo-stage--dominant .yd-tracker-v4-photo-stage__viewer {
+    min-height: min(42vh, 360px);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .yd-triage-inbox-row,

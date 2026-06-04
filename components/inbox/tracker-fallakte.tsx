@@ -5,7 +5,6 @@ import type { TrackerTimelineEvent } from "@/lib/inbox/build-tracker-workspace";
 import type { TrackerStatusDisplay } from "@/lib/inbox/tracker-inbox-logic";
 import type { YdCaseProductStatus } from "@/lib/inbox/tracker-product-status";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
-import { cn } from "@/lib/utils";
 
 type TrackerFallakteProps = {
   submissionId: string;
@@ -28,8 +27,6 @@ type TrackerFallakteProps = {
   isDraft?: boolean;
   patientEmail?: string | null;
   patientPhone?: string | null;
-  /** Mobil: Kopfzeile kommt aus TrackerMobileCaseShell. */
-  hidePatientHeaderOnMobile?: boolean;
 };
 
 export function TrackerFallakte({
@@ -48,16 +45,10 @@ export function TrackerFallakte({
   isDraft,
   patientEmail,
   patientPhone,
-  hidePatientHeaderOnMobile = false,
 }: TrackerFallakteProps) {
   return (
     <div className="yd-tracker-fallakte">
-      <header
-        className={cn(
-          "yd-tracker-fallakte__head",
-          hidePatientHeaderOnMobile && "max-md:sr-only max-md:h-0 max-md:overflow-hidden max-md:p-0"
-        )}
-      >
+      <header className="yd-tracker-fallakte__head">
         <h2 className="yd-tracker-fallakte__patient">{patientName}</h2>
         <p className="yd-tracker-fallakte__status">{productStatus.fallakteLabel}</p>
         {concernLine ? (

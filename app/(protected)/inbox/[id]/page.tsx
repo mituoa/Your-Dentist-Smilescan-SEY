@@ -6,7 +6,6 @@ import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
 import { TrackerWorkspace } from "@/components/inbox/tracker-workspace";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
 import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
-import { inboxSearchQueryFromParam } from "@/lib/inbox-search-q";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
   trackerStatusForRow,
@@ -19,7 +18,6 @@ import { markSubmissionSeen } from "./actions";
 
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 function messageDraftStatusFromDetail(
@@ -35,9 +33,8 @@ function messageDraftStatusFromDetail(
   return "none";
 }
 
-export default async function InboxDetailPage({ params, searchParams }: InboxDetailPageProps) {
+export default async function InboxDetailPage({ params }: InboxDetailPageProps) {
   const { id } = await params;
-  const sp = await searchParams;
   const workspace = await getCurrentWorkspace();
 
   if (!workspace) {
@@ -107,11 +104,6 @@ export default async function InboxDetailPage({ params, searchParams }: InboxDet
 
   const status = trackerStatusForRow(statusRow);
 
-  const qEffective = inboxSearchQueryFromParam(sp.q);
-  const mobileBackHref = qEffective
-    ? `/inbox?q=${encodeURIComponent(qEffective)}`
-    : "/inbox";
-
   return (
     <>
       <InboxAssistHydration
@@ -125,7 +117,7 @@ export default async function InboxDetailPage({ params, searchParams }: InboxDet
       <CaseCreatedToast />
 
       <div className="yd-tracker-triage-detail flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="yd-tracker-v4-detail__bar hidden shrink-0 px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] md:block md:px-5 md:pt-3">
+        <div className="yd-tracker-v4-detail__bar shrink-0 px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:z-[6] md:px-5 md:pt-3">
           <Suspense fallback={null}>
             <InboxMobileBack />
           </Suspense>
@@ -170,7 +162,6 @@ export default async function InboxDetailPage({ params, searchParams }: InboxDet
             canSendAppointmentLink={isDoctor}
             openTaskCount={statusRow.open_task_count}
             photoDocumentation={statusRow.photo_documentation}
-            mobileBackHref={mobileBackHref}
           />
         </div>
       </div>

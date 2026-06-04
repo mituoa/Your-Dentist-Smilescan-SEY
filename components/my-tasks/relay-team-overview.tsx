@@ -1,41 +1,44 @@
 "use client";
 
-import type { RelayTeamDetailRow } from "@/lib/relay/build-relay-snapshot";
+import type { RelayTeamRow } from "@/lib/relay/build-relay-snapshot";
 import { YD } from "@/lib/design/yd-design-tokens";
 
 type RelayTeamOverviewProps = {
-  rows: RelayTeamDetailRow[];
+  rows: RelayTeamRow[];
 };
 
 export function RelayTeamOverview({ rows }: RelayTeamOverviewProps) {
-  if (rows.length === 0) {
-    return (
-      <p className="text-[13px] font-medium" style={{ color: YD.text.muted }}>
-        Keine offenen Zuweisungen.
-      </p>
-    );
-  }
-
   return (
-    <ul className="yd-relay-v4-team-list">
-      {rows.map((row) => (
-        <li key={row.key} className="yd-relay-v4-team-list__item">
-          <p className="text-[14px] font-semibold tracking-[-0.01em]" style={{ color: YD.text.primary }}>
-            {row.label}
-          </p>
-          {row.hint ? (
-            <p className="text-[11px] font-medium" style={{ color: YD.text.muted }}>
-              {row.hint}
-            </p>
-          ) : null}
-          <p className="mt-1 text-[12px] font-medium leading-snug" style={{ color: YD.text.secondary }}>
-            {row.count === 1 ? "1 Aufgabe" : `${row.count} Aufgaben`}
-            {" · "}
-            {row.readSummary}
-            {row.overdueCount > 0 ? ` · ${row.overdueCount} überfällig` : ""}
-          </p>
-        </li>
-      ))}
-    </ul>
+    <section className="yd-relay-side-card" aria-labelledby="yd-relay-team-title">
+      <h2 id="yd-relay-team-title" className="yd-relay-section-title">
+        Teamübersicht
+      </h2>
+      {rows.length === 0 ? (
+        <p className="mt-3 text-[13px]" style={{ color: YD.text.muted }}>
+          Keine offenen Zuweisungen.
+        </p>
+      ) : (
+        <ul className="mt-3 space-y-2">
+          {rows.map((row) => (
+            <li
+              key={row.key}
+              className="flex items-center justify-between gap-3 border-b border-[rgba(226,232,240,0.7)] py-2 last:border-0"
+            >
+              <span className="min-w-0">
+                <span className="block text-[14px] font-medium text-[#0F172A]">{row.label}</span>
+                {row.hint ? (
+                  <span className="block text-[12px] font-medium" style={{ color: YD.text.muted }}>
+                    {row.hint}
+                  </span>
+                ) : null}
+              </span>
+              <span className="shrink-0 tabular-nums text-[13px] font-semibold" style={{ color: YD.text.secondary }}>
+                {row.count}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
