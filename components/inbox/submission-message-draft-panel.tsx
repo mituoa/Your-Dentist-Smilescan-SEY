@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation";
 import { Check, Copy } from "lucide-react";
 
 import {
-  approveMessageDraftForSubmission,
-  markMessageDraftSentForSubmission,
   prepareMessageDraftForSubmission,
   saveMessageDraftBody,
 } from "@/app/(protected)/inbox/[id]/message-draft-actions";
+import { sendTrackerPatientMessage } from "@/app/(protected)/inbox/[id]/patient-message-actions";
 import {
   buildFollowUpDraft,
   buildRuckfrageDraftForSnippet,
@@ -24,6 +23,7 @@ import { cn } from "@/lib/utils";
 type SubmissionMessageDraftPanelProps = {
   submissionId: string;
   patientName: string | null;
+  patientEmail: string | null;
   urgency: string | null;
   practicePhone: string | null;
   appointmentUrl: string | null;
@@ -31,6 +31,7 @@ type SubmissionMessageDraftPanelProps = {
   draftsAvailable: boolean;
   initialEditableDraft: MessageDraftRow | null;
   initialHistoryDraft: MessageDraftRow | null;
+  trackerBackboneAvailable?: boolean;
 };
 
 function toUrgencyKey(urgency: string | null): UrgencyKey {
@@ -41,8 +42,8 @@ function toUrgencyKey(urgency: string | null): UrgencyKey {
 }
 
 function historyStatusLabel(status: MessageDraftRow["status"]): string {
-  if (status === "approved") return "Antwort freigegeben";
-  if (status === "sent") return "Als versendet markiert";
+  if (status === "approved") return "Antwort freigegeben (noch nicht versendet)";
+  if (status === "sent") return "Antwort per E-Mail gesendet";
   return "Verlauf";
 }
 
@@ -66,6 +67,7 @@ function draftPreviewTwoLines(body: string): string {
 export function SubmissionMessageDraftPanel({
   submissionId,
   patientName,
+  patientEmail,
   urgency,
   practicePhone,
   appointmentUrl,
@@ -73,6 +75,7 @@ export function SubmissionMessageDraftPanel({
   draftsAvailable,
   initialEditableDraft,
   initialHistoryDraft,
+  trackerBackboneAvailable = true,
 }: SubmissionMessageDraftPanelProps) {
   const urgencyKey = toUrgencyKey(urgency);
   const params = useMemo(
@@ -203,30 +206,39 @@ export function SubmissionMessageDraftPanel({
           {historyDraft.body}
         </div>
         <p className="text-[12px] leading-relaxed text-slate-500">
-          Freigabe durch die Praxis. Kein automatischer Versand an Patient:innen.
+          {historyDraft.status === "sent"
+            ? "Die Antwort wurde per E-Mail an den Patienten gesendet."
+            : "Freigabe durch die Praxis — Versand nur nach ausdrücklichem Senden."}
         </p>
         {isDoctor && historyDraft.status === "approved" ? (
           <button
             type="button"
-            disabled={isPending}
+            disabled={isPending || !patientEmail?.trim() || !trackerBackboneAvailable}
             onClick={() => {
               setErrorMessage(null);
               startTransition(async () => {
-                const res = await markMessageDraftSentForSubmission({
-                  draftId: historyDraft.id,
+                const res = await sendTrackerPatientMessage({
                   submissionId,
+                  body: historyDraft.body,
+                  messageKind: "reply",
+                  draftId: historyDraft.id,
                 });
                 if (!res.ok) setErrorMessage(res.error);
                 else {
-                  setStatusMessage("Als versendet markiert");
+                  setStatusMessage(res.message ?? "Antwort wurde per E-Mail gesendet.");
                   refreshAfterMutation();
                 }
               });
             }}
             className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] border border-[#E5E7EB] bg-white px-4 text-[14px] font-medium text-[#0F172A] transition disabled:opacity-60"
           >
-            {isPending ? "Wird gespeichert …" : "Als gesendet markieren"}
+            {isPending ? "Wird gesendet …" : "Freigeben und senden"}
           </button>
+        ) : null}
+        {isDoctor && historyDraft.status === "approved" && !patientEmail?.trim() ? (
+          <p className="text-[12px] leading-relaxed text-amber-800" role="status">
+            Für diesen Patienten ist keine E-Mail-Adresse hinterlegt.
+          </p>
         ) : null}
         {!editableDraft ? (
           <PrepareDraftButton
@@ -261,8 +273,7 @@ export function SubmissionMessageDraftPanel({
         />
         <StatusBanners statusMessage={statusMessage} errorMessage={errorMessage} />
         <p className="text-[12px] leading-relaxed text-slate-500">
-          Die Plattform bereitet einen Entwurf vor — Sie prüfen und geben frei. Kein automatischer
-          Versand.
+          Die Plattform bereitet einen Entwurf vor — Versand erfolgt erst nach Prüfung und Senden.
         </p>
       </div>
     );
@@ -322,12 +333,14 @@ export function SubmissionMessageDraftPanel({
             color: "#0F172A",
             fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
           }}
-          aria-label="Antwortentwurf — wird nicht automatisch versendet"
+          aria-label="Antwortentwurf"
           data-tracker-draft
         />
       </div>
       <p className="text-[12px] leading-relaxed text-slate-500">
-        Freigabe durch die Praxis erforderlich. Kein automatischer Versand.
+        {patientEmail?.trim()
+          ? "Versand an den Patienten nur nach ausdrücklichem Senden durch Zahnärzt:innen."
+          : "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt — nur Entwurf speicherbar."}
       </p>
 
       <div>
@@ -407,7 +420,7 @@ export function SubmissionMessageDraftPanel({
         {isDoctor ? (
           <button
             type="button"
-            disabled={isPending}
+            disabled={isPending || !patientEmail?.trim() || !trackerBackboneAvailable}
             onClick={() => {
               setErrorMessage(null);
               startTransition(async () => {
@@ -420,20 +433,22 @@ export function SubmissionMessageDraftPanel({
                   setErrorMessage(saveRes.error);
                   return;
                 }
-                const res = await approveMessageDraftForSubmission({
-                  draftId: editableDraft.id,
+                const res = await sendTrackerPatientMessage({
                   submissionId,
+                  body,
+                  messageKind: "reply",
+                  draftId: editableDraft.id,
                 });
                 if (!res.ok) setErrorMessage(res.error);
                 else {
-                  setStatusMessage("Antwort freigegeben");
+                  setStatusMessage(res.message ?? "Antwort wurde per E-Mail gesendet.");
                   refreshAfterMutation();
                 }
               });
             }}
             className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] border border-[#CBD5E1] bg-white px-4 text-[14px] font-medium text-[#1A4F9C] transition disabled:opacity-60"
           >
-            {isPending ? "Freigabe wird gespeichert …" : "Freigeben"}
+            {isPending ? "Wird gesendet …" : "Freigeben und senden"}
           </button>
         ) : (
           <p className="text-[12px] leading-relaxed text-slate-500" role="note">

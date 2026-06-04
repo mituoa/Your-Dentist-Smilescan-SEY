@@ -4,8 +4,9 @@ import { TrackerPatientHeader } from "@/components/inbox/tracker-patient-header"
 import { TrackerPhotoStage } from "@/components/inbox/tracker-photo-stage";
 import { TrackerPraxisAssistent } from "@/components/inbox/tracker-praxis-assistent";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
-import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+import { deriveSubmissionConcernDisplay } from "@/lib/inbox/derive-submission-issue-short-line";
 import { buildTrackerCaseTimeline } from "@/lib/inbox/build-tracker-workspace";
+import type { OutboundMessageRow } from "@/lib/outbound-messages/types";
 import {
   isApprovalPending,
   type EnrichedSubmissionListItem,
@@ -48,6 +49,9 @@ type TrackerWorkspaceProps = {
   canSendAppointmentLink: boolean;
   openTaskCount?: number;
   assignableMembers: AssignableMember[];
+  outboundMessages?: OutboundMessageRow[];
+  trackerBackboneAvailable?: boolean;
+  hasOutboundReplySent?: boolean;
 };
 
 function hasMultiDayPhotos(photos: { created_at: string }[]): boolean {
@@ -67,12 +71,15 @@ export function TrackerWorkspace({
   appointmentUrl,
   canSendAppointmentLink,
   openTaskCount = 0,
+  outboundMessages = [],
+  trackerBackboneAvailable = true,
+  hasOutboundReplySent = false,
 }: TrackerWorkspaceProps) {
   const patientLabel = submission.patient_name?.trim() || "Unbekannter Patient";
-  const concern = deriveSubmissionIssueShortLine(
+  const concern = deriveSubmissionConcernDisplay(
     submission.patient_notes,
     submission.patient_name,
-    { maxLen: 120, emptyLabel: "" }
+    ""
   );
   const note = submission.patient_notes?.trim();
   const statusRow: EnrichedSubmissionListItem = {
@@ -91,6 +98,9 @@ export function TrackerWorkspace({
     intake_channel: submission.intake_channel,
     open_task_count: openTaskCount,
     photo_documentation: null,
+    practice_status: null,
+    photo_request_requested_at: null,
+    follow_up_series_id: null,
   };
 
   const photoTrail =
@@ -103,6 +113,13 @@ export function TrackerWorkspace({
     patientNotes: submission.patient_notes,
     messageDraftStatus,
     isApprovalPending: approvalPending,
+    outboundSent: outboundMessages
+      .filter((m) => m.status === "sent")
+      .map((m) => ({
+        id: m.id,
+        message_kind: m.message_kind,
+        sent_at: m.sent_at,
+      })),
   });
 
   const draftBody =
@@ -123,7 +140,7 @@ export function TrackerWorkspace({
     editableMessageDraft?.body?.trim() || historyMessageDraft?.body?.trim() || null;
 
   return (
-    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v12-workspace">
+    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v12-workspace yd-tracker-v14-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
         birthDate={submission.patient_birth_date}
@@ -150,6 +167,8 @@ export function TrackerWorkspace({
 
         <TrackerPraxisAssistent
           submissionId={submission.id}
+          trackerBackboneAvailable={trackerBackboneAvailable}
+          hasOutboundReplySent={hasOutboundReplySent}
           isDoctor={isDoctor}
           openTaskCount={openTaskCount}
           photoCount={submission.photos.length}
@@ -180,8 +199,10 @@ export function TrackerWorkspace({
             >
               <h2 className="yd-tracker-v6-section-label">Kommunikation</h2>
               <TrackerDraftWorkspace
+                trackerBackboneAvailable={trackerBackboneAvailable}
                 submissionId={submission.id}
                 patientName={submission.patient_name}
+                patientEmail={submission.patient_email}
                 urgency={submission.urgency}
                 practicePhone={practicePhone}
                 appointmentUrl={appointmentUrl}

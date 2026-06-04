@@ -36,7 +36,7 @@ export function TerminlinkSection({ initial }: TerminlinkSectionProps) {
       <SectionHeader
         number="I"
         title="Terminlink"
-        description="Ihre Kalender-URL. Wird an Patienten gesendet, wenn Sie im Inbox-Detail den Terminlink-Button klicken."
+        description="Ihre Kalender-URL. Wird bei „Termin anbieten“ im Tracker an die Patienten-E-Mail angehängt."
       />
 
       <div className="space-y-2 max-w-xl">

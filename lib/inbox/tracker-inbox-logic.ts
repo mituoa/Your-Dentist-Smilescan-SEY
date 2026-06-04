@@ -6,7 +6,12 @@ import {
 import { isSubmissionReadyForReview } from "@/lib/message-drafts/list-status";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
+import { normalizePracticeStatus, practiceStatusLabel } from "@/lib/practice-status";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
+import {
+  EMPTY_OUTBOUND_SENT,
+  type OutboundSentFlags,
+} from "@/lib/outbound-messages/types";
 
 export type PhotoDocumentationHint = {
   kind: "single" | "timeline" | "linked";
@@ -20,7 +25,14 @@ export type PhotoDocumentationHint = {
 export type EnrichedSubmissionListItem = SubmissionListItem & {
   open_task_count: number;
   photo_documentation: PhotoDocumentationHint | null;
+  outbound_sent?: OutboundSentFlags;
 };
+
+export function outboundSentForItem(
+  item: EnrichedSubmissionListItem
+): OutboundSentFlags {
+  return item.outbound_sent ?? EMPTY_OUTBOUND_SENT;
+}
 
 export type TrackerInboxFilter =
   | "all"
@@ -320,11 +332,18 @@ function verlaufskontrolleTag(item: EnrichedSubmissionListItem): number {
 }
 
 function verlaufskontrolleHeadline(item: EnrichedSubmissionListItem): string {
+  if (item.follow_up_series_id?.trim()) {
+    const doc = item.photo_documentation;
+    if (doc?.kind === "linked" && doc.linkedSubmissionCount > 1) {
+      return "Verlaufskontrolle · Folgeeinsendung";
+    }
+    return `Verlaufskontrolle Tag ${verlaufskontrolleTag(item)}`;
+  }
   const doc = item.photo_documentation;
   if (doc?.kind === "linked" && doc.linkedSubmissionCount > 1) {
-    return "Verlaufskontrolle · Folgeeinsendung";
+    return "Möglicher Verlauf · Folgeeinsendung";
   }
-  return `Verlaufskontrolle Tag ${verlaufskontrolleTag(item)}`;
+  return `Möglicher Verlauf · Tag ${verlaufskontrolleTag(item)}`;
 }
 
 function verlaufskontrolleContext(item: EnrichedSubmissionListItem): string | null {
@@ -386,8 +405,13 @@ export function trackerInboxWorkType(item: EnrichedSubmissionListItem): TrackerI
     };
   }
 
-  if (item.message_draft_status === "sent") {
-    return { kind: "abgeschlossen", headline: "Abgeschlossen", context: "Antwort versendet" };
+  const outbound = outboundSentForItem(item);
+  if (outbound.reply) {
+    return {
+      kind: "abgeschlossen",
+      headline: "Antwort gesendet",
+      context: "Per E-Mail an Patient:innen",
+    };
   }
 
   const decision = buildTrackerClinicalDecisionFromListItem(item);
@@ -422,6 +446,22 @@ export function trackerCaseTypeLabel(item: EnrichedSubmissionListItem): string {
 }
 
 export function trackerStatusForRow(item: EnrichedSubmissionListItem): TrackerStatusDisplay {
+  const practiceStatus = normalizePracticeStatus(item.practice_status);
+  if (practiceStatus === "resolved") {
+    return { label: "Abgeschlossen", className: "yd-tracker-table__status--done" };
+  }
+  if (practiceStatus === "waiting_for_patient") {
+    return {
+      label: practiceStatusLabel("waiting_for_patient"),
+      className: "yd-tracker-table__status--pending",
+    };
+  }
+  if (practiceStatus === "photo_requested") {
+    return {
+      label: practiceStatusLabel("photo_requested"),
+      className: "yd-tracker-table__status--progress",
+    };
+  }
   if (item.is_draft) {
     return { label: "Entwurf", className: "yd-tracker-table__status--draft" };
   }
@@ -431,11 +471,11 @@ export function trackerStatusForRow(item: EnrichedSubmissionListItem): TrackerSt
       className: "yd-tracker-table__status--pending",
     };
   }
-  if (!item.seen_at) {
+  if (!item.seen_at || practiceStatus === "new") {
     return { label: "Neu", className: "yd-tracker-table__status--new" };
   }
-  if (item.message_draft_status === "sent") {
-    return { label: "Abgeschlossen", className: "yd-tracker-table__status--done" };
+  if (outboundSentForItem(item).reply) {
+    return { label: "Antwort gesendet", className: "yd-tracker-table__status--done" };
   }
   if (item.urgency === "today") {
     return { label: "Zeitnah", className: "yd-tracker-table__status--urgent" };

@@ -26,21 +26,18 @@ export const CLINICAL_URGENCY_OPTIONS: { id: ClinicalUrgencyId; label: string }[
   { id: "not_urgent", label: "Nicht dringend" },
 ];
 
-export type InboxPracticeStatusId =
-  | "neu"
-  | "in_bearbeitung"
-  | "beobachten"
-  | "freigegeben";
+import {
+  MANUAL_PRACTICE_STATUS_OPTIONS,
+  normalizePracticeStatus,
+  practiceStatusLabel,
+  type PracticeStatusId,
+} from "@/lib/practice-status";
 
-export const INBOX_PRACTICE_STATUS_OPTIONS: {
-  id: InboxPracticeStatusId;
-  label: string;
-}[] = [
-  { id: "neu", label: "Neu" },
-  { id: "in_bearbeitung", label: "In Bearbeitung" },
-  { id: "beobachten", label: "Beobachten" },
-  { id: "freigegeben", label: "Freigegeben" },
-];
+export type InboxPracticeStatusId = PracticeStatusId;
+
+export const INBOX_PRACTICE_STATUS_OPTIONS = MANUAL_PRACTICE_STATUS_OPTIONS.map(
+  (o) => ({ id: o.id, label: o.label })
+);
 
 export type TrackerNextStepItem = {
   id: string;
@@ -401,7 +398,7 @@ export function buildTrackerNextStepGroups(opts: {
     {
       id: "org",
       label: "Praxisorganisation",
-      items: [{ id: "aufgabe", label: "Aufgabe erstellen", href: taskHref }],
+      items: [{ id: "aufgabe", label: "Praxisaufgabe erstellen", href: taskHref }],
     },
   ];
 }
@@ -495,22 +492,19 @@ export function buildTrackerV9FromListItem(
 }
 
 export function resolveInboxPracticeStatus(
-  item: EnrichedSubmissionListItem
+  item: EnrichedSubmissionListItem & { practice_status?: string | null }
 ): InboxPracticeStatusId {
-  if (item.message_draft_status === "sent") return "freigegeben";
-  if (isApprovalPending(item) || item.message_draft_status === "approved") {
-    return "in_bearbeitung";
+  const stored = normalizePracticeStatus(item.practice_status);
+  if (stored) return stored;
+
+  if (!item.seen_at && !item.is_draft) return "new";
+  if (item.urgency === "not_urgent" || hasVerlaufskontrolleContext(item)) {
+    return "watching";
   }
-  if (!item.seen_at && !item.is_draft) return "neu";
-  if (
-    item.urgency === "not_urgent" ||
-    hasVerlaufskontrolleContext(item)
-  ) {
-    return "beobachten";
-  }
-  if (item.seen_at) return "in_bearbeitung";
-  return "neu";
+  return "in_progress";
 }
+
+export { practiceStatusLabel };
 
 /** Relatives Eingangszeitpunkt für die Inbox-Zeile 3. */
 export function formatTrackerRelativeIngress(iso: string): string {

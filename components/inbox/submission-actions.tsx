@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { AppointmentLinkButton } from "./appointment-link-button";
 import { SubmissionMessageDraftPanel } from "./submission-message-draft-panel";
 import { TrackerCaseSidebarMeta } from "./tracker-case-sidebar-meta";
 import type { MessageDraftRow } from "@/lib/queries/message-drafts";
@@ -70,6 +69,7 @@ export function SubmissionActions({
             <SubmissionMessageDraftPanel
               submissionId={submissionId}
               patientName={patientName}
+              patientEmail={patientEmail}
               urgency={urgency ?? null}
               practicePhone={practicePhone ?? null}
               appointmentUrl={appointmentUrl ?? null}
@@ -84,11 +84,10 @@ export function SubmissionActions({
             <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
               Termin
             </p>
-            <AppointmentLinkButton
-              submissionId={submissionId}
-              hasPatientEmail={!!patientEmail}
-              canSend={canSendAppointmentLink}
-            />
+            <p className="text-[14px] leading-relaxed text-slate-600">
+              Terminangebote senden Sie im Tracker über „Termin anbieten“ (Nachrichtentext und
+              Terminlink in einer E-Mail).
+            </p>
           </div>
 
           <div className={sectionPad}>

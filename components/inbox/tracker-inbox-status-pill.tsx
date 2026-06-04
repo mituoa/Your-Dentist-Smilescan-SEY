@@ -11,28 +11,23 @@ import {
   INBOX_PRACTICE_STATUS_OPTIONS,
   type InboxPracticeStatusId,
 } from "@/lib/inbox/tracker-v9-clinical";
-import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import { cn } from "@/lib/utils";
 
 type TrackerInboxStatusPillProps = {
   submissionId: string;
   status: InboxPracticeStatusId;
-  messageDraftStatus: MessageDraftListStatus;
 };
 
 /** V10 — Dezente Segment-Auswahl für den Praxisstatus. */
 export function TrackerInboxStatusPill({
   submissionId,
   status,
-  messageDraftStatus,
 }: TrackerInboxStatusPillProps) {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-
-  const canMarkFreigegeben = messageDraftStatus === "sent";
 
   const label =
     INBOX_PRACTICE_STATUS_OPTIONS.find((o) => o.id === status)?.label ?? status;
@@ -52,10 +47,6 @@ export function TrackerInboxStatusPill({
     if (pending) return;
     if (next === status) {
       setOpen(false);
-      return;
-    }
-    if (next === "freigegeben" && !canMarkFreigegeben) {
-      setError("Erst nach versendeter Antwort möglich.");
       return;
     }
     setError(null);
@@ -100,8 +91,6 @@ export function TrackerInboxStatusPill({
           aria-label="Praxisstatus"
         >
           {INBOX_PRACTICE_STATUS_OPTIONS.map((opt) => {
-            const disabledFreigegeben =
-              opt.id === "freigegeben" && !canMarkFreigegeben;
             const isActive = opt.id === status;
             return (
               <button
@@ -111,15 +100,9 @@ export function TrackerInboxStatusPill({
                 aria-selected={isActive}
                 className={cn(
                   "yd-tracker-v10-inbox-status__segment",
-                  isActive && "yd-tracker-v10-inbox-status__segment--active",
-                  disabledFreigegeben && "yd-tracker-v10-inbox-status__segment--disabled"
+                  isActive && "yd-tracker-v10-inbox-status__segment--active"
                 )}
-                disabled={pending || disabledFreigegeben}
-                title={
-                  disabledFreigegeben
-                    ? "Erst nach versendeter Antwort möglich."
-                    : undefined
-                }
+                disabled={pending}
                 onClick={() => apply(opt.id)}
               >
                 {opt.label}

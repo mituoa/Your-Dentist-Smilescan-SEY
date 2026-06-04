@@ -43,6 +43,9 @@ export interface SubmissionListItem {
   open_task_count: number;
   /** Foto-Dokumentation innerhalb des Falls / per Patienten-ID. */
   photo_documentation: PhotoDocumentationHint | null;
+  practice_status: string | null;
+  photo_request_requested_at: string | null;
+  follow_up_series_id: string | null;
 }
 
 export type InboxSubmissionsResult =
@@ -64,6 +67,9 @@ const INBOX_SELECT_WITH_CASE_FIELDS = [
   "intake_channel",
   "created_at",
   "seen_at",
+  "practice_status",
+  "photo_request_requested_at",
+  "follow_up_series_id",
   "submission_photos(count)",
 ].join(", ");
 
@@ -75,6 +81,9 @@ const INBOX_SELECT_BASE = [
   "patient_notes",
   "created_at",
   "seen_at",
+  "practice_status",
+  "photo_request_requested_at",
+  "follow_up_series_id",
   "submission_photos(count)",
 ].join(", ");
 
@@ -108,6 +117,10 @@ function mapInboxRow(
       : normalizeIntakeChannel(s.intake_channel),
     open_task_count: 0,
     photo_documentation: null,
+    practice_status: (s.practice_status as string | null) ?? "new",
+    photo_request_requested_at:
+      (s.photo_request_requested_at as string | null) ?? null,
+    follow_up_series_id: (s.follow_up_series_id as string | null) ?? null,
   };
 }
 

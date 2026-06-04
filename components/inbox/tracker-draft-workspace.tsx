@@ -4,6 +4,7 @@ import type { MessageDraftRow } from "@/lib/queries/message-drafts";
 type TrackerDraftWorkspaceProps = {
   submissionId: string;
   patientName: string | null;
+  patientEmail: string | null;
   urgency: string | null;
   practicePhone: string | null;
   appointmentUrl: string | null;
@@ -11,6 +12,7 @@ type TrackerDraftWorkspaceProps = {
   draftsAvailable: boolean;
   editableMessageDraft: MessageDraftRow | null;
   historyMessageDraft: MessageDraftRow | null;
+  trackerBackboneAvailable?: boolean;
 };
 
 export function TrackerDraftWorkspace(props: TrackerDraftWorkspaceProps) {
@@ -19,6 +21,7 @@ export function TrackerDraftWorkspace(props: TrackerDraftWorkspaceProps) {
       <SubmissionMessageDraftPanel
         submissionId={props.submissionId}
         patientName={props.patientName}
+        patientEmail={props.patientEmail}
         urgency={props.urgency}
         practicePhone={props.practicePhone}
         appointmentUrl={props.appointmentUrl}
@@ -26,6 +29,7 @@ export function TrackerDraftWorkspace(props: TrackerDraftWorkspaceProps) {
         draftsAvailable={props.draftsAvailable}
         initialEditableDraft={props.editableMessageDraft}
         initialHistoryDraft={props.historyMessageDraft}
+        trackerBackboneAvailable={props.trackerBackboneAvailable ?? true}
       />
     </div>
   );

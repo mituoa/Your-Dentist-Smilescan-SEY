@@ -3319,24 +3319,39 @@
   cursor: pointer;
 }
 
-.yd-tracker-v10-inbox-status__trigger--neu {
+.yd-tracker-v10-inbox-status__trigger--neu,
+.yd-tracker-v10-inbox-status__trigger--new {
   color: #1a4f9c;
   background: #fff;
   border-color: rgba(186, 203, 222, 0.65);
 }
 
-.yd-tracker-v10-inbox-status__trigger--in_bearbeitung {
+.yd-tracker-v10-inbox-status__trigger--in_bearbeitung,
+.yd-tracker-v10-inbox-status__trigger--in_progress {
   color: rgba(12, 25, 41, 0.68);
 }
 
-.yd-tracker-v10-inbox-status__trigger--beobachten {
+.yd-tracker-v10-inbox-status__trigger--beobachten,
+.yd-tracker-v10-inbox-status__trigger--watching {
   color: rgba(71, 85, 105, 0.88);
 }
 
-.yd-tracker-v10-inbox-status__trigger--freigegeben {
+.yd-tracker-v10-inbox-status__trigger--freigegeben,
+.yd-tracker-v10-inbox-status__trigger--resolved {
   color: #166534;
   background: rgba(240, 253, 244, 0.9);
   border-color: rgba(187, 247, 208, 0.75);
+}
+
+.yd-tracker-v10-inbox-status__trigger--waiting_for_patient {
+  color: #1a4f9c;
+  background: rgba(239, 246, 255, 0.95);
+  border-color: rgba(186, 203, 222, 0.75);
+}
+
+.yd-tracker-v10-inbox-status__trigger--photo_requested {
+  color: rgba(12, 25, 41, 0.72);
+  background: rgba(248, 250, 252, 0.95);
 }
 
 .yd-tracker-v10-inbox-status__segments {
@@ -4611,4 +4626,218 @@
   border-color: rgba(12, 25, 41, 0.2) !important;
   background: rgba(248, 250, 252, 0.98) !important;
   color: #0c1929 !important;
+}
+
+/* ── Tracker V14 — Premium Medical Polish (Struktur unverändert) ─────────── */
+
+/* Hero — Patient → Anliegen → Stammdaten */
+.yd-tracker-v14-hero__name {
+  font-size: clamp(1.625rem, 4vw, 2.125rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.045em !important;
+}
+
+.yd-tracker-v14-hero__concern {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-top: 0.85rem !important;
+  font-size: clamp(1.125rem, 2.6vw, 1.5rem) !important;
+  font-weight: 500 !important;
+  line-height: 1.38 !important;
+  word-break: break-word;
+}
+
+.yd-tracker-v14-hero__demographics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1.15rem;
+  padding-top: 0.15rem;
+}
+
+.yd-tracker-v14-hero__demographics-row {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: rgba(12, 25, 41, 0.52);
+}
+
+.yd-tracker-v14-hero__link {
+  color: #1a4f9c;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.yd-tracker-v14-hero__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.yd-tracker-v14-hero__draft {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(12, 25, 41, 0.38);
+}
+
+/* Inbox — edler, mehr Luft, 2-zeiliges Anliegen */
+.yd-tracker-v14-inbox__list {
+  padding: 0.5rem 0.85rem 1.5rem !important;
+}
+
+.yd-tracker-v14-inbox-card .yd-tracker-v12-inbox-card__body,
+.yd-tracker-v14-inbox-card .yd-tracker-v10-inbox-card__body {
+  padding: 1.15rem 0.9rem 1.15rem 1.15rem !important;
+}
+
+.yd-tracker-v14-inbox .yd-tracker-v10-inbox-card__text {
+  gap: 0.38rem !important;
+}
+
+.yd-tracker-v14-inbox .yd-tracker-v10-inbox-card__name,
+.yd-tracker-v14-inbox .yd-tracker-v12-inbox-card__name {
+  font-size: 1.1875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.yd-tracker-v14-inbox .yd-tracker-v10-inbox-card__concern,
+.yd-tracker-v14-inbox .yd-tracker-v14-inbox-card__concern,
+.yd-tracker-v14-inbox .yd-tracker-v12-inbox-card__concern {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  text-overflow: unset !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.42 !important;
+  word-break: break-word;
+  color: rgba(12, 25, 41, 0.56) !important;
+}
+
+.yd-tracker-v14-inbox .yd-tracker-v10-inbox-card__time {
+  margin-top: 0.12rem;
+  font-size: 0.75rem !important;
+}
+
+.yd-tracker-v14-inbox .yd-tracker-v10-inbox-status__trigger {
+  min-height: 1.75rem;
+  padding: 0 0.65rem;
+  font-weight: 550;
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  border-color: rgba(186, 203, 222, 0.55) !important;
+  background: #fff !important;
+  color: rgba(12, 25, 41, 0.55) !important;
+  box-shadow: none !important;
+}
+
+.yd-tracker-v14-inbox .yd-tracker-v10-inbox-status__trigger--open,
+.yd-tracker-v14-inbox .yd-tracker-v10-inbox-status__trigger:hover:not(:disabled) {
+  border-color: rgba(12, 25, 41, 0.14) !important;
+  background: #f8fafc !important;
+}
+
+/* Entscheidungsspalte */
+.yd-tracker-v14-rail .yd-tracker-v12-rail__headline {
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem) !important;
+  margin-bottom: 1rem !important;
+}
+
+.yd-tracker-v14-primary-action {
+  min-height: 3rem !important;
+  padding: 0.7rem 1rem !important;
+  font-size: 0.9375rem !important;
+  font-weight: 650 !important;
+  border-radius: 0.6875rem !important;
+}
+
+.yd-tracker-v14-primary-action:focus-visible {
+  outline: 2px solid rgba(26, 79, 156, 0.35);
+  outline-offset: 2px;
+}
+
+.yd-tracker-v14-more-action {
+  min-height: 2.5rem;
+  padding: 0.5rem 0 !important;
+  font-size: 0.875rem !important;
+}
+
+.yd-tracker-v14-more-action:active {
+  opacity: 0.85;
+}
+
+.yd-tracker-v14-rail .yd-tracker-v12-urgency__option {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.55rem;
+}
+
+.yd-tracker-v14-rail .yd-tracker-v12-urgency__badge {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+/* Bildbereich */
+.yd-tracker-v14-photo-stage .yd-tracker-v4-photo-stage__head {
+  margin-bottom: 0.9rem;
+}
+
+.yd-tracker-v14-photo-stage .yd-tracker-v4-photo-stage__viewer {
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  background: rgba(248, 250, 252, 0.65);
+}
+
+.yd-tracker-v14-photo {
+  gap: 1.15rem !important;
+}
+
+.yd-tracker-v14-photo .flex.flex-wrap.gap-2 {
+  gap: 0.5rem !important;
+  padding-top: 0.15rem;
+}
+
+.yd-tracker-v14-photo .flex.flex-wrap.gap-2 button {
+  border-radius: 0.5rem;
+}
+
+/* Mobile — Hero → Entscheidung → Bilder, Safe Area */
+@media (max-width: 1023px) {
+  .yd-tracker-v14-workspace {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    overflow-x: hidden;
+  }
+
+  .yd-tracker-v14-hero__name {
+    font-size: 1.5rem !important;
+  }
+
+  .yd-tracker-v14-hero__concern {
+    font-size: 1.125rem !important;
+  }
+
+  .yd-tracker-v14-workspace .yd-tracker-v8-rail {
+    order: 1;
+  }
+
+  .yd-tracker-v14-workspace .yd-tracker-v8-evidence {
+    order: 2;
+  }
+
+  .yd-tracker-v14-inbox-card {
+    max-width: 100%;
+  }
+
+  .yd-tracker-v8-action-backdrop .yd-tracker-v8-action-sheet {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
 }

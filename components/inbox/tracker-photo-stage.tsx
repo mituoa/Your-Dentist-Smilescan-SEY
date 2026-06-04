@@ -64,6 +64,7 @@ export function TrackerPhotoStage({
   const stageClass = cn(
     "yd-tracker-v4-photo-stage",
     "yd-tracker-v11-photo-stage",
+    "yd-tracker-v14-photo-stage",
     dominant && "yd-tracker-v4-photo-stage--dominant yd-tracker-v11-photo-stage--dominant"
   );
   const title = "Klinische Bilder";

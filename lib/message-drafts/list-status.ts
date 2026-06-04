@@ -48,7 +48,7 @@ export function resolveMessageDraftBadge(input: {
     return {
       label: "Gesendet",
       variant: "sent",
-      title: "Antwort wurde als versendet markiert.",
+      title: "Antwort wurde per E-Mail an Patient:innen gesendet.",
     };
   }
 

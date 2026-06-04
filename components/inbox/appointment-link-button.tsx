@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Legacy — im produktiven Tracker (`/inbox/[id]` → TrackerWorkspace) nicht mehr eingebunden.
+ * Terminangebote laufen über „Termin anbieten“ → `sendPatientOutboundMessage` (`appointment_offer`).
+ */
+
 import { useState, useTransition } from "react";
 import { sendAppointmentLink } from "@/app/(protected)/inbox/[id]/actions";
 import { Button } from "@/components/ui/button";

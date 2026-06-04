@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { TrackerInboxStatusPill } from "@/components/inbox/tracker-inbox-status-pill";
-import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+import { deriveSubmissionConcernDisplay } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
@@ -64,7 +64,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
     filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
 
   return (
-    <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-tracker-v12-inbox yd-clinical-control flex h-full min-h-0 flex-col">
+    <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-tracker-v12-inbox yd-tracker-v14-inbox yd-clinical-control flex h-full min-h-0 flex-col">
       <div className="yd-tracker-v4-inbox__toolbar yd-tracker-v8-inbox__toolbar">
         <div className="yd-tracker-v8-inbox__head">
           <p className="yd-tracker-v4-inbox__eyebrow">Arbeitsliste</p>
@@ -112,11 +112,12 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
           filtered.map((item) => {
             const isActive = pathname === `/inbox/${item.id}`;
             const patientName = item.patient_name?.trim() || "Unbekannter Patient";
-            const concern = deriveSubmissionIssueShortLine(
+            const concern = deriveSubmissionConcernDisplay(
               item.patient_notes,
               item.patient_name,
-              { maxLen: 56, emptyLabel: "Anliegen ohne Kurztext" }
+              "Anliegen ohne Kurztext"
             );
+            const concernTitle = item.patient_notes?.trim() || concern;
             const practiceStatus = resolveInboxPracticeStatus(item);
             const timeLabel = formatTrackerRelativeIngress(item.created_at);
 
@@ -129,6 +130,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                     "yd-tracker-v9-inbox-card",
                     "yd-tracker-v10-inbox-card",
                     "yd-tracker-v12-inbox-card",
+                    "yd-tracker-v14-inbox-card",
                     isActive && "yd-tracker-v4-inbox-card--active",
                     isActive && "yd-tracker-v8-inbox-card--active",
                     isActive && "yd-tracker-v10-inbox-card--active",
@@ -150,8 +152,8 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                         {patientName}
                       </span>
                       <span
-                        className="yd-tracker-v10-inbox-card__concern yd-tracker-v12-inbox-card__concern"
-                        title={concern}
+                        className="yd-tracker-v10-inbox-card__concern yd-tracker-v12-inbox-card__concern yd-tracker-v14-inbox-card__concern"
+                        title={concernTitle}
                       >
                         {concern}
                       </span>
@@ -163,7 +165,6 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                   <TrackerInboxStatusPill
                     submissionId={item.id}
                     status={practiceStatus}
-                    messageDraftStatus={item.message_draft_status}
                   />
                 </div>
               </li>

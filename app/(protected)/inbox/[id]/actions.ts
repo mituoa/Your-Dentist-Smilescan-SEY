@@ -3,15 +3,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { buildTerminOfferDraft } from "@/lib/clinical/message-templates";
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
-import { buildAppointmentLinkEmail } from "@/lib/mail/appointment-link-email";
-import { buildAppointmentLinkPractitionerNoticeEmail } from "@/lib/mail/appointment-link-notice-email";
-import { isSmtpConfigured } from "@/lib/env";
+import { sendPatientOutboundMessage } from "@/lib/outbound-messages/send-to-patient";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { submitTaskForReview } from "@/app/(protected)/my-tasks/actions";
 import { upsertTaskReceipts } from "@/lib/tasks/receipts";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
 import { submissionPhotoDownloadErrors } from "@/lib/inbox/submission-photo-download-errors";
+import {
+  normalizePracticeStatus,
+  type PracticeStatusId,
+} from "@/lib/practice-status";
 import JSZip from "jszip";
 
 /**
@@ -95,11 +98,14 @@ export async function markSubmissionSeen(submissionId: string) {
 
   if (!user) return { error: "Nicht angemeldet." };
 
+  const now = new Date().toISOString();
   const { error } = await supabase
     .from("submissions")
     .update({
-      seen_at: new Date().toISOString(),
+      seen_at: now,
       seen_by: user.id,
+      practice_status: "in_progress",
+      updated_at: now,
     })
     .eq("id", submissionId)
     .eq("workspace_id", workspace.workspace_id)
@@ -123,11 +129,7 @@ export type SubmissionUrgencyValue =
   | "this_week"
   | "not_urgent";
 
-export type InboxPracticeStatusValue =
-  | "neu"
-  | "in_bearbeitung"
-  | "beobachten"
-  | "freigegeben";
+export type InboxPracticeStatusValue = PracticeStatusId;
 
 export async function updateSubmissionUrgency(
   submissionId: string,
@@ -157,7 +159,10 @@ export async function updateSubmissionUrgency(
 
   if (error) {
     logPostgrest("updateSubmissionUrgency", error);
-    return { error: "Zeitraum konnte nicht gespeichert werden." };
+    return {
+      error:
+        "Dringlichkeit konnte gerade nicht gespeichert werden. Bitte erneut wählen.",
+    };
   }
 
   revalidatePath(`/inbox/${submissionId}`);
@@ -185,6 +190,7 @@ export async function markSubmissionUnseen(submissionId: string) {
     .update({
       seen_at: null,
       seen_by: null,
+      practice_status: "new",
       updated_at: new Date().toISOString(),
     })
     .eq("id", submissionId)
@@ -202,7 +208,7 @@ export async function markSubmissionUnseen(submissionId: string) {
   return { success: true };
 }
 
-/** Praxisstatus aus der Inbox-Liste (ohne neues Datenmodell). */
+/** Persistenter Praxisstatus (`submissions.practice_status`). */
 export async function updateSubmissionPracticeStatus(
   submissionId: string,
   status: InboxPracticeStatusValue
@@ -210,6 +216,10 @@ export async function updateSubmissionPracticeStatus(
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
     return { error: "Arbeitsbereich nicht gefunden." };
+  }
+
+  if (!normalizePracticeStatus(status)) {
+    return { error: "Ungültiger Status." };
   }
 
   const supabase = await createClient();
@@ -230,50 +240,21 @@ export async function updateSubmissionPracticeStatus(
     return { error: "Fall konnte nicht geladen werden." };
   }
 
-  if (status === "freigegeben") {
-    const { data: sentDraft, error: draftError } = await supabase
-      .from("message_drafts")
-      .select("id")
-      .eq("submission_id", submissionId)
-      .eq("workspace_id", workspace.workspace_id)
-      .eq("status", "sent")
-      .limit(1)
-      .maybeSingle();
-
-    if (draftError) {
-      logPostgrest("updateSubmissionPracticeStatus/sentDraft", draftError);
-      return { error: "Status konnte nicht geprüft werden." };
-    }
-
-    if (!sentDraft) {
-      return {
-        error:
-          "Freigegeben ist erst nach versendeter Patientenantwort möglich.",
-      };
-    }
-    return { success: true };
-  }
-
-  let patch: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
+  const now = new Date().toISOString();
+  const patch: Record<string, unknown> = {
+    practice_status: status,
+    updated_at: now,
   };
 
-  if (status === "neu") {
-    patch = { ...patch, seen_at: null, seen_by: null };
-  } else if (status === "in_bearbeitung") {
-    patch = {
-      ...patch,
-      seen_at: new Date().toISOString(),
-      seen_by: user.id,
-      urgency: null,
-    };
-  } else if (status === "beobachten") {
-    patch = {
-      ...patch,
-      seen_at: row.seen_at ?? new Date().toISOString(),
-      seen_by: user.id,
-      urgency: "not_urgent",
-    };
+  if (status === "new") {
+    patch.seen_at = null;
+    patch.seen_by = null;
+  } else {
+    patch.seen_at = row.seen_at ?? now;
+    patch.seen_by = user.id;
+    if (status === "watching") {
+      patch.urgency = "not_urgent";
+    }
   }
 
   const { error } = await supabase
@@ -532,33 +513,17 @@ export async function submitInboxTaskForReview(
   return result;
 }
 
+/** @deprecated Nutzen Sie „Termin anbieten“ im Tracker — einheitlicher `outbound_messages`-Flow. */
 export async function sendAppointmentLink(submissionId: string) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
     return { error: "Arbeitsbereich nicht gefunden." };
   }
-  if (workspace.role !== "doctor") {
-    return { error: "Nur Ärzte dürfen Terminlinks versenden." };
-  }
-
-  if (!isSmtpConfigured()) {
-    return {
-      error:
-        "E-Mail-Versand ist derzeit nicht eingerichtet. Bitte kontaktieren Sie den Admin.",
-      code: "SMTP_NOT_CONFIGURED",
-    };
-  }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return { error: "Nicht angemeldet." };
-
   const { data: submission, error: submissionLookupError } = await supabase
     .from("submissions")
-    .select("patient_name, patient_email, workspace_id")
+    .select("patient_name, patient_email, urgency, workspace_id")
     .eq("id", submissionId)
     .eq("workspace_id", workspace.workspace_id)
     .single();
@@ -566,71 +531,41 @@ export async function sendAppointmentLink(submissionId: string) {
   if (submissionLookupError || !submission) {
     return { error: "Fall nicht gefunden oder kein Zugriff." };
   }
-  if (!submission.patient_email) {
-    return { error: "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt." };
-  }
 
   const { data: profile } = await supabase
     .from("profile_data")
-    .select("practice_name, appointment_link")
-    .eq("workspace_id", submission.workspace_id)
+    .select("practice_name, appointment_link, practice_phone")
+    .eq("workspace_id", workspace.workspace_id)
     .single();
 
-  if (!profile?.appointment_link) {
-    return {
-      error: "Kein Terminlink hinterlegt. Bitte in den Einstellungen ergänzen.",
-    };
-  }
+  const urgency =
+    submission.urgency === "today" ||
+    submission.urgency === "within_24h" ||
+    submission.urgency === "this_week" ||
+    submission.urgency === "not_urgent"
+      ? submission.urgency
+      : "this_week";
 
-  const practiceName = profile.practice_name || "Ihre Zahnarztpraxis";
-
-  const fullName = submission.patient_name?.trim() || "";
-  const parts = fullName.split(/\s+/);
-  const patientFirstName =
-    parts.length > 1 ? parts.slice(0, -1).join(" ") : fullName || null;
-  const patientLastName = parts.length > 1 ? parts[parts.length - 1] : null;
-
-  const mail = buildAppointmentLinkEmail({
-    bookingUrl: profile.appointment_link,
-    practiceName,
-    patientFirstName,
-    patientLastName,
+  const body = buildTerminOfferDraft({
+    patientName: submission.patient_name?.trim() || "Patient",
+    urgency,
+    practicePhone: profile?.practice_phone?.trim() || "",
+    appointmentUrl: profile?.appointment_link?.trim() ?? null,
   });
 
-  const result = await sendTransactionalMailBestEffort(
-    {
-      to: submission.patient_email,
-      subject: mail.subject,
-      text: mail.text,
-      html: mail.html,
-      mailContext: "appointment_link_to_patient",
-    },
-    "appointment_link_to_patient"
-  );
+  const result = await sendPatientOutboundMessage({
+    submissionId,
+    body,
+    messageKind: "appointment_offer",
+    includeAppointmentLink: Boolean(profile?.appointment_link?.trim()),
+    urgency,
+  });
 
-  if (!result.sent) {
-    return {
-      error: "Der Terminlink konnte nicht versendet werden. Bitte erneut versuchen.",
-    };
+  if (!result.ok) {
+    return { error: result.error };
   }
 
-  if (user.email) {
-    const notice = buildAppointmentLinkPractitionerNoticeEmail({
-      patientDisplayLabel: fullName || submission.patient_email,
-    });
-    await sendTransactionalMailBestEffort(
-      {
-        to: user.email,
-        subject: notice.subject,
-        text: notice.text,
-        html: notice.html,
-      },
-      "appointment_link_notice_to_practitioner"
-    );
-  }
-
-  revalidatePath(`/inbox/${submissionId}`);
-  return { success: true, message: "Terminlink wurde per E-Mail versendet." };
+  return { success: true, message: "Terminangebot wurde per E-Mail gesendet." };
 }
 
 /**

@@ -222,7 +222,7 @@ export function PhotoViewer({
 
   return (
     <div
-      className={cn("space-y-4 overflow-x-hidden", className)}
+      className={cn("yd-tracker-v14-photo space-y-4 overflow-x-hidden", className)}
       aria-label={`Fotos: ${patientName}`}
     >
       <div
@@ -286,8 +286,8 @@ export function PhotoViewer({
         </button>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[12px] font-medium" style={{ color: "#94A3B8" }}>
+      <div className="yd-tracker-v14-photo__footer flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="yd-tracker-v14-photo__counter text-[12px] font-medium text-[#94A3B8]">
           {photos.length > 1 ? `${idx + 1} / ${photos.length}` : null}
         </p>
         {enableZipDownload ? (
@@ -298,28 +298,27 @@ export function PhotoViewer({
           aria-busy={isLoading}
           aria-label={
             isLoading
-              ? "ZIP-Export wird vorbereitet"
+              ? "Bilderexport wird vorbereitet"
               : downloadStatus === "error"
-                ? "ZIP-Export erneut versuchen"
-                : "Fotos dieses Falls als ZIP-Datei exportieren"
+                ? "Bilderexport erneut versuchen"
+                : "Klinische Bilder als ZIP exportieren"
           }
-          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium text-[#475569] transition hover:border-[rgba(12,25,41,0.2)] hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.12)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
-          style={{ color: "#475569" }}
+          className="yd-tracker-v14-photo__export inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 self-start rounded-md border-0 bg-transparent px-2 py-1 text-[12px] font-medium text-[rgba(12,25,41,0.45)] underline-offset-2 transition hover:text-[#1A4F9C] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.12)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.75} />
           ) : downloadStatus === "success" ? (
-            <Check className="h-4 w-4 text-[#047857]" strokeWidth={2} />
+            <Check className="h-3.5 w-3.5 text-[#047857]" strokeWidth={2} />
           ) : (
-            <Download className="h-4 w-4 opacity-70" strokeWidth={1.75} />
+            <Download className="h-3.5 w-3.5 opacity-60" strokeWidth={1.75} />
           )}
           {isLoading
-            ? "ZIP wird erstellt…"
+            ? "Export…"
             : downloadStatus === "success"
-              ? "Download gestartet"
+              ? "Gestartet"
               : downloadStatus === "error"
-                ? "Erneut versuchen"
-                : "ZIP exportieren"}
+                ? "Erneut"
+                : "Bilder exportieren"}
         </button>
         ) : null}
       </div>

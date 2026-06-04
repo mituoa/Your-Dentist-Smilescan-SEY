@@ -21,7 +21,14 @@ type TrackerClinicalUrgencyProps = {
   onUrgencyChange?: (urgency: ClinicalUrgencyId) => void;
 };
 
-/** V10+ — Klinische Dringlichkeit mit „Empfohlen“ unter der KI-Option. */
+function calmUrgencySaveError(message: string): string {
+  if (/zeitraum|dringlichkeit/i.test(message)) {
+    return "Dringlichkeit konnte gerade nicht gespeichert werden. Bitte erneut wählen.";
+  }
+  return message;
+}
+
+/** V10+ — Klinische Dringlichkeit mit „Empfohlen“-Hinweis. */
 export function TrackerClinicalUrgency({
   submissionId,
   initialUrgency,
@@ -48,7 +55,7 @@ export function TrackerClinicalUrgency({
         id as SubmissionUrgencyValue
       );
       if (res.error) {
-        setError(res.error);
+        setError(calmUrgencySaveError(res.error));
         return;
       }
       setUrgency(id);
@@ -85,7 +92,7 @@ export function TrackerClinicalUrgency({
             >
               <span className="yd-tracker-v12-urgency__option-label">{opt.label}</span>
               {isRecommended ? (
-                <span className="yd-tracker-v12-urgency__badge">KI empfohlen</span>
+                <span className="yd-tracker-v12-urgency__badge">Empfohlen</span>
               ) : null}
             </button>
           );

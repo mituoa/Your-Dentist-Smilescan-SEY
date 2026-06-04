@@ -4,6 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { isLikelyMissingDbRelationError } from "@/lib/supabase/postgrest-errors";
 import type { PhotoDocumentationHint } from "@/lib/inbox/tracker-inbox-logic";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
+import {
+  EMPTY_OUTBOUND_SENT,
+  type OutboundSentFlags,
+} from "@/lib/outbound-messages/types";
 
 function logInboxEnrichmentFailure(scope: string, err: unknown): void {
   const row = err as { code?: string };
@@ -77,6 +81,7 @@ export async function attachInboxListEnrichment(
     SubmissionListItem & {
       open_task_count: number;
       photo_documentation: PhotoDocumentationHint | null;
+      outbound_sent: OutboundSentFlags;
     }
   >
 > {
@@ -87,11 +92,12 @@ export async function attachInboxListEnrichment(
 
   const openTaskCount = new Map<string, number>();
   const photoTimestampsBySubmission = new Map<string, string[]>();
+  const outboundSentBySubmission = new Map<string, OutboundSentFlags>();
 
   for (let i = 0; i < submissionIds.length; i += SUBMISSION_BATCH) {
     const batch = submissionIds.slice(i, i + SUBMISSION_BATCH);
 
-    const [tasksRes, photosRes] = await Promise.all([
+    const [tasksRes, photosRes, outboundRes] = await Promise.all([
       supabase
         .from("tasks")
         .select("submission_id")
@@ -101,6 +107,12 @@ export async function attachInboxListEnrichment(
       supabase
         .from("submission_photos")
         .select("submission_id, created_at")
+        .in("submission_id", batch),
+      supabase
+        .from("outbound_messages")
+        .select("submission_id, message_kind")
+        .eq("workspace_id", workspaceId)
+        .eq("status", "sent")
         .in("submission_id", batch),
     ]);
 
@@ -126,6 +138,22 @@ export async function attachInboxListEnrichment(
         const list = photoTimestampsBySubmission.get(sid) ?? [];
         list.push(ts);
         photoTimestampsBySubmission.set(sid, list);
+      }
+    }
+
+    if (outboundRes.error) {
+      if (!isLikelyMissingDbRelationError(outboundRes.error)) {
+        logInboxEnrichmentFailure("outbound_messages batch", outboundRes.error);
+      }
+    } else {
+      for (const row of outboundRes.data ?? []) {
+        const sid = row.submission_id as string;
+        const kind = row.message_kind as keyof OutboundSentFlags;
+        const prev = outboundSentBySubmission.get(sid) ?? { ...EMPTY_OUTBOUND_SENT };
+        if (kind in prev) {
+          prev[kind] = true;
+        }
+        outboundSentBySubmission.set(sid, prev);
       }
     }
   }
@@ -183,6 +211,7 @@ export async function attachInboxListEnrichment(
       ...item,
       open_task_count: openTaskCount.get(item.id) ?? 0,
       photo_documentation: buildPhotoHintFromTimestamps(stamps, linkedCount),
+      outbound_sent: outboundSentBySubmission.get(item.id) ?? EMPTY_OUTBOUND_SENT,
     };
   });
 }

@@ -109,6 +109,9 @@ export function TrackerPatientRecord({
     intake_channel: submission.intake_channel,
     open_task_count: openTaskCount,
     photo_documentation: null,
+    practice_status: "new",
+    photo_request_requested_at: null,
+    follow_up_series_id: null,
   };
 
   const queueCard = buildClinicalQueueCard(statusRow);

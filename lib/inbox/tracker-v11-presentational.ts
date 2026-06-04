@@ -3,6 +3,7 @@
  */
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
+  hasPhotoTrail,
   isApprovalPending,
   type EnrichedSubmissionListItem,
 } from "@/lib/inbox/tracker-inbox-logic";
@@ -99,17 +100,23 @@ export function resolveTrackerCaseType(
 }
 
 export function isVerlaufskontrolle(item: EnrichedSubmissionListItem): boolean {
+  if (!item.follow_up_series_id?.trim()) return false;
   return resolveTrackerCaseType(item).kind === "nachsorge" && hasFollowUpSeries(item);
 }
 
 export function verlaufTagHeadline(item: EnrichedSubmissionListItem): string | null {
-  if (!isVerlaufskontrolle(item)) return null;
   const dayCount =
     item.photo_documentation?.dayCount ??
     Math.max(1, item.photo_count ?? 1);
   const idx = Math.min(dayCount - 1, VERLAUF_DAY_MARKERS.length - 1);
   const tag = VERLAUF_DAY_MARKERS[idx] ?? 7;
-  return `Nachsorge Tag ${tag}`;
+  if (isVerlaufskontrolle(item)) {
+    return `Verlaufskontrolle Tag ${tag}`;
+  }
+  if (hasFollowUpSeries(item) || item.intake_channel === "follow_up" || hasPhotoTrail(item)) {
+    return `Möglicher Verlauf · Tag ${tag}`;
+  }
+  return null;
 }
 
 export function queueVisualAccent(item: EnrichedSubmissionListItem): QueueVisualAccent {

@@ -6,11 +6,9 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 
 import {
-  approveMessageDraftForSubmission,
-  prepareMessageDraftForSubmission,
-  saveMessageDraftBody,
-} from "@/app/(protected)/inbox/[id]/message-draft-actions";
-import { AppointmentLinkButton } from "@/components/inbox/appointment-link-button";
+  saveTrackerDraftOnly,
+  sendTrackerPatientMessage,
+} from "@/app/(protected)/inbox/[id]/patient-message-actions";
 import { MedicalFormSegmented } from "@/components/forms/medical-form-ui";
 import {
   ASSIST_PHOTO_OPTIONS,
@@ -23,13 +21,28 @@ import {
   type RuckfrageTopicId,
   type UrgencyKey,
 } from "@/lib/clinical/message-templates";
-import { stashCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
 import {
   photoActionLabel,
   type TrackerActionIntent,
 } from "@/lib/inbox/tracker-clinical-decision";
 import { CLINICAL_URGENCY_OPTIONS } from "@/lib/inbox/tracker-v9-clinical";
+import type { OutboundMessageKind } from "@/lib/outbound-messages/types";
 import { cn } from "@/lib/utils";
+
+function messageKindForIntent(intent: TrackerActionIntent): OutboundMessageKind | null {
+  switch (intent) {
+    case "rueckfrage":
+      return "question";
+    case "foto":
+      return "photo_request";
+    case "termin":
+      return "appointment_offer";
+    case "freigabe":
+      return "reply";
+    default:
+      return null;
+  }
+}
 
 export type TrackerClinicalActionSheetProps = {
   open: boolean;
@@ -52,6 +65,7 @@ export type TrackerClinicalActionSheetProps = {
   initialDraftBody: string | null;
   prioritizedRuckfrageTopics?: string[];
   suggestedPhotoViewId?: string | null;
+  trackerBackboneAvailable?: boolean;
 };
 
 type FlowStep = "choose" | "draft";
@@ -76,12 +90,14 @@ function toUrgencyKey(urgency: string | null): UrgencyKey {
   return null;
 }
 
-function AssistReadyBanner() {
+function AssistReadyBanner({ canSend }: { canSend: boolean }) {
   return (
     <div className="yd-tracker-v13-assist-ready" role="status">
-      <p className="yd-tracker-v13-assist-ready__title">KI-Entwurf bereit</p>
+      <p className="yd-tracker-v13-assist-ready__title">Entwurf bereit</p>
       <p className="yd-tracker-v13-assist-ready__hint">
-        Bitte prüfen und bei Bedarf anpassen — kein automatischer Versand.
+        {canSend
+          ? "Bitte prüfen und anpassen — Versand erfolgt erst nach Ihrer Bestätigung."
+          : "Bitte prüfen und anpassen — Entwurf wird gespeichert, kein Versand ohne E-Mail."}
       </p>
     </div>
   );
@@ -116,6 +132,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     initialDraftBody,
     prioritizedRuckfrageTopics = [],
     suggestedPhotoViewId,
+    trackerBackboneAvailable = true,
   } = props;
 
   const router = useRouter();
@@ -345,44 +362,33 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     });
   }, []);
 
-  const ensureDraftAndSave = useCallback(async (): Promise<{ ok: true } | { ok: false; error: string }> => {
-    if (!draftsAvailable) {
-      return { ok: false, error: "Antwortentwürfe sind aktuell nicht verfügbar." };
-    }
+  const hasPatientEmail = Boolean(patientEmail?.trim());
+  const messageKind = intent ? messageKindForIntent(intent) : null;
+  const canSendToPatient =
+    trackerBackboneAvailable &&
+    Boolean(messageKind) &&
+    hasPatientEmail &&
+    (messageKind === "question" ||
+      messageKind === "photo_request" ||
+      (messageKind === "appointment_offer" && isDoctor) ||
+      (messageKind === "reply" && isDoctor));
 
-    stashCommandDraftForSubmission({
-      submissionId,
-      body,
-      savedAt: new Date().toISOString(),
-    });
-
-    if (editableDraftId) {
-      const save = await saveMessageDraftBody({
-        draftId: editableDraftId,
-        submissionId,
-        body,
-      });
-      if (!save.ok) return { ok: false, error: save.error };
-      return { ok: true };
-    }
-
-    const prep = await prepareMessageDraftForSubmission(submissionId);
-    if (!prep.ok) return { ok: false, error: prep.error };
-    return { ok: true };
-  }, [body, draftsAvailable, editableDraftId, submissionId]);
-
-  const handleApply = () => {
+  const handleSaveDraftOnly = () => {
     if (isPending || isGenerating || !body.trim()) return;
     setError(null);
     setStatus(null);
     startTransition(async () => {
-      const res = await ensureDraftAndSave();
+      const res = await saveTrackerDraftOnly({
+        submissionId,
+        body,
+        draftId: editableDraftId,
+      });
       if (!res.ok) {
         setError(res.error);
         onOutcome?.({ type: "error", message: res.error });
         return;
       }
-      const successMsg = "Nachricht übernommen — weiter in der Kommunikation.";
+      const successMsg = res.message ?? "Entwurf gespeichert.";
       setStatus(successMsg);
       onOutcome?.({ type: "success", message: successMsg });
       router.refresh();
@@ -391,45 +397,52 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     });
   };
 
-  const handleApprove = () => {
-    if (!isDoctor) {
-      const msg = "Nur Zahnärzt:innen können Antworten freigeben.";
+  const handleSendToPatient = () => {
+    if (isPending || isGenerating || !body.trim() || !messageKind) return;
+    if (!trackerBackboneAvailable) {
+      const msg =
+        "Patientenversand ist auf dieser Umgebung noch nicht aktiv (Migration 038 fehlt).";
+      setError(msg);
+      onOutcome?.({ type: "error", message: msg });
+      return;
+    }
+    if (!hasPatientEmail) {
+      const msg = "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt.";
+      setError(msg);
+      onOutcome?.({ type: "error", message: msg });
+      return;
+    }
+    if (!canSendToPatient) {
+      const msg =
+        messageKind === "reply" || messageKind === "appointment_offer"
+          ? "Nur Zahnärzt:innen können diese Nachricht an Patient:innen senden."
+          : "Versand ist für Ihre Rolle nicht möglich.";
       setError(msg);
       onOutcome?.({ type: "error", message: msg });
       return;
     }
     setError(null);
+    setStatus(null);
     startTransition(async () => {
-      const ensured = await ensureDraftAndSave();
-      if (!ensured.ok) {
-        setError(ensured.error);
-        onOutcome?.({ type: "error", message: ensured.error });
-        return;
-      }
-      router.refresh();
-      if (!editableDraftId) {
-        const msg = "Entwurf vorbereitet — Freigabe in der Kommunikation.";
-        setStatus(msg);
-        onOutcome?.({ type: "success", message: msg });
-        onClose();
-        window.setTimeout(scrollToCommunication, 120);
-        return;
-      }
-      const res = await approveMessageDraftForSubmission({
-        draftId: editableDraftId,
+      const res = await sendTrackerPatientMessage({
         submissionId,
+        body,
+        messageKind,
+        draftId: intent === "freigabe" ? editableDraftId : null,
+        includeAppointmentLink:
+          intent === "termin" && Boolean(appointmentUrl?.trim()) && isDoctor,
+        urgency: intent === "termin" ? terminUrgency : null,
       });
       if (!res.ok) {
         setError(res.error);
         onOutcome?.({ type: "error", message: res.error });
         return;
       }
-      const msg = "Antwort freigegeben.";
-      setStatus(msg);
-      onOutcome?.({ type: "success", message: msg });
+      const successMsg = res.message ?? "Nachricht wurde per E-Mail gesendet.";
+      setStatus(successMsg);
+      onOutcome?.({ type: "success", message: successMsg });
       router.refresh();
       onClose();
-      window.setTimeout(scrollToCommunication, 120);
     });
   };
 
@@ -457,13 +470,12 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
   };
 
   const onPrimary = () => {
-    if (flowStep === "draft") {
-      if (intent === "freigabe" && isDoctor) {
-        handleApprove();
-        return;
-      }
-      handleApply();
+    if (flowStep !== "draft") return;
+    if (canSendToPatient) {
+      handleSendToPatient();
+      return;
     }
+    handleSaveDraftOnly();
   };
 
   if (!open || !intent || !mounted) return null;
@@ -481,7 +493,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
 
   const lead =
     isGenerating
-      ? "Nachricht wird vorbereitet…"
+      ? "Entwurf wird vorbereitet…"
       : flowStep === "draft"
         ? "Die KI hat einen Entwurf vorbereitet — bitte kurz prüfen."
         : intent === "rueckfrage"
@@ -492,8 +504,11 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
               ? "Welche Dringlichkeit gilt für den Terminvorschlag?"
               : "Antwortentwurf zur Prüfung.";
 
-  const primaryLabel =
-    intent === "freigabe" && isDoctor ? "Antwort freigeben" : "Nachricht übernehmen";
+  const primaryLabel = canSendToPatient
+    ? intent === "freigabe" && isDoctor
+      ? "Freigeben und senden"
+      : "An Patient senden"
+    : "Entwurf speichern";
 
   const showDraftEditor = flowStep === "draft" && body.trim().length > 0 && !isGenerating;
 
@@ -540,7 +555,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
             </p>
           ) : null}
 
-          {isGenerating ? <AssistLoading label="Nachricht wird vorbereitet…" /> : null}
+          {isGenerating ? <AssistLoading label="Entwurf wird vorbereitet…" /> : null}
 
           {draftFailed && !isGenerating ? (
             <div className="yd-tracker-v13-assist-empty" role="status">
@@ -625,7 +640,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
 
             {showDraftEditor ? (
               <div className="yd-tracker-v8-action-flow-block">
-                <AssistReadyBanner />
+                <AssistReadyBanner canSend={canSendToPatient} />
                 <label htmlFor={`${titleId}-body`} className="yd-tracker-v8-action-sheet__label">
                   Nachrichtentwurf
                 </label>
@@ -641,28 +656,24 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
             ) : null}
 
             {intent === "termin" && showDraftEditor ? (
-              <div className="yd-tracker-v8-action-sheet__termin">
-                <p className="yd-tracker-v8-action-sheet__label">Terminlink</p>
-                {canSendAppointmentLink && isDoctor ? (
-                  <AppointmentLinkButton
-                    submissionId={submissionId}
-                    hasPatientEmail={Boolean(patientEmail?.trim())}
-                    canSend
-                  />
-                ) : (
-                  <p className="yd-tracker-v8-action-sheet__hint">
-                    Versand des Terminlinks nur durch Zahnärzt:innen. Der Text wird in der
-                    Kommunikation vorbereitet.
-                  </p>
-                )}
-              </div>
+              <p className="yd-tracker-v8-action-sheet__hint">
+                {appointmentUrl?.trim() && isDoctor
+                  ? "Der hinterlegte Terminlink wird der E-Mail angehängt."
+                  : "Ohne Terminlink in den Einstellungen wird nur der Nachrichtentext versendet."}
+              </p>
             ) : null}
 
             {showDraftEditor ? (
               <p className="yd-tracker-v8-action-sheet__hint">
-                {intent === "freigabe" && !isDoctor
-                  ? "Entwurf wird übernommen — die Freigabe erfolgt durch Zahnärzt:innen."
-                  : "Kein automatischer Versand — Übernahme in die Kommunikation zur Freigabe."}
+                {!trackerBackboneAvailable
+                  ? "Patientenversand ist noch nicht aktiv (Migration 038) — nur Entwurf speicherbar."
+                  : !hasPatientEmail
+                  ? "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt — nur Entwurf speicherbar."
+                  : intent === "freigabe" && !isDoctor
+                    ? "Entwurf speichern — Versand und Freigabe durch Zahnärzt:innen."
+                    : canSendToPatient
+                      ? "Nach dem Senden erhält der Patient eine E-Mail."
+                      : "Entwurf speichern — kein Versand ohne Berechtigung oder E-Mail."}
               </p>
             ) : null}
           </fieldset>
@@ -690,7 +701,11 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
               disabled={isPending || isGenerating || !body.trim()}
               onClick={onPrimary}
             >
-              {isPending ? "Wird gespeichert…" : primaryLabel}
+              {isPending
+                ? canSendToPatient
+                  ? "Wird gesendet…"
+                  : "Wird gespeichert…"
+                : primaryLabel}
             </button>
           ) : null}
         </footer>

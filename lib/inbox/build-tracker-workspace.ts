@@ -9,7 +9,23 @@ import {
   type TrackerStatusDisplay,
 } from "@/lib/inbox/tracker-inbox-logic";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import type { OutboundMessageKind } from "@/lib/outbound-messages/types";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
+
+export function outboundKindTimelineTitle(kind: OutboundMessageKind): string {
+  switch (kind) {
+    case "question":
+      return "Rückfrage gesendet";
+    case "photo_request":
+      return "Foto angefordert";
+    case "appointment_offer":
+      return "Termin angeboten";
+    case "reply":
+      return "Antwort gesendet";
+    default:
+      return "Nachricht gesendet";
+  }
+}
 
 export type TrackerTimelineEvent = {
   id: string;
@@ -55,6 +71,7 @@ export function buildTrackerCaseTimeline(input: {
   patientNotes: string | null;
   messageDraftStatus?: MessageDraftListStatus;
   isApprovalPending?: boolean;
+  outboundSent?: { id: string; message_kind: OutboundMessageKind; sent_at: string | null }[];
 }): TrackerTimelineEvent[] {
   const events: TrackerTimelineEvent[] = [
     {
@@ -123,15 +140,16 @@ export function buildTrackerCaseTimeline(input: {
     events.push({
       id: "approval-done",
       dateLabel: "Heute",
-      title: "Antwort freigegeben",
+      title: "Antwort freigegeben (noch nicht versendet)",
     });
   }
 
-  if (input.messageDraftStatus === "sent") {
+  const sentOutbound = (input.outboundSent ?? []).filter((m) => m.sent_at);
+  for (const msg of sentOutbound) {
     events.push({
-      id: "sent",
-      dateLabel: "Heute",
-      title: "Antwort gesendet",
+      id: `outbound-${msg.id}`,
+      dateLabel: formatTimelineDate(msg.sent_at!),
+      title: outboundKindTimelineTitle(msg.message_kind),
     });
   }
 
@@ -143,6 +161,7 @@ function buildPreparedResponseCopy(input: {
   draftsAvailable: boolean;
   isApprovalPending: boolean;
   isDoctor: boolean;
+  hasOutboundReplySent?: boolean;
 }): string {
   const hasDraft =
     input.draftsAvailable &&
@@ -150,8 +169,8 @@ function buildPreparedResponseCopy(input: {
       input.messageDraftStatus === "approved" ||
       input.messageDraftStatus === "sent");
 
-  if (input.messageDraftStatus === "sent") {
-    return "Die Patientenantwort wurde versendet.";
+  if (input.hasOutboundReplySent) {
+    return "Die Antwort wurde per E-Mail an den Patienten gesendet.";
   }
   if (input.isApprovalPending && input.isDoctor) {
     return "Eine Antwort liegt zur ärztlichen Freigabe bereit.";
@@ -183,6 +202,7 @@ export function buildTrackerPraxisAssistent(input: {
   urgency: string | null;
   hasPhotoTrail: boolean;
   draftPreview?: string | null;
+  hasOutboundReplySent?: boolean;
 }): TrackerPraxisAssistentModel {
   const prepChecks = buildTrackerAssistChecklist({
     photoCount: input.photoCount,
@@ -220,6 +240,7 @@ export function buildTrackerPraxisAssistent(input: {
     draftsAvailable: input.draftsAvailable,
     isApprovalPending: input.isApprovalPending,
     isDoctor: input.isDoctor,
+    hasOutboundReplySent: input.hasOutboundReplySent,
   });
 
   const draftPreview = input.draftPreview?.trim() || null;

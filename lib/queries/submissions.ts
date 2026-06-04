@@ -13,6 +13,7 @@ const SIGNED_PHOTO_URL_TTL_SEC = 3600;
 const SUBMISSION_DETAIL_SELECT_FULL = `
       id, workspace_id, patient_name, patient_email, patient_phone, patient_notes,
       patient_birth_date, patient_external_id, urgency, is_draft, intake_channel,
+      practice_status, photo_request_requested_at, follow_up_series_id,
       created_at, updated_at, seen_at, seen_by,
       submission_photos (id, storage_path, sort_order, created_at)
     `;
@@ -39,6 +40,9 @@ export interface SubmissionDetail {
   updated_at: string;
   seen_at: string | null;
   seen_by: string | null;
+  practice_status: string | null;
+  photo_request_requested_at: string | null;
+  follow_up_series_id: string | null;
   photos: Array<{
     id: string;
     storage_path: string;
@@ -89,14 +93,45 @@ async function getSubmissionByIdInner(
 
   let extendedCaseFields = true;
   let hasIntakeChannel = true;
+  let hasTrackerBackboneFields = true;
   if (res.error && isLikelyMissingDbColumnError(res.error)) {
     const errMsg = (res.error.message ?? "").toLowerCase();
-    const intakeOnlyMissing =
-      errMsg.includes("intake_channel") &&
+    const backboneOnlyMissing =
+      (errMsg.includes("practice_status") ||
+        errMsg.includes("photo_request_requested_at") ||
+        errMsg.includes("follow_up_series_id")) &&
       !errMsg.includes("patient_birth_date") &&
       !errMsg.includes("patient_external_id") &&
       !errMsg.includes("is_draft") &&
-      !errMsg.includes("urgency");
+      !errMsg.includes("urgency") &&
+      !errMsg.includes("intake_channel");
+
+    if (backboneOnlyMissing) {
+      console.warn(
+        "[submissions] detail: tracker backbone columns missing — retrying without migration-038 fields."
+      );
+      hasTrackerBackboneFields = false;
+      const withoutBackbone = SUBMISSION_DETAIL_SELECT_FULL.replace(
+        /, practice_status, photo_request_requested_at, follow_up_series_id/g,
+        ""
+      );
+      res = await supabase
+        .from("submissions")
+        .select(withoutBackbone)
+        .eq("id", submissionId)
+        .eq("workspace_id", workspaceId)
+        .single();
+    }
+
+    const errMsgAfterBackbone = (res.error?.message ?? "").toLowerCase();
+    const intakeOnlyMissing =
+      res.error &&
+      isLikelyMissingDbColumnError(res.error) &&
+      errMsgAfterBackbone.includes("intake_channel") &&
+      !errMsgAfterBackbone.includes("patient_birth_date") &&
+      !errMsgAfterBackbone.includes("patient_external_id") &&
+      !errMsgAfterBackbone.includes("is_draft") &&
+      !errMsgAfterBackbone.includes("urgency");
 
     if (intakeOnlyMissing) {
       console.warn(
@@ -166,6 +201,15 @@ async function getSubmissionByIdInner(
     updated_at: data.updated_at as string,
     seen_at: data.seen_at,
     seen_by: data.seen_by,
+    practice_status: hasTrackerBackboneFields
+      ? ((data.practice_status as string | null) ?? "new")
+      : "new",
+    photo_request_requested_at: hasTrackerBackboneFields
+      ? ((data.photo_request_requested_at as string | null) ?? null)
+      : null,
+    follow_up_series_id: hasTrackerBackboneFields
+      ? ((data.follow_up_series_id as string | null) ?? null)
+      : null,
     photos,
   };
 }

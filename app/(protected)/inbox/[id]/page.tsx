@@ -16,6 +16,9 @@ import {
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { loadMessageDraftDetailForSubmission } from "@/lib/queries/message-drafts";
+import { isTrackerBackboneAvailable } from "@/lib/outbound-messages/backbone-available";
+import { getOutboundMessagesForSubmission } from "@/lib/queries/outbound-messages";
+import { TrackerBackboneNotice } from "@/components/inbox/tracker-backbone-notice";
 import { markSubmissionSeen } from "./actions";
 
 interface InboxDetailPageProps {
@@ -69,6 +72,15 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
     workspace.workspace_id
   );
 
+  const trackerBackboneAvailable = await isTrackerBackboneAvailable();
+  const outboundMessages = await getOutboundMessagesForSubmission(
+    submission.id,
+    workspace.workspace_id
+  );
+  const hasOutboundReplySent = outboundMessages.some(
+    (m) => m.message_kind === "reply" && m.status === "sent"
+  );
+
   const messageDraftStatus = messageDraftStatusFromDetail(
     messageDraftLoad.available ? messageDraftLoad.editableDraft : null,
     messageDraftLoad.available ? messageDraftLoad.historyDraft : null,
@@ -104,6 +116,9 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
     intake_channel: submission.intake_channel,
     open_task_count: openTaskCount,
     photo_documentation: null,
+    practice_status: submission.practice_status,
+    photo_request_requested_at: submission.photo_request_requested_at,
+    follow_up_series_id: submission.follow_up_series_id,
   };
 
   const status = trackerStatusForRow(statusRow);
@@ -128,6 +143,9 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
         </div>
 
         <div className="yd-tracker-v4-detail__scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-[max(1.25rem,var(--safe-area-bottom))] md:px-6 md:pb-8 md:pt-2">
+          <div className="mb-4">
+            <TrackerBackboneNotice available={trackerBackboneAvailable} />
+          </div>
           <TrackerWorkspace
             submission={{
               id: submission.id,
@@ -164,6 +182,9 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
             canSendAppointmentLink={isDoctor}
             openTaskCount={openTaskCount}
             assignableMembers={assignableMembers}
+            outboundMessages={outboundMessages}
+            trackerBackboneAvailable={trackerBackboneAvailable}
+            hasOutboundReplySent={hasOutboundReplySent}
           />
         </div>
       </div>

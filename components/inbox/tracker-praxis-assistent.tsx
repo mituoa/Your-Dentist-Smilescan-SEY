@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
 
 type TrackerPraxisAssistentProps = {
   submissionId: string;
+  trackerBackboneAvailable?: boolean;
+  hasOutboundReplySent?: boolean;
   isDoctor: boolean;
   openTaskCount?: number;
   photoCount: number;
@@ -47,15 +49,12 @@ type ActionNotice = {
 };
 
 const MORE_OPTION_IDS = ["rueckfrage", "foto", "aufgabe"] as const;
-const MORE_OPTION_LABELS: Record<(typeof MORE_OPTION_IDS)[number], string> = {
-  rueckfrage: "Rückfrage",
-  foto: "Foto",
-  aufgabe: "Praxisaufgabe",
-};
 
 /** V12 — Entscheidung: Empfehlung → Handlung → Dringlichkeit → Vorbereitet. */
 export function TrackerPraxisAssistent({
   submissionId,
+  trackerBackboneAvailable = true,
+  hasOutboundReplySent = false,
   isDoctor,
   photoCount,
   isApprovalPending,
@@ -147,9 +146,10 @@ export function TrackerPraxisAssistent({
   return (
     <>
       <aside
-        id="tracker-klinische-voranalyse"
-        className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail"
-        aria-label="Klinische Entscheidung"
+        id="tracker-entscheidung"
+        className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail yd-tracker-v14-rail"
+        aria-label="Entscheidung"
+        aria-busy={sheetIntent !== null}
       >
         <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--empfehlung">
           <h2 className="yd-tracker-v12-rail__label">Empfehlung</h2>
@@ -157,7 +157,8 @@ export function TrackerPraxisAssistent({
           <button
             id="tracker-v10-primary-action"
             type="button"
-            className="yd-tracker-v12-primary-action"
+            className="yd-tracker-v12-primary-action yd-tracker-v14-primary-action"
+            aria-haspopup="dialog"
             onClick={() => runStep(primary)}
           >
             {primary.label}
@@ -204,11 +205,10 @@ export function TrackerPraxisAssistent({
                 <li key={item.id}>
                   <button
                     type="button"
-                    className="yd-tracker-v12-more-action"
+                    className="yd-tracker-v12-more-action yd-tracker-v14-more-action"
                     onClick={() => runStep(item)}
                   >
-                    {MORE_OPTION_LABELS[item.id as (typeof MORE_OPTION_IDS)[number]] ??
-                      item.label}
+                    {item.label}
                   </button>
                 </li>
               ))}
@@ -251,6 +251,7 @@ export function TrackerPraxisAssistent({
         initialDraftBody={initialDraftBody}
         prioritizedRuckfrageTopics={clinical.prioritizedRuckfrageTopics}
         suggestedPhotoViewId={clinical.suggestedPhotoViewId}
+        trackerBackboneAvailable={trackerBackboneAvailable}
       />
     </>
   );
