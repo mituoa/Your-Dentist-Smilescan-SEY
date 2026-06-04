@@ -1,18 +1,14 @@
 import { AppointmentLinkButton } from "@/components/inbox/appointment-link-button";
 import { TrackerCaseTimeline } from "@/components/inbox/tracker-case-timeline";
-import { TrackerCommandFlow } from "@/components/inbox/tracker-command-flow";
 import { TrackerDraftWorkspace } from "@/components/inbox/tracker-draft-workspace";
 import { TrackerPatientHeader } from "@/components/inbox/tracker-patient-header";
 import { TrackerPhotoStage } from "@/components/inbox/tracker-photo-stage";
+import { TrackerPraxisAssistent } from "@/components/inbox/tracker-praxis-assistent";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
-import { TrackerWorkspaceAssist } from "@/components/inbox/tracker-workspace-assist";
-import { TrackerWorkspaceNextSteps } from "@/components/inbox/tracker-workspace-next-steps";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
-  buildTrackerAssistChecklist,
   buildTrackerCaseTimeline,
-  buildTrackerCommandFlow,
-  buildTrackerNextSteps,
+  buildTrackerPraxisAssistent,
 } from "@/lib/inbox/build-tracker-workspace";
 import {
   isApprovalPending,
@@ -109,29 +105,17 @@ export function TrackerWorkspace({
     isApprovalPending: approvalPending,
   });
 
-  const assist = buildTrackerAssistChecklist({
+  const praxisAssistent = buildTrackerPraxisAssistent({
     photoCount: submission.photos.length,
     hasMultiDayPhotos: hasMultiDayPhotos(submission.photos),
     messageDraftStatus,
     draftsAvailable: messageDraftsAvailable,
     status,
     isApprovalPending: approvalPending,
-  });
-
-  const nextSteps = buildTrackerNextSteps({
     isDoctor,
-    messageDraftStatus,
-    isApprovalPending: approvalPending,
-    photoCount: submission.photos.length,
+    openTaskCount,
     urgency: submission.urgency,
     hasPhotoTrail: photoTrail,
-  });
-
-  const commandFlow = buildTrackerCommandFlow({
-    messageDraftStatus,
-    draftsAvailable: messageDraftsAvailable,
-    openTaskCount,
-    isApprovalPending: approvalPending,
   });
 
   return (
@@ -188,9 +172,7 @@ export function TrackerWorkspace({
         </div>
 
         <aside className="yd-tracker-v4-workspace__rail">
-          <TrackerWorkspaceAssist items={assist} />
-          <TrackerWorkspaceNextSteps steps={nextSteps} />
-          <TrackerCommandFlow steps={commandFlow} />
+          <TrackerPraxisAssistent model={praxisAssistent} />
           {canSendAppointmentLink ? (
             <section className="yd-tracker-v4-rail-card yd-dash-surface rounded-[14px] border border-[rgba(226,232,240,0.95)] p-4 md:p-5">
               <h3 className="yd-tracker-v4-section-title">Termin</h3>

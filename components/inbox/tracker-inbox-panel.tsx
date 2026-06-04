@@ -5,9 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 
+import { TrackerInboxPulse } from "@/components/inbox/tracker-inbox-pulse";
 import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { trackerInboxPriorityLabel } from "@/lib/inbox/build-tracker-workspace";
+import { buildTrackerInboxPulse } from "@/lib/inbox/tracker-inbox-metrics";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
@@ -16,20 +18,13 @@ import {
   matchesTrackerFilter,
   matchesTrackerSearch,
   sortTrackerInboxItems,
-  trackerCaseTypeLabel,
+  trackerInboxHeadline,
   trackerStatusForRow,
   type EnrichedSubmissionListItem,
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
 import { cn } from "@/lib/utils";
-
-function initials(name: string | null): string {
-  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-}
 
 type TrackerInboxPanelProps = {
   items: SubmissionListItem[];
@@ -69,6 +64,8 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
     router.push(href);
   };
 
+  const pulse = useMemo(() => buildTrackerInboxPulse(searchScoped), [searchScoped]);
+
   const emptyCopy =
     filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
 
@@ -77,10 +74,8 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
       <div className="yd-tracker-v4-inbox__toolbar">
         <div className="yd-tracker-v4-inbox__toolbar-head">
           <div className="min-w-0">
-            <h2 className="yd-dash-section text-[1rem] md:text-[1.0625rem]">Praxis-Inbox</h2>
-            <p className="mt-0.5 text-[12px] font-medium text-[#64748B]">
-              Was jetzt bearbeitet werden soll
-            </p>
+            <p className="yd-tracker-v4-inbox__eyebrow">Arbeitswarteschlange</p>
+            <h2 className="yd-dash-section yd-tracker-v4-inbox__title">Praxis-Inbox</h2>
           </div>
           {showCreateCase ? (
             <Link href="/create-case?from=inbox" className="yd-tracker-v4-new-case">
@@ -89,7 +84,12 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
             </Link>
           ) : null}
         </div>
-        <TrackerInboxSearch />
+        <TrackerInboxPulse
+          metrics={pulse}
+          activeFilter={filter}
+          onSelect={setFilter}
+        />
+        <TrackerInboxSearch className="yd-tracker-search--inbox" />
         <div className="yd-tracker-filter-scroll">
           <div className="yd-tracker-filter-chips" role="tablist" aria-label="Praxis-Inbox filtern">
             {TRACKER_FILTER_CHIPS.map((chip) => {
@@ -125,13 +125,13 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
         aria-label="Patienten in der Praxis-Inbox"
       >
         {filtered.length === 0 ? (
-          <li className="px-4 py-12 text-center text-[14px] leading-relaxed text-[#64748B]">
-            {emptyCopy}
+          <li className="px-3 py-8">
+            <p className="yd-tracker-empty__text text-center">{emptyCopy}</p>
           </li>
         ) : (
           filtered.map((item) => {
             const isActive = pathname === `/inbox/${item.id}`;
-            const caseType = trackerCaseTypeLabel(item);
+            const headline = trackerInboxHeadline(item);
             const status = trackerStatusForRow(item);
             const concern = deriveSubmissionIssueShortLine(
               item.patient_notes,
@@ -159,15 +159,14 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
                   aria-current={isActive ? "page" : undefined}
                 >
                   <div className="yd-tracker-v4-inbox-card__row">
-                    <span className="yd-tracker-v4-inbox-card__avatar" aria-hidden>
-                      {initials(item.patient_name)}
-                    </span>
                     <div className="min-w-0 flex-1">
-                      <span className="yd-tracker-v4-inbox-card__case-type">{caseType}</span>
+                      <span className="yd-tracker-v4-inbox-card__headline">{headline}</span>
                       <span className="yd-tracker-v4-inbox-card__name">
                         {item.patient_name?.trim() || "Unbekannter Patient"}
                       </span>
-                      <span className="yd-tracker-v4-inbox-card__concern">{concern}</span>
+                      {concern ? (
+                        <span className="yd-tracker-v4-inbox-card__concern">{concern}</span>
+                      ) : null}
                     </div>
                     <span
                       className={cn(

@@ -7,6 +7,7 @@ export type WorkspaceIntegratedHeaderProps = {
   hideGreeting?: boolean;
   displayName: string;
   subtitle: string;
+  subtitleMeta?: string;
   email: string;
   workspaceName: string;
   role: "doctor" | "team";
@@ -23,6 +24,7 @@ export function WorkspaceIntegratedHeader({
   hideGreeting = false,
   displayName,
   subtitle,
+  subtitleMeta,
   email,
   workspaceName,
   role,
@@ -42,6 +44,9 @@ export function WorkspaceIntegratedHeader({
             </p>
           )}
           <p className="yd-dash-header-premium__subtitle">{subtitle}</p>
+          {subtitleMeta ? (
+            <p className="yd-dash-header-premium__subtitle-meta">{subtitleMeta}</p>
+          ) : null}
         </div>
 
         <WorkspaceHeaderControls

@@ -57,28 +57,38 @@ export function TrackerPhotoStage({
     "yd-tracker-v4-photo-stage",
     dominant && "yd-tracker-v4-photo-stage--dominant"
   );
-  const title = dominant ? "Fotos" : "Foto-Dokumentation";
+  const title = "Foto-Dokumentation";
 
   if (sorted.length === 0) {
     return (
-      <section className={stageClass} aria-label="Fotos">
-        <h3 className="yd-tracker-workspace-section__title">{title}</h3>
+      <section className={stageClass} aria-label="Foto-Dokumentation">
+        <header className="yd-tracker-v4-photo-stage__head">
+          <h3 className="yd-tracker-workspace-section__title">{title}</h3>
+        </header>
         <div className="yd-tracker-v4-photo-stage__empty">
-          <ImageIcon className="h-10 w-10 text-[#94A3B8]/45" strokeWidth={1.25} aria-hidden />
-          <p className="mt-2 text-[14px] font-semibold text-[#475569]">
-            Noch keine klinische Dokumentation
+          <ImageIcon className="h-9 w-9 text-[#94A3B8]/40" strokeWidth={1.25} aria-hidden />
+          <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[#334155]">
+            Es liegen noch keine klinischen Bilder vor.
           </p>
-          <p className="mt-1 max-w-sm text-[13px] leading-relaxed text-[#64748B]">
-            Sobald der Patient Fotos sendet, erscheinen sie hier mit Verlauf und Tageszuordnung.
+          <p className="mt-1.5 max-w-md text-[13px] leading-relaxed text-[#64748B]">
+            Nach Eingang erscheinen die Aufnahmen hier mit klinischem Viewer und Tagesverlauf.
           </p>
         </div>
       </section>
     );
   }
 
+  const photoMeta =
+    sorted.length === 1
+      ? "1 Bild"
+      : `${sorted.length} Bilder · ${dayGroups.length} ${dayGroups.length === 1 ? "Tag" : "Tage"}`;
+
   return (
-    <section className={stageClass} aria-label="Fotos">
-      <h3 className="yd-tracker-workspace-section__title">{title}</h3>
+    <section className={stageClass} aria-label="Foto-Dokumentation">
+      <header className="yd-tracker-v4-photo-stage__head">
+        <h3 className="yd-tracker-workspace-section__title">{title}</h3>
+        <p className="yd-tracker-v4-photo-stage__meta">{photoMeta}</p>
+      </header>
       <div className="yd-tracker-v4-photo-stage__viewer">
         <PhotoViewer
           submissionId={submissionId}

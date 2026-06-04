@@ -110,8 +110,8 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
       />
       <CaseCreatedToast />
 
-      <div className="yd-tracker-v4-detail flex h-full min-h-0 flex-1 flex-col overflow-hidden max-md:overflow-y-auto max-md:overscroll-y-contain max-md:bg-[#EDF1F7] md:bg-[#F7F9FC]">
-        <div className="shrink-0 bg-white px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:z-[6] max-md:border-b max-md:border-[rgba(15,23,42,0.06)] md:px-6 md:pt-4">
+      <div className="yd-tracker-v4-detail flex h-full min-h-0 flex-1 flex-col overflow-hidden max-md:overflow-y-auto max-md:overscroll-y-contain">
+        <div className="yd-tracker-v4-detail__bar shrink-0 px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:z-[6] md:px-6 md:pt-4">
           <Suspense fallback={null}>
             <InboxMobileBack />
           </Suspense>

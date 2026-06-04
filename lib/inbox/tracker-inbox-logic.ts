@@ -22,6 +22,7 @@ export type TrackerInboxFilter =
   | "new_submissions"
   | "draft_prepared"
   | "approval_pending"
+  | "active_cases"
   | "open_tasks"
   | "photo_trail"
   | "follow_up"
@@ -49,6 +50,7 @@ export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
   new_submissions: "Keine neuen Patienteneingänge.",
   draft_prepared: "Keine vorbereiteten Antworten offen.",
   approval_pending: "Keine Antworten warten auf Freigabe.",
+  active_cases: "Keine aktiven Fälle in Bearbeitung.",
   open_tasks: "Keine offenen Aufgaben zu Fällen.",
   photo_trail: "Keine aktiven Fotoverläufe.",
   follow_up: "Keine aktiven Nachsorge-Einsendungen.",
@@ -88,6 +90,13 @@ export function matchesTrackerFilter(
       return item.message_draft_status === "draft";
     case "approval_pending":
       return isApprovalPending(item);
+    case "active_cases":
+      return (
+        !item.is_draft &&
+        item.message_draft_status !== "sent" &&
+        Boolean(item.seen_at) &&
+        !isApprovalPending(item)
+      );
     case "open_tasks":
       return item.open_task_count > 0;
     case "photo_trail":
@@ -261,16 +270,31 @@ export type TrackerStatusDisplay = {
   className: string;
 };
 
+function daysSinceIntake(createdAt: string): number {
+  const start = new Date(createdAt).getTime();
+  if (Number.isNaN(start)) return 1;
+  const diff = Date.now() - start;
+  return Math.max(1, Math.floor(diff / 86_400_000) + 1);
+}
+
 /**
- * Falltyp für Inbox — neutral wenn unklar, keine Pauschallabels.
+ * Primäre Inbox-Zeile — Falltyp vor Patientenname.
  */
-export function trackerCaseTypeLabel(item: EnrichedSubmissionListItem): string {
+export function trackerInboxHeadline(item: EnrichedSubmissionListItem): string {
   if (item.is_draft) return "Entwurf";
-  if (isApprovalPending(item)) return "KI-Freigabe";
+  if (isApprovalPending(item)) return "Freigabe erforderlich";
+  if (item.message_draft_status === "draft") return "KI Antwort bereit";
   if (item.open_task_count > 0) return "Praxisaufgabe";
-  if (item.intake_channel === "follow_up") return "Nachsorge";
+  if (item.intake_channel === "follow_up" || hasPhotoTrail(item)) {
+    return `Nachsorge Tag ${daysSinceIntake(item.created_at)}`;
+  }
   if (!item.seen_at) return "Neue Anfrage";
   return "In Bearbeitung";
+}
+
+/** @deprecated Nutze trackerInboxHeadline — Alias für bestehende Aufrufer. */
+export function trackerCaseTypeLabel(item: EnrichedSubmissionListItem): string {
+  return trackerInboxHeadline(item);
 }
 
 export function trackerStatusForRow(item: EnrichedSubmissionListItem): TrackerStatusDisplay {

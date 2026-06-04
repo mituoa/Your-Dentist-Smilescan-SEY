@@ -175,6 +175,17 @@
     0 3px 16px rgba(47, 128, 237, 0.05) !important;
 }
 
+/* Tracker — gleiche Materialität wie Dashboard */
+.yd-workspace .yd-inbox-workspace .yd-dash-section {
+  font-size: 0.9375rem;
+  letter-spacing: -0.022em;
+}
+
+.yd-workspace .yd-tracker-v4-photo-stage,
+.yd-workspace .yd-tracker-v4-timeline--premium .yd-tracker-v4-timeline__list {
+  box-shadow: var(--yd-ws-shadow-soft) !important;
+}
+
 .yd-workspace .yd-dashboard .yd-dash-search-input:hover {
   box-shadow:
     inset 0 1px 2px rgba(15, 35, 58, 0.03),

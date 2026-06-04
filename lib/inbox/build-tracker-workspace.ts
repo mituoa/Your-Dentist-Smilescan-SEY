@@ -25,6 +25,15 @@ export type TrackerCommandStep = {
   state: "done" | "active" | "pending";
 };
 
+export type TrackerPraxisAssistentModel = {
+  analysis: string;
+  preparation: string;
+  approvalStatus: string;
+  recommendedAction: string;
+  flowSteps: TrackerCommandStep[];
+  prepChecks: TrackerAssistItem[];
+};
+
 function formatTimelineDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
@@ -45,7 +54,7 @@ export function buildTrackerCaseTimeline(input: {
     {
       id: "intake",
       dateLabel: formatTimelineDate(input.createdAt),
-      title: "Einsendung eingegangen",
+      title: "Anfrage eingegangen",
     },
   ];
 
@@ -69,7 +78,7 @@ export function buildTrackerCaseTimeline(input: {
     events.push({
       id: `photo-${group.iso}`,
       dateLabel: formatTimelineDate(group.iso),
-      title: count === 1 ? "Foto eingegangen" : `${count} Fotos eingegangen`,
+      title: count === 1 ? "Bilder erhalten" : `${count} Bilder erhalten`,
     });
   }
 
@@ -85,9 +94,9 @@ export function buildTrackerCaseTimeline(input: {
 
   if (input.messageDraftStatus === "draft" || input.messageDraftStatus === "approved") {
     events.push({
-      id: "ki-summary",
+      id: "ki-analysis",
       dateLabel: "Heute",
-      title: "KI-Zusammenfassung erstellt",
+      title: "KI Analyse erstellt",
     });
     events.push({
       id: "draft-ready",
@@ -104,6 +113,14 @@ export function buildTrackerCaseTimeline(input: {
     });
   }
 
+  if (input.messageDraftStatus === "approved") {
+    events.push({
+      id: "approval-done",
+      dateLabel: "Heute",
+      title: "Antwort freigegeben",
+    });
+  }
+
   if (input.messageDraftStatus === "sent") {
     events.push({
       id: "sent",
@@ -113,6 +130,89 @@ export function buildTrackerCaseTimeline(input: {
   }
 
   return events;
+}
+
+export function buildTrackerPraxisAssistent(input: {
+  photoCount: number;
+  hasMultiDayPhotos: boolean;
+  messageDraftStatus: MessageDraftListStatus;
+  draftsAvailable: boolean;
+  status: TrackerStatusDisplay;
+  isApprovalPending: boolean;
+  isDoctor: boolean;
+  openTaskCount: number;
+  urgency: string | null;
+  hasPhotoTrail: boolean;
+}): TrackerPraxisAssistentModel {
+  const prepChecks = buildTrackerAssistChecklist({
+    photoCount: input.photoCount,
+    hasMultiDayPhotos: input.hasMultiDayPhotos,
+    messageDraftStatus: input.messageDraftStatus,
+    draftsAvailable: input.draftsAvailable,
+    status: input.status,
+    isApprovalPending: input.isApprovalPending,
+  });
+
+  const flowSteps = buildTrackerCommandFlow({
+    messageDraftStatus: input.messageDraftStatus,
+    draftsAvailable: input.draftsAvailable,
+    openTaskCount: input.openTaskCount,
+    isApprovalPending: input.isApprovalPending,
+  });
+
+  const nextSteps = buildTrackerNextSteps({
+    isDoctor: input.isDoctor,
+    messageDraftStatus: input.messageDraftStatus,
+    isApprovalPending: input.isApprovalPending,
+    photoCount: input.photoCount,
+    urgency: input.urgency,
+    hasPhotoTrail: input.hasPhotoTrail,
+  });
+
+  const hasDraft =
+    input.draftsAvailable &&
+    (input.messageDraftStatus === "draft" ||
+      input.messageDraftStatus === "approved" ||
+      input.messageDraftStatus === "sent");
+
+  let analysis = "Eingang wird strukturiert.";
+  if (input.photoCount > 0 && input.hasMultiDayPhotos) {
+    analysis = "Klinische Bilder mit Verlauf — Tageszuordnung liegt vor.";
+  } else if (input.photoCount > 0) {
+    analysis = "Klinische Bilder liegen vor und sind bereit zur Sichtung.";
+  } else {
+    analysis = "Noch keine Bilder — Anfrage wartet auf klinische Dokumentation.";
+  }
+
+  let preparation = "Antwort noch nicht vorbereitet.";
+  if (input.messageDraftStatus === "sent") {
+    preparation = "Antwort wurde versendet.";
+  } else if (hasDraft) {
+    preparation = "Antwortentwurf liegt zur Prüfung bereit.";
+  } else if (input.draftsAvailable) {
+    preparation = "Assistenz kann Antwort aus dem Anliegen vorbereiten.";
+  }
+
+  let approvalStatus = "Freigabe derzeit nicht erforderlich.";
+  if (input.isApprovalPending) {
+    approvalStatus = "Ärztliche Freigabe ausstehend.";
+  } else if (input.messageDraftStatus === "approved" || input.messageDraftStatus === "sent") {
+    approvalStatus = "Freigabe abgeschlossen.";
+  } else if (hasDraft && input.isDoctor) {
+    approvalStatus = "Entwurf kann freigegeben werden.";
+  }
+
+  const recommendedAction =
+    nextSteps[0] ?? "Fall in der Inbox weiter bearbeiten.";
+
+  return {
+    analysis,
+    preparation,
+    approvalStatus,
+    recommendedAction,
+    flowSteps,
+    prepChecks,
+  };
 }
 
 export function buildTrackerAssistChecklist(input: {

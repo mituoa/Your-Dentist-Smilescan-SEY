@@ -106,6 +106,23 @@
   }
 }
 
+.yd-workspace .yd-dash-header-premium__subtitle-meta {
+  margin: 0.35rem 0 0;
+  max-width: 36rem;
+  color: var(--yd-header-subtitle);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  opacity: 0.88;
+}
+
+@media (min-width: 768px) {
+  .yd-workspace .yd-dash-header-premium__subtitle-meta {
+    font-size: 0.875rem;
+  }
+}
+
 .yd-workspace .yd-dash-header-premium__toolbar {
   display: flex;
   flex-wrap: wrap;

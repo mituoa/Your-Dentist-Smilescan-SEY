@@ -7,6 +7,7 @@ import {
   resolveWorkspaceGreeting,
   resolveWorkspaceIntegratedHeader,
 } from "@/lib/app-shell/workspace-integrated-header-context";
+import type { TrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
 import type { ThemePreference } from "@/lib/theme";
 
 import { WorkspaceIntegratedHeader } from "./workspace-integrated-header";
@@ -19,6 +20,7 @@ type WorkspaceIntegratedHeaderBridgeProps = {
   displayName: string;
   avatarUrl?: string | null;
   inboxCount?: number;
+  trackerHeaderSummary?: TrackerHeaderSummary | null;
 };
 
 /** Route-aware integrierte Headline — Desktop md+, ersetzt die alte Toolbar. */
@@ -30,9 +32,19 @@ export function WorkspaceIntegratedHeaderBridge({
   displayName,
   avatarUrl,
   inboxCount,
+  trackerHeaderSummary,
 }: WorkspaceIntegratedHeaderBridgeProps) {
   const pathname = usePathname() || "";
   const ctx = resolveWorkspaceIntegratedHeader(pathname);
+  const onTracker = pathname.startsWith("/inbox");
+  const subtitle =
+    onTracker && trackerHeaderSummary
+      ? trackerHeaderSummary.lead
+      : ctx.subtitle;
+  const subtitleMeta =
+    onTracker && trackerHeaderSummary
+      ? trackerHeaderSummary.breakdown
+      : ctx.subtitleMeta;
 
   const greeting = useMemo(() => {
     return resolveWorkspaceGreeting(new Date().getHours());
@@ -49,7 +61,8 @@ export function WorkspaceIntegratedHeaderBridge({
         greeting={greeting}
         hideGreeting={ctx.hideGreeting}
         displayName={displayName}
-        subtitle={ctx.subtitle}
+        subtitle={subtitle}
+        subtitleMeta={subtitleMeta}
         email={email}
         workspaceName={workspaceName}
         role={role}

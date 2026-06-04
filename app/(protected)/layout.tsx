@@ -18,6 +18,8 @@ import { WorkspaceIntegratedHeaderBridge } from "@/components/app-shell/workspac
 import { ProtectedTopbar } from "@/components/app-shell/protected-topbar";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
+import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
+import type { EnrichedSubmissionListItem } from "@/lib/inbox/tracker-inbox-logic";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
@@ -116,6 +118,7 @@ export default async function ProtectedLayout({
     patient_name: string | null;
     patient_notes: string | null;
   }[] = [];
+  let trackerHeaderSummary = null;
 
   if (workspace) {
     const [inboxRes, tasksRes, journals] = await Promise.all([
@@ -130,6 +133,9 @@ export default async function ProtectedLayout({
         patient_name: item.patient_name,
         patient_notes: item.patient_notes,
       }));
+      trackerHeaderSummary = buildTrackerHeaderSummary(
+        inboxRes.items as EnrichedSubmissionListItem[]
+      );
     }
 
     navAmbient = buildNavAmbientPreviews({
@@ -193,6 +199,7 @@ export default async function ProtectedLayout({
                     displayName={doctorLabel}
                     avatarUrl={profileData?.photo_url ?? null}
                     inboxCount={inboxCount}
+                    trackerHeaderSummary={trackerHeaderSummary}
                   />
                   {children}
                 </HcAppCanvas>

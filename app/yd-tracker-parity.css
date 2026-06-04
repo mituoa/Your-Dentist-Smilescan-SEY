@@ -1,0 +1,314 @@
+/**
+ * Tracker — Dashboard-Parität (Atmosphäre, KPI-Pulse, Zonen)
+ * Split-Architektur unverändert.
+ */
+
+/* —— Seite & Shell —— */
+
+.yd-tracker-page {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.yd-tracker-page .yd-dash-ambient-orb {
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(72px);
+  opacity: 0.5;
+}
+
+.yd-tracker-page .yd-dash-ambient-orb--a {
+  top: -8%;
+  right: 4%;
+  width: min(42vw, 380px);
+  height: min(42vw, 380px);
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.14) 0%, transparent 68%);
+}
+
+.yd-tracker-page .yd-dash-ambient-orb--b {
+  bottom: 8%;
+  left: 18%;
+  width: min(34vw, 300px);
+  height: min(34vw, 300px);
+  background: radial-gradient(circle, rgba(47, 128, 237, 0.1) 0%, transparent 70%);
+}
+
+.yd-tracker-page .yd-tracker-shell {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    var(--yd-ws-shadow-soft, 0 1px 2px rgba(15, 35, 58, 0.04)),
+    0 20px 56px rgba(15, 35, 58, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+}
+
+.yd-workspace .yd-inbox-workspace {
+  min-height: 0;
+}
+
+/* —— Inbox KPI-Pulse (Dashboard-DNA, schmal) —— */
+
+.yd-tracker-pulse {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.yd-tracker-pulse__metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-height: 4.25rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(186, 210, 232, 0.45);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(241, 247, 252, 0.82) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 2px 10px rgba(15, 35, 58, 0.04);
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.yd-tracker-pulse__metric:hover {
+  border-color: rgba(130, 168, 210, 0.65);
+  box-shadow: 0 4px 16px rgba(47, 128, 237, 0.1);
+}
+
+.yd-tracker-pulse__metric--active {
+  border-color: rgba(47, 128, 237, 0.35);
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(224, 238, 252, 0.92) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 6px 20px rgba(47, 128, 237, 0.12);
+}
+
+.yd-tracker-pulse__metric--has-work .yd-tracker-pulse__value {
+  color: #1d4ed8;
+}
+
+.yd-tracker-pulse__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(239, 246, 255, 0.95);
+  color: #2563eb;
+}
+
+.yd-tracker-pulse__value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.yd-tracker-pulse__label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+/* —— Inbox Toolbar & Filter (Dashboard-Search-Nähe) —— */
+
+.yd-tracker-v4-inbox__eyebrow {
+  margin: 0 0 0.15rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-inbox__title {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -0.025em;
+}
+
+.yd-tracker-v4-inbox__toolbar {
+  border-bottom-color: rgba(180, 198, 218, 0.32);
+}
+
+.yd-tracker-v4-inbox .yd-tracker-search__input,
+.yd-tracker-v4-inbox .yd-tracker-search--inbox .yd-tracker-search__input {
+  min-height: 2.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--yd-ws-border-soft, rgba(186, 210, 232, 0.55));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 253, 250, 0.94) 0%,
+    rgba(238, 246, 252, 0.98) 100%
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(15, 35, 58, 0.025),
+    0 0 0 1px rgba(255, 255, 255, 0.55);
+  font-size: 0.875rem;
+}
+
+.yd-tracker-v4-inbox .yd-tracker-filter-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(186, 210, 232, 0.5);
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
+
+.yd-tracker-v4-inbox .yd-tracker-filter-chip--active {
+  background: linear-gradient(165deg, #fff 0%, rgba(224, 238, 252, 0.95) 100%);
+  border-color: rgba(47, 128, 237, 0.28);
+  color: #1d4ed8;
+  box-shadow: 0 2px 10px rgba(47, 128, 237, 0.1);
+}
+
+/* —— Inbox-Karten —— */
+
+.yd-tracker-v4-inbox-card {
+  margin: 0 0.5rem;
+  border-radius: 12px;
+  border-bottom: none;
+}
+
+.yd-tracker-v4-inbox-card + .yd-tracker-v4-inbox-card,
+.yd-tracker-v4-inbox__list > li + li .yd-tracker-v4-inbox-card {
+  margin-top: 0.25rem;
+}
+
+.yd-tracker-v4-inbox-card:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* —— Leerzustände —— */
+
+.yd-tracker-empty {
+  margin: 0.75rem;
+  border-radius: 16px;
+  border: 1px solid rgba(186, 210, 232, 0.4);
+}
+
+.yd-tracker-empty__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.yd-tracker-empty__text {
+  margin: 0.5rem 0 0;
+  max-width: 20rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+/* —— Arbeitsbereich (Detail) —— */
+
+.yd-tracker-v4-detail {
+  background: transparent !important;
+}
+
+.yd-tracker-v4-detail__bar {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 767px) {
+  .yd-tracker-v4-detail__bar {
+    background: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  }
+}
+
+.yd-tracker-v4-detail__scroll {
+  position: relative;
+}
+
+.yd-tracker-v4-workspace {
+  position: relative;
+}
+
+.yd-tracker-v4-patient-header {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.125rem 1.125rem;
+  border-radius: 16px;
+  border: 1px solid rgba(186, 210, 232, 0.45);
+  border-bottom: 1px solid rgba(186, 210, 232, 0.45);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(241, 247, 252, 0.88) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.yd-tracker-v4-praxis-assistent {
+  border: 1px solid rgba(184, 220, 255, 0.4) !important;
+  box-shadow:
+    var(--yd-ws-shadow-soft, 0 2px 12px rgba(15, 35, 58, 0.05)),
+    0 12px 36px rgba(47, 128, 237, 0.08) !important;
+}
+
+.yd-tracker-workspace-placeholder {
+  border-radius: 18px;
+  margin: 1rem;
+  border: 1px solid rgba(186, 210, 232, 0.35);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(237, 246, 255, 0.5) 100%
+  );
+}
+
+.yd-tracker-workspace-placeholder__glow {
+  opacity: 0.65;
+}
+
+/* Workspace atmosphere tokens */
+.yd-workspace .yd-inbox-workspace .yd-ambient-card,
+.yd-workspace .yd-inbox-workspace .yd-dash-surface {
+  box-shadow: var(--yd-ws-shadow-soft, 0 2px 12px rgba(15, 35, 58, 0.05)) !important;
+}
+
+.yd-workspace main:has(.yd-inbox-workspace) .yd-dash-header-premium__subtitle {
+  font-weight: 600;
+  color: var(--yd-ws-text-secondary, #334155);
+}

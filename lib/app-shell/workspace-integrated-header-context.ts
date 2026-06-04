@@ -3,6 +3,8 @@
 export type WorkspaceIntegratedHeaderContext = {
   eyebrow: string;
   subtitle: string;
+  /** Zweite Zeile (z. B. Tracker-Aufschlüsselung). */
+  subtitleMeta?: string;
   showSearch: boolean;
   /** Keine Begrüßung mit Namen (z. B. Relay — ruhiger Kopf). */
   hideGreeting?: boolean;
