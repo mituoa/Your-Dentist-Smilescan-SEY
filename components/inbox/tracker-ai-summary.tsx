@@ -32,7 +32,7 @@ export function TrackerAiSummary({
   const hasPhotos = photoCount > 0;
 
   const actionClass =
-    "inline-flex items-center justify-center rounded-lg border border-[rgba(15,23,42,0.08)] bg-[#F8FAFC] px-3 py-2 text-[12px] font-medium text-[#334155] transition-colors hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.28)]";
+    "inline-flex items-center justify-center rounded-lg border border-[rgba(15,23,42,0.08)] bg-[#F8FAFC] px-3 py-2 text-[12px] font-medium text-[#334155] transition-colors hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.12)]";
 
   return (
     <section

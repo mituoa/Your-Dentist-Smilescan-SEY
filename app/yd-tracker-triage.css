@@ -710,8 +710,10 @@
 }
 
 .yd-tracker-assistent .yd-tracker-draft--assistent button[style*="2B6FE8"],
-.yd-tracker-assistent .yd-tracker-draft--assistent button[style*="background: #2B6FE8"] {
-  background: #0f172a !important;
+.yd-tracker-assistent .yd-tracker-draft--assistent button[style*="background: #2B6FE8"],
+.yd-tracker-assistent .yd-tracker-draft--assistent button[style*="0C1929"],
+.yd-tracker-assistent .yd-tracker-draft--assistent button[style*="background: #0C1929"] {
+  background: #0c1929 !important;
   box-shadow: none !important;
   border-radius: 8px !important;
   font-size: 0.8125rem !important;

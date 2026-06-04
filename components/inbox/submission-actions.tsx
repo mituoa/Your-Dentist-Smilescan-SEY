@@ -103,7 +103,7 @@ export function SubmissionActions({
               seenAt={seenAt}
             />
             <p className="mt-4 text-[12px] text-[#94A3B8]">
-              <Link href="/relay" className="font-medium text-[#2563EB] hover:underline">
+              <Link href="/relay" className="font-medium text-[#1A4F9C] hover:underline">
                 Relay
               </Link>
             </p>

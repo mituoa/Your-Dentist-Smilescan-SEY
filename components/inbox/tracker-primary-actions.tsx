@@ -30,14 +30,14 @@ export function TrackerPrimaryActions() {
         style={{
           padding: "0 20px",
           height: "44px",
-          background: "#2B6FE8",
+          background: "#0C1929",
           color: "#FFFFFF",
           borderRadius: "9px",
           fontSize: "15px",
           fontWeight: 600,
           letterSpacing: "-0.01em",
           marginBottom: "10px",
-          boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
+          boxShadow: "0 1px 2px rgba(12,25,41,0.08)",
         }}
       >
         <Calendar className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
@@ -53,7 +53,7 @@ export function TrackerPrimaryActions() {
           padding: "0 20px",
           height: "44px",
           background: "#FFFFFF",
-          color: "#2B6FE8",
+          color: "#1A4F9C",
           border: "1px solid #CBD5E1",
           borderRadius: "9px",
           fontSize: "15px",

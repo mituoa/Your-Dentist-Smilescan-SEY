@@ -303,7 +303,7 @@ export function PhotoViewer({
                 ? "ZIP-Export erneut versuchen"
                 : "Fotos dieses Falls als ZIP-Datei exportieren"
           }
-          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium transition hover:border-[#2B6FE8]/40 hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 self-start rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-[13px] font-medium text-[#475569] transition hover:border-[rgba(12,25,41,0.2)] hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.12)] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
           style={{ color: "#475569" }}
         >
           {isLoading ? (
@@ -345,9 +345,9 @@ export function PhotoViewer({
               key={photo.id}
               type="button"
               onClick={() => setSelectedIndex(i)}
-              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] ${
+              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.15)] ${
                 i === idx
-                  ? "border-[#2B6FE8] ring-1 ring-[#2B6FE8]/30"
+                  ? "border-[#1A4F9C] ring-1 ring-[#1A4F9C]/25"
                   : "border-transparent hover:border-[#E2E8F0]"
               }`}
             >

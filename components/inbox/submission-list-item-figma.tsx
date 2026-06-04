@@ -113,7 +113,7 @@ export function SubmissionListItemFigma({
         borderRadius: "8px",
         cursor: "pointer",
         background: isActive ? "#EEF6FF" : "transparent",
-        borderLeft: isActive ? "3px solid #2B6FE8" : "3px solid transparent",
+        borderLeft: isActive ? "3px solid #0C1929" : "3px solid transparent",
       }}
     >
       <p

@@ -57,7 +57,7 @@ export function AppointmentLinkButton({
             ? "Nur Ärzte dürfen Terminlinks versenden."
             : undefined
         }
-        className="h-11 w-full rounded-[10px] border-0 bg-[#2B6FE8] text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(43,111,232,0.12)] hover:bg-[#2361CC]"
+        className="h-11 w-full rounded-[10px] border-0 bg-[#0C1929] text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(12,25,41,0.12)] hover:bg-[#1A4F9C]"
       >
         <Send className="w-4 h-4 mr-2" strokeWidth={1.75} />
         {isPending ? "Wird gesendet…" : "Terminlink per E-Mail senden"}

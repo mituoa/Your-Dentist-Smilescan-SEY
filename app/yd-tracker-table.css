@@ -117,7 +117,7 @@
 .yd-tracker-search__input:focus {
   outline: none;
   border-color: rgba(147, 197, 253, 0.95);
-  box-shadow: 0 0 0 3px rgba(43, 111, 232, 0.1);
+  box-shadow: 0 0 0 3px rgba(12, 25, 41, 0.1);
 }
 
 .yd-tracker-search--directory .yd-tracker-search__input {
@@ -129,7 +129,7 @@
   background: rgba(255, 255, 255, 0.95);
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.04),
-    0 4px 20px rgba(43, 111, 232, 0.05);
+    0 4px 20px rgba(12, 25, 41, 0.05);
 }
 
 .yd-tracker-search--directory .yd-tracker-search__icon {
@@ -151,7 +151,7 @@
 .yd-tracker-directory--full .yd-tracker-filter-chip--active {
   background: #fff;
   border-color: rgba(147, 197, 253, 0.9);
-  box-shadow: 0 2px 10px rgba(43, 111, 232, 0.1);
+  box-shadow: 0 2px 10px rgba(12, 25, 41, 0.1);
 }
 
 .yd-tracker-filter-select-wrap {
@@ -240,7 +240,7 @@
 }
 
 .yd-tracker-table tbody tr.yd-tracker-table__row--active {
-  background: #eef6ff;
+  background: #f8fafc;
 }
 
 .yd-tracker-table tbody tr.yd-tracker-table__row--active:hover {
@@ -395,18 +395,18 @@
   align-items: center;
   gap: 0.375rem;
   border-radius: 10px;
-  border: 1px solid rgba(37, 99, 235, 0.2);
-  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+  border: 1px solid rgba(12, 25, 41, 0.12);
+  background: #fff;
   padding: 0 0.875rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #1d4ed8;
+  color: #1a4f9c;
   transition: background-color 160ms ease, border-color 160ms ease;
 }
 
 .yd-tracker-new-case-btn:hover {
-  border-color: rgba(37, 99, 235, 0.35);
-  background: #eef6ff;
+  border-color: rgba(12, 25, 41, 0.2);
+  background: #f8fafc;
 }
 
 .yd-tracker-filter-scroll {
@@ -451,14 +451,15 @@
 
 .yd-tracker-filter-chip:hover {
   background: #f8fafc;
-  border-color: rgba(191, 219, 254, 0.8);
+  border-color: rgba(186, 203, 222, 0.85);
 }
 
 .yd-tracker-filter-chip--active {
-  border-color: rgba(147, 197, 253, 0.9);
-  background: rgba(239, 246, 255, 0.95);
-  color: #1d4ed8;
+  border-color: rgba(12, 25, 41, 0.16);
+  background: #fff;
+  color: #0c1929;
   font-weight: 600;
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.05);
 }
 
 .yd-tracker-filter-chip__count {
@@ -476,8 +477,8 @@
 }
 
 .yd-tracker-filter-chip--active .yd-tracker-filter-chip__count {
-  background: rgba(219, 234, 254, 0.65);
-  color: #1e40af;
+  background: rgba(241, 245, 249, 0.95);
+  color: #1a4f9c;
 }
 
 .yd-tracker-filter-chip__count--zero {
@@ -537,7 +538,7 @@
 
 .yd-tracker-assist-badge--blue {
   background: rgba(219, 234, 254, 0.75);
-  color: #1d4ed8;
+  color: #1a4f9c;
 }
 
 .yd-tracker-assist-badge--amber {
@@ -559,14 +560,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
-  color: #2563eb;
+  color: #0c1929;
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .yd-tracker-row__action--active {
-  color: #1d4ed8;
+  color: #1a4f9c;
 }
 
 .yd-tracker-mobile-list {
@@ -595,7 +596,7 @@
 
 .yd-tracker-mobile-card--active {
   border-color: rgba(147, 197, 253, 0.9);
-  background: rgba(239, 246, 255, 0.65);
+  background: rgba(248, 250, 252, 0.65);
   box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.25);
 }
 
@@ -750,7 +751,7 @@
 
 .yd-message-draft-badge--draft {
   background: rgba(219, 234, 254, 0.75);
-  color: #1d4ed8;
+  color: #1a4f9c;
 }
 
 .yd-message-draft-badge--pending {
@@ -870,7 +871,7 @@
 
 .yd-tracker-table-pagination__page--active {
   border-color: rgba(22, 61, 122, 0.18);
-  background: #eef6ff;
+  background: #f8fafc;
   color: #1a4f9c;
   font-weight: 600;
 }
@@ -903,8 +904,8 @@
 
 .yd-tracker-primary-filter--active {
   border-color: rgba(147, 197, 253, 0.9);
-  background: #eef6ff;
-  color: #1d4ed8;
+  background: #f8fafc;
+  color: #1a4f9c;
 }
 
 .yd-tracker-primary-filter__count {
@@ -1293,7 +1294,7 @@
 .yd-tracker-ref-pagination .yd-tracker-table-pagination__page--active {
   border-radius: 999px;
   border: none;
-  background: #2563eb;
+  background: #0c1929;
   color: #ffffff;
   font-weight: 600;
   min-width: 2.25rem;

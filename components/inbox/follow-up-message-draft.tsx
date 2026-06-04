@@ -121,9 +121,9 @@ export function FollowUpMessageDraft({
   const chip = (active: boolean) =>
     active
       ? {
-          border: "1px solid #2B6FE8",
-          background: "#EEF6FF",
-          color: "#1D4ED8",
+          border: "1px solid rgba(12,25,41,0.18)",
+          background: "#F8FAFC",
+          color: "#1A4F9C",
         }
       : {
           border: "1px solid #E5E7EB",
@@ -138,7 +138,7 @@ export function FollowUpMessageDraft({
         style={{
           borderRadius: "10px",
           boxShadow: flash
-            ? "inset 0 0 0 1px rgba(43,111,232,0.12)"
+            ? "inset 0 0 0 1px rgba(12,25,41,0.12)"
             : "inset 0 0 0 1px rgba(226, 232, 240, 1)",
         }}
       >
@@ -185,7 +185,7 @@ export function FollowUpMessageDraft({
               width: "100%",
               ...chip(activeSnippetId === null),
             }}
-            className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+            className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.25)]"
           >
             Standard
           </button>
@@ -207,7 +207,7 @@ export function FollowUpMessageDraft({
                   width: "100%",
                   ...chip(active),
                 }}
-                className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+                className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.25)]"
               >
                 {s.label}
               </button>
@@ -219,7 +219,7 @@ export function FollowUpMessageDraft({
       <button
         type="button"
         onClick={copy}
-        className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[9px] px-4 text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)]"
+        className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[9px] px-4 text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.25)]"
         style={{
           color: "#0F172A",
           background: "#FFFFFF",
@@ -228,7 +228,7 @@ export function FollowUpMessageDraft({
         }}
       >
         {copied ? (
-          <Check className="h-4 w-4" style={{ color: "#2563EB" }} strokeWidth={2} />
+          <Check className="h-4 w-4" style={{ color: "#1A4F9C" }} strokeWidth={2} />
         ) : (
           <Copy className="h-4 w-4 opacity-60" strokeWidth={1.75} />
         )}

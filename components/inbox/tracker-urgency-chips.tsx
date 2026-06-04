@@ -77,9 +77,9 @@ export function TrackerUrgencyChips({
               style={{
                 padding: "0 10px",
                 borderRadius: "8px",
-                border: active ? "1px solid #2B6FE8" : "1px solid #E5E7EB",
-                background: active ? "#EEF6FF" : "#FFFFFF",
-                color: active ? "#2B6FE8" : "#64748B",
+                border: active ? "1px solid rgba(12,25,41,0.18)" : "1px solid #E5E7EB",
+                background: active ? "#F8FAFC" : "#FFFFFF",
+                color: active ? "#0C1929" : "#64748B",
                 letterSpacing: "-0.005em",
               }}
             >

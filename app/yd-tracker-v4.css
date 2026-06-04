@@ -1,6 +1,20 @@
 /**
  * Tracker V4 — Premium Medical Inbox (Dashboard-Designsprache)
+ * Farbwelt: Navy #0C1929 / #1A4F9C — ruhig, ohne CRM-Hellblau.
  */
+
+.yd-tracker-page,
+.yd-inbox-workspace,
+.yd-tracker-v4-detail,
+.yd-tracker-v8-action-backdrop {
+  --tr-ink: #0c1929;
+  --tr-brand: #1a4f9c;
+  --tr-brand-hover: #0c1929;
+  --tr-brand-muted: rgba(26, 79, 156, 0.12);
+  --tr-border: rgba(186, 203, 222, 0.55);
+  --tr-text-muted: rgba(12, 25, 41, 0.52);
+  --tr-surface: #ffffff;
+}
 
 .yd-tracker-v4-inbox {
   background: transparent;
@@ -31,9 +45,9 @@
   min-height: 2.25rem;
   padding: 0 0.75rem;
   border-radius: 10px;
-  border: 1px solid rgba(43, 111, 232, 0.2);
-  background: #eef6ff;
-  color: #1d4ed8;
+  border: 1px solid rgba(12, 25, 41, 0.14);
+  background: #ffffff;
+  color: #1a4f9c;
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
@@ -41,7 +55,7 @@
 }
 
 .yd-tracker-v4-new-case:hover {
-  background: #dbeafe;
+  background: #f8fafc;
 }
 
 .yd-tracker-v4-inbox__list {
@@ -75,8 +89,8 @@
     rgba(255, 255, 255, 0.98) 100%
   );
   box-shadow:
-    inset 3px 0 0 #2563eb,
-    0 2px 12px rgba(37, 99, 235, 0.08);
+    inset 3px 0 0 #1a4f9c,
+    0 2px 12px rgba(12, 25, 41, 0.08);
 }
 
 .yd-tracker-v4-inbox-card--unseen .yd-tracker-v4-inbox-card__headline {
@@ -96,8 +110,8 @@
   height: 2.25rem;
   flex-shrink: 0;
   border-radius: 999px;
-  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
-  color: #1d4ed8;
+  background: linear-gradient(145deg, #eff6ff 0%, #f8fafc 100%);
+  color: #1a4f9c;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -113,7 +127,7 @@
 }
 
 .yd-tracker-v4-inbox-card--active .yd-tracker-v4-inbox-card__headline {
-  color: #1d4ed8;
+  color: #1a4f9c;
 }
 
 .yd-tracker-v4-inbox-card__headline--freigabe,
@@ -172,7 +186,7 @@
 }
 
 .yd-tracker-v4-inbox-card__priority {
-  color: #2563eb;
+  color: #1a4f9c;
   font-weight: 600;
 }
 
@@ -498,8 +512,8 @@
   height: 0.5rem;
   flex-shrink: 0;
   border-radius: 999px;
-  background: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  background: #1a4f9c;
+  box-shadow: 0 0 0 3px rgba(12, 25, 41, 0.12);
 }
 
 .yd-tracker-v4-timeline__line {
@@ -507,7 +521,7 @@
   width: 1px;
   min-height: 1.5rem;
   margin-top: 0.25rem;
-  background: linear-gradient(180deg, rgba(37, 99, 235, 0.35) 0%, rgba(203, 213, 225, 0.5) 100%);
+  background: linear-gradient(180deg, rgba(12, 25, 41, 0.35) 0%, rgba(203, 213, 225, 0.5) 100%);
 }
 
 .yd-tracker-v4-timeline__date {
@@ -595,13 +609,13 @@
 }
 
 .yd-tracker-v4-command-flow__node--done {
-  border-color: #2563eb;
-  background: #2563eb;
+  border-color: #1a4f9c;
+  background: #1a4f9c;
 }
 
 .yd-tracker-v4-command-flow__node--active {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: #1a4f9c;
+  box-shadow: 0 0 0 3px rgba(12, 25, 41, 0.15);
 }
 
 .yd-tracker-v4-command-flow__connector {
@@ -655,7 +669,7 @@
 
 .yd-tracker-v4-praxis-assistent__action {
   font-weight: 600;
-  color: #1d4ed8 !important;
+  color: #1a4f9c !important;
 }
 
 .yd-tracker-v4-praxis-assistent__checks {
@@ -772,13 +786,13 @@
   min-height: 2.5rem;
   padding: 0 1rem;
   border-radius: 12px;
-  border: 1px solid rgba(43, 111, 232, 0.18);
+  border: 1px solid rgba(12, 25, 41, 0.18);
   background: rgba(255, 255, 255, 0.88);
-  color: #1d4ed8;
+  color: #1a4f9c;
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(43, 111, 232, 0.08);
+  box-shadow: 0 1px 3px rgba(12, 25, 41, 0.08);
   transition:
     background-color 160ms ease,
     box-shadow 160ms ease;
@@ -786,7 +800,7 @@
 
 .yd-tracker-directory__new-case:hover {
   background: #fff;
-  box-shadow: 0 4px 14px rgba(43, 111, 232, 0.12);
+  box-shadow: 0 4px 14px rgba(12, 25, 41, 0.12);
 }
 
 .yd-tracker-directory__body {
@@ -807,7 +821,7 @@
   border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.03),
-    0 8px 32px rgba(43, 111, 232, 0.06),
+    0 8px 32px rgba(12, 25, 41, 0.06),
     0 24px 48px -12px rgba(15, 23, 42, 0.06);
   backdrop-filter: blur(12px);
   overflow: hidden;
@@ -856,7 +870,7 @@
 }
 
 .yd-tracker-directory__row--active {
-  background: linear-gradient(90deg, rgba(239, 246, 255, 0.98) 0%, rgba(255, 255, 255, 1) 100%);
+  background: linear-gradient(90deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 1) 100%);
   box-shadow: inset 4px 0 0 #3b82f6;
 }
 
@@ -897,8 +911,8 @@
   height: 2.75rem;
   flex-shrink: 0;
   border-radius: 999px;
-  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 55%, #e0f2fe 100%);
-  color: #1d4ed8;
+  background: linear-gradient(145deg, #eff6ff 0%, #f8fafc 55%, #e0f2fe 100%);
+  color: #1a4f9c;
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -1060,7 +1074,7 @@
 }
 
 .yd-tracker-directory__page-num--active:hover {
-  background: #2563eb;
+  background: #1a4f9c;
   color: #fff;
 }
 
@@ -1086,8 +1100,8 @@
 }
 
 .yd-tracker-directory__sidebar-card--active {
-  background: linear-gradient(90deg, rgba(239, 246, 255, 0.95) 0%, #fff 100%);
-  box-shadow: inset 3px 0 0 #2563eb;
+  background: linear-gradient(90deg, rgba(248, 250, 252, 0.95) 0%, #fff 100%);
+  box-shadow: inset 3px 0 0 #1a4f9c;
 }
 
 .yd-tracker-directory__sidebar-meta {
@@ -1508,7 +1522,7 @@
   border: 1px solid rgba(191, 219, 254, 0.55);
   background: linear-gradient(
     165deg,
-    rgba(239, 246, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.92) 0%,
     rgba(248, 250, 252, 0.98) 58%
   );
 }
@@ -1603,7 +1617,7 @@
   padding: 0.55rem 0.65rem;
   margin-top: 0.15rem;
   border-radius: 10px;
-  border: 1px solid rgba(37, 99, 235, 0.22);
+  border: 1px solid rgba(12, 25, 41, 0.22);
   background: rgba(255, 255, 255, 0.72);
 }
 
@@ -1920,7 +1934,7 @@
 
 .yd-tracker-v6-decision-btn:hover {
   border-color: rgba(47, 128, 237, 0.35);
-  background: rgba(239, 246, 255, 0.98);
+  background: rgba(248, 250, 252, 0.98);
   box-shadow: 0 6px 20px rgba(47, 128, 237, 0.1);
 }
 
@@ -1972,7 +1986,7 @@
   background: linear-gradient(
     165deg,
     rgba(255, 255, 255, 0.98) 0%,
-    rgba(239, 246, 255, 0.92) 100%
+    rgba(248, 250, 252, 0.92) 100%
   );
   box-shadow: 0 8px 28px rgba(47, 128, 237, 0.08);
 }
@@ -2626,7 +2640,7 @@
 
 .yd-tracker-v8-action-topic-btn--active {
   border-color: rgba(47, 128, 237, 0.45);
-  background: rgba(239, 246, 255, 0.95);
+  background: rgba(248, 250, 252, 0.95);
   color: #1a4f9c;
 }
 
@@ -2962,7 +2976,7 @@
 
 .yd-tracker-v9-inbox-status__pill--neu .yd-tracker-v9-inbox-status__dot,
 .yd-tracker-v9-inbox-status__dot--neu {
-  background: #2b6fe8;
+  background: #1a4f9c;
 }
 
 .yd-tracker-v9-inbox-status__pill--in_bearbeitung .yd-tracker-v9-inbox-status__dot,
@@ -3013,7 +3027,7 @@
 
 .yd-tracker-v9-inbox-status__option--active,
 .yd-tracker-v9-inbox-status__option:hover {
-  background: rgba(239, 246, 255, 0.9);
+  background: rgba(248, 250, 252, 0.9);
 }
 
 .yd-tracker-v9-inbox-status__error {
@@ -3107,8 +3121,8 @@
 }
 
 .yd-tracker-v9-urgency__btn--active {
-  border-color: rgba(43, 111, 232, 0.45);
-  background: rgba(239, 246, 255, 0.95);
+  border-color: rgba(12, 25, 41, 0.45);
+  background: rgba(248, 250, 252, 0.95);
   color: #1a4f9c;
 }
 
@@ -3165,13 +3179,13 @@
 }
 
 .yd-tracker-v9-next-step-btn--emphasized {
-  border-color: rgba(43, 111, 232, 0.4);
-  background: rgba(239, 246, 255, 0.92);
+  border-color: rgba(12, 25, 41, 0.4);
+  background: rgba(248, 250, 252, 0.92);
 }
 
 .yd-tracker-v9-next-step-btn:hover {
-  border-color: rgba(43, 111, 232, 0.35);
-  box-shadow: 0 2px 8px rgba(43, 111, 232, 0.08);
+  border-color: rgba(12, 25, 41, 0.35);
+  box-shadow: 0 2px 8px rgba(12, 25, 41, 0.08);
 }
 
 @media (min-width: 1024px) {
@@ -3307,8 +3321,8 @@
 
 .yd-tracker-v10-inbox-status__trigger--neu {
   color: #1a4f9c;
-  background: rgba(239, 246, 255, 0.85);
-  border-color: rgba(191, 219, 254, 0.7);
+  background: #fff;
+  border-color: rgba(186, 203, 222, 0.65);
 }
 
 .yd-tracker-v10-inbox-status__trigger--in_bearbeitung {
@@ -3674,7 +3688,7 @@
 }
 
 .yd-tracker-v11-inbox-card--active .yd-tracker-v10-inbox-card__body {
-  background: rgba(239, 246, 255, 0.65);
+  background: rgba(248, 250, 252, 0.65);
   box-shadow: none;
 }
 
@@ -3737,7 +3751,7 @@
   justify-content: center;
   border: none;
   border-radius: 0.625rem;
-  background: #2b6fe8;
+  background: #1a4f9c;
   color: #fff;
   font-size: 0.875rem;
   font-weight: 600;
@@ -3747,7 +3761,7 @@
 }
 
 .yd-tracker-v11-primary-action:hover:not(:disabled) {
-  background: #2563eb;
+  background: #1a4f9c;
 }
 
 .yd-tracker-v11-primary-action:disabled {
@@ -3803,7 +3817,7 @@
   padding: 0.35rem 0;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #2b6fe8;
+  color: #1a4f9c;
   text-align: left;
   cursor: pointer;
 }
@@ -3865,9 +3879,9 @@
 }
 
 .yd-tracker-v11-urgency__option--active {
-  border-color: rgba(43, 111, 232, 0.35);
-  background: rgba(239, 246, 255, 0.95);
-  color: #1d4ed8;
+  border-color: rgba(12, 25, 41, 0.35);
+  background: rgba(248, 250, 252, 0.95);
+  color: #1a4f9c;
 }
 
 .yd-tracker-v11-urgency__badge {
@@ -3875,7 +3889,7 @@
   font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #2b6fe8;
+  color: #1a4f9c;
 }
 
 .yd-tracker-v11-urgency__pending,
@@ -3954,12 +3968,12 @@
   margin-top: 1rem;
   min-height: 2.5rem;
   padding: 0 1rem;
-  border: 1px solid rgba(43, 111, 232, 0.25);
+  border: 1px solid rgba(12, 25, 41, 0.25);
   border-radius: 0.5rem;
   background: #fff;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #2b6fe8;
+  color: #1a4f9c;
   cursor: pointer;
 }
 
@@ -4008,7 +4022,7 @@
   background: #fff;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #2b6fe8;
+  color: #1a4f9c;
   cursor: pointer;
 }
 
@@ -4045,8 +4059,8 @@
 }
 
 .yd-tracker-v11-action-radio--active {
-  border-color: rgba(43, 111, 232, 0.35);
-  background: rgba(239, 246, 255, 0.55);
+  border-color: rgba(12, 25, 41, 0.35);
+  background: rgba(248, 250, 252, 0.55);
   color: #1e40af;
 }
 
@@ -4059,8 +4073,8 @@
 }
 
 .yd-tracker-v11-action-radio--active .yd-tracker-v11-action-radio__dot {
-  border-color: #2b6fe8;
-  background: radial-gradient(circle at center, #2b6fe8 38%, transparent 40%);
+  border-color: #1a4f9c;
+  background: radial-gradient(circle at center, #1a4f9c 38%, transparent 40%);
 }
 
 /* Mobile — Patient → Empfehlung → Bild → Verlauf */
@@ -4568,4 +4582,33 @@
     animation: none;
     border-top-color: rgba(26, 79, 156, 0.35);
   }
+}
+
+/* ── Tracker Farbwelt — Navy / Medical Enterprise (global im Inbox-Bereich) ─ */
+
+.yd-tracker-page .yd-tracker-v7-rail {
+  border: 1px solid rgba(186, 203, 222, 0.42) !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.04) !important;
+}
+
+.yd-tracker-page .yd-auth-btn-primary,
+.yd-tracker-v8-action-backdrop .yd-auth-btn-primary {
+  background: var(--tr-brand-hover, #0c1929) !important;
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.12) !important;
+}
+
+.yd-tracker-page .yd-auth-btn-primary:hover:not(:disabled),
+.yd-tracker-v8-action-backdrop .yd-auth-btn-primary:hover:not(:disabled) {
+  background: var(--tr-brand, #1a4f9c) !important;
+}
+
+.yd-tracker-v11-inbox-card:not(.yd-tracker-v11-inbox-card--active):hover .yd-tracker-v10-inbox-card__body {
+  background: rgba(248, 250, 252, 0.98) !important;
+}
+
+.yd-tracker-v8-action-topic-btn--active {
+  border-color: rgba(12, 25, 41, 0.2) !important;
+  background: rgba(248, 250, 252, 0.98) !important;
+  color: #0c1929 !important;
 }

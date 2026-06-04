@@ -150,7 +150,7 @@ export function InboxSearchFigma({
           transition: "all 150ms ease",
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = "#2563EB";
+          e.currentTarget.style.borderColor = "#1A4F9C";
           e.currentTarget.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.1)";
         }}
         onBlur={(e) => {

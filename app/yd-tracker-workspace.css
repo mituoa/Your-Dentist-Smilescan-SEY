@@ -355,7 +355,7 @@
 .yd-tracker-inbox-card__priority--mid,
 .yd-tracker-case-card__priority.yd-tracker-inbox-card__priority--mid {
   background: rgba(219, 234, 254, 0.9);
-  color: #1d4ed8;
+  color: #1a4f9c;
 }
 
 .yd-tracker-inbox-card__priority--low,
@@ -3247,10 +3247,10 @@
 }
 
 .yd-tracker-v8-pagination__page--active {
-  background: linear-gradient(165deg, #3b7dd8 0%, #2563eb 100%);
+  background: #0c1929;
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 1px 3px rgba(12, 25, 41, 0.12);
 }
 
 .yd-tracker-v8-pagination__ellipsis {
@@ -3596,13 +3596,13 @@
 }
 
 .yd-tracker-v3-row-object:hover {
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
-  background: rgba(248, 252, 255, 0.98);
+  box-shadow: 0 2px 8px rgba(12, 25, 41, 0.05);
+  background: rgba(248, 250, 252, 0.98);
 }
 
 .yd-tracker-v3-row-object--active {
-  border-color: rgba(130, 168, 210, 0.8);
-  box-shadow: inset 3px 0 0 #3b7dd8, 0 4px 14px rgba(37, 99, 235, 0.1);
+  border-color: rgba(186, 203, 222, 0.75);
+  box-shadow: inset 3px 0 0 #0c1929, 0 2px 8px rgba(12, 25, 41, 0.06);
 }
 
 .yd-tracker-v3-row-object__top {
@@ -4385,7 +4385,7 @@
   --yd-tracker-v11-accent: #7c3aed;
 }
 .yd-tracker-v11-card--task {
-  --yd-tracker-v11-accent: #2563eb;
+  --yd-tracker-v11-accent: #1a4f9c;
 }
 
 .yd-tracker-v11-card__hit {

@@ -172,9 +172,9 @@ export function SubmissionMessageDraftPanel({
   const chip = (active: boolean) =>
     active
       ? {
-          border: "1px solid #2B6FE8",
-          background: "#EEF6FF",
-          color: "#1D4ED8",
+          border: "1px solid rgba(12, 25, 41, 0.18)",
+          background: "#F8FAFC",
+          color: "#1A4F9C",
         }
       : {
           border: "1px solid #E5E7EB",
@@ -299,7 +299,7 @@ export function SubmissionMessageDraftPanel({
         style={{
           borderRadius: "10px",
           boxShadow: flash
-            ? "inset 0 0 0 1px rgba(43,111,232,0.12)"
+            ? "inset 0 0 0 1px rgba(12,25,41,0.1)"
             : "inset 0 0 0 1px rgba(226, 232, 240, 1)",
         }}
       >
@@ -348,7 +348,7 @@ export function SubmissionMessageDraftPanel({
               width: "100%",
               ...chip(activeSnippetId === null),
             }}
-            className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)] disabled:opacity-60"
+            className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.15)] disabled:opacity-60"
           >
             Standard
           </button>
@@ -367,7 +367,7 @@ export function SubmissionMessageDraftPanel({
                 width: "100%",
                 ...chip(activeSnippetId === s.id),
               }}
-              className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.25)] disabled:opacity-60"
+              className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.15)] disabled:opacity-60"
             >
               {s.label}
             </button>
@@ -397,8 +397,8 @@ export function SubmissionMessageDraftPanel({
           }}
           className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] px-4 text-[14px] font-semibold text-white transition disabled:opacity-60"
           style={{
-            background: "#2B6FE8",
-            boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
+            background: "#0C1929",
+            boxShadow: "0 1px 2px rgba(12,25,41,0.08)",
           }}
         >
           {isPending ? "Entwurf wird gespeichert …" : "Entwurf speichern"}
@@ -431,7 +431,7 @@ export function SubmissionMessageDraftPanel({
                 }
               });
             }}
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] border border-[#CBD5E1] bg-white px-4 text-[14px] font-medium text-[#2B6FE8] transition disabled:opacity-60"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] border border-[#CBD5E1] bg-white px-4 text-[14px] font-medium text-[#1A4F9C] transition disabled:opacity-60"
           >
             {isPending ? "Freigabe wird gespeichert …" : "Freigeben"}
           </button>
@@ -448,7 +448,7 @@ export function SubmissionMessageDraftPanel({
           className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[9px] border border-[#E5E7EB] bg-white px-4 text-[14px] font-medium text-[#0F172A] transition disabled:opacity-60"
         >
           {copied ? (
-            <Check className="h-4 w-4 text-[#2563EB]" strokeWidth={2} />
+            <Check className="h-4 w-4 text-[#1A4F9C]" strokeWidth={2} />
           ) : (
             <Copy className="h-4 w-4 opacity-60" strokeWidth={1.75} />
           )}
@@ -517,8 +517,8 @@ function PrepareDraftButton({
       }}
       className="inline-flex min-h-11 w-full items-center justify-center rounded-[9px] px-4 text-[14px] font-semibold text-white transition disabled:opacity-60"
       style={{
-        background: "#2B6FE8",
-        boxShadow: "0 1px 2px rgba(43,111,232,0.1)",
+        background: "#0C1929",
+        boxShadow: "0 1px 2px rgba(12,25,41,0.08)",
       }}
     >
       {isPending ? "Nachricht wird vorbereitet…" : "Nachricht erstellen"}
