@@ -133,7 +133,21 @@ export function TrackerWorkspace({
         isDraft={submission.is_draft}
       />
 
-      <div className="yd-tracker-v8-clinical-row yd-tracker-v12-clinical-row">
+      <div className="yd-tracker-v8-clinical-row">
+        <section
+          id="tracker-beweise"
+          className="yd-tracker-v6-evidence yd-tracker-v7-evidence yd-tracker-v8-evidence"
+          aria-label="Klinische Dokumentation"
+        >
+          <h2 className="yd-tracker-v6-section-label">Klinische Dokumentation</h2>
+          <TrackerPhotoStage
+            submissionId={submission.id}
+            photos={submission.photos}
+            patientName={patientLabel}
+            dominant
+          />
+        </section>
+
         <TrackerPraxisAssistent
           submissionId={submission.id}
           isDoctor={isDoctor}
@@ -155,19 +169,6 @@ export function TrackerWorkspace({
           editableDraftId={editableMessageDraft?.id ?? null}
           initialDraftBody={draftBodyForAssist}
         />
-
-        <section
-          id="tracker-beweise"
-          className="yd-tracker-v6-evidence yd-tracker-v7-evidence yd-tracker-v8-evidence yd-tracker-v12-evidence"
-          aria-label="Klinische Bilder"
-        >
-          <TrackerPhotoStage
-            submissionId={submission.id}
-            photos={submission.photos}
-            patientName={patientLabel}
-            dominant
-          />
-        </section>
       </div>
 
       <div className="yd-tracker-v8-workspace__below">

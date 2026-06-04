@@ -4323,42 +4323,6 @@
   color: #b42318;
 }
 
-/* Desktop: Entscheidung links, Bilder rechts */
-@media (min-width: 1024px) {
-  .yd-tracker-v12-workspace .yd-tracker-v12-clinical-row {
-    display: grid;
-    grid-template-columns: minmax(17.5rem, 21rem) minmax(0, 1fr);
-    gap: 1.5rem;
-    align-items: start;
-  }
-}
-
-@media (max-width: 1023px) {
-  .yd-tracker-v12-workspace .yd-tracker-v12-clinical-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-
-  .yd-tracker-v12-workspace .yd-tracker-v12-rail {
-    order: 1;
-  }
-
-  .yd-tracker-v12-workspace .yd-tracker-v12-evidence {
-    order: 2;
-  }
-
-  .yd-tracker-v12-workspace .yd-tracker-v8-workspace__below {
-    order: 3;
-  }
-}
-
-.yd-tracker-v12-evidence .yd-tracker-v4-photo-stage {
-  border: none;
-  background: transparent;
-  box-shadow: none;
-}
-
 /* Inbox — edel, viel Weißraum, keine Ticket-Markierung */
 .yd-tracker-v12-inbox .yd-tracker-v4-inbox__title {
   color: #0c1929;
