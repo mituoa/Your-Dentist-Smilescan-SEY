@@ -79,14 +79,13 @@
     0 2px 12px rgba(37, 99, 235, 0.08);
 }
 
-.yd-tracker-v4-inbox-card--unseen .yd-tracker-v4-inbox-card__name {
-  font-weight: 700;
+.yd-tracker-v4-inbox-card--unseen .yd-tracker-v4-inbox-card__headline {
+  font-weight: 650;
+  color: #0f172a;
 }
 
-.yd-tracker-v4-inbox-card__row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
+.yd-tracker-v4-inbox-card__main {
+  min-width: 0;
 }
 
 .yd-tracker-v4-inbox-card__avatar {
@@ -106,32 +105,53 @@
 
 .yd-tracker-v4-inbox-card__headline {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: #0f172a;
-  line-height: 1.25;
+  line-height: 1.28;
 }
 
 .yd-tracker-v4-inbox-card--active .yd-tracker-v4-inbox-card__headline {
   color: #1d4ed8;
 }
 
-.yd-tracker-v4-inbox-card__name {
-  display: block;
-  margin-top: 0.2rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #64748b;
-  line-height: 1.3;
+.yd-tracker-v4-inbox-card__headline--freigabe,
+.yd-tracker-v4-inbox-card__headline--antwort_pruefen {
+  color: #1e40af;
 }
 
-.yd-tracker-v4-inbox-card__concern {
+.yd-tracker-v4-inbox-card__headline--praxisaufgabe {
+  color: #334155;
+}
+
+.yd-tracker-v4-inbox-card__headline--verlaufskontrolle {
+  color: #0f766e;
+}
+
+.yd-tracker-v4-inbox-card__headline--neue_anfrage {
+  color: #0f172a;
+}
+
+.yd-tracker-v4-inbox-card__headline--rueckfrage {
+  color: #9a3412;
+}
+
+.yd-tracker-v4-inbox-card__name {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: 0.22rem;
   font-size: 0.6875rem;
   font-weight: 500;
   color: #94a3b8;
+  line-height: 1.3;
+}
+
+.yd-tracker-v4-inbox-card__context {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #64748b;
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1134,4 +1154,386 @@
     letter-spacing: 0.04em;
     color: #94a3b8;
   }
+}
+
+/* —— Phase 1: Visuelle Hierarchie (Salienz, keine neue IA) —— */
+
+.yd-tracker-v4-workspace--hierarchy {
+  max-width: 76rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.75);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__name {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-status--header {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  box-shadow: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__case-focus {
+  margin-top: 0.65rem;
+  padding: 0.85rem 1rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid rgba(191, 219, 254, 0.55);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(248, 251, 255, 0.96) 100%
+  );
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__case-focus-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__case-focus-text {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__meta--tertiary,
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__contact-grid.yd-tracker-v4-patient-header__meta--tertiary {
+  margin-top: 0.55rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__meta--tertiary dt,
+.yd-tracker-v4-workspace--hierarchy
+  .yd-tracker-v4-patient-header__contact-grid.yd-tracker-v4-patient-header__meta--tertiary
+  dt {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__meta--tertiary dd,
+.yd-tracker-v4-workspace--hierarchy
+  .yd-tracker-v4-patient-header__contact-grid.yd-tracker-v4-patient-header__meta--tertiary
+  dd {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-workspace__grid {
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-workspace__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(272px, 320px);
+  }
+
+  .yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-workspace__rail {
+    position: sticky;
+    top: 0.5rem;
+    max-height: calc(100dvh - 1.25rem);
+    overflow-y: auto;
+    overscroll-y: contain;
+  }
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-workspace__main {
+  gap: 1rem;
+}
+
+/* Fotos = Beweismaterial, nicht Hauptgeschichte */
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage {
+  padding: 0.75rem 0.875rem 0.875rem;
+  border-radius: 12px;
+  background: #fafbfc;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage--dominant {
+  padding: 0.8rem 0.9rem 0.9rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage__head {
+  margin-bottom: 0.55rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage__head .yd-tracker-workspace-section__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage--dominant .yd-tracker-v4-photo-stage__viewer {
+  min-height: min(28vh, 240px);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage--dominant .yd-tracker-v4-photo-stage__viewer img {
+  max-height: min(28vh, 240px) !important;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage__empty {
+  min-height: 0;
+  padding: 0.85rem 1rem;
+  align-items: flex-start;
+  text-align: left;
+  border-radius: 10px;
+  background: rgba(248, 250, 252, 0.95);
+  box-shadow: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage__empty svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage__empty p:first-of-type {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-photo-stage__empty p:last-of-type {
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+/* Entwurf / Handlung vor Verlauf */
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-draft__surface {
+  border-radius: 12px;
+  border: 1px solid rgba(191, 219, 254, 0.45);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+/* Verlauf & Metadaten zurücknehmen */
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-section-title--quiet {
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-timeline--deferred.yd-tracker-v4-timeline--premium .yd-tracker-v4-timeline__list {
+  padding: 0.5rem 0 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-timeline--deferred .yd-tracker-workspace-section__title {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-timeline--deferred .yd-tracker-v4-timeline__title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-timeline--deferred .yd-tracker-v4-timeline__node {
+  width: 0.375rem;
+  height: 0.375rem;
+  box-shadow: none;
+  background: #94a3b8;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-note--original .yd-tracker-v4-note__text {
+  padding: 0.75rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #64748b;
+  border-radius: 10px;
+  border: 1px solid rgba(241, 245, 249, 0.95);
+  background: rgba(248, 250, 252, 0.65);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-urgency--quiet {
+  opacity: 0.92;
+}
+
+/* Praxis-Assistent Phase 2: eine klinische Entscheidungshilfe */
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent--phase2 {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 20px rgba(30, 91, 189, 0.06);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent--phase2 .yd-tracker-v4-praxis-assistent__head {
+  margin-bottom: 0.65rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__decision {
+  margin: 0 0 0.75rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(191, 219, 254, 0.55);
+  background: linear-gradient(
+    165deg,
+    rgba(239, 246, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.98) 58%
+  );
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__decision-ki {
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.65);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__label {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__label--quiet {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__analysis {
+  margin: 0.35rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: -0.015em;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__confidence {
+  margin: 0.4rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__recommendation {
+  margin: 0.3rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__response {
+  margin: 0 0 0.65rem;
+  padding: 0 0.1rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__response-copy {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__draft-preview {
+  margin: 0.45rem 0 0;
+  padding: 0.5rem 0.55rem;
+  border-radius: 8px;
+  border-left: 2px solid rgba(148, 163, 184, 0.55);
+  background: rgba(248, 250, 252, 0.9);
+  font-size: 0.6875rem;
+  font-weight: 450;
+  line-height: 1.5;
+  font-style: normal;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__tertiary {
+  margin: 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.75);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__tertiary-summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  padding: 0.35rem 0;
+  user-select: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__tertiary-summary::-webkit-details-marker {
+  display: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__tertiary[open] .yd-tracker-v4-praxis-assistent__tertiary-summary {
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent--phase2 .yd-tracker-v4-praxis-assistent__checks {
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border-top: none;
+  opacity: 0.9;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent--phase2 .yd-tracker-v4-praxis-assistent__flow {
+  margin: 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.65);
+  opacity: 0.88;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-rail-card:not(.yd-tracker-v4-praxis-assistent) {
+  padding: 0.75rem 0.875rem !important;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-rail-card:not(.yd-tracker-v4-praxis-assistent) .yd-tracker-v4-section-title {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
 }

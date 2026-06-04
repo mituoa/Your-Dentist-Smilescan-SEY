@@ -78,9 +78,11 @@ export function TrackerPatientHeader({
   const email = patientEmail?.trim() || null;
   const phone = patientPhone?.trim() || null;
 
+  const caseFocus = concern?.trim() || null;
+
   return (
     <header className="yd-tracker-v4-patient-header">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="yd-tracker-v4-patient-header__identity">
         <div className="min-w-0">
           <h2 className="yd-tracker-v4-patient-header__name">{displayName}</h2>
           {firstName && displayName !== firstName ? (
@@ -89,7 +91,7 @@ export function TrackerPatientHeader({
         </div>
         <span
           className={cn(
-            "yd-tracker-v4-status yd-tracker-v4-status--lg",
+            "yd-tracker-v4-status yd-tracker-v4-status--lg yd-tracker-v4-status--header",
             "yd-tracker-table__status",
             status.className
           )}
@@ -99,7 +101,14 @@ export function TrackerPatientHeader({
         </span>
       </div>
 
-      <dl className="yd-tracker-v4-patient-header__meta">
+      <div className="yd-tracker-v4-patient-header__case-focus" role="region" aria-label="Fallgrund">
+        <p className="yd-tracker-v4-patient-header__case-focus-label">Warum dieser Fall</p>
+        <p className="yd-tracker-v4-patient-header__case-focus-text">
+          {caseFocus ?? "Eingang ohne dokumentiertes Anliegen — bitte Verlauf und Bilder prüfen."}
+        </p>
+      </div>
+
+      <dl className="yd-tracker-v4-patient-header__meta yd-tracker-v4-patient-header__meta--tertiary">
         <div>
           <dt>Patienten-ID</dt>
           <dd>{patientId}</dd>
@@ -138,15 +147,8 @@ export function TrackerPatientHeader({
         ) : null}
       </dl>
 
-      {concern ? (
-        <div className="yd-tracker-v4-patient-header__concern-block">
-          <p className="yd-tracker-v4-patient-header__concern-label">Anliegen</p>
-          <p className="yd-tracker-v4-patient-header__concern">{concern}</p>
-        </div>
-      ) : null}
-
       {email || phone ? (
-        <dl className="yd-tracker-v4-patient-header__contact-grid">
+        <dl className="yd-tracker-v4-patient-header__contact-grid yd-tracker-v4-patient-header__meta--tertiary">
           {email ? (
             <div>
               <dt>E-Mail</dt>

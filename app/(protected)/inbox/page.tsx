@@ -57,11 +57,19 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
 
   if (!listResult.ok) {
     return (
-      <div className="yd-triage-placeholder" role="status" aria-live="polite">
-        <p className="yd-triage-placeholder__title">
+      <div
+        className="yd-inbox-detail-root flex h-full min-h-0 flex-col items-center justify-center px-6"
+        style={{ padding: "28px 32px 32px" }}
+        role="status"
+        aria-live="polite"
+      >
+        <p className="max-w-md text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>
           Einsendungen können momentan nicht geladen werden
         </p>
-        <p className="yd-triage-placeholder__lead">
+        <p
+          className="mt-2 max-w-md text-center text-[14px] leading-relaxed"
+          style={{ color: "#64748B" }}
+        >
           Bitte später erneut versuchen oder die Seite neu laden.
         </p>
       </div>
@@ -77,9 +85,14 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
 
   if (qTrimmed) {
     return (
-      <div className="yd-triage-placeholder">
-        <p className="yd-triage-placeholder__title">Keine Treffer für diese Suche</p>
-        <p className="yd-triage-placeholder__lead">
+      <div
+        className="yd-inbox-detail-root flex h-full min-h-0 flex-col items-center justify-center"
+        style={{ padding: "28px 32px 32px" }}
+      >
+        <p className="text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>
+          Keine Treffer für diese Suche
+        </p>
+        <p className="mt-2 max-w-md text-center text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
           Anderen Begriff versuchen oder Suche leeren.
         </p>
       </div>
@@ -87,10 +100,15 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   }
 
   return (
-    <div className="yd-triage-placeholder">
-      <p className="yd-triage-placeholder__title">Keine Eingänge</p>
-      <p className="yd-triage-placeholder__lead">
-        Sobald Einsendungen vorliegen, erscheinen sie in der Liste links.
+    <div
+      className="yd-inbox-detail-root flex h-full min-h-0 flex-col items-center justify-center"
+      style={{ padding: "28px 32px 32px" }}
+    >
+      <p className="text-center text-[15px] font-medium" style={{ color: "#0F172A" }}>
+        Keine Eingänge
+      </p>
+      <p className="mt-2 max-w-md text-center text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
+        Sobald Einsendungen vorliegen, erscheinen sie in der Liste.
       </p>
     </div>
   );

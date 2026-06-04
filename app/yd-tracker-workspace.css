@@ -50,9 +50,9 @@
 
 @media (min-width: 768px) {
   .yd-tracker-shell__inbox {
-    width: 28%;
-    min-width: 260px;
-    max-width: 320px;
+    width: 34%;
+    min-width: 300px;
+    max-width: 400px;
   }
 }
 

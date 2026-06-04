@@ -183,13 +183,9 @@ function priorityTier(item: EnrichedSubmissionListItem): number {
   if (item.open_task_count > 0) return 3;
   if (item.urgency === "today") return 4;
   if (item.urgency === "this_week") return 5;
-  if (
-    hasPhotoTrail(item) ||
-    (item.intake_channel === "patient_upload" && Boolean(item.seen_at))
-  ) {
-    return 6;
-  }
-  return 7;
+  if (hasVerlaufskontrolleContext(item)) return 6;
+  if (item.photo_count === 0 && Boolean(item.seen_at)) return 7;
+  return 8;
 }
 
 /** Handlungsbedarf zuerst, innerhalb der Stufe neueste zuerst. */
@@ -270,26 +266,130 @@ export type TrackerStatusDisplay = {
   className: string;
 };
 
-function daysSinceIntake(createdAt: string): number {
-  const start = new Date(createdAt).getTime();
-  if (Number.isNaN(start)) return 1;
-  const diff = Date.now() - start;
-  return Math.max(1, Math.floor(diff / 86_400_000) + 1);
+const VERLAUF_DAY_MARKERS = [1, 3, 7, 14] as const;
+
+export type TrackerInboxWorkKind =
+  | "entwurf"
+  | "freigabe"
+  | "antwort_pruefen"
+  | "praxisaufgabe"
+  | "verlaufskontrolle"
+  | "neue_anfrage"
+  | "rueckfrage"
+  | "laufend"
+  | "abgeschlossen";
+
+export type TrackerInboxWorkType = {
+  kind: TrackerInboxWorkKind;
+  /** Primäre Zeile — Art der Arbeit (vor Patientenname). */
+  headline: string;
+  /** Kurzer klinischer Kontext (Anliegen, Verlauf, Aufgaben …). */
+  context: string | null;
+};
+
+/**
+ * Verlaufskontrolle — Nachsorge, Fotoverlauf oder spätere Verlaufskette
+ * (`follow_up_series_id` / linked submissions). Kein Datenmodell-Zwang hier.
+ */
+export function hasVerlaufskontrolleContext(item: EnrichedSubmissionListItem): boolean {
+  if (item.intake_channel === "follow_up") return true;
+  const doc = item.photo_documentation;
+  if (doc?.kind === "linked" && doc.linkedSubmissionCount > 1) return true;
+  return hasPhotoTrail(item);
+}
+
+function verlaufskontrolleTag(item: EnrichedSubmissionListItem): number {
+  const dayCount = Math.max(1, item.photo_documentation?.dayCount ?? 1);
+  const idx = Math.min(dayCount - 1, VERLAUF_DAY_MARKERS.length - 1);
+  return VERLAUF_DAY_MARKERS[idx] ?? 7;
+}
+
+function verlaufskontrolleHeadline(item: EnrichedSubmissionListItem): string {
+  const doc = item.photo_documentation;
+  if (doc?.kind === "linked" && doc.linkedSubmissionCount > 1) {
+    return "Verlaufskontrolle · Fortsetzung";
+  }
+  return `Verlaufskontrolle Tag ${verlaufskontrolleTag(item)}`;
+}
+
+function verlaufskontrolleContext(item: EnrichedSubmissionListItem): string | null {
+  const doc = item.photo_documentation;
+  if (doc?.kind === "linked" && doc.linkedSubmissionCount > 1) {
+    const n = doc.linkedSubmissionCount;
+    return n === 2
+      ? "2 Einsendungen · dieselbe Verlaufskette"
+      : `${n} Einsendungen · dieselbe Verlaufskette`;
+  }
+  const trail = photoTrailSummary(item);
+  if (trail) return trail;
+  const count = item.photo_count ?? 0;
+  if (count > 0) {
+    return count === 1 ? "1 Verlaufsfoto" : `${count} Verlaufsfotos`;
+  }
+  return "Verlauf dokumentieren";
+}
+
+/**
+ * Primäre Inbox-Zeile — welche Arbeit wartet (Falltyp vor Patient).
+ */
+export function trackerInboxWorkType(item: EnrichedSubmissionListItem): TrackerInboxWorkType {
+  if (item.is_draft) {
+    return { kind: "entwurf", headline: "Entwurf", context: "Noch nicht veröffentlicht" };
+  }
+
+  if (isApprovalPending(item)) {
+    return { kind: "freigabe", headline: "Antwort freigeben", context: "KI-Antwort wartet auf Sie" };
+  }
+
+  if (item.message_draft_status === "draft") {
+    return {
+      kind: "antwort_pruefen",
+      headline: "Antwort prüfen",
+      context: "Entwurf zur ärztlichen Sichtung",
+    };
+  }
+
+  if (item.open_task_count > 0) {
+    return {
+      kind: "praxisaufgabe",
+      headline: "Praxisaufgabe",
+      context:
+        item.open_task_count === 1 ? "1 offene Aufgabe" : `${item.open_task_count} offene Aufgaben`,
+    };
+  }
+
+  if (hasVerlaufskontrolleContext(item)) {
+    return {
+      kind: "verlaufskontrolle",
+      headline: verlaufskontrolleHeadline(item),
+      context: verlaufskontrolleContext(item),
+    };
+  }
+
+  if (!item.seen_at) {
+    return { kind: "neue_anfrage", headline: "Neue Anfrage", context: null };
+  }
+
+  if (item.message_draft_status === "sent") {
+    return { kind: "abgeschlossen", headline: "Abgeschlossen", context: "Antwort versendet" };
+  }
+
+  if (item.photo_count === 0) {
+    return {
+      kind: "rueckfrage",
+      headline: "Rückfrage offen",
+      context: "Klinische Bilder fehlen",
+    };
+  }
+
+  return { kind: "laufend", headline: "In Bearbeitung", context: null };
 }
 
 /**
  * Primäre Inbox-Zeile — Falltyp vor Patientenname.
  */
 export function trackerInboxHeadline(item: EnrichedSubmissionListItem): string {
-  if (item.is_draft) return "Entwurf";
-  if (isApprovalPending(item)) return "Freigabe erforderlich";
-  if (item.message_draft_status === "draft") return "KI Antwort bereit";
-  if (item.open_task_count > 0) return "Praxisaufgabe";
-  if (item.intake_channel === "follow_up" || hasPhotoTrail(item)) {
-    return `Nachsorge Tag ${daysSinceIntake(item.created_at)}`;
-  }
-  if (!item.seen_at) return "Neue Anfrage";
-  return "In Bearbeitung";
+  return trackerInboxWorkType(item).headline;
 }
 
 /** @deprecated Nutze trackerInboxHeadline — Alias für bestehende Aufrufer. */

@@ -16,7 +16,7 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
   const isCaseDetail = pathname.startsWith("/inbox/") && pathname !== "/inbox";
 
   return (
-    <div className="yd-tracker-shell yd-tracker-shell--clinical">
+    <div className="yd-tracker-shell">
       <div
         className={cn(
           "yd-tracker-shell__inbox",

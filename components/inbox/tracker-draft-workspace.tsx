@@ -15,7 +15,7 @@ type TrackerDraftWorkspaceProps = {
 
 export function TrackerDraftWorkspace(props: TrackerDraftWorkspaceProps) {
   return (
-    <div className="yd-tracker-v4-draft__surface yd-tracker-draft--assistent">
+    <div className="yd-tracker-v4-draft__surface">
       <SubmissionMessageDraftPanel
         submissionId={props.submissionId}
         patientName={props.patientName}
