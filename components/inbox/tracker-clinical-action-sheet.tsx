@@ -169,6 +169,16 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     return () => window.removeEventListener("keydown", onKey);
   }, [open, isPending, onClose]);
 
+  useEffect(() => {
+    if (!open) return;
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prev;
+    };
+  }, [open]);
+
   const scrollToCommunication = useCallback(() => {
     document.getElementById("tracker-kommunikation")?.scrollIntoView({
       behavior: "smooth",
@@ -273,71 +283,73 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
         className="yd-tracker-v8-action-sheet"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="yd-tracker-v8-action-sheet__head">
-          <div>
-            <h2 id={titleId} className="yd-tracker-v8-action-sheet__title">
-              {copy.title}
-            </h2>
-            <p className="yd-tracker-v8-action-sheet__lead">{copy.lead}</p>
-          </div>
-          <button
-            type="button"
-            className="yd-tracker-v8-action-sheet__close"
-            onClick={onClose}
-            disabled={isPending}
-            aria-label="Schließen"
-          >
-            <X className="h-5 w-5" aria-hidden />
-          </button>
-        </header>
-
-        {error ? (
-          <p className="yd-medical-form-alert" role="alert">
-            {error}
-          </p>
-        ) : null}
-        {status ? (
-          <p className="yd-tracker-v8-action-sheet__status" role="status">
-            {status}
-          </p>
-        ) : null}
-
-        <fieldset
-          disabled={isPending}
-          aria-busy={isPending}
-          className="m-0 min-w-0 border-0 p-0 disabled:opacity-[0.58]"
-        >
-          <label htmlFor={`${titleId}-body`} className="yd-tracker-v8-action-sheet__label">
-            Nachrichtentext
-          </label>
-          <textarea
-            id={`${titleId}-body`}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={9}
-            className="yd-tracker-v8-action-sheet__textarea"
-            spellCheck={false}
-          />
-          <p className="yd-tracker-v8-action-sheet__hint">
-            Kein automatischer Versand — Sie prüfen und geben frei.
-          </p>
-
-          {intent === "termin" && canSendAppointmentLink ? (
-            <div className="yd-tracker-v8-action-sheet__termin">
-              <p className="yd-tracker-v8-action-sheet__label">Terminlink per E-Mail</p>
-              <AppointmentLinkButton
-                submissionId={submissionId}
-                hasPatientEmail={Boolean(patientEmail?.trim())}
-                canSend={isDoctor}
-              />
+        <div className="yd-tracker-v8-action-sheet__scroll">
+          <header className="yd-tracker-v8-action-sheet__head">
+            <div>
+              <h2 id={titleId} className="yd-tracker-v8-action-sheet__title">
+                {copy.title}
+              </h2>
+              <p className="yd-tracker-v8-action-sheet__lead">{copy.lead}</p>
             </div>
+            <button
+              type="button"
+              className="yd-tracker-v8-action-sheet__close"
+              onClick={onClose}
+              disabled={isPending}
+              aria-label="Schließen"
+            >
+              <X className="h-5 w-5" aria-hidden />
+            </button>
+          </header>
+
+          {error ? (
+            <p className="yd-medical-form-alert" role="alert">
+              {error}
+            </p>
           ) : null}
-        </fieldset>
+          {status ? (
+            <p className="yd-tracker-v8-action-sheet__status" role="status">
+              {status}
+            </p>
+          ) : null}
+
+          <fieldset
+            disabled={isPending}
+            aria-busy={isPending}
+            className="m-0 min-w-0 border-0 p-0 disabled:opacity-[0.58]"
+          >
+            <label htmlFor={`${titleId}-body`} className="yd-tracker-v8-action-sheet__label">
+              Nachrichtentext
+            </label>
+            <textarea
+              id={`${titleId}-body`}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={7}
+              className="yd-tracker-v8-action-sheet__textarea"
+              spellCheck={false}
+            />
+            <p className="yd-tracker-v8-action-sheet__hint">
+              Kein automatischer Versand — Sie prüfen und geben frei.
+            </p>
+
+            {intent === "termin" && canSendAppointmentLink ? (
+              <div className="yd-tracker-v8-action-sheet__termin">
+                <p className="yd-tracker-v8-action-sheet__label">Terminlink per E-Mail</p>
+                <AppointmentLinkButton
+                  submissionId={submissionId}
+                  hasPatientEmail={Boolean(patientEmail?.trim())}
+                  canSend={isDoctor}
+                />
+              </div>
+            ) : null}
+          </fieldset>
+        </div>
 
         <footer className="yd-tracker-v8-action-sheet__footer">
           <button
             type="button"
-            className="yd-auth-btn-secondary"
+            className="yd-auth-btn-secondary yd-tracker-v8-action-sheet__btn"
             disabled={isPending}
             onClick={onClose}
           >
@@ -346,7 +358,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
           {intent === "freigabe" ? (
             <button
               type="button"
-              className="yd-auth-btn-primary"
+              className="yd-auth-btn-primary yd-tracker-v8-action-sheet__btn"
               disabled={isPending || !editableDraftId}
               onClick={handleApprove}
             >
@@ -355,7 +367,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
           ) : (
             <button
               type="button"
-              className="yd-auth-btn-primary"
+              className="yd-auth-btn-primary yd-tracker-v8-action-sheet__btn"
               disabled={isPending || !body.trim()}
               onClick={handleApplyToCommunication}
             >

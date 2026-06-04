@@ -68,7 +68,7 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
 
   return (
     <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-clinical-control flex h-full min-h-0 flex-col">
-      <div className="yd-tracker-v4-inbox__toolbar">
+      <div className="yd-tracker-v4-inbox__toolbar yd-tracker-v8-inbox__toolbar">
         <div className="yd-tracker-v4-inbox__toolbar-head">
           <div className="min-w-0">
             <p className="yd-tracker-v4-inbox__eyebrow">Arbeitsliste</p>
@@ -121,7 +121,7 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
       </div>
 
       <ul
-        className="yd-tracker-v4-inbox__list min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+        className="yd-tracker-v4-inbox__list yd-tracker-v8-inbox__list min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
         aria-label="Arbeit in der Praxis-Inbox"
       >
         {filtered.length === 0 ? (

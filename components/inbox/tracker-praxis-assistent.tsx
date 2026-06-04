@@ -104,6 +104,11 @@ export function TrackerPraxisAssistent({
     draftsAvailable,
   });
 
+  const primaryAction = actions.find((a) => a.primary) ?? actions[0];
+  const otherActions = actions.filter((a) => a !== primaryAction);
+  const mobileSecondary = otherActions.slice(0, 2);
+  const mobileMore = otherActions.slice(2);
+
   const handleIntent = (intent: TrackerActionIntent) => {
     setSheetIntent(intent);
   };
@@ -123,6 +128,23 @@ export function TrackerPraxisAssistent({
       });
     }
   };
+
+  const renderAction = (action: TrackerDecisionAction) =>
+    action.href ? (
+      <button
+        key={action.id}
+        type="button"
+        className={cn(
+          "yd-tracker-v8-decision-btn",
+          action.primary && "yd-tracker-v8-decision-btn--primary"
+        )}
+        onClick={() => handleActionClick(action)}
+      >
+        {action.label}
+      </button>
+    ) : (
+      <DecisionButton key={action.id} action={action} onIntent={handleIntent} />
+    );
 
   return (
     <>
@@ -183,28 +205,30 @@ export function TrackerPraxisAssistent({
           <h3 id="tracker-v8-actions" className="yd-tracker-v7-rail__label">
             Aktionen
           </h3>
-          <div className="yd-tracker-v8-rail__actions-grid">
-            {actions.map((action) =>
-              action.href ? (
-                <button
-                  key={action.id}
-                  type="button"
-                  className={cn(
-                    "yd-tracker-v8-decision-btn",
-                    action.primary && "yd-tracker-v8-decision-btn--primary"
-                  )}
-                  onClick={() => handleActionClick(action)}
-                >
-                  {action.label}
-                </button>
-              ) : (
-                <DecisionButton
-                  key={action.id}
-                  action={action}
-                  onIntent={handleIntent}
-                />
-              )
-            )}
+
+          <div className="yd-tracker-v8-rail__actions-grid yd-tracker-v8-rail__actions-grid--desktop">
+            {actions.map((action) => renderAction(action))}
+          </div>
+
+          <div className="yd-tracker-v8-rail__actions-mobile">
+            {primaryAction ? (
+              <div className="yd-tracker-v8-rail__actions-primary">
+                {renderAction({ ...primaryAction, primary: true })}
+              </div>
+            ) : null}
+            {mobileSecondary.length > 0 ? (
+              <div className="yd-tracker-v8-rail__actions-secondary">
+                {mobileSecondary.map((action) => renderAction(action))}
+              </div>
+            ) : null}
+            {mobileMore.length > 0 ? (
+              <details className="yd-tracker-v8-rail__actions-more">
+                <summary>Weitere Aktionen</summary>
+                <div className="yd-tracker-v8-rail__actions-more-list">
+                  {mobileMore.map((action) => renderAction(action))}
+                </div>
+              </details>
+            ) : null}
           </div>
         </section>
       </aside>
