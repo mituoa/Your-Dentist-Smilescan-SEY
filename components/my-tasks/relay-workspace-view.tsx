@@ -188,7 +188,7 @@ export function RelayWorkspaceView({
       <RelayCommandTaskPrefill />
       <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
         {isRelay ? (
-          <div className="yd-relay-v4-page">
+          <div className="yd-relay-v4-page yd-relay-v4-page--mobile">
             <RelaySectionBox
               title=""
               hideTitle

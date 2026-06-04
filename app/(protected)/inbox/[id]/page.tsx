@@ -6,6 +6,7 @@ import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
 import { TrackerWorkspace } from "@/components/inbox/tracker-workspace";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
 import { InboxMobileBack } from "@/components/inbox/inbox-mobile-back";
+import { inboxSearchQueryFromParam } from "@/lib/inbox-search-q";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
   trackerStatusForRow,
@@ -18,6 +19,7 @@ import { markSubmissionSeen } from "./actions";
 
 interface InboxDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 function messageDraftStatusFromDetail(
@@ -33,8 +35,9 @@ function messageDraftStatusFromDetail(
   return "none";
 }
 
-export default async function InboxDetailPage({ params }: InboxDetailPageProps) {
+export default async function InboxDetailPage({ params, searchParams }: InboxDetailPageProps) {
   const { id } = await params;
+  const sp = await searchParams;
   const workspace = await getCurrentWorkspace();
 
   if (!workspace) {
@@ -74,29 +77,40 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
   );
 
   const listResult = await getInboxSubmissions(workspace.workspace_id);
-  const openTaskCount = listResult.ok
-    ? (listResult.items.find((i) => i.id === id)?.open_task_count ?? 0)
-    : 0;
+  const listItem = listResult.ok ? listResult.items.find((i) => i.id === id) : undefined;
 
-  const statusRow: EnrichedSubmissionListItem = {
-    id: submission.id,
-    patient_name: submission.patient_name,
-    patient_email: submission.patient_email,
-    patient_notes: submission.patient_notes,
-    patient_birth_date: submission.patient_birth_date,
-    patient_external_id: submission.patient_external_id,
-    urgency: submission.urgency,
-    is_draft: submission.is_draft,
-    created_at: submission.created_at,
-    seen_at: submission.seen_at,
-    photo_count: submission.photos.length,
-    message_draft_status: messageDraftStatus,
-    intake_channel: submission.intake_channel,
-    open_task_count: openTaskCount,
-    photo_documentation: null,
-  };
+  const statusRow: EnrichedSubmissionListItem = listItem
+    ? {
+        ...listItem,
+        message_draft_status: messageDraftStatus,
+        photo_count: submission.photos.length,
+        seen_at: submission.seen_at ?? listItem.seen_at,
+        patient_notes: submission.patient_notes ?? listItem.patient_notes,
+      }
+    : {
+        id: submission.id,
+        patient_name: submission.patient_name,
+        patient_email: submission.patient_email,
+        patient_notes: submission.patient_notes,
+        patient_birth_date: submission.patient_birth_date,
+        patient_external_id: submission.patient_external_id,
+        urgency: submission.urgency,
+        is_draft: submission.is_draft,
+        created_at: submission.created_at,
+        seen_at: submission.seen_at,
+        photo_count: submission.photos.length,
+        message_draft_status: messageDraftStatus,
+        intake_channel: submission.intake_channel,
+        open_task_count: 0,
+        photo_documentation: null,
+      };
 
   const status = trackerStatusForRow(statusRow);
+
+  const qEffective = inboxSearchQueryFromParam(sp.q);
+  const mobileBackHref = qEffective
+    ? `/inbox?q=${encodeURIComponent(qEffective)}`
+    : "/inbox";
 
   return (
     <>
@@ -110,14 +124,14 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
       />
       <CaseCreatedToast />
 
-      <div className="yd-tracker-v4-detail flex h-full min-h-0 flex-1 flex-col overflow-hidden max-md:overflow-y-auto max-md:overscroll-y-contain">
-        <div className="yd-tracker-v4-detail__bar shrink-0 px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] max-md:sticky max-md:top-0 max-md:z-[6] md:px-6 md:pt-4">
+      <div className="yd-tracker-triage-detail flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="yd-tracker-v4-detail__bar hidden shrink-0 px-4 pb-2 pt-[max(12px,env(safe-area-inset-top))] md:block md:px-5 md:pt-3">
           <Suspense fallback={null}>
             <InboxMobileBack />
           </Suspense>
         </div>
 
-        <div className="yd-tracker-v4-detail__scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-[max(1.25rem,var(--safe-area-bottom))] md:px-6 md:pb-8 md:pt-2">
+        <div className="min-h-0 flex-1">
           <TrackerWorkspace
             submission={{
               id: submission.id,
@@ -128,6 +142,8 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
               patient_birth_date: submission.patient_birth_date,
               urgency: submission.urgency,
               created_at: submission.created_at,
+              seen_at: submission.seen_at,
+              patient_external_id: submission.patient_external_id,
               is_draft: submission.is_draft,
               intake_channel: submission.intake_channel,
               photos: submission.photos.map(
@@ -152,7 +168,9 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
             practicePhone={practicePhone}
             appointmentUrl={appointmentUrl}
             canSendAppointmentLink={isDoctor}
-            openTaskCount={openTaskCount}
+            openTaskCount={statusRow.open_task_count}
+            photoDocumentation={statusRow.photo_documentation}
+            mobileBackHref={mobileBackHref}
           />
         </div>
       </div>

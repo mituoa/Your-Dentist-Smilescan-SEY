@@ -19,6 +19,9 @@ type TrackerPhotoStageProps = {
   patientName: string;
   /** Große Foto-Bühne — Kern der Arbeitsfläche. */
   dominant?: boolean;
+  showTrailHint?: boolean;
+  /** Nur dezente Meta-Zeile, kein Sektionstitel (Fallakte). */
+  quietHeader?: boolean;
 };
 
 function dayIndexLabel(index: number): string {
@@ -30,6 +33,8 @@ export function TrackerPhotoStage({
   photos,
   patientName,
   dominant = false,
+  showTrailHint = false,
+  quietHeader = false,
 }: TrackerPhotoStageProps) {
   const sorted = useMemo(
     () =>
@@ -57,22 +62,45 @@ export function TrackerPhotoStage({
     "yd-tracker-v4-photo-stage",
     dominant && "yd-tracker-v4-photo-stage--dominant"
   );
-  const title = "Foto-Dokumentation";
+  const title = "Klinische Dokumentation";
 
   if (sorted.length === 0) {
     return (
-      <section className={stageClass} aria-label="Foto-Dokumentation">
-        <header className="yd-tracker-v4-photo-stage__head">
-          <h3 className="yd-tracker-workspace-section__title">{title}</h3>
+      <section className={cn(stageClass, "yd-tracker-v4-photo-stage--awaiting")} aria-label={title}>
+        <header
+          className={cn(
+            "yd-tracker-v4-photo-stage__head yd-tracker-v4-photo-stage__head--dominant",
+            quietHeader && "yd-tracker-v4-photo-stage__head--quiet"
+          )}
+        >
+          {quietHeader ? (
+            <p className="yd-tracker-v4-photo-stage__meta yd-tracker-v4-photo-stage__meta--solo">
+              Noch keine Aufnahmen
+            </p>
+          ) : (
+            <div>
+              <h3 className="yd-tracker-ia-section-title yd-tracker-ia-section-title--hero">{title}</h3>
+              <p className="yd-tracker-v4-photo-stage__meta">Noch keine Aufnahmen</p>
+            </div>
+          )}
         </header>
-        <div className="yd-tracker-v4-photo-stage__empty">
-          <ImageIcon className="h-9 w-9 text-[#94A3B8]/40" strokeWidth={1.25} aria-hidden />
-          <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[#334155]">
-            Es liegen noch keine klinischen Bilder vor.
-          </p>
-          <p className="mt-1.5 max-w-md text-[13px] leading-relaxed text-[#64748B]">
-            Nach Eingang erscheinen die Aufnahmen hier mit klinischem Viewer und Tagesverlauf.
-          </p>
+        <div className="yd-tracker-v4-photo-stage__empty yd-tracker-v4-photo-stage__empty--clinical">
+          <div className="yd-tracker-v4-photo-stage__empty-canvas" aria-hidden>
+            <div className="yd-tracker-v4-photo-stage__empty-frame" />
+            <div className="yd-tracker-v4-photo-stage__empty-frame yd-tracker-v4-photo-stage__empty-frame--secondary" />
+          </div>
+          <div className="yd-tracker-v4-photo-stage__empty-copy">
+            <p className="yd-tracker-v4-photo-stage__empty-title">
+              Warten auf klinische Dokumentation
+            </p>
+            <p className="yd-tracker-v4-photo-stage__empty-lead">
+              Sobald Bilder eingehen, erscheinen sie hier im Viewer — mit Tagesverlauf und
+              Vergleich über mehrere Aufnahmen.
+            </p>
+            <p className="yd-tracker-v4-photo-stage__empty-hint">
+              Nachforderung über den Praxis-Assistenten rechts.
+            </p>
+          </div>
         </div>
       </section>
     );
@@ -85,9 +113,30 @@ export function TrackerPhotoStage({
 
   return (
     <section className={stageClass} aria-label="Foto-Dokumentation">
-      <header className="yd-tracker-v4-photo-stage__head">
-        <h3 className="yd-tracker-workspace-section__title">{title}</h3>
-        <p className="yd-tracker-v4-photo-stage__meta">{photoMeta}</p>
+      <header
+        className={cn(
+          "yd-tracker-v4-photo-stage__head yd-tracker-v4-photo-stage__head--dominant",
+          quietHeader && "yd-tracker-v4-photo-stage__head--quiet"
+        )}
+      >
+        {quietHeader ? (
+          <p className="yd-tracker-v4-photo-stage__meta yd-tracker-v4-photo-stage__meta--solo">
+            {photoMeta}
+            {showTrailHint ? " · Verlauf über mehrere Tage" : ""}
+          </p>
+        ) : (
+          <>
+            <div>
+              <h3 className="yd-tracker-ia-section-title yd-tracker-ia-section-title--hero">{title}</h3>
+              <p className="yd-tracker-v4-photo-stage__meta">{photoMeta}</p>
+            </div>
+            {showTrailHint ? (
+              <p className="yd-tracker-v4-photo-stage__trail-hint">
+                Verlauf über mehrere Tage — Tageszeilen zum Vergleich.
+              </p>
+            ) : null}
+          </>
+        )}
       </header>
       <div className="yd-tracker-v4-photo-stage__viewer">
         <PhotoViewer

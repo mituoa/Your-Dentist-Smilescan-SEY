@@ -1,0 +1,896 @@
+/**
+ * Tracker Triage — klinische Entscheidungszentrale
+ * Inbox · Fallakte · Praxis-Assistent — minimalistisch, penibel
+ */
+
+/* —— Seite & Shell (ruhig, kein Dashboard-Glow) —— */
+
+.yd-tracker-page--clinical .yd-dash-ambient-orb {
+  display: none;
+}
+
+.yd-tracker-shell--clinical {
+  border-radius: 16px;
+  background: #f8fafc;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 32px rgba(15, 23, 42, 0.06);
+}
+
+.yd-tracker-shell--clinical .yd-tracker-shell__inbox {
+  background: #f1f5f9;
+  border-right-color: rgba(226, 232, 240, 0.9);
+}
+
+.yd-tracker-shell--clinical .yd-tracker-shell__workspace {
+  background: #ffffff;
+}
+
+.yd-tracker-shell--clinical .yd-tracker-shell__workspace::before {
+  display: none;
+}
+
+/* —— Detail-Root —— */
+
+.yd-tracker-triage-detail {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.yd-tracker-triage-detail .yd-tracker-v4-detail__bar {
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.yd-tracker-triage-detail > .min-h-0 {
+  min-height: 0;
+  flex: 1;
+  padding: 0 !important;
+}
+
+.yd-tracker-triage {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.yd-tracker-triage__fallakte {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1.35rem 2.5rem;
+  scrollbar-gutter: stable;
+}
+
+.yd-tracker-assistent {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid #e2e8f0;
+  background: #fafbfc;
+}
+
+@media (min-width: 900px) {
+  .yd-tracker-triage {
+    flex-direction: row;
+  }
+
+  .yd-tracker-triage__fallakte {
+    padding: 1.25rem 1.75rem 2.75rem;
+  }
+
+  .yd-tracker-assistent {
+    width: min(340px, 36%);
+    max-width: 380px;
+    flex-shrink: 0;
+    border-top: none;
+    border-left: 1px solid #e2e8f0;
+  }
+}
+
+/* —— Inbox —— */
+
+.yd-triage-inbox__toolbar {
+  flex-shrink: 0;
+  padding: 1rem 1rem 0.75rem;
+}
+
+.yd-triage-inbox__toolbar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.yd-triage-inbox__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.yd-triage-inbox__queue {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+.yd-triage-inbox__new {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color 140ms ease, background-color 140ms ease;
+}
+
+.yd-triage-inbox__new:hover {
+  color: #334155;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.yd-triage-inbox__new:focus-visible {
+  outline: 2px solid rgba(15, 23, 42, 0.2);
+  outline-offset: 2px;
+}
+
+.yd-triage-inbox .yd-tracker-search {
+  margin-top: 0.65rem;
+}
+
+.yd-triage-inbox .yd-tracker-search__input {
+  min-height: 2.375rem;
+  border-radius: 8px;
+  border-color: rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 0.8125rem;
+}
+
+.yd-triage-inbox .yd-tracker-search__input:focus {
+  border-color: #cbd5e1;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.04);
+}
+
+.yd-triage-inbox__tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+}
+
+.yd-triage-inbox__tab {
+  flex: 1;
+  min-height: 2.125rem;
+  padding: 0.4rem 0.35rem;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: #94a3b8;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
+}
+
+.yd-triage-inbox__tab:hover {
+  color: #64748b;
+}
+
+.yd-triage-inbox__tab:focus-visible {
+  outline: 2px solid rgba(15, 23, 42, 0.15);
+  outline-offset: 1px;
+}
+
+.yd-triage-inbox__tab--active {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.yd-triage-inbox__tab-count {
+  margin-left: 0.2rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #94a3b8;
+}
+
+.yd-triage-inbox__tab--active .yd-triage-inbox__tab-count {
+  color: #64748b;
+}
+
+.yd-triage-inbox__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-triage-inbox-row {
+  display: grid;
+  width: 100%;
+  gap: 0.12rem 0.65rem;
+  padding: 0.72rem 1rem;
+  border: none;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.98);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  transition: background-color 140ms ease;
+}
+
+.yd-triage-inbox-row:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.yd-triage-inbox-row:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 3px 0 0 #0f172a;
+}
+
+.yd-triage-inbox-row--active {
+  background: #ffffff;
+  box-shadow: inset 3px 0 0 #0f172a;
+}
+
+.yd-triage-inbox-row--attention .yd-triage-inbox-row__name {
+  font-weight: 600;
+}
+
+.yd-triage-inbox-row__main {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+  grid-column: 1;
+}
+
+.yd-triage-inbox-row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+}
+
+.yd-triage-inbox-row__dot {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #0f172a;
+}
+
+.yd-triage-inbox-row__hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #94a3b8;
+  grid-column: 1;
+}
+
+.yd-triage-inbox-row__date {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #cbd5e1;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  padding-top: 0.08rem;
+}
+
+.yd-triage-inbox__empty {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+/* —— Fallakte —— */
+
+.yd-tracker-fallakte__head {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0;
+}
+
+.yd-tracker-fallakte__patient {
+  margin: 0;
+  font-size: clamp(1.375rem, 2.5vw, 1.625rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  color: #0f172a;
+}
+
+.yd-tracker-fallakte__status {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-tracker-fallakte__concern {
+  margin: 0.65rem 0 0;
+  max-width: 36rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #475569;
+}
+
+/* Fotos */
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage {
+  margin-bottom: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage__head--quiet {
+  margin-bottom: 0.5rem;
+  justify-content: flex-start;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage__meta--solo {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage__viewer {
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.08);
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage--dominant .yd-tracker-v4-photo-stage__viewer {
+  min-height: min(60vh, 540px);
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage--dominant .yd-tracker-v4-photo-stage__viewer img {
+  max-height: min(60vh, 540px) !important;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage--awaiting .yd-tracker-v4-photo-stage__empty--clinical {
+  min-height: min(50vh, 440px);
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fafbfc;
+  box-shadow: none;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage__empty-title {
+  font-size: 1rem;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage__empty-lead {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-stage__empty-hint {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-day__label {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.yd-tracker-fallakte .yd-tracker-v4-photo-thumb {
+  border-radius: 8px;
+  border-color: rgba(226, 232, 240, 0.95);
+}
+
+/* Verlauf */
+
+.yd-tracker-fallakte__timeline.yd-tracker-v4-timeline--premium {
+  margin: 0 0 2rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.yd-tracker-fallakte__timeline .yd-tracker-workspace-section__title {
+  margin-bottom: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-fallakte__timeline .yd-tracker-v4-timeline__node {
+  width: 5px;
+  height: 5px;
+  border: none;
+  background: #cbd5e1;
+}
+
+.yd-tracker-fallakte__timeline .yd-tracker-v4-timeline__line {
+  background: #f1f5f9;
+}
+
+.yd-tracker-fallakte__timeline .yd-tracker-v4-timeline__title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.yd-tracker-fallakte__timeline .yd-tracker-v4-timeline__date {
+  font-size: 0.6875rem;
+  color: #cbd5e1;
+}
+
+.yd-tracker-fallakte__timeline .yd-tracker-v4-timeline__detail {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Stammdaten */
+
+.yd-tracker-meta-minimal {
+  margin-top: 0.5rem;
+}
+
+.yd-tracker-meta-minimal__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #cbd5e1;
+  cursor: pointer;
+  list-style: none;
+}
+
+.yd-tracker-meta-minimal__summary::-webkit-details-marker {
+  display: none;
+}
+
+.yd-tracker-meta-minimal__hint {
+  font-size: 0.6875rem;
+  color: #e2e8f0;
+}
+
+.yd-tracker-meta-minimal__body {
+  padding: 0.5rem 0 0.25rem;
+}
+
+.yd-tracker-meta-minimal__grid {
+  display: grid;
+  gap: 0.55rem 1.25rem;
+  margin: 0;
+}
+
+@media (min-width: 520px) {
+  .yd-tracker-meta-minimal__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.yd-tracker-meta-minimal__grid dt {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+.yd-tracker-meta-minimal__grid dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.yd-tracker-meta-minimal__grid a {
+  color: #475569;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.yd-tracker-meta-minimal__grid a:hover {
+  color: #0f172a;
+}
+
+.yd-tracker-meta-minimal__urgency {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.yd-tracker-meta-minimal__urgency-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+.yd-tracker-meta-minimal__urgency button {
+  min-height: 2rem !important;
+  border-radius: 6px !important;
+  border-color: #e2e8f0 !important;
+  background: #ffffff !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+}
+
+.yd-tracker-meta-minimal__urgency button[aria-pressed="true"] {
+  border-color: #94a3b8 !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* —— Praxis-Assistent —— */
+
+.yd-tracker-assistent__head {
+  flex-shrink: 0;
+  padding: 1.15rem 1.25rem 0.5rem;
+}
+
+.yd-tracker-assistent__head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.yd-tracker-assistent__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.yd-tracker-assistent__status-pill {
+  flex-shrink: 0;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: #f1f5f9;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #64748b;
+}
+
+.yd-tracker-assistent__block--relay .yd-tracker-assistent__relay-link {
+  display: inline-block;
+  margin-top: 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.yd-tracker-assistent__block--relay .yd-tracker-assistent__relay-link:hover {
+  color: #0f172a;
+}
+
+.yd-tracker-assistent__body {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-y: contain;
+  padding: 0.25rem 1.25rem 0.5rem;
+}
+
+.yd-tracker-assistent__block {
+  padding-bottom: 1.15rem;
+  margin-bottom: 1.15rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.yd-tracker-assistent__block:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.yd-tracker-assistent__block--decision {
+  padding-bottom: 1.25rem;
+}
+
+.yd-tracker-assistent__block--draft {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0.5rem;
+}
+
+.yd-tracker-assistent__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-assistent__text {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.yd-tracker-assistent__decision {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.4;
+  color: #0f172a;
+}
+
+.yd-tracker-assistent__note {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+/* Draft im Assistenten — ohne Karten-Optik */
+
+.yd-tracker-assistent .yd-tracker-draft--assistent {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.yd-tracker-assistent__block--draft .touch-manipulation > p:first-of-type {
+  display: none;
+}
+
+.yd-tracker-assistent .yd-tracker-draft--assistent textarea,
+.yd-tracker-assistent .yd-tracker-draft--assistent [data-tracker-draft] {
+  min-height: 140px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  font-size: 0.875rem !important;
+  line-height: 1.55 !important;
+}
+
+.yd-tracker-assistent .yd-tracker-draft--assistent p {
+  font-size: 0.75rem !important;
+  color: #94a3b8 !important;
+}
+
+.yd-tracker-assistent .yd-tracker-draft--assistent button[style*="2B6FE8"],
+.yd-tracker-assistent .yd-tracker-draft--assistent button[style*="background: #2B6FE8"] {
+  background: #0f172a !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  min-height: 2.5rem !important;
+}
+
+.yd-tracker-assistent .yd-tracker-draft--assistent button[class*="border-[#CBD5E1]"],
+.yd-tracker-assistent .yd-tracker-draft--assistent button[class*="border border"] {
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+  font-size: 0.8125rem !important;
+  min-height: 2.5rem !important;
+  border-radius: 8px !important;
+}
+
+.yd-tracker-assistent .yd-tracker-draft--assistent button[style*="padding: \"10px"] {
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  min-height: 2rem !important;
+  border-color: #e2e8f0 !important;
+}
+
+.yd-tracker-assistent .yd-tracker-draft--assistent .mb-2 {
+  font-size: 0.625rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: #94a3b8 !important;
+}
+
+/* Termin */
+
+.yd-tracker-assistent__termin-btn {
+  height: 2.5rem !important;
+  width: 100%;
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  color: #334155 !important;
+  box-shadow: none !important;
+}
+
+.yd-tracker-assistent__termin-btn:hover:not(:disabled) {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+.yd-tracker-assistent__termin-status {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.yd-tracker-assistent__termin-status--success {
+  color: #047857;
+}
+
+.yd-tracker-assistent__termin-status--error {
+  color: #b91c1c;
+}
+
+/* Footer: Aktionen */
+
+.yd-tracker-assistent__footer {
+  flex-shrink: 0;
+  padding: 0.85rem 1.25rem max(0.85rem, env(safe-area-inset-bottom));
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.yd-tracker-assistent__footer-label {
+  margin: 0 0 0.45rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-assistent__disclaimer {
+  margin: 0.65rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yd-tracker-assistent-actions__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+}
+
+.yd-tracker-assistent-actions__btn {
+  display: flex;
+  min-height: 2.375rem;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 0.65rem;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #475569;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.yd-tracker-assistent-actions__btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.yd-tracker-assistent-actions__btn:focus-visible {
+  outline: 2px solid rgba(15, 23, 42, 0.12);
+  outline-offset: 1px;
+}
+
+.yd-tracker-assistent-actions__btn--primary {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.yd-tracker-assistent-actions__btn--primary:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.yd-tracker-assistent-actions__btn--disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Leerzustände Workspace */
+
+.yd-triage-placeholder {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.yd-triage-placeholder__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #334155;
+}
+
+.yd-triage-placeholder__lead {
+  margin: 0.45rem 0 0;
+  max-width: 18rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: #94a3b8;
+}
+
+/* Mobile Fall-Shell: s. yd-workspace-mobile.css (.yd-tracker-mobile-case) */
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-triage-inbox-row,
+  .yd-triage-inbox__tab,
+  .yd-triage-inbox__new,
+  .yd-tracker-assistent-actions__btn {
+    transition: none;
+  }
+}

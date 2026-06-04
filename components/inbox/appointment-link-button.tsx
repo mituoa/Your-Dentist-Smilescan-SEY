@@ -9,12 +9,14 @@ interface AppointmentLinkButtonProps {
   submissionId: string;
   hasPatientEmail: boolean;
   canSend: boolean;
+  variant?: "default" | "minimal";
 }
 
 export function AppointmentLinkButton({
   submissionId,
   hasPatientEmail,
   canSend,
+  variant = "default",
 }: AppointmentLinkButtonProps) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<{
@@ -39,14 +41,19 @@ export function AppointmentLinkButton({
 
   if (!hasPatientEmail) {
     return (
-      <p className="text-[14px] leading-relaxed" style={{ color: "#64748B" }}>
-        Keine E-Mail-Adresse hinterlegt — ein Terminlink per E-Mail ist hier nicht möglich.
+      <p className={variant === "minimal" ? "yd-tracker-assistent__note" : "text-[14px] leading-relaxed text-[#64748B]"}>
+        Keine E-Mail hinterlegt — Terminlink nicht verfügbar.
       </p>
     );
   }
 
+  const btnClass =
+    variant === "minimal"
+      ? "yd-tracker-assistent__termin-btn"
+      : "h-11 w-full rounded-[10px] border-0 bg-[#2B6FE8] text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(43,111,232,0.12)] hover:bg-[#2361CC]";
+
   return (
-    <div className="space-y-3">
+    <div className={variant === "minimal" ? "yd-tracker-assistent__termin" : "space-y-3"}>
       <Button
         type="button"
         onClick={handleClick}
@@ -57,10 +64,10 @@ export function AppointmentLinkButton({
             ? "Nur Ärzte dürfen Terminlinks versenden."
             : undefined
         }
-        className="h-11 w-full rounded-[10px] border-0 bg-[#2B6FE8] text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(43,111,232,0.12)] hover:bg-[#2361CC]"
+        className={btnClass}
       >
         <Send className="w-4 h-4 mr-2" strokeWidth={1.75} />
-        {isPending ? "Wird gesendet…" : "Terminlink per E-Mail senden"}
+        {isPending ? "Wird gesendet…" : "Terminlink senden"}
       </Button>
 
       {result && (
@@ -68,11 +75,15 @@ export function AppointmentLinkButton({
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          className={`flex items-start gap-2 rounded-[10px] px-3 py-2.5 text-[14px] leading-relaxed ${
-            result.type === "success"
-              ? "bg-[#ECFDF5] text-[#047857]"
-              : "bg-[#FEF2F2] text-[#B91C1C]"
-          }`}
+          className={
+            variant === "minimal"
+              ? `yd-tracker-assistent__termin-status yd-tracker-assistent__termin-status--${result.type}`
+              : `flex items-start gap-2 rounded-[10px] px-3 py-2.5 text-[14px] leading-relaxed ${
+                  result.type === "success"
+                    ? "bg-[#ECFDF5] text-[#047857]"
+                    : "bg-[#FEF2F2] text-[#B91C1C]"
+                }`
+          }
         >
           {result.type === "success" ? (
             <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />

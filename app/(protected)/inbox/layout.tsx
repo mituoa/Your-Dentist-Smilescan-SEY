@@ -5,6 +5,7 @@ import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { InboxTrackerShell } from "@/components/inbox/inbox-tracker-shell";
 import { TrackerEmptyState } from "@/components/inbox/tracker-empty-state";
 import { TrackerInboxPanel } from "@/components/inbox/tracker-inbox-panel";
+import { WorkspaceMobileShortcutsBar } from "@/components/workspace/workspace-mobile-shortcuts-bar";
 
 interface InboxLayoutProps {
   children: React.ReactNode;
@@ -23,7 +24,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   const submissions = listResult.ok ? listResult.items : [];
 
   const list = (
-    <div className="flex h-full min-h-0 flex-col px-1 pb-1 md:px-2 md:pb-2">
+    <div className="flex h-full min-h-0 flex-col px-0 pb-0 md:px-1 md:pb-1">
       {listFailed ? (
         <TrackerEmptyState
           title="Einsendungen können momentan nicht geladen werden"
@@ -41,9 +42,8 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   );
 
   return (
-    <div className="yd-tracker-page yd-inbox-workspace relative flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="yd-dash-ambient-orb yd-dash-ambient-orb--a" aria-hidden />
-      <div className="yd-dash-ambient-orb yd-dash-ambient-orb--b" aria-hidden />
+    <div className="yd-tracker-page yd-tracker-page--clinical yd-inbox-workspace relative flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+      <WorkspaceMobileShortcutsBar />
       <InboxTrackerShell list={list} detail={children} />
     </div>
   );

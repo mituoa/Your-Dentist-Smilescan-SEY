@@ -5,26 +5,28 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 
-import { TrackerInboxPulse } from "@/components/inbox/tracker-inbox-pulse";
 import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
-import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
-import { trackerInboxPriorityLabel } from "@/lib/inbox/build-tracker-workspace";
-import { buildTrackerInboxPulse } from "@/lib/inbox/tracker-inbox-metrics";
 import {
-  TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
-  countByTrackerFilter,
   formatTrackerListDate,
-  matchesTrackerFilter,
-  matchesTrackerSearch,
   sortTrackerInboxItems,
-  trackerInboxHeadline,
-  trackerStatusForRow,
   type EnrichedSubmissionListItem,
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
+import {
+  buildTrackerInboxQueueLine,
+  buildTrackerInboxTabCounts,
+  matchesTriageInboxTab,
+  resolveYdCaseProductStatus,
+} from "@/lib/inbox/tracker-product-status";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
 import { cn } from "@/lib/utils";
+
+const TRIAGE_INBOX_TABS: { id: TrackerInboxFilter; label: string }[] = [
+  { id: "new_submissions", label: "Neue Anfragen" },
+  { id: "follow_up", label: "Nachsorgen" },
+  { id: "approval_pending", label: "Freigaben" },
+];
 
 type TrackerInboxPanelProps = {
   items: SubmissionListItem[];
@@ -42,21 +44,40 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
     [items]
   );
 
-  const [filter, setFilter] = useState<TrackerInboxFilter>("all");
+  const [filter, setFilter] = useState<TrackerInboxFilter>("new_submissions");
   const qLower = q?.toLowerCase() ?? "";
 
   const searchScoped = useMemo(
-    () => enriched.filter((item) => matchesTrackerSearch(item, qLower)),
+    () =>
+      enriched.filter((item) => {
+        const haystack = [
+          item.patient_name,
+          item.patient_email,
+          item.patient_notes,
+          item.patient_external_id,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return !qLower || haystack.includes(qLower);
+      }),
     [enriched, qLower]
   );
 
+  const tabCounts = useMemo(
+    () => buildTrackerInboxTabCounts(searchScoped),
+    [searchScoped]
+  );
+
+  const queueLine = useMemo(() => buildTrackerInboxQueueLine(tabCounts), [tabCounts]);
+
   const filtered = useMemo(
-    () => searchScoped.filter((item) => matchesTrackerFilter(item, filter)),
+    () => searchScoped.filter((item) => matchesTriageInboxTab(item, filter)),
     [searchScoped, filter]
   );
 
   useEffect(() => {
-    setFilter("all");
+    setFilter("new_submissions");
   }, [qLower]);
 
   const goToCase = (id: string) => {
@@ -64,132 +85,83 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
     router.push(href);
   };
 
-  const pulse = useMemo(() => buildTrackerInboxPulse(searchScoped), [searchScoped]);
-
-  const emptyCopy =
-    filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
+  const emptyCopy = q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
 
   return (
-    <div className="yd-tracker-v4-inbox yd-clinical-control flex h-full min-h-0 flex-col">
-      <div className="yd-tracker-v4-inbox__toolbar">
-        <div className="yd-tracker-v4-inbox__toolbar-head">
-          <div className="min-w-0">
-            <p className="yd-tracker-v4-inbox__eyebrow">Arbeitswarteschlange</p>
-            <h2 className="yd-dash-section yd-tracker-v4-inbox__title">Praxis-Inbox</h2>
-          </div>
+    <div className="yd-triage-inbox flex h-full min-h-0 flex-col">
+      <div className="yd-triage-inbox__toolbar">
+        <div className="yd-triage-inbox__toolbar-head">
+          <h2 className="yd-triage-inbox__title">Praxis-Inbox</h2>
           {showCreateCase ? (
-            <Link href="/create-case?from=inbox" className="yd-tracker-v4-new-case">
-              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
-              Neuer Fall
+            <Link href="/create-case?from=inbox" className="yd-triage-inbox__new">
+              <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              Fall
             </Link>
           ) : null}
         </div>
-        <TrackerInboxPulse
-          metrics={pulse}
-          activeFilter={filter}
-          onSelect={setFilter}
-        />
+        <p className="yd-triage-inbox__queue">{queueLine}</p>
         <TrackerInboxSearch className="yd-tracker-search--inbox" />
-        <div className="yd-tracker-filter-scroll">
-          <div className="yd-tracker-filter-chips" role="tablist" aria-label="Praxis-Inbox filtern">
-            {TRACKER_FILTER_CHIPS.map((chip) => {
-              const count = countByTrackerFilter(searchScoped, chip.id);
-              const active = filter === chip.id;
-              return (
-                <button
-                  key={chip.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
-                  onClick={() => setFilter(chip.id)}
-                >
-                  <span>{chip.label}</span>
-                  <span
-                    className={cn(
-                      "yd-tracker-filter-chip__count",
-                      count === 0 && "yd-tracker-filter-chip__count--zero"
-                    )}
-                  >
+        <div className="yd-triage-inbox__tabs" role="tablist" aria-label="Inbox-Bereiche">
+          {TRIAGE_INBOX_TABS.map((tab) => {
+            const active = filter === tab.id;
+            const count = tabCounts[tab.id as keyof typeof tabCounts];
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                className={cn("yd-triage-inbox__tab", active && "yd-triage-inbox__tab--active")}
+                onClick={() => setFilter(tab.id)}
+              >
+                {tab.label}
+                {count > 0 ? (
+                  <span className="yd-triage-inbox__tab-count" aria-hidden>
                     {count}
                   </span>
-                </button>
-              );
-            })}
-          </div>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <ul
-        className="yd-tracker-v4-inbox__list min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
-        aria-label="Patienten in der Praxis-Inbox"
+        className="yd-triage-inbox__list min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+        aria-label="Patientenliste"
       >
         {filtered.length === 0 ? (
-          <li className="px-3 py-8">
-            <p className="yd-tracker-empty__text text-center">{emptyCopy}</p>
+          <li className="px-4 py-10">
+            <p className="yd-triage-inbox__empty">{emptyCopy}</p>
           </li>
         ) : (
           filtered.map((item) => {
             const isActive = pathname === `/inbox/${item.id}`;
-            const headline = trackerInboxHeadline(item);
-            const status = trackerStatusForRow(item);
-            const concern = deriveSubmissionIssueShortLine(
-              item.patient_notes,
-              item.patient_name,
-              { maxLen: 64, emptyLabel: "Anliegen offen" }
-            );
-            const priority = trackerInboxPriorityLabel(item);
-            const photoLabel =
-              item.photo_count === 0
-                ? "Keine Fotos"
-                : item.photo_count === 1
-                  ? "1 Foto"
-                  : `${item.photo_count} Fotos`;
+            const product = resolveYdCaseProductStatus(item);
+            const name = item.patient_name?.trim() || "Unbekannter Patient";
 
             return (
               <li key={item.id}>
                 <button
                   type="button"
                   className={cn(
-                    "yd-tracker-v4-inbox-card",
-                    isActive && "yd-tracker-v4-inbox-card--active",
-                    !item.seen_at && !isActive && "yd-tracker-v4-inbox-card--unseen"
+                    "yd-triage-inbox-row",
+                    isActive && "yd-triage-inbox-row--active",
+                    product.needsAttention && !isActive && "yd-triage-inbox-row--attention"
                   )}
                   onClick={() => goToCase(item.id)}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <div className="yd-tracker-v4-inbox-card__row">
-                    <div className="min-w-0 flex-1">
-                      <span className="yd-tracker-v4-inbox-card__headline">{headline}</span>
-                      <span className="yd-tracker-v4-inbox-card__name">
-                        {item.patient_name?.trim() || "Unbekannter Patient"}
-                      </span>
-                      {concern ? (
-                        <span className="yd-tracker-v4-inbox-card__concern">{concern}</span>
-                      ) : null}
-                    </div>
-                    <span
-                      className={cn(
-                        "yd-tracker-v4-status",
-                        "yd-tracker-table__status",
-                        status.className
-                      )}
-                    >
-                      <span className="yd-tracker-v4-status__dot" aria-hidden />
-                      {status.label}
-                    </span>
-                  </div>
-                  <div className="yd-tracker-v4-inbox-card__meta">
-                    <span>{photoLabel}</span>
-                    <span aria-hidden>·</span>
-                    <span>{formatTrackerListDate(item.created_at)}</span>
-                    {priority ? (
-                      <>
-                        <span aria-hidden>·</span>
-                        <span className="yd-tracker-v4-inbox-card__priority">{priority}</span>
-                      </>
+                  <span className="yd-triage-inbox-row__main">
+                    <span className="yd-triage-inbox-row__name">{name}</span>
+                    {product.needsAttention ? (
+                      <span className="yd-triage-inbox-row__dot" aria-label="Benötigt Aufmerksamkeit" />
                     ) : null}
-                  </div>
+                  </span>
+                  <span className="yd-triage-inbox-row__hint">{product.shortLabel}</span>
+                  <span className="yd-triage-inbox-row__date">
+                    {formatTrackerListDate(item.created_at)}
+                  </span>
                 </button>
               </li>
             );
