@@ -1182,6 +1182,44 @@
   letter-spacing: -0.025em;
 }
 
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  margin: 0.3rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__strip > span:not(:last-child)::after {
+  content: "·";
+  margin-left: 0.55rem;
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__more {
+  margin-top: 0.5rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__more summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  user-select: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-patient-header__more summary::-webkit-details-marker {
+  display: none;
+}
+
 .yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-status--header {
   font-size: 0.6875rem;
   font-weight: 600;
@@ -1377,6 +1415,31 @@
   background: #94a3b8;
 }
 
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-note--original {
+  margin-top: 0.35rem;
+  padding: 0.5rem 0 0;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-note__summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #94a3b8;
+  user-select: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-note__summary::-webkit-details-marker {
+  display: none;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-note--original[open] .yd-tracker-v4-note__summary {
+  margin-bottom: 0.4rem;
+  color: #64748b;
+}
+
 .yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-note--original .yd-tracker-v4-note__text {
   padding: 0.75rem 0.875rem;
   font-size: 0.8125rem;
@@ -1392,6 +1455,18 @@
   opacity: 0.92;
 }
 
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-urgency--interactive {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-tasks {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
 /* Praxis-Assistent Phase 2: eine klinische Entscheidungshilfe */
 
 .yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent--phase2 {
@@ -1404,7 +1479,7 @@
   margin-bottom: 0.65rem;
 }
 
-.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__decision {
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__ki-body {
   margin: 0 0 0.75rem;
   padding: 0.85rem 0.9rem;
   border-radius: 12px;
@@ -1416,10 +1491,98 @@
   );
 }
 
-.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__decision-ki {
-  padding-bottom: 0.7rem;
-  margin-bottom: 0.7rem;
-  border-bottom: 1px solid rgba(203, 213, 225, 0.65);
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__ki-section + .yd-tracker-v4-praxis-assistent__ki-section {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(203, 213, 225, 0.55);
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__ki-heading {
+  margin: 0 0 0.45rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__ki-dl {
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__ki-row dt {
+  margin: 0;
+  font-size: 0.5625rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__ki-row dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__report {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__bullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__bullets li {
+  position: relative;
+  padding-left: 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: #64748b;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__bullets--muted li::before {
+  background: #cbd5e1;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__primary-action {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
+.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__ki-section--action {
+  padding: 0.55rem 0.65rem;
+  margin-top: 0.15rem;
+  border-radius: 10px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__label {
@@ -1436,30 +1599,6 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   color: #94a3b8;
-}
-
-.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__analysis {
-  margin: 0.35rem 0 0;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.55;
-  letter-spacing: -0.015em;
-}
-
-.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__confidence {
-  margin: 0.4rem 0 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.4;
-}
-
-.yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__recommendation {
-  margin: 0.3rem 0 0;
-  font-size: 0.875rem;
-  font-weight: 650;
-  line-height: 1.45;
-  letter-spacing: -0.01em;
 }
 
 .yd-tracker-v4-workspace--hierarchy .yd-tracker-v4-praxis-assistent__response {

@@ -73,11 +73,14 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
       <div className="yd-tracker-v4-inbox__toolbar">
         <div className="yd-tracker-v4-inbox__toolbar-head">
           <div className="min-w-0">
-            <p className="yd-tracker-v4-inbox__eyebrow">Arbeitswarteschlange</p>
+            <p className="yd-tracker-v4-inbox__eyebrow">Arbeitsliste</p>
             <h2 className="yd-dash-section yd-tracker-v4-inbox__title">Praxis-Inbox</h2>
           </div>
           {showCreateCase ? (
-            <Link href="/create-case?from=inbox" className="yd-tracker-v4-new-case">
+            <Link
+              href="/create-case?from=inbox"
+              className="yd-tracker-v4-new-case relative z-[2]"
+            >
               <Plus className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
               Neuer Fall
             </Link>
@@ -90,7 +93,7 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
         />
         <TrackerInboxSearch className="yd-tracker-search--inbox" />
         <div className="yd-tracker-filter-scroll">
-          <div className="yd-tracker-filter-chips" role="tablist" aria-label="Praxis-Inbox filtern">
+          <div className="yd-tracker-filter-chips" role="tablist" aria-label="Arbeit in der Inbox filtern">
             {TRACKER_FILTER_CHIPS.map((chip) => {
               const count = countByTrackerFilter(searchScoped, chip.id);
               const active = filter === chip.id;

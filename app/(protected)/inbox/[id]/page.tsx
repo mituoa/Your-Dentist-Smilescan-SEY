@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
+import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { CaseCreatedToast } from "@/components/inbox/case-created-toast";
 import { TrackerWorkspace } from "@/components/inbox/tracker-workspace";
 import { InboxAssistHydration } from "@/components/command-assist/inbox-assist-hydration";
@@ -78,6 +80,14 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
     ? (listResult.items.find((i) => i.id === id)?.open_task_count ?? 0)
     : 0;
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const assignableMembers = user
+    ? await getAssignableWorkspaceMembers(workspace.workspace_id, user.id)
+    : [];
+
   const statusRow: EnrichedSubmissionListItem = {
     id: submission.id,
     patient_name: submission.patient_name,
@@ -153,6 +163,7 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
             appointmentUrl={appointmentUrl}
             canSendAppointmentLink={isDoctor}
             openTaskCount={openTaskCount}
+            assignableMembers={assignableMembers}
           />
         </div>
       </div>

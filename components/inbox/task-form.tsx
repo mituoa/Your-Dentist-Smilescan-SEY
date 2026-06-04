@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { createTask } from "@/app/(protected)/inbox/[id]/actions";
 import { Button } from "@/components/ui/button";
 import type { AssignableMember } from "@/lib/queries/team-members";
@@ -11,6 +12,7 @@ interface TaskFormProps {
 }
 
 export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -101,6 +103,7 @@ export function TaskForm({ submissionId, assignableMembers }: TaskFormProps) {
         setSelectedRecipientIds([]);
         setAssignAllTeam(false);
         setAssignToMe(false);
+        router.refresh();
       }
     });
   };

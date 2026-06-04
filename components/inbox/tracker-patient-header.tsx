@@ -3,7 +3,7 @@ import {
   formatTrackerCaseRef,
   type TrackerStatusDisplay,
 } from "@/lib/inbox/tracker-inbox-logic";
-import { getIntakeChannelLabel, type IntakeChannel } from "@/lib/submissions/intake-channel";
+import type { IntakeChannel } from "@/lib/submissions/intake-channel";
 import { cn } from "@/lib/utils";
 
 type TrackerPatientHeaderProps = {
@@ -12,8 +12,7 @@ type TrackerPatientHeaderProps = {
   status: TrackerStatusDisplay;
   birthDate: string | null;
   createdAt: string;
-  urgency: string | null;
-  intakeChannel: IntakeChannel;
+  photoCount: number;
   concern: string | null;
   isDraft?: boolean;
   patientEmail?: string | null;
@@ -26,33 +25,13 @@ function formatIntakeDate(iso: string): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
-function formatBirthDe(value: string | null): string | null {
-  if (!value) return null;
-  const part = value.split("T")[0];
-  const [y, m, d] = part.split("-").map((x) => parseInt(x, 10));
-  if (!y || !m || !d) return null;
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
-
-function patientFirstName(name: string | null): string | null {
-  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
-  return parts[0] ?? null;
-}
-
-function urgencyLabel(urgency: string | null): string | null {
-  if (urgency === "today") return "Heute";
-  if (urgency === "this_week") return "Diese Woche";
-  if (urgency === "not_urgent") return "Nicht dringend";
-  return null;
+function photoCountLabel(count: number): string {
+  if (count === 0) return "Keine Bilder";
+  if (count === 1) return "1 Bild";
+  return `${count} Bilder`;
 }
 
 export function TrackerPatientHeader({
@@ -61,8 +40,7 @@ export function TrackerPatientHeader({
   status,
   birthDate,
   createdAt,
-  urgency,
-  intakeChannel,
+  photoCount,
   concern,
   isDraft,
   patientEmail,
@@ -70,14 +48,10 @@ export function TrackerPatientHeader({
   patientExternalId,
 }: TrackerPatientHeaderProps) {
   const displayName = patientName?.trim() || "Unbekannter Patient";
-  const firstName = patientFirstName(patientName);
   const age = formatPatientAgeYears(birthDate);
-  const birthFormatted = formatBirthDe(birthDate);
-  const urgencyText = urgencyLabel(urgency);
   const patientId = formatTrackerCaseRef(submissionId, patientExternalId ?? null);
   const email = patientEmail?.trim() || null;
   const phone = patientPhone?.trim() || null;
-
   const caseFocus = concern?.trim() || null;
 
   return (
@@ -85,9 +59,12 @@ export function TrackerPatientHeader({
       <div className="yd-tracker-v4-patient-header__identity">
         <div className="min-w-0">
           <h2 className="yd-tracker-v4-patient-header__name">{displayName}</h2>
-          {firstName && displayName !== firstName ? (
-            <p className="yd-tracker-v4-patient-header__firstname">Vorname: {firstName}</p>
-          ) : null}
+          <p className="yd-tracker-v4-patient-header__strip">
+            {age ? <span>{age}</span> : null}
+            <span>Eingang {formatIntakeDate(createdAt)}</span>
+            <span>{photoCountLabel(photoCount)}</span>
+            {isDraft ? <span>Entwurf</span> : null}
+          </p>
         </div>
         <span
           className={cn(
@@ -108,68 +85,39 @@ export function TrackerPatientHeader({
         </p>
       </div>
 
-      <dl className="yd-tracker-v4-patient-header__meta yd-tracker-v4-patient-header__meta--tertiary">
-        <div>
-          <dt>Patienten-ID</dt>
-          <dd>{patientId}</dd>
-        </div>
-        {birthFormatted ? (
-          <div>
-            <dt>Geburtsdatum</dt>
-            <dd>{birthFormatted}</dd>
-          </div>
-        ) : null}
-        {age ? (
-          <div>
-            <dt>Alter</dt>
-            <dd>{age}</dd>
-          </div>
-        ) : null}
-        <div>
-          <dt>Eingang</dt>
-          <dd>{formatIntakeDate(createdAt)}</dd>
-        </div>
-        <div>
-          <dt>Eingangskanal</dt>
-          <dd>{getIntakeChannelLabel(intakeChannel)}</dd>
-        </div>
-        {urgencyText ? (
-          <div>
-            <dt>Dringlichkeit</dt>
-            <dd>{urgencyText}</dd>
-          </div>
-        ) : null}
-        {isDraft ? (
-          <div>
-            <dt>Fallstatus</dt>
-            <dd>Entwurf</dd>
-          </div>
-        ) : null}
-      </dl>
-
       {email || phone ? (
-        <dl className="yd-tracker-v4-patient-header__contact-grid yd-tracker-v4-patient-header__meta--tertiary">
-          {email ? (
+        <details className="yd-tracker-v4-patient-header__more">
+          <summary>Kontakt & Fallreferenz</summary>
+          <dl className="yd-tracker-v4-patient-header__contact-grid">
             <div>
-              <dt>E-Mail</dt>
-              <dd>
-                <a href={`mailto:${email}`} className="text-[#2563EB] hover:underline">
-                  {email}
-                </a>
-              </dd>
+              <dt>Fallreferenz</dt>
+              <dd>{patientId}</dd>
             </div>
-          ) : null}
-          {phone ? (
-            <div>
-              <dt>Telefon</dt>
-              <dd>
-                <a href={`tel:${phone.replace(/\s/g, "")}`} className="text-[#2563EB] hover:underline">
-                  {phone}
-                </a>
-              </dd>
-            </div>
-          ) : null}
-        </dl>
+            {email ? (
+              <div>
+                <dt>E-Mail</dt>
+                <dd>
+                  <a href={`mailto:${email}`} className="text-[#2563EB] hover:underline">
+                    {email}
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+            {phone ? (
+              <div>
+                <dt>Telefon</dt>
+                <dd>
+                  <a
+                    href={`tel:${phone.replace(/\s/g, "")}`}
+                    className="text-[#2563EB] hover:underline"
+                  >
+                    {phone}
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </details>
       ) : null}
     </header>
   );

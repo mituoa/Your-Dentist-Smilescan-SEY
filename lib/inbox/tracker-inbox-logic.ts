@@ -1,3 +1,8 @@
+import {
+  buildTrackerClinicalDecisionFromListItem,
+  clinicalHeadlineToWorkKind,
+  clinicalPrimaryActionToInboxHeadline,
+} from "@/lib/inbox/tracker-clinical-decision";
 import { isSubmissionReadyForReview } from "@/lib/message-drafts/list-status";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
@@ -26,6 +31,7 @@ export type TrackerInboxFilter =
   | "open_tasks"
   | "photo_trail"
   | "follow_up"
+  | "rueckfrage"
   | "practice_cases"
   | "completed";
 
@@ -34,27 +40,28 @@ export type TrackerFilterChip = {
   label: string;
 };
 
-/** Praxis-Inbox — alle Filter als Chips (Count 0 bleibt sichtbar). */
+/** Praxis-Inbox — Arbeit filtern (nicht Kategorien anzeigen). */
 export const TRACKER_FILTER_CHIPS: TrackerFilterChip[] = [
   { id: "all", label: "Alle" },
-  { id: "new_submissions", label: "Neue Einsendungen" },
-  { id: "draft_prepared", label: "Antwort vorbereitet" },
-  { id: "approval_pending", label: "Freigabe ausstehend" },
-  { id: "open_tasks", label: "Offene Aufgaben" },
-  { id: "follow_up", label: "Nachsorge" },
-  { id: "practice_cases", label: "Praxisfälle" },
+  { id: "new_submissions", label: "Neue Anfrage" },
+  { id: "approval_pending", label: "Antwort freigeben" },
+  { id: "draft_prepared", label: "Antwort prüfen" },
+  { id: "open_tasks", label: "Praxisaufgabe" },
+  { id: "follow_up", label: "Verlaufskontrolle" },
+  { id: "rueckfrage", label: "Rückfrage offen" },
 ];
 
 export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
-  all: "Keine Fälle in der Praxis-Inbox.",
-  new_submissions: "Keine neuen Patienteneingänge.",
-  draft_prepared: "Keine vorbereiteten Antworten offen.",
-  approval_pending: "Keine Antworten warten auf Freigabe.",
-  active_cases: "Keine aktiven Fälle in Bearbeitung.",
-  open_tasks: "Keine offenen Aufgaben zu Fällen.",
-  photo_trail: "Keine aktiven Fotoverläufe.",
-  follow_up: "Keine aktiven Nachsorge-Einsendungen.",
-  practice_cases: "Keine manuell angelegten Praxisfälle.",
+  all: "Keine offene Arbeit in der Praxis-Inbox.",
+  new_submissions: "Keine neuen Patientenanfragen.",
+  draft_prepared: "Keine Antworten zur Prüfung.",
+  approval_pending: "Keine Antworten warten auf ärztliche Freigabe.",
+  active_cases: "Keine weiteren Fälle in Bearbeitung.",
+  open_tasks: "Keine offenen Praxisaufgaben zu Fällen.",
+  photo_trail: "Keine Verlaufskontrollen mit Fotoverlauf.",
+  follow_up: "Keine aktiven Verlaufskontrollen.",
+  rueckfrage: "Keine offenen Rückfragen.",
+  practice_cases: "Keine Praxisfälle ohne Patienteneingang.",
   completed: "Keine abgeschlossenen Fälle.",
 };
 
@@ -77,6 +84,13 @@ export function hasPhotoTrail(item: EnrichedSubmissionListItem): boolean {
   return false;
 }
 
+export function matchesTrackerWorkKind(
+  item: EnrichedSubmissionListItem,
+  kind: TrackerInboxWorkKind
+): boolean {
+  return trackerInboxWorkType(item).kind === kind;
+}
+
 export function matchesTrackerFilter(
   item: EnrichedSubmissionListItem,
   filter: TrackerInboxFilter
@@ -85,31 +99,31 @@ export function matchesTrackerFilter(
     case "all":
       return true;
     case "new_submissions":
-      return !item.seen_at && !item.is_draft && item.intake_channel === "patient_upload";
+      return matchesTrackerWorkKind(item, "neue_anfrage");
     case "draft_prepared":
-      return item.message_draft_status === "draft";
+      return matchesTrackerWorkKind(item, "antwort_pruefen");
     case "approval_pending":
-      return isApprovalPending(item);
+      return matchesTrackerWorkKind(item, "freigabe");
+    case "open_tasks":
+      return matchesTrackerWorkKind(item, "praxisaufgabe");
+    case "follow_up":
+      return matchesTrackerWorkKind(item, "verlaufskontrolle");
+    case "rueckfrage":
+      return matchesTrackerWorkKind(item, "rueckfrage");
     case "active_cases":
       return (
-        !item.is_draft &&
-        item.message_draft_status !== "sent" &&
-        Boolean(item.seen_at) &&
-        !isApprovalPending(item)
+        !matchesTrackerWorkKind(item, "abgeschlossen") &&
+        !matchesTrackerWorkKind(item, "entwurf") &&
+        item.message_draft_status !== "sent"
       );
-    case "open_tasks":
-      return item.open_task_count > 0;
     case "photo_trail":
-      return hasPhotoTrail(item);
-    case "follow_up":
       return (
-        item.intake_channel === "follow_up" ||
-        (item.photo_documentation?.linkedSubmissionCount ?? 0) > 1
+        matchesTrackerWorkKind(item, "verlaufskontrolle") && hasPhotoTrail(item)
       );
     case "practice_cases":
       return item.intake_channel === "practice_manual";
     case "completed":
-      return item.message_draft_status === "sent";
+      return matchesTrackerWorkKind(item, "abgeschlossen");
     default:
       return true;
   }
@@ -307,7 +321,7 @@ function verlaufskontrolleTag(item: EnrichedSubmissionListItem): number {
 function verlaufskontrolleHeadline(item: EnrichedSubmissionListItem): string {
   const doc = item.photo_documentation;
   if (doc?.kind === "linked" && doc.linkedSubmissionCount > 1) {
-    return "Verlaufskontrolle · Fortsetzung";
+    return "Verlaufskontrolle · Folgeeinsendung";
   }
   return `Verlaufskontrolle Tag ${verlaufskontrolleTag(item)}`;
 }
@@ -338,7 +352,12 @@ export function trackerInboxWorkType(item: EnrichedSubmissionListItem): TrackerI
   }
 
   if (isApprovalPending(item)) {
-    return { kind: "freigabe", headline: "Antwort freigeben", context: "KI-Antwort wartet auf Sie" };
+    const decision = buildTrackerClinicalDecisionFromListItem(item);
+    return {
+      kind: "freigabe",
+      headline: "Antwort freigeben",
+      context: decision.confidenceNote,
+    };
   }
 
   if (item.message_draft_status === "draft") {
@@ -366,23 +385,27 @@ export function trackerInboxWorkType(item: EnrichedSubmissionListItem): TrackerI
     };
   }
 
-  if (!item.seen_at) {
-    return { kind: "neue_anfrage", headline: "Neue Anfrage", context: null };
-  }
-
   if (item.message_draft_status === "sent") {
     return { kind: "abgeschlossen", headline: "Abgeschlossen", context: "Antwort versendet" };
   }
 
-  if (item.photo_count === 0) {
+  const decision = buildTrackerClinicalDecisionFromListItem(item);
+  const headline = clinicalPrimaryActionToInboxHeadline(decision.primaryAction);
+  const kind = clinicalHeadlineToWorkKind(headline);
+
+  if (!item.seen_at && kind === "neue_anfrage") {
+    return { kind: "neue_anfrage", headline: "Neue Anfrage", context: decision.confidenceNote };
+  }
+
+  if (item.photo_count === 0 && kind === "rueckfrage") {
     return {
       kind: "rueckfrage",
       headline: "Rückfrage offen",
-      context: "Klinische Bilder fehlen",
+      context: decision.missing[0] ?? decision.confidenceNote,
     };
   }
 
-  return { kind: "laufend", headline: "In Bearbeitung", context: null };
+  return { kind, headline, context: decision.confidenceNote };
 }
 
 /**
@@ -416,7 +439,8 @@ export function trackerStatusForRow(item: EnrichedSubmissionListItem): TrackerSt
   if (item.urgency === "today") {
     return { label: "Zeitnah", className: "yd-tracker-table__status--urgent" };
   }
-  return { label: "In Bearbeitung", className: "yd-tracker-table__status--progress" };
+  const work = trackerInboxWorkType(item);
+  return { label: work.headline, className: "yd-tracker-table__status--progress" };
 }
 
 export function photoTrailSummary(item: EnrichedSubmissionListItem): string | null {
@@ -485,7 +509,7 @@ export function intakeChannelLabel(channel: IntakeChannel): string {
     case "practice_manual":
       return "Praxisfall";
     case "follow_up":
-      return "Nachsorge";
+      return "Verlaufskontrolle";
     case "recall":
       return "Recall";
     default:

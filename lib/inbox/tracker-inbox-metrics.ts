@@ -1,5 +1,5 @@
 import {
-  isApprovalPending,
+  trackerInboxWorkType,
   type EnrichedSubmissionListItem,
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
@@ -7,7 +7,7 @@ import {
 export type TrackerInboxPulseId =
   | "new_submissions"
   | "approval_pending"
-  | "active_cases";
+  | "follow_up";
 
 export type TrackerInboxPulseMetric = {
   id: TrackerInboxPulseId;
@@ -21,33 +21,33 @@ export function buildTrackerInboxPulse(
 ): TrackerInboxPulseMetric[] {
   let newCount = 0;
   let approvalCount = 0;
-  let activeCount = 0;
+  let verlaufCount = 0;
 
   for (const item of items) {
-    if (item.is_draft || item.message_draft_status === "sent") continue;
-    if (isApprovalPending(item)) approvalCount += 1;
-    else if (!item.seen_at) newCount += 1;
-    else activeCount += 1;
+    const { kind } = trackerInboxWorkType(item);
+    if (kind === "neue_anfrage") newCount += 1;
+    else if (kind === "freigabe") approvalCount += 1;
+    else if (kind === "verlaufskontrolle") verlaufCount += 1;
   }
 
   return [
     {
       id: "new_submissions",
-      label: "Neu",
+      label: "Neue Anfrage",
       value: newCount,
-      footnote: "Neue Anfragen",
+      footnote: "Patientenanfragen",
     },
     {
       id: "approval_pending",
-      label: "Freigabe",
+      label: "Antwort freigeben",
       value: approvalCount,
-      footnote: "KI wartet",
+      footnote: "Ärztliche Freigabe",
     },
     {
-      id: "active_cases",
-      label: "Aktiv",
-      value: activeCount,
-      footnote: "In Bearbeitung",
+      id: "follow_up",
+      label: "Verlaufskontrolle",
+      value: verlaufCount,
+      footnote: "Verlauf & Folgeeinsendungen",
     },
   ];
 }

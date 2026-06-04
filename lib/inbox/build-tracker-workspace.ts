@@ -1,10 +1,15 @@
 import {
+  buildTrackerClinicalDecision,
+  type TrackerClinicalDecision,
+} from "@/lib/inbox/tracker-clinical-decision";
+import {
   hasPhotoTrail,
   isApprovalPending,
   type EnrichedSubmissionListItem,
   type TrackerStatusDisplay,
 } from "@/lib/inbox/tracker-inbox-logic";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import type { IntakeChannel } from "@/lib/submissions/intake-channel";
 
 export type TrackerTimelineEvent = {
   id: string;
@@ -25,12 +30,12 @@ export type TrackerCommandStep = {
   state: "done" | "active" | "pending";
 };
 
+export type { TrackerClinicalDecision } from "@/lib/inbox/tracker-clinical-decision";
+
 export type TrackerPraxisAssistentModel = {
-  analysis: string;
-  confidence: string;
+  decision: TrackerClinicalDecision;
   preparation: string;
   draftPreview: string | null;
-  recommendedAction: string;
   flowSteps: TrackerCommandStep[];
   prepChecks: TrackerAssistItem[];
 };
@@ -97,7 +102,7 @@ export function buildTrackerCaseTimeline(input: {
     events.push({
       id: "ki-analysis",
       dateLabel: "Heute",
-      title: "KI Analyse erstellt",
+      title: "KI hat Anliegen strukturiert",
     });
     events.push({
       id: "draft-ready",
@@ -133,61 +138,6 @@ export function buildTrackerCaseTimeline(input: {
   return events;
 }
 
-function buildKiClinicalAnalysis(input: {
-  photoCount: number;
-  hasMultiDayPhotos: boolean;
-  messageDraftStatus: MessageDraftListStatus;
-  isApprovalPending: boolean;
-}): string {
-  if (input.photoCount === 0) {
-    return "Die aktuelle Situation spricht für eine kurze Rückfrage — es liegen noch keine klinischen Bilder vor.";
-  }
-  if (input.hasMultiDayPhotos) {
-    return "Die aktuelle Situation spricht für eine Nachsorge mit dokumentiertem Verlauf — Bilder über mehrere Tage sind vorhanden.";
-  }
-  if (input.isApprovalPending) {
-    return "Die aktuelle Situation spricht für eine ärztliche Freigabe — Anliegen und Bilder sind ausreichend vorbereitet.";
-  }
-  if (
-    input.messageDraftStatus === "draft" ||
-    input.messageDraftStatus === "approved" ||
-    input.messageDraftStatus === "sent"
-  ) {
-    return "Die aktuelle Situation spricht für eine zeitnahe ärztliche Entscheidung — Anliegen und Bildmaterial sind eingeordnet.";
-  }
-  return "Die aktuelle Situation spricht für eine klinische Sichtung — das Bildmaterial sollte die Einordnung tragen.";
-}
-
-function buildKiConfidence(input: {
-  photoCount: number;
-  hasMultiDayPhotos: boolean;
-  messageDraftStatus: MessageDraftListStatus;
-  draftsAvailable: boolean;
-}): string {
-  const hasDraft =
-    input.draftsAvailable &&
-    (input.messageDraftStatus === "draft" ||
-      input.messageDraftStatus === "approved" ||
-      input.messageDraftStatus === "sent");
-
-  if (input.photoCount === 0) {
-    return "Einschätzung vorläufig — ohne Bilder.";
-  }
-  if (input.photoCount > 0 && input.hasMultiDayPhotos && hasDraft) {
-    return "Gut abgesichert — Anliegen, Verlauf und Antwortentwurf.";
-  }
-  if (input.photoCount > 0 && hasDraft) {
-    return "Gut abgesichert — Anliegen, Bilder und Antwortentwurf.";
-  }
-  if (input.photoCount > 0 && input.hasMultiDayPhotos) {
-    return "Solide — Anliegen und Verlauf; Antwort noch offen.";
-  }
-  if (input.photoCount > 0) {
-    return "Solide — Anliegen und Bilder; Entwurf ggf. noch offen.";
-  }
-  return "Einschätzung auf Basis des Anliegens.";
-}
-
 function buildPreparedResponseCopy(input: {
   messageDraftStatus: MessageDraftListStatus;
   draftsAvailable: boolean;
@@ -219,6 +169,9 @@ function buildPreparedResponseCopy(input: {
 }
 
 export function buildTrackerPraxisAssistent(input: {
+  patientName: string;
+  patientNotes: string | null;
+  intakeChannel: IntakeChannel;
   photoCount: number;
   hasMultiDayPhotos: boolean;
   messageDraftStatus: MessageDraftListStatus;
@@ -247,27 +200,19 @@ export function buildTrackerPraxisAssistent(input: {
     isApprovalPending: input.isApprovalPending,
   });
 
-  const nextSteps = buildTrackerNextSteps({
-    isDoctor: input.isDoctor,
-    messageDraftStatus: input.messageDraftStatus,
-    isApprovalPending: input.isApprovalPending,
+  const decision = buildTrackerClinicalDecision({
+    patientNotes: input.patientNotes,
+    patientName: input.patientName,
     photoCount: input.photoCount,
-    urgency: input.urgency,
+    hasMultiDayPhotos: input.hasMultiDayPhotos,
     hasPhotoTrail: input.hasPhotoTrail,
-  });
-
-  const analysis = buildKiClinicalAnalysis({
-    photoCount: input.photoCount,
-    hasMultiDayPhotos: input.hasMultiDayPhotos,
-    messageDraftStatus: input.messageDraftStatus,
-    isApprovalPending: input.isApprovalPending,
-  });
-
-  const confidence = buildKiConfidence({
-    photoCount: input.photoCount,
-    hasMultiDayPhotos: input.hasMultiDayPhotos,
     messageDraftStatus: input.messageDraftStatus,
     draftsAvailable: input.draftsAvailable,
+    urgency: input.urgency,
+    intakeChannel: input.intakeChannel,
+    isApprovalPending: input.isApprovalPending,
+    isDoctor: input.isDoctor,
+    openTaskCount: input.openTaskCount,
   });
 
   const preparation = buildPreparedResponseCopy({
@@ -279,15 +224,10 @@ export function buildTrackerPraxisAssistent(input: {
 
   const draftPreview = input.draftPreview?.trim() || null;
 
-  const recommendedAction =
-    nextSteps[0] ?? "Fall kurz sichten und nächsten Schritt in der Fallakte setzen.";
-
   return {
-    analysis,
-    confidence,
+    decision,
     preparation,
     draftPreview,
-    recommendedAction,
     flowSteps,
     prepChecks,
   };

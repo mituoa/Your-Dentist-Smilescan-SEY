@@ -10,6 +10,8 @@ type TrackerPraxisAssistentProps = {
 };
 
 export function TrackerPraxisAssistent({ model }: TrackerPraxisAssistentProps) {
+  const { decision } = model;
+
   return (
     <HcCard
       tone="default"
@@ -28,44 +30,54 @@ export function TrackerPraxisAssistent({ model }: TrackerPraxisAssistentProps) {
             className="text-[14px] font-semibold tracking-[-0.015em] md:text-[15px]"
             style={{ color: YD.text.primary }}
           >
-            Klinische Entscheidungshilfe
+            Klinische Voranalyse
           </h3>
           <p className="mt-0.5 text-[12px] font-medium" style={{ color: YD.text.muted }}>
-            KI bereitet Ihre Entscheidung vor
+            {decision.confidenceNote}
           </p>
         </div>
       </div>
 
-      <section
-        className="yd-tracker-v4-praxis-assistent__decision"
-        aria-label="KI-Einschätzung und Empfehlung"
-      >
-        <div className="yd-tracker-v4-praxis-assistent__decision-ki">
-          <p className="yd-tracker-v4-praxis-assistent__label">KI-Einschätzung</p>
+      <div className="yd-tracker-v4-praxis-assistent__ki-body" aria-label="Klinische Entscheidungsunterstützung">
+        <section className="yd-tracker-v4-praxis-assistent__ki-section">
+          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was berichtet der Patient?</h4>
           <p
-            className="yd-tracker-v4-praxis-assistent__analysis"
+            className="yd-tracker-v4-praxis-assistent__report"
             style={{ color: YD.text.primary }}
           >
-            {model.analysis}
+            {decision.patientReport}
           </p>
-          <p
-            className="yd-tracker-v4-praxis-assistent__confidence"
-            style={{ color: YD.text.muted }}
-          >
-            {model.confidence}
-          </p>
-        </div>
+        </section>
 
-        <div className="yd-tracker-v4-praxis-assistent__decision-action">
-          <p className="yd-tracker-v4-praxis-assistent__label">Empfehlung</p>
-          <p
-            className="yd-tracker-v4-praxis-assistent__recommendation"
-            style={{ color: YD.accent.core }}
-          >
-            {model.recommendedAction}
+        <section className="yd-tracker-v4-praxis-assistent__ki-section">
+          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was spricht dafür?</h4>
+          <ul className="yd-tracker-v4-praxis-assistent__bullets">
+            {decision.speaksFor.map((point) => (
+              <li key={point} style={{ color: YD.text.secondary }}>
+                {point}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="yd-tracker-v4-praxis-assistent__ki-section">
+          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was fehlt noch?</h4>
+          <ul className="yd-tracker-v4-praxis-assistent__bullets yd-tracker-v4-praxis-assistent__bullets--muted">
+            {decision.missing.map((point) => (
+              <li key={point} style={{ color: YD.text.muted }}>
+                {point}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="yd-tracker-v4-praxis-assistent__ki-section yd-tracker-v4-praxis-assistent__ki-section--action">
+          <h4 className="yd-tracker-v4-praxis-assistent__ki-heading">Was sollte jetzt passieren?</h4>
+          <p className="yd-tracker-v4-praxis-assistent__primary-action" style={{ color: YD.accent.core }}>
+            {decision.primaryAction}
           </p>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section
         className="yd-tracker-v4-praxis-assistent__response"
@@ -74,7 +86,10 @@ export function TrackerPraxisAssistent({ model }: TrackerPraxisAssistentProps) {
         <p className="yd-tracker-v4-praxis-assistent__label yd-tracker-v4-praxis-assistent__label--quiet">
           Vorbereitete Antwort
         </p>
-        <p className="yd-tracker-v4-praxis-assistent__response-copy" style={{ color: YD.text.secondary }}>
+        <p
+          className="yd-tracker-v4-praxis-assistent__response-copy"
+          style={{ color: YD.text.secondary }}
+        >
           {model.preparation}
         </p>
         {model.draftPreview ? (
@@ -89,7 +104,7 @@ export function TrackerPraxisAssistent({ model }: TrackerPraxisAssistentProps) {
 
       <details className="yd-tracker-v4-praxis-assistent__tertiary">
         <summary className="yd-tracker-v4-praxis-assistent__tertiary-summary">
-          Stand & Verlauf
+          Automatisch erfasster Stand
         </summary>
         <ul className="yd-tracker-v4-praxis-assistent__checks" aria-label="Fallstand">
           {model.prepChecks.map((item) => (
@@ -107,7 +122,10 @@ export function TrackerPraxisAssistent({ model }: TrackerPraxisAssistentProps) {
           ))}
         </ul>
 
-        <ol className="yd-tracker-v4-command-flow yd-tracker-v4-praxis-assistent__flow" aria-label="Verlauf">
+        <ol
+          className="yd-tracker-v4-command-flow yd-tracker-v4-praxis-assistent__flow"
+          aria-label="Bearbeitungsverlauf"
+        >
           {model.flowSteps.map((step, index) => (
             <li key={step.id} className="yd-tracker-v4-command-flow__step">
               <span

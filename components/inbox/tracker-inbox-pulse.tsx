@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 const ICONS: Record<TrackerInboxPulseId, typeof ClipboardList> = {
   new_submissions: ClipboardList,
   approval_pending: Sparkles,
-  active_cases: ListTodo,
+  follow_up: ListTodo,
 };
 
 type TrackerInboxPulseProps = {
@@ -30,7 +30,7 @@ export function TrackerInboxPulse({
     <div
       className="yd-tracker-pulse"
       role="group"
-      aria-label="Kurzüberblick Praxis-Inbox"
+      aria-label="Arbeit in der Praxis-Inbox"
     >
       {metrics.map((metric) => {
         const Icon = ICONS[metric.id] ?? ClipboardList;

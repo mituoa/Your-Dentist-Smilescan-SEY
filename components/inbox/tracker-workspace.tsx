@@ -4,6 +4,7 @@ import { TrackerDraftWorkspace } from "@/components/inbox/tracker-draft-workspac
 import { TrackerPatientHeader } from "@/components/inbox/tracker-patient-header";
 import { TrackerPhotoStage } from "@/components/inbox/tracker-photo-stage";
 import { TrackerPraxisAssistent } from "@/components/inbox/tracker-praxis-assistent";
+import { TaskForm } from "@/components/inbox/task-form";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import {
@@ -17,6 +18,7 @@ import {
 } from "@/lib/inbox/tracker-inbox-logic";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { MessageDraftRow } from "@/lib/queries/message-drafts";
+import type { AssignableMember } from "@/lib/queries/team-members";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
 
 type TrackerWorkspaceProps = {
@@ -48,6 +50,7 @@ type TrackerWorkspaceProps = {
   appointmentUrl: string | null;
   canSendAppointmentLink: boolean;
   openTaskCount?: number;
+  assignableMembers: AssignableMember[];
 };
 
 function hasMultiDayPhotos(photos: { created_at: string }[]): boolean {
@@ -67,6 +70,7 @@ export function TrackerWorkspace({
   appointmentUrl,
   canSendAppointmentLink,
   openTaskCount = 0,
+  assignableMembers,
 }: TrackerWorkspaceProps) {
   const patientLabel = submission.patient_name?.trim() || "Unbekannter Patient";
   const concern = deriveSubmissionIssueShortLine(
@@ -119,6 +123,9 @@ export function TrackerWorkspace({
       : null;
 
   const praxisAssistent = buildTrackerPraxisAssistent({
+    patientName: patientLabel,
+    patientNotes: submission.patient_notes,
+    intakeChannel: submission.intake_channel,
     photoCount: submission.photos.length,
     hasMultiDayPhotos: hasMultiDayPhotos(submission.photos),
     messageDraftStatus,
@@ -140,8 +147,7 @@ export function TrackerWorkspace({
         status={status}
         birthDate={submission.patient_birth_date}
         createdAt={submission.created_at}
-        urgency={submission.urgency}
-        intakeChannel={submission.intake_channel}
+        photoCount={submission.photos.length}
         concern={concern || null}
         isDraft={submission.is_draft}
         patientEmail={submission.patient_email}
@@ -169,18 +175,31 @@ export function TrackerWorkspace({
           />
           <TrackerCaseTimeline events={timeline} className="yd-tracker-v4-timeline--deferred" />
           {note ? (
-            <section
-              className="yd-tracker-v4-note yd-tracker-v4-note--original"
-              aria-label="Anliegen Originaltext"
-            >
-              <h3 className="yd-tracker-v4-section-title yd-tracker-v4-section-title--quiet">
-                Anliegen (Original)
-              </h3>
+            <details className="yd-tracker-v4-note yd-tracker-v4-note--original">
+              <summary className="yd-tracker-v4-note__summary">
+                Originalanliegen des Patienten
+              </summary>
               <p className="yd-tracker-v4-note__text">{note}</p>
-            </section>
+            </details>
           ) : null}
           <section
-            className="yd-tracker-v4-urgency yd-tracker-v4-urgency--quiet"
+            className="yd-tracker-v4-tasks yd-tracker-v4-urgency--quiet"
+            aria-labelledby="tracker-v4-tasks-label"
+          >
+            <h3
+              id="tracker-v4-tasks-label"
+              className="yd-tracker-v4-section-title yd-tracker-v4-section-title--quiet"
+            >
+              Praxisaufgabe
+            </h3>
+            <TaskForm
+              submissionId={submission.id}
+              assignableMembers={assignableMembers}
+            />
+          </section>
+          <section
+            id="tracker-zeitraum"
+            className="yd-tracker-v4-urgency yd-tracker-v4-urgency--quiet yd-tracker-v4-urgency--interactive"
             aria-labelledby="tracker-v4-urgency-label"
           >
             <h3
