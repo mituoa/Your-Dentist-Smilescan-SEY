@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState, useTransition } from "react";
+import { useCallback, useEffect, useId, useMemo, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
@@ -11,16 +11,25 @@ import {
   saveMessageDraftBody,
 } from "@/app/(protected)/inbox/[id]/message-draft-actions";
 import { AppointmentLinkButton } from "@/components/inbox/appointment-link-button";
+import { MedicalFormSegmented } from "@/components/forms/medical-form-ui";
 import {
-  buildAssistQuickDraft,
-  buildFollowUpDraft,
   buildPhotoRequestDraft,
+  buildPhotoRequestRationale,
   buildRuckfrageDraftForSnippet,
   buildTaskSuggestionFromCase,
+  buildTerminOfferDraft,
+  FOLLOW_UP_SNIPPETS,
+  PHOTO_VIEW_SNIPPETS,
+  type RuckfrageTopicId,
   type UrgencyKey,
 } from "@/lib/clinical/message-templates";
 import { stashCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
-import type { TrackerActionIntent } from "@/lib/inbox/tracker-clinical-decision";
+import {
+  photoActionLabel,
+  type TrackerActionIntent,
+} from "@/lib/inbox/tracker-clinical-decision";
+import { CLINICAL_URGENCY_OPTIONS } from "@/lib/inbox/tracker-v9-clinical";
+import { cn } from "@/lib/utils";
 
 export type TrackerClinicalActionSheetProps = {
   open: boolean;
@@ -40,75 +49,37 @@ export type TrackerClinicalActionSheetProps = {
   draftsAvailable: boolean;
   editableDraftId: string | null;
   initialDraftBody: string | null;
+  prioritizedRuckfrageTopics?: string[];
+  suggestedPhotoViewId?: string | null;
 };
 
-const INTENT_COPY: Record<
-  TrackerActionIntent,
-  { title: string; lead: string; primaryCta: string }
-> = {
-  rueckfrage: {
-    title: "Rückfrage an Patient",
-    lead: "KI-Vorschlag — bitte prüfen und anpassen, bevor Sie den Entwurf übernehmen.",
-    primaryCta: "In Kommunikation übernehmen",
-  },
-  termin: {
-    title: "Termin anbieten",
-    lead: "Empfehlungstext und optional Terminlink per E-Mail.",
-    primaryCta: "In Kommunikation übernehmen",
-  },
-  foto: {
-    title: "Fotoanforderung",
-    lead: "Formulierung passend zum aktuellen Bildbestand — bearbeitbar.",
-    primaryCta: "In Kommunikation übernehmen",
-  },
-  freigabe: {
-    title: "Antwort freigeben",
-    lead: "Patientenantwort prüfen und freigeben.",
-    primaryCta: "Freigeben",
-  },
-};
+type FlowStep = "choose" | "review" | "preview";
+
+const TERMIN_OPTIONS: { id: Exclude<UrgencyKey, null>; label: string }[] =
+  CLINICAL_URGENCY_OPTIONS.map((o) => ({
+    id: o.id,
+    label: o.id === "not_urgent" ? "Routine" : o.label,
+  }));
 
 function toUrgencyKey(urgency: string | null): UrgencyKey {
-  if (urgency === "today" || urgency === "this_week" || urgency === "not_urgent") {
+  if (
+    urgency === "today" ||
+    urgency === "within_24h" ||
+    urgency === "this_week" ||
+    urgency === "not_urgent"
+  ) {
     return urgency;
   }
   return null;
 }
 
-function buildInitialBody(
-  intent: TrackerActionIntent,
-  params: {
-    patientName: string;
-    urgency: UrgencyKey;
-    practicePhone: string;
-    appointmentUrl: string | null;
-    photoCount: number;
-    existingBody: string | null;
-  }
-): string {
-  if (intent === "freigabe" && params.existingBody?.trim()) {
-    return params.existingBody.trim();
-  }
-  const base = {
-    patientName: params.patientName,
-    urgency: params.urgency,
-    practicePhone: params.practicePhone,
-    appointmentUrl: params.appointmentUrl,
-  };
-  if (intent === "rueckfrage") {
-    return buildRuckfrageDraftForSnippet("pain", base);
-  }
-  if (intent === "termin") {
-    return buildAssistQuickDraft("appointment_link_text", base);
-  }
-  if (intent === "foto") {
-    return buildPhotoRequestDraft({
-      patientName: params.patientName,
-      practicePhone: params.practicePhone,
-      photoCount: params.photoCount,
-    });
-  }
-  return buildFollowUpDraft(base);
+function DraftPreview({ body }: { body: string }) {
+  return (
+    <div className="yd-tracker-v8-action-preview" aria-label="Vorschau der Nachricht">
+      <p className="yd-tracker-v8-action-sheet__label">Vorschau</p>
+      <div className="yd-tracker-v8-action-preview__body">{body.trim() || "—"}</div>
+    </div>
+  );
 }
 
 export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProps) {
@@ -119,36 +90,51 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     submissionId,
     patientName,
     patientEmail,
-    patientNotes,
     urgency,
     practicePhone,
     appointmentUrl,
     photoCount,
-    primaryAction,
     isDoctor,
     canSendAppointmentLink,
     draftsAvailable,
     editableDraftId,
     initialDraftBody,
+    prioritizedRuckfrageTopics = [],
+    suggestedPhotoViewId,
   } = props;
 
   const router = useRouter();
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
   const [body, setBody] = useState("");
+  const [flowStep, setFlowStep] = useState<FlowStep>("choose");
+  const [ruckfrageTopic, setRuckfrageTopic] = useState<RuckfrageTopicId | null>(null);
+  const [photoViewId, setPhotoViewId] = useState<string | null>(null);
+  const [terminUrgency, setTerminUrgency] = useState<Exclude<UrgencyKey, null>>("this_week");
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const urgencyKey = toUrgencyKey(urgency);
-  const draftParams = {
+  const draftBase = {
     patientName,
     urgency: urgencyKey,
     practicePhone: practicePhone || "",
     appointmentUrl,
-    photoCount,
-    existingBody: initialDraftBody,
   };
+
+  const orderedRuckfrageTopics = useMemo(() => {
+    const byId = new Map(FOLLOW_UP_SNIPPETS.map((s) => [s.id, s]));
+    const out: typeof FOLLOW_UP_SNIPPETS = [];
+    for (const id of prioritizedRuckfrageTopics) {
+      const row = byId.get(id);
+      if (row) out.push(row);
+    }
+    for (const s of FOLLOW_UP_SNIPPETS) {
+      if (!out.some((o) => o.id === s.id)) out.push(s);
+    }
+    return out;
+  }, [prioritizedRuckfrageTopics]);
 
   useEffect(() => setMounted(true), []);
 
@@ -156,9 +142,15 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     if (!open || !intent) return;
     setError(null);
     setStatus(null);
-    setBody(buildInitialBody(intent, draftParams));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intent/open only
-  }, [open, intent]);
+    setBody("");
+    setFlowStep(intent === "freigabe" ? "review" : "choose");
+    setRuckfrageTopic(null);
+    setPhotoViewId(suggestedPhotoViewId ?? null);
+    setTerminUrgency(urgencyKey ?? "this_week");
+    if (intent === "freigabe" && initialDraftBody?.trim()) {
+      setBody(initialDraftBody.trim());
+    }
+  }, [open, intent, initialDraftBody, suggestedPhotoViewId, urgencyKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -188,10 +180,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
 
   const ensureDraftAndSave = useCallback(async (): Promise<{ ok: true } | { ok: false; error: string }> => {
     if (!draftsAvailable) {
-      return {
-        ok: false,
-        error: "Antwortentwürfe sind aktuell nicht verfügbar.",
-      };
+      return { ok: false, error: "Antwortentwürfe sind aktuell nicht verfügbar." };
     }
 
     stashCommandDraftForSubmission({
@@ -215,8 +204,8 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     return { ok: true };
   }, [body, draftsAvailable, editableDraftId, submissionId]);
 
-  const handleApplyToCommunication = () => {
-    if (isPending) return;
+  const handleApply = () => {
+    if (isPending || !body.trim()) return;
     setError(null);
     setStatus(null);
     startTransition(async () => {
@@ -225,7 +214,7 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
         setError(res.error);
         return;
       }
-      setStatus("Entwurf übernommen — Sie können ihn in der Kommunikation prüfen.");
+      setStatus("Nachricht übernommen — Freigabe erfolgt in der Kommunikation.");
       router.refresh();
       onClose();
       window.setTimeout(scrollToCommunication, 120);
@@ -266,9 +255,92 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
     });
   };
 
+  const buildDraftForChoice = (): string => {
+    if (intent === "rueckfrage" && ruckfrageTopic) {
+      return buildRuckfrageDraftForSnippet(ruckfrageTopic, draftBase);
+    }
+    if (intent === "foto" && photoViewId) {
+      return buildPhotoRequestDraft({
+        patientName,
+        practicePhone: practicePhone || "",
+        photoCount,
+        viewId: photoViewId,
+      });
+    }
+    if (intent === "termin" && terminUrgency) {
+      return buildTerminOfferDraft({ ...draftBase, urgency: terminUrgency });
+    }
+    return body;
+  };
+
+  const advanceFromChoose = () => {
+    const draft = buildDraftForChoice();
+    setBody(draft);
+    setFlowStep("review");
+  };
+
+  const onPrimary = () => {
+    if (flowStep === "choose") {
+      advanceFromChoose();
+      return;
+    }
+    if (flowStep === "review") {
+      setFlowStep("preview");
+      return;
+    }
+    if (intent === "freigabe" && isDoctor) {
+      handleApprove();
+      return;
+    }
+    handleApply();
+  };
+
+  const canAdvanceChoose =
+    intent === "freigabe" ||
+    (intent === "rueckfrage" && ruckfrageTopic) ||
+    (intent === "foto" && photoViewId) ||
+    (intent === "termin" && terminUrgency);
+
+  const primaryLabel =
+    flowStep === "choose"
+      ? "Weiter"
+      : flowStep === "review"
+        ? "Nachricht prüfen"
+        : intent === "freigabe" && isDoctor
+          ? "Antwort freigeben"
+          : "Nachricht übernehmen";
+
   if (!open || !intent || !mounted) return null;
 
-  const copy = INTENT_COPY[intent];
+  const title =
+    intent === "rueckfrage"
+      ? "Rückfrage an Patient"
+      : intent === "termin"
+        ? "Termin anbieten"
+        : intent === "foto"
+          ? photoActionLabel(photoCount)
+          : isDoctor
+            ? "Antwort senden"
+            : "Antwort vorbereiten";
+
+  const lead =
+    intent === "rueckfrage" && flowStep === "choose"
+      ? "Was möchten Sie klären?"
+      : intent === "foto" && flowStep === "choose"
+        ? "Welche Aufnahme fehlt?"
+        : intent === "termin" && flowStep === "choose"
+          ? "Welche Dringlichkeit gilt für den Terminvorschlag?"
+          : intent === "foto"
+            ? buildPhotoRequestRationale(photoCount)
+            : intent === "termin"
+              ? terminUrgency === "today"
+                ? "Wir empfehlen eine Untersuchung noch heute."
+                : terminUrgency === "within_24h"
+                  ? "Wir empfehlen eine Untersuchung innerhalb der nächsten 24 Stunden."
+                  : terminUrgency === "this_week"
+                    ? "Wir empfehlen eine Untersuchung in dieser Woche."
+                    : "Routine-Termin nach Praxiskapazität."
+              : "Patientenantwort prüfen und freigeben.";
 
   return createPortal(
     <div
@@ -280,16 +352,16 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="yd-tracker-v8-action-sheet"
+        className="yd-tracker-v8-action-sheet yd-tracker-v9-action-sheet"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="yd-tracker-v8-action-sheet__scroll">
           <header className="yd-tracker-v8-action-sheet__head">
             <div>
               <h2 id={titleId} className="yd-tracker-v8-action-sheet__title">
-                {copy.title}
+                {title}
               </h2>
-              <p className="yd-tracker-v8-action-sheet__lead">{copy.lead}</p>
+              <p className="yd-tracker-v8-action-sheet__lead">{lead}</p>
             </div>
             <button
               type="button"
@@ -318,31 +390,104 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
             aria-busy={isPending}
             className="m-0 min-w-0 border-0 p-0 disabled:opacity-[0.58]"
           >
-            <label htmlFor={`${titleId}-body`} className="yd-tracker-v8-action-sheet__label">
-              Nachrichtentext
-            </label>
-            <textarea
-              id={`${titleId}-body`}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={7}
-              className="yd-tracker-v8-action-sheet__textarea"
-              spellCheck={false}
-            />
-            <p className="yd-tracker-v8-action-sheet__hint">
-              Kein automatischer Versand — Sie prüfen und geben frei.
-            </p>
+            {intent === "rueckfrage" && flowStep === "choose" ? (
+              <div className="yd-tracker-v8-action-flow-block">
+                <div className="yd-tracker-v8-action-topic-grid">
+                  {orderedRuckfrageTopics.map((topic) => (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      className={cn(
+                        "yd-tracker-v8-action-topic-btn",
+                        ruckfrageTopic === topic.id && "yd-tracker-v8-action-topic-btn--active"
+                      )}
+                      onClick={() => setRuckfrageTopic(topic.id as RuckfrageTopicId)}
+                    >
+                      {topic.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
-            {intent === "termin" && canSendAppointmentLink ? (
-              <div className="yd-tracker-v8-action-sheet__termin">
-                <p className="yd-tracker-v8-action-sheet__label">Terminlink per E-Mail</p>
-                <AppointmentLinkButton
-                  submissionId={submissionId}
-                  hasPatientEmail={Boolean(patientEmail?.trim())}
-                  canSend={isDoctor}
+            {intent === "foto" && flowStep === "choose" ? (
+              <div className="yd-tracker-v8-action-flow-block">
+                <div className="yd-tracker-v8-action-topic-grid">
+                  {PHOTO_VIEW_SNIPPETS.map((view) => (
+                    <button
+                      key={view.id}
+                      type="button"
+                      className={cn(
+                        "yd-tracker-v8-action-topic-btn",
+                        photoViewId === view.id && "yd-tracker-v8-action-topic-btn--active"
+                      )}
+                      onClick={() => setPhotoViewId(view.id)}
+                    >
+                      {view.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {intent === "termin" && flowStep === "choose" ? (
+              <div className="yd-tracker-v8-action-flow-block">
+                <MedicalFormSegmented
+                  name="termin_urgency"
+                  aria-label="Termin-Dringlichkeit"
+                  options={TERMIN_OPTIONS}
+                  value={terminUrgency}
+                  onChange={(v) => v && setTerminUrgency(v)}
+                  disabled={isPending}
                 />
               </div>
             ) : null}
+
+            {flowStep !== "choose" ? (
+              <div className="yd-tracker-v8-action-flow-block">
+                <label htmlFor={`${titleId}-body`} className="yd-tracker-v8-action-sheet__label">
+                  {intent === "freigabe" ? "Antwortentwurf" : "KI-Vorschlag (bearbeitbar)"}
+                </label>
+                <textarea
+                  id={`${titleId}-body`}
+                  value={body}
+                  onChange={(e) => {
+                    setBody(e.target.value);
+                    if (flowStep === "preview") setFlowStep("review");
+                  }}
+                  rows={intent === "freigabe" ? 9 : 7}
+                  className="yd-tracker-v8-action-sheet__textarea"
+                  spellCheck={false}
+                />
+              </div>
+            ) : null}
+
+            {flowStep === "preview" ? <DraftPreview body={body} /> : null}
+
+            {intent === "termin" && flowStep === "preview" ? (
+              <div className="yd-tracker-v8-action-sheet__termin">
+                <p className="yd-tracker-v8-action-sheet__label">Terminlink per E-Mail</p>
+                {canSendAppointmentLink && isDoctor ? (
+                  <AppointmentLinkButton
+                    submissionId={submissionId}
+                    hasPatientEmail={Boolean(patientEmail?.trim())}
+                    canSend
+                  />
+                ) : (
+                  <p className="yd-tracker-v8-action-sheet__hint">
+                    {canSendAppointmentLink
+                      ? "Nur Zahnärzt:innen können den Terminlink direkt versenden. Der Nachrichtentext kann von allen Rollen vorbereitet werden."
+                      : "Terminlink-Versand ist für Ihre Rolle nicht freigeschaltet. Der Nachrichtentext kann in der Kommunikation vorbereitet werden."}
+                  </p>
+                )}
+              </div>
+            ) : null}
+
+            <p className="yd-tracker-v8-action-sheet__hint">
+              {intent === "freigabe" && !isDoctor
+                ? "Entwurf wird in die Kommunikation übernommen — die Freigabe erfolgt durch Zahnärzt:innen."
+                : "Kein automatischer Versand — Nachricht wird in die Kommunikation übernommen zur Prüfung und Freigabe."}
+            </p>
           </fieldset>
         </div>
 
@@ -351,29 +496,32 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
             type="button"
             className="yd-auth-btn-secondary yd-tracker-v8-action-sheet__btn"
             disabled={isPending}
-            onClick={onClose}
+            onClick={() => {
+              if (flowStep === "preview") {
+                setFlowStep("review");
+                return;
+              }
+              if (flowStep === "review" && intent !== "freigabe") {
+                setFlowStep("choose");
+                return;
+              }
+              onClose();
+            }}
           >
-            Abbrechen
+            {flowStep === "choose" ? "Abbrechen" : "Zurück"}
           </button>
-          {intent === "freigabe" ? (
-            <button
-              type="button"
-              className="yd-auth-btn-primary yd-tracker-v8-action-sheet__btn"
-              disabled={isPending || !editableDraftId}
-              onClick={handleApprove}
-            >
-              {isPending ? "Wird freigegeben…" : copy.primaryCta}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="yd-auth-btn-primary yd-tracker-v8-action-sheet__btn"
-              disabled={isPending || !body.trim()}
-              onClick={handleApplyToCommunication}
-            >
-              {isPending ? "Wird übernommen…" : copy.primaryCta}
-            </button>
-          )}
+          <button
+            type="button"
+            className="yd-auth-btn-primary yd-tracker-v8-action-sheet__btn"
+            disabled={
+              isPending ||
+              (flowStep === "choose" && !canAdvanceChoose) ||
+              (flowStep !== "choose" && !body.trim())
+            }
+            onClick={onPrimary}
+          >
+            {isPending ? "Wird übernommen…" : primaryLabel}
+          </button>
         </footer>
       </div>
     </div>,
@@ -381,7 +529,6 @@ export function TrackerClinicalActionSheet(props: TrackerClinicalActionSheetProp
   );
 }
 
-/** Navigiert zum Aufgabenflow mit KI-Vorschlag (kein Sheet). */
 export function openTrackerTaskFlow(props: {
   router: ReturnType<typeof useRouter>;
   submissionId: string;

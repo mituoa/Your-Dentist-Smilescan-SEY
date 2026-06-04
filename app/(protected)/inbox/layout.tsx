@@ -16,8 +16,6 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) redirect("/login?error=workspace_missing");
 
-  const role = (workspace.role || "team") as "doctor" | "team";
-
   const listResult = await getInboxSubmissions(workspace.workspace_id);
   const listFailed = !listResult.ok;
   const submissions = listResult.ok ? listResult.items : [];
@@ -35,7 +33,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
           description="Neue Patientenfälle erscheinen hier in der Übersicht."
         />
       ) : (
-        <TrackerInboxPanel items={submissions} showCreateCase={role === "doctor"} />
+        <TrackerInboxPanel items={submissions} />
       )}
     </div>
   );

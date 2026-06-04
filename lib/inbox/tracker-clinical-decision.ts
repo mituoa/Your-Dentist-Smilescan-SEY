@@ -163,11 +163,17 @@ function buildSpeaksFor(input: TrackerClinicalDecisionInput): string[] {
     );
   }
 
-  if (input.urgency === "today" || input.urgency === "this_week") {
+  if (
+    input.urgency === "today" ||
+    input.urgency === "within_24h" ||
+    input.urgency === "this_week"
+  ) {
     points.push(
       input.urgency === "today"
         ? "Terminwunsch: zeitnah (heute)"
-        : "Terminwunsch: in dieser Woche"
+        : input.urgency === "within_24h"
+          ? "Terminwunsch: innerhalb von 24 Stunden"
+          : "Terminwunsch: in dieser Woche"
     );
   }
 
@@ -296,7 +302,11 @@ function buildPrimaryAction(input: TrackerClinicalDecisionInput): string {
     return photoActionLabel(input.photoCount);
   }
 
-  if (input.urgency === "today" || input.urgency === "this_week") {
+  if (
+    input.urgency === "today" ||
+    input.urgency === "within_24h" ||
+    input.urgency === "this_week"
+  ) {
     return "Termin anbieten";
   }
 
@@ -412,6 +422,8 @@ function buildClinicalBrief(
 
   if (input.urgency === "today") {
     lines.push("Der Fall wirkt zeitnah zu klären.");
+  } else if (input.urgency === "within_24h") {
+    lines.push("Eine Einordnung innerhalb von 24 Stunden ist sinnvoll.");
   } else if (input.urgency === "this_week") {
     lines.push("Eine Einordnung in dieser Woche ist gewünscht.");
   } else {

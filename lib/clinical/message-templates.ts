@@ -3,7 +3,12 @@
  * Nothing is sent automatically — always physician review.
  */
 
-export type UrgencyKey = "today" | "this_week" | "not_urgent" | null;
+export type UrgencyKey =
+  | "today"
+  | "within_24h"
+  | "this_week"
+  | "not_urgent"
+  | null;
 
 export function buildFollowUpDraft(params: {
   patientName: string;
@@ -18,9 +23,11 @@ export function buildFollowUpDraft(params: {
   const timing =
     params.urgency === "today"
       ? "Wir möchten Sie noch heute kurzfristig in die Praxis einladen, um Ihr Anliegen sicher einzuordnen."
-      : params.urgency === "this_week"
-        ? "Wir möchten Sie innerhalb der nächsten Tage für eine zeitnahe Klärung in die Praxis einladen."
-        : "Wir bitten Sie, einen für Sie passenden Termin bei uns zu vereinbaren.";
+      : params.urgency === "within_24h"
+        ? "Wir empfehlen eine Untersuchung innerhalb der nächsten 24 Stunden."
+        : params.urgency === "this_week"
+          ? "Wir möchten Sie innerhalb der nächsten Tage für eine zeitnahe Klärung in die Praxis einladen."
+          : "Wir bitten Sie, einen für Sie passenden Termin bei uns zu vereinbaren.";
 
   const linkLine = link
     ? `Online-Termin: ${link}`
@@ -39,34 +46,111 @@ export function buildFollowUpDraft(params: {
 export const FOLLOW_UP_SNIPPETS: { id: string; label: string; text: string }[] = [
   {
     id: "pain",
-    label: "Schmerzen?",
-    text: "Treten derzeit Schmerzen auf? Wenn ja: wie stark auf einer Skala von 0 (keine Schmerzen) bis 10 (stärkste vorstellbare Belastung), und seit ungefähr wann?",
+    label: "Schmerzintensität",
+    text: "Treten derzeit Schmerzen auf? Wenn ja: wie stark auf einer Skala von 0 (keine Schmerzen) bis 10 (stärkste vorstellbare Belastung)?",
   },
   {
-    id: "since",
-    label: "Seit wann?",
-    text: "Seit wann bestehen Ihre Beschwerden ungefähr, und wie haben sie sich in den letzten Tagen entwickelt (besser, gleich, schlechter)?",
+    id: "course",
+    label: "Schmerzverlauf",
+    text: "Seit wann bestehen die Beschwerden, und haben sie sich seitdem verändert (besser, schlechter, gleich)?",
   },
   {
     id: "swelling",
-    label: "Schwellung/Fieber",
-    text: "Treten Schwellungen, Fieber oder eine deutliche Einschränkung beim Öffnen des Mundes auf? Bitte kurz beschreiben.",
+    label: "Schwellung",
+    text: "Haben Sie aktuell eine sichtbare Schwellung bemerkt? Bitte kurz beschreiben, wo und seit wann.",
   },
   {
-    id: "photo",
-    label: "Weiteres Bild",
-    text: "Zur besseren Einordnung wäre uns eine zusätzliche, gut ausgeleuchtete Nahaufnahme des betroffenen Bereichs hilfreich. Könnten Sie uns diese bitte beifügen?",
+    id: "fever",
+    label: "Fieber",
+    text: "Hatten Sie in den letzten Tagen Fieber oder ein allgemeines Krankheitsgefühl? Eine kurze Rückmeldung hilft uns bei der Einordnung.",
   },
   {
     id: "meds",
     label: "Medikamente",
-    text: "Nehmen Sie derzeit regelmäßig Medikamente ein (einschließlich rezeptfreier Präparate und ggf. blutverdünnender Mittel)? Eine grobe Auflistung genügt.",
+    text: "Nehmen Sie derzeit regelmäßig Medikamente ein (einschließlich rezeptfreier Präparate)? Eine grobe Auflistung genügt.",
+  },
+  {
+    id: "bleeding",
+    label: "Blutung",
+    text: "Besteht aktuell eine Blutung am betroffenen Zahn oder Zahnfleisch? Wenn ja: seit wann und in welchem Ausmaß?",
+  },
+  {
+    id: "cold",
+    label: "Kälteempfindlichkeit",
+    text: "Reagieren die Zähne auf Kälte, Wärme oder Süßes? Bitte kurz beschreiben, welcher Reiz betroffen ist.",
+  },
+  {
+    id: "chew",
+    label: "Kauprobleme",
+    text: "Können Sie normal kauen, oder vermeiden Sie bestimmte Seiten? Eine kurze Beschreibung hilft bei der Einordnung.",
+  },
+  {
+    id: "photo",
+    label: "Weiteres Foto",
+    text: "Könnten Sie bitte zusätzlich eine Aufnahme aus größerem Abstand senden, damit wir den betroffenen Bereich besser einordnen können?",
+  },
+  {
+    id: "custom",
+    label: "Freitext",
+    text: "[Ihre Rückfrage hier formulieren]",
   },
 ];
+
+export const PHOTO_VIEW_SNIPPETS: { id: string; label: string; requestLine: string }[] = [
+  {
+    id: "closeup",
+    label: "Nahaufnahme",
+    requestLine:
+      "Bitte senden Sie eine gut ausgeleuchtete Nahaufnahme des betroffenen Zahns oder der betroffenen Stelle.",
+  },
+  {
+    id: "overview",
+    label: "Übersichtsaufnahme",
+    requestLine:
+      "Bitte senden Sie zusätzlich eine Übersichtsaufnahme aus etwas größerem Abstand, damit wir den Bereich einordnen können.",
+  },
+  {
+    id: "upper",
+    label: "Oberkiefer",
+    requestLine: "Bitte senden Sie eine Aufnahme des Oberkiefers mit gut sichtbarem Befundbereich.",
+  },
+  {
+    id: "lower",
+    label: "Unterkiefer",
+    requestLine: "Bitte senden Sie eine Aufnahme des Unterkiefers mit gut sichtbarem Befundbereich.",
+  },
+  {
+    id: "left",
+    label: "Linke Seite",
+    requestLine: "Bitte senden Sie eine Aufnahme von der linken Seite mit deutlich erkennbarem Befund.",
+  },
+  {
+    id: "right",
+    label: "Rechte Seite",
+    requestLine: "Bitte senden Sie eine Aufnahme von der rechten Seite mit deutlich erkennbarem Befund.",
+  },
+  {
+    id: "affected",
+    label: "Betroffener Zahn",
+    requestLine:
+      "Bitte senden Sie eine Nahaufnahme des betroffenen Zahns aus Frontal- und Seitenansicht, falls möglich.",
+  },
+  {
+    id: "free",
+    label: "Freie Auswahl",
+    requestLine:
+      "Bitte senden Sie eine gut ausgeleuchtete Aufnahme des betroffenen Bereichs aus einem für Sie passenden Blickwinkel.",
+  },
+];
+
+export type RuckfrageTopicId = (typeof FOLLOW_UP_SNIPPETS)[number]["id"];
 
 const timingLine = (urgency: UrgencyKey): string => {
   if (urgency === "today") {
     return "Wir möchten Ihr Anliegen zeitnah mit Ihnen klären.";
+  }
+  if (urgency === "within_24h") {
+    return "Wir möchten Ihr Anliegen innerhalb der nächsten 24 Stunden mit Ihnen klären.";
   }
   if (urgency === "this_week") {
     return "Wir möchten Ihr Anliegen in den nächsten Tagen gemeinsam mit Ihnen einordnen.";
@@ -114,20 +198,72 @@ export type AssistQuickActionId =
   | "appointment_link_text"
   | "polish_placeholder";
 
-/** KI-Vorschlag für Fotoanforderung — abhängig vom Bildbestand. */
+/** Kurze KI-Einordnung für Fotoanforderung (UI, nicht der Brief). */
+export function buildPhotoRequestRationale(photoCount: number): string {
+  if (photoCount === 0) {
+    return "Ohne klinische Bilder können wir den Fall nur eingeschränkt einordnen — eine erste Aufnahme sichert die Beurteilung.";
+  }
+  if (photoCount === 1) {
+    return "Für eine bessere Einschätzung wird eine zusätzliche Aufnahme aus einem weiteren Blickwinkel benötigt.";
+  }
+  return "Bei Verlaufs- oder Befundänderung hilft eine aktuelle Aufnahme bei der sicheren Einordnung.";
+}
+
+/** Terminvorschlag mit Dringlichkeit und begründeter Empfehlung. */
+export function buildTerminOfferDraft(params: {
+  patientName: string;
+  urgency: UrgencyKey;
+  practicePhone: string;
+  appointmentUrl: string | null;
+}): string {
+  const name = params.patientName.trim() || "Patient";
+  const tel = params.practicePhone.trim() || "[Praxisnummer]";
+  const link = params.appointmentUrl?.trim();
+  const linkLine = link
+    ? `Online-Terminbuchung: ${link}`
+    : "Online-Terminbuchung: [Link einfügen]";
+
+  const recommendation =
+    params.urgency === "today"
+      ? "Aufgrund Ihrer Angaben empfehlen wir einen Termin noch heute."
+      : params.urgency === "within_24h"
+        ? "Wir empfehlen eine Untersuchung innerhalb der nächsten 24 Stunden."
+        : params.urgency === "this_week"
+          ? "Aufgrund Ihrer Angaben empfehlen wir einen Termin in dieser Woche."
+          : "Aufgrund Ihrer Angaben empfehlen wir einen Termin nach Praxiskapazität — zur sicheren Klärung.";
+
+  const timing =
+    params.urgency === "today"
+      ? "Wir möchten Sie noch heute kurz in die Praxis einladen."
+      : params.urgency === "within_24h"
+        ? "Wir möchten Sie zeitnah in die Praxis einladen."
+        : params.urgency === "this_week"
+          ? "Wir möchten Sie innerhalb der nächsten Tage in die Praxis einladen."
+          : "Wir bitten Sie, einen für Sie passenden Termin zu vereinbaren.";
+
+  return (
+    `Sehr geehrte/r ${name},\n\n` +
+    `vielen Dank für Ihre Einsendung. ${recommendation}\n\n` +
+    `${timing} Bitte kontaktieren Sie uns unter ${tel} oder nutzen Sie unseren Online-Termin:\n` +
+    `${linkLine}\n\n` +
+    `Mit freundlichen Grüßen\n` +
+    `Ihr Praxisteam`
+  );
+}
+
+/** KI-Vorschlag für Fotoanforderung — abhängig vom gewählten Aufnahmetyp. */
 export function buildPhotoRequestDraft(params: {
   patientName: string;
   practicePhone: string;
   photoCount: number;
+  viewId?: string;
 }): string {
   const name = params.patientName.trim() || "Patient";
   const tel = params.practicePhone.trim() || "[Praxisnummer]";
-  const core =
-    params.photoCount === 0
-      ? "Damit wir Ihr Anliegen sicher einordnen können, bitten wir Sie um gut ausgeleuchtete Nahaufnahmen des betroffenen Bereichs (Frontal- und Seitenansicht, falls möglich)."
-      : params.photoCount === 1
-        ? "Zur besseren Einordnung wäre uns eine zusätzliche, gut ausgeleuchtete Nahaufnahme aus einem weiteren Blickwinkel hilfreich."
-        : "Falls sich der Befund verändert hat, senden Sie uns bitte eine aktuelle, gut ausgeleuchtete Aufnahme des betroffenen Bereichs.";
+  const view =
+    PHOTO_VIEW_SNIPPETS.find((v) => v.id === params.viewId) ??
+    PHOTO_VIEW_SNIPPETS[params.photoCount === 0 ? 0 : 1];
+  const core = view.requestLine;
 
   return (
     `Sehr geehrte/r ${name},\n\n` +

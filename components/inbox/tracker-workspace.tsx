@@ -146,7 +146,6 @@ export function TrackerWorkspace({
     <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
-        status={status}
         birthDate={submission.patient_birth_date}
         patientEmail={submission.patient_email}
         patientPhone={submission.patient_phone}
@@ -181,6 +180,9 @@ export function TrackerWorkspace({
           patientEmail={submission.patient_email}
           patientNotes={submission.patient_notes}
           urgency={submission.urgency}
+          intakeChannel={submission.intake_channel}
+          hasPhotoTrail={photoTrail}
+          hasMultiDayPhotos={hasMultiDayPhotos(submission.photos)}
           practicePhone={practicePhone}
           appointmentUrl={appointmentUrl}
           canSendAppointmentLink={canSendAppointmentLink}

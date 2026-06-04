@@ -10,6 +10,7 @@ import {
 
 const OPTIONS: { id: SubmissionUrgencyValue; label: string }[] = [
   { id: "today", label: "Heute" },
+  { id: "within_24h", label: "24 Stunden" },
   { id: "this_week", label: "Diese Woche" },
   { id: "not_urgent", label: "Nicht dringend" },
 ];
@@ -59,7 +60,7 @@ export function TrackerUrgencyChips({
         Dringlichkeit
       </p>
       <div
-        className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-2"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2"
         role="group"
         aria-labelledby="tracker-urgency-label"
       >

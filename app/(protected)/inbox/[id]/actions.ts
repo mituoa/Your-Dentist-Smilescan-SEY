@@ -117,7 +117,17 @@ export async function markSubmissionSeen(submissionId: string) {
   return { success: true };
 }
 
-export type SubmissionUrgencyValue = "today" | "this_week" | "not_urgent";
+export type SubmissionUrgencyValue =
+  | "today"
+  | "within_24h"
+  | "this_week"
+  | "not_urgent";
+
+export type InboxPracticeStatusValue =
+  | "neu"
+  | "in_bearbeitung"
+  | "beobachten"
+  | "freigegeben";
 
 export async function updateSubmissionUrgency(
   submissionId: string,
@@ -148,6 +158,119 @@ export async function updateSubmissionUrgency(
   if (error) {
     logPostgrest("updateSubmissionUrgency", error);
     return { error: "Zeitraum konnte nicht gespeichert werden." };
+  }
+
+  revalidatePath(`/inbox/${submissionId}`);
+  revalidatePath("/inbox");
+  revalidatePath("/inbox", "layout");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+/** Setzt einen Fall zurück auf „Neu“ (Arbeitsliste). */
+export async function markSubmissionUnseen(submissionId: string) {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { error: "Arbeitsbereich nicht gefunden." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Nicht angemeldet." };
+
+  const { error } = await supabase
+    .from("submissions")
+    .update({
+      seen_at: null,
+      seen_by: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id);
+
+  if (error) {
+    logPostgrest("markSubmissionUnseen", error);
+    return { error: "Status konnte nicht aktualisiert werden." };
+  }
+
+  revalidatePath(`/inbox/${submissionId}`);
+  revalidatePath("/inbox");
+  revalidatePath("/inbox", "layout");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+/** Praxisstatus aus der Inbox-Liste (ohne neues Datenmodell). */
+export async function updateSubmissionPracticeStatus(
+  submissionId: string,
+  status: InboxPracticeStatusValue
+) {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { error: "Arbeitsbereich nicht gefunden." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Nicht angemeldet." };
+
+  const { data: row, error: fetchError } = await supabase
+    .from("submissions")
+    .select("message_draft_status, seen_at")
+    .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id)
+    .maybeSingle();
+
+  if (fetchError || !row) {
+    logPostgrest("updateSubmissionPracticeStatus", fetchError);
+    return { error: "Fall konnte nicht geladen werden." };
+  }
+
+  if (status === "freigegeben") {
+    if (row.message_draft_status !== "sent") {
+      return {
+        error:
+          "Freigegeben ist erst nach versendeter Patientenantwort möglich.",
+      };
+    }
+    return { success: true };
+  }
+
+  let patch: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (status === "neu") {
+    patch = { ...patch, seen_at: null, seen_by: null };
+  } else if (status === "in_bearbeitung") {
+    patch = {
+      ...patch,
+      seen_at: new Date().toISOString(),
+      seen_by: user.id,
+      urgency: null,
+    };
+  } else if (status === "beobachten") {
+    patch = {
+      ...patch,
+      seen_at: row.seen_at ?? new Date().toISOString(),
+      seen_by: user.id,
+      urgency: "not_urgent",
+    };
+  }
+
+  const { error } = await supabase
+    .from("submissions")
+    .update(patch)
+    .eq("id", submissionId)
+    .eq("workspace_id", workspace.workspace_id);
+
+  if (error) {
+    logPostgrest("updateSubmissionPracticeStatus", error);
+    return { error: "Status konnte nicht gespeichert werden." };
   }
 
   revalidatePath(`/inbox/${submissionId}`);

@@ -196,6 +196,7 @@ function priorityTier(item: EnrichedSubmissionListItem): number {
   if (isApprovalPending(item)) return 2;
   if (item.open_task_count > 0) return 3;
   if (item.urgency === "today") return 4;
+  if (item.urgency === "within_24h") return 4;
   if (item.urgency === "this_week") return 5;
   if (hasVerlaufskontrolleContext(item)) return 6;
   if (item.photo_count === 0 && Boolean(item.seen_at)) return 7;
@@ -469,6 +470,9 @@ export function trackerPriorityForRow(item: EnrichedSubmissionListItem): {
 } {
   if (item.urgency === "today") {
     return { label: "Heute", className: "yd-tracker-inbox-card__priority--high" };
+  }
+  if (item.urgency === "within_24h") {
+    return { label: "24 Std.", className: "yd-tracker-inbox-card__priority--high" };
   }
   if (item.urgency === "this_week") {
     return { label: "Diese Woche", className: "yd-tracker-inbox-card__priority--mid" };
