@@ -139,36 +139,57 @@ export function TrackerWorkspace({
     Boolean(draftPreview) ||
     canSendAppointmentLink;
 
+  const draftBodyForAssist =
+    editableMessageDraft?.body?.trim() || historyMessageDraft?.body?.trim() || null;
+
   return (
-    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace">
+    <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
         status={status}
         birthDate={submission.patient_birth_date}
-        createdAt={submission.created_at}
-        photoCount={submission.photos.length}
+        patientEmail={submission.patient_email}
+        patientPhone={submission.patient_phone}
         concern={concern || null}
         isDraft={submission.is_draft}
       />
 
-      <div className="yd-tracker-v6-workspace__grid yd-tracker-v7-workspace__flow">
+      <div className="yd-tracker-v8-clinical-row">
+        <section
+          id="tracker-beweise"
+          className="yd-tracker-v6-evidence yd-tracker-v7-evidence yd-tracker-v8-evidence"
+          aria-label="Klinische Dokumentation"
+        >
+          <h2 className="yd-tracker-v6-section-label">Klinische Dokumentation</h2>
+          <TrackerPhotoStage
+            submissionId={submission.id}
+            photos={submission.photos}
+            patientName={patientLabel}
+          />
+        </section>
+
         <TrackerPraxisAssistent
           model={praxisAssistent}
           submissionId={submission.id}
           isDoctor={isDoctor}
           openTaskCount={openTaskCount}
+          photoCount={submission.photos.length}
+          isApprovalPending={approvalPending}
+          messageDraftStatus={messageDraftStatus}
+          draftsAvailable={messageDraftsAvailable}
+          patientName={patientLabel}
+          patientEmail={submission.patient_email}
+          patientNotes={submission.patient_notes}
+          urgency={submission.urgency}
+          practicePhone={practicePhone}
+          appointmentUrl={appointmentUrl}
+          canSendAppointmentLink={canSendAppointmentLink}
+          editableDraftId={editableMessageDraft?.id ?? null}
+          initialDraftBody={draftBodyForAssist}
         />
+      </div>
 
-        <div className="yd-tracker-v6-workspace__main yd-tracker-v7-workspace__main">
-          <section id="tracker-beweise" className="yd-tracker-v6-evidence yd-tracker-v7-evidence" aria-label="Klinische Dokumentation">
-            <h2 className="yd-tracker-v6-section-label">Klinische Dokumentation</h2>
-            <TrackerPhotoStage
-              submissionId={submission.id}
-              photos={submission.photos}
-              patientName={patientLabel}
-            />
-          </section>
-
+      <div className="yd-tracker-v8-workspace__below">
           {showCommunication ? (
             <section
               id="tracker-kommunikation"
@@ -201,7 +222,7 @@ export function TrackerWorkspace({
                 </details>
               ) : null}
               <details className="yd-tracker-v6-docs__group">
-                <summary>Stammdaten & Kontakt</summary>
+                <summary>Weitere Stammdaten</summary>
                 <dl className="yd-tracker-v6-docs__dl">
                   {submission.patient_external_id ? (
                     <>
@@ -209,20 +230,16 @@ export function TrackerWorkspace({
                       <dd>{submission.patient_external_id}</dd>
                     </>
                   ) : null}
-                  {submission.patient_email ? (
-                    <>
-                      <dt>E-Mail</dt>
-                      <dd>{submission.patient_email}</dd>
-                    </>
-                  ) : null}
-                  {submission.patient_phone ? (
-                    <>
-                      <dt>Telefon</dt>
-                      <dd>{submission.patient_phone}</dd>
-                    </>
-                  ) : null}
                   <dt>Kanal</dt>
                   <dd>{getIntakeChannelLabel(submission.intake_channel)}</dd>
+                  <dt>Eingang</dt>
+                  <dd>
+                    {new Date(submission.created_at).toLocaleDateString("de-DE", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </dd>
                 </dl>
               </details>
               <details className="yd-tracker-v6-docs__group">
@@ -236,7 +253,6 @@ export function TrackerWorkspace({
               </details>
             </div>
           </details>
-        </div>
       </div>
     </div>
   );

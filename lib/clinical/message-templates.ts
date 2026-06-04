@@ -114,6 +114,54 @@ export type AssistQuickActionId =
   | "appointment_link_text"
   | "polish_placeholder";
 
+/** KI-Vorschlag für Fotoanforderung — abhängig vom Bildbestand. */
+export function buildPhotoRequestDraft(params: {
+  patientName: string;
+  practicePhone: string;
+  photoCount: number;
+}): string {
+  const name = params.patientName.trim() || "Patient";
+  const tel = params.practicePhone.trim() || "[Praxisnummer]";
+  const core =
+    params.photoCount === 0
+      ? "Damit wir Ihr Anliegen sicher einordnen können, bitten wir Sie um gut ausgeleuchtete Nahaufnahmen des betroffenen Bereichs (Frontal- und Seitenansicht, falls möglich)."
+      : params.photoCount === 1
+        ? "Zur besseren Einordnung wäre uns eine zusätzliche, gut ausgeleuchtete Nahaufnahme aus einem weiteren Blickwinkel hilfreich."
+        : "Falls sich der Befund verändert hat, senden Sie uns bitte eine aktuelle, gut ausgeleuchtete Aufnahme des betroffenen Bereichs.";
+
+  return (
+    `Sehr geehrte/r ${name},\n\n` +
+    `vielen Dank für Ihre Einsendung. ${core}\n\n` +
+    `Sie erreichen uns bei Rückfragen unter ${tel}.\n\n` +
+    `Mit freundlichen Grüßen\n` +
+    `Ihr Praxisteam`
+  );
+}
+
+/** Kurzvorschlag für Praxisaufgabe aus dem Fallkontext. */
+export function buildTaskSuggestionFromCase(params: {
+  patientName: string;
+  patientNotes: string | null;
+  primaryAction: string;
+}): { title: string; description: string } {
+  const name = params.patientName.trim() || "Patient";
+  const notes = params.patientNotes?.trim() ?? "";
+  const pain = /schmerz|weh/i.test(notes);
+  const photo = /foto|bild/i.test(params.primaryAction);
+  const title = photo
+    ? `Fotos nachfordern — ${name}`
+    : pain
+      ? `Rückmeldung Schmerz — ${name}`
+      : `Fall nachverfolgen — ${name}`;
+  const description =
+    notes.length > 0
+      ? notes.length > 280
+        ? `${notes.slice(0, 280).trimEnd()}…`
+        : notes
+      : `Interne Aufgabe zum Fall von ${name}. Nächster Schritt: ${params.primaryAction}.`;
+  return { title, description };
+}
+
 export function buildAssistQuickDraft(
   actionId: AssistQuickActionId,
   params: {

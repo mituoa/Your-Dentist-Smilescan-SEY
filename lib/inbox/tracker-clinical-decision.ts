@@ -26,13 +26,23 @@ export type TrackerClinicalDecision = {
   stillNeed: string[];
 };
 
+export type TrackerActionIntent = "rueckfrage" | "termin" | "foto" | "freigabe";
+
 export type TrackerDecisionAction = {
   id: string;
   label: string;
   href?: string;
   scrollToId?: string;
+  intent?: TrackerActionIntent;
   primary?: boolean;
 };
+
+/** Foto-CTA abhängig vom Bildbestand (V8). */
+export function photoActionLabel(photoCount: number): string {
+  if (photoCount === 0) return "Foto anfordern";
+  if (photoCount === 1) return "Weiteres Foto anfordern";
+  return "Weitere Fotos anfordern";
+}
 
 export type TrackerClinicalDecisionInput = {
   patientNotes: string | null;
@@ -279,11 +289,11 @@ function buildPrimaryAction(input: TrackerClinicalDecisionInput): string {
   }
 
   if (input.photoCount === 0) {
-    return "Rückfrage senden";
+    return "Foto anfordern";
   }
 
   if (input.photoCount < 2 && !input.hasPhotoTrail) {
-    return "Weitere Fotos anfordern";
+    return photoActionLabel(input.photoCount);
   }
 
   if (input.urgency === "today" || input.urgency === "this_week") {
@@ -308,7 +318,7 @@ function buildPrimaryAction(input: TrackerClinicalDecisionInput): string {
     return "Rückfrage senden";
   }
 
-  return "Weitere Fotos anfordern";
+  return photoActionLabel(input.photoCount);
 }
 
 function shortenMissingLabel(raw: string): string {
@@ -426,63 +436,100 @@ function buildClinicalBrief(
 function primaryActionToButtonId(primaryAction: string, isDoctor: boolean): string {
   if (/freigeben/i.test(primaryAction) && isDoctor) return "freigabe";
   if (/termin/i.test(primaryAction)) return "termin";
-  if (/foto/i.test(primaryAction)) return "foto";
+  if (/foto|bild/i.test(primaryAction)) return "foto";
   if (/verlauf|beobachten/i.test(primaryAction)) return "verlauf";
   return "rueckfrage";
 }
 
-/** V7 — eine Hauptaktion, maximal zwei Nebenaktionen; Praxisaufgabe nur sekundär. */
+/** V8 — gebündelte klinische Aktionen (alle sichtbar, kontextabhängige Labels). */
+export function buildTrackerActionCatalog(opts: {
+  primaryAction: string;
+  submissionId: string;
+  isDoctor: boolean;
+  photoCount: number;
+  isApprovalPending: boolean;
+  messageDraftStatus: MessageDraftListStatus;
+  draftsAvailable: boolean;
+}): TrackerDecisionAction[] {
+  const { primaryAction, submissionId, isDoctor, photoCount } = opts;
+  const taskHref = `/my-tasks/new?submission_id=${submissionId}&from=inbox`;
+
+  const primaryId = primaryActionToButtonId(primaryAction, isDoctor);
+
+  const catalog: Record<string, TrackerDecisionAction> = {
+    rueckfrage: {
+      id: "rueckfrage",
+      label: "Rückfrage senden",
+      intent: "rueckfrage",
+    },
+    termin: { id: "termin", label: "Termin anbieten", intent: "termin" },
+    foto: {
+      id: "foto",
+      label: photoActionLabel(photoCount),
+      intent: "foto",
+    },
+    freigabe: {
+      id: "freigabe",
+      label: "Antwort freigeben",
+      intent: "freigabe",
+    },
+    aufgabe: {
+      id: "aufgabe",
+      label: "Praxisaufgabe erstellen",
+      href: taskHref,
+    },
+  };
+
+  const showFreigabe =
+    isDoctor &&
+    opts.draftsAvailable &&
+    (opts.isApprovalPending || opts.messageDraftStatus === "draft");
+
+  const order: string[] = [
+    primaryId,
+    "rueckfrage",
+    "termin",
+    "foto",
+    ...(showFreigabe ? ["freigabe"] : []),
+    "aufgabe",
+  ];
+
+  const seen = new Set<string>();
+  const out: TrackerDecisionAction[] = [];
+  for (const id of order) {
+    if (seen.has(id)) continue;
+    const row = catalog[id];
+    if (!row) continue;
+    seen.add(id);
+    out.push({
+      ...row,
+      primary: id === primaryId,
+    });
+  }
+
+  return out;
+}
+
+/** @deprecated V8 nutzt buildTrackerActionCatalog — Alias für ältere Aufrufer. */
 export function buildTrackerDecisionActions(opts: {
   primaryAction: string;
   submissionId: string;
   isDoctor: boolean;
   openTaskCount?: number;
+  photoCount?: number;
+  isApprovalPending?: boolean;
+  messageDraftStatus?: MessageDraftListStatus;
+  draftsAvailable?: boolean;
 }): TrackerDecisionAction[] {
-  const { primaryAction, submissionId, isDoctor } = opts;
-  const taskHref = `/my-tasks/new?submission_id=${submissionId}&from=inbox`;
-  const comm = "tracker-kommunikation";
-
-  const catalog: Record<string, TrackerDecisionAction> = {
-    termin: { id: "termin", label: "Termin anbieten", scrollToId: comm },
-    freigabe: { id: "freigabe", label: "Antwort freigeben", scrollToId: comm },
-    rueckfrage: { id: "rueckfrage", label: "Rückfrage senden", scrollToId: comm },
-    foto: { id: "foto", label: "Weitere Fotos anfordern", scrollToId: comm },
-    aufgabe: { id: "aufgabe", label: "Praxisaufgabe erstellen", href: taskHref },
-    verlauf: { id: "verlauf", label: "Verlauf beobachten", scrollToId: "tracker-beweise" },
-  };
-
-  let primaryId = primaryActionToButtonId(primaryAction, isDoctor);
-
-  const secondaryOrder: Record<string, string[]> = {
-    freigabe: ["rueckfrage", "termin"],
-    rueckfrage: ["foto", "termin"],
-    foto: ["rueckfrage", "termin"],
-    termin: ["rueckfrage", "foto"],
-    verlauf: ["rueckfrage", "termin"],
-    aufgabe: ["rueckfrage", "termin"],
-  };
-
-  const out: TrackerDecisionAction[] = [];
-  const primary = catalog[primaryId];
-  if (primary) out.push({ ...primary, primary: true });
-
-  for (const id of secondaryOrder[primaryId] ?? ["rueckfrage", "termin"]) {
-    if (out.length >= 3) break;
-    if (id === primaryId) continue;
-    const row = catalog[id];
-    if (row && !out.some((a) => a.id === row.id)) out.push(row);
-  }
-
-  if (
-    (opts.openTaskCount ?? 0) > 0 &&
-    primaryId !== "aufgabe" &&
-    out.length < 3 &&
-    !out.some((a) => a.id === "aufgabe")
-  ) {
-    out.push(catalog.aufgabe!);
-  }
-
-  return out.slice(0, 3);
+  return buildTrackerActionCatalog({
+    primaryAction: opts.primaryAction,
+    submissionId: opts.submissionId,
+    isDoctor: opts.isDoctor,
+    photoCount: opts.photoCount ?? 0,
+    isApprovalPending: opts.isApprovalPending ?? false,
+    messageDraftStatus: opts.messageDraftStatus ?? "none",
+    draftsAvailable: opts.draftsAvailable ?? false,
+  }).slice(0, 3);
 }
 
 /** Zentrale klinische Entscheidungslogik — Tracker & Inbox. */
@@ -558,7 +605,14 @@ export function clinicalPrimaryActionToInboxHeadline(action: string): string {
     return "Antwort freigeben";
   }
   if (action === "Rückfrage senden" || action === "Rückfrage stellen") return "Rückfrage offen";
-  if (action === "Weitere Fotos anfordern" || action === "Foto nachfordern") return "Rückfrage offen";
+  if (
+    action === "Weitere Fotos anfordern" ||
+    action === "Weiteres Foto anfordern" ||
+    action === "Foto anfordern" ||
+    action === "Foto nachfordern"
+  ) {
+    return "Rückfrage offen";
+  }
   if (action === "Termin anbieten") return "Neue Anfrage";
   if (action.startsWith("Praxisaufgabe")) return "Praxisaufgabe";
   if (action.startsWith("Verlauf")) return "Verlaufskontrolle";

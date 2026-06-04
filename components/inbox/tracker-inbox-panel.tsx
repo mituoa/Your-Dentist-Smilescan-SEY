@@ -7,7 +7,6 @@ import { Plus } from "lucide-react";
 
 import { TrackerInboxPulse } from "@/components/inbox/tracker-inbox-pulse";
 import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
-import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { buildTrackerInboxPulse } from "@/lib/inbox/tracker-inbox-metrics";
 import {
   TRACKER_FILTER_CHIPS,
@@ -68,7 +67,7 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
     filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
 
   return (
-    <div className="yd-tracker-v4-inbox yd-clinical-control flex h-full min-h-0 flex-col">
+    <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-clinical-control flex h-full min-h-0 flex-col">
       <div className="yd-tracker-v4-inbox__toolbar">
         <div className="yd-tracker-v4-inbox__toolbar-head">
           <div className="min-w-0">
@@ -134,13 +133,6 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
             const isActive = pathname === `/inbox/${item.id}`;
             const work = trackerInboxWorkType(item);
             const patientName = item.patient_name?.trim() || "Unbekannter Patient";
-            const contextLine =
-              work.context ||
-              deriveSubmissionIssueShortLine(item.patient_notes, item.patient_name, {
-                maxLen: 72,
-                emptyLabel: "",
-              }) ||
-              null;
             const photoLabel =
               item.photo_count === 0
                 ? "Keine Bilder"
@@ -154,25 +146,24 @@ export function TrackerInboxPanel({ items, showCreateCase = false }: TrackerInbo
                   type="button"
                   className={cn(
                     "yd-tracker-v4-inbox-card",
+                    "yd-tracker-v8-inbox-card",
                     isActive && "yd-tracker-v4-inbox-card--active",
+                    isActive && "yd-tracker-v8-inbox-card--active",
                     !item.seen_at && !isActive && "yd-tracker-v4-inbox-card--unseen"
                   )}
                   onClick={() => goToCase(item.id)}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <div className="yd-tracker-v4-inbox-card__main">
+                  <div className="yd-tracker-v4-inbox-card__main yd-tracker-v8-inbox-card__main">
+                    <span className="yd-tracker-v8-inbox-card__name">{patientName}</span>
                     <span
                       className={cn(
-                        "yd-tracker-v4-inbox-card__headline",
-                        `yd-tracker-v4-inbox-card__headline--${work.kind}`
+                        "yd-tracker-v8-inbox-card__status",
+                        `yd-tracker-v8-inbox-card__status--${work.kind}`
                       )}
                     >
                       {work.headline}
                     </span>
-                    <span className="yd-tracker-v4-inbox-card__name">{patientName}</span>
-                    {contextLine ? (
-                      <span className="yd-tracker-v4-inbox-card__context">{contextLine}</span>
-                    ) : null}
                   </div>
                   <div className="yd-tracker-v4-inbox-card__meta">
                     <span>{formatTrackerListDate(item.created_at)}</span>
