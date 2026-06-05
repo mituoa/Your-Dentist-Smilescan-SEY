@@ -185,11 +185,11 @@ export default async function DashboardPage() {
       <DashboardMobileShell
         greeting={greeting}
         displayName={doctorLabel}
-        pendingApprovals={unseenCount}
         openTaskCount={openTaskCount}
-        weeklyCounts={weeklyCounts}
         unseenCount={unseenCount}
         seenCount={seenCount}
+        preparedAwaitingCount={preparedAwaitingCount}
+        priorityItems={priorityItems}
         previewRows={previewRows}
       />
 

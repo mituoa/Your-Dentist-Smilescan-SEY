@@ -1,199 +1,189 @@
 import Link from "next/link";
-import {
-  BookOpen,
-  ChevronDown,
-  ClipboardList,
-  ListTodo,
-  Plus,
-  UserPlus,
-} from "lucide-react";
 
-import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
-import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
-import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
+import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+import type { DashboardPriorityItem } from "@/lib/queries/dashboard";
 import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
 
 type DashboardMobileShellProps = {
   greeting: string;
   displayName: string;
-  pendingApprovals: number | null;
   openTaskCount: number;
-  weeklyCounts: number[] | null;
   unseenCount: number | null;
   seenCount: number | null;
+  preparedAwaitingCount: number | null;
+  priorityItems: DashboardPriorityItem[] | null;
   previewRows: SubmissionPreviewRow[] | null;
 };
 
-function MobileKpiCard({
-  href,
-  title,
-  value,
-  hint,
-  icon: Icon,
-  emphasis,
-}: {
-  href: string;
-  title: string;
-  value: string | number;
-  hint: string;
-  icon: typeof ClipboardList;
-  emphasis?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`yd-dash-mobile-kpi${emphasis ? " yd-dash-mobile-kpi--emphasis" : ""}`}
-    >
-      <div className="yd-dash-mobile-kpi__icon" aria-hidden>
-        <Icon strokeWidth={1.65} className="h-[16px] w-[16px]" />
-      </div>
-      <div className="yd-dash-mobile-kpi__body min-w-0">
-        <p className="yd-dash-mobile-kpi__title">{title}</p>
-        <p className="yd-dash-mobile-kpi__value">{value}</p>
-        <p className="yd-dash-mobile-kpi__hint">{hint}</p>
-      </div>
-    </Link>
-  );
+function formatRelativeDate(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Heute";
+  if (diffDays === 1) return "Gestern";
+  return date.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
+}
+
+function buildStatusParts(
+  seenCount: number | null,
+  openTaskCount: number,
+  preparedAwaitingCount: number | null
+): string[] {
+  const parts: string[] = [];
+  if (seenCount != null && seenCount > 0) {
+    parts.push(
+      seenCount === 1 ? "1 aktiver Fall" : `${seenCount} aktive Fälle`
+    );
+  }
+  if (openTaskCount > 0) {
+    parts.push(
+      openTaskCount === 1 ? "1 offene Aufgabe" : `${openTaskCount} offene Aufgaben`
+    );
+  }
+  if (preparedAwaitingCount != null && preparedAwaitingCount > 0) {
+    parts.push(
+      preparedAwaitingCount === 1
+        ? "1 Antwort wartet"
+        : `${preparedAwaitingCount} Antworten warten`
+    );
+  }
+  return parts;
 }
 
 export function DashboardMobileShell({
   greeting,
   displayName,
-  pendingApprovals,
   openTaskCount,
-  weeklyCounts,
   unseenCount,
   seenCount,
+  preparedAwaitingCount,
+  priorityItems,
   previewRows,
 }: DashboardMobileShellProps) {
-  const reviewCount = pendingApprovals ?? 0;
-  const statusLine =
-    reviewCount > 0 && openTaskCount > 0
-      ? `${reviewCount} zur Durchsicht · ${openTaskCount} Aufgaben`
-      : reviewCount > 0
-        ? `${reviewCount} ${reviewCount === 1 ? "Einsendung" : "Einsendungen"} zur Durchsicht`
-        : openTaskCount > 0
-          ? `${openTaskCount} ${openTaskCount === 1 ? "Aufgabe" : "Aufgaben"} offen`
-          : "Praxis aktiv — keine offenen Vorgänge";
+  const statusParts = buildStatusParts(seenCount, openTaskCount, preparedAwaitingCount);
+  const attentionItems = (priorityItems ?? [])
+    .filter((item) => !item.seen_at)
+    .slice(0, 3);
+
+  const submissionRows = previewRows?.slice(0, 6) ?? [];
 
   return (
     <div className="yd-dash-mobile md:hidden">
-      {reviewCount > 0 ? (
-        <Link href="/inbox" className="yd-dash-mobile-critical">
-          <div className="min-w-0">
-            <p className="yd-dash-mobile-critical__label">Kritisch · Heute</p>
-            <p className="yd-dash-mobile-critical__title">
-              {reviewCount} {reviewCount === 1 ? "Einsendung" : "Einsendungen"} zur Durchsicht
-            </p>
-          </div>
-          <span className="yd-dash-mobile-critical__cta">Öffnen</span>
-        </Link>
-      ) : null}
-
-      <section className="yd-dash-mobile__actions" aria-label="Wichtigste Aktionen">
-        <div className="yd-dash-mobile-actions-grid">
-          <Link href="/inbox" className="yd-dash-mobile-action yd-dash-mobile-action--primary">
-            <ClipboardList className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
-            <span className="yd-dash-mobile-action__label">Tracker</span>
-            {unseenCount != null && unseenCount > 0 ? (
-              <span className="yd-dash-mobile-action__badge">{unseenCount > 9 ? "9+" : unseenCount}</span>
-            ) : null}
-          </Link>
-          <Link href="/relay" className="yd-dash-mobile-action">
-            <ListTodo className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
-            <span className="yd-dash-mobile-action__label">Relay</span>
-            {openTaskCount > 0 ? (
-              <span className="yd-dash-mobile-action__badge">
-                {openTaskCount > 9 ? "9+" : openTaskCount}
-              </span>
-            ) : null}
-          </Link>
-          <Link href="/journal" className="yd-dash-mobile-action">
-            <BookOpen className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
-            <span className="yd-dash-mobile-action__label">Journal</span>
-          </Link>
-          <Link href="/create-case" className="yd-dash-mobile-action">
-            <Plus className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
-            <span className="yd-dash-mobile-action__label">Fall</span>
-          </Link>
-        </div>
-      </section>
-
-      <header className="yd-dash-mobile__header">
-        <p className="yd-dash-mobile__eyebrow">Praxisüberblick</p>
+      <header className="yd-dash-mobile__hero">
         <h1 className="yd-dash-mobile__title">
           {greeting}, {displayName}
         </h1>
-        <p className="yd-dash-mobile__status-line" role="status">
-          {statusLine}
-        </p>
+        {statusParts.length > 0 ? (
+          <ul className="yd-dash-mobile__status-list" role="status">
+            {statusParts.map((part) => (
+              <li key={part}>{part}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="yd-dash-mobile__status-empty" role="status">
+            Praxis aktiv — keine offenen Vorgänge
+          </p>
+        )}
       </header>
 
-      <section className="yd-dash-mobile__kpis" aria-label="Heute">
-        <p className="yd-dash-mobile__section-label">Heute</p>
-        <div className="yd-dash-mobile__kpi-stack">
-          <MobileKpiCard
-            href="/inbox"
-            title="Neue Einsendungen"
-            value={unseenCount === null ? "—" : unseenCount}
-            hint="Zur Durchsicht im Tracker"
-            icon={ClipboardList}
-            emphasis={reviewCount > 0}
-          />
-          <div className="yd-dash-mobile__kpi-row">
-            <MobileKpiCard
-              href="/relay"
-              title="Offene Aufgaben"
-              value={openTaskCount}
-              hint="Praxisworkflow"
-              icon={ListTodo}
-            />
-            <MobileKpiCard
-              href="/inbox"
-              title="Aktive Fälle"
-              value={seenCount === null ? "—" : seenCount}
-              hint="Laufende Prozesse"
-              icon={UserPlus}
-            />
-          </div>
+      {attentionItems.length > 0 ? (
+        <section className="yd-dash-mobile__attention" aria-label="Benötigt Aufmerksamkeit">
+          <h2 className="yd-dash-mobile__section-title">Benötigt Aufmerksamkeit</h2>
+          <ul className="yd-dash-mobile-attention-list">
+            {attentionItems.map((item) => {
+              const name = item.patient_name?.trim() || "Unbekannter Patient";
+              const subject = deriveSubmissionIssueShortLine(
+                item.patient_notes,
+                item.patient_name,
+                { maxLen: 72, emptyLabel: "Einsendung" }
+              );
+              return (
+                <li key={item.id}>
+                  <Link href={`/inbox/${item.id}`} className="yd-dash-mobile-attention-row">
+                    <span className="yd-dash-mobile-attention-row__main">
+                      <span className="yd-dash-mobile-attention-row__name">{name}</span>
+                      {subject ? (
+                        <span className="yd-dash-mobile-attention-row__subject">{subject}</span>
+                      ) : null}
+                    </span>
+                    <span className="yd-dash-mobile-attention-row__meta">
+                      <span className="yd-dash-mobile-attention-row__badge">Neu</span>
+                      <span className="yd-dash-mobile-attention-row__date">
+                        {formatRelativeDate(item.created_at)}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      <section className="yd-dash-mobile__inbox" aria-label="Aktuelle Einsendungen">
+        <div className="yd-dash-mobile__section-head">
+          <h2 className="yd-dash-mobile__section-title">Aktuelle Einsendungen</h2>
+          <Link href="/inbox" className="yd-dash-mobile__section-link">
+            Alle
+          </Link>
         </div>
+        {submissionRows.length > 0 ? (
+          <ul className="yd-dash-mobile-inbox-list">
+            {submissionRows.map((row) => {
+              const name = row.patient_name?.trim() || "Unbekannter Patient";
+              const subject = deriveSubmissionIssueShortLine(
+                row.patient_notes,
+                row.patient_name,
+                { maxLen: 72, emptyLabel: "Einsendung" }
+              );
+              const isNew = !row.seen_at;
+              return (
+                <li key={row.id}>
+                  <Link href={`/inbox/${row.id}`} className="yd-dash-mobile-inbox-row">
+                    <span className="yd-dash-mobile-inbox-row__name">{name}</span>
+                    <span className="yd-dash-mobile-inbox-row__subject">
+                      {subject || "Einsendung"}
+                    </span>
+                    <span className="yd-dash-mobile-inbox-row__status">
+                      {isNew ? "Neu" : "In Bearbeitung"}
+                    </span>
+                    <span className="yd-dash-mobile-inbox-row__date">
+                      {formatRelativeDate(row.created_at)}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="yd-dash-mobile__empty">Keine aktuellen Einsendungen.</p>
+        )}
       </section>
 
-      <section className="yd-dash-mobile__submissions" aria-label="Patienten">
-        <p className="yd-dash-mobile__section-label">Patienten</p>
-        <HcRecentTable rows={previewRows} mobileLimit={3} compactMobile />
+      <section className="yd-dash-mobile__overview" aria-label="Praxisübersicht">
+        <h2 className="yd-dash-mobile__section-title yd-dash-mobile__section-title--subtle">
+          Praxisübersicht
+        </h2>
+        <div className="yd-dash-mobile-overview-grid">
+          <Link href="/inbox" className="yd-dash-mobile-overview-stat">
+            <span className="yd-dash-mobile-overview-stat__value">
+              {seenCount === null ? "—" : seenCount}
+            </span>
+            <span className="yd-dash-mobile-overview-stat__label">Aktive Fälle</span>
+          </Link>
+          <Link href="/relay" className="yd-dash-mobile-overview-stat">
+            <span className="yd-dash-mobile-overview-stat__value">{openTaskCount}</span>
+            <span className="yd-dash-mobile-overview-stat__label">Offene Aufgaben</span>
+          </Link>
+          <Link href="/inbox" className="yd-dash-mobile-overview-stat">
+            <span className="yd-dash-mobile-overview-stat__value">
+              {unseenCount === null ? "—" : unseenCount}
+            </span>
+            <span className="yd-dash-mobile-overview-stat__label">Neue Einsendungen</span>
+          </Link>
+        </div>
       </section>
-
-      <Link href="/journal" className="yd-dash-mobile-journal-teaser">
-        <div className="yd-dash-mobile-journal-teaser__body">
-          <p className="yd-dash-mobile-journal-teaser__eyebrow">Praxiswissen</p>
-          <p className="yd-dash-mobile-journal-teaser__title">Journal öffnen</p>
-          <p className="yd-dash-mobile-journal-teaser__copy">
-            Antworten, Nachsorge und Erklärungen für Patienten
-          </p>
-        </div>
-        <BookOpen className="yd-dash-mobile-journal-teaser__icon" strokeWidth={1.5} aria-hidden />
-      </Link>
-
-      <details className="yd-dash-fold yd-dash-mobile__fold">
-        <summary className="yd-dash-fold__summary">
-          <span>
-            <span className="yd-dash-fold__title">Praxisentwicklung</span>
-            <span className="yd-dash-fold__hint">Analytics</span>
-          </span>
-          <ChevronDown className="yd-dash-fold__chevron" aria-hidden />
-        </summary>
-        <div className="yd-dash-fold__panel yd-dash-mobile__fold-panel">
-          <HcAnalyticsBars counts={weeklyCounts} />
-          <div className="mt-3">
-            <HcPracticeStatus
-              unseen={unseenCount}
-              seen={seenCount}
-              openTaskCount={openTaskCount}
-            />
-          </div>
-        </div>
-      </details>
     </div>
   );
 }

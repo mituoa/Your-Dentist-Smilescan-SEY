@@ -162,25 +162,38 @@ export const SETTINGS_MOBILE_NAV_GROUPS: SettingsNavGroup[] = [
     items: pickNavItems([
       "praxisprofil",
       "standorte",
-      "behandlungsspektrum",
       "oeffnungszeiten",
-    ]),
+      "behandlungsspektrum",
+    ]).map((item) =>
+      item.id === "behandlungsspektrum"
+        ? { ...item, label: "Leistungen", hint: "Schwerpunkte im Profil" }
+        : item
+    ),
   },
   {
     label: "TEAM",
     items: pickNavItems(["team-rollen", "einladungen"]),
   },
   {
-    label: "PATIENTEN",
+    label: "KOMMUNIKATION",
     items: pickNavItems([
-      "nachrichten",
-      "automatisierungen",
       "journal-kategorien",
+      "nachrichten",
       "journal-vorlagen",
-    ]),
+    ]).map((item) =>
+      item.id === "journal-kategorien"
+        ? { ...item, label: "Journal", hint: "Themenbereiche" }
+        : item.id === "journal-vorlagen"
+          ? { ...item, label: "Vorlagen", hint: "Nachsorge und FAQ" }
+          : item
+    ),
   },
   {
     label: "SYSTEM",
-    items: pickNavItems(["sicherheit"]),
+    items: pickNavItems(["sicherheit"]).map((item) => ({
+      ...item,
+      label: "Sicherheit & Login",
+      hint: "Passwort und Sitzungen",
+    })),
   },
 ];

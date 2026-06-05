@@ -21,7 +21,8 @@ export async function WorkspaceMobileShortcutsBar() {
 
   return (
     <WorkspaceMobileShortcuts
-      showDashboard={role === "doctor"}
+      overviewHref={role === "doctor" ? "/dashboard" : "/my-tasks"}
+      showJournal={role === "doctor"}
       inboxBadge={inboxBadge}
       relayBadge={relayBadge}
     />

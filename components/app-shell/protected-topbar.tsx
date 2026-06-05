@@ -1,8 +1,6 @@
 "use client";
 
-import { MobileMenuButton } from "./mobile-nav";
 import { MobileWorkspaceBrandAnchor } from "./mobile-workspace-brand";
-import { WorkspaceMobileQuickActions } from "./workspace-mobile-quick-actions";
 import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 import type { ThemePreference } from "@/lib/theme";
@@ -18,7 +16,8 @@ type ProtectedTopbarProps = {
 };
 
 /**
- * App-Shell: Mobile-Topbar (Drawer) + Desktop integrierte Headline im Canvas (Layout).
+ * Mobile: ruhige Leiste ohne Hamburger — Navigation über Bottom Bar.
+ * Desktop: integrierte Headline im Canvas (Layout).
  */
 export function ProtectedTopbar({
   email,
@@ -27,7 +26,6 @@ export function ProtectedTopbar({
   initialTheme,
   avatarUrl,
   displayName,
-  inboxCount,
 }: ProtectedTopbarProps) {
   return (
     <>
@@ -35,25 +33,18 @@ export function ProtectedTopbar({
       <header
         className={cn(
           "yd-protected-topbar yd-mobile-workspace-topbar sticky top-0 z-30 flex shrink-0 flex-col pt-[env(safe-area-inset-top,0px)] md:hidden",
-          "border-b border-[rgba(180,198,218,0.22)] bg-white/78 backdrop-blur-[16px]"
+          "border-b border-[rgba(180,198,218,0.18)] bg-white/72 backdrop-blur-[14px]"
         )}
       >
-        <div className="yd-mobile-topbar-grid flex h-[52px] w-full items-center">
-          <div className="relative z-[2] shrink-0">
-            <MobileMenuButton />
-          </div>
-          <div className="yd-mobile-topbar-brand-spacer min-w-0 flex-1" aria-hidden />
-          <WorkspaceMobileQuickActions variant="topbar" />
-          <div className="relative z-[2] flex shrink-0 justify-end">
-            <UserMenu
-              email={email}
-              workspaceName={workspaceName}
-              role={role}
-              initialTheme={initialTheme}
-              avatarUrl={avatarUrl}
-              displayName={displayName}
-            />
-          </div>
+        <div className="flex h-[48px] w-full items-center justify-end px-3">
+          <UserMenu
+            email={email}
+            workspaceName={workspaceName}
+            role={role}
+            initialTheme={initialTheme}
+            avatarUrl={avatarUrl}
+            displayName={displayName}
+          />
         </div>
       </header>
     </>
