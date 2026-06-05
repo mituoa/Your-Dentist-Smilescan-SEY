@@ -1,6 +1,8 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 // Scope: ein aktueller profile_data-Satz je Workspace. Keine Versionierung/Änderungshistorie im MVP (bewusst out of scope).
+import { parseProfileCareerPath } from "@/lib/profile/parse-career-path";
+import { parseProfileCredentials } from "@/lib/profile/parse-credentials";
 import {
   parseServicesStructured,
   parseSpecializations,
@@ -66,6 +68,10 @@ function mapToEditor(data: Record<string, unknown>): ProfileEditorData {
     practice_email: (data.practice_email as string | null) ?? null,
     practice_website: (data.practice_website as string | null) ?? null,
     practice_hours: (data.practice_hours as string | null) ?? null,
+    practice_subtitle: (data.practice_subtitle as string | null) ?? null,
+    profile_credentials: parseProfileCredentials(data.profile_credentials),
+    profile_personal_approach: (data.profile_personal_approach as string | null) ?? null,
+    profile_career_path: parseProfileCareerPath(data.profile_career_path),
     logo_url: (data.logo_url as string | null) ?? null,
     accent_color: (data.accent_color as string | null) ?? null,
     profile_background_color: (data.profile_background_color as string | null) ?? null,

@@ -1,17 +1,11 @@
 import Link from "next/link";
+import { Camera, Mail, MapPin, Phone } from "lucide-react";
+
+import { CarreeMonogramMark } from "@/components/profile-preview/carree-monogram-mark";
+import { CarreeWatermarkLetters } from "@/components/profile-preview/carree-watermark-letters";
+import { practiceMonogram, practiceNameCaps } from "@/lib/profile/practice-monogram";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
 import { parsePracticeAddressBlock } from "@/lib/profile/practice-address-split";
-
-function formatEditorialDate(foundingYear: number | null): string {
-  if (foundingYear) {
-    return `Seit ${foundingYear}`;
-  }
-  const now = new Date();
-  const dd = String(now.getDate()).padStart(2, "0");
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const yyyy = now.getFullYear();
-  return `${dd} . ${mm} . ${yyyy}`;
-}
 
 function buildCapsName(data: ProfileEditorData): string {
   const first = (data.first_name || "").trim();
@@ -38,13 +32,8 @@ function splitHeadline(practiceName: string | null, workspaceName: string): {
   return { lead: words[0]!, rest: words.slice(1).join(" ") };
 }
 
-function displayWebsite(url: string): string {
-  try {
-    const host = new URL(url.startsWith("http") ? url : `https://${url}`).hostname;
-    return host.replace(/^www\./i, "").toLowerCase();
-  } catch {
-    return url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "");
-  }
+function defaultEyebrow(city: string): string {
+  return city ? `Ihre Praxis in ${city}` : "Willkommen in Ihrer Praxis";
 }
 
 function initials(data: ProfileEditorData): string {
@@ -75,6 +64,8 @@ export type CarreeEditorialHeroProps = {
   appointmentLink?: string | null;
   compact?: boolean;
   showUploadCta?: boolean;
+  onPortraitEdit?: () => void;
+  portraitEditPending?: boolean;
 };
 
 export function CarreeEditorialHero({
@@ -84,6 +75,8 @@ export function CarreeEditorialHero({
   appointmentLink = null,
   compact = false,
   showUploadCta = false,
+  onPortraitEdit,
+  portraitEditPending = false,
 }: CarreeEditorialHeroProps) {
   const addr = parsePracticeAddressBlock(data.practice_address);
   const city = addr.city.trim();
@@ -91,91 +84,115 @@ export function CarreeEditorialHero({
   const headline = splitHeadline(data.practice_name, workspaceName);
   const capsName = buildCapsName(data);
   const roleLine = buildRoleLine(practiceName, city, data.practice_employment_status);
+  const monogram = practiceMonogram(practiceName);
+  const eyebrow = (data.practice_subtitle || "").trim() || defaultEyebrow(city);
 
   const terminHref = appointmentLink?.trim() || (data.practice_phone ? `tel:${data.practice_phone}` : null);
   const terminLabel =
     appointmentLink?.trim() ||
     data.practice_phone?.trim() ||
     null;
-  const webUrl = data.practice_website?.trim() || null;
+  const email = data.practice_email?.trim() || null;
+  const addressLine = [addr.street, [addr.postalCode, addr.city].filter(Boolean).join(" ")]
+    .filter(Boolean)
+    .join(", ");
 
-  const tagline = city
-    ? `ihre praxis in ${city.toLowerCase()}`
-    : "willkommen in ihrer praxis";
+  const hasContact = Boolean(terminLabel || email || addressLine);
 
   return (
     <header className={`yd-carree-hero${compact ? " yd-carree-hero--compact" : ""}`}>
+      {(data.logo_url || monogram) ? (
+        <div className="yd-carree-hero__watermark" aria-hidden>
+          {data.logo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={data.logo_url} alt="" className="yd-carree-hero__watermark-logo" />
+          ) : (
+            <CarreeWatermarkLetters letters={monogram} className="yd-carree-hero__watermark-letters" />
+          )}
+        </div>
+      ) : null}
+
       <div className="yd-carree-hero__top">
-        {data.logo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.logo_url} alt="" className="yd-carree-hero__logo" />
-        ) : (
-          <span className="yd-carree-hero__logo-text">{practiceName}</span>
-        )}
-        <p className="yd-carree-hero__date">{formatEditorialDate(data.founding_year)}</p>
+        <div className="yd-carree-hero__brand">
+          {data.logo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={data.logo_url} alt="" className="yd-carree-hero__logo-mark" />
+          ) : (
+            <CarreeMonogramMark letters={monogram} className="yd-carree-hero__logo-mark-svg" />
+          )}
+          <span className="yd-carree-hero__logo-text">{practiceNameCaps(practiceName)}</span>
+        </div>
       </div>
 
       <div className="yd-carree-hero__inner">
-        <p className="yd-carree-hero__tagline">{tagline}</p>
+        <p className="yd-carree-hero__eyebrow">{eyebrow}</p>
         <h1 className="yd-carree-hero__headline">
-          {headline.lead}
+          <span className="yd-carree-hero__headline-first">{headline.lead}</span>
           {headline.rest ? (
-            <>
-              <br />
-              <em>{headline.rest}.</em>
-            </>
+            <span className="yd-carree-hero__headline-line">{headline.rest}.</span>
           ) : (
-            "."
+            <span className="yd-carree-hero__headline-line">.</span>
           )}
         </h1>
         <p className="yd-carree-hero__name">{capsName}</p>
         <p className="yd-carree-hero__role">{roleLine}</p>
 
-        {(terminLabel || webUrl) && (
-          <div className="yd-carree-hero__contact">
-            {terminLabel ? (
-              <div className="yd-carree-hero__contact-row">
-                <span className="yd-carree-hero__contact-label">Termin</span>
-                {terminHref ? (
-                  <a href={terminHref} className="yd-carree-hero__contact-value">
-                    {terminLabel}
+        {hasContact ? (
+          <div className="yd-carree-hero__contact-block">
+            <p className="yd-carree-hero__contact-heading">Kontakt zur Praxis</p>
+            <div className="yd-carree-hero__contact-chips">
+              {terminLabel ? (
+                <div className="yd-carree-hero__chip">
+                  <Phone className="yd-carree-hero__chip-icon" strokeWidth={1.5} aria-hidden />
+                  {terminHref ? (
+                    <a href={terminHref} className="yd-carree-hero__chip-value">
+                      {terminLabel}
+                    </a>
+                  ) : (
+                    <span className="yd-carree-hero__chip-value">{terminLabel}</span>
+                  )}
+                </div>
+              ) : null}
+              {email ? (
+                <div className="yd-carree-hero__chip">
+                  <Mail className="yd-carree-hero__chip-icon" strokeWidth={1.5} aria-hidden />
+                  <a href={`mailto:${email}`} className="yd-carree-hero__chip-value">
+                    {email}
                   </a>
-                ) : (
-                  <span className="yd-carree-hero__contact-value">{terminLabel}</span>
-                )}
-              </div>
-            ) : null}
-            {webUrl ? (
-              <div className="yd-carree-hero__contact-row">
-                <span className="yd-carree-hero__contact-label">Web</span>
-                <a
-                  href={webUrl.startsWith("http") ? webUrl : `https://${webUrl}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="yd-carree-hero__contact-value"
-                >
-                  {displayWebsite(webUrl)}
-                </a>
-              </div>
-            ) : null}
+                </div>
+              ) : null}
+              {addressLine ? (
+                <div className="yd-carree-hero__chip yd-carree-hero__chip--address">
+                  <MapPin className="yd-carree-hero__chip-icon" strokeWidth={1.5} aria-hidden />
+                  <span className="yd-carree-hero__chip-value">{addressLine}</span>
+                </div>
+              ) : null}
+            </div>
           </div>
-        )}
+        ) : null}
 
         {showUploadCta && slug ? (
           <div className="yd-carree-hero__cta-row">
             <Link href={`/doc/${slug}/upload`} className="yd-carree-hero__cta-link">
               Unterlagen einsenden
             </Link>
-            {data.practice_email ? (
-              <a href={`mailto:${data.practice_email}`} className="yd-carree-hero__cta-link">
-                Kontakt
-              </a>
-            ) : null}
           </div>
         ) : null}
       </div>
 
-      <div className="yd-carree-hero__portrait-stage" aria-hidden={!data.photo_url}>
+      <div className="yd-carree-hero__portrait-stage" aria-hidden={!data.photo_url && !onPortraitEdit}>
+        {onPortraitEdit ? (
+          <button
+            type="button"
+            className="yd-carree-hero__portrait-edit"
+            onClick={onPortraitEdit}
+            disabled={portraitEditPending}
+            aria-busy={portraitEditPending}
+          >
+            <Camera className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+            {portraitEditPending ? "Wird hochgeladen…" : "Porträt ändern"}
+          </button>
+        ) : null}
         <div className="yd-carree-hero__portrait">
           {data.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element

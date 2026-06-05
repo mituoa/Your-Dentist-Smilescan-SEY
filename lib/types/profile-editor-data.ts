@@ -23,6 +23,10 @@ export interface ProfileEditorData {
   practice_email: string | null;
   practice_website: string | null;
   practice_hours: string | null;
+  practice_subtitle: string | null;
+  profile_credentials: string[];
+  profile_personal_approach: string | null;
+  profile_career_path: string[];
   logo_url: string | null;
   accent_color: string | null;
   profile_background_color: string | null;

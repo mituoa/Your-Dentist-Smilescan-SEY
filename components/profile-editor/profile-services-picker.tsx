@@ -12,12 +12,14 @@ type ProfileServicesPickerProps = {
   services: ServiceStructured[];
   onChange: (services: ServiceStructured[]) => void;
   disabled?: boolean;
+  embedded?: boolean;
 };
 
 export function ProfileServicesPicker({
   services,
   onChange,
   disabled = false,
+  embedded = false,
 }: ProfileServicesPickerProps) {
   const [openGroups, setOpenGroups] = useState<string[]>([]);
   const [customName, setCustomName] = useState("");
@@ -60,18 +62,28 @@ export function ProfileServicesPicker({
 
   return (
     <div>
-      <div className="mb-3 flex items-baseline justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-          Leistungen
+      {!embedded ? (
+        <div className="mb-3 flex items-baseline justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Leistungen
+          </p>
+          <span
+            className={`text-[10px] font-medium tabular-nums ${overLimit ? "text-amber-700" : "text-slate-400"}`}
+          >
+            {services.length}
+            {overLimit ? ` · max. ${PROFILE_LIMITS.MAX_VISIBLE_SERVICES} sichtbar` : ""}
+          </span>
+        </div>
+      ) : (
+        <p className="mb-3 flex items-baseline justify-between gap-2 text-[11px] leading-snug text-slate-500">
+          <span>Was wird konkret angeboten? Getrennt von Ihren Fachbereichen.</span>
+          <span
+            className={`shrink-0 text-[10px] font-medium tabular-nums ${overLimit ? "text-amber-700" : "text-slate-400"}`}
+          >
+            {services.length}
+          </span>
         </p>
-        <span className={`text-[10px] font-medium tabular-nums ${overLimit ? "text-amber-700" : "text-slate-400"}`}>
-          {services.length}
-          {overLimit ? ` · max. ${PROFILE_LIMITS.MAX_VISIBLE_SERVICES} sichtbar` : ""}
-        </span>
-      </div>
-      <p className="mb-3 text-[11px] leading-snug text-slate-500">
-        Patientenverständliche Leistungen — nach Fachbereich wählen (Vorsorge, KFO, Chirurgie …).
-      </p>
+      )}
 
       {services.length > 0 ? (
         <ul className="mb-4 divide-y divide-slate-300/25 border-y border-slate-300/25">
@@ -92,7 +104,7 @@ export function ProfileServicesPicker({
       ) : null}
 
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-        Aus Kategorien wählen
+        Nach Fachbereich wählen
       </p>
       <div className="rounded-lg border border-slate-300/25 bg-white/35 px-2">
         {SERVICE_MASTER.map((group) => {
@@ -103,13 +115,13 @@ export function ProfileServicesPicker({
               <button
                 type="button"
                 onClick={() => toggleGroup(group.id)}
-                className="flex w-full items-center justify-between gap-2 py-3 text-left text-[12px] font-medium text-slate-700 transition-colors hover:text-slate-900"
+                className="flex w-full items-center justify-between gap-2 py-2.5 text-left text-[12px] font-medium text-slate-700 transition-colors hover:text-slate-900"
               >
                 <span>
                   {group.label}
                   {count > 0 ? (
                     <span className="ml-2 text-[10px] font-normal tabular-nums text-slate-400">
-                      {count} gewählt
+                      {count}
                     </span>
                   ) : null}
                 </span>
@@ -151,12 +163,11 @@ export function ProfileServicesPicker({
       </div>
 
       <div className="mt-4">
-        <label htmlFor="pe-custom-service" className="mb-1.5 block text-[11px] font-medium text-slate-600">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
           Eigene Leistung
-        </label>
+        </p>
         <div className="flex gap-2">
           <FigmaTextInput
-            id="pe-custom-service"
             variant="quiet"
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
@@ -167,7 +178,7 @@ export function ProfileServicesPicker({
               }
             }}
             maxLength={PROFILE_LIMITS.service_name}
-            placeholder="z. B. Prominentenbehandlung"
+            placeholder="z. B. Professionelle Zahnreinigung"
             disabled={disabled}
             className="flex-1"
           />
@@ -175,7 +186,7 @@ export function ProfileServicesPicker({
             type="button"
             disabled={disabled || !customName.trim()}
             onClick={addCustom}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-300/40 bg-white/70 text-slate-600 transition-colors hover:border-slate-400/60 disabled:opacity-40"
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg border border-slate-300/40 bg-white/70 px-3 text-slate-600 transition-colors hover:border-slate-400/60 disabled:opacity-40"
             aria-label="Eigene Leistung hinzufügen"
           >
             <Plus className="h-4 w-4" strokeWidth={1.75} />

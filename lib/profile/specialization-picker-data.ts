@@ -4,8 +4,8 @@ import {
 } from "@/lib/masterdata/specializations";
 
 /**
- * Schwerpunkte — Original Phase 8 (Chef-Repo, Commit 3821b7f).
- * Quelle: lib/masterdata/specializations.ts — 18 Fachgebiete, keine Figma-Kurzliste.
+ * Fachbereiche — vollständige Zahnmedizin-Struktur für den Profil-Editor.
+ * Fachbereich = wofür die Praxis steht. Leistungen separat unter services.ts.
  */
 
 export type SpecializationPickerItem = {
@@ -16,20 +16,8 @@ export type SpecializationPickerItem = {
 export type SpecializationPickerGroup = {
   id: string;
   label: string;
-  /** Immer sichtbar (Hauptschwerpunkte) */
-  primary?: boolean;
   items: SpecializationPickerItem[];
 };
-
-/** Sechs häufige Fachgebiete — zuerst sichtbar (Phase-8-Reihenfolge, praxisnah). */
-export const PRIMARY_SPECIALIZATION_IDS = [
-  "general-dentistry",
-  "implantology",
-  "periodontology",
-  "endodontics",
-  "orthodontics",
-  "oral-surgery",
-] as const;
 
 export const MAX_SPECIALIZATION_SELECTIONS = 5;
 
@@ -37,74 +25,97 @@ function item(id: string): SpecializationPickerItem {
   return { id, label: getSpecializationLabel(id) };
 }
 
-/** Alle 18 Fachgebiete aus SPECIALIZATION_MASTER — exakt wie in der Repo hinterlegt. */
-export const SPECIALIZATION_PICKER_GROUPS: SpecializationPickerGroup[] = [
+/** Zwölf praxisnahe Fachbereiche — jeder kann später Leistungen enthalten. */
+export const FACHBEREICH_GROUPS: SpecializationPickerGroup[] = [
   {
-    id: "primary",
-    label: "Häufige Schwerpunkte",
-    primary: true,
-    items: PRIMARY_SPECIALIZATION_IDS.map((id) => item(id)),
+    id: "general",
+    label: "Allgemeine Zahnmedizin",
+    items: [item("general-dentistry"), item("oral-medicine")],
   },
   {
-    id: "conservative",
-    label: "Konservierend & Prothetik",
-    items: [item("restorative"), item("prosthodontics")],
+    id: "conservation",
+    label: "Zahnerhalt",
+    items: [item("restorative"), item("endodontics")],
+  },
+  {
+    id: "perio",
+    label: "Parodontologie",
+    items: [item("periodontology")],
+  },
+  {
+    id: "implant",
+    label: "Implantologie",
+    items: [item("implantology")],
+  },
+  {
+    id: "aesthetic",
+    label: "Ästhetische Zahnmedizin",
+    items: [item("aesthetic-dentistry")],
+  },
+  {
+    id: "prosthetics",
+    label: "Prothetik",
+    items: [item("prosthodontics")],
+  },
+  {
+    id: "ortho",
+    label: "Kieferorthopädie",
+    items: [item("orthodontics")],
   },
   {
     id: "surgery",
-    label: "Chirurgie",
-    items: [item("maxillofacial-surgery")],
+    label: "Oralchirurgie",
+    items: [item("oral-surgery"), item("maxillofacial-surgery")],
   },
   {
     id: "pediatric",
-    label: "Kinder & besondere Patientengruppen",
-    items: [item("pediatric-dentistry"), item("special-care")],
+    label: "Kinderzahnheilkunde",
+    items: [item("pediatric-dentistry")],
   },
   {
-    id: "oral-medicine",
-    label: "Oralmedizin & Diagnostik",
-    items: [
-      item("oral-medicine"),
-      item("orofacial-pain"),
-      item("dental-radiology"),
-      item("oral-pathology"),
-      item("oral-microbiology"),
-    ],
+    id: "cmd",
+    label: "Funktionsdiagnostik / CMD",
+    items: [item("orofacial-pain"), item("dental-radiology")],
   },
   {
     id: "sedation",
-    label: "Anästhesie & Sedierung",
+    label: "Sedierung / Anästhesie",
     items: [item("anesthesia")],
   },
   {
-    id: "public",
-    label: "Öffentliches Gesundheitswesen",
-    items: [item("public-health")],
+    id: "special-groups",
+    label: "Besondere Patientengruppen",
+    items: [item("special-care")],
   },
 ];
 
-/** Sicherstellen: jedes Master-Fachgebiet ist wählbar (Vollständigkeit). */
-const groupedIds = new Set(
-  SPECIALIZATION_PICKER_GROUPS.flatMap((g) => g.items.map((i) => i.id))
-);
-const missingFromGroups = SPECIALIZATION_MASTER.filter((s) => !groupedIds.has(s.id));
-if (missingFromGroups.length > 0) {
-  SPECIALIZATION_PICKER_GROUPS.push({
-    id: "weitere",
-    label: "Weitere Fachgebiete",
-    items: missingFromGroups.map((s) => ({ id: s.id, label: s.label })),
-  });
-}
+const groupedIds = new Set(FACHBEREICH_GROUPS.flatMap((g) => g.items.map((i) => i.id)));
+const ungroupedMaster = SPECIALIZATION_MASTER.filter((s) => !groupedIds.has(s.id));
 
-export const SPECIALIZATION_EXTENDED_GROUPS = SPECIALIZATION_PICKER_GROUPS.filter(
-  (g) => !g.primary && g.items.length > 0
-);
+/** Seltene Zusatz-Fachgebiete — eingeklappt, nicht im Hauptfokus. */
+export const FACHBEREICH_EXTENDED_GROUPS: SpecializationPickerGroup[] =
+  ungroupedMaster.length > 0
+    ? [
+        {
+          id: "extended",
+          label: "Weitere Fachgebiete",
+          items: ungroupedMaster.map((s) => ({ id: s.id, label: s.label })),
+        },
+      ]
+    : [];
+
+/** @deprecated Alias — weiterhin für Vorschau-Labels */
+export const SPECIALIZATION_PICKER_GROUPS = FACHBEREICH_GROUPS;
+export const SPECIALIZATION_EXTENDED_GROUPS = FACHBEREICH_EXTENDED_GROUPS;
+export const PRIMARY_SPECIALIZATION_IDS = FACHBEREICH_GROUPS.flatMap((g) =>
+  g.items.map((i) => i.id)
+) as unknown as readonly string[];
 
 const labelById = new Map<string, string>();
 for (const s of SPECIALIZATION_MASTER) {
   labelById.set(s.id, s.label);
 }
-for (const group of SPECIALIZATION_PICKER_GROUPS) {
+for (const group of [...FACHBEREICH_GROUPS, ...FACHBEREICH_EXTENDED_GROUPS]) {
   for (const entry of group.items) {
     labelById.set(entry.id, entry.label);
   }

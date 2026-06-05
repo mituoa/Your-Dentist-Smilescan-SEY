@@ -17,6 +17,7 @@ export const SPECIALIZATION_MASTER: SpecializationOption[] = [
   { id: "prosthodontics", label: "Prothetik" },
   { id: "restorative", label: "Restaurative Zahnheilkunde" },
   { id: "implantology", label: "Implantologie" },
+  { id: "aesthetic-dentistry", label: "Ästhetische Zahnmedizin" },
   { id: "oral-medicine", label: "Oralmedizin" },
   { id: "orofacial-pain", label: "Orofazialer Schmerz / Kiefergelenk" },
   {

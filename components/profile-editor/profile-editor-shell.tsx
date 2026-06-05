@@ -2,14 +2,21 @@
 
 /** Öffentliche Präsenz: Bühne (Vorschau) dominant, Kuratieren in schmaler Nebenspur. */
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Camera } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { AutoSaveIndicator, type SaveStatus } from "./auto-save-indicator";
 import { FigmaTextInput } from "./figma-form-fields";
 import { ProfileBackgroundPicker } from "@/components/profile-editor/profile-background-picker";
+import { ProfileCareerPathEditor } from "@/components/profile-editor/profile-career-path-editor";
+import { ProfileCredentialsEditor } from "@/components/profile-editor/profile-credentials-editor";
+import { ProfileEditorSection } from "@/components/profile-editor/profile-editor-section";
+import { ProfilePersonalApproachEditor } from "@/components/profile-editor/profile-personal-approach-editor";
 import { ProfileFigmaLivePreview } from "@/components/profile-editor/profile-figma-live-preview";
+import { ProfileLogoUpload } from "@/components/profile-editor/profile-logo-upload";
 import { ProfileServicesPicker } from "@/components/profile-editor/profile-services-picker";
 import { ProfileSpecializationPicker } from "@/components/profile-editor/profile-specialization-picker";
+import { resolveCarreeTheme } from "@/lib/profile/carree-theme";
+import { specializationPickerLabel } from "@/lib/profile/specialization-picker-data";
 import { saveProfileData, uploadPortraitPhoto } from "@/app/(protected)/profile/editor/actions";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
 import {
@@ -29,12 +36,28 @@ interface ProfileEditorShellProps {
 
 type WorkingFormState = ReturnType<typeof parseWorkingStyleVita>;
 
+type EditorSectionId =
+  | "praxis"
+  | "arzt"
+  | "approach"
+  | "career"
+  | "fach"
+  | "leistungen"
+  | "certs";
+
+function truncateSummary(text: string, max = 28): string {
+  const t = text.trim();
+  if (!t) return "";
+  return t.length <= max ? t : `${t.slice(0, max - 1)}…`;
+}
+
 export function ProfileEditorShell({
   initialData,
   workspaceName = "Ihre Praxis",
 }: ProfileEditorShellProps) {
   const [data, setData] = useState<ProfileEditorData>(initialData);
   const [working, setWorking] = useState<WorkingFormState>(() => parseWorkingStyleVita(initialData.vita_markdown));
+  const [openSection, setOpenSection] = useState<EditorSectionId>("praxis");
   const [showStatementLibrary, setShowStatementLibrary] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -44,7 +67,6 @@ export function ProfileEditorShell({
   const fileRef = useRef<HTMLInputElement>(null);
 
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  /** Verhindert, dass ein abgeschlossener Speichern-Lauf den Status überschreibt, wenn inzwischen ein neuer Lauf gestartet wurde. */
   const saveSeqRef = useRef(0);
   const latestDataRef = useRef(data);
   const mergedProfile = useMemo(
@@ -64,6 +86,11 @@ export function ProfileEditorShell({
 
   const updatePracticeField = useCallback((field: string, value: string) => {
     setData((prev) => ({ ...prev, [field]: value } as ProfileEditorData));
+  }, []);
+
+  const openEditorSection = useCallback((id: EditorSectionId) => {
+    setOpenSection(id);
+    setShowStatementLibrary(false);
   }, []);
 
   const performSave = useCallback(async () => {
@@ -88,12 +115,14 @@ export function ProfileEditorShell({
         practice_email: d.practice_email || "",
         practice_website: d.practice_website || "",
         practice_hours: d.practice_hours || "",
+        practice_subtitle: d.practice_subtitle || "",
+        profile_credentials: (d.profile_credentials ?? []).filter((c) => c.trim()),
+        profile_personal_approach: (d.profile_personal_approach ?? "").trim(),
+        profile_career_path: (d.profile_career_path ?? []).filter((line) => line.trim()),
         profile_background_color: d.profile_background_color,
       });
 
-      if (seq !== saveSeqRef.current) {
-        return;
-      }
+      if (seq !== saveSeqRef.current) return;
 
       if (result.error) {
         setSaveStatus("error");
@@ -103,9 +132,7 @@ export function ProfileEditorShell({
         setLastSavedAt(new Date());
       }
     } catch {
-      if (seq !== saveSeqRef.current) {
-        return;
-      }
+      if (seq !== saveSeqRef.current) return;
       setSaveStatus("error");
       setErrorMessage("Speichern fehlgeschlagen.");
     }
@@ -175,320 +202,460 @@ export function ProfileEditorShell({
     }
   };
 
-  /** Keine parallelen Nebenaktionen während persistierendem Speichern oder Porträt-Upload. */
   const interactionLocked = saveStatus === "saving" || photoUploading;
+  const themeInk = resolveCarreeTheme(data.profile_background_color).ink;
+
+  const doctorName = [data.title, data.first_name, data.last_name].filter(Boolean).join(" ").trim();
+  const careerFilled = (data.profile_career_path ?? []).filter((l) => l.trim()).length;
+  const credFilled = (data.profile_credentials ?? []).filter((c) => c.trim()).length;
+  const approachFilled = (data.profile_personal_approach ?? "").trim();
+
+  const sectionSummaries = {
+    praxis: truncateSummary(data.practice_name || workspaceName) || "Praxis",
+    arzt: truncateSummary(doctorName) || "Arztprofil",
+    approach: approachFilled ? truncateSummary(approachFilled) : "Optional",
+    career:
+      careerFilled > 0
+        ? `${careerFilled} ${careerFilled === 1 ? "Station" : "Stationen"}`
+        : "Optional",
+    fach:
+      data.specializations.length > 0
+        ? data.specializations.length === 1
+          ? truncateSummary(specializationPickerLabel(data.specializations[0]!))
+          : `${data.specializations.length} Bereiche`
+        : "Auswählen",
+    leistungen:
+      data.services_structured.length > 0
+        ? `${data.services_structured.length} ${data.services_structured.length === 1 ? "Leistung" : "Leistungen"}`
+        : "Auswählen",
+    certs:
+      credFilled > 0
+        ? `${credFilled} ${credFilled === 1 ? "Eintrag" : "Einträge"}`
+        : "Optional",
+  };
 
   return (
-    <div
-      className="yd-profile-editor-shell relative flex min-h-0 w-full flex-1 flex-col overflow-hidden pb-[max(0px,env(safe-area-inset-bottom))] md:h-full"
-      style={{ backgroundColor: "#EDECE8" }}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_50%_at_50%_0%,rgba(255,255,255,0.5),transparent_50%)]"
-        aria-hidden
-      />
+    <div className="yd-profile-editor-shell relative flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent pb-[max(0px,env(safe-area-inset-bottom))] md:h-full">
       <div className="yd-profile-editor-body relative flex min-h-0 min-w-0 flex-1 flex-col md:flex-row md:overflow-hidden">
-        {/* Bühne — zuerst im DOM: liest sich als Profil, nicht als Formular */}
         <div
-          className="yd-profile-editor-preview order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] md:order-1"
+          className="yd-profile-editor-preview order-1 flex min-h-0 min-w-0 flex-[1.35] flex-col items-start overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] md:order-1"
           role="region"
           aria-label="Öffentliche Profildarstellung"
         >
-          <ProfileFigmaLivePreview data={mergedProfile} workspaceName={workspaceName} />
+          <ProfileFigmaLivePreview
+            data={mergedProfile}
+            workspaceName={workspaceName}
+            onPortraitEdit={() => fileRef.current?.click()}
+            portraitEditPending={photoUploading}
+          />
         </div>
 
-        {/* Kuratieren — schmal, visuell zurückgenommen */}
         <div
           className="yd-profile-editor-curate order-2 flex min-h-0 w-full shrink-0 flex-col border-slate-300/20 bg-[#F4F3F0] max-md:border-t md:order-2 md:w-[min(100%,320px)] md:max-w-[360px] md:border-l md:border-t-0 xl:max-w-[380px]"
           aria-busy={saveStatus === "saving" || photoUploading}
         >
           <div className="yd-profile-editor-curate-scroll px-5 py-8 sm:px-6 sm:py-9">
             <header className="border-b border-slate-300/25 pb-5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Öffentliche Präsenz</p>
-              <h1 className="mt-1.5 font-serif text-[1.25rem] font-light leading-snug tracking-[-0.02em] text-slate-900 sm:text-[1.35rem]">
-                Patientenbereich
-              </h1>
-              <p className="mt-2 text-[12px] leading-snug text-slate-500">Änderungen werden automatisch übernommen.</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-700">
+                Öffentliche Präsenz
+              </p>
+              <p className="mt-2 text-[11px] leading-snug text-slate-500">
+                Bereich für Bereich kuratieren — Änderungen werden automatisch übernommen.
+              </p>
             </header>
 
-            <div className="mt-8 flex flex-col gap-9 sm:gap-10">
-              {/* Porträt */}
-              <section aria-labelledby="pe-photo-label">
-                <h2 id="pe-photo-label" className="sr-only">
-                  Porträt
-                </h2>
-                <div className="flex items-start gap-4">
-                  <button
-                    type="button"
-                    disabled={interactionLocked}
-                    onClick={() => fileRef.current?.click()}
-                    className="group relative shrink-0 touch-manipulation overflow-hidden rounded-xl border border-slate-300/30 bg-white/50 transition hover:border-slate-400/50 disabled:cursor-not-allowed disabled:opacity-50"
-                    style={{ width: 72, height: 96 }}
-                  >
-                    {data.photo_url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={data.photo_url}
-                        alt=""
-                        className="h-full w-full object-cover object-[50%_15%]"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full flex-col items-center justify-center bg-slate-50 px-2">
-                        <Camera className="h-6 w-6 text-slate-300" strokeWidth={1.25} />
-                      </div>
-                    )}
-                    <div className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-slate-900/35 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100">
-                      <span className="mb-2 text-[11px] font-medium text-white">Ersetzen</span>
-                    </div>
-                  </button>
-                  <div className="min-w-0 flex-1 pt-0.5">
-                    <p className="text-[12px] text-slate-500">Porträt · mind. 400px · JPG, PNG oder WebP</p>
-                  </div>
-                </div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    e.target.value = "";
-                    if (f) void onPhotoPick(f);
-                  }}
-                />
-                {photoUploading ? (
-                  <p className="mt-2 text-[12px] text-slate-500">Wird hochgeladen…</p>
-                ) : null}
-                {photoError ? (
-                  <p
-                    className="mt-2 border-l-2 border-text-tertiary/60 pl-2 text-[12px] leading-relaxed text-text-secondary"
-                    role="status"
-                    aria-live="polite"
-                  >
-                    {photoError}
-                  </p>
-                ) : null}
-              </section>
-
-              {/* Name */}
-              <section aria-labelledby="pe-name-label">
-                <h2 id="pe-name-label" className="sr-only">
-                  Name
-                </h2>
-                <div className="flex flex-col gap-3">
-                  <FigmaTextInput
-                    variant="quiet"
-                    placeholder="Titel"
-                    maxLength={PROFILE_LIMITS.title}
-                    value={data.title || ""}
-                    onChange={(e) => updateField("title", e.target.value || null)}
-                  />
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-3">
-                    <FigmaTextInput
-                      variant="quiet"
-                      placeholder="Vorname"
-                      maxLength={PROFILE_LIMITS.first_name}
-                      value={data.first_name || ""}
-                      onChange={(e) => updateField("first_name", e.target.value || null)}
-                    />
-                    <FigmaTextInput
-                      variant="quiet"
-                      placeholder="Nachname"
-                      maxLength={PROFILE_LIMITS.last_name}
-                      value={data.last_name || ""}
-                      onChange={(e) => updateField("last_name", e.target.value || null)}
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Praxis — oben, steuert die Headline in der Vorschau */}
-              <section aria-labelledby="pe-practice-label">
-                <h2
-                  id="pe-practice-label"
-                  className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+            <div className="mt-6">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) void onPhotoPick(f);
+                }}
+              />
+              {photoError ? (
+                <p
+                  className="mb-4 border-l-2 border-text-tertiary/60 pl-2 text-[12px] leading-relaxed text-text-secondary"
+                  role="status"
+                  aria-live="polite"
                 >
-                  Praxis
-                </h2>
-                <p className="mb-4 text-[12px] leading-snug text-slate-500">
-                  Praxisname erscheint in der großen Headline der Patientenansicht.
+                  {photoError}
                 </p>
-                <div className="flex flex-col gap-3">
-                  <div>
-                    <label
-                      htmlFor="pe-practice-name"
-                      className="mb-1.5 block text-[11px] font-medium text-slate-600"
-                    >
-                      Praxisname
-                    </label>
-                    <FigmaTextInput
-                      id="pe-practice-name"
-                      variant="quiet"
-                      placeholder="z. B. Carree Dental"
-                      maxLength={PROFILE_LIMITS.practice_name}
-                      value={data.practice_name || ""}
-                      onChange={(e) => updateField("practice_name", e.target.value || null)}
-                    />
-                  </div>
-                  <ProfileBackgroundPicker
-                    value={data.profile_background_color}
-                    onChange={(hex) => updateField("profile_background_color", hex)}
-                    disabled={interactionLocked}
-                  />
-                  <FigmaTextInput
-                    variant="quiet"
-                    placeholder="Straße, Nr."
-                    maxLength={120}
-                    value={addr.street}
-                    onChange={(e) =>
-                      updatePracticeField(
-                        "practice_address",
-                        mergePracticeAddressBlock(e.target.value, addr.postalCode, addr.city)
-                      )
-                    }
-                  />
-                  <div className="grid grid-cols-3 gap-x-3 gap-y-3">
-                    <FigmaTextInput
-                      variant="quiet"
-                      placeholder="PLZ"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="postal-code"
-                      maxLength={12}
-                      value={addr.postalCode}
-                      onChange={(e) =>
-                        updatePracticeField(
-                          "practice_address",
-                          mergePracticeAddressBlock(addr.street, e.target.value, addr.city)
-                        )
-                      }
-                    />
-                    <FigmaTextInput
-                      variant="quiet"
-                      placeholder="Stadt"
-                      maxLength={80}
-                      value={addr.city}
-                      onChange={(e) =>
-                        updatePracticeField(
-                          "practice_address",
-                          mergePracticeAddressBlock(addr.street, addr.postalCode, e.target.value)
-                        )
-                      }
-                      className="col-span-2 w-full"
-                    />
-                  </div>
-                  <FigmaTextInput
-                    variant="quiet"
-                    placeholder="Öffnungszeiten"
-                    maxLength={PROFILE_LIMITS.practice_hours}
-                    value={data.practice_hours || ""}
-                    onChange={(e) => updateField("practice_hours", e.target.value || null)}
-                  />
-                </div>
-              </section>
+              ) : null}
 
-              {/* Arbeitsweise */}
-              <section aria-labelledby="pe-work-label">
-                <h2 id="pe-work-label" className="sr-only">
-                  Arbeitsweise
-                </h2>
-                <div className="flex flex-col gap-3">
-                  {([0, 1, 2] as const).map((i) => (
-                    <FigmaTextInput
-                      key={i}
-                      variant="quiet"
-                      maxLength={400}
-                      placeholder={i === 0 ? "Erster Satz" : i === 1 ? "Zweiter Satz" : "Dritter Satz"}
-                      value={displayLines[i]}
-                      onChange={(e) => onWorkingLineChange(i, e.target.value)}
+              <div className="yd-pe-sections flex flex-col gap-2">
+                <ProfileEditorSection
+                  id="praxis"
+                  title="Praxisprofil"
+                  summary={sectionSummaries.praxis}
+                  isOpen={openSection === "praxis"}
+                  onToggle={() => openEditorSection("praxis")}
+                >
+                  <div className="flex flex-col gap-5">
+                    <ProfileLogoUpload
+                      logoUrl={data.logo_url}
+                      onLogoChange={(url) => updateField("logo_url", url)}
+                      disabled={interactionLocked}
                     />
-                  ))}
-                </div>
-
-                {!showStatementLibrary ? (
-                  <button
-                    type="button"
-                    disabled={interactionLocked}
-                    onClick={() => setShowStatementLibrary(true)}
-                    className="mt-4 inline-flex min-h-[44px] items-center text-[12px] font-medium text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 touch-manipulation disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Formulierungsvorschläge
-                  </button>
-                ) : null}
-
-                {showStatementLibrary ? (
-                  <div className="mt-5 border-t border-slate-200/80 pt-5">
-                    <div className="mb-4 flex items-center justify-between">
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                        {working.statementIds.length}/{MAX_WORKING_STYLE_SELECTIONS} ausgewählt
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setShowStatementLibrary(false)}
-                        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-[12px] font-medium text-slate-500 transition-colors hover:text-slate-800 touch-manipulation"
+                    <div>
+                      <label
+                        htmlFor="pe-practice-name"
+                        className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
                       >
-                        Schließen
-                      </button>
+                        Praxisname
+                      </label>
+                      <FigmaTextInput
+                        id="pe-practice-name"
+                        variant="quiet"
+                        placeholder="z. B. Carree Dental"
+                        maxLength={PROFILE_LIMITS.practice_name}
+                        value={data.practice_name || ""}
+                        onChange={(e) => updateField("practice_name", e.target.value || null)}
+                      />
                     </div>
-                    <div className="flex flex-col" style={{ gap: 16 }}>
-                      {getCategorizedStatements().map((category) => (
-                        <div key={category.name}>
-                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                            {category.name}
-                          </p>
-                          <div className="flex flex-col" style={{ gap: 5 }}>
-                            {category.statements.map((statement) => {
-                              const isSelected = working.statementIds.includes(statement.id);
-                              const isDisabled =
-                                (!isSelected &&
-                                  working.statementIds.length >= MAX_WORKING_STYLE_SELECTIONS) ||
-                                interactionLocked;
-                              return (
-                                <button
-                                  key={statement.id}
-                                  type="button"
-                                  disabled={isDisabled}
-                                  onClick={() => !isDisabled && toggleStatement(statement.id)}
-                                  className="rounded-xl border px-3 py-2.5 text-left text-[12px] leading-relaxed transition-colors disabled:cursor-not-allowed"
-                                  style={{
-                                    background: isSelected ? "rgba(248,250,252,0.95)" : "rgba(255,255,255,0.65)",
-                                    color: isSelected ? "#0f172a" : "#64748b",
-                                    borderColor: isSelected ? "rgba(51,65,85,0.35)" : "rgba(226,232,240,0.9)",
-                                    opacity: isDisabled ? 0.35 : 1,
-                                    cursor: isDisabled ? "not-allowed" : "pointer",
-                                  }}
-                                >
-                                  {statement.text}
-                                </button>
-                              );
-                            })}
+                    <div>
+                      <label
+                        htmlFor="pe-practice-subtitle"
+                        className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                      >
+                        Untertitel
+                      </label>
+                      <FigmaTextInput
+                        id="pe-practice-subtitle"
+                        variant="quiet"
+                        placeholder="z. B. Ihre Praxis in Köln"
+                        maxLength={PROFILE_LIMITS.practice_subtitle}
+                        value={data.practice_subtitle || ""}
+                        onChange={(e) => updateField("practice_subtitle", e.target.value || null)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label
+                          htmlFor="pe-practice-phone"
+                          className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                        >
+                          Telefon
+                        </label>
+                        <FigmaTextInput
+                          id="pe-practice-phone"
+                          variant="quiet"
+                          placeholder="z. B. 0221 - 123 45 67"
+                          type="tel"
+                          maxLength={PROFILE_LIMITS.practice_phone}
+                          value={data.practice_phone || ""}
+                          onChange={(e) => updateField("practice_phone", e.target.value || null)}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="pe-practice-email"
+                          className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                        >
+                          E-Mail
+                        </label>
+                        <FigmaTextInput
+                          id="pe-practice-email"
+                          variant="quiet"
+                          placeholder="z. B. info@praxis.de"
+                          type="email"
+                          maxLength={PROFILE_LIMITS.practice_email}
+                          value={data.practice_email || ""}
+                          onChange={(e) => updateField("practice_email", e.target.value || null)}
+                        />
+                      </div>
+                    </div>
+                    <ProfileBackgroundPicker
+                      value={data.profile_background_color}
+                      onChange={(hex) => updateField("profile_background_color", hex)}
+                      disabled={interactionLocked}
+                    />
+                    <div>
+                      <label
+                        htmlFor="pe-practice-address"
+                        className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                      >
+                        Anschrift
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        <FigmaTextInput
+                          id="pe-practice-address"
+                          variant="quiet"
+                          placeholder="Straße, Nr."
+                          maxLength={120}
+                          value={addr.street}
+                          onChange={(e) =>
+                            updatePracticeField(
+                              "practice_address",
+                              mergePracticeAddressBlock(e.target.value, addr.postalCode, addr.city)
+                            )
+                          }
+                        />
+                        <div className="grid grid-cols-3 gap-x-3 gap-y-3">
+                          <FigmaTextInput
+                            variant="quiet"
+                            placeholder="PLZ"
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="postal-code"
+                            maxLength={12}
+                            value={addr.postalCode}
+                            onChange={(e) =>
+                              updatePracticeField(
+                                "practice_address",
+                                mergePracticeAddressBlock(addr.street, e.target.value, addr.city)
+                              )
+                            }
+                          />
+                          <FigmaTextInput
+                            variant="quiet"
+                            placeholder="Stadt"
+                            maxLength={80}
+                            value={addr.city}
+                            onChange={(e) =>
+                              updatePracticeField(
+                                "practice_address",
+                                mergePracticeAddressBlock(addr.street, addr.postalCode, e.target.value)
+                              )
+                            }
+                            className="col-span-2 w-full"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={interactionLocked}
+                      onClick={() => void performSave()}
+                      className="yd-profile-editor-save inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-4 text-[12px] font-semibold tracking-[0.02em] text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
+                      style={{ background: themeInk }}
+                    >
+                      <Check className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                      {saveStatus === "saving" ? "Wird gespeichert…" : "Speichern"}
+                    </button>
+                  </div>
+                </ProfileEditorSection>
+
+                <ProfileEditorSection
+                  id="arzt"
+                  title="Arztprofil"
+                  summary={sectionSummaries.arzt}
+                  isOpen={openSection === "arzt"}
+                  onToggle={() => openEditorSection("arzt")}
+                >
+                  <div className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-3">
+                      <FigmaTextInput
+                        variant="quiet"
+                        placeholder="Titel"
+                        maxLength={PROFILE_LIMITS.title}
+                        value={data.title || ""}
+                        onChange={(e) => updateField("title", e.target.value || null)}
+                      />
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-3">
+                        <FigmaTextInput
+                          variant="quiet"
+                          placeholder="Vorname"
+                          maxLength={PROFILE_LIMITS.first_name}
+                          value={data.first_name || ""}
+                          onChange={(e) => updateField("first_name", e.target.value || null)}
+                        />
+                        <FigmaTextInput
+                          variant="quiet"
+                          placeholder="Nachname"
+                          maxLength={PROFILE_LIMITS.last_name}
+                          value={data.last_name || ""}
+                          onChange={(e) => updateField("last_name", e.target.value || null)}
+                        />
+                      </div>
+                      <FigmaTextInput
+                        variant="quiet"
+                        placeholder="Website"
+                        maxLength={PROFILE_LIMITS.practice_website}
+                        value={data.practice_website || ""}
+                        onChange={(e) => updateField("practice_website", e.target.value || null)}
+                      />
+                      <FigmaTextInput
+                        variant="quiet"
+                        placeholder="Öffnungszeiten"
+                        maxLength={PROFILE_LIMITS.practice_hours}
+                        value={data.practice_hours || ""}
+                        onChange={(e) => updateField("practice_hours", e.target.value || null)}
+                      />
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        Vita / Arbeitsweise
+                      </p>
+                      <p className="mb-3 text-[11px] leading-snug text-slate-500">
+                        Drei Sätze, die Patienten auf Ihrer Profilseite lesen.
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        {([0, 1, 2] as const).map((i) => (
+                          <FigmaTextInput
+                            key={i}
+                            variant="quiet"
+                            maxLength={400}
+                            placeholder={
+                              i === 0 ? "Erster Satz" : i === 1 ? "Zweiter Satz" : "Dritter Satz"
+                            }
+                            value={displayLines[i]}
+                            onChange={(e) => onWorkingLineChange(i, e.target.value)}
+                          />
+                        ))}
+                      </div>
+
+                      {!showStatementLibrary ? (
+                        <button
+                          type="button"
+                          disabled={interactionLocked}
+                          onClick={() => setShowStatementLibrary(true)}
+                          className="mt-3 inline-flex min-h-[40px] items-center text-[12px] font-medium text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 touch-manipulation disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Formulierungsvorschläge
+                        </button>
+                      ) : null}
+
+                      {showStatementLibrary ? (
+                        <div className="mt-4 border-t border-slate-200/80 pt-4">
+                          <div className="mb-3 flex items-center justify-between">
+                            <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                              {working.statementIds.length}/{MAX_WORKING_STYLE_SELECTIONS} ausgewählt
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setShowStatementLibrary(false)}
+                              className="text-[12px] font-medium text-slate-500 transition-colors hover:text-slate-800"
+                            >
+                              Schließen
+                            </button>
+                          </div>
+                          <div className="flex max-h-[240px] flex-col gap-3 overflow-y-auto pr-1">
+                            {getCategorizedStatements().map((category) => (
+                              <div key={category.name}>
+                                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                                  {category.name}
+                                </p>
+                                <div className="flex flex-col gap-1">
+                                  {category.statements.map((statement) => {
+                                    const isSelected = working.statementIds.includes(statement.id);
+                                    const isDisabled =
+                                      (!isSelected &&
+                                        working.statementIds.length >= MAX_WORKING_STYLE_SELECTIONS) ||
+                                      interactionLocked;
+                                    return (
+                                      <button
+                                        key={statement.id}
+                                        type="button"
+                                        disabled={isDisabled}
+                                        onClick={() => !isDisabled && toggleStatement(statement.id)}
+                                        className="rounded-lg border px-3 py-2 text-left text-[12px] leading-relaxed transition-colors disabled:cursor-not-allowed"
+                                        style={{
+                                          background: isSelected
+                                            ? "rgba(248,250,252,0.95)"
+                                            : "rgba(255,255,255,0.65)",
+                                          color: isSelected ? "#0f172a" : "#64748b",
+                                          borderColor: isSelected
+                                            ? "rgba(51,65,85,0.35)"
+                                            : "rgba(226,232,240,0.9)",
+                                          opacity: isDisabled ? 0.35 : 1,
+                                        }}
+                                      >
+                                        {statement.text}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      ))}
+                      ) : null}
                     </div>
                   </div>
-                ) : null}
-              </section>
+                </ProfileEditorSection>
 
-              {/* Schwerpunkte — vollständige Masterliste, gruppiert */}
-              <section aria-labelledby="pe-spec-label">
-                <ProfileSpecializationPicker
-                  selected={data.specializations}
-                  onChange={(ids) => updateField("specializations", ids)}
-                  disabled={interactionLocked}
-                />
-              </section>
+                <ProfileEditorSection
+                  id="approach"
+                  title="Persönliche Worte"
+                  summary={sectionSummaries.approach}
+                  isOpen={openSection === "approach"}
+                  onToggle={() => openEditorSection("approach")}
+                >
+                  <ProfilePersonalApproachEditor
+                    embedded
+                    value={data.profile_personal_approach ?? ""}
+                    onChange={(value) => updateField("profile_personal_approach", value || null)}
+                    disabled={interactionLocked}
+                  />
+                </ProfileEditorSection>
 
-              {/* Leistungen — SERVICE_MASTER (12 Fachbereiche) */}
-              <section aria-labelledby="pe-services-label" className="mt-9">
-                <ProfileServicesPicker
-                  services={data.services_structured}
-                  onChange={(services) => updateField("services_structured", services)}
-                  disabled={interactionLocked}
-                />
-              </section>
+                <ProfileEditorSection
+                  id="career"
+                  title="Ausbildung & Werdegang"
+                  summary={sectionSummaries.career}
+                  isOpen={openSection === "career"}
+                  onToggle={() => openEditorSection("career")}
+                >
+                  <ProfileCareerPathEditor
+                    embedded
+                    items={data.profile_career_path ?? []}
+                    onChange={(items) => updateField("profile_career_path", items)}
+                    disabled={interactionLocked}
+                  />
+                </ProfileEditorSection>
 
-              <div className="mt-10 flex min-h-[2.5rem] flex-col justify-end border-t border-slate-300/25 pt-6">
+                <ProfileEditorSection
+                  id="fach"
+                  title="Fachbereiche"
+                  summary={sectionSummaries.fach}
+                  isOpen={openSection === "fach"}
+                  onToggle={() => openEditorSection("fach")}
+                >
+                  <ProfileSpecializationPicker
+                    embedded
+                    selected={data.specializations}
+                    onChange={(ids) => updateField("specializations", ids)}
+                    disabled={interactionLocked}
+                  />
+                </ProfileEditorSection>
+
+                <ProfileEditorSection
+                  id="leistungen"
+                  title="Leistungen"
+                  summary={sectionSummaries.leistungen}
+                  isOpen={openSection === "leistungen"}
+                  onToggle={() => openEditorSection("leistungen")}
+                >
+                  <ProfileServicesPicker
+                    embedded
+                    services={data.services_structured}
+                    onChange={(services) => updateField("services_structured", services)}
+                    disabled={interactionLocked}
+                  />
+                </ProfileEditorSection>
+
+                <ProfileEditorSection
+                  id="certs"
+                  title="Fortbildungen & Zertifikate"
+                  summary={sectionSummaries.certs}
+                  isOpen={openSection === "certs"}
+                  onToggle={() => openEditorSection("certs")}
+                >
+                  <ProfileCredentialsEditor
+                    embedded
+                    credentials={data.profile_credentials ?? []}
+                    onChange={(items) => updateField("profile_credentials", items)}
+                    disabled={interactionLocked}
+                  />
+                </ProfileEditorSection>
+              </div>
+
+              <div className="mt-6 flex min-h-[2.5rem] flex-col justify-end border-t border-slate-300/25 pt-4">
                 <AutoSaveIndicator status={saveStatus} lastSavedAt={lastSavedAt} errorMessage={errorMessage} />
               </div>
             </div>

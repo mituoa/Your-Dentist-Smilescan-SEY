@@ -349,6 +349,7 @@ export async function uploadLogo(
   }
 
   revalidatePath("/settings");
+  revalidatePath("/profile/editor");
   return { url: data.publicUrl };
 }
 
@@ -364,6 +365,7 @@ export async function removeLogo(): Promise<{ error?: string; success?: boolean 
     .eq("workspace_id", workspace.workspace_id);
 
   revalidatePath("/settings");
+  revalidatePath("/profile/editor");
   return { success: true };
 }
 

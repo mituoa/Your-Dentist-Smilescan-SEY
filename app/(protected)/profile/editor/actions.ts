@@ -6,6 +6,8 @@ import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { generateSlug, isSafeDocPathSlug } from "@/lib/slug";
 import { MAX_FIGMA_SPECIALTY_SELECTIONS } from "@/lib/profile/figma-specialties";
 import { normalizeProfileBackgroundHex } from "@/lib/profile/carree-theme";
+import { parseProfileCareerPath } from "@/lib/profile/parse-career-path";
+import { parseProfileCredentials } from "@/lib/profile/parse-credentials";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { revalidatePath } from "next/cache";
 
@@ -56,6 +58,18 @@ function sanitizeServicesStructured(
     .filter((s) => s.id.length > 0 && s.name.length > 0);
 }
 
+function sanitizeCredentials(raw: unknown): string[] {
+  return parseProfileCredentials(raw)
+    .map((line) => clampStr(line, PROFILE_LIMITS.credential_line))
+    .filter(Boolean);
+}
+
+function sanitizeCareerPath(raw: unknown): string[] {
+  return parseProfileCareerPath(raw)
+    .map((line) => clampStr(line, PROFILE_LIMITS.career_line))
+    .filter(Boolean);
+}
+
 function sanitizeSavePayload(payload: SaveProfilePayload): SaveProfilePayload {
   return {
     first_name: clampStr(payload.first_name, PROFILE_LIMITS.first_name),
@@ -75,6 +89,13 @@ function sanitizeSavePayload(payload: SaveProfilePayload): SaveProfilePayload {
     practice_email: clampStr(payload.practice_email, PROFILE_LIMITS.practice_email),
     practice_website: clampStr(payload.practice_website, PROFILE_LIMITS.practice_website),
     practice_hours: clampStr(payload.practice_hours, PROFILE_LIMITS.practice_hours),
+    practice_subtitle: clampStr(payload.practice_subtitle, PROFILE_LIMITS.practice_subtitle),
+    profile_credentials: sanitizeCredentials(payload.profile_credentials),
+    profile_personal_approach: clampStr(
+      payload.profile_personal_approach,
+      PROFILE_LIMITS.personal_approach
+    ),
+    profile_career_path: sanitizeCareerPath(payload.profile_career_path),
     profile_background_color: normalizeProfileBackgroundHex(payload.profile_background_color),
   };
 }
@@ -99,6 +120,10 @@ export interface SaveProfilePayload {
   practice_email: string;
   practice_website: string;
   practice_hours: string;
+  practice_subtitle: string;
+  profile_credentials: string[];
+  profile_personal_approach: string;
+  profile_career_path: string[];
   profile_background_color: string | null;
 }
 
@@ -139,6 +164,10 @@ export async function saveProfileData(
     practice_email: p.practice_email || null,
     practice_website: p.practice_website || null,
     practice_hours: p.practice_hours || null,
+    practice_subtitle: p.practice_subtitle || null,
+    profile_credentials: p.profile_credentials,
+    profile_personal_approach: p.profile_personal_approach || null,
+    profile_career_path: p.profile_career_path,
     logo_url: existingBranding?.logo_url ?? null,
     accent_color: existingBranding?.accent_color ?? null,
     profile_background_color: p.profile_background_color,

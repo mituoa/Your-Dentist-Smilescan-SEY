@@ -3,7 +3,7 @@ import Link from "next/link";
 import { JournalPreviewList } from "@/components/public/journal-preview-list";
 import { carreeThemeStyle } from "@/lib/profile/carree-theme";
 import { CarreeEditorialHero } from "@/components/profile-preview/carree-editorial-hero";
-import { getSpecializationLabel } from "@/lib/masterdata/specializations";
+import { CarreeProfileBody } from "@/components/profile-preview/carree-profile-body";
 import { expandWorkingStyleVitaForDisplay } from "@/lib/profile/working-style-library";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
@@ -26,12 +26,18 @@ export function EditorialProfile({
   journalEntries,
   previewMode = false,
 }: EditorialProfileProps) {
-  const visibleSpecs = data.specializations.slice(0, PROFILE_LIMITS.MAX_VISIBLE_SPECIALIZATIONS);
   const visibleServices = data.services_structured.slice(0, PROFILE_LIMITS.MAX_VISIBLE_SERVICES);
 
   const vitaParagraphs = expandWorkingStyleVitaForDisplay(data.vita_markdown ?? null)
     .split(/\n\n+/)
     .filter((p) => p.trim());
+
+  const hasCarreeBody =
+    vitaParagraphs.length > 0 ||
+    Boolean((data.profile_personal_approach ?? "").trim()) ||
+    (data.profile_career_path?.length ?? 0) > 0 ||
+    data.specializations.length > 0 ||
+    (data.profile_credentials?.length ?? 0) > 0;
 
   return (
     <div
@@ -46,35 +52,7 @@ export function EditorialProfile({
         showUploadCta={!previewMode}
       />
 
-      {vitaParagraphs.length > 0 ? (
-        <section className="yd-carree-profile__section" aria-labelledby="carree-vita">
-          <p className="yd-carree-profile__section-label">I · Vita</p>
-          <h2 id="carree-vita" className="yd-carree-profile__section-title">
-            Über <em>mich</em>.
-          </h2>
-          <div className="yd-carree-profile__body space-y-6">
-            {vitaParagraphs.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {visibleSpecs.length > 0 ? (
-        <section className="yd-carree-profile__section" aria-labelledby="carree-specs">
-          <p className="yd-carree-profile__section-label">II · Schwerpunkte</p>
-          <h2 id="carree-specs" className="yd-carree-profile__section-title">
-            Meine <em>Schwerpunkte</em>.
-          </h2>
-          <ul className="yd-carree-profile__list">
-            {visibleSpecs.map((id) => (
-              <li key={id}>
-                {id.startsWith("custom:") ? id.replace("custom:", "") : getSpecializationLabel(id)}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {hasCarreeBody ? <CarreeProfileBody data={data} /> : null}
 
       {visibleServices.length > 0 ? (
         <section className="yd-carree-profile__section" aria-labelledby="carree-services">

@@ -14,6 +14,10 @@ export const PROFILE_LIMITS = {
   practice_email: 80,
   practice_website: 100,
   practice_hours: 100,
+  practice_subtitle: 80,
+  credential_line: 120,
+  personal_approach: 800,
+  career_line: 140,
   MAX_VISIBLE_SPECIALIZATIONS: 6,
   MAX_VISIBLE_SERVICES: 12,
 } as const;

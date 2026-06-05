@@ -1,4 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { parseProfileCareerPath } from "@/lib/profile/parse-career-path";
+import { parseProfileCredentials } from "@/lib/profile/parse-credentials";
 import {
   parseServicesStructured,
   parseSpecializations,
@@ -26,6 +28,10 @@ export interface PublicProfile {
   practice_email: string | null;
   practice_website: string | null;
   practice_hours: string | null;
+  practice_subtitle: string | null;
+  profile_credentials: string[];
+  profile_personal_approach: string | null;
+  profile_career_path: string[];
   logo_url: string | null;
   accent_color: string | null;
   profile_background_color: string | null;
@@ -58,6 +64,10 @@ export function publicProfileToEditorData(
     practice_email: profile.practice_email,
     practice_website: profile.practice_website,
     practice_hours: profile.practice_hours,
+    practice_subtitle: profile.practice_subtitle,
+    profile_credentials: profile.profile_credentials,
+    profile_personal_approach: profile.profile_personal_approach,
+    profile_career_path: profile.profile_career_path,
     logo_url: profile.logo_url,
     accent_color: profile.accent_color,
     profile_background_color: profile.profile_background_color,
@@ -91,6 +101,10 @@ function mapProfileRow(
       practice_email: null,
       practice_website: null,
       practice_hours: null,
+      practice_subtitle: null,
+      profile_credentials: [],
+      profile_personal_approach: null,
+      profile_career_path: [],
       logo_url: null,
       accent_color: null,
       profile_background_color: null,
@@ -123,6 +137,10 @@ function mapProfileRow(
     practice_email: (profile.practice_email as string | null) ?? null,
     practice_website: (profile.practice_website as string | null) ?? null,
     practice_hours: (profile.practice_hours as string | null) ?? null,
+    practice_subtitle: (profile.practice_subtitle as string | null) ?? null,
+    profile_credentials: parseProfileCredentials(profile.profile_credentials),
+    profile_personal_approach: (profile.profile_personal_approach as string | null) ?? null,
+    profile_career_path: parseProfileCareerPath(profile.profile_career_path),
     logo_url: (profile.logo_url as string | null) ?? null,
     accent_color: (profile.accent_color as string | null) ?? null,
     profile_background_color: (profile.profile_background_color as string | null) ?? null,
@@ -131,7 +149,7 @@ function mapProfileRow(
 }
 
 const PUBLIC_PROFILE_FIELDS =
-  "display_name, title, photo_url, vita_markdown, services, first_name, last_name, founding_year, specializations, services_structured, practice_name, practice_address, practice_employment_status, practice_phone, practice_email, practice_website, practice_hours, logo_url, accent_color, profile_background_color, appointment_link" as const;
+  "display_name, title, photo_url, vita_markdown, services, first_name, last_name, founding_year, specializations, services_structured, practice_name, practice_address, practice_employment_status, practice_phone, practice_email, practice_website, practice_hours, practice_subtitle, profile_credentials, profile_personal_approach, profile_career_path, logo_url, accent_color, profile_background_color, appointment_link" as const;
 
 export async function getPublicProfileBySlug(
   slug: string
