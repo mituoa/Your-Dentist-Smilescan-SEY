@@ -225,6 +225,7 @@ export async function sendRelayMessage(
 /** Neue interne Nachricht: Direktgespräch starten oder fortsetzen und erste Nachricht senden. */
 export async function sendRelayMessageToRecipient(input: {
   recipientUserId?: string;
+  recipientUserIds?: string[];
   assignAllTeam?: boolean;
   body: string;
   submissionId?: string | null;
@@ -265,7 +266,27 @@ export async function sendRelayMessageToRecipient(input: {
     return { ok: true, conversationId: group.conversationId };
   }
 
-  const recipientId = input.recipientUserId?.trim();
+  const multiIds = Array.from(
+    new Set((input.recipientUserIds ?? []).map((id) => id.trim()).filter(Boolean))
+  ).filter((id) => id !== user.id);
+
+  if (multiIds.length > 1) {
+    const fd = new FormData();
+    fd.set("title", "Übergabe");
+    for (const id of multiIds) {
+      fd.append("member_ids[]", id);
+    }
+    if (input.submissionId) fd.set("submission_id", input.submissionId);
+    const group = await createGroupConversation(fd);
+    if (group.error || !group.conversationId) {
+      return { error: group.error ?? "Nachricht konnte nicht gesendet werden." };
+    }
+    const sent = await sendRelayMessage(group.conversationId, trimmed);
+    if (sent.error) return { error: sent.error };
+    return { ok: true, conversationId: group.conversationId };
+  }
+
+  const recipientId = (multiIds[0] ?? input.recipientUserId)?.trim();
   if (!recipientId) {
     return { error: "Bitte wählen Sie einen Empfänger." };
   }

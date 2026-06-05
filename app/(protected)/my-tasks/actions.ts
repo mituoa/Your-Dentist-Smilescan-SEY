@@ -138,7 +138,8 @@ async function resolveActorWorkspace(): Promise<
 
 /** Mitgliederliste für das Modal „Neue Aufgabe“ (geschützter Arbeitsbereich). */
 export async function fetchAssignableMembersForTaskCreate(): Promise<
-  { ok: true; members: AssignableMember[] } | { ok: false; error: string }
+  | { ok: true; members: AssignableMember[]; currentUserId: string }
+  | { ok: false; error: string }
 > {
   const actor = await resolveActorWorkspace();
   if (!actor.ok) return { ok: false, error: actor.error.error };
@@ -146,7 +147,7 @@ export async function fetchAssignableMembersForTaskCreate(): Promise<
     actor.workspace.workspace_id,
     actor.user.id
   );
-  return { ok: true, members };
+  return { ok: true, members, currentUserId: actor.user.id };
 }
 
 export async function createMyTask(formData: FormData): Promise<{
@@ -216,6 +217,7 @@ export async function createMyTask(formData: FormData): Promise<{
           : "";
   const assignAllTeam = formData.get("assign_all_team") === "true";
   const assignToMe = formData.get("assign_to_me") === "true";
+  const assignToDoctor = formData.get("assign_to_doctor") === "true";
   const specificRecipientId =
     (formData.get("specific_recipient_id") as string | null) || null;
   const specificRecipientIds = Array.from(
@@ -258,10 +260,16 @@ export async function createMyTask(formData: FormData): Promise<{
     return { error: "Bitte wählen Sie entweder alle Mitarbeitenden oder konkrete Personen." };
   }
 
-  const recipientType = assignAllTeam ? "all_team" : "specific_person";
+  let recipientType: "doctor_only" | "all_team" | "specific_person" = assignAllTeam
+    ? "all_team"
+    : "specific_person";
+
+  if (assignToDoctor) {
+    recipientType = "doctor_only";
+  }
 
   if (
-    !assignAllTeam &&
+    recipientType === "specific_person" &&
     !assignToMe &&
     specificRecipientIds.length === 0 &&
     (!specificRecipientId || specificRecipientId.trim().length === 0)
@@ -270,7 +278,7 @@ export async function createMyTask(formData: FormData): Promise<{
   }
 
   const normalizedSpecificRecipientIds =
-    !assignAllTeam
+    recipientType === "specific_person"
       ? specificRecipientIds.length > 0
         ? specificRecipientIds
         : specificRecipientId

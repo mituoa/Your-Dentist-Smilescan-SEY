@@ -60,7 +60,7 @@ export function WorkspaceHeaderControls({
 
       <div className="yd-dash-header-premium__actions">
         <Link
-          href="/relay?panel=messages"
+          href="/relay?section=handoffs"
           className="yd-dash-header-premium__action"
           aria-label="Team-Nachrichten in Relay"
           title="Team-Nachrichten (Relay)"

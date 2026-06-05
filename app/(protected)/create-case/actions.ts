@@ -229,6 +229,14 @@ export async function createPracticeCase(input: {
     return { error: "Bitte geben Sie den Namen des Patienten ein." };
   }
 
+  if (!input.isDraft && !emailTrim) {
+    return { error: "Bitte geben Sie die E-Mail-Adresse des Patienten ein." };
+  }
+
+  if (!input.isDraft && !phoneTrim) {
+    return { error: "Bitte geben Sie die Telefonnummer des Patienten ein." };
+  }
+
   if (input.isDraft && !nameTrim && !notesTrim) {
     return {
       error:

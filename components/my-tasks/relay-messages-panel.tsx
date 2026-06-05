@@ -13,7 +13,7 @@ import {
 import { NewRelayMessageModal } from "@/components/my-tasks/new-relay-message-modal";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayConversationRow, RelayMessageRow } from "@/lib/queries/relay-messages";
-import { RelayHandoffReadBlock } from "@/components/my-tasks/relay-handoff-read-block";
+import { RelayReadStatusCompact } from "@/components/my-tasks/relay-read-status-compact";
 import { formatRelayMessageTimestamp } from "@/lib/relay/read-receipt-display";
 import { cn } from "@/lib/utils";
 
@@ -87,7 +87,7 @@ export function RelayMessagesPanel({
   }, [activeId, loadThread]);
 
   const openConversation = (id: string) => {
-    router.replace(`/relay?panel=messages&conversation=${id}`, { scroll: false });
+    router.replace(`/relay?section=handoffs&conversation=${id}`, { scroll: false });
   };
 
   const handleSend = () => {
@@ -113,15 +113,27 @@ export function RelayMessagesPanel({
             <p className="relay-messages-list-title">Praxisübergaben</p>
             <p className="relay-messages-list-sub">Intern · mit Lesebestätigung</p>
           </div>
-          <button
-            type="button"
-            className="relay-messages-new-btn"
-            onClick={() => setNewMessageOpen(true)}
-          >
-            <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-            Neu
-          </button>
+          {!newMessageOpen ? (
+            <button
+              type="button"
+              className="relay-messages-new-btn"
+              onClick={() => setNewMessageOpen(true)}
+            >
+              <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+              Neu
+            </button>
+          ) : null}
         </div>
+
+        {newMessageOpen ? (
+          <NewRelayMessageModal
+            open={newMessageOpen}
+            onClose={() => setNewMessageOpen(false)}
+            assignableMembers={assignableMembers}
+            currentUserId={currentUserId}
+            variant="inline"
+          />
+        ) : null}
 
         {conversations.length === 0 ? (
           <div className="relay-messages-empty">
@@ -221,7 +233,7 @@ export function RelayMessagesPanel({
                         {m.is_own ? "Ihre Übergabe" : senderDisplayName(m.sender_email)}
                       </p>
                       <p className="relay-handoff-entry__body">{m.body}</p>
-                      <RelayHandoffReadBlock
+                      <RelayReadStatusCompact
                         receipts={m.read_receipts}
                         isGroup={m.is_group_thread}
                       />
@@ -267,12 +279,6 @@ export function RelayMessagesPanel({
         )}
       </section>
 
-      <NewRelayMessageModal
-        open={newMessageOpen}
-        onClose={() => setNewMessageOpen(false)}
-        assignableMembers={assignableMembers}
-        currentUserId={currentUserId}
-      />
     </div>
   );
 }

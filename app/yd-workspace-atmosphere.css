@@ -238,14 +238,14 @@
 }
 
 .yd-workspace .yd-relay .yd-relay-work-table tbody tr td {
-  padding-top: 0.875rem;
-  padding-bottom: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
 }
 
 @media (min-width: 768px) {
   .yd-workspace .yd-relay .yd-relay-work-table tbody tr td {
-    padding-top: 0.9375rem;
-    padding-bottom: 0.9375rem;
+    padding-top: 0.6875rem;
+    padding-bottom: 0.6875rem;
   }
 }
 

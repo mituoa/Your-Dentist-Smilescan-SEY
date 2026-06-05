@@ -26,7 +26,8 @@ export function createTaskFromQuery(pathname: string): string {
   const p = pathname || "";
   if (p === "/dashboard" || p.startsWith("/dashboard/")) return "dashboard";
   if (p.startsWith("/inbox")) return "inbox";
-  if (p.startsWith("/relay") || p.startsWith("/my-tasks")) return "my-tasks";
+  if (p.startsWith("/relay")) return "relay";
+  if (p.startsWith("/my-tasks")) return "my-tasks";
   if (p.startsWith("/journal")) return "journal";
   if (p === "/settings" || p.startsWith("/settings/")) return "settings";
   return "my-tasks";

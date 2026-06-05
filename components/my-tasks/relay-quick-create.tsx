@@ -1,68 +1,184 @@
 "use client";
 
-import { ChevronDown, User } from "lucide-react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 
 import { createMyTask } from "@/app/(protected)/my-tasks/actions";
+import { sendRelayMessageToRecipient } from "@/app/(protected)/my-tasks/messages-actions";
 import type { AssignableMember } from "@/lib/queries/team-members";
-import { buildMemberAvatarMap, emailInitials } from "@/lib/tasks/relay-helpers";
+import type { RelayTaskCategory } from "@/lib/relay/relay-task-category";
+import {
+  defaultDomainForSection,
+  domainById,
+  relayDomainsForRole,
+} from "@/lib/relay/relay-practice-domains";
+import {
+  closeRelayQuickCreate,
+  getRelayQuickCreateState,
+  getRelayQuickCreateVersion,
+  subscribeRelayQuickCreate,
+  type RelayQuickCreateMode,
+} from "@/lib/relay/relay-quick-create-bus";
+import type { TaskRecurrenceType } from "@/lib/tasks/recurrence";
 import { cn } from "@/lib/utils";
 
-interface RelayQuickCreateProps {
+type RelayQuickCreateProps = {
   assignableMembers: AssignableMember[];
   currentUserId: string;
-  currentUserEmail: string | null;
-}
+  isDoctor: boolean;
+  isRelay: boolean;
+};
+
+type RecipientMode = "me" | "team" | "people";
+
+const RECURRENCE_OPTIONS: { id: TaskRecurrenceType; label: string }[] = [
+  { id: "once", label: "Einmalig" },
+  { id: "weekly", label: "Wöchentlich" },
+  { id: "monthly", label: "Monatlich" },
+];
 
 export function RelayQuickCreate({
   assignableMembers,
   currentUserId,
-  currentUserEmail,
+  isDoctor,
+  isRelay,
 }: RelayQuickCreateProps) {
+  useSyncExternalStore(subscribeRelayQuickCreate, getRelayQuickCreateVersion, getRelayQuickCreateVersion);
+
+  const bus = getRelayQuickCreateState();
+  if (!bus.open || !bus.anchor) return null;
+
+  return (
+    <RelayQuickCreatePopover
+      key={`${bus.section}-${bus.preferredMode}-${bus.anchor.top}`}
+      anchor={bus.anchor}
+      section={bus.section}
+      initialMode={bus.preferredMode}
+      assignableMembers={assignableMembers}
+      currentUserId={currentUserId}
+      isDoctor={isDoctor}
+      isRelay={isRelay}
+      onClose={closeRelayQuickCreate}
+    />
+  );
+}
+
+function RelayQuickCreatePopover({
+  anchor,
+  section,
+  initialMode,
+  assignableMembers,
+  currentUserId,
+  isDoctor,
+  isRelay,
+  onClose,
+}: {
+  anchor: { top: number; left: number; right: number; bottom: number; width: number };
+  section: "operations" | "routines" | "handoffs";
+  initialMode: RelayQuickCreateMode;
+  assignableMembers: AssignableMember[];
+  currentUserId: string;
+  isDoctor: boolean;
+  isRelay: boolean;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const formId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [line, setLine] = useState("");
-  const [focused, setFocused] = useState(false);
-  const [important, setImportant] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [assignAll, setAssignAll] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<RelayQuickCreateMode>(initialMode);
 
-  const avatarMap = buildMemberAvatarMap(assignableMembers);
-  const selfInitials = currentUserEmail ? emailInitials(currentUserEmail) : "Ich";
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [domainId, setDomainId] = useState<RelayTaskCategory>(defaultDomainForSection(section));
+  const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState<"normal" | "high">("normal");
+  const [recurrence, setRecurrence] = useState<TaskRecurrenceType>(
+    section === "routines" ? "weekly" : "once"
+  );
+  const [patientRef, setPatientRef] = useState("");
+  const [submissionId, setSubmissionId] = useState("");
+  const [assignMode, setAssignMode] = useState<RecipientMode>("me");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const [messageBody, setMessageBody] = useState("");
+  const [msgRecipientMode, setMsgRecipientMode] = useState<"person" | "people" | "team">("person");
+  const [msgRecipientId, setMsgRecipientId] = useState("");
+  const [msgRecipientIds, setMsgRecipientIds] = useState<string[]>([]);
+  const [msgSubmissionId, setMsgSubmissionId] = useState("");
+  const [msgPatientRef, setMsgPatientRef] = useState("");
+  const [msgDomainId, setMsgDomainId] = useState<RelayTaskCategory>(defaultDomainForSection(section));
+
+  const domains = relayDomainsForRole(isDoctor);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isPending) onClose();
+    };
+    const onClick = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node) && !isPending) {
+        onClose();
       }
     };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onClick);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClick);
+    };
+  }, [isPending, onClose]);
 
-  const toggleMember = (id: string) => {
-    setAssignAll(false);
+  const panelWidth = 400;
+  const left = Math.min(
+    Math.max(12, anchor.right - panelWidth),
+    typeof window !== "undefined" ? window.innerWidth - panelWidth - 12 : anchor.right - panelWidth
+  );
+  const top = anchor.bottom + 8;
+
+  const toggleMsgMember = (id: string) => {
+    setMsgRecipientIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleTaskMember = (id: string) => {
+    setAssignMode("people");
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  const submit = () => {
-    const content = line.trim();
-    if (!content) return;
+  const submitTask = () => {
+    const titleTrim = title.trim();
+    if (!titleTrim) {
+      setError("Bitte geben Sie einen Titel an.");
+      return;
+    }
     setError(null);
+    const domain = domainById(domainId);
+    const descParts = [`Bereich: ${domain.label}`];
+    if (description.trim()) descParts.push(description.trim());
+    if (patientRef.trim()) descParts.push(`Patient: ${patientRef.trim()}`);
+
     const fd = new FormData();
-    fd.set("content", content);
-    fd.set("title", content.length > 120 ? content.slice(0, 120) : content);
-    if (important) fd.set("is_important", "true");
-    if (assignAll) {
-      fd.set("assign_all_team", "true");
-    } else if (selectedIds.length > 0) {
-      for (const id of selectedIds) {
-        fd.append("specific_recipient_ids[]", id);
-      }
-    } else {
-      fd.set("assign_to_me", "true");
+    fd.set("task_form", "page");
+    fd.set("title", titleTrim);
+    fd.set("content", titleTrim);
+    fd.set("description", descParts.join("\n\n"));
+    fd.set("task_context", domain.taskContextKey);
+    if (dueDate.trim()) fd.set("due_date", dueDate.trim());
+    fd.set("priority_level", priority);
+    fd.set("recurrence_type", recurrence);
+    if (submissionId.trim()) fd.set("submission_id", submissionId.trim());
+    if (domain.doctorOnly) fd.set("assign_to_doctor", "true");
+    else if (assignMode === "team") fd.set("assign_all_team", "true");
+    else if (assignMode === "me") fd.set("assign_to_me", "true");
+    else {
+      for (const id of selectedIds) fd.append("specific_recipient_ids[]", id);
     }
 
     startTransition(async () => {
@@ -71,175 +187,381 @@ export function RelayQuickCreate({
         setError(result.error);
         return;
       }
-      setLine("");
-      setImportant(false);
-      setSelectedIds([]);
-      setAssignAll(false);
-      setDropdownOpen(false);
+      onClose();
+      router.refresh();
     });
   };
 
-  const showOptions = focused || dropdownOpen;
+  const submitMessage = () => {
+    if (!messageBody.trim()) {
+      setError("Bitte schreiben Sie eine Nachricht.");
+      return;
+    }
+    if (msgRecipientMode === "person" && !msgRecipientId) {
+      setError("Bitte wählen Sie einen Empfänger.");
+      return;
+    }
+    if (msgRecipientMode === "people" && msgRecipientIds.length === 0) {
+      setError("Bitte wählen Sie mindestens eine Person.");
+      return;
+    }
+    setError(null);
 
-  return (
+    const domain = domainById(msgDomainId);
+    const bodyParts: string[] = [];
+    if (msgPatientRef.trim()) bodyParts.push(`Patient: ${msgPatientRef.trim()}`);
+    bodyParts.push(`Bereich: ${domain.label}`);
+    bodyParts.push(messageBody.trim());
+    const composedBody = bodyParts.join("\n\n");
+
+    startTransition(async () => {
+      const res = await sendRelayMessageToRecipient({
+        assignAllTeam: msgRecipientMode === "team",
+        recipientUserId: msgRecipientMode === "person" ? msgRecipientId : undefined,
+        recipientUserIds: msgRecipientMode === "people" ? msgRecipientIds : undefined,
+        body: composedBody,
+        submissionId: msgSubmissionId.trim() || null,
+      });
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      onClose();
+      if (isRelay && res.conversationId) {
+        router.replace(`/relay?section=handoffs&conversation=${res.conversationId}`, { scroll: false });
+      }
+      router.refresh();
+    });
+  };
+
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      ref={wrapRef}
+      ref={panelRef}
       id="relay-quick-create"
-      className={cn(
-        "yd-clinical-control yd-relay-quick-create",
-        focused && "yd-relay-quick-create--focused"
-      )}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Schnellerfassung"
+      className="yd-relay-qc-popover"
+      style={{ top, left, width: panelWidth }}
     >
-      <input
-        type="text"
-        value={line}
-        onChange={(e) => setLine(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            if (!isPending) submit();
-          }
-        }}
-        onFocus={() => setFocused(true)}
-        onBlur={() => {
-          setTimeout(() => setFocused(false), 180);
-        }}
-        disabled={isPending}
-        placeholder="Was steht als Nächstes an?"
-        className="yd-relay-quick-create__input"
-      />
-
-      {showOptions ? (
-        <div className="yd-relay-quick-create__options">
-          <div className="relative min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={() => setDropdownOpen((o) => !o)}
-              className="flex h-10 w-full items-center gap-2 rounded-lg border border-[rgba(15,23,42,0.08)] px-3 text-left transition-colors hover:border-[rgba(43,111,232,0.15)] hover:bg-[#F4F7FB]"
-            >
-              {assignAll ? (
-                <>
-                  <User className="h-4 w-4 shrink-0 text-[#94A3B8]" />
-                  <span className="truncate text-[13px] text-[#1E293B]">Alle im Team</span>
-                </>
-              ) : selectedIds.length === 0 ? (
-                <>
-                  <div
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                    style={{ background: "#2F80ED" }}
-                    title="Dir zugewiesen"
-                  >
-                    {selfInitials.slice(0, 2)}
-                  </div>
-                  <span className="truncate text-[13px] text-[#64748B]">Dir zuweisen (Standard)</span>
-                </>
-              ) : (
-                <>
-                  <div className="flex shrink-0 -space-x-1.5">
-                    {selectedIds.slice(0, 4).map((id) => {
-                      const a = avatarMap[id];
-                      return (
-                        <div
-                          key={id}
-                          className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white text-[9px] font-semibold text-white"
-                          style={{ background: a?.color ?? "#64748B" }}
-                        >
-                          {a?.initials ?? "?"}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <span className="min-w-0 flex-1 truncate text-left text-[13px] text-[#1E293B]">
-                    {selectedIds.length} Person{selectedIds.length === 1 ? "" : "en"}
-                  </span>
-                </>
-              )}
-              <ChevronDown className="ml-auto h-3.5 w-3.5 shrink-0 text-[#94A3B8]" />
-            </button>
-
-            {dropdownOpen ? (
-              <div
-                className="absolute left-0 right-0 z-50 mt-2 max-h-56 overflow-auto rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-2 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.15)]"
-                onMouseDown={(e) => e.preventDefault()}
-              >
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F4F7FB]">
-                  <input
-                    type="radio"
-                    name="relay-assign-mode"
-                    checked={!assignAll && selectedIds.length === 0}
-                    onChange={() => {
-                      setAssignAll(false);
-                      setSelectedIds([]);
-                    }}
-                    className="h-4 w-4"
-                  />
-                  <span>Mir zuweisen</span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-[13px] hover:bg-[#F4F7FB]">
-                  <input
-                    type="radio"
-                    name="relay-assign-mode"
-                    checked={assignAll}
-                    onChange={() => {
-                      setAssignAll(true);
-                      setSelectedIds([]);
-                    }}
-                    className="h-4 w-4"
-                  />
-                  <span>An alle Mitarbeitenden</span>
-                </label>
-                <div className="my-1 border-t border-[rgba(15,23,42,0.06)]" />
-                {assignableMembers
-                  .filter((m) => m.user_id !== currentUserId)
-                  .map((m) => {
-                    const checked = selectedIds.includes(m.user_id);
-                    const a = avatarMap[m.user_id];
-                    return (
-                      <button
-                        key={m.user_id}
-                        type="button"
-                        onClick={() => {
-                          setAssignAll(false);
-                          toggleMember(m.user_id);
-                        }}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[13px] hover:bg-[#F4F7FB]"
-                      >
-                        <span
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                          style={{ background: a?.color ?? "#64748B" }}
-                        >
-                          {a?.initials ?? "?"}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate">{m.email}</span>
-                        {checked ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2F80ED]" /> : null}
-                      </button>
-                    );
-                  })}
-              </div>
-            ) : null}
-          </div>
-
+      <div className="yd-relay-qc-popover__head">
+        <div className="yd-relay-qc-popover__modes" role="tablist">
           <button
             type="button"
-            onClick={() => setImportant((v) => !v)}
-            className={cn(
-              "yd-relay-quick-create__priority",
-              important && "yd-relay-quick-create__priority--on"
-            )}
+            role="tab"
+            aria-selected={mode === "task"}
+            className={cn("yd-relay-qc-popover__mode", mode === "task" && "yd-relay-qc-popover__mode--active")}
+            onClick={() => setMode("task")}
+            disabled={isPending}
           >
-            <span className="yd-relay-quick-create__priority-dot" aria-hidden />
-            <span>Wichtig</span>
+            Praxisaufgabe
+          </button>
+          {isRelay ? (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "message"}
+              className={cn(
+                "yd-relay-qc-popover__mode",
+                mode === "message" && "yd-relay-qc-popover__mode--active"
+              )}
+              onClick={() => setMode("message")}
+              disabled={isPending}
+            >
+              Nachricht
+            </button>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          className="yd-relay-qc-popover__close"
+          onClick={onClose}
+          disabled={isPending}
+          aria-label="Schließen"
+        >
+          <X className="h-4 w-4" strokeWidth={2} />
+        </button>
+      </div>
+
+      <fieldset
+        disabled={isPending}
+        aria-busy={isPending}
+        className="yd-relay-qc-popover__body m-0 min-w-0 border-0 p-0 disabled:opacity-[0.58]"
+      >
+        {mode === "task" ? (
+          <>
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-title`}>
+              Titel
+            </label>
+            <input
+              id={`${formId}-title`}
+              className="yd-relay-qc-field__input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Kurz erfassen …"
+              autoFocus
+              maxLength={200}
+            />
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-desc`}>
+              Kontext <span className="yd-relay-qc-field__opt">optional</span>
+            </label>
+            <textarea
+              id={`${formId}-desc`}
+              className="yd-relay-qc-field__textarea"
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Nächster Schritt fürs Team …"
+            />
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-domain`}>
+              Bereich
+            </label>
+            <select
+              id={`${formId}-domain`}
+              className="yd-relay-qc-field__input"
+              value={domainId}
+              onChange={(e) => setDomainId(e.target.value as RelayTaskCategory)}
+            >
+              {domains.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+
+            <div className="yd-relay-qc-popover__grid">
+              <div>
+                <label className="yd-relay-qc-field__label" htmlFor={`${formId}-assign`}>
+                  Verantwortlich
+                </label>
+                <select
+                  id={`${formId}-assign`}
+                  className="yd-relay-qc-field__input"
+                  value={assignMode}
+                  onChange={(e) => setAssignMode(e.target.value as RecipientMode)}
+                  disabled={domainById(domainId).doctorOnly}
+                >
+                  <option value="me">Mir zuweisen</option>
+                  <option value="team">Gesamtes Team</option>
+                  <option value="people">Bestimmte Personen</option>
+                </select>
+              </div>
+              <div>
+                <label className="yd-relay-qc-field__label" htmlFor={`${formId}-due`}>
+                  Fällig <span className="yd-relay-qc-field__opt">optional</span>
+                </label>
+                <input
+                  id={`${formId}-due`}
+                  type="date"
+                  className="yd-relay-qc-field__input"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {assignMode === "people" && !domainById(domainId).doctorOnly ? (
+              <div className="yd-relay-qc-member-pick">
+                {assignableMembers
+                  .filter((m) => m.user_id !== currentUserId)
+                  .map((m) => (
+                    <label key={m.user_id} className="yd-relay-qc-member-pick__item">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(m.user_id)}
+                        onChange={() => toggleTaskMember(m.user_id)}
+                      />
+                      <span className="truncate">{m.email}</span>
+                    </label>
+                  ))}
+              </div>
+            ) : null}
+
+            <div className="yd-relay-qc-popover__grid">
+              <div>
+                <label className="yd-relay-qc-field__label" htmlFor={`${formId}-prio`}>
+                  Priorität
+                </label>
+                <select
+                  id={`${formId}-prio`}
+                  className="yd-relay-qc-field__input"
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as "normal" | "high")}
+                >
+                  <option value="normal">Normal</option>
+                  <option value="high">Hoch</option>
+                </select>
+              </div>
+              {section === "routines" ? (
+                <div>
+                  <label className="yd-relay-qc-field__label" htmlFor={`${formId}-rec`}>
+                    Rhythmus
+                  </label>
+                  <select
+                    id={`${formId}-rec`}
+                    className="yd-relay-qc-field__input"
+                    value={recurrence}
+                    onChange={(e) => setRecurrence(e.target.value as TaskRecurrenceType)}
+                  >
+                    {RECURRENCE_OPTIONS.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+            </div>
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-patient`}>
+              Patient <span className="yd-relay-qc-field__opt">optional</span>
+            </label>
+            <input
+              id={`${formId}-patient`}
+              className="yd-relay-qc-field__input"
+              value={patientRef}
+              onChange={(e) => setPatientRef(e.target.value)}
+              placeholder="Name oder Kurzbezug"
+            />
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-sub`}>
+              Tracker-Fall-ID <span className="yd-relay-qc-field__opt">optional</span>
+            </label>
+            <input
+              id={`${formId}-sub`}
+              className="yd-relay-qc-field__input"
+              value={submissionId}
+              onChange={(e) => setSubmissionId(e.target.value)}
+              placeholder="UUID des Falls"
+            />
+          </>
+        ) : (
+          <>
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-msg-to`}>
+              Empfänger
+            </label>
+            <select
+              id={`${formId}-msg-to`}
+              className="yd-relay-qc-field__input"
+              value={msgRecipientMode}
+              onChange={(e) => setMsgRecipientMode(e.target.value as "person" | "people" | "team")}
+            >
+              <option value="person">Einzelne Person</option>
+              <option value="people">Mehrere Personen</option>
+              <option value="team">Ganzes Team</option>
+            </select>
+
+            {msgRecipientMode === "person" ? (
+              <select
+                className="yd-relay-qc-field__input"
+                value={msgRecipientId}
+                onChange={(e) => setMsgRecipientId(e.target.value)}
+              >
+                <option value="">Person wählen …</option>
+                {assignableMembers
+                  .filter((m) => m.user_id !== currentUserId)
+                  .map((m) => (
+                    <option key={m.user_id} value={m.user_id}>
+                      {m.email}
+                    </option>
+                  ))}
+              </select>
+            ) : null}
+
+            {msgRecipientMode === "people" ? (
+              <div className="yd-relay-qc-member-pick">
+                {assignableMembers
+                  .filter((m) => m.user_id !== currentUserId)
+                  .map((m) => (
+                    <label key={m.user_id} className="yd-relay-qc-member-pick__item">
+                      <input
+                        type="checkbox"
+                        checked={msgRecipientIds.includes(m.user_id)}
+                        onChange={() => toggleMsgMember(m.user_id)}
+                      />
+                      <span className="truncate">{m.email}</span>
+                    </label>
+                  ))}
+              </div>
+            ) : null}
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-msg`}>
+              Nachricht
+            </label>
+            <textarea
+              id={`${formId}-msg`}
+              className="yd-relay-qc-field__textarea"
+              rows={3}
+              value={messageBody}
+              onChange={(e) => setMessageBody(e.target.value)}
+              placeholder="Interne Übergabe …"
+              autoFocus
+            />
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-msg-patient`}>
+              Patient <span className="yd-relay-qc-field__opt">optional</span>
+            </label>
+            <input
+              id={`${formId}-msg-patient`}
+              className="yd-relay-qc-field__input"
+              value={msgPatientRef}
+              onChange={(e) => setMsgPatientRef(e.target.value)}
+              placeholder="Name oder Kurzbezug"
+            />
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-msg-domain`}>
+              Praxisbereich <span className="yd-relay-qc-field__opt">optional</span>
+            </label>
+            <select
+              id={`${formId}-msg-domain`}
+              className="yd-relay-qc-field__input"
+              value={msgDomainId}
+              onChange={(e) => setMsgDomainId(e.target.value as RelayTaskCategory)}
+            >
+              {domains.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+
+            <label className="yd-relay-qc-field__label" htmlFor={`${formId}-msg-sub`}>
+              Tracker-Fall <span className="yd-relay-qc-field__opt">optional</span>
+            </label>
+            <input
+              id={`${formId}-msg-sub`}
+              className="yd-relay-qc-field__input"
+              value={msgSubmissionId}
+              onChange={(e) => setMsgSubmissionId(e.target.value)}
+            />
+          </>
+        )}
+
+        {error ? (
+          <p className="yd-relay-qc-popover__error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <div className="yd-relay-qc-popover__footer">
+          <button type="button" className="yd-relay-qc-popover__cancel" onClick={onClose} disabled={isPending}>
+            Abbrechen
+          </button>
+          <button
+            type="button"
+            className="yd-relay-qc-popover__submit"
+            disabled={isPending}
+            onClick={mode === "task" ? submitTask : submitMessage}
+          >
+            {isPending ? "Wird gespeichert …" : mode === "task" ? "Anlegen" : "Senden"}
           </button>
         </div>
-      ) : null}
-
-      {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
-
-      {line.trim() && !showOptions ? (
-        <p className="mt-2 text-[11px] text-[#94A3B8]">
-          Enter zum Speichern · in das Feld tippen für Zuweisung und Priorität
-        </p>
-      ) : null}
-    </div>
+      </fieldset>
+    </div>,
+    document.body
   );
 }

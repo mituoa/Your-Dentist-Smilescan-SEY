@@ -40,14 +40,6 @@ const URGENCY_OPTIONS = [
   { id: "not_urgent" as const, label: "Nicht dringend" },
 ];
 
-const WIZARD_STEPS = [
-  { id: 1, title: "Patient", lead: "Stammdaten des Patienten" },
-  { id: 2, title: "Anliegen", lead: "Worum geht es bei diesem Fall?" },
-  { id: 3, title: "Klinische Bilder", lead: "Fotos für die Einordnung" },
-  { id: 4, title: "Priorität", lead: "Gewünschter Zeitraum" },
-  { id: 5, title: "Prüfen & Speichern", lead: "Angaben kurz prüfen" },
-] as const;
-
 function toServerUrgency(ui: UrgencyUi | null): PracticeCaseUrgency {
   if (!ui) return null;
   return ui;
@@ -101,15 +93,15 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
   const [notes, setNotes] = useState("");
   const [urgency, setUrgency] = useState<UrgencyUi | null>(null);
   const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
-  const [step, setStep] = useState(1);
 
   const busy = isPending;
-  const activeStep = WIZARD_STEPS[step - 1]!;
 
   const patientName = `${firstName.trim()} ${lastName.trim()}`.trim();
   const notesTrim = notes.trim();
-  const canSaveFinal = patientName.length > 0;
-  const canAdvanceStep1 = lastName.trim().length > 0 || firstName.trim().length > 0;
+  const emailTrim = patientEmail.trim();
+  const phoneTrim = patientPhone.trim();
+  const canSaveFinal =
+    patientName.length > 0 && emailTrim.length > 0 && phoneTrim.length > 0;
 
   const urgencyLabel =
     urgency === "today"
@@ -258,6 +250,15 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
         }
         const patientBirthDate = flu?.ok ? flu.iso : birthIso;
 
+        if (!emailTrim) {
+          setError("Bitte geben Sie die E-Mail-Adresse des Patienten ein.");
+          return;
+        }
+        if (!phoneTrim) {
+          setError("Bitte geben Sie die Telefonnummer des Patienten ein.");
+          return;
+        }
+
         const pathsResult = await uploadFiles();
         if ("error" in pathsResult) {
           setUploadZoneError(pathsResult.error);
@@ -269,8 +270,8 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
           patientName,
           patientBirthDate,
           patientExternalId: externalId || null,
-          patientEmail: patientEmail || null,
-          patientPhone: patientPhone || null,
+          patientEmail: emailTrim,
+          patientPhone: phoneTrim,
           patientNotes: notesTrim || null,
           urgency: toServerUrgency(urgency),
           isDraft: false,
@@ -295,58 +296,26 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
     });
   };
 
-  const wizardFooter =
-    step < 5 ? (
-      <div className="yd-medical-wizard-footer">
-        <button
-          type="button"
-          className="yd-auth-btn-secondary yd-medical-form-footer__cancel"
-          disabled={busy || step <= 1}
-          onClick={() => setStep((s) => Math.max(1, s - 1))}
-        >
-          Zurück
-        </button>
-        <button
-          type="button"
-          className="yd-auth-btn-primary yd-medical-form-footer__primary"
-          disabled={busy || (step === 1 && !canAdvanceStep1)}
-          onClick={() => setStep((s) => Math.min(5, s + 1))}
-        >
-          Weiter
-        </button>
-      </div>
-    ) : (
-      <MedicalFormFooterActions
-        onCancel={close}
-        cancelDisabled={busy}
-        primaryLabel="Patientenfall anlegen"
-        primaryPendingLabel="Wird angelegt…"
-        onPrimary={submit}
-        primaryDisabled={!canSaveFinal}
-        isPending={busy}
-      />
-    );
-
   return (
     <MedicalFormShell
       title="Neuen Patientenfall anlegen"
-      subtitle={`Schritt ${step} von 5 · ${activeStep.title} — ${activeStep.lead}`}
+      subtitle="Patientenstammdaten, Anliegen und Bilder in einem Schritt — danach Bearbeitung im Tracker."
       onClose={close}
       closeDisabled={busy}
       ariaLabel="Neuen Patientenfall anlegen"
-      footer={wizardFooter}
+      footer={
+        <MedicalFormFooterActions
+          onCancel={close}
+          cancelDisabled={busy}
+          primaryLabel="Patientenfall anlegen"
+          primaryPendingLabel="Wird angelegt…"
+          onPrimary={submit}
+          primaryDisabled={!canSaveFinal}
+          isPending={busy}
+        />
+      }
     >
       <div className="yd-medical-form">
-        <div className="yd-medical-wizard-progress" aria-hidden>
-          <div
-            className="yd-medical-wizard-progress__bar"
-            style={{ width: `${((step - 1) / 4) * 100}%` }}
-          />
-        </div>
-        <p className="yd-medical-wizard-step-label">
-          Schritt {step} von 5 · {activeStep.title}
-        </p>
-
         <div ref={actionErrorBannerRef} aria-live="polite">
           {error ? (
             <p className="yd-medical-form-alert" role="alert">
@@ -360,7 +329,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
           aria-busy={busy}
           className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
         >
-          {step === 1 ? (
           <MedicalFormSection title="Patient">
             <MedicalFormFieldStack>
               <div>
@@ -416,38 +384,34 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
             </MedicalFormFieldStack>
             <MedicalFormFieldStack className="mt-4">
               <div>
-                <MedicalFormLabel htmlFor="cc-email" optional>
-                  E-Mail
-                </MedicalFormLabel>
+                <MedicalFormLabel htmlFor="cc-email">E-Mail</MedicalFormLabel>
                 <input
                   id="cc-email"
                   type="email"
                   value={patientEmail}
                   onChange={(e) => setPatientEmail(e.target.value)}
                   autoComplete="email"
+                  required
                   className="yd-auth-input"
                   placeholder="E-Mail-Adresse"
                 />
               </div>
               <div>
-                <MedicalFormLabel htmlFor="cc-phone" optional>
-                  Telefon
-                </MedicalFormLabel>
+                <MedicalFormLabel htmlFor="cc-phone">Telefon</MedicalFormLabel>
                 <input
                   id="cc-phone"
                   type="tel"
                   value={patientPhone}
                   onChange={(e) => setPatientPhone(e.target.value)}
                   autoComplete="tel"
+                  required
                   className="yd-auth-input"
                   placeholder="+49 …"
                 />
               </div>
             </MedicalFormFieldStack>
           </MedicalFormSection>
-          ) : null}
 
-          {step === 2 ? (
           <MedicalFormSection title="Anliegen">
             <MedicalFormLabel htmlFor="cc-notes">
               Worum geht es bei diesem Fall?
@@ -460,9 +424,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
               placeholder="Beschwerden, Verlauf und klinischer Kontext in eigenen Worten …"
             />
           </MedicalFormSection>
-          ) : null}
 
-          {step === 3 ? (
           <section ref={uploadSectionRef}>
           <MedicalFormSection title="Klinische Bilder">
             <MedicalFormUploadEmpty
@@ -541,9 +503,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
             ) : null}
           </MedicalFormSection>
           </section>
-          ) : null}
 
-          {step === 4 ? (
           <MedicalFormSection title="Priorität">
             <MedicalFormSegmented
               name="urgency"
@@ -555,10 +515,8 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
               disabled={busy}
             />
           </MedicalFormSection>
-          ) : null}
 
-          {step === 5 ? (
-          <MedicalFormSection title="Prüfen & Speichern">
+          <MedicalFormSection title="Übersicht" hint="Kurz prüfen, dann anlegen.">
             <dl className="yd-medical-review-dl">
               <div>
                 <dt>Patient</dt>
@@ -578,7 +536,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
               </div>
             </dl>
           </MedicalFormSection>
-          ) : null}
         </fieldset>
       </div>
     </MedicalFormShell>

@@ -7,11 +7,17 @@ import { resolveCreateTaskCancelHref } from "@/lib/create-task-return";
 interface NewTaskPageProps {
   searchParams: Promise<{
     from?: string;
+    mode?: string;
     submission_id?: string;
     title?: string;
     description?: string;
     due_date?: string;
   }>;
+}
+
+function resolveInitialMode(raw: string | undefined): "task" | "assign" | "message" {
+  if (raw === "assign" || raw === "message") return raw;
+  return "task";
 }
 
 export default async function NewPraxisTaskPage({ searchParams }: NewTaskPageProps) {
@@ -28,6 +34,7 @@ export default async function NewPraxisTaskPage({ searchParams }: NewTaskPagePro
     >
       <CreatePraxisTaskPageClient
         cancelHref={cancelHref}
+        initialMode={resolveInitialMode(sp.mode)}
         submissionId={sp.submission_id?.trim() || null}
         initialTitle={sp.title?.trim() || ""}
         initialDescription={sp.description?.trim() || ""}

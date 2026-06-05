@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { sendRelayMessageToRecipient } from "@/app/(protected)/my-tasks/messages-actions";
 import type { AssignableMember } from "@/lib/queries/team-members";
+
 type AssignMode = "person" | "all";
 
 type NewRelayMessageModalTriggerProps = {
@@ -50,17 +51,24 @@ type NewRelayMessageModalProps = {
   onClose: () => void;
   assignableMembers?: AssignableMember[];
   currentUserId?: string;
+  /** Inline panel at trigger site — no fullscreen overlay. */
+  variant?: "modal" | "inline";
 };
 
-export function NewRelayMessageModal({
-  open,
+function RelayMessageCreateForm({
+  titleId,
   onClose,
   assignableMembers: membersProp,
   currentUserId,
-}: NewRelayMessageModalProps) {
+  inline,
+}: {
+  titleId: string;
+  onClose: () => void;
+  assignableMembers?: AssignableMember[];
+  currentUserId?: string;
+  inline?: boolean;
+}) {
   const router = useRouter();
-  const titleId = useId();
-  const [mounted, setMounted] = useState(false);
   const [assignMode, setAssignMode] = useState<AssignMode>("person");
   const [recipientId, setRecipientId] = useState("");
   const [body, setBody] = useState("");
@@ -68,10 +76,7 @@ export function NewRelayMessageModal({
   const [isPending, startTransition] = useTransition();
   const [members, setMembers] = useState<AssignableMember[]>(membersProp ?? []);
 
-  useEffect(() => setMounted(true), []);
-
   useEffect(() => {
-    if (!open) return;
     setError(null);
     if (membersProp?.length) {
       setMembers(membersProp);
@@ -82,9 +87,7 @@ export function NewRelayMessageModal({
         if (res.ok && res.members) setMembers(res.members);
       });
     });
-  }, [open, membersProp]);
-
-  if (!open || !mounted) return null;
+  }, [membersProp]);
 
   const submit = () => {
     setError(null);
@@ -102,46 +105,64 @@ export function NewRelayMessageModal({
       setBody("");
       setRecipientId("");
       if (res.conversationId) {
-        router.replace(`/relay?panel=messages&conversation=${res.conversationId}`);
+        router.replace(`/relay?section=handoffs&conversation=${res.conversationId}`);
       }
       router.refresh();
     });
   };
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[200] flex items-end justify-center bg-[rgba(15,23,42,0.35)] p-0 sm:items-center sm:p-4"
-      role="presentation"
-      onClick={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="yd-clinical-control max-h-[min(92dvh,640px)] w-full overflow-y-auto rounded-t-[20px] border border-[rgba(15,23,42,0.08)] bg-white p-5 shadow-xl sm:max-w-lg sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h2 id={titleId} className="text-[17px] font-semibold text-[#0F172A]">
-              Neue Übergabe
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F8FAFC]"
-            aria-label="Schließen"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+  const shellClass = inline
+    ? "yd-relay-message-create-panel"
+    : "yd-clinical-control max-h-[min(92dvh,640px)] w-full overflow-y-auto rounded-t-[20px] border border-[rgba(15,23,42,0.08)] bg-white p-5 shadow-xl sm:max-w-lg sm:rounded-2xl";
 
-        <label htmlFor="relay-recipient" className="mb-1.5 block text-[12px] font-medium text-[#64748B]">
+  return (
+    <div
+      role="dialog"
+      aria-modal={inline ? undefined : true}
+      aria-labelledby={titleId}
+      className={shellClass}
+      onClick={inline ? undefined : (e) => e.stopPropagation()}
+    >
+      <div className={inline ? "yd-relay-create-panel__head" : "mb-4 flex items-start justify-between gap-3"}>
+        <div>
+          <h2
+            id={titleId}
+            className={inline ? "yd-relay-create-panel__title" : "text-[17px] font-semibold text-[#0F172A]"}
+          >
+            Neue Übergabe
+          </h2>
+          {inline ? (
+            <p className="yd-relay-create-panel__hint">Interne Nachricht — Empfänger und Text in einem Schritt.</p>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isPending}
+          className={
+            inline
+              ? "yd-relay-create-panel__close"
+              : "flex h-10 w-10 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F8FAFC]"
+          }
+          aria-label="Schließen"
+        >
+          <X className={inline ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2} />
+        </button>
+      </div>
+
+      <fieldset
+        disabled={isPending}
+        aria-busy={isPending}
+        className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
+      >
+        <label
+          htmlFor={`${titleId}-recipient`}
+          className={inline ? "yd-relay-create-panel__label" : "mb-1.5 block text-[12px] font-medium text-[#64748B]"}
+        >
           Empfänger
         </label>
         <select
-          id="relay-recipient"
+          id={`${titleId}-recipient`}
           value={assignMode === "all" ? "__all__" : recipientId}
           onChange={(e) => {
             const v = e.target.value;
@@ -154,7 +175,11 @@ export function NewRelayMessageModal({
             }
           }}
           disabled={isPending}
-          className="mb-4 w-full rounded-lg border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 text-[14px] text-[#0F172A]"
+          className={
+            inline
+              ? "yd-relay-create-panel__input mb-3"
+              : "mb-4 w-full rounded-lg border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 text-[14px] text-[#0F172A]"
+          }
         >
           <option value="">Empfänger wählen …</option>
           <option value="__all__">Gesamtes Team</option>
@@ -167,41 +192,102 @@ export function NewRelayMessageModal({
             ))}
         </select>
 
-        <label className="mb-1.5 block text-[12px] font-medium text-[#64748B]">Nachricht</label>
+        <label
+          htmlFor={`${titleId}-body`}
+          className={inline ? "yd-relay-create-panel__label" : "mb-1.5 block text-[12px] font-medium text-[#64748B]"}
+        >
+          Nachricht
+        </label>
         <textarea
+          id={`${titleId}-body`}
           value={body}
           onChange={(e) => setBody(e.target.value)}
           disabled={isPending}
-          rows={4}
+          rows={inline ? 3 : 4}
           placeholder="Interne Übergabe formulieren …"
-          className="mb-4 w-full resize-none rounded-lg border border-[rgba(15,23,42,0.08)] px-3 py-2.5 text-[15px] text-[#0F172A] placeholder:text-[#94A3B8]"
+          className={
+            inline
+              ? "yd-relay-create-panel__textarea mb-3"
+              : "mb-4 w-full resize-none rounded-lg border border-[rgba(15,23,42,0.08)] px-3 py-2.5 text-[15px] text-[#0F172A] placeholder:text-[#94A3B8]"
+          }
         />
 
-        {error ? <p className="mb-3 text-[13px] text-[#991B1B]">{error}</p> : null}
+        {error ? (
+          <p className={inline ? "yd-relay-create-panel__error" : "mb-3 text-[13px] text-[#991B1B]"} role="alert">
+            {error}
+          </p>
+        ) : null}
 
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div
+          className={
+            inline
+              ? "yd-relay-create-panel__footer yd-relay-create-panel__footer--end"
+              : "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
+          }
+        >
           <button
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="min-h-[2.75rem] rounded-xl border border-[rgba(15,23,42,0.08)] px-4 text-[14px] font-medium text-[#475569]"
+            className={
+              inline
+                ? "yd-relay-create-panel__cancel"
+                : "min-h-[2.75rem] rounded-xl border border-[rgba(15,23,42,0.08)] px-4 text-[14px] font-medium text-[#475569]"
+            }
           >
             Abbrechen
           </button>
           <button
             type="button"
-            disabled={
-              isPending ||
-              !body.trim() ||
-              (assignMode === "person" && !recipientId)
-            }
+            disabled={isPending || !body.trim() || (assignMode === "person" && !recipientId)}
             onClick={submit}
-            className="min-h-[2.75rem] rounded-xl bg-[#2563EB] px-4 text-[14px] font-semibold text-white disabled:opacity-50"
+            className={
+              inline
+                ? "yd-relay-create-panel__submit"
+                : "min-h-[2.75rem] rounded-xl bg-[#2563EB] px-4 text-[14px] font-semibold text-white disabled:opacity-50"
+            }
           >
             {isPending ? "Wird gesendet …" : "Senden"}
           </button>
         </div>
-      </div>
+      </fieldset>
+    </div>
+  );
+}
+
+export function NewRelayMessageModal({
+  open,
+  onClose,
+  assignableMembers: membersProp,
+  currentUserId,
+  variant = "modal",
+}: NewRelayMessageModalProps) {
+  const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!open || !mounted) return null;
+
+  const form = (
+    <RelayMessageCreateForm
+      titleId={titleId}
+      onClose={onClose}
+      assignableMembers={membersProp}
+      currentUserId={currentUserId}
+      inline={variant === "inline"}
+    />
+  );
+
+  if (variant === "inline") return form;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-end justify-center bg-[rgba(15,23,42,0.35)] p-0 sm:items-center sm:p-4"
+      role="presentation"
+      onClick={onClose}
+    >
+      {form}
     </div>,
     document.body
   );
