@@ -585,8 +585,15 @@ a.yd-carree-hero__contact-value:hover {
 
   .yd-carree-hero--compact .yd-carree-hero__watermark {
     padding-left: 0;
-    justify-content: flex-end;
     padding-right: 4%;
+    padding-bottom: 12%;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__watermark-logo,
+  .yd-carree-hero--compact .yd-carree-hero__watermark-letters {
+    transform: translateY(-0.35rem);
   }
 
   .yd-carree-hero--compact .yd-carree-hero__watermark-svg,
@@ -695,6 +702,10 @@ a.yd-carree-hero__contact-value:hover {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--yd-carree-gold);
+}
+
+.yd-carree-profile__section-label--split span + span::before {
+  content: " ";
 }
 
 .yd-carree-profile__section-title {
@@ -1354,6 +1365,7 @@ a.yd-carree-hero__contact-value:hover {
   .yd-carree-hero--compact .yd-carree-hero__watermark {
     padding-left: 0;
     padding-right: 6%;
+    padding-bottom: 14%;
     justify-content: flex-end;
     align-items: flex-end;
     opacity: 0.85;
@@ -1362,11 +1374,13 @@ a.yd-carree-hero__contact-value:hover {
   .yd-carree-hero--compact .yd-carree-hero__watermark-letters {
     opacity: 0.28;
     font-size: clamp(7.5rem, 44vw, 11rem);
+    transform: translateY(-0.4rem);
   }
 
   .yd-carree-hero--compact .yd-carree-hero__watermark-logo {
     width: clamp(7rem, 40vw, 10rem);
     opacity: 0.08;
+    transform: translateY(-0.4rem);
   }
 
   .yd-carree-hero--compact .yd-carree-hero__contact-chips {

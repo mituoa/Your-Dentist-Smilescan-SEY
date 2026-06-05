@@ -1,11 +1,11 @@
 /**
- * Settings — Team & Benutzer (editorial Carree-Niveau)
+ * Settings — Team cards (Clinical Brand)
  */
 
 .yd-settings-team-grid {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .yd-settings-team-card {
@@ -14,9 +14,10 @@
   grid-template-columns: minmax(0, 1fr) 7.5rem;
   gap: 1rem;
   padding: 1.35rem 1.25rem 1.35rem 1.5rem;
-  border-radius: 2px;
-  background: #f2efe9;
-  border: 1px solid rgba(26, 26, 26, 0.06);
+  border-radius: var(--yd-brand-card-radius, 14px);
+  background: var(--yd-brand-card-bg);
+  border: 1px solid var(--yd-brand-border-soft);
+  box-shadow: var(--yd-brand-card-shadow);
   overflow: hidden;
 }
 
@@ -29,9 +30,13 @@
 }
 
 .yd-settings-team-card--pending {
-  background: linear-gradient(165deg, #f5f2ec 0%, #eeeadf 100%);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 252, 255, 0.92) 100%
+  );
   border-style: dashed;
-  border-color: rgba(26, 26, 26, 0.1);
+  border-color: var(--yd-brand-border);
 }
 
 .yd-settings-team-card__main {
@@ -44,8 +49,8 @@
   margin: 0 0 0.65rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  color: rgba(26, 26, 26, 0.42);
+  letter-spacing: 0.12em;
+  color: var(--yd-brand-faint);
   font-variant-numeric: tabular-nums;
 }
 
@@ -53,7 +58,7 @@
   width: 100%;
   height: 1px;
   margin: 0 0 1rem;
-  background: rgba(26, 26, 26, 0.1);
+  background: var(--yd-brand-border-soft);
   border: none;
 }
 
@@ -65,7 +70,7 @@
   font-style: italic;
   letter-spacing: -0.01em;
   line-height: 1.25;
-  color: #9a7b4f;
+  color: var(--yd-brand-accent-deep);
 }
 
 @media (min-width: 520px) {
@@ -78,9 +83,9 @@
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   line-height: 1.35;
-  color: #1a1a1a;
+  color: var(--yd-brand-navy);
   text-transform: uppercase;
 }
 
@@ -95,13 +100,13 @@
   font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.45;
-  color: rgba(26, 26, 26, 0.55);
+  color: var(--yd-brand-muted);
 }
 
 .yd-settings-team-card__meta {
   margin-top: 1.1rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(26, 26, 26, 0.08);
+  border-top: 1px solid var(--yd-brand-border-soft);
   display: grid;
   gap: 0.55rem;
 }
@@ -116,175 +121,167 @@
 .yd-settings-team-card__meta-label {
   font-size: 0.625rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #9a7b4f;
+  color: var(--yd-brand-faint);
 }
 
 .yd-settings-team-card__meta-value {
-  font-size: 0.8125rem;
-  font-weight: 400;
+  font-size: 0.75rem;
+  font-weight: 500;
   line-height: 1.4;
-  color: #1a1a1a;
-  word-break: break-word;
+  color: var(--yd-brand-body);
 }
 
 .yd-settings-team-card__meta-value--muted {
-  color: rgba(26, 26, 26, 0.45);
+  color: var(--yd-brand-muted);
 }
 
 .yd-settings-team-card__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 0.85rem;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .yd-settings-team-card__action {
-  padding: 0;
-  border: none;
-  background: transparent;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--yd-brand-border-soft);
+  border-radius: 8px;
+  background: var(--yd-brand-ivory);
   font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: rgba(26, 26, 26, 0.38);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-weight: 600;
+  color: var(--yd-brand-muted);
   cursor: pointer;
-  transition: color 140ms ease;
+  transition: border-color 160ms ease, color 160ms ease;
 }
 
 .yd-settings-team-card__action:hover:not(:disabled) {
-  color: rgba(26, 26, 26, 0.62);
+  border-color: rgba(26, 79, 156, 0.28);
+  color: var(--yd-brand-accent-deep);
 }
 
 .yd-settings-team-card__action:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .yd-settings-team-card__portrait {
   position: relative;
-  align-self: end;
+  align-self: start;
+  justify-self: end;
   width: 100%;
-  min-height: 6.5rem;
-  margin-bottom: -0.25rem;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  pointer-events: none;
+  max-width: 7.5rem;
 }
 
 @media (min-width: 520px) {
   .yd-settings-team-card__portrait {
-    min-height: 8.5rem;
+    max-width: 9.5rem;
   }
 }
 
 .yd-settings-team-card__portrait-frame {
-  position: relative;
-  width: 100%;
-  max-width: 7.5rem;
-  aspect-ratio: 4 / 5;
-  border-radius: 1px;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
   overflow: hidden;
-  background: linear-gradient(180deg, #e8e4dc 0%, #d8d2c6 100%);
-  box-shadow: 0 8px 28px rgba(26, 26, 26, 0.08);
+  background: var(--yd-brand-stone);
+  border: 1px solid var(--yd-brand-border-soft);
 }
 
 .yd-settings-team-card__portrait-initials {
-  position: absolute;
-  inset: 0;
   display: flex;
+  height: 100%;
   align-items: center;
   justify-content: center;
   font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.75rem;
   font-weight: 400;
-  letter-spacing: 0.06em;
-  color: rgba(26, 26, 26, 0.22);
+  color: var(--yd-brand-faint);
 }
 
 .yd-settings-team-card__portrait-pending {
-  position: absolute;
-  inset: 0;
   display: flex;
+  height: 100%;
   align-items: center;
   justify-content: center;
   font-size: 0.625rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(26, 26, 26, 0.28);
+  color: var(--yd-brand-muted);
 }
 
 .yd-settings-team-card__badge-you {
-  display: inline-block;
-  margin-left: 0.35rem;
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: var(--yd-brand-navy);
   font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #9a7b4f;
-  vertical-align: middle;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fff;
 }
 
 .yd-settings-team-invite-panel {
-  margin-top: 2rem;
-  padding: 1.5rem 1.5rem 1.65rem;
-  border-radius: 2px;
-  background: #faf8f4;
-  border: 1px solid rgba(26, 26, 26, 0.06);
+  margin-top: 1rem;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--yd-brand-border-soft);
+  border-radius: var(--yd-brand-card-radius, 14px);
+  background: var(--yd-brand-card-bg);
+  box-shadow: var(--yd-brand-card-shadow);
 }
 
 .yd-settings-team-invite-panel__label {
   display: block;
-  margin-bottom: 0.75rem;
-  font-size: 0.625rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #9a7b4f;
+  color: var(--yd-brand-muted);
 }
 
 .yd-settings-team-invite-panel__input,
 .yd-settings-team-invite-panel__select {
   width: 100%;
-  margin-bottom: 0.75rem;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(26, 26, 26, 0.08);
-  border-radius: 2px;
-  background: #f2efe9;
-  font-size: 0.9375rem;
-  color: #1a1a1a;
+  min-height: 2.5rem;
+  margin-bottom: 0.65rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--yd-brand-border-soft);
+  border-radius: 10px;
+  background: var(--yd-brand-ivory);
+  font-size: 0.875rem;
+  color: var(--yd-brand-ink);
+  outline: none;
 }
 
 .yd-settings-team-invite-panel__input:focus,
 .yd-settings-team-invite-panel__select:focus {
-  outline: none;
-  border-color: rgba(154, 123, 79, 0.45);
+  border-color: rgba(26, 79, 156, 0.35);
+  box-shadow: 0 0 0 3px rgba(22, 61, 122, 0.1);
 }
 
 .yd-settings-team-invite-panel__submit {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid rgba(26, 26, 26, 0.14);
-  border-radius: 2px;
-  background: #1a1a1a;
+  min-height: 2.5rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--yd-brand-navy);
   font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: #f2efe9;
+  font-weight: 600;
+  color: #fff;
   cursor: pointer;
-  transition: background 140ms ease, opacity 140ms ease;
+  transition: background 160ms ease;
+}
+
+.yd-settings-team-invite-panel__submit:hover:not(:disabled) {
+  background: var(--yd-brand-accent-deep);
 }
 
 .yd-settings-team-invite-panel__submit:disabled {
-  background: rgba(26, 26, 26, 0.12);
-  color: rgba(26, 26, 26, 0.35);
+  opacity: 0.5;
   cursor: not-allowed;
-}
-
-.yd-settings-team-invite-panel__submit:not(:disabled):hover {
-  background: #2a2a2a;
 }

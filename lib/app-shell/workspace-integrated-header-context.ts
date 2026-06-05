@@ -47,8 +47,9 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname.startsWith("/journal")) {
     return {
       eyebrow: "Journal",
-      subtitle: "Inhalte und Praxis-Kommunikation",
+      subtitle: "Das Wissen Ihrer Praxis — Erklärungen, Nachsorge und Antworten für Patienten",
       showSearch: true,
+      hideGreeting: true,
     };
   }
   if (pathname.startsWith("/create-case")) {
@@ -61,8 +62,9 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname.startsWith("/settings")) {
     return {
       eyebrow: "Einstellungen",
-      subtitle: "Administration und Praxisprofil",
+      subtitle: "Verwalten Sie Ihre Praxis und Ihr Team",
       showSearch: false,
+      hideGreeting: true,
     };
   }
   if (pathname.startsWith("/admin")) {

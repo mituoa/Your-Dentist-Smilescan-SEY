@@ -11,8 +11,6 @@ import { LoginSubmitButton } from "@/components/auth/login-submit-button";
 import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-button";
 import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirmation-submit-button";
 import { YdAuthPending } from "@/components/auth/yd-auth-ui";
-import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
-import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { LoginRegisterCta } from "@/components/auth/login-register-cta";
 import { AUTH_LOGIN_INVALID_CREDENTIALS } from "@/lib/auth-user-facing-errors";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
@@ -186,10 +184,6 @@ export function LoginPageClient({
 
   return (
     <div className="min-w-0">
-      <div className="yd-auth-login-brand">
-          <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
-        </div>
-
       <header className="yd-auth-intro">
         <h1 className="yd-public-entry-title yd-public-entry-title--login">Anmelden</h1>
         <p className="yd-public-entry-lead yd-public-entry-lead--login">

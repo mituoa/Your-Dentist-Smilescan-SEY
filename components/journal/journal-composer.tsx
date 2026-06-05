@@ -253,7 +253,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
   };
 
   return (
-    <div className="yd-journal-composer-v6">
+    <div className="yd-journal-composer-v6 yd-clinical-brand">
       <header className="yd-journal-composer-v6__bar">
         <div className="yd-journal-composer-v6__bar-inner">
           <div className="flex min-w-0 items-center gap-3">

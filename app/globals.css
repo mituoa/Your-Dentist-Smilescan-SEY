@@ -8,6 +8,7 @@
 @import "./yd-mobile-modules.css";
 @import "./yd-mobile-sidebar.css";
 @import "./yd-mobile-v2.css";
+@import "./yd-mobile-premium.css";
 @import "./yd-inbox-workspace.css";
 @import "./yd-tracker-table.css";
 @import "./yd-tracker-v4.css";
@@ -29,7 +30,10 @@
 @import "./yd-relay-enterprise.css";
 @import "./yd-clinical-controls.css";
 @import "./yd-settings-team.css";
+@import "./yd-settings-v2.css";
 @import "./yd-carree-profile.css";
+@import "./yd-clinical-brand.css";
+@import "./yd-clinical-settings.css";
 @import "./yd-journal-v6.css";
 @import "./yd-loading.css";
 

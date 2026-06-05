@@ -1,0 +1,213 @@
+/**
+ * Settings — aligned with Login / Clinical Brand
+ */
+
+.yd-clinical-settings {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  background: var(--yd-brand-canvas-glow), var(--yd-brand-canvas);
+}
+
+.yd-clinical-settings__inner {
+  color: var(--yd-brand-ink);
+}
+
+.yd-clinical-settings__page-title {
+  margin: 2rem 0 0.35rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.75rem, 3vw, 2.125rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--yd-brand-navy);
+}
+
+.yd-clinical-settings__page-copy {
+  margin: 0 0 2rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--yd-brand-muted);
+}
+
+.yd-clinical-settings__section-title {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--yd-brand-navy);
+}
+
+.yd-clinical-settings__label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--yd-brand-muted);
+}
+
+.yd-clinical-settings__field {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  border: 1px solid var(--yd-brand-border-soft);
+  border-radius: 12px;
+  background: var(--yd-brand-card-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: var(--yd-brand-ink);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.yd-clinical-settings__field:focus-within {
+  border-color: rgba(26, 79, 156, 0.35);
+  box-shadow: 0 0 0 3px rgba(22, 61, 122, 0.1);
+}
+
+.yd-clinical-settings__input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.85rem;
+  border: none;
+  background: transparent;
+  font-size: 0.9375rem;
+  color: var(--yd-brand-ink);
+  outline: none;
+}
+
+.yd-clinical-settings__input--muted {
+  color: var(--yd-brand-muted);
+}
+
+.yd-clinical-settings__prefix {
+  flex-shrink: 0;
+  padding-left: 0.85rem;
+  font-size: 0.875rem;
+  color: var(--yd-brand-faint);
+}
+
+.yd-clinical-settings__hint {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--yd-brand-faint);
+}
+
+.yd-clinical-settings__hint--saved {
+  color: var(--yd-brand-muted);
+}
+
+.yd-clinical-settings__upload {
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--yd-brand-border);
+  border-radius: var(--yd-brand-card-radius);
+  background: var(--yd-brand-card-bg);
+  box-shadow: var(--yd-brand-card-shadow);
+  padding: 1.5rem;
+  transition: border-color 160ms ease;
+}
+
+.yd-clinical-settings__upload:hover {
+  border-color: rgba(26, 79, 156, 0.35);
+}
+
+.yd-clinical-settings__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--yd-brand-muted);
+  transition: color 160ms ease;
+}
+
+.yd-clinical-settings__link:hover {
+  color: var(--yd-brand-accent);
+}
+
+.yd-clinical-settings__ghost-btn {
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--yd-brand-muted);
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+
+.yd-clinical-settings__ghost-btn:hover:not(:disabled) {
+  color: var(--yd-brand-accent-deep);
+}
+
+.yd-clinical-settings__icon-btn {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--yd-brand-faint);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.yd-clinical-settings__icon-btn:hover {
+  background: rgba(47, 128, 237, 0.06);
+  color: var(--yd-brand-accent);
+}
+
+.yd-clinical-settings__icon-btn--active {
+  color: var(--yd-brand-accent);
+}
+
+.yd-clinical-settings__theme-btn {
+  flex: 1;
+  border: 1px solid var(--yd-brand-border-soft);
+  border-radius: 12px;
+  background: var(--yd-brand-ice);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+  text-align: left;
+  color: var(--yd-brand-muted);
+  cursor: pointer;
+}
+
+.yd-clinical-settings__theme-btn--active {
+  border-color: rgba(26, 79, 156, 0.35);
+  background: var(--yd-brand-card-bg);
+  color: var(--yd-brand-navy);
+  box-shadow: var(--yd-brand-card-shadow);
+}
+
+.yd-clinical-settings__accent {
+  position: relative;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+
+.yd-clinical-settings__accent--active {
+  border-color: var(--yd-brand-navy);
+}
+
+.yd-clinical-settings__accent-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 999px;
+  background: var(--yd-brand-navy);
+}

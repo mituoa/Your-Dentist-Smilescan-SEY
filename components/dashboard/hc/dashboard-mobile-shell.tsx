@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ChevronDown, ClipboardList, ListTodo, UserPlus } from "lucide-react";
+import {
+  BookOpen,
+  ChevronDown,
+  ClipboardList,
+  ListTodo,
+  Plus,
+  UserPlus,
+} from "lucide-react";
 
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
@@ -23,15 +30,20 @@ function MobileKpiCard({
   value,
   hint,
   icon: Icon,
+  emphasis,
 }: {
   href: string;
   title: string;
   value: string | number;
   hint: string;
   icon: typeof ClipboardList;
+  emphasis?: boolean;
 }) {
   return (
-    <Link href={href} className="yd-dash-mobile-kpi">
+    <Link
+      href={href}
+      className={`yd-dash-mobile-kpi${emphasis ? " yd-dash-mobile-kpi--emphasis" : ""}`}
+    >
       <div className="yd-dash-mobile-kpi__icon" aria-hidden>
         <Icon strokeWidth={1.65} className="h-[16px] w-[16px]" />
       </div>
@@ -78,6 +90,35 @@ export function DashboardMobileShell({
         </Link>
       ) : null}
 
+      <section className="yd-dash-mobile__actions" aria-label="Wichtigste Aktionen">
+        <div className="yd-dash-mobile-actions-grid">
+          <Link href="/inbox" className="yd-dash-mobile-action yd-dash-mobile-action--primary">
+            <ClipboardList className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
+            <span className="yd-dash-mobile-action__label">Tracker</span>
+            {unseenCount != null && unseenCount > 0 ? (
+              <span className="yd-dash-mobile-action__badge">{unseenCount > 9 ? "9+" : unseenCount}</span>
+            ) : null}
+          </Link>
+          <Link href="/relay" className="yd-dash-mobile-action">
+            <ListTodo className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
+            <span className="yd-dash-mobile-action__label">Relay</span>
+            {openTaskCount > 0 ? (
+              <span className="yd-dash-mobile-action__badge">
+                {openTaskCount > 9 ? "9+" : openTaskCount}
+              </span>
+            ) : null}
+          </Link>
+          <Link href="/journal" className="yd-dash-mobile-action">
+            <BookOpen className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
+            <span className="yd-dash-mobile-action__label">Journal</span>
+          </Link>
+          <Link href="/create-case" className="yd-dash-mobile-action">
+            <Plus className="yd-dash-mobile-action__icon" strokeWidth={1.75} aria-hidden />
+            <span className="yd-dash-mobile-action__label">Fall</span>
+          </Link>
+        </div>
+      </section>
+
       <header className="yd-dash-mobile__header">
         <p className="yd-dash-mobile__eyebrow">Praxisüberblick</p>
         <h1 className="yd-dash-mobile__title">
@@ -88,23 +129,18 @@ export function DashboardMobileShell({
         </p>
       </header>
 
-      <section className="yd-dash-mobile__kpis" aria-label="Überblick">
+      <section className="yd-dash-mobile__kpis" aria-label="Heute">
+        <p className="yd-dash-mobile__section-label">Heute</p>
         <div className="yd-dash-mobile__kpi-stack">
           <MobileKpiCard
             href="/inbox"
             title="Neue Einsendungen"
             value={unseenCount === null ? "—" : unseenCount}
-            hint="Patientenfälle zur Durchsicht"
+            hint="Zur Durchsicht im Tracker"
             icon={ClipboardList}
+            emphasis={reviewCount > 0}
           />
           <div className="yd-dash-mobile__kpi-row">
-            <MobileKpiCard
-              href="/inbox"
-              title="Aktive Fälle"
-              value={seenCount === null ? "—" : seenCount}
-              hint="Laufende Patientenprozesse"
-              icon={UserPlus}
-            />
             <MobileKpiCard
               href="/relay"
               title="Offene Aufgaben"
@@ -112,13 +148,32 @@ export function DashboardMobileShell({
               hint="Praxisworkflow"
               icon={ListTodo}
             />
+            <MobileKpiCard
+              href="/inbox"
+              title="Aktive Fälle"
+              value={seenCount === null ? "—" : seenCount}
+              hint="Laufende Prozesse"
+              icon={UserPlus}
+            />
           </div>
         </div>
       </section>
 
-      <section className="yd-dash-mobile__submissions" aria-label="Aktuelle Einsendungen">
+      <section className="yd-dash-mobile__submissions" aria-label="Patienten">
+        <p className="yd-dash-mobile__section-label">Patienten</p>
         <HcRecentTable rows={previewRows} mobileLimit={3} compactMobile />
       </section>
+
+      <Link href="/journal" className="yd-dash-mobile-journal-teaser">
+        <div className="yd-dash-mobile-journal-teaser__body">
+          <p className="yd-dash-mobile-journal-teaser__eyebrow">Praxiswissen</p>
+          <p className="yd-dash-mobile-journal-teaser__title">Journal öffnen</p>
+          <p className="yd-dash-mobile-journal-teaser__copy">
+            Antworten, Nachsorge und Erklärungen für Patienten
+          </p>
+        </div>
+        <BookOpen className="yd-dash-mobile-journal-teaser__icon" strokeWidth={1.5} aria-hidden />
+      </Link>
 
       <details className="yd-dash-fold yd-dash-mobile__fold">
         <summary className="yd-dash-fold__summary">

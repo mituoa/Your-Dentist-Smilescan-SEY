@@ -1,86 +1,183 @@
 /**
- * Journal V6 — Premium Praxisbibliothek
- * Profil-DNA: Fraunces, Cream, Gold, Ruhe — eigene Bibliotheks-Identität
+ * Journal — Wissenszentrale (Login / Startseite Farbwelt)
+ * Medical Blue oben → Ice/Ivory Mitte → dezentes Warm unten
  */
 
-.yd-journal-v6 {
-  --yd-j6-cream: #faf8f5;
-  --yd-j6-surface: #fffcfa;
-  --yd-j6-gold: #b89564;
-  --yd-j6-ink: #1a2d4a;
-  --yd-j6-muted: rgba(26, 45, 74, 0.52);
-  --yd-j6-faint: rgba(26, 45, 74, 0.34);
-  --yd-j6-border: rgba(26, 43, 74, 0.08);
-  --yd-j6-divider: rgba(26, 43, 74, 0.06);
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  background: var(--yd-j6-cream);
-  color: var(--yd-j6-ink);
-  font-family: var(--font-inter), system-ui, sans-serif;
+.yd-awaken-canvas:has(.yd-journal-v6) {
+  --yd-journal-canvas: linear-gradient(
+    168deg,
+    #eef4fa 0%,
+    #f8fbfe 46%,
+    #f1f7fc 100%
+  );
+  --yd-journal-canvas-glow:
+    radial-gradient(ellipse 88% 68% at 78% 4%, rgba(47, 128, 237, 0.1) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 50% at 8% 92%, rgba(255, 250, 244, 0.32) 0%, transparent 50%),
+    radial-gradient(ellipse 65% 50% at 14% 8%, rgba(255, 244, 232, 0.2) 0%, transparent 52%);
+
+  background: var(--yd-journal-canvas-glow), var(--yd-journal-canvas) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
-.yd-journal-v6__frame {
-  max-width: 72rem;
-  margin: 0 auto;
+.yd-awaken-canvas:has(.yd-journal-v6) > div:not(.relative) {
+  display: none;
 }
 
-/* ── Hero ── */
+.yd-awaken-canvas:has(.yd-journal-v6)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 110% 85% at 14% 92%, rgba(255, 244, 232, 0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 120% 80% at 76% 10%, rgba(47, 128, 237, 0.06) 0%, transparent 58%);
+  opacity: 0.72;
+}
+
+.yd-awaken-canvas:has(.yd-journal-v6) > .relative {
+  position: relative;
+  z-index: 1;
+}
+
+.yd-awaken-canvas:has(.yd-journal-v6) {
+  padding: 0.35rem 0.5rem 0.75rem max(0.35rem, env(safe-area-inset-left));
+}
+
+@media (min-width: 768px) {
+  .yd-awaken-canvas:has(.yd-journal-v6) {
+    padding: 0.45rem 0.75rem 1rem 0.25rem;
+  }
+}
+
+.yd-workspace main:has(.yd-journal-v6) .yd-workspace-integrated-header {
+  padding-bottom: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .yd-workspace main:has(.yd-journal-v6) .yd-workspace-integrated-header {
+    padding-bottom: 1rem;
+  }
+}
+
+/* ── Hero — ruhig, im Workspace-Rhythmus (Headline kommt aus integriertem Header) ── */
 .yd-journal-v6__hero {
-  padding: clamp(1.5rem, 3vw, 2.25rem) 0 clamp(2rem, 4vw, 2.75rem);
-  border-bottom: 1px solid var(--yd-j6-divider);
+  margin-bottom: 1.35rem;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .yd-journal-v6__eyebrow {
-  margin: 0 0 0.4rem;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 0.8125rem;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: 0.04em;
+  margin: 0 0 0.35rem;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--yd-j6-gold);
+  color: var(--yd-brand-accent-deep);
 }
 
 .yd-journal-v6__title {
   margin: 0;
   font-family: var(--font-fraunces), Georgia, serif;
-  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 1.08;
   letter-spacing: -0.03em;
-  color: var(--yd-j6-ink);
+  color: var(--yd-journal-ink);
 }
 
-.yd-journal-v6__tagline {
-  margin: 0.65rem 0 0;
-  max-width: 36ch;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: clamp(1rem, 2vw, 1.1875rem);
+.yd-journal-v6__lead {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.9375rem;
   font-weight: 400;
-  font-style: italic;
-  line-height: 1.45;
-  color: var(--yd-j6-muted);
+  line-height: 1.55;
+  color: var(--yd-journal-muted);
 }
 
-.yd-journal-v6__meta {
-  margin: 1.1rem 0 0;
+.yd-journal-v6__intro {
+  margin: 0.75rem 0 0;
+  max-width: 52ch;
+}
+
+.yd-journal-v6__intro p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--yd-journal-muted);
+}
+
+.yd-journal-v6__promise {
+  margin: 0.65rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__stats-line {
+  margin: 0;
+  max-width: 62ch;
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.55;
-  color: var(--yd-j6-faint);
+  color: var(--yd-journal-faint);
 }
 
-/* ── Body layout ── */
+.yd-journal-v6.yd-clinical-brand {
+  --yd-journal-ink: var(--yd-brand-ink);
+  --yd-journal-muted: var(--yd-brand-muted);
+  --yd-journal-faint: var(--yd-brand-faint);
+  --yd-journal-border: var(--yd-brand-border-soft);
+  --yd-journal-border-soft: rgba(180, 198, 218, 0.28);
+  --yd-journal-card: var(--yd-brand-ivory);
+  --yd-journal-accent: var(--yd-brand-accent-deep);
+  --yd-journal-warm: rgba(255, 250, 244, 0.55);
+
+  --yd-brand-canvas: var(--yd-journal-canvas, linear-gradient(168deg, #eef4fa 0%, #f8fbfe 46%, #f1f7fc 100%));
+  --yd-brand-canvas-glow: var(--yd-journal-canvas-glow, none);
+  --yd-brand-card-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(248, 252, 255, 0.96) 50%,
+    rgba(255, 253, 250, 0.94) 100%
+  );
+  --yd-brand-card-shadow:
+    0 2px 4px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.yd-journal-v6 {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  isolation: isolate;
+  background: transparent;
+  color: var(--yd-journal-ink);
+}
+
+.yd-journal-v6__frame {
+  position: relative;
+  z-index: 1;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+/* ── Layout ── */
 .yd-journal-v6__body {
   display: grid;
   gap: 2rem;
-  padding: clamp(1.5rem, 3vw, 2.25rem) 0 3rem;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1080px) {
   .yd-journal-v6__body {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 220px);
     gap: 2.5rem 3rem;
     align-items: start;
   }
@@ -89,375 +186,670 @@
 .yd-journal-v6__main {
   display: flex;
   flex-direction: column;
-  gap: 2.75rem;
+  gap: 0;
   min-width: 0;
 }
 
-/* ── Section headers ── */
-.yd-journal-v6__section-label {
-  margin: 0 0 0.35rem;
+/* Desktop-Reihenfolge: Suche → Bibliothek → Bereiche → FAQ → Entwürfe */
+.yd-journal-v6__section--search {
+  order: 0;
+  margin-bottom: 1.75rem;
+}
+
+.yd-journal-v6__section--library {
+  order: 1;
+  margin-bottom: 3rem;
+}
+
+.yd-journal-v6__section--areas {
+  order: 2;
+  margin-bottom: 3rem;
+}
+
+.yd-journal-v6__section--faq {
+  order: 3;
+  margin-bottom: 2.5rem;
+}
+
+.yd-journal-v6__section--drafts {
+  order: 4;
+  margin-bottom: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--yd-journal-border-soft);
+}
+
+/* Mobile: Entwurf → FAQ → Bereiche → Bibliothek → Entwürfe (Liste) */
+@media (max-width: 767px) {
+  .yd-journal-v6__section--resume {
+    order: 0;
+    margin-bottom: 1.25rem;
+  }
+
+  .yd-journal-v6__section--search {
+    order: 1;
+    margin-bottom: 1.25rem;
+  }
+
+  .yd-journal-v6__section--faq {
+    order: 2;
+    margin-bottom: 2rem;
+  }
+
+  .yd-journal-v6__section--areas {
+    order: 3;
+    margin-bottom: 2rem;
+  }
+
+  .yd-journal-v6__section--library {
+    order: 4;
+    margin-bottom: 1.75rem;
+  }
+
+  .yd-journal-v6__section--drafts {
+    order: 5;
+  }
+
+  .yd-journal-v6__rail {
+    display: none;
+  }
+}
+
+/* ── Suche ── */
+.yd-journal-v6__search {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--yd-journal-border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--yd-brand-ice) 88%, white);
+  box-shadow: 0 1px 4px rgba(15, 35, 58, 0.04);
+}
+
+.yd-journal-v6__search-icon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--yd-journal-ink);
+  outline: none;
+}
+
+.yd-journal-v6__search-input::placeholder {
+  color: var(--yd-journal-faint);
+}
+
+/* ── Block heads ── */
+.yd-journal-v6__block-head {
+  margin-bottom: 1.25rem;
+}
+
+.yd-journal-v6__block-head--subtle {
+  margin-bottom: 0.85rem;
+}
+
+.yd-journal-v6__block-title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.375rem, 2.6vw, 1.75rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--yd-journal-ink);
+}
+
+.yd-journal-v6__block-title--large {
+  font-size: clamp(1.625rem, 3vw, 2.125rem);
+  letter-spacing: -0.03em;
+}
+
+.yd-journal-v6__block-title--small {
+  font-size: 1.0625rem;
+  color: color-mix(in srgb, var(--yd-journal-ink) 72%, transparent);
+}
+
+.yd-journal-v6__block-copy {
+  margin: 0.45rem 0 0;
+  max-width: 48ch;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--yd-journal-muted);
+}
+
+.yd-journal-v6__block--featured {
+  padding: 0;
+}
+
+/* ── Bibliothek (Mittelpunkt) ── */
+.yd-journal-v6__library-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.yd-journal-v6__library-filters {
+  margin-bottom: 0.5rem;
+}
+
+.yd-journal-v6__filter-hint {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgba(26, 79, 156, 0.22);
+  border-radius: 999px;
+  background: rgba(47, 128, 237, 0.07);
   font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--yd-brand-accent-deep);
+  cursor: pointer;
+}
+
+.yd-journal-v6__new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--yd-journal-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 160ms ease;
+}
+
+.yd-journal-v6__new-btn:hover:not(:disabled) {
+  background: var(--yd-brand-accent-deep);
+}
+
+.yd-journal-v6__new-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.yd-journal-v6__library-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--yd-journal-border-soft);
+}
+
+.yd-journal-v6__library-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.15rem 0;
+  border: none;
+  border-bottom: 1px solid var(--yd-journal-border-soft);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 160ms ease;
+}
+
+.yd-journal-v6__library-row:hover {
+  opacity: 0.78;
+}
+
+.yd-journal-v6__library-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.yd-journal-v6__library-row-meta {
+  font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--yd-j6-gold);
+  color: var(--yd-brand-accent-deep);
 }
 
-.yd-journal-v6__section-title {
-  margin: 0 0 0.5rem;
+.yd-journal-v6__library-row-title {
+  margin: 0.35rem 0 0;
   font-family: var(--font-fraunces), Georgia, serif;
-  font-size: clamp(1.375rem, 2.5vw, 1.75rem);
+  font-size: clamp(1.0625rem, 2vw, 1.25rem);
   font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: var(--yd-j6-ink);
+  line-height: 1.32;
+  color: var(--yd-journal-ink);
 }
 
-.yd-journal-v6__section-copy {
-  margin: 0 0 1.25rem;
-  max-width: 48ch;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--yd-j6-muted);
+.yd-journal-v6__library-row-sub {
+  margin: 0.3rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--yd-journal-faint);
 }
 
-/* ── Themenbereiche ── */
+.yd-journal-v6__library-row-thumb {
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--yd-journal-border-soft);
+}
+
+.yd-journal-v6__library-row-arrow {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: var(--yd-journal-faint);
+  opacity: 0.6;
+}
+
+/* ── Wissensbereiche (Magazin-Karten) ── */
 .yd-journal-v6__areas {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-  gap: 0.5rem 0.75rem;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
 }
 
-.yd-journal-v6__area {
+@media (min-width: 540px) {
+  .yd-journal-v6__areas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 960px) {
+  .yd-journal-v6__areas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+}
+
+.yd-journal-v6__area-card {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--yd-j6-border);
-  border-radius: 12px;
-  background: var(--yd-j6-surface);
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-height: 9.5rem;
+  padding: 1.25rem 1.2rem 1.15rem;
+  border: 1px solid var(--yd-brand-border-soft);
+  border-radius: 16px;
+  background: var(--yd-brand-card-bg);
+  box-shadow: var(--yd-brand-card-shadow);
   text-align: left;
   cursor: pointer;
   touch-action: manipulation;
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.yd-journal-v6__area:hover {
-  border-color: rgba(184, 149, 100, 0.35);
-  box-shadow: 0 2px 12px rgba(26, 43, 74, 0.04);
+.yd-journal-v6__area-card:hover {
+  border-color: rgba(26, 79, 156, 0.2);
+  box-shadow:
+    0 2px 6px rgba(26, 43, 74, 0.04),
+    0 12px 28px rgba(26, 43, 74, 0.06);
 }
 
-.yd-journal-v6__area--active {
-  border-color: rgba(184, 149, 100, 0.45);
-  box-shadow: inset 3px 0 0 var(--yd-j6-gold);
+.yd-journal-v6__area-card--active {
+  border-color: rgba(26, 79, 156, 0.32);
+  box-shadow:
+    inset 3px 0 0 var(--yd-brand-accent-deep),
+    var(--yd-brand-card-shadow);
 }
 
-.yd-journal-v6__area--empty {
-  opacity: 0.72;
+.yd-journal-v6__area-card--empty {
+  opacity: 0.9;
 }
 
-.yd-journal-v6__area-name {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 0.9375rem;
-  font-weight: 400;
-  line-height: 1.25;
-  color: var(--yd-j6-ink);
+.yd-journal-v6__area-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.yd-journal-v6__area-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 11px;
+  background: rgba(47, 128, 237, 0.09);
+  color: var(--yd-brand-accent-deep);
 }
 
 .yd-journal-v6__area-count {
   font-size: 0.6875rem;
-  font-weight: 500;
-  color: var(--yd-j6-faint);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--yd-journal-muted);
 }
 
-.yd-journal-v6__area-count--gap {
-  font-style: italic;
-  color: var(--yd-j6-muted);
+.yd-journal-v6__area-name {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.0625rem, 2vw, 1.1875rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--yd-journal-ink);
 }
 
-/* ── Patientenfragen ── */
-.yd-journal-v6__faq-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--yd-j6-border);
-  border-radius: 16px;
-  background: var(--yd-j6-surface);
+.yd-journal-v6__area-meter {
+  width: 100%;
+  height: 3px;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--yd-journal-ink) 6%, transparent);
   overflow: hidden;
 }
 
-.yd-journal-v6__faq-item {
-  border-bottom: 1px solid var(--yd-j6-divider);
-}
-
-.yd-journal-v6__faq-item:last-child {
-  border-bottom: none;
-}
-
-.yd-journal-v6__faq-btn {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  width: 100%;
-  padding: 1.1rem 1.25rem;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: background 140ms ease;
-}
-
-.yd-journal-v6__faq-btn:hover:not(:disabled) {
-  background: rgba(250, 248, 245, 0.85);
-}
-
-.yd-journal-v6__faq-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.yd-journal-v6__faq-q {
-  margin: 0;
-  flex: 1 1 auto;
-  min-width: 0;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.0625rem;
-  font-weight: 400;
-  line-height: 1.35;
-  color: var(--yd-j6-ink);
-}
-
-.yd-journal-v6__faq-cta {
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--yd-j6-gold);
-}
-
-/* ── Bibliothek (Magazin) ── */
-.yd-journal-v6__library {
-  border-top: 1px solid var(--yd-j6-divider);
-  padding-top: 2.5rem;
-}
-
-.yd-journal-v6__library-group {
-  margin-bottom: 2rem;
-}
-
-.yd-journal-v6__library-group:last-child {
-  margin-bottom: 0;
-}
-
-.yd-journal-v6__library-area {
-  margin: 0 0 1rem;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.125rem;
-  font-weight: 400;
-  color: var(--yd-j6-ink);
-}
-
-.yd-journal-v6__articles {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.yd-journal-v6__article {
-  border-bottom: 1px solid var(--yd-j6-divider);
-}
-
-.yd-journal-v6__article:last-child {
-  border-bottom: none;
-}
-
-.yd-journal-v6__article-btn {
+.yd-journal-v6__area-meter-fill {
   display: block;
-  width: 100%;
-  padding: 1.35rem 0;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: opacity 140ms ease;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--yd-brand-accent-deep),
+    rgba(47, 128, 237, 0.75)
+  );
+  transition: width 280ms ease;
 }
 
-.yd-journal-v6__article-btn:hover {
-  opacity: 0.82;
-}
-
-.yd-journal-v6__article-title {
-  margin: 0 0 0.45rem;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: clamp(1.125rem, 2vw, 1.3125rem);
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  color: var(--yd-j6-ink);
-}
-
-.yd-journal-v6__article-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.85rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--yd-j6-faint);
-}
-
-.yd-journal-v6__article-type {
-  color: var(--yd-j6-gold);
-}
-
-/* ── Entwürfe (kompakt) ── */
-.yd-journal-v6__drafts {
-  border-top: 1px solid var(--yd-j6-divider);
-  padding-top: 1.75rem;
-}
-
-.yd-journal-v6__drafts-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.yd-journal-v6__drafts-title {
-  margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--yd-j6-muted);
-}
-
-.yd-journal-v6__drafts-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.yd-journal-v6__draft-item {
-  border-bottom: 1px solid var(--yd-j6-divider);
-}
-
-.yd-journal-v6__draft-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  padding: 0.75rem 0;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  font-size: 0.8125rem;
-  color: var(--yd-j6-muted);
-  touch-action: manipulation;
-}
-
-.yd-journal-v6__draft-btn:hover {
-  color: var(--yd-j6-ink);
-}
-
-/* ── Empfohlen als Nächstes ── */
-.yd-journal-v6__next {
-  position: sticky;
-  top: 1.25rem;
-}
-
-.yd-journal-v6__next-card {
-  border: 1px solid var(--yd-j6-border);
-  border-radius: 16px;
-  background: var(--yd-j6-surface);
-  padding: 1.25rem;
-}
-
-.yd-journal-v6__next-title {
-  margin: 0 0 1rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--yd-j6-gold);
-}
-
-.yd-journal-v6__next-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.yd-journal-v6__next-item {
-  border-top: 1px solid var(--yd-j6-divider);
-}
-
-.yd-journal-v6__next-item:first-child {
-  border-top: none;
-}
-
-.yd-journal-v6__next-btn {
-  display: block;
-  width: 100%;
-  padding: 0.85rem 0;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.yd-journal-v6__next-btn:hover:not(:disabled) {
-  opacity: 0.78;
-}
-
-.yd-journal-v6__next-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.yd-journal-v6__next-label {
-  margin: 0 0 0.2rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--yd-j6-ink);
-}
-
-.yd-journal-v6__next-desc {
+.yd-journal-v6__area-coverage {
   margin: 0;
   font-size: 0.75rem;
   line-height: 1.45;
-  color: var(--yd-j6-muted);
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__area-card--active .yd-journal-v6__area-coverage,
+.yd-journal-v6__area-card:not(.yd-journal-v6__area-card--empty) .yd-journal-v6__area-coverage {
+  color: var(--yd-journal-muted);
+}
+
+/* ── FAQ (Patientenstimme, keine Ticket-Optik) ── */
+.yd-journal-v6__faq-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--yd-journal-border-soft);
+}
+
+@media (min-width: 768px) {
+  .yd-journal-v6__faq-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1.25rem;
+    border-top: none;
+  }
+
+  .yd-journal-v6__faq-row {
+    border: 1px solid var(--yd-brand-border-soft);
+    border-radius: 16px;
+    margin-bottom: 0.85rem;
+    padding: 1.15rem 1.1rem !important;
+    background: var(--yd-brand-card-bg);
+    box-shadow: var(--yd-brand-card-shadow);
+  }
+
+  .yd-journal-v6__faq-list li {
+    border-bottom: none;
+  }
+}
+
+.yd-journal-v6__faq-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem 1rem;
+  width: 100%;
+  padding: 1.1rem 0;
+  border: none;
+  border-bottom: 1px solid var(--yd-journal-border-soft);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 160ms ease;
+}
+
+.yd-journal-v6__faq-row:hover:not(:disabled) {
+  opacity: 0.82;
+}
+
+.yd-journal-v6__faq-row:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.yd-journal-v6__faq-row-icon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.15rem;
+  color: var(--yd-brand-accent-deep);
+}
+
+.yd-journal-v6__faq-row-body {
+  flex: 1;
+  min-width: min(100%, 16rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.yd-journal-v6__faq-row-q {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.0625rem, 2.2vw, 1.1875rem);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--yd-journal-ink);
+}
+
+.yd-journal-v6__faq-row-hint {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__faq-row-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--yd-brand-accent-deep);
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .yd-journal-v6__faq-row-cta {
+    width: 100%;
+    margin-left: 1.85rem;
+  }
+}
+
+/* ── Entwürfe (unten, Arbeitsmaterial) ── */
+.yd-journal-v6__draft-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-journal-v6__draft-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 0;
+  border: none;
+  border-bottom: 1px solid var(--yd-journal-border-soft);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.88;
+  transition: opacity 160ms ease;
+}
+
+.yd-journal-v6__draft-row:hover {
+  opacity: 1;
+}
+
+.yd-journal-v6__draft-row-icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__draft-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yd-journal-v6__draft-row-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--yd-journal-ink) 78%, transparent);
+}
+
+.yd-journal-v6__draft-row-meta {
+  font-size: 0.6875rem;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__draft-row-chevron {
+  flex-shrink: 0;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--yd-journal-faint);
+  transform: rotate(-90deg);
+  opacity: 0.5;
+}
+
+/* ── Rail (ruhige Assistenz) ── */
+.yd-journal-v6__rail {
+  min-width: 0;
+}
+
+@media (min-width: 1080px) {
+  .yd-journal-v6__rail {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.yd-journal-v6__rail-inner {
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--yd-journal-border-soft);
+}
+
+@media (min-width: 1080px) {
+  .yd-journal-v6__rail-inner {
+    padding: 0.25rem 0 0;
+    border-top: none;
+  }
+}
+
+.yd-journal-v6__rail-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__rail-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-journal-v6__rail-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  opacity: 0.88;
+  transition: opacity 160ms ease;
+}
+
+.yd-journal-v6__rail-link:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.yd-journal-v6__rail-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.yd-journal-v6__rail-link-icon {
+  flex-shrink: 0;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-top: 0.1rem;
+  color: var(--yd-journal-faint);
+}
+
+.yd-journal-v6__rail-link-text {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--yd-journal-ink) 75%, transparent);
 }
 
 /* ── Empty / Error ── */
 .yd-journal-v6__empty {
-  padding: 2rem 0;
-  text-align: left;
+  padding: 1.75rem 0 0.5rem;
 }
 
 .yd-journal-v6__empty-title {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.4rem;
   font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.125rem;
   font-weight: 400;
-  color: var(--yd-j6-ink);
+  line-height: 1.3;
+  color: var(--yd-journal-ink);
 }
 
 .yd-journal-v6__empty-copy {
   margin: 0;
-  max-width: 40ch;
+  max-width: 44ch;
   font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--yd-j6-muted);
+  line-height: 1.6;
+  color: var(--yd-journal-muted);
 }
 
 .yd-journal-v6__error {
@@ -470,20 +862,49 @@
   color: #b91c1c;
 }
 
-/* ── Composer V6 ── */
+/* ── Composer (warm, konsistent) ── */
+.yd-journal-composer-v6.yd-clinical-brand {
+  --yd-brand-canvas: linear-gradient(168deg, #eef4fa 0%, #f8fbfe 46%, #f1f7fc 100%);
+  --yd-brand-canvas-glow:
+    radial-gradient(ellipse 88% 68% at 78% 4%, rgba(47, 128, 237, 0.09) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 50% at 12% 88%, rgba(255, 250, 244, 0.24) 0%, transparent 50%);
+}
+
 .yd-journal-composer-v6 {
+  position: relative;
+  isolation: isolate;
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--yd-j6-cream);
-  color: var(--yd-j6-ink);
+  background: var(--yd-brand-canvas-glow), var(--yd-brand-canvas);
+  color: var(--yd-brand-ink);
+}
+
+.yd-journal-composer-v6::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(47, 128, 237, 0.05) 0%,
+    transparent 20%,
+    transparent 100%
+  );
+}
+
+.yd-journal-composer-v6__bar,
+.yd-journal-composer-v6__body {
+  position: relative;
+  z-index: 1;
 }
 
 .yd-journal-composer-v6__bar {
   flex-shrink: 0;
-  border-bottom: 1px solid var(--yd-j6-divider);
-  background: var(--yd-j6-surface);
+  border-bottom: 1px solid var(--yd-journal-border-soft);
+  background: color-mix(in srgb, var(--yd-brand-ivory) 96%, transparent);
 }
 
 .yd-journal-composer-v6__bar-inner {
@@ -504,18 +925,18 @@
   background: transparent;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--yd-j6-muted);
+  color: var(--yd-journal-muted);
   cursor: pointer;
 }
 
 .yd-journal-composer-v6__back:hover {
-  color: var(--yd-j6-ink);
+  color: var(--yd-journal-ink);
 }
 
 .yd-journal-composer-v6__save {
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--yd-j6-faint);
+  color: var(--yd-journal-faint);
 }
 
 .yd-journal-composer-v6__body {
@@ -552,12 +973,12 @@
   font-weight: 400;
   line-height: 1.15;
   letter-spacing: -0.025em;
-  color: var(--yd-j6-ink);
+  color: var(--yd-journal-ink);
   outline: none;
 }
 
 .yd-journal-composer-v6__title::placeholder {
-  color: rgba(26, 45, 74, 0.28);
+  color: var(--yd-journal-faint);
 }
 
 .yd-journal-composer-v6__subtitle {
@@ -566,20 +987,20 @@
   margin: 0 0 1.75rem;
   padding: 0 0 1.25rem;
   border: none;
-  border-bottom: 1px solid var(--yd-j6-divider);
+  border-bottom: 1px solid var(--yd-journal-border-soft);
   background: transparent;
   font-family: var(--font-fraunces), Georgia, serif;
   font-size: 1.0625rem;
   font-style: italic;
   font-weight: 400;
   line-height: 1.45;
-  color: var(--yd-j6-muted);
+  color: var(--yd-journal-muted);
   outline: none;
   resize: none;
 }
 
 .yd-journal-composer-v6__subtitle::placeholder {
-  color: rgba(26, 45, 74, 0.28);
+  color: var(--yd-journal-faint);
 }
 
 .yd-journal-composer-v6__content .ProseMirror {
@@ -587,7 +1008,7 @@
   padding: 0;
   font-size: 1.0625rem;
   line-height: 1.75;
-  color: var(--yd-j6-ink);
+  color: var(--yd-journal-ink);
   outline: none;
 }
 
@@ -602,15 +1023,10 @@
   margin: 1.5rem 0 0.75rem;
 }
 
-.yd-journal-composer-v6__content .ProseMirror p.is-editor-empty:first-child::before {
-  color: rgba(26, 45, 74, 0.28);
-  font-style: italic;
-}
-
 .yd-journal-composer-v6__media {
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--yd-j6-divider);
+  border-top: 1px solid var(--yd-journal-border-soft);
 }
 
 .yd-journal-composer-v6__media-label {
@@ -619,7 +1035,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--yd-j6-faint);
+  color: var(--yd-journal-faint);
 }
 
 .yd-journal-composer-v6__aside {
@@ -629,9 +1045,10 @@
   flex-direction: column;
   gap: 1.25rem;
   padding: 1.25rem;
-  border: 1px solid var(--yd-j6-border);
+  border: 1px solid var(--yd-journal-border);
   border-radius: 14px;
-  background: var(--yd-j6-surface);
+  background: var(--yd-brand-card-bg);
+  box-shadow: var(--yd-brand-card-shadow);
 }
 
 .yd-journal-composer-v6__field-label {
@@ -641,17 +1058,17 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--yd-j6-faint);
+  color: var(--yd-journal-faint);
 }
 
 .yd-journal-composer-v6__select {
   width: 100%;
   padding: 0.5rem 0.65rem;
-  border: 1px solid var(--yd-j6-border);
+  border: 1px solid var(--yd-journal-border);
   border-radius: 8px;
-  background: var(--yd-j6-cream);
+  background: var(--yd-brand-card-bg);
   font-size: 0.8125rem;
-  color: var(--yd-j6-ink);
+  color: var(--yd-journal-ink);
   outline: none;
 }
 
@@ -659,13 +1076,13 @@
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--yd-j6-muted);
+  color: var(--yd-journal-muted);
 }
 
 .yd-journal-composer-v6__reading {
   margin: 0;
   font-size: 0.75rem;
-  color: var(--yd-j6-faint);
+  color: var(--yd-journal-faint);
 }
 
 .yd-journal-composer-v6__publish {
@@ -674,12 +1091,16 @@
   padding: 0.55rem 1rem;
   border: none;
   border-radius: 10px;
-  background: var(--yd-j6-ink);
+  background: var(--yd-journal-ink);
   font-size: 0.8125rem;
   font-weight: 600;
   color: #fff;
   cursor: pointer;
   touch-action: manipulation;
+}
+
+.yd-journal-composer-v6__publish:hover:not(:disabled) {
+  background: var(--yd-brand-accent-deep);
 }
 
 .yd-journal-composer-v6__publish:disabled {
@@ -689,6 +1110,11 @@
 
 .yd-journal-composer-v6__publish--ghost {
   background: transparent;
-  border: 1px solid var(--yd-j6-border);
-  color: var(--yd-j6-muted);
+  border: 1px solid var(--yd-journal-border);
+  color: var(--yd-journal-muted);
+}
+
+.yd-journal-composer-v6__publish--ghost:hover:not(:disabled) {
+  background: var(--yd-brand-ice);
+  color: var(--yd-journal-ink);
 }

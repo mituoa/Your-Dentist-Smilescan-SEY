@@ -115,7 +115,10 @@ export function CarreeProfileBody({ data }: CarreeProfileBodyProps) {
               className="yd-carree-profile__dual-col yd-carree-profile__panel yd-carree-profile__panel--credentials"
               aria-label="Fortbildungen und Zertifikate"
             >
-              <p className="yd-carree-profile__section-label">Fortbildungen &amp; Zertifikate</p>
+              <p className="yd-carree-profile__section-label yd-carree-profile__section-label--split">
+                <span>Fortbildungen</span>
+                <span>&amp; Zertifikate</span>
+              </p>
               <ul className="yd-carree-profile__cred-badges">
                 {credentials.map((line) => (
                   <li key={line} className="yd-carree-profile__cred-badge">

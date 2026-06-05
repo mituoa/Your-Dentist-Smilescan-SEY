@@ -16,6 +16,7 @@ import {
 } from "@/components/app-shell/mobile-nav";
 import { WorkspaceIntegratedHeaderBridge } from "@/components/app-shell/workspace-integrated-header-bridge";
 import { ProtectedTopbar } from "@/components/app-shell/protected-topbar";
+import { WorkspaceMobileShortcutsBar } from "@/components/workspace/workspace-mobile-shortcuts-bar";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
@@ -204,6 +205,9 @@ export default async function ProtectedLayout({
                   {children}
                 </HcAppCanvas>
               </main>
+              <Suspense fallback={null}>
+                <WorkspaceMobileShortcutsBar />
+              </Suspense>
             </div>
           </div>
         </div>

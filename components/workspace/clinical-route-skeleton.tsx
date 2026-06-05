@@ -238,21 +238,17 @@ export function ClinicalSettingsSkeleton() {
   return (
     <YdSkeletonPage
       label="Einstellungen werden geladen"
-      className="relative flex min-h-0 flex-1 flex-col overflow-auto"
-      style={{ background: "#F7F9FC" }}
+      className="yd-settings-v2 yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto"
     >
-      <div className="mx-auto w-full max-w-[640px] px-4 py-6 pb-24 sm:px-6 md:px-10 md:py-8">
-        <div className="mb-16 space-y-3 pt-8">
-          <YdSkeleton className="h-10 w-48" />
-          <YdSkeleton className="h-4 w-64" variant="calm" />
-        </div>
-        {[28, 32, 28, 16].map((titleW, section) => (
-          <div key={section} className="mb-16 space-y-6">
-            <YdSkeleton className={`h-5 w-${titleW}`} style={{ width: `${titleW * 4}px` }} variant="calm" />
-            <YdSkeleton className="h-11 w-full rounded-[10px]" variant="calm" />
-            <YdSkeleton className="h-[120px] w-full rounded-[10px]" variant="calm" />
+      <div className="yd-settings-v2__frame pb-12">
+        <div className="yd-settings-v2__layout">
+          <div className="space-y-3">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <YdSkeleton key={i} className="h-10 w-full max-w-[200px] rounded-xl" variant="calm" />
+            ))}
           </div>
-        ))}
+          <YdSkeleton className="h-[26rem] w-full rounded-[18px]" variant="calm" />
+        </div>
       </div>
     </YdSkeletonPage>
   );
@@ -262,25 +258,22 @@ export function ClinicalJournalSkeleton() {
   return (
     <YdSkeletonPage
       label="Journal wird geladen"
-      className="yd-journal-v6 relative flex min-h-0 flex-1 flex-col overflow-auto"
+      className="yd-journal-v6 yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto"
     >
       <div className={`yd-journal-v6__frame ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
-        <div className="yd-journal-v6__hero space-y-3 border-b border-[rgba(26,43,74,0.06)] pb-8">
+        <div className="mb-10 space-y-3 border-b border-[rgba(26,43,74,0.06)] pb-10">
           <YdSkeleton className="h-3 w-24" variant="calm" />
-          <YdSkeleton className="h-10 w-40" />
-          <YdSkeleton className="h-4 w-72 max-w-full" variant="calm" />
-          <YdSkeleton className="h-3 w-56" variant="calm" />
+          <YdSkeleton className="h-12 w-40" />
+          <YdSkeleton className="h-5 w-56" />
+          <YdSkeleton className="h-4 w-full max-w-sm" variant="calm" />
+          <YdSkeleton className="h-3 w-64" variant="calm" />
         </div>
-        <div className="yd-journal-v6__body pt-8">
-          <div className="space-y-6">
-            <YdSkeleton className="h-4 w-32" variant="calm" />
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <YdSkeleton key={i} className="h-16 rounded-xl" variant="calm" />
-              ))}
-            </div>
-            <YdSkeleton className="h-48 w-full rounded-2xl" variant="calm" />
-          </div>
+        <YdSkeleton className="mb-8 h-12 w-full rounded-[14px]" variant="calm" />
+        <div className="space-y-4">
+          <YdSkeleton className="h-8 w-48" />
+          {[0, 1, 2].map((i) => (
+            <YdSkeleton key={i} className="h-16 w-full" variant="calm" />
+          ))}
         </div>
       </div>
     </YdSkeletonPage>

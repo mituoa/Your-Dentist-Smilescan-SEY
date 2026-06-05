@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Copy, Eye, Upload } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import {
   changeSlug,
   changeWorkspaceName,
@@ -20,21 +19,21 @@ import {
 import { setThemePreference } from "@/app/actions/theme";
 import { signOutWithFullPageRedirect } from "@/lib/auth/sign-out-client";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
+import { SettingsMobileNav } from "@/components/settings/settings-mobile-nav";
+import { SettingsPracticeProfilePanel } from "@/components/settings/settings-practice-profile-panel";
 import {
-  clinicalFormColumnMax,
-  clinicalWorkspaceFrame,
-  clinicalWorkspaceVerticalPadding,
-} from "@/lib/clinical-ui";
-import { SettingsTeamMemberCard } from "@/components/settings/settings-team-member-card";
+  SettingsPlaceholderPanel,
+  SettingsSecurityPanel,
+} from "@/components/settings/settings-secondary-panels";
+import { SettingsTeamPanel } from "@/components/settings/settings-team-panel";
+import {
+  defaultTeamTabForSection,
+  isSettingsSectionId,
+  SETTINGS_NAV_GROUPS,
+  type SettingsSectionId,
+} from "@/lib/settings/settings-navigation";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
 import type { ThemePreference } from "@/lib/theme";
-
-const ACCENT_PRESETS = [
-  { value: "#2F80ED", default: true },
-  { value: "#27AE60" },
-  { value: "#95A5A6" },
-  { value: "#5D6D7E" },
-];
 
 function profileDocPath(slug: string): string {
   return `/doc/${slug}`;
@@ -82,6 +81,12 @@ export function SettingsFigmaView({
   currentUserId,
 }: SettingsFigmaViewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const sectionFromUrl = searchParams.get("section");
+  const [activeSection, setActiveSection] = useState<SettingsSectionId>(
+    isSettingsSectionId(sectionFromUrl) ? sectionFromUrl : "team-rollen"
+  );
 
   const [slug, setSlug] = useState(initialSlug);
   const [workspaceName, setWorkspaceName] = useState(initialWorkspaceName);
@@ -98,29 +103,29 @@ export function SettingsFigmaView({
   const [formError, setFormError] = useState<string | null>(null);
   const [passwordHint, setPasswordHint] = useState<string | null>(null);
 
-  const logoInputRef = useRef<HTMLInputElement>(null);
   const calDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setSlug(initialSlug);
-  }, [initialSlug]);
-  useEffect(() => {
-    setWorkspaceName(initialWorkspaceName);
-  }, [initialWorkspaceName]);
-  useEffect(() => {
-    setCalendarUrl(initialAppointmentLink || "");
-  }, [initialAppointmentLink]);
-  useEffect(() => {
-    setAccent(initialAccentColor);
-  }, [initialAccentColor]);
-  useEffect(() => {
-    setTheme(initialTheme);
-  }, [initialTheme]);
+    if (isSettingsSectionId(sectionFromUrl)) {
+      setActiveSection(sectionFromUrl);
+    }
+  }, [sectionFromUrl]);
+
+  useEffect(() => setSlug(initialSlug), [initialSlug]);
+  useEffect(() => setWorkspaceName(initialWorkspaceName), [initialWorkspaceName]);
+  useEffect(() => setCalendarUrl(initialAppointmentLink || ""), [initialAppointmentLink]);
+  useEffect(() => setAccent(initialAccentColor), [initialAccentColor]);
+  useEffect(() => setTheme(initialTheme), [initialTheme]);
 
   const flashSaved = useCallback((field: string) => {
     setSaveIndicator(field);
     setTimeout(() => setSaveIndicator(null), 1800);
   }, []);
+
+  const navigateSection = (section: SettingsSectionId) => {
+    setActiveSection(section);
+    router.replace(`/settings?section=${section}`, { scroll: false });
+  };
 
   const persistSlug = useCallback(
     async (next: string) => {
@@ -273,6 +278,39 @@ export function SettingsFigmaView({
     })();
   };
 
+  const handleRemoveMember = (userId: string) => {
+    if (
+      !confirm(
+        "Mitglied entfernen? Der Account bleibt bestehen, der Zugriff auf diesen Workspace endet."
+      )
+    )
+      return;
+    void (async () => {
+      setBusy(true);
+      try {
+        const r = await removeTeamMember(userId);
+        if (r.error) setFormError(r.error);
+        else router.refresh();
+      } finally {
+        setBusy(false);
+      }
+    })();
+  };
+
+  const handleRevokeInvitation = (invitationId: string) => {
+    if (!confirm("Einladung widerrufen?")) return;
+    void (async () => {
+      setBusy(true);
+      try {
+        const r = await revokeInvitation(invitationId);
+        if (r.error) setFormError(r.error);
+        else router.refresh();
+      } finally {
+        setBusy(false);
+      }
+    })();
+  };
+
   const handlePassword = () => {
     if (busy) return;
     setPasswordHint(null);
@@ -304,514 +342,191 @@ export function SettingsFigmaView({
     })();
   };
 
-  const sortedMembers = [...members].sort((a, b) => {
-    if (a.role !== b.role) return a.role === "doctor" ? -1 : 1;
-    return a.email.localeCompare(b.email);
-  });
-
   const hostPrefix = hostDocPrefix(appBaseUrl);
   const profileCopyUrl = fullProfileUrl(appBaseUrl, slug);
+  const teamTab = defaultTeamTabForSection(activeSection);
+
+  const panel = (() => {
+    switch (activeSection) {
+      case "praxisprofil":
+        return (
+          <SettingsPracticeProfilePanel
+            slug={slug}
+            hostPrefix={hostPrefix}
+            profileDocPath={profileDocPath(slug)}
+            logoUrl={logoUrl}
+            accent={accent}
+            workspaceName={workspaceName}
+            calendarUrl={calendarUrl}
+            busy={busy}
+            copiedProfile={copiedProfile}
+            copiedCalendar={copiedCalendar}
+            saveIndicator={saveIndicator}
+            onSlugChange={(v) => {
+              setSlug(v);
+              setFormError(null);
+            }}
+            onSlugBlur={flushSlug}
+            onCopyProfile={() => handleCopy(profileCopyUrl, "profile")}
+            onLogoSelect={handleLogo}
+            onLogoRemove={() => {
+              void (async () => {
+                setBusy(true);
+                await removeLogo();
+                setBusy(false);
+                router.refresh();
+              })();
+            }}
+            onAccent={(hex) => void handleAccent(hex)}
+            onWorkspaceNameChange={(v) => {
+              setWorkspaceName(v);
+              setFormError(null);
+            }}
+            onWorkspaceNameBlur={flushWorkspaceName}
+            onCalendarChange={onCalendarChange}
+            onCopyCalendar={() => handleCopy(calendarUrl, "calendar")}
+          />
+        );
+      case "standorte":
+        return (
+          <SettingsPlaceholderPanel
+            title="Standorte"
+            description="Adresse und Standortdaten pflegen Sie im Profil-Editor unter Praxis."
+            href="/profile/editor"
+            hrefLabel="Zum Profil-Editor"
+          />
+        );
+      case "behandlungsspektrum":
+        return (
+          <SettingsPlaceholderPanel
+            title="Behandlungsspektrum"
+            description="Schwerpunkte, Leistungen und Vita werden im öffentlichen Profil gepflegt."
+            href="/profile/editor"
+            hrefLabel="Schwerpunkte bearbeiten"
+          />
+        );
+      case "oeffnungszeiten":
+        return (
+          <SettingsPlaceholderPanel
+            title="Öffnungszeiten"
+            description="Sprechzeiten und Erreichbarkeit hinterlegen Sie im Profil-Editor."
+            href="/profile/editor"
+            hrefLabel="Öffnungszeiten bearbeiten"
+          />
+        );
+      case "team-rollen":
+      case "einladungen":
+        return (
+          <SettingsTeamPanel
+            initialTab={teamTab}
+            members={members}
+            invitations={invitations}
+            workspaceName={workspaceName}
+            currentUserId={currentUserId}
+            busy={busy}
+            inviteEmail={inviteEmail}
+            inviteRole={inviteRole}
+            onInviteEmailChange={setInviteEmail}
+            onInviteRoleChange={setInviteRole}
+            onInvite={handleInvite}
+            onRemoveMember={handleRemoveMember}
+            onRevokeInvitation={handleRevokeInvitation}
+          />
+        );
+      case "sicherheit":
+        return (
+          <SettingsSecurityPanel
+            userEmail={userEmail}
+            theme={theme}
+            passwordHint={passwordHint}
+            busy={busy}
+            onPasswordReset={handlePassword}
+            onThemeChange={handleTheme}
+            onLogout={handleLogout}
+          />
+        );
+      case "nachrichten":
+        return (
+          <SettingsPlaceholderPanel
+            title="Nachrichten"
+            description="Vorlagen für Patientenkommunikation werden hier gebündelt — derzeit über Tracker und Relay."
+          />
+        );
+      case "automatisierungen":
+        return (
+          <SettingsPlaceholderPanel
+            title="Automatisierungen"
+            description="Erinnerungen und Workflows verwalten Sie in Relay."
+            href="/relay"
+            hrefLabel="Zu Relay"
+          />
+        );
+      case "journal-kategorien":
+        return (
+          <SettingsPlaceholderPanel
+            title="Journal — Kategorien"
+            description="Themenbereiche und Inhalte Ihrer Praxiswissensbibliothek."
+            href="/journal"
+            hrefLabel="Zum Journal"
+          />
+        );
+      case "journal-vorlagen":
+        return (
+          <SettingsPlaceholderPanel
+            title="Journal — Vorlagen"
+            description="Nachsorge- und FAQ-Vorlagen entstehen direkt im Journal."
+            href="/journal"
+            hrefLabel="Vorlagen im Journal"
+          />
+        );
+      default:
+        return null;
+    }
+  })();
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-auto" style={{ background: "#F7F9FC" }}>
-      <div className={`flex-1 overflow-auto ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} pb-24`}>
-        <div className={`mx-auto w-full ${clinicalFormColumnMax}`}>
-          {formError ? (
-            <div
-              className="mb-8 mt-8 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-              role="alert"
-            >
-              {formError}
-            </div>
-          ) : null}
-
-          <div style={{ paddingTop: 96, marginBottom: 72 }}>
-            <h1
-              className="font-medium"
-              style={{
-                fontSize: 38,
-                color: "#1A1A1A",
-                marginBottom: 8,
-                letterSpacing: "-0.02em",
-                lineHeight: 1.2,
-              }}
-            >
-              Einstellungen
-            </h1>
-            <p style={{ fontSize: 15, color: "#999999", lineHeight: 1.5 }}>
-              Verwalten Sie Ihre Praxis und Ihr Team
-            </p>
+    <div className="yd-settings-v2 yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto">
+      <div className="yd-settings-v2__frame flex-1 overflow-auto pb-12">
+        {formError ? (
+          <div className="yd-settings-v2__error" role="alert">
+            {formError}
           </div>
+        ) : null}
 
-          {/* Ihre Praxis */}
-          <section style={{ marginBottom: 96 }}>
-            <h2
-              className="font-medium"
-              style={{ fontSize: 20, color: "#1A1A1A", marginBottom: 24, letterSpacing: "-0.01em" }}
-            >
-              Ihre Praxis
-            </h2>
-
-            <div style={{ marginBottom: 32 }}>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                Öffentliches Profil
-              </label>
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex min-w-0 flex-1 items-center focus-within:bg-[#F3F3F1]"
-                  style={{
-                    padding: "12px 14px",
-                    background: "#F7F7F5",
-                    borderRadius: 10,
-                    fontSize: 16,
-                    color: "#1A1A1A",
-                    transition: "background 140ms ease",
-                  }}
-                >
-                  <span style={{ color: "#CCCCCC", marginRight: 4, flexShrink: 0 }}>{hostPrefix}</span>
-                  <input
-                    type="text"
-                    value={slug}
-                    onChange={(e) => {
-                      setSlug(e.target.value.toLowerCase());
-                      setFormError(null);
-                    }}
-                    onBlur={() => flushSlug()}
-                    className="min-w-0 flex-1 bg-transparent focus:outline-none"
-                    style={{ color: "#1A1A1A" }}
-                    maxLength={50}
-                    disabled={busy}
-                    aria-label="Profil-Slug"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(profileCopyUrl, "profile")}
-                  className="flex shrink-0 items-center justify-center rounded-[10px] transition-colors hover:bg-black/[0.02]"
-                  style={{ width: 40, height: 40, color: copiedProfile ? "#2F80ED" : "#999999" }}
-                  aria-label="Profil-URL kopieren"
-                >
-                  {copiedProfile ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </button>
+        <div className="yd-settings-v2__layout">
+          <nav className="yd-settings-v2__nav yd-settings-v2__nav--desktop hidden md:block" aria-label="Einstellungsbereiche">
+            {SETTINGS_NAV_GROUPS.map((group) => (
+              <div key={group.label} className="yd-settings-v2__nav-group">
+                <p className="yd-settings-v2__nav-group-label">{group.label}</p>
+                <ul className="yd-settings-v2__nav-list">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeSection === item.id;
+                    return (
+                      <li key={item.id}>
+                        <button
+                          type="button"
+                          className={`yd-settings-v2__nav-item${isActive ? " yd-settings-v2__nav-item--active" : ""}`}
+                          onClick={() => navigateSection(item.id)}
+                          aria-current={isActive ? "page" : undefined}
+                        >
+                          <Icon className="yd-settings-v2__nav-icon" strokeWidth={1.75} aria-hidden />
+                          <span className="yd-settings-v2__nav-text">
+                            <span className="yd-settings-v2__nav-label">{item.label}</span>
+                            <span className="yd-settings-v2__nav-hint">{item.hint}</span>
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-              <div className="mt-2 flex items-center justify-between gap-3">
-                <p style={{ fontSize: 13, color: "#CCCCCC" }}>Dieser Link ist für Ihre Patienten sichtbar</p>
-                {saveIndicator === "profileSlug" ? (
-                  <p style={{ fontSize: 13, color: "#999999" }}>Gespeichert</p>
-                ) : null}
-              </div>
-            </div>
+            ))}
+          </nav>
 
-            <div style={{ marginBottom: 32 }}>
-              <Link
-                href={profileDocPath(slug)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-[#666666] transition-colors hover:text-[#2F80ED]"
-                style={{ fontSize: 14, padding: "6px 0" }}
-              >
-                <Eye className="h-4 w-4" />
-                Vorschau anzeigen
-              </Link>
-            </div>
+          <SettingsMobileNav activeSection={activeSection} onNavigate={navigateSection} />
 
-            <div style={{ marginBottom: 32 }}>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                Logo
-              </label>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  e.target.value = "";
-                  if (f) handleLogo(f);
-                }}
-              />
-              {logoUrl ? (
-                <div className="space-y-3">
-                  <button
-                    type="button"
-                    onClick={() => logoInputRef.current?.click()}
-                    className="flex w-full items-center justify-center transition-colors"
-                    style={{
-                      minHeight: 120,
-                      background: "#F7F7F5",
-                      borderRadius: 10,
-                      border: "1px dashed rgba(0,0,0,0.12)",
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logoUrl} alt="" className="max-h-20 max-w-[200px] object-contain" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void (async () => {
-                        setBusy(true);
-                        await removeLogo();
-                        setBusy(false);
-                        router.refresh();
-                      })();
-                    }}
-                    className="text-[13px] text-[#999999] underline-offset-2 hover:text-[#666666] hover:underline"
-                  >
-                    Logo entfernen
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => logoInputRef.current?.click()}
-                  className="flex w-full cursor-pointer flex-col items-center justify-center transition-colors hover:border-black/[0.16] hover:bg-[#F3F3F1]"
-                  style={{
-                    height: 120,
-                    background: "#F7F7F5",
-                    borderRadius: 10,
-                    border: "1px dashed rgba(0,0,0,0.12)",
-                  }}
-                >
-                  <Upload className="mx-auto mb-2 h-5 w-5" style={{ color: "#CCCCCC" }} />
-                  <p style={{ fontSize: 13, color: "#999999" }}>Logo hochladen</p>
-                  <p style={{ fontSize: 13, color: "#CCCCCC", marginTop: 4 }}>512×512px empfohlen</p>
-                </button>
-              )}
-              <p style={{ fontSize: 13, color: "#CCCCCC", marginTop: 8 }}>
-                Ihr Logo erscheint in Ihrem öffentlichen Profil
-              </p>
-            </div>
-
-            <div>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                Akzentfarbe
-              </label>
-              <div className="flex items-center gap-2">
-                {ACCENT_PRESETS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => void handleAccent(option.value)}
-                    disabled={busy}
-                    className="relative shrink-0 transition-all"
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 10,
-                      background: option.value,
-                      border:
-                        accent.toLowerCase() === option.value.toLowerCase()
-                          ? "2px solid #1A1A1A"
-                          : "1px solid rgba(0,0,0,0.08)",
-                    }}
-                    aria-label={`Akzentfarbe ${option.value}`}
-                  >
-                    {option.default && accent.toLowerCase() === option.value.toLowerCase() ? (
-                      <span
-                        className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full"
-                        style={{ background: "#1A1A1A" }}
-                      />
-                    ) : null}
-                  </button>
-                ))}
-              </div>
-              {saveIndicator === "accentColor" ? (
-                <p style={{ fontSize: 13, color: "#999999", marginTop: 8 }}>Gespeichert</p>
-              ) : null}
-            </div>
-          </section>
-
-          {/* Team & Zugriff */}
-          <section style={{ marginBottom: 96 }}>
-            <h2
-              className="font-medium"
-              style={{ fontSize: 20, color: "#1A1A1A", marginBottom: 24, letterSpacing: "-0.01em" }}
-            >
-              Team & Zugriff
-            </h2>
-
-            <div className="yd-settings-team-grid" style={{ marginBottom: 32 }}>
-              {sortedMembers.map((m) => (
-                <SettingsTeamMemberCard
-                  key={m.user_id}
-                  email={m.email}
-                  role={m.role}
-                  joinedAt={m.joined_at}
-                  workspaceName={workspaceName}
-                  isCurrentUser={m.user_id === currentUserId}
-                  busy={busy}
-                  onRemove={
-                    m.user_id !== currentUserId
-                      ? () => {
-                          if (
-                            !confirm(
-                              "Mitglied entfernen? Der Account bleibt bestehen, der Zugriff auf diesen Workspace endet."
-                            )
-                          )
-                            return;
-                          void (async () => {
-                            setBusy(true);
-                            try {
-                              const r = await removeTeamMember(m.user_id);
-                              if (r.error) setFormError(r.error);
-                              else router.refresh();
-                            } finally {
-                              setBusy(false);
-                            }
-                          })();
-                        }
-                      : undefined
-                  }
-                />
-              ))}
-              {invitations.map((inv) => (
-                <SettingsTeamMemberCard
-                  key={inv.id}
-                  email={inv.email}
-                  role={inv.role}
-                  joinedAt={inv.created_at}
-                  workspaceName={workspaceName}
-                  pending
-                  busy={busy}
-                  onRevoke={() => {
-                    if (!confirm("Einladung widerrufen?")) return;
-                    void (async () => {
-                      setBusy(true);
-                      try {
-                        const r = await revokeInvitation(inv.id);
-                        if (r.error) setFormError(r.error);
-                        else router.refresh();
-                      } finally {
-                        setBusy(false);
-                      }
-                    })();
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="yd-settings-team-invite-panel">
-              <label className="yd-settings-team-invite-panel__label" htmlFor="settings-invite-email">
-                Neues Mitglied einladen
-              </label>
-              <input
-                id="settings-invite-email"
-                type="email"
-                placeholder="E-Mail-Adresse"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                className="yd-settings-team-invite-panel__input"
-                disabled={busy}
-              />
-              <select
-                value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as "doctor" | "team")}
-                className="yd-settings-team-invite-panel__select"
-                disabled={busy}
-                aria-label="Rolle für Einladung"
-              >
-                <option value="doctor">Administrator</option>
-                <option value="team">Bearbeiter</option>
-              </select>
-              <button
-                type="button"
-                onClick={handleInvite}
-                disabled={!inviteEmail.trim() || busy}
-                className="yd-settings-team-invite-panel__submit"
-              >
-                Einladung senden
-              </button>
-            </div>
-
-            <div style={{ marginTop: 32 }}>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                Workspace
-              </label>
-              <input
-                type="text"
-                value={workspaceName}
-                onChange={(e) => {
-                  setWorkspaceName(e.target.value);
-                  setFormError(null);
-                }}
-                onBlur={() => flushWorkspaceName()}
-                className="w-full focus:outline-none"
-                style={{
-                  padding: "12px 14px",
-                  background: "#F7F7F5",
-                  borderRadius: 10,
-                  fontSize: 16,
-                  color: "#1A1A1A",
-                  border: "none",
-                }}
-                maxLength={80}
-                disabled={busy}
-              />
-              {saveIndicator === "workspaceName" ? (
-                <p style={{ fontSize: 13, color: "#999999", marginTop: 8 }}>Gespeichert</p>
-              ) : null}
-            </div>
-          </section>
-
-          {/* Integrationen */}
-          <section style={{ marginBottom: 96 }}>
-            <h2
-              className="font-medium"
-              style={{ fontSize: 20, color: "#1A1A1A", marginBottom: 24, letterSpacing: "-0.01em" }}
-            >
-              Integrationen
-            </h2>
-            <div>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                Kalender-Link
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={calendarUrl}
-                  onChange={(e) => onCalendarChange(e.target.value)}
-                  className="min-w-0 flex-1 focus:outline-none"
-                  style={{
-                    padding: "12px 14px",
-                    background: "#F7F7F5",
-                    borderRadius: 10,
-                    fontSize: 16,
-                    color: "#1A1A1A",
-                    border: "none",
-                  }}
-                  placeholder="https://…"
-                  disabled={busy}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleCopy(calendarUrl, "calendar")}
-                  className="flex shrink-0 items-center justify-center rounded-[10px] transition-colors hover:bg-black/[0.02]"
-                  style={{ width: 40, height: 40, color: copiedCalendar ? "#2F80ED" : "#999999" }}
-                  aria-label="Kalender-Link kopieren"
-                >
-                  {copiedCalendar ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </div>
-              <div className="mt-2 flex items-center justify-between gap-3">
-                <p style={{ fontSize: 13, color: "#CCCCCC" }}>
-                  Über diesen Link können Patienten Termine buchen
-                </p>
-                {saveIndicator === "calendarUrl" ? (
-                  <p style={{ fontSize: 13, color: "#999999" }}>Gespeichert</p>
-                ) : null}
-              </div>
-            </div>
-          </section>
-
-          {/* Konto */}
-          <section style={{ marginBottom: 96 }}>
-            <h2
-              className="font-medium"
-              style={{ fontSize: 20, color: "#1A1A1A", marginBottom: 24, letterSpacing: "-0.01em" }}
-            >
-              Konto
-            </h2>
-            <div style={{ marginBottom: 24 }}>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                E-Mail
-              </label>
-              <input
-                type="email"
-                value={userEmail}
-                disabled
-                readOnly
-                className="w-full"
-                style={{
-                  padding: "12px 14px",
-                  background: "#F7F7F5",
-                  borderRadius: 10,
-                  fontSize: 16,
-                  color: "#999999",
-                  cursor: "not-allowed",
-                  border: "none",
-                }}
-              />
-            </div>
-            <div>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                Passwort
-              </label>
-              <button
-                type="button"
-                onClick={handlePassword}
-                disabled={busy}
-                className="transition-colors disabled:opacity-50"
-                style={{ fontSize: 14, color: "#666666", padding: "6px 0", background: "none", border: "none" }}
-              >
-                Passwort ändern
-              </button>
-              {passwordHint ? (
-                <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
-                  {passwordHint}
-                </p>
-              ) : null}
-            </div>
-          </section>
-
-          {/* System */}
-          <section>
-            <h2
-              className="font-medium"
-              style={{ fontSize: 20, color: "#1A1A1A", marginBottom: 24, letterSpacing: "-0.01em" }}
-            >
-              System
-            </h2>
-            <div style={{ marginBottom: 48 }}>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
-                Erscheinungsbild
-              </label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleTheme("light")}
-                  className="flex-1 text-left transition-colors"
-                  style={{
-                    padding: "12px 14px",
-                    background: theme === "light" ? "#F7F7F5" : "rgba(0,0,0,0.03)",
-                    fontSize: 15,
-                    color: theme === "light" ? "#1A1A1A" : "#999999",
-                    borderRadius: 10,
-                    border: "none",
-                    boxShadow: theme === "light" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
-                  }}
-                >
-                  Hell
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTheme("dark")}
-                  className="flex-1 text-left transition-colors"
-                  style={{
-                    padding: "12px 14px",
-                    background: theme === "dark" ? "#F7F7F5" : "rgba(0,0,0,0.03)",
-                    fontSize: 15,
-                    color: theme === "dark" ? "#1A1A1A" : "#999999",
-                    borderRadius: 10,
-                    border: "none",
-                    boxShadow: theme === "dark" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
-                  }}
-                >
-                  Dunkel
-                </button>
-              </div>
-            </div>
-            <div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="transition-colors"
-                style={{ fontSize: 14, color: "#999999", padding: "6px 0", background: "none", border: "none" }}
-              >
-                Abmelden
-              </button>
-            </div>
-          </section>
+          <div className="yd-settings-v2__content">{panel}</div>
         </div>
       </div>
     </div>

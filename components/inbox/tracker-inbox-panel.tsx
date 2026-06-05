@@ -148,10 +148,17 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                     isFresh && "yd-tracker-v15-inbox-card--fresh"
                   )}
                 >
-                  <button
-                    type="button"
+                  <div
+                    role="presentation"
                     className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body"
                     onClick={() => goToCase(item.id)}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Enter" && e.key !== " ") return;
+                      if ((e.target as HTMLElement).closest(".yd-tracker-v10-inbox-status")) return;
+                      e.preventDefault();
+                      goToCase(item.id);
+                    }}
+                    tabIndex={0}
                     aria-current={isActive ? "page" : undefined}
                   >
                     <span
@@ -203,7 +210,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                         </span>
                       ) : null}
                     </span>
-                  </button>
+                  </div>
                 </div>
               </li>
             );
