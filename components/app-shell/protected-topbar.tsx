@@ -2,6 +2,7 @@
 
 import { MobileMenuButton } from "./mobile-nav";
 import { MobileWorkspaceBrandAnchor } from "./mobile-workspace-brand";
+import { WorkspaceMobileQuickActions } from "./workspace-mobile-quick-actions";
 import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 import type { ThemePreference } from "@/lib/theme";
@@ -38,9 +39,12 @@ export function ProtectedTopbar({
         )}
       >
         <div className="yd-mobile-topbar-grid flex h-[52px] w-full items-center">
-          <MobileMenuButton />
+          <div className="relative z-[2] shrink-0">
+            <MobileMenuButton />
+          </div>
           <div className="yd-mobile-topbar-brand-spacer min-w-0 flex-1" aria-hidden />
-          <div className="flex shrink-0 justify-end">
+          <WorkspaceMobileQuickActions variant="topbar" />
+          <div className="relative z-[2] flex shrink-0 justify-end">
             <UserMenu
               email={email}
               workspaceName={workspaceName}

@@ -8,12 +8,14 @@ interface AutoSaveIndicatorProps {
   status: SaveStatus;
   lastSavedAt: Date | null;
   errorMessage?: string | null;
+  warningMessage?: string | null;
 }
 
 export function AutoSaveIndicator({
   status,
   lastSavedAt,
   errorMessage,
+  warningMessage,
 }: AutoSaveIndicatorProps) {
   if (status === "saving") {
     return (
@@ -40,6 +42,15 @@ export function AutoSaveIndicator({
             ? "Bitte prüfen Sie die Verbindung und versuchen Sie es in einem Moment erneut."
             : detail}
         </p>
+      </div>
+    );
+  }
+
+  if (warningMessage?.trim()) {
+    return (
+      <div className="max-w-md text-xs leading-relaxed" role="status">
+        <p className="font-medium text-amber-900">Teilweise gespeichert</p>
+        <p className="mt-1 text-amber-800/90">{warningMessage.trim()}</p>
       </div>
     );
   }

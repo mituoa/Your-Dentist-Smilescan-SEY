@@ -1317,7 +1317,8 @@ a.yd-carree-hero__contact-value:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 40;
+    z-index: 78;
+    pointer-events: auto;
     display: flex;
     flex-direction: column;
     gap: 0.45rem;

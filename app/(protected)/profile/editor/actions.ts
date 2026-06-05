@@ -80,36 +80,90 @@ function isSchemaColumnError(error: { code?: string; message?: string }): boolea
   );
 }
 
+const PROFILE_OPTIONAL_COLUMN_GROUPS: Array<{
+  fields: string[];
+  label: string;
+}> = [
+  {
+    fields: ["profile_personal_approach", "profile_career_path"],
+    label: "Persönliche Worte und Werdegang",
+  },
+  {
+    fields: ["practice_subtitle", "profile_credentials"],
+    label: "Praxis-Untertitel und Zertifikate",
+  },
+  {
+    fields: ["profile_background_color"],
+    label: "Grundfarbe",
+  },
+];
+
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+  profile_personal_approach: "Persönliche Worte",
+  profile_career_path: "Ausbildung & Werdegang",
+  practice_subtitle: "Praxis-Untertitel",
+  profile_credentials: "Fortbildungen & Zertifikate",
+  profile_background_color: "Grundfarbe",
+};
+
 type ProfileDataUpsertRow = Record<string, unknown>;
+
+type UpsertProfileRowResult = {
+  error: { code?: string; message?: string } | null;
+  droppedFields: string[];
+};
 
 async function upsertProfileRow(
   supabase: Awaited<ReturnType<typeof createClient>>,
   row: ProfileDataUpsertRow
-): Promise<{ error: { code?: string; message?: string } | null }> {
-  const { error } = await supabase
-    .from("profile_data")
-    .upsert(row as never, { onConflict: "workspace_id" });
+): Promise<UpsertProfileRowResult> {
+  const droppedFields: string[] = [];
+  let payload = { ...row };
+  let error: { code?: string; message?: string } | null = null;
 
-  if (!error || !isSchemaColumnError(error)) {
-    return { error };
+  const attempt = async () => {
+    const result = await supabase
+      .from("profile_data")
+      .upsert(payload as never, { onConflict: "workspace_id" });
+    error = result.error;
+  };
+
+  await attempt();
+  if (!error) {
+    return { error: null, droppedFields };
   }
 
-  const legacy = { ...row };
-  delete legacy.profile_personal_approach;
-  delete legacy.profile_career_path;
-  const retryV3 = await supabase
-    .from("profile_data")
-    .upsert(legacy as never, { onConflict: "workspace_id" });
-  if (!retryV3.error || !isSchemaColumnError(retryV3.error)) {
-    return { error: retryV3.error };
+  for (const group of PROFILE_OPTIONAL_COLUMN_GROUPS) {
+    if (!error || !isSchemaColumnError(error)) break;
+
+    let strippedInGroup = false;
+    for (const field of group.fields) {
+      if (field in payload) {
+        delete payload[field];
+        droppedFields.push(field);
+        strippedInGroup = true;
+      }
+    }
+    if (!strippedInGroup) continue;
+
+    await attempt();
   }
 
-  delete legacy.practice_subtitle;
-  delete legacy.profile_credentials;
-  const retryCarree = await supabase
-    .from("profile_data")
-    .upsert(legacy as never, { onConflict: "workspace_id" });
-  return { error: retryCarree.error };
+  return { error, droppedFields };
+}
+
+function buildDroppedFieldsWarning(droppedFields: string[]): string | null {
+  if (droppedFields.length === 0) return null;
+
+  const labels = [...new Set(droppedFields.map((field) => PROFILE_FIELD_LABELS[field] ?? field))];
+  const fieldsLine =
+    labels.length === 1
+      ? labels[0]!
+      : labels.length === 2
+        ? `${labels[0]} und ${labels[1]}`
+        : `${labels.slice(0, -1).join(", ")} und ${labels[labels.length - 1]}`;
+
+  return `${fieldsLine} konnten nicht dauerhaft gespeichert werden — die Datenbank ist noch nicht auf dem neuesten Stand. Bitte wenden Sie die Migrationen 039–041 in Supabase an (lokal: supabase db push).`;
 }
 
 function sanitizeSavePayload(payload: SaveProfilePayload): SaveProfilePayload {
@@ -171,7 +225,7 @@ export interface SaveProfilePayload {
 
 export async function saveProfileData(
   payload: SaveProfilePayload
-): Promise<{ error?: string; success?: boolean }> {
+): Promise<{ error?: string; success?: boolean; warning?: string }> {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return { error: "Nicht angemeldet." };
   if (workspace.role !== "doctor") return { error: profileRoleError };
@@ -215,12 +269,20 @@ export async function saveProfileData(
     profile_background_color: p.profile_background_color,
   };
 
-  const { error } = await upsertProfileRow(supabase, row);
+  const { error, droppedFields } = await upsertProfileRow(supabase, row);
 
   if (error) {
-    console.error("[saveProfile]", error.code ?? "unknown");
+    console.error("[saveProfile]", error.code ?? "unknown", error.message ?? "");
+    if (isSchemaColumnError(error)) {
+      return {
+        error:
+          "Profil konnte nicht gespeichert werden — die Datenbank benötigt ein Update (Migrationen 039–041). Bitte supabase db push ausführen oder die SQL-Dateien im Supabase-Dashboard anwenden.",
+      };
+    }
     return { error: "Speichern fehlgeschlagen." };
   }
+
+  const warning = buildDroppedFieldsWarning(droppedFields);
 
   if (display_name) {
     const newSlug = generateSlug(display_name);
@@ -248,7 +310,7 @@ export async function saveProfileData(
     revalidatePath(`/doc/${slugAfter}`);
   }
 
-  return { success: true };
+  return warning ? { success: true, warning } : { success: true };
 }
 
 export async function uploadPortraitPhoto(

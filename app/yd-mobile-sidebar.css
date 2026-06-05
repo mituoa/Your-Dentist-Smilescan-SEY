@@ -5,7 +5,7 @@
 @media (max-width: 767px) {
   .yd-mobile-workspace-topbar {
     --yd-mobile-topbar-h: 52px;
-    z-index: 60;
+    z-index: 75;
   }
 
   .yd-mobile-nav-portal {
@@ -41,10 +41,14 @@
     align-items: stretch !important;
     justify-content: flex-start !important;
     padding: 0 !important;
+    pointer-events: none;
+  }
+
+  .yd-mobile-nav-root.yd-mobile-nav-root--open {
     pointer-events: auto;
   }
 
-  .yd-mobile-nav-root .yd-mobile-nav-panel {
+  .yd-mobile-nav-root.yd-mobile-nav-root--open .yd-mobile-nav-panel {
     pointer-events: auto;
   }
 
@@ -101,7 +105,8 @@
 
   .yd-mobile-brand-anchor {
     position: fixed;
-    z-index: 62;
+    z-index: 58;
+    pointer-events: auto;
     top: calc(env(safe-area-inset-top, 0px) + 0.625rem);
     left: 50%;
     display: flex;
@@ -254,7 +259,7 @@
   }
 
   html[data-mobile-nav-open] .yd-mobile-workspace-topbar {
-    z-index: 60;
+    z-index: 75;
   }
 }
 

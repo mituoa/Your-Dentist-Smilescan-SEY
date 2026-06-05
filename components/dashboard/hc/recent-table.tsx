@@ -9,6 +9,7 @@ import type { SubmissionPreparation } from "@/lib/command-ai/types";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { YD } from "@/lib/design/yd-design-tokens";
 import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
+import { cn } from "@/lib/utils";
 
 type SubmissionStatus = {
   label: string;
@@ -31,9 +32,18 @@ function resolveSubmissionStatus(
 type RecentTableProps = {
   rows: SubmissionPreviewRow[] | null;
   preparationById?: Record<string, SubmissionPreparation>;
+  /** Mobile: maximale Anzahl sichtbarer Karten (Rest über „Alle anzeigen“). */
+  mobileLimit?: number;
+  /** Mobile: kompaktere Kopfzeile ohne Vollbild-Wirkung. */
+  compactMobile?: boolean;
 };
 
-export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) {
+export function HcRecentTable({
+  rows,
+  preparationById = {},
+  mobileLimit,
+  compactMobile = false,
+}: RecentTableProps) {
   const columns = ["Patient", "Anliegen", "Vorbereitung", "Status", "Datum", "Aktion"] as const;
   const orderedRows =
     rows === null
@@ -50,20 +60,45 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
 
+  const mobileRows =
+    orderedRows === null || mobileLimit == null
+      ? orderedRows
+      : orderedRows.slice(0, mobileLimit);
+  const mobileOverflow =
+    orderedRows !== null && mobileLimit != null && orderedRows.length > mobileLimit
+      ? orderedRows.length - mobileLimit
+      : 0;
+
   return (
-    <HcCard tone="primary" ambient={false} className="yd-dash-surface yd-dash-recent-table max-w-full overflow-hidden p-0">
+    <HcCard
+      tone="primary"
+      ambient={false}
+      className={cn(
+        "yd-dash-surface yd-dash-recent-table max-w-full overflow-hidden p-0",
+        compactMobile && "yd-dash-recent-table--compact-mobile"
+      )}
+    >
       <div
-        className="flex items-center justify-between gap-4 px-5 py-4 md:px-6 md:py-5"
+        className={cn(
+          "flex items-center justify-between gap-4 px-5 py-4 md:px-6 md:py-5",
+          compactMobile && "max-md:px-4 max-md:py-3"
+        )}
         style={{
           background: YD.surface.tableHead,
           borderBottom: `1px solid ${YD.border.soft}`,
         }}
       >
-        <div>
+        <div className="min-w-0">
           <p className="yd-dash-section yd-dash-section--primary">Aktuelle Einsendungen</p>
-          <p className="mt-1 text-[11px] font-medium leading-snug" style={{ color: YD.text.muted }}>
-            Vorbereitung wird automatisch erstellt — Sie prüfen und geben frei.
-          </p>
+          {!compactMobile ? (
+            <p className="mt-1 text-[11px] font-medium leading-snug" style={{ color: YD.text.muted }}>
+              Vorbereitung wird automatisch erstellt — Sie prüfen und geben frei.
+            </p>
+          ) : (
+            <p className="mt-0.5 text-[10px] font-medium leading-snug max-md:block md:hidden" style={{ color: YD.text.muted }}>
+              Zur Durchsicht — Vollständige Liste im Tracker
+            </p>
+          )}
         </div>
         <Link
           href="/inbox"
@@ -76,14 +111,14 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
       </div>
 
       <div className="yd-dash-recent-mobile md:hidden">
-        {orderedRows === null ? (
+        {mobileRows === null ? (
           <div className="yd-mobile-empty">
             <p className="yd-mobile-empty__title">Übersicht momentan nicht verfügbar</p>
             <p className="yd-mobile-empty__copy">
               Bitte Seite erneut laden — Ihre Patientenfälle bleiben unverändert.
             </p>
           </div>
-        ) : orderedRows.length === 0 ? (
+        ) : mobileRows.length === 0 ? (
           <div className="yd-mobile-empty">
             <p className="yd-mobile-empty__title">Keine offenen Vorgänge</p>
             <p className="yd-mobile-empty__copy">
@@ -92,7 +127,7 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
           </div>
         ) : (
           <div className="yd-mobile-row-cards">
-            {orderedRows.map((row) => {
+            {mobileRows.map((row) => {
               const name = row.patient_name?.trim() || "Patient";
               const issue = deriveSubmissionIssueShortLine(row.patient_notes, row.patient_name, {
                 maxLen: 80,
@@ -128,6 +163,17 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
             })}
           </div>
         )}
+        {mobileOverflow > 0 ? (
+          <div className="yd-dash-recent-mobile-more px-4 pb-3 pt-0">
+            <Link
+              href="/inbox"
+              prefetch
+              className="inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-[rgba(180,198,218,0.32)] bg-[rgba(248,251,254,0.9)] text-[12px] font-semibold text-[#2F80ED] no-underline"
+            >
+              {mobileOverflow} weitere {mobileOverflow === 1 ? "Einsendung" : "Einsendungen"} im Tracker
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       <div className="hidden max-w-full overflow-x-auto overscroll-x-contain md:block">

@@ -62,6 +62,7 @@ export function ProfileEditorShell({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -97,6 +98,7 @@ export function ProfileEditorShell({
     const seq = ++saveSeqRef.current;
     setSaveStatus("saving");
     setErrorMessage(null);
+    setWarningMessage(null);
     const d = latestDataRef.current;
 
     try {
@@ -127,9 +129,11 @@ export function ProfileEditorShell({
       if (result.error) {
         setSaveStatus("error");
         setErrorMessage(result.error);
+        setWarningMessage(null);
       } else {
         setSaveStatus("saved");
         setLastSavedAt(new Date());
+        setWarningMessage(result.warning ?? null);
       }
     } catch {
       if (seq !== saveSeqRef.current) return;
@@ -667,6 +671,7 @@ export function ProfileEditorShell({
               status={saveStatus}
               lastSavedAt={lastSavedAt}
               errorMessage={errorMessage}
+              warningMessage={warningMessage}
             />
           </div>
         </div>

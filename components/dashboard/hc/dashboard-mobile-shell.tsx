@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ChevronDown, ClipboardList, ListTodo, UserPlus } from "lucide-react";
 
-import { DashboardMobileActions } from "@/components/dashboard/hc/dashboard-mobile-actions";
 import { HcAnalyticsBars } from "@/components/dashboard/hc/analytics-bars";
 import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
@@ -77,12 +76,6 @@ export function DashboardMobileShell({
         </p>
       </header>
 
-      <DashboardMobileActions />
-
-      <section className="yd-dash-mobile__submissions" aria-label="Aktuelle Einsendungen">
-        <HcRecentTable rows={previewRows} />
-      </section>
-
       <section className="yd-dash-mobile__kpis" aria-label="Überblick">
         <div className="yd-dash-mobile__kpi-stack">
           <MobileKpiCard
@@ -109,6 +102,10 @@ export function DashboardMobileShell({
             />
           </div>
         </div>
+      </section>
+
+      <section className="yd-dash-mobile__submissions" aria-label="Aktuelle Einsendungen">
+        <HcRecentTable rows={previewRows} mobileLimit={3} compactMobile />
       </section>
 
       <details className="yd-dash-fold yd-dash-mobile__fold">
