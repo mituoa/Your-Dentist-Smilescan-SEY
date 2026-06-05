@@ -26,7 +26,7 @@ type TrackerMobileInboxProps = {
   items: SubmissionListItem[];
 };
 
-/** Mobile-only — Triage: Handlungsbedarf vor Patient. */
+/** Mobile Tracker-Liste — Karten wie Desktop V16, klare Triage-Hierarchie. */
 export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
@@ -78,12 +78,16 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
 
   return (
     <div className="yd-tracker-mobile-inbox flex h-full min-h-0 flex-col">
-      <header className="yd-tracker-mobile-inbox__head">
+      <header className="yd-tracker-mobile-inbox__head shrink-0">
         <h1 className="yd-tracker-mobile-inbox__title">{headerSummary.lead}</h1>
         <p className="yd-tracker-mobile-inbox__lead">{headerSummary.breakdown}</p>
       </header>
 
-      <div className="yd-tracker-mobile-inbox__filters" role="tablist" aria-label="Filter">
+      <div
+        className="yd-tracker-mobile-inbox__filters shrink-0"
+        role="tablist"
+        aria-label="Filter"
+      >
         {[...TRACKER_FILTER_CHIPS, ...optionalChips].map((chip) => {
           const count = countByTrackerFilter(searchScoped, chip.id);
           const active = filter === chip.id;
@@ -120,32 +124,37 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
         ) : (
           filtered.map((item) => {
             const isActive = pathname === `/inbox/${item.id}`;
-            const isFresh = !item.seen_at;
+            const isFresh = !item.seen_at && !item.is_draft;
             const patientName = item.patient_name?.trim() || "Unbekannter Patient";
             const work = trackerInboxWorkType(item);
             const attention = trackerInboxAttentionTier(item);
             const timeLabel = formatTrackerRelativeIngress(item.created_at);
 
             return (
-              <li key={item.id}>
+              <li key={item.id} className="yd-tracker-mobile-inbox__item">
                 <button
                   type="button"
                   className={cn(
-                    "yd-tracker-mobile-inbox__row",
-                    `yd-tracker-mobile-inbox__row--${attention}`,
-                    isActive && "yd-tracker-mobile-inbox__row--active",
-                    isFresh && "yd-tracker-mobile-inbox__row--fresh"
+                    "yd-tracker-mobile-card",
+                    `yd-tracker-mobile-card--${attention}`,
+                    isActive && "yd-tracker-mobile-card--active",
+                    isFresh && "yd-tracker-mobile-card--fresh"
                   )}
                   onClick={() => goToCase(item.id)}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <span className="yd-tracker-mobile-inbox__row-top">
-                    <span className="yd-tracker-mobile-inbox__headline">{work.headline}</span>
-                    <span className="yd-tracker-mobile-inbox__date">{timeLabel}</span>
+                  <span className="yd-tracker-mobile-card__headline-row">
+                    <span className="yd-tracker-mobile-card__headline">{work.headline}</span>
+                    {isFresh ? (
+                      <span className="yd-tracker-mobile-card__fresh" aria-label="Neu">
+                        Neu
+                      </span>
+                    ) : null}
+                    <span className="yd-tracker-mobile-card__time">{timeLabel}</span>
                   </span>
-                  <span className="yd-tracker-mobile-inbox__name">{patientName}</span>
+                  <span className="yd-tracker-mobile-card__patient">{patientName}</span>
                   {work.context ? (
-                    <span className="yd-tracker-mobile-inbox__subject">{work.context}</span>
+                    <span className="yd-tracker-mobile-card__context">{work.context}</span>
                   ) : null}
                 </button>
               </li>

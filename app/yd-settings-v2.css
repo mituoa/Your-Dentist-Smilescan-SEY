@@ -209,6 +209,100 @@
   min-width: 0;
 }
 
+/* ── Desktop: fixierte Nav, rechter Panel-Scroll ── */
+@media (min-width: 960px) {
+  .yd-workspace main:has(.yd-settings-v2) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden !important;
+    overscroll-behavior: contain;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .yd-workspace main:has(.yd-settings-v2) .yd-awaken-canvas {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    padding: 0.5rem 1.75rem 0.75rem;
+    border-radius: 40px;
+  }
+
+  .yd-workspace main:has(.yd-settings-v2) .yd-awaken-canvas > .relative {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .yd-workspace main:has(.yd-settings-v2) .yd-workspace-integrated-header {
+    flex-shrink: 0;
+  }
+
+  .yd-settings-v2 {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .yd-settings-v2__frame {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0 0.25rem 0;
+    overflow: hidden;
+  }
+
+  .yd-settings-v2__error {
+    flex-shrink: 0;
+  }
+
+  .yd-settings-v2__layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .yd-settings-v2__nav--desktop {
+    align-self: start;
+    position: sticky;
+    top: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+
+  .yd-settings-v2__content {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 2rem;
+    padding-right: 0.15rem;
+    padding-bottom: 2rem;
+  }
+}
+
 .yd-settings-v2__panel {
   padding: 1.75rem 1.35rem 2rem;
   border: 1px solid rgba(160, 178, 198, 0.32);

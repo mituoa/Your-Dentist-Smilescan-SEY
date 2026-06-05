@@ -1,9 +1,11 @@
 "use client";
 
-import { MobileWorkspaceBrandAnchor } from "./mobile-workspace-brand";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { SignOutIconForm } from "@/components/app-shell/sign-out-form";
 import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 import type { ThemePreference } from "@/lib/theme";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 type ProtectedTopbarProps = {
   email: string;
@@ -16,7 +18,7 @@ type ProtectedTopbarProps = {
 };
 
 /**
- * Mobile: ruhige Leiste ohne Hamburger — Navigation über Bottom Bar.
+ * Mobile: Your Dentist immer sichtbar — zentriert in der Topbar.
  * Desktop: integrierte Headline im Canvas (Layout).
  */
 export function ProtectedTopbar({
@@ -28,15 +30,19 @@ export function ProtectedTopbar({
   displayName,
 }: ProtectedTopbarProps) {
   return (
-    <>
-      <MobileWorkspaceBrandAnchor />
-      <header
-        className={cn(
-          "yd-protected-topbar yd-mobile-workspace-topbar sticky top-0 z-30 flex shrink-0 flex-col pt-[env(safe-area-inset-top,0px)] md:hidden",
-          "border-b border-[rgba(180,198,218,0.18)] bg-white/72 backdrop-blur-[14px]"
-        )}
-      >
-        <div className="flex h-[48px] w-full items-center justify-end px-3">
+    <header
+      className={cn(
+        "yd-protected-topbar yd-mobile-workspace-topbar sticky top-0 z-[76] flex shrink-0 flex-col pt-[env(safe-area-inset-top,0px)] md:hidden",
+        "border-b border-[rgba(180,198,218,0.18)] bg-white/88 backdrop-blur-[16px]"
+      )}
+    >
+      <div className="yd-mobile-topbar-inner">
+        <div className="yd-mobile-topbar-brand" aria-label="Your Dentist">
+          <YourDentistBrandLockup size="sm" tagline={null} className="min-w-0" priority />
+        </div>
+        <div className="yd-mobile-topbar-actions">
+          <ThemeToggle initialTheme={initialTheme} />
+          <SignOutIconForm />
           <UserMenu
             email={email}
             workspaceName={workspaceName}
@@ -44,9 +50,10 @@ export function ProtectedTopbar({
             initialTheme={initialTheme}
             avatarUrl={avatarUrl}
             displayName={displayName}
+            compact
           />
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }

@@ -109,11 +109,17 @@ export function SettingsFigmaView({
 
   const calDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const contentRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (isSettingsSectionId(sectionFromUrl)) {
       setActiveSection(sectionFromUrl);
     }
   }, [sectionFromUrl]);
+
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [activeSection]);
 
   useEffect(() => setSlug(initialSlug), [initialSlug]);
   useEffect(() => setWorkspaceName(initialWorkspaceName), [initialWorkspaceName]);
@@ -489,8 +495,8 @@ export function SettingsFigmaView({
   })();
 
   return (
-    <div className="yd-settings-v2 yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto">
-      <div className="yd-settings-v2__frame flex-1 overflow-auto pb-12">
+    <div className="yd-settings-v2 yd-clinical-brand relative flex min-h-0 flex-1 flex-col">
+      <div className="yd-settings-v2__frame flex-1 min-h-0">
         {formError ? (
           <div className="yd-settings-v2__error" role="alert">
             {formError}
@@ -530,7 +536,9 @@ export function SettingsFigmaView({
 
           <SettingsMobileNav activeSection={activeSection} onNavigate={navigateSection} />
 
-          <div className="yd-settings-v2__content">{panel}</div>
+          <div ref={contentRef} className="yd-settings-v2__content">
+            {panel}
+          </div>
         </div>
       </div>
     </div>

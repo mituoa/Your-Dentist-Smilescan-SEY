@@ -461,30 +461,32 @@
   min-height: 2.75rem;
   width: 100%;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   background: linear-gradient(
     168deg,
-    #2a5f9e 0%,
-    var(--yd-login-accent-deep) 48%,
-    var(--yd-login-accent-mid) 100%
+    #3d8ef0 0%,
+    var(--yd-login-accent) 44%,
+    var(--yd-login-accent-deep) 100%
   );
   color: #ffffff;
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   box-shadow:
-    0 1px 2px rgba(22, 61, 122, 0.2),
-    0 4px 14px rgba(22, 61, 122, 0.24);
+    0 2px 4px rgba(26, 79, 156, 0.14),
+    0 8px 22px rgba(47, 128, 237, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
   transition:
     filter 200ms ease,
     box-shadow 200ms ease;
 }
 
 .yd-login-split .yd-auth-btn-primary:hover:not(:disabled) {
-  filter: brightness(1.03);
+  filter: brightness(1.04);
   box-shadow:
-    0 2px 4px rgba(22, 61, 122, 0.22),
-    0 8px 20px rgba(22, 61, 122, 0.28);
+    0 4px 8px rgba(26, 79, 156, 0.16),
+    0 12px 28px rgba(47, 128, 237, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .yd-login-split .yd-auth-btn-secondary--oauth {
