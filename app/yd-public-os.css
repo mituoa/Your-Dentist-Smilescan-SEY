@@ -1882,9 +1882,14 @@
 }
 
 .yd-public-os--focus:has(.yd-clinical-entry--login) .yd-product-entry {
-  flex: 0 0 auto;
-  justify-content: flex-start;
-  padding: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+  padding: 0.5rem 0 max(1.25rem, env(safe-area-inset-bottom));
 }
 
 .yd-product-entry-card {

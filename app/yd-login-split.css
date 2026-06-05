@@ -189,8 +189,9 @@
 }
 
 .yd-login-showcase__brand-panel {
-  display: inline-flex;
-  width: fit-content;
+  display: flex;
+  justify-content: center;
+  width: 100%;
   margin-bottom: 1.625rem;
   padding: 0;
   border: 0;

@@ -1447,11 +1447,31 @@
   display: none;
 }
 
+@media (max-width: 767px) {
+  .yd-auth-register-panel--page .yd-auth-register-header {
+    display: block;
+    flex-shrink: 0;
+    padding: 0 0.875rem 0.625rem;
+    background: transparent;
+  }
+
+  .yd-auth-register-panel--page .yd-auth-register-header .mb-5 {
+    margin-bottom: 0 !important;
+    display: flex;
+    justify-content: center;
+  }
+}
+
 .yd-auth-register-panel--page .yd-auth-register-body {
   flex: none;
   min-height: auto;
   overflow: visible;
-  padding: 0.25rem 0 max(0.5rem, env(safe-area-inset-bottom));
+  padding: 0 0 max(0.5rem, env(safe-area-inset-bottom));
+}
+
+.yd-auth-register-page-top + .yd-auth-register-header + .yd-auth-register-body,
+.yd-auth-register-page-top + .yd-auth-register-body {
+  padding-top: 0;
 }
 
 .yd-clinical-register-stage {

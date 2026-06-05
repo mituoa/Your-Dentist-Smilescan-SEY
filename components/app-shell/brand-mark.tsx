@@ -5,6 +5,7 @@ import Image from "next/image";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { YourDentistWordmarkStack } from "@/components/brand/your-dentist-wordmark-stack";
+import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { cn } from "@/lib/utils";
 
 interface BrandMarkProps {
@@ -36,10 +37,11 @@ export function BrandMark({ compact = false }: BrandMarkProps) {
         />
         <YourDentistWordmarkStack compact />
       </span>
-      <span className="md:hidden">
+      <span className="flex w-full justify-center md:hidden">
         <YourDentistBrandLockup
           size={compact ? "sm" : "md"}
-          tagline={compact ? null : "Neutral Practice Platform"}
+          tagline={compact ? null : PUBLIC_BRAND_TAGLINE}
+          centered
           className="min-w-0"
           priority
         />

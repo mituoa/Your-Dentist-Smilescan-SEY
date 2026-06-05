@@ -720,23 +720,35 @@ export function RegisterClient(props: {
               presentation === "page" && "yd-auth-register-panel--page"
             )}
           >
-          <button
-            type="button"
-            onClick={handleRegistrationModalClose}
-            aria-label="Schließen"
-            className="yd-auth-close-btn"
-          >
-            <svg
-              className="h-4 w-4 text-gray-600 transition-all duration-200 group-hover:rotate-90"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              aria-hidden="true"
+          {presentation === "page" ? (
+            <div className="yd-auth-register-page-top">
+              <button
+                type="button"
+                onClick={handleRegistrationModalClose}
+                className="yd-auth-register-page-back"
+              >
+                {registrationStep > 1 && !props.success ? "Zurück" : "Schließen"}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleRegistrationModalClose}
+              aria-label="Schließen"
+              className="yd-auth-close-btn"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+              <svg
+                className="h-4 w-4 text-gray-600 transition-all duration-200 group-hover:rotate-90"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
 
             <div className="yd-auth-register-header">
               <div className="mb-5 flex justify-center pb-1 md:mb-6">
@@ -772,9 +784,9 @@ export function RegisterClient(props: {
                 </p>
               ) : null}
 
-              <div className="mb-8">
-                <div className="mb-4">
-                  <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="yd-auth-register-wizard mb-8 max-md:mb-5">
+                <div className="mb-4 max-md:mb-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
                     <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                       Ablauf
                     </span>
@@ -836,8 +848,8 @@ export function RegisterClient(props: {
 
               {registrationStep === 1 ? (
                 <div className="yd-auth-awaken-field">
-                  <div className="mb-7 text-center">
-                    <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
+                  <div className="mb-7 max-md:mb-5 text-center">
+                    <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900 max-md:text-[20px]">
                       Geschützten Praxiszugang einrichten
                     </h3>
                     <p className="text-[13px] leading-relaxed text-gray-500">

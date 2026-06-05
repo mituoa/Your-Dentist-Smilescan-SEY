@@ -12,10 +12,8 @@ export function LoginShowcase() {
       <div className="yd-login-showcase__inner">
         <div className="yd-login-showcase__surface">
           <div className="yd-login-showcase__brand-panel">
-            <YourDentistBrandLockup size="md" tagline={PUBLIC_BRAND_TAGLINE} />
+            <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
           </div>
-
-          <p className="yd-login-showcase__kicker">Neutral Practice Platform</p>
 
           <h2 className="yd-login-showcase__headline">
             Praxis‑Betriebssystem

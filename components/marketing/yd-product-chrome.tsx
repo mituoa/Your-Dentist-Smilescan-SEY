@@ -34,7 +34,7 @@ export function YdProductChrome({
       style={{ ["--yd-public-field-i" as string]: "0" }}
     >
       <Link href="/" className="yd-auth-brand-link" aria-label="Startseite">
-        <YourDentistBrandLockup size="md" tagline={PUBLIC_BRAND_TAGLINE} />
+        <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
       </Link>
       <nav
         className={cn("yd-product-chrome-nav", variant === "entry" && "yd-product-chrome-nav--entry")}
