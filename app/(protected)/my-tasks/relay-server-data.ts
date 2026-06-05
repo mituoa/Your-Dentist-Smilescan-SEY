@@ -7,6 +7,7 @@ import { getMyTasks } from "@/lib/queries/my-tasks";
 import type { TaskCounts } from "@/lib/queries/task-counts";
 import { getMessageDraftStatusMapForSubmissions } from "@/lib/queries/message-drafts";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import { listJournalForWorkspace } from "@/lib/queries/journal";
 import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
 import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { createClient } from "@/lib/supabase/server";
@@ -57,13 +58,17 @@ export async function loadRelayWorkspaceData(searchParams: Promise<Record<string
 
   const isDoctor = workspace.role === "doctor";
 
-  const [openTasks, pendingTasks, doneTasks, assignableMembers, conversations] = await Promise.all([
-    getMyTasks(user.id, workspace.workspace_id, isDoctor, "open"),
-    getMyTasks(user.id, workspace.workspace_id, isDoctor, "pending_review"),
-    getMyTasks(user.id, workspace.workspace_id, isDoctor, "done"),
-    getAssignableWorkspaceMembers(workspace.workspace_id, user.id),
-    getRelayConversationsForUser(workspace.workspace_id, user.id),
-  ]);
+  const [openTasks, pendingTasks, doneTasks, assignableMembers, conversations, journalEntries] =
+    await Promise.all([
+      getMyTasks(user.id, workspace.workspace_id, isDoctor, "open"),
+      getMyTasks(user.id, workspace.workspace_id, isDoctor, "pending_review"),
+      getMyTasks(user.id, workspace.workspace_id, isDoctor, "done"),
+      getAssignableWorkspaceMembers(workspace.workspace_id, user.id),
+      getRelayConversationsForUser(workspace.workspace_id, user.id),
+      listJournalForWorkspace(workspace.workspace_id),
+    ]);
+
+  const journalDrafts = journalEntries.filter((entry) => entry.status === "draft");
 
   const counts: TaskCounts = {
     open: openTasks.length,
@@ -93,6 +98,7 @@ export async function loadRelayWorkspaceData(searchParams: Promise<Record<string
     counts,
     assignableMembers,
     conversations,
+    journalDrafts,
     submissionDraftStatus,
   };
 }

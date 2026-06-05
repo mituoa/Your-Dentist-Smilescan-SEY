@@ -8,23 +8,28 @@ const SECTION_ID_ALIASES: Record<string, string> = {
   preise: PUBLIC_SITE_SECTIONS.pricing,
   pakete: PUBLIC_SITE_SECTIONS.pricing,
   pricing: PUBLIC_SITE_SECTIONS.pricing,
-  nutzen: PUBLIC_SITE_SECTIONS.nutzen,
-  funktionen: PUBLIC_SITE_SECTIONS.nutzen,
-  ablauf: PUBLIC_SITE_SECTIONS.ablauf,
-  loesung: PUBLIC_SITE_SECTIONS.ablauf,
-  "fuer-wen": PUBLIC_SITE_SECTIONS.fuerWen,
-  "fuer-praxen": PUBLIC_SITE_SECTIONS.fuerWen,
-  einfuehrung: PUBLIC_SITE_SECTIONS.einfuehrung,
   demo: PUBLIC_SITE_SECTIONS.demo,
+  problem: PUBLIC_SITE_SECTIONS.praxisalltag,
+  praxisalltag: PUBLIC_SITE_SECTIONS.praxisalltag,
+  patienten: PUBLIC_SITE_SECTIONS.patienten,
+  perspektive: PUBLIC_SITE_SECTIONS.patienten,
+  team: PUBLIC_SITE_SECTIONS.team,
+  loesung: PUBLIC_SITE_SECTIONS.loesung,
+  ablauf: PUBLIC_SITE_SECTIONS.loesung,
+  nutzen: PUBLIC_SITE_SECTIONS.loesung,
+  funktionen: PUBLIC_SITE_SECTIONS.plattform,
+  command: PUBLIC_SITE_SECTIONS.plattform,
+  "command-ai": PUBLIC_SITE_SECTIONS.plattform,
+  plattform: PUBLIC_SITE_SECTIONS.plattform,
+  "fuer-wen": PUBLIC_SITE_SECTIONS.demo,
+  "fuer-praxen": PUBLIC_SITE_SECTIONS.demo,
+  einfuehrung: PUBLIC_SITE_SECTIONS.demo,
 };
 
-/** Mobile hat weniger Sektionen — sinnvolle Scroll-Ziele */
+/** Mobile — fehlende Sektionen auf sinnvolle Ziele mappen */
 const SECTION_SCROLL_FALLBACKS: Record<string, string> = {
-  [PUBLIC_SITE_SECTIONS.ablauf]: PUBLIC_SITE_SECTIONS.nutzen,
-  [PUBLIC_SITE_SECTIONS.problem]: PUBLIC_SITE_SECTIONS.nutzen,
-  [PUBLIC_SITE_SECTIONS.perspektive]: PUBLIC_SITE_SECTIONS.nutzen,
-  [PUBLIC_SITE_SECTIONS.command]: PUBLIC_SITE_SECTIONS.demo,
-  [PUBLIC_SITE_SECTIONS.plattform]: PUBLIC_SITE_SECTIONS.nutzen,
+  [PUBLIC_SITE_SECTIONS.patienten]: PUBLIC_SITE_SECTIONS.praxisalltag,
+  [PUBLIC_SITE_SECTIONS.team]: PUBLIC_SITE_SECTIONS.praxisalltag,
 };
 
 function isDesktopPublicSite(): boolean {

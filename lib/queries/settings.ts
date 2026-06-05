@@ -2,6 +2,9 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  parseOpeningHoursConfig,
+} from "@/lib/settings/opening-hours";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
 
 export type { TeamInvitation, TeamMember };
@@ -18,7 +21,7 @@ export async function getSettingsData(workspaceId: string) {
       .single(),
     supabase
       .from("profile_data")
-      .select("appointment_link, logo_url, accent_color")
+      .select("appointment_link, logo_url, accent_color, opening_hours_config")
       .eq("workspace_id", workspaceId)
       .single(),
   ]);
@@ -51,7 +54,14 @@ export async function getSettingsData(workspaceId: string) {
 
   return {
     workspace: ws.data || null,
-    profile: profile.data || null,
+    profile: profile.data
+      ? {
+          ...profile.data,
+          opening_hours_config: profile.data.opening_hours_config
+            ? parseOpeningHoursConfig(profile.data.opening_hours_config)
+            : null,
+        }
+      : null,
     members,
     invitations: (invitations as TeamInvitation[]) || [],
   };

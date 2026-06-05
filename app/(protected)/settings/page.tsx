@@ -40,6 +40,7 @@ export default async function SettingsPage() {
         initialAppointmentLink={data.profile?.appointment_link ?? null}
         logoUrl={data.profile?.logo_url ?? null}
         initialAccentColor={data.profile?.accent_color || "#2F80ED"}
+        initialOpeningHours={data.profile?.opening_hours_config ?? null}
         userEmail={user.email ?? ""}
         initialTheme={theme}
         members={data.members}

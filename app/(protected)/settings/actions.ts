@@ -12,6 +12,45 @@ import { buildTeamInvitationEmail } from "@/lib/mail/team-invitation-email";
 import { getAppBaseUrl } from "@/lib/env";
 import { findAuthUserIdByEmail } from "@/lib/team-invitations/get-invitation-by-token";
 import { isInviteTokenFormat } from "@/lib/team-invitations/invite-token-format";
+import {
+  formatOpeningHoursForProfile,
+  parseOpeningHoursConfig,
+  validateOpeningHoursConfig,
+  type OpeningHoursConfig,
+} from "@/lib/settings/opening-hours";
+
+export async function saveOpeningHoursConfig(
+  config: OpeningHoursConfig
+): Promise<{ error?: string; success?: boolean }> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) return { error: "Nicht angemeldet." };
+  if (workspace.role !== "doctor") return { error: "Keine Berechtigung." };
+
+  const parsed = parseOpeningHoursConfig(config);
+  const validationError = validateOpeningHoursConfig(parsed);
+  if (validationError) return { error: validationError };
+
+  const practiceHours = formatOpeningHoursForProfile(parsed).slice(0, 2000);
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profile_data")
+    .update({
+      opening_hours_config: parsed,
+      practice_hours: practiceHours || null,
+    })
+    .eq("workspace_id", workspace.workspace_id);
+
+  if (error) {
+    console.error("[saveOpeningHoursConfig]", error);
+    return { error: "Öffnungszeiten konnten nicht gespeichert werden." };
+  }
+
+  revalidatePath("/settings");
+  revalidatePath("/profile");
+  revalidatePath("/profile/editor");
+  return { success: true };
+}
 
 export async function saveAppointmentLink(
   url: string

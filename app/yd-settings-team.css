@@ -12,8 +12,8 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 7.5rem;
-  gap: 1rem;
-  padding: 1.35rem 1.25rem 1.35rem 1.5rem;
+  gap: 1.25rem;
+  padding: 1.65rem 1.35rem 1.65rem 1.75rem;
   border-radius: var(--yd-brand-card-radius, 14px);
   background: var(--yd-brand-card-bg);
   border: 1px solid var(--yd-brand-border-soft);
@@ -24,8 +24,8 @@
 @media (min-width: 520px) {
   .yd-settings-team-card {
     grid-template-columns: minmax(0, 1fr) 9.5rem;
-    gap: 1.25rem;
-    padding: 1.75rem 1.5rem 1.75rem 2rem;
+    gap: 1.5rem;
+    padding: 2rem 1.75rem 2rem 2.25rem;
   }
 }
 
@@ -55,15 +55,11 @@
 }
 
 .yd-settings-team-card__rule {
-  width: 100%;
-  height: 1px;
-  margin: 0 0 1rem;
-  background: var(--yd-brand-border-soft);
-  border: none;
+  display: none;
 }
 
 .yd-settings-team-card__lead {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.45rem;
   font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
   font-size: 1.125rem;
   font-weight: 400;
@@ -104,11 +100,10 @@
 }
 
 .yd-settings-team-card__meta {
-  margin-top: 1.1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--yd-brand-border-soft);
+  margin-top: 1.35rem;
+  padding-top: 0;
   display: grid;
-  gap: 0.55rem;
+  gap: 0.75rem;
 }
 
 .yd-settings-team-card__meta-row {

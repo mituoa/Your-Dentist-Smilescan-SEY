@@ -9,6 +9,7 @@ import {
 } from "@/lib/app-shell/workspace-integrated-header-context";
 import type { DashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
 import type { TrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
+import type { RelayHeaderSummary } from "@/lib/relay/relay-header-summary";
 import type { ThemePreference } from "@/lib/theme";
 
 import { WorkspaceIntegratedHeader } from "./workspace-integrated-header";
@@ -23,6 +24,7 @@ type WorkspaceIntegratedHeaderBridgeProps = {
   inboxCount?: number;
   trackerHeaderSummary?: TrackerHeaderSummary | null;
   dashboardHeaderSummary?: DashboardHeaderSummary | null;
+  relayHeaderSummary?: RelayHeaderSummary | null;
 };
 
 /** Route-aware integrierte Headline — Desktop md+, ersetzt die alte Toolbar. */
@@ -36,21 +38,27 @@ export function WorkspaceIntegratedHeaderBridge({
   inboxCount,
   trackerHeaderSummary,
   dashboardHeaderSummary,
+  relayHeaderSummary,
 }: WorkspaceIntegratedHeaderBridgeProps) {
   const pathname = usePathname() || "";
   const ctx = resolveWorkspaceIntegratedHeader(pathname);
   const onTracker = pathname.startsWith("/inbox");
   const onDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const onRelay = pathname === "/relay" || pathname.startsWith("/relay/");
   const subtitle =
     onTracker && trackerHeaderSummary
       ? trackerHeaderSummary.lead
       : onDashboard && dashboardHeaderSummary
         ? dashboardHeaderSummary.subtitle
-        : ctx.subtitle;
+        : onRelay && relayHeaderSummary
+          ? relayHeaderSummary.lead
+          : ctx.subtitle;
   const subtitleMeta =
     onTracker && trackerHeaderSummary
       ? trackerHeaderSummary.breakdown
-      : ctx.subtitleMeta;
+      : onRelay && relayHeaderSummary
+        ? relayHeaderSummary.breakdown
+        : ctx.subtitleMeta;
 
   const greeting = useMemo(() => {
     return resolveWorkspaceGreeting(new Date().getHours());

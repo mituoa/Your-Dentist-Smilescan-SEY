@@ -32,9 +32,8 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname === "/relay" || pathname.startsWith("/relay/")) {
     return {
       eyebrow: "Relay",
-      subtitle: "Interne Praxisorganisation",
-      showSearch: false,
-      hideGreeting: true,
+      subtitle: "Praxiszentrale — Aufgaben, Freigaben und Team an einem Ort",
+      showSearch: true,
     };
   }
   if (pathname === "/my-tasks" || pathname.startsWith("/my-tasks/")) {

@@ -4,16 +4,20 @@ import type { AssignableMember } from "@/lib/queries/team-members";
 import { assigneeLabelForTask } from "@/lib/relay/build-relay-snapshot";
 import { buildSubmissionEnrichmentMap } from "@/lib/relay/build-relay-ops-snapshot";
 import {
-  formatRelayRelativeTime,
   inferTrackerRecommendation,
   isWaitingOnDoctorTask,
   resolveRelayOpsStatus,
   taskLastActivityAt,
   type RelayTaskEnrichment,
 } from "@/lib/relay/relay-ops-status";
+import {
+  resolveRelayPracticePersona,
+  taskCategoryMatchesPersonaFocus,
+  type RelayPracticePersona,
+} from "@/lib/relay/relay-practice-persona";
 import { relayCategoryLabel, resolveRelayTaskCategory } from "@/lib/relay/relay-task-category";
 
-export type RelayDecisionBucket = "patient_waiting" | "team_waiting" | "approvals" | "overdue";
+export type RelayPracticeBucket = "waiting_on_you" | "waiting_on_team" | "overdue";
 
 export type RelayDecisionRow = {
   id: string;
@@ -22,24 +26,26 @@ export type RelayDecisionRow = {
   context: string;
   waitingLabel: string;
   actionLabel: string;
-  bucket: RelayDecisionBucket;
+  bucket: RelayPracticeBucket;
+};
+
+export type RelayAttentionHighlight = {
+  id: string;
+  label: string;
 };
 
 export type RelayDecisionsTodaySummary = {
-  areaCount: number;
-  patientWaiting: number;
-  teamWaiting: number;
-  approvals: number;
-  overdue: number;
-  intro: string | null;
-  lines: string[];
+  allClear: boolean;
+  todayLabel: string;
+  todayCalmLine: string | null;
 };
 
 export type RelayDecisionsSnapshot = {
+  persona: RelayPracticePersona;
   summary: RelayDecisionsTodaySummary;
-  patientWaiting: RelayDecisionRow[];
-  teamWaiting: RelayDecisionRow[];
-  approvals: RelayDecisionRow[];
+  needsAttention: RelayAttentionHighlight[];
+  waitingOnYou: RelayDecisionRow[];
+  waitingOnTeam: RelayDecisionRow[];
   overdue: RelayDecisionRow[];
 };
 
@@ -62,6 +68,18 @@ function formatWaitingSince(iso: string): string {
   return `Wartet seit ${then.toLocaleDateString("de-DE", { day: "numeric", month: "short" })}`;
 }
 
+function formatTodayLabel(): string {
+  try {
+    return new Intl.DateTimeFormat("de-DE", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }).format(new Date());
+  } catch {
+    return "Heute";
+  }
+}
+
 function taskContext(task: MyTask, enrichment?: RelayTaskEnrichment): string {
   const recommendation = task.submission_id
     ? inferTrackerRecommendation(task.title, task.description)
@@ -79,10 +97,10 @@ function taskContext(task: MyTask, enrichment?: RelayTaskEnrichment): string {
 
 function inferActionLabel(
   task: MyTask,
-  bucket: RelayDecisionBucket,
+  bucket: RelayPracticeBucket,
   enrichment?: RelayTaskEnrichment
 ): string {
-  if (bucket === "approvals" || task.status === "pending_review") return "Freigeben";
+  if (task.status === "pending_review") return "Freigeben";
   const draftStatus = enrichment?.messageDraftStatus ?? "none";
   if (draftStatus === "draft" || draftStatus === "approved") return "Freigeben";
   const category = resolveRelayTaskCategory(task);
@@ -104,11 +122,13 @@ function taskVisibleForDecisions(
   return true;
 }
 
-function resolveDecisionBucket(
+type LegacyBucket = "patient_waiting" | "team_waiting" | "approvals" | "overdue";
+
+function resolveLegacyBucket(
   task: MyTask,
   enrichment: RelayTaskEnrichment | undefined,
   isDoctor: boolean
-): RelayDecisionBucket | null {
+): LegacyBucket | null {
   if (task.status === "done") return null;
   if (!taskVisibleForDecisions(task, isDoctor, enrichment)) return null;
 
@@ -139,9 +159,41 @@ function resolveDecisionBucket(
   return null;
 }
 
+function isAssignedToUser(task: MyTask, userId: string): boolean {
+  return task.assignee_ids.includes(userId) || task.specific_recipient_id === userId;
+}
+
+function resolvePracticeBucket(
+  task: MyTask,
+  enrichment: RelayTaskEnrichment | undefined,
+  isDoctor: boolean,
+  userId: string
+): RelayPracticeBucket | null {
+  const legacy = resolveLegacyBucket(task, enrichment, isDoctor);
+  if (!legacy) {
+    if (task.status === "open" && taskVisibleForDecisions(task, isDoctor, enrichment)) {
+      return isAssignedToUser(task, userId) ? "waiting_on_you" : "waiting_on_team";
+    }
+    return null;
+  }
+
+  if (legacy === "overdue") return "overdue";
+
+  if (isDoctor) {
+    if (legacy === "approvals" || legacy === "team_waiting") return "waiting_on_you";
+    if (isAssignedToUser(task, userId)) return "waiting_on_you";
+    if (legacy === "patient_waiting") return "waiting_on_team";
+    return "waiting_on_team";
+  }
+
+  if (isAssignedToUser(task, userId)) return "waiting_on_you";
+  if (legacy === "patient_waiting" || legacy === "approvals") return "waiting_on_you";
+  return "waiting_on_team";
+}
+
 function mapDecisionRow(
   task: MyTask,
-  bucket: RelayDecisionBucket,
+  bucket: RelayPracticeBucket,
   membersById: Map<string, AssignableMember>,
   enrichment?: RelayTaskEnrichment
 ): RelayDecisionRow {
@@ -150,14 +202,12 @@ function mapDecisionRow(
   const context = taskContext(task, enrichment);
 
   let primaryLabel: string;
-  if (bucket === "patient_waiting" || (bucket === "approvals" && patient)) {
+  if (bucket === "waiting_on_you") {
     primaryLabel = patient ?? task.title;
-  } else if (bucket === "team_waiting") {
-    primaryLabel = assigneeLabelForTask(task, membersById);
-  } else if (bucket === "overdue") {
+  } else if (bucket === "waiting_on_team") {
     primaryLabel = patient ?? assigneeLabelForTask(task, membersById);
   } else {
-    primaryLabel = patient ?? task.title;
+    primaryLabel = patient ?? assigneeLabelForTask(task, membersById);
   }
 
   return {
@@ -179,37 +229,158 @@ function taskPriorityScore(task: MyTask, isCritical: boolean): number {
   return score;
 }
 
-function buildSummaryLines(summary: Omit<RelayDecisionsTodaySummary, "intro" | "lines" | "areaCount">): string[] {
-  const lines: string[] = [];
-  if (summary.patientWaiting > 0) {
-    lines.push(
-      summary.patientWaiting === 1
-        ? "1 Patient wartet auf Rückmeldung."
-        : `${summary.patientWaiting} Patienten warten auf Rückmeldung.`
-    );
+type AttentionCounts = {
+  approvals: number;
+  teamRequests: number;
+  recallBlocked: number;
+  overdue: number;
+  waitingOnYou: number;
+  waitingOnTeam: number;
+  callbacks: number;
+  appointments: number;
+  aftercare: number;
+  unreadComms: number;
+};
+
+function buildAttentionHighlights(
+  counts: AttentionCounts,
+  persona: RelayPracticePersona
+): RelayAttentionHighlight[] {
+  const candidates: { priority: number; label: string }[] = [];
+
+  if (persona === "zahnarzt") {
+    if (counts.approvals > 0) {
+      candidates.push({
+        priority: 100,
+        label:
+          counts.approvals === 1
+            ? "1 Freigabe offen"
+            : `${counts.approvals} Freigaben offen`,
+      });
+    }
+    if (counts.teamRequests > 0) {
+      candidates.push({
+        priority: 95,
+        label:
+          counts.teamRequests === 1
+            ? "1 Teamanfrage wartet"
+            : `${counts.teamRequests} Teamanfragen warten`,
+      });
+    }
+    if (counts.recallBlocked > 0) {
+      candidates.push({
+        priority: 90,
+        label:
+          counts.recallBlocked === 1
+            ? "1 Recall blockiert"
+            : `${counts.recallBlocked} Recalls blockiert`,
+      });
+    }
+  } else if (persona === "rezeption") {
+    if (counts.callbacks > 0) {
+      candidates.push({
+        priority: 100,
+        label:
+          counts.callbacks === 1
+            ? "1 Rückruf offen"
+            : `${counts.callbacks} Rückrufe offen`,
+      });
+    }
+    if (counts.appointments > 0) {
+      candidates.push({
+        priority: 95,
+        label:
+          counts.appointments === 1
+            ? "1 Termin offen"
+            : `${counts.appointments} Termine offen`,
+      });
+    }
+  } else if (persona === "zfa") {
+    if (counts.aftercare > 0) {
+      candidates.push({
+        priority: 100,
+        label:
+          counts.aftercare === 1
+            ? "1 Nachsorge offen"
+            : `${counts.aftercare} Nachsorge-Vorgänge offen`,
+      });
+    }
+    if (counts.callbacks > 0) {
+      candidates.push({
+        priority: 95,
+        label:
+          counts.callbacks === 1
+            ? "1 Fotoanforderung offen"
+            : `${counts.callbacks} Fotoanforderungen offen`,
+      });
+    }
+  } else if (persona === "zmp") {
+    if (counts.recallBlocked > 0) {
+      candidates.push({
+        priority: 100,
+        label:
+          counts.recallBlocked === 1
+            ? "1 Recall ausstehend"
+            : `${counts.recallBlocked} Recalls ausstehend`,
+      });
+    }
+    if (counts.aftercare > 0) {
+      candidates.push({
+        priority: 95,
+        label:
+          counts.aftercare === 1
+            ? "1 Nachbetreuung offen"
+            : `${counts.aftercare} Nachbetreuungen offen`,
+      });
+    }
+  } else if (persona === "praxismanager") {
+    if (counts.waitingOnTeam > 0) {
+      candidates.push({
+        priority: 100,
+        label:
+          counts.waitingOnTeam === 1
+            ? "1 Teamaufgabe offen"
+            : `${counts.waitingOnTeam} Teamaufgaben offen`,
+      });
+    }
+    if (counts.approvals > 0) {
+      candidates.push({
+        priority: 95,
+        label:
+          counts.approvals === 1
+            ? "1 Freigabe ausstehend"
+            : `${counts.approvals} Freigaben ausstehend`,
+      });
+    }
   }
-  if (summary.teamWaiting > 0) {
-    lines.push(
-      summary.teamWaiting === 1
-        ? "1 Teamentscheidung ist offen."
-        : `${summary.teamWaiting} Teamentscheidungen sind offen.`
-    );
+
+  if (counts.overdue > 0) {
+    candidates.push({
+      priority: 85,
+      label:
+        counts.overdue === 1
+          ? "1 Vorgang überfällig"
+          : `${counts.overdue} Vorgänge überfällig`,
+    });
   }
-  if (summary.approvals > 0) {
-    lines.push(
-      summary.approvals === 1
-        ? "1 Freigabe steht aus."
-        : `${summary.approvals} Freigaben stehen aus.`
-    );
+
+  if (counts.unreadComms > 0) {
+    candidates.push({
+      priority: 80,
+      label:
+        counts.unreadComms === 1
+          ? "1 interne Nachricht ungelesen"
+          : `${counts.unreadComms} interne Nachrichten ungelesen`,
+    });
   }
-  if (summary.overdue > 0) {
-    lines.push(
-      summary.overdue === 1
-        ? "1 Vorgang ist überfällig."
-        : `${summary.overdue} Vorgänge sind überfällig.`
-    );
-  }
-  return lines;
+
+  return candidates
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, 3)
+    .map((item, index) => ({
+      id: `attention-${index}`,
+      label: item.label,
+    }));
 }
 
 export function buildRelayDecisionsSnapshot(input: {
@@ -218,17 +389,26 @@ export function buildRelayDecisionsSnapshot(input: {
   members: AssignableMember[];
   draftBySubmissionId: Record<string, MessageDraftListStatus>;
   isDoctor: boolean;
+  userId: string;
+  unreadCommsCount?: number;
 }): RelayDecisionsSnapshot {
+  const persona = resolveRelayPracticePersona(input.isDoctor);
   const enrichments = buildSubmissionEnrichmentMap(input.draftBySubmissionId);
   const membersById = new Map(input.members.map((m) => [m.user_id, m]));
   const active = [...input.open, ...input.pending];
 
-  const buckets: Record<RelayDecisionBucket, RelayDecisionRow[]> = {
-    patient_waiting: [],
-    team_waiting: [],
-    approvals: [],
+  const buckets: Record<RelayPracticeBucket, RelayDecisionRow[]> = {
+    waiting_on_you: [],
+    waiting_on_team: [],
     overdue: [],
   };
+
+  let approvalsCount = 0;
+  let teamRequestsCount = 0;
+  let recallBlockedCount = 0;
+  let callbacksCount = 0;
+  let appointmentsCount = 0;
+  let aftercareCount = 0;
 
   const sorted = [...active].sort((a, b) => {
     const ea = a.submission_id ? enrichments.get(a.submission_id) : undefined;
@@ -240,44 +420,66 @@ export function buildRelayDecisionsSnapshot(input: {
 
   for (const task of sorted) {
     const enrichment = task.submission_id ? enrichments.get(task.submission_id) : undefined;
-    const bucket = resolveDecisionBucket(task, enrichment, input.isDoctor);
+    const legacy = resolveLegacyBucket(task, enrichment, input.isDoctor);
+    const category = resolveRelayTaskCategory(task);
+    const bucket = resolvePracticeBucket(task, enrichment, input.isDoctor, input.userId);
     if (!bucket) continue;
+
+    if (legacy === "approvals") approvalsCount += 1;
+    if (legacy === "team_waiting") teamRequestsCount += 1;
+    if (category === "recall" && task.status !== "done") recallBlockedCount += 1;
+    if (category === "patient_contact") callbacksCount += 1;
+    if (category === "appointment") appointmentsCount += 1;
+    if (category === "aftercare") aftercareCount += 1;
+
     buckets[bucket].push(mapDecisionRow(task, bucket, membersById, enrichment));
   }
 
-  const counts = {
-    patientWaiting: buckets.patient_waiting.length,
-    teamWaiting: buckets.team_waiting.length,
-    approvals: buckets.approvals.length,
+  const attentionCounts: AttentionCounts = {
+    approvals: approvalsCount,
+    teamRequests: teamRequestsCount,
+    recallBlocked: recallBlockedCount,
     overdue: buckets.overdue.length,
+    waitingOnYou: buckets.waiting_on_you.length,
+    waitingOnTeam: buckets.waiting_on_team.length,
+    callbacks: callbacksCount,
+    appointments: appointmentsCount,
+    aftercare: aftercareCount,
+    unreadComms: input.unreadCommsCount ?? 0,
   };
 
-  const areaCount = [
-    counts.patientWaiting,
-    counts.teamWaiting,
-    counts.approvals,
-    counts.overdue,
-  ].filter((n) => n > 0).length;
-
-  const lines = buildSummaryLines(counts);
-
-  const intro =
-    areaCount === 0
-      ? null
-      : areaCount === 1
-        ? "Heute benötigt Ihre Praxis Aufmerksamkeit in 1 Bereich."
-        : `Heute benötigt Ihre Praxis Aufmerksamkeit in ${areaCount} Bereichen.`;
+  const needsAttention = buildAttentionHighlights(attentionCounts, persona);
+  const allClear =
+    buckets.waiting_on_you.length === 0 &&
+    buckets.waiting_on_team.length === 0 &&
+    buckets.overdue.length === 0 &&
+    needsAttention.length === 0;
 
   return {
+    persona,
     summary: {
-      ...counts,
-      areaCount,
-      intro,
-      lines,
+      allClear,
+      todayLabel: formatTodayLabel(),
+      todayCalmLine: allClear
+        ? "Neue Vorgänge erscheinen hier, sobald Patienten oder Team auf die Praxis warten."
+        : null,
     },
-    patientWaiting: buckets.patient_waiting,
-    teamWaiting: buckets.team_waiting,
-    approvals: buckets.approvals,
+    needsAttention,
+    waitingOnYou: buckets.waiting_on_you,
+    waitingOnTeam: buckets.waiting_on_team,
     overdue: buckets.overdue,
   };
+}
+
+/** Hilfsfunktion für künftige Profil-Rollen — priorisiert passende Aufgaben in der Liste. */
+export function sortRowsForPersona(rows: RelayDecisionRow[], tasksById: Map<string, MyTask>, persona: RelayPracticePersona): RelayDecisionRow[] {
+  return [...rows].sort((a, b) => {
+    const ta = tasksById.get(a.id);
+    const tb = tasksById.get(b.id);
+    const fa = ta ? taskCategoryMatchesPersonaFocus(ta, persona) : false;
+    const fb = tb ? taskCategoryMatchesPersonaFocus(tb, persona) : false;
+    if (fa && !fb) return -1;
+    if (!fa && fb) return 1;
+    return 0;
+  });
 }

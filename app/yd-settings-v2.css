@@ -3,18 +3,18 @@
  */
 
 .yd-awaken-canvas:has(.yd-settings-v2) {
-  padding: 0.75rem 1rem 1.25rem max(0.5rem, env(safe-area-inset-left));
+  padding: 0.75rem 1.25rem 1.5rem max(1rem, env(safe-area-inset-left));
 }
 
 @media (min-width: 768px) {
   .yd-awaken-canvas:has(.yd-settings-v2) {
-    padding: 0.85rem 1.35rem 1.75rem 0.5rem;
+    padding: 1rem 2rem 2.25rem max(1.25rem, env(safe-area-inset-left));
   }
 }
 
 @media (min-width: 1024px) {
   .yd-awaken-canvas:has(.yd-settings-v2) {
-    padding: 0.95rem 1.5rem 2rem 0.35rem;
+    padding: 1.15rem 2.5rem 2.5rem max(1.5rem, env(safe-area-inset-left));
   }
 }
 
@@ -49,28 +49,30 @@
 
 .yd-settings-v2__frame {
   width: 100%;
-  max-width: 1180px;
-  margin: 0;
-  padding: 0;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 0.25rem 2rem;
 }
 
 .yd-settings-v2__layout {
   display: grid;
-  gap: 0.85rem;
+  gap: 1.25rem;
   align-items: start;
 }
 
 @media (min-width: 960px) {
   .yd-settings-v2__layout {
-    grid-template-columns: 200px minmax(0, 1fr);
-    gap: 1rem 1.35rem;
+    grid-template-columns: 220px minmax(0, 680px);
+    gap: 2.75rem 3.25rem;
+    justify-content: center;
+    margin: 0 auto;
   }
 }
 
 @media (min-width: 1100px) {
   .yd-settings-v2__layout {
-    grid-template-columns: 212px minmax(0, 1fr);
-    gap: 1.1rem 1.5rem;
+    grid-template-columns: 232px minmax(0, 700px);
+    gap: 3rem 3.75rem;
   }
 }
 
@@ -110,7 +112,7 @@
 }
 
 .yd-settings-v2__nav-group + .yd-settings-v2__nav-group {
-  margin-top: 1.15rem;
+  margin-top: 1.65rem;
 }
 
 @media (max-width: 959px) {
@@ -140,9 +142,9 @@
 .yd-settings-v2__nav-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.55rem;
+  gap: 0.65rem;
   width: 100%;
-  padding: 0.55rem 0.6rem;
+  padding: 0.65rem 0.7rem;
   border: 1px solid transparent;
   border-radius: 11px;
   background: transparent;
@@ -208,17 +210,19 @@
 }
 
 .yd-settings-v2__panel {
-  padding: 1.35rem 1.2rem 1.55rem;
-  border: 1px solid var(--yd-brand-border-soft);
-  border-radius: 16px;
+  padding: 1.75rem 1.35rem 2rem;
+  border: 1px solid rgba(160, 178, 198, 0.32);
+  border-radius: 24px;
   background: var(--yd-settings-panel);
-  box-shadow: var(--yd-brand-card-shadow);
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.08);
 }
 
 @media (min-width: 640px) {
   .yd-settings-v2__panel {
-    padding: 1.55rem 1.65rem 1.75rem;
-    border-radius: 18px;
+    padding: 2rem 2rem 2.25rem;
+    border-radius: 24px;
   }
 }
 
@@ -228,28 +232,35 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.85rem 1.25rem;
-  margin-bottom: 1.35rem;
+  margin-bottom: 1.75rem;
 }
 
 .yd-settings-v2__panel-head--solo {
-  margin-bottom: 1.15rem;
+  margin-bottom: 1.65rem;
 }
 
 .yd-settings-v2__panel-title {
   margin: 0;
   font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.1875rem;
+  font-size: clamp(1.25rem, 2.4vw, 1.4375rem);
   font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  letter-spacing: -0.025em;
+  line-height: 1.22;
   color: var(--yd-brand-navy);
 }
 
 .yd-settings-v2__panel-copy {
-  margin: 0.35rem 0 0;
-  max-width: 52ch;
-  font-size: 0.8125rem;
-  line-height: 1.55;
+  margin: 0.5rem 0 0;
+  max-width: 48ch;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--yd-brand-muted);
+}
+
+.yd-settings-v2__save-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
   color: var(--yd-brand-muted);
 }
 
@@ -291,15 +302,15 @@
 .yd-settings-v2__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1.15rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--yd-brand-border-soft);
+  gap: 0.35rem 1.35rem;
+  margin-bottom: 1.65rem;
+  padding-bottom: 0.15rem;
 }
 
 .yd-settings-v2__tab {
   position: relative;
-  margin-bottom: -1px;
-  padding: 0.5rem 0.1rem;
+  margin-bottom: 0;
+  padding: 0.55rem 0.15rem;
   border: none;
   background: transparent;
   font-size: 0.8125rem;
@@ -329,36 +340,35 @@
   background: var(--yd-brand-accent-deep);
 }
 
-/* ── Roles table ── */
-.yd-settings-v2__roles-table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin: 0 -0.15rem;
-  padding: 0 0.15rem;
+/* ── Roles (card grid) ── */
+.yd-settings-v2__roles-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
 }
 
-.yd-settings-v2__roles-table {
-  width: 100%;
-  min-width: 42rem;
-  border-collapse: collapse;
-  font-size: 0.8125rem;
+.yd-settings-v2__role-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 1.35rem 1.25rem 1.45rem;
+  border-radius: 18px;
+  background: rgba(248, 252, 255, 0.45);
 }
 
-.yd-settings-v2__roles-table th {
-  padding: 0 0.65rem 0.7rem 0;
-  border-bottom: 1px solid var(--yd-brand-border-soft);
-  font-size: 0.5625rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-align: left;
+.yd-settings-v2__role-card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.yd-settings-v2__role-card-label {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--yd-brand-faint);
-}
-
-.yd-settings-v2__roles-table td {
-  padding: 0.95rem 0.65rem 0.95rem 0;
-  border-bottom: 1px solid var(--yd-brand-border-soft);
-  vertical-align: top;
 }
 
 .yd-settings-v2__role-cell {
@@ -431,14 +441,14 @@
 .yd-settings-v2__perm-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 0.45rem 0.5rem;
 }
 
 .yd-settings-v2__perm {
   display: inline-flex;
   align-items: center;
-  gap: 0.22rem;
-  padding: 0.22rem 0.42rem;
+  gap: 0.28rem;
+  padding: 0.32rem 0.55rem;
   border-radius: 999px;
   background: rgba(47, 128, 237, 0.06);
   font-size: 0.625rem;
@@ -469,16 +479,16 @@
 /* ── Info banner ── */
 .yd-settings-v2__info-banner {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1.35rem;
-  padding: 1rem 1.05rem;
-  border-radius: 14px;
+  gap: 0.85rem;
+  margin-top: 1.75rem;
+  padding: 1.25rem 1.25rem;
+  border-radius: 18px;
   background: linear-gradient(
     165deg,
     rgba(239, 246, 255, 0.95) 0%,
     rgba(248, 252, 255, 0.92) 100%
   );
-  border: 1px solid rgba(26, 79, 156, 0.12);
+  border: 1px solid rgba(26, 79, 156, 0.1);
 }
 
 .yd-settings-v2__info-banner-icon {
@@ -524,7 +534,7 @@
 .yd-settings-v2__fields {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.65rem;
 }
 
 .yd-settings-v2__field-label {
@@ -770,8 +780,8 @@
 }
 
 .yd-settings-v2__field--divider {
-  padding-top: 0.45rem;
-  border-top: 1px solid var(--yd-brand-border-soft);
+  padding-top: 0.75rem;
+  margin-top: 0.35rem;
 }
 
 .yd-settings-v2__logout-btn {
@@ -805,26 +815,25 @@
 .yd-settings-v2__member-list {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin-bottom: 1.1rem;
+  gap: 1.15rem;
+  margin-bottom: 1.5rem;
 }
 
 .yd-settings-v2__member-list--compact {
-  margin-bottom: 0.85rem;
+  margin-bottom: 1.15rem;
 }
 
 .yd-settings-v2__invite-box {
-  margin-top: 0.85rem;
-  padding: 1.05rem 1.1rem;
-  border: 1px solid var(--yd-brand-border-soft);
-  border-radius: 14px;
-  background: rgba(248, 252, 255, 0.65);
+  margin-top: 1.25rem;
+  padding: 1.35rem 1.35rem 1.45rem;
+  border: 1px solid rgba(160, 178, 198, 0.28);
+  border-radius: 18px;
+  background: rgba(248, 252, 255, 0.55);
 }
 
 .yd-settings-v2__invite-summary {
-  margin-top: 1.1rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--yd-brand-border-soft);
+  margin-top: 1.5rem;
+  padding-top: 0;
 }
 
 .yd-settings-v2__invite-summary-list {
@@ -837,7 +846,7 @@
   display: flex;
   justify-content: space-between;
   gap: 0.85rem;
-  padding: 0.4rem 0;
+  padding: 0.55rem 0;
   font-size: 0.8125rem;
   color: var(--yd-brand-body);
 }
@@ -850,6 +859,258 @@
   background: rgba(254, 242, 242, 0.65);
   font-size: 0.8125rem;
   color: #b91c1c;
+}
+
+/* ── Opening hours ── */
+.yd-settings-v2__hours-fieldset {
+  margin: 0;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+
+.yd-settings-v2__hours-fieldset:disabled {
+  opacity: 0.58;
+  pointer-events: none;
+}
+
+.yd-settings-v2__hours-block {
+  padding: 1.5rem 0;
+}
+
+.yd-settings-v2__hours-block:first-child {
+  padding-top: 0;
+}
+
+.yd-settings-v2__hours-block + .yd-settings-v2__hours-block {
+  margin-top: 0.5rem;
+}
+
+.yd-settings-v2__hours-block-head {
+  margin-bottom: 1.15rem;
+}
+
+.yd-settings-v2__hours-block-title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--yd-brand-navy);
+}
+
+.yd-settings-v2__hours-block-copy {
+  margin: 0.4rem 0 0;
+  max-width: 46ch;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--yd-brand-muted);
+}
+
+.yd-settings-v2__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+}
+
+.yd-settings-v2__toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.yd-settings-v2__toggle-ui {
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(160, 178, 198, 0.45);
+  transition: background 180ms ease;
+}
+
+.yd-settings-v2__toggle-ui::after {
+  content: "";
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 35, 58, 0.12);
+  transition: transform 180ms ease;
+}
+
+.yd-settings-v2__toggle input:checked + .yd-settings-v2__toggle-ui {
+  background: var(--yd-brand-accent-deep);
+}
+
+.yd-settings-v2__toggle input:checked + .yd-settings-v2__toggle-ui::after {
+  transform: translateX(1.25rem);
+}
+
+.yd-settings-v2__toggle-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--yd-brand-navy);
+}
+
+.yd-settings-v2__hours-days {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.yd-settings-v2__hours-day-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.yd-settings-v2__hours-day-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--yd-brand-navy);
+}
+
+.yd-settings-v2__hours-closed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--yd-brand-muted);
+  cursor: pointer;
+}
+
+.yd-settings-v2__hours-closed--inline {
+  margin: 0.75rem 0 0.35rem;
+}
+
+.yd-settings-v2__hours-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.yd-settings-v2__hours-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.yd-settings-v2__hours-slot-icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: var(--yd-brand-faint);
+}
+
+.yd-settings-v2__hours-time {
+  min-height: 2.375rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(160, 178, 198, 0.32);
+  border-radius: 10px;
+  background: var(--yd-brand-ivory);
+  font-size: 0.875rem;
+  color: var(--yd-brand-ink);
+}
+
+.yd-settings-v2__hours-slot-sep {
+  font-size: 0.75rem;
+  color: var(--yd-brand-faint);
+}
+
+.yd-settings-v2__hours-slot-remove,
+.yd-settings-v2__hours-special-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--yd-brand-faint);
+  cursor: pointer;
+}
+
+.yd-settings-v2__hours-slot-remove:hover,
+.yd-settings-v2__hours-special-remove:hover {
+  background: rgba(248, 252, 255, 0.95);
+  color: var(--yd-brand-muted);
+}
+
+.yd-settings-v2__hours-add-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  padding: 0.35rem 0;
+  border: none;
+  background: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--yd-brand-accent-deep);
+  cursor: pointer;
+}
+
+.yd-settings-v2__hours-closed-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--yd-brand-faint);
+}
+
+.yd-settings-v2__hours-special-list {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.yd-settings-v2__hours-special {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.2rem 1.35rem;
+  border-radius: 16px;
+  background: rgba(248, 252, 255, 0.55);
+}
+
+.yd-settings-v2__hours-special-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.yd-settings-v2__hours-special-kind {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--yd-brand-accent-deep);
+}
+
+.yd-settings-v2__hours-special-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.yd-settings-v2__hours-special-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
 }
 
 .sr-only {

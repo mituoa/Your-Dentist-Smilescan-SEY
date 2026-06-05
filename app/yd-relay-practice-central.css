@@ -1,0 +1,958 @@
+/**
+ * Relay — Praxiszentrale (Polish: Tracker / Dashboard Materialität)
+ * Keine neue IA — nur Typo, Abstände, Flächen, Leerzustände.
+ */
+
+.yd-relay-central {
+  --yd-relay-ink: #0c1929;
+  --yd-relay-muted: #5e7389;
+  --yd-relay-faint: #667d92;
+  --yd-relay-border: rgba(180, 198, 218, 0.35);
+  --yd-relay-border-soft: rgba(186, 203, 222, 0.55);
+  --yd-relay-surface-inset: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.375rem;
+}
+
+/* —— Tabs (Tracker Filter-Chips) —— */
+.yd-relay-central__chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.125rem 0 0.875rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.28);
+}
+
+.yd-relay-central__tab-scroll {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 !important;
+}
+
+.yd-relay-central__tab-scroll .yd-tracker-filter-chips {
+  min-width: 0;
+  width: auto;
+}
+
+.yd-relay-central .yd-tracker-v4-new-case.yd-relay-practice__create {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* —— Body-Rhythmus —— */
+.yd-relay-central__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.375rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Statuszeile — Tracker v16 Breakdown */
+.yd-relay-central__status-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem 1.375rem;
+  margin: 0 !important;
+  padding: 0 0.125rem;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--yd-relay-muted);
+}
+
+.yd-relay-central__status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.yd-relay-central__status-dot::before {
+  content: "";
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.yd-relay-central__status-dot--attention::before {
+  background: #7c6aad;
+  box-shadow: 0 0 0 3px rgba(124, 106, 173, 0.14);
+}
+
+.yd-relay-central__status-dot--teamwork::before {
+  background: #4a7ec9;
+  box-shadow: 0 0 0 3px rgba(74, 126, 201, 0.14);
+}
+
+/* —— Summary-Karten (Dashboard-Fläche, dezente Tönung) —— */
+.yd-relay-central__summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.yd-relay-central-summary {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-height: 7.5rem;
+  padding: 1.125rem 1.125rem 1.05rem !important;
+  border-radius: 24px !important;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    box-shadow 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease,
+    background-color 280ms ease;
+}
+
+.yd-relay-central-summary:hover {
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 14px 36px rgba(30, 91, 189, 0.09) !important;
+}
+
+.yd-relay-central-summary--active {
+  border-color: rgba(26, 79, 156, 0.28) !important;
+  box-shadow:
+    0 0 0 1px rgba(26, 79, 156, 0.12),
+    0 14px 36px rgba(30, 91, 189, 0.1) !important;
+}
+
+.yd-relay-central-summary--attention {
+  background: linear-gradient(168deg, #ffffff 0%, rgba(250, 247, 255, 0.72) 100%) !important;
+  border-color: rgba(167, 139, 250, 0.2) !important;
+}
+
+.yd-relay-central-summary--teamwork {
+  background: linear-gradient(168deg, #ffffff 0%, rgba(245, 249, 255, 0.72) 100%) !important;
+  border-color: rgba(96, 165, 250, 0.2) !important;
+}
+
+.yd-relay-central-summary--handovers {
+  background: linear-gradient(168deg, #ffffff 0%, rgba(244, 253, 250, 0.72) 100%) !important;
+  border-color: rgba(45, 212, 191, 0.2) !important;
+}
+
+.yd-relay-central-summary--practice {
+  background: linear-gradient(168deg, #ffffff 0%, rgba(255, 250, 245, 0.72) 100%) !important;
+  border-color: rgba(251, 146, 60, 0.2) !important;
+}
+
+.yd-relay-central-summary__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 0.625rem;
+  margin-bottom: 0.2rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(186, 203, 222, 0.35);
+  box-shadow: var(--yd-relay-surface-inset);
+}
+
+.yd-relay-central-summary__icon--attention {
+  color: #6d56a8;
+}
+
+.yd-relay-central-summary__icon--teamwork {
+  color: #3b6eb5;
+}
+
+.yd-relay-central-summary__icon--handovers {
+  color: #0d9488;
+}
+
+.yd-relay-central-summary__icon--practice {
+  color: #c27830;
+}
+
+/* Dashboard KPI-Typo */
+.yd-relay-central-summary__count {
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--yd-relay-ink);
+}
+
+.yd-relay-central-summary__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.35;
+  color: var(--yd-relay-ink);
+}
+
+.yd-relay-central-summary__hint {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--yd-relay-muted);
+}
+
+.yd-relay-central-summary__arrow {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  color: rgba(12, 25, 41, 0.24);
+  transition: transform 200ms ease, color 200ms ease;
+}
+
+.yd-relay-central-summary:hover .yd-relay-central-summary__arrow,
+.yd-relay-central-summary--active .yd-relay-central-summary__arrow {
+  color: #1a4f9c;
+  transform: translateX(2px);
+}
+
+/* Pick / Leer — Tracker-empty */
+.yd-relay-central__pick {
+  margin: 0;
+  padding: 1.375rem 1.25rem !important;
+  border-radius: 24px !important;
+}
+
+.yd-relay-central__pick.yd-tracker-empty {
+  margin: 0;
+}
+
+/* —— Expand-Panel —— */
+.yd-relay-central-panel {
+  overflow: hidden;
+  border-radius: 24px !important;
+}
+
+.yd-relay-central-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.875rem;
+  padding: 1.125rem 1.25rem 0.875rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-relay-central-panel__head-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.yd-relay-central-panel__title {
+  margin: 0 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.25 !important;
+  color: #0a1628 !important;
+}
+
+.yd-relay-central-panel__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--yd-relay-border-soft);
+  background: rgba(248, 250, 252, 0.98);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(12, 25, 41, 0.58);
+}
+
+.yd-relay-central-panel__all {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #1a4f9c;
+  text-decoration: none;
+}
+
+.yd-relay-central-panel__all:hover {
+  text-decoration: underline;
+}
+
+.yd-relay-central-panel__list {
+  margin: 0;
+  padding: 0.875rem 1rem 1.125rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.yd-relay-central-panel__empty {
+  margin: 0.875rem 1rem 1.125rem;
+  padding: 1.125rem 1.125rem 1.25rem;
+}
+
+.yd-relay-central-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+/* —— Task-Karte (Tracker v12 Körper) —— */
+.yd-relay-central-task__surface {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 4.5rem;
+  padding: 1.05rem 0.9rem 1.05rem 1rem;
+  border: 1px solid var(--yd-relay-border-soft);
+  border-radius: 0.75rem;
+  background: rgba(248, 251, 255, 0.92);
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.04);
+  transition:
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.yd-relay-central-task__surface:hover {
+  border-color: rgba(186, 203, 222, 0.65);
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(12, 25, 41, 0.04),
+    0 4px 14px rgba(12, 25, 41, 0.05);
+}
+
+.yd-relay-central-task__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(186, 203, 222, 0.28);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.yd-relay-central-task__icon--attention {
+  color: #6d56a8;
+}
+
+.yd-relay-central-task__icon--teamwork {
+  color: #3b6eb5;
+}
+
+.yd-relay-central-task__icon--handovers {
+  color: #0d9488;
+}
+
+.yd-relay-central-task__icon--practice {
+  color: #c27830;
+}
+
+.yd-relay-central-task__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.yd-relay-central-task__title {
+  color: var(--yd-relay-ink) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-relay-central-task__meta {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-relay-central-task__pill {
+  flex-shrink: 0;
+  display: none;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .yd-relay-central-task__pill {
+    display: inline-flex;
+  }
+}
+
+.yd-relay-central-task__pill--attention {
+  background: rgba(124, 106, 173, 0.1);
+  color: #5b4a8a;
+}
+
+.yd-relay-central-task__pill--teamwork {
+  background: rgba(59, 110, 181, 0.1);
+  color: #2f5f9e;
+}
+
+.yd-relay-central-task__pill--handovers {
+  background: rgba(13, 148, 136, 0.1);
+  color: #0f766e;
+}
+
+.yd-relay-central-task__pill--practice {
+  background: rgba(194, 120, 48, 0.1);
+  color: #9a5a1a;
+}
+
+.yd-relay-central-task__action {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1a4f9c;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.yd-relay-central-task__action:hover {
+  text-decoration: underline;
+}
+
+.yd-relay-central-task__more {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  color: var(--yd-relay-faint);
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.yd-relay-central-task__more:hover {
+  background: rgba(248, 250, 252, 0.98);
+  color: var(--yd-relay-ink);
+}
+
+/* —— Übergaben —— */
+.yd-relay-central-handover {
+  padding: 0 !important;
+  border-radius: 24px !important;
+  overflow: hidden;
+}
+
+.yd-relay-central-handover__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.875rem;
+  padding: 1.125rem 1.25rem 0.875rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.2);
+}
+
+.yd-relay-central-handover__title {
+  margin: 0 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.25 !important;
+  color: #0a1628 !important;
+}
+
+.yd-relay-central-handover__all {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #1a4f9c;
+  text-decoration: none;
+}
+
+.yd-relay-central-handover__empty {
+  margin: 0.875rem 1rem 1.125rem;
+  padding: 1.125rem 1.125rem 1.25rem;
+}
+
+.yd-relay-central-handover__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.875rem 1rem 1.125rem;
+  list-style: none;
+}
+
+.yd-relay-central-handover__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  min-height: 4.75rem;
+  padding: 0.875rem 0.95rem;
+  border: 1px solid rgba(180, 198, 218, 0.28);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.03);
+  transition:
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.yd-relay-central-handover__item:hover {
+  background: #ffffff;
+  border-color: var(--yd-relay-border-soft);
+  box-shadow: 0 4px 14px rgba(12, 25, 41, 0.05);
+}
+
+.yd-relay-central-handover__item-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(186, 203, 222, 0.28);
+  background: rgba(240, 253, 250, 0.95);
+  color: #0d9488;
+}
+
+.yd-relay-central-handover__item-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yd-relay-central-handover__item-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  color: var(--yd-relay-ink);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.yd-relay-central-handover__item-meta {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--yd-relay-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* —— Erstellen-Menü —— */
+.yd-relay-create-menu {
+  position: relative;
+}
+
+.yd-relay-create-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  right: 0;
+  z-index: 40;
+  min-width: 16rem;
+  margin: 0;
+  padding: 0.375rem;
+  list-style: none;
+  border: 1px solid var(--yd-relay-border);
+  border-radius: 0.875rem;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(12, 25, 41, 0.1);
+}
+
+.yd-relay-create-menu__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.yd-relay-create-menu__item:hover {
+  background: rgba(248, 250, 252, 0.98);
+}
+
+.yd-relay-create-menu__item strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--yd-relay-ink);
+}
+
+.yd-relay-create-menu__item small {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--yd-relay-muted);
+  line-height: 1.35;
+}
+
+.yd-relay-create-menu__item svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: #1a4f9c;
+}
+
+/* —— Nachrichten —— */
+.yd-relay-practice__messages,
+.yd-relay-central .yd-relay-practice__messages {
+  min-height: 0;
+  flex: 1;
+}
+
+.yd-relay-practice__messages-shell {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px !important;
+  overflow: hidden;
+}
+
+.yd-relay-practice__messages-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.125rem 1.25rem 0.95rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-relay-practice__messages-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.625rem;
+  padding: 0 0.95rem;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--yd-relay-faint);
+}
+
+.yd-relay-practice__messages-search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--yd-relay-ink);
+  outline: none;
+}
+
+.yd-relay-practice__messages-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.yd-relay-practice__messages-list-pane {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.875rem 1rem 1.125rem;
+}
+
+.yd-relay-practice__messages-thread-pane {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-relay-practice__panel-empty {
+  margin: 0.875rem;
+  padding: 1.125rem 1.125rem 1.25rem;
+}
+
+.yd-relay-practice__panel-title {
+  margin: 0 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.022em !important;
+  color: #0a1628 !important;
+}
+
+.yd-relay-practice__thread-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0.875rem !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+  border: 1px solid rgba(180, 198, 218, 0.28) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: none !important;
+}
+
+.yd-relay-practice__thread-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.875rem;
+  padding: 0.95rem 1.05rem 0.75rem;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.2);
+}
+
+.yd-relay-practice__thread-head-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.yd-relay-practice__thread-back {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1a4f9c;
+  cursor: pointer;
+}
+
+.yd-relay-practice__thread-links a {
+  color: #1a4f9c;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.yd-relay-practice__thread-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.875rem 1.05rem;
+}
+
+.yd-relay-practice__thread-messages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.yd-relay-practice__thread-message {
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(180, 198, 218, 0.22);
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.yd-relay-practice__thread-message--own {
+  background: rgba(236, 245, 255, 0.88);
+}
+
+.yd-relay-practice__thread-message-meta {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--yd-relay-faint);
+  margin-bottom: 0.2rem;
+}
+
+.yd-relay-practice__thread-message-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--yd-relay-ink);
+  white-space: pre-wrap;
+}
+
+.yd-relay-practice__thread-compose {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem 1.05rem 1.05rem;
+  border-top: 1px solid rgba(180, 198, 218, 0.2);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.yd-relay-practice__thread-input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid rgba(180, 198, 218, 0.32);
+  border-radius: 0.75rem;
+  font-size: 16px;
+  resize: vertical;
+}
+
+.yd-relay-practice__thread-send {
+  align-self: flex-end;
+}
+
+.yd-relay-practice__thread-send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.yd-relay-practice__thread-status {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--yd-relay-muted);
+}
+
+.yd-relay-practice__thread-status--error {
+  color: #b42318;
+}
+
+.yd-relay-practice__panel-empty--thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 11rem;
+  margin: 0.875rem;
+}
+
+.yd-relay-practice__panel-list {
+  padding: 0.65rem 0.75rem 1rem !important;
+  gap: 0.65rem;
+}
+
+.yd-relay-practice__card-link {
+  display: flex !important;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.yd-relay-practice__card-action {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1a4f9c;
+}
+
+/* Relay: dash-section außerhalb Dashboard */
+.yd-relay-central .yd-dash-section {
+  color: #0a1628;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.25;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .yd-relay-central__summary-grid,
+  .yd-relay-central-handover__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .yd-relay-central {
+    gap: 1.125rem;
+  }
+
+  .yd-relay-central__body {
+    gap: 1.125rem;
+  }
+
+  .yd-relay-central__summary-grid,
+  .yd-relay-central-handover__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .yd-relay-central__chrome {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .yd-relay-central-task__surface {
+    flex-wrap: wrap;
+  }
+
+  .yd-relay-central-task__main {
+    flex: 1 1 100%;
+    order: 2;
+  }
+
+  .yd-relay-central-task__action {
+    order: 3;
+  }
+
+  .yd-relay-practice__messages-thread-pane:not(:has(.yd-relay-practice__thread-panel)) {
+    display: none;
+  }
+
+  .yd-relay-practice__messages-body:has(.yd-relay-practice__thread-panel) .yd-relay-practice__messages-list-pane {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .yd-relay-practice__messages-body {
+    flex-direction: row;
+  }
+
+  .yd-relay-practice__messages-list-pane {
+    flex: 0 0 min(21rem, 36%);
+    border-right: 1px solid rgba(180, 198, 218, 0.22);
+  }
+
+  .yd-relay-practice__messages-thread-pane {
+    flex: 1;
+    border-top: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-workspace main:has(.yd-relay-central) {
+    padding-bottom: 1.5rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-relay-central-summary,
+  .yd-relay-central-task__surface,
+  .yd-relay-central-handover__item {
+    transition: none;
+  }
+}

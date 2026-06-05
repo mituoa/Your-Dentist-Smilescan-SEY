@@ -114,27 +114,22 @@ export function RelayMessagesPanel({
             <p className="relay-messages-list-title">Praxisübergaben</p>
             <p className="relay-messages-list-sub">Intern · mit Lesebestätigung</p>
           </div>
-          {!newMessageOpen ? (
-            <button
-              type="button"
-              className="relay-messages-new-btn"
-              onClick={() => setNewMessageOpen(true)}
-            >
-              <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              Neu
-            </button>
-          ) : null}
+          <button
+            type="button"
+            className="relay-messages-new-btn"
+            onClick={() => setNewMessageOpen(true)}
+          >
+            <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+            Neu
+          </button>
         </div>
 
-        {newMessageOpen ? (
-          <NewRelayMessageModal
-            open={newMessageOpen}
-            onClose={() => setNewMessageOpen(false)}
-            assignableMembers={assignableMembers}
-            currentUserId={currentUserId}
-            variant="inline"
-          />
-        ) : null}
+        <NewRelayMessageModal
+          open={newMessageOpen}
+          onClose={() => setNewMessageOpen(false)}
+          assignableMembers={assignableMembers}
+          currentUserId={currentUserId}
+        />
 
         {conversations.length === 0 ? (
           <div className="relay-messages-empty">

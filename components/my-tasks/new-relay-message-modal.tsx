@@ -1,14 +1,30 @@
 "use client";
 
-import { useEffect, useId, useState, useTransition } from "react";
-import { createPortal } from "react-dom";
-import { MessageSquarePlus, X } from "lucide-react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
+import { MessageSquarePlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { sendRelayMessageToRecipient } from "@/app/(protected)/my-tasks/messages-actions";
+import { fetchAssignableMembersForTaskCreate } from "@/app/(protected)/my-tasks/actions";
+import { MedicalFormShell } from "@/components/forms/medical-form-shell";
+import {
+  MedicalFormFieldStack,
+  MedicalFormFooterActions,
+  MedicalFormLabel,
+  MedicalFormSection,
+  MedicalFormSegmented,
+  MedicalFormTextarea,
+} from "@/components/forms/medical-form-ui";
 import type { AssignableMember } from "@/lib/queries/team-members";
+import { cn } from "@/lib/utils";
 
-type AssignMode = "person" | "all";
+type MsgRecipientMode = "person" | "people" | "team";
+
+const MSG_RECIPIENT_OPTIONS = [
+  { id: "person" as const, label: "Einzelperson" },
+  { id: "people" as const, label: "Mehrere" },
+  { id: "team" as const, label: "Gesamtes Team" },
+];
 
 type NewRelayMessageModalTriggerProps = {
   className?: string;
@@ -51,244 +67,245 @@ type NewRelayMessageModalProps = {
   onClose: () => void;
   assignableMembers?: AssignableMember[];
   currentUserId?: string;
-  /** Inline panel at trigger site — no fullscreen overlay. */
-  variant?: "modal" | "inline";
+  submissionId?: string | null;
 };
 
 function RelayMessageCreateForm({
-  titleId,
   onClose,
   assignableMembers: membersProp,
-  currentUserId,
-  inline,
-}: {
-  titleId: string;
-  onClose: () => void;
-  assignableMembers?: AssignableMember[];
-  currentUserId?: string;
-  inline?: boolean;
-}) {
+  currentUserId: currentUserIdProp,
+  submissionId = null,
+}: Omit<NewRelayMessageModalProps, "open">) {
   const router = useRouter();
-  const [assignMode, setAssignMode] = useState<AssignMode>("person");
-  const [recipientId, setRecipientId] = useState("");
-  const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const errorRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const [members, setMembers] = useState<AssignableMember[]>(membersProp ?? []);
+  const [membersError, setMembersError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(currentUserIdProp ?? null);
+
+  const [msgRecipientMode, setMsgRecipientMode] = useState<MsgRecipientMode>("person");
+  const [msgRecipientId, setMsgRecipientId] = useState("");
+  const [msgRecipientIds, setMsgRecipientIds] = useState<string[]>([]);
+  const [messageBody, setMessageBody] = useState("");
+  const [msgSubmissionId, setMsgSubmissionId] = useState(submissionId ?? "");
+
+  const busy = isPending;
 
   useEffect(() => {
-    setError(null);
     if (membersProp?.length) {
       setMembers(membersProp);
       return;
     }
-    void import("@/app/(protected)/my-tasks/actions").then((m) => {
-      void m.fetchAssignableMembersForTaskCreate().then((res) => {
-        if (res.ok && res.members) setMembers(res.members);
-      });
+    let cancelled = false;
+    void fetchAssignableMembersForTaskCreate().then((res) => {
+      if (cancelled) return;
+      if (!res.ok) {
+        setMembers([]);
+        setMembersError(res.error);
+        return;
+      }
+      setMembersError(null);
+      setMembers(res.members);
+      if (res.currentUserId) setCurrentUserId(res.currentUserId);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [membersProp]);
 
-  const submit = () => {
+  useEffect(() => {
+    if (!error) return;
+    errorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [error]);
+
+  const close = () => {
+    if (busy) return;
+    onClose();
+  };
+
+  const toggleMsgMember = (id: string) => {
+    setMsgRecipientIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSubmit = () => {
+    if (!messageBody.trim()) {
+      setError("Bitte schreiben Sie eine Nachricht.");
+      return;
+    }
+    if (msgRecipientMode === "person" && !msgRecipientId) {
+      setError("Bitte wählen Sie einen Empfänger.");
+      return;
+    }
+    if (msgRecipientMode === "people" && msgRecipientIds.length === 0) {
+      setError("Bitte wählen Sie mindestens eine Person.");
+      return;
+    }
     setError(null);
+
     startTransition(async () => {
       const res = await sendRelayMessageToRecipient({
-        recipientUserId: assignMode === "person" ? recipientId : undefined,
-        assignAllTeam: assignMode === "all",
-        body,
+        assignAllTeam: msgRecipientMode === "team",
+        recipientUserId: msgRecipientMode === "person" ? msgRecipientId : undefined,
+        recipientUserIds: msgRecipientMode === "people" ? msgRecipientIds : undefined,
+        body: messageBody.trim(),
+        submissionId: msgSubmissionId.trim() || null,
       });
       if (res.error) {
         setError(res.error);
         return;
       }
       onClose();
-      setBody("");
-      setRecipientId("");
+      setMessageBody("");
+      setMsgRecipientId("");
+      setMsgRecipientIds([]);
       if (res.conversationId) {
-        router.replace(`/relay?section=handoffs&conversation=${res.conversationId}`);
+        router.replace(`/relay?tab=nachrichten&conversation=${res.conversationId}`);
       }
       router.refresh();
     });
   };
 
-  const shellClass = inline
-    ? "yd-relay-message-create-panel"
-    : "yd-clinical-control max-h-[min(92dvh,640px)] w-full overflow-y-auto rounded-t-[20px] border border-[rgba(15,23,42,0.08)] bg-white p-5 shadow-xl sm:max-w-lg sm:rounded-2xl";
-
   return (
-    <div
-      role="dialog"
-      aria-modal={inline ? undefined : true}
-      aria-labelledby={titleId}
-      className={shellClass}
-      onClick={inline ? undefined : (e) => e.stopPropagation()}
+    <MedicalFormShell
+      title="Interne Nachricht"
+      subtitle="Übergabe oder Hinweis an Kolleginnen und Kollegen — kein Patientenkanal."
+      onClose={close}
+      closeDisabled={busy}
+      ariaLabel="Interne Nachricht"
+      footer={
+        <MedicalFormFooterActions
+          onCancel={close}
+          cancelDisabled={busy}
+          primaryLabel="Nachricht senden"
+          primaryPendingLabel="Wird gesendet…"
+          onPrimary={handleSubmit}
+          primaryDisabled={!messageBody.trim()}
+          isPending={busy}
+        />
+      }
     >
-      <div className={inline ? "yd-relay-create-panel__head" : "mb-4 flex items-start justify-between gap-3"}>
-        <div>
-          <h2
-            id={titleId}
-            className={inline ? "yd-relay-create-panel__title" : "text-[17px] font-semibold text-[#0F172A]"}
-          >
-            Neue Übergabe
-          </h2>
-          {inline ? (
-            <p className="yd-relay-create-panel__hint">Interne Nachricht — Empfänger und Text in einem Schritt.</p>
+      <div className="yd-medical-form">
+        <div ref={errorRef} aria-live="polite">
+          {error ? (
+            <p className="yd-medical-form-alert" role="alert">
+              {error}
+            </p>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          disabled={isPending}
-          className={
-            inline
-              ? "yd-relay-create-panel__close"
-              : "flex h-10 w-10 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F8FAFC]"
-          }
-          aria-label="Schließen"
+
+        <fieldset
+          disabled={busy}
+          aria-busy={busy}
+          className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
         >
-          <X className={inline ? "h-4 w-4" : "h-5 w-5"} strokeWidth={2} />
-        </button>
+          <MedicalFormSection title="Empfänger">
+            <MedicalFormSegmented
+              name="msg_recipient_mode"
+              aria-label="Empfänger"
+              options={MSG_RECIPIENT_OPTIONS}
+              value={msgRecipientMode}
+              onChange={(v) => v && setMsgRecipientMode(v)}
+              disabled={busy}
+            />
+            {msgRecipientMode === "person" ? (
+              <div className="mt-4">
+                <MedicalFormLabel htmlFor={`${formId}-msg-to`}>Person</MedicalFormLabel>
+                <select
+                  id={`${formId}-msg-to`}
+                  value={msgRecipientId}
+                  onChange={(e) => setMsgRecipientId(e.target.value)}
+                  className={cn("yd-auth-input", "yd-medical-form-select")}
+                >
+                  <option value="">Bitte wählen …</option>
+                  {members
+                    .filter((m) => m.user_id !== currentUserId)
+                    .map((m) => (
+                      <option key={m.user_id} value={m.user_id}>
+                        {m.email}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            ) : null}
+            {msgRecipientMode === "people" ? (
+              <div className="mt-4 space-y-2">
+                <MedicalFormLabel>Personen</MedicalFormLabel>
+                {members
+                  .filter((m) => m.user_id !== currentUserId)
+                  .map((m) => (
+                    <label
+                      key={m.user_id}
+                      className="flex cursor-pointer items-center gap-2 text-[14px] text-[#334155]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={msgRecipientIds.includes(m.user_id)}
+                        onChange={() => toggleMsgMember(m.user_id)}
+                      />
+                      <span className="truncate">{m.email}</span>
+                    </label>
+                  ))}
+              </div>
+            ) : null}
+            {membersError ? (
+              <p className="yd-medical-form-context-note">{membersError}</p>
+            ) : null}
+          </MedicalFormSection>
+
+          <MedicalFormSection title="Nachricht">
+            <MedicalFormLabel htmlFor={`${formId}-msg-body`}>Text</MedicalFormLabel>
+            <MedicalFormTextarea
+              id={`${formId}-msg-body`}
+              value={messageBody}
+              onChange={setMessageBody}
+              rows={5}
+              placeholder="Interne Übergabe formulieren …"
+            />
+          </MedicalFormSection>
+
+          <MedicalFormSection title="Bezug" hint="Optional — Fall oder Tracker-Verknüpfung.">
+            <MedicalFormFieldStack>
+              <div>
+                <MedicalFormLabel htmlFor={`${formId}-msg-sub`} optional>
+                  Tracker-Fall-ID
+                </MedicalFormLabel>
+                <input
+                  id={`${formId}-msg-sub`}
+                  type="text"
+                  value={msgSubmissionId}
+                  onChange={(e) => setMsgSubmissionId(e.target.value)}
+                  className="yd-auth-input"
+                  placeholder="UUID des Falls"
+                  disabled={Boolean(submissionId)}
+                />
+              </div>
+            </MedicalFormFieldStack>
+          </MedicalFormSection>
+        </fieldset>
       </div>
-
-      <fieldset
-        disabled={isPending}
-        aria-busy={isPending}
-        className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
-      >
-        <label
-          htmlFor={`${titleId}-recipient`}
-          className={inline ? "yd-relay-create-panel__label" : "mb-1.5 block text-[12px] font-medium text-[#64748B]"}
-        >
-          Empfänger
-        </label>
-        <select
-          id={`${titleId}-recipient`}
-          value={assignMode === "all" ? "__all__" : recipientId}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (v === "__all__") {
-              setAssignMode("all");
-              setRecipientId("");
-            } else {
-              setAssignMode("person");
-              setRecipientId(v);
-            }
-          }}
-          disabled={isPending}
-          className={
-            inline
-              ? "yd-relay-create-panel__input mb-3"
-              : "mb-4 w-full rounded-lg border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5 text-[14px] text-[#0F172A]"
-          }
-        >
-          <option value="">Empfänger wählen …</option>
-          <option value="__all__">Gesamtes Team</option>
-          {members
-            .filter((m) => m.user_id !== currentUserId)
-            .map((m) => (
-              <option key={m.user_id} value={m.user_id}>
-                {m.email || "Teammitglied"}
-              </option>
-            ))}
-        </select>
-
-        <label
-          htmlFor={`${titleId}-body`}
-          className={inline ? "yd-relay-create-panel__label" : "mb-1.5 block text-[12px] font-medium text-[#64748B]"}
-        >
-          Nachricht
-        </label>
-        <textarea
-          id={`${titleId}-body`}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          disabled={isPending}
-          rows={inline ? 3 : 4}
-          placeholder="Interne Übergabe formulieren …"
-          className={
-            inline
-              ? "yd-relay-create-panel__textarea mb-3"
-              : "mb-4 w-full resize-none rounded-lg border border-[rgba(15,23,42,0.08)] px-3 py-2.5 text-[15px] text-[#0F172A] placeholder:text-[#94A3B8]"
-          }
-        />
-
-        {error ? (
-          <p className={inline ? "yd-relay-create-panel__error" : "mb-3 text-[13px] text-[#991B1B]"} role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        <div
-          className={
-            inline
-              ? "yd-relay-create-panel__footer yd-relay-create-panel__footer--end"
-              : "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
-          }
-        >
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className={
-              inline
-                ? "yd-relay-create-panel__cancel"
-                : "min-h-[2.75rem] rounded-xl border border-[rgba(15,23,42,0.08)] px-4 text-[14px] font-medium text-[#475569]"
-            }
-          >
-            Abbrechen
-          </button>
-          <button
-            type="button"
-            disabled={isPending || !body.trim() || (assignMode === "person" && !recipientId)}
-            onClick={submit}
-            className={
-              inline
-                ? "yd-relay-create-panel__submit"
-                : "min-h-[2.75rem] rounded-xl bg-[#2563EB] px-4 text-[14px] font-semibold text-white disabled:opacity-50"
-            }
-          >
-            {isPending ? "Wird gesendet …" : "Senden"}
-          </button>
-        </div>
-      </fieldset>
-    </div>
+    </MedicalFormShell>
   );
 }
 
 export function NewRelayMessageModal({
   open,
   onClose,
-  assignableMembers: membersProp,
+  assignableMembers,
   currentUserId,
-  variant = "modal",
+  submissionId,
 }: NewRelayMessageModalProps) {
-  const titleId = useId();
-  const [mounted, setMounted] = useState(false);
+  if (!open) return null;
 
-  useEffect(() => setMounted(true), []);
-
-  if (!open || !mounted) return null;
-
-  const form = (
+  return (
     <RelayMessageCreateForm
-      titleId={titleId}
       onClose={onClose}
-      assignableMembers={membersProp}
+      assignableMembers={assignableMembers}
       currentUserId={currentUserId}
-      inline={variant === "inline"}
+      submissionId={submissionId}
     />
-  );
-
-  if (variant === "inline") return form;
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[200] flex items-end justify-center bg-[rgba(15,23,42,0.35)] p-0 sm:items-center sm:p-4"
-      role="presentation"
-      onClick={onClose}
-    >
-      {form}
-    </div>,
-    document.body
   );
 }

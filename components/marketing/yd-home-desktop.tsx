@@ -1,19 +1,16 @@
 "use client";
 
-import { YdEcosystemRelayCommand } from "@/components/marketing/yd-ecosystem-relay-command";
-import { YdPracticeDemo } from "@/components/marketing/yd-practice-demo";
 import { YdPublicPricingStage } from "@/components/marketing/yd-public-pricing-stage";
 import { YdPublicSiteFooter } from "@/components/marketing/yd-public-site-footer";
 import { YdPublicSiteHeader } from "@/components/marketing/yd-public-site-header";
-import { YdPublicSiteCommandShowcase } from "@/components/marketing/yd-public-site-command-showcase";
 import {
   YdPublicSiteDemo,
-  YdPublicSiteEinfuehrung,
-  YdPublicSiteFuerWen,
   YdPublicSiteHero,
-  YdPublicSiteNutzen,
-  YdPublicSitePerspective,
-  YdPublicSiteProblem,
+  YdPublicSiteLoesung,
+  YdPublicSitePatienten,
+  YdPublicSitePlattform,
+  YdPublicSitePraxisalltag,
+  YdPublicSiteTeam,
 } from "@/components/marketing/yd-public-site-sections";
 
 type YdHomeDesktopProps = {
@@ -23,7 +20,7 @@ type YdHomeDesktopProps = {
   dashboardHref?: string | null;
 };
 
-/** Öffentliche Landing — editorial, überzeugend, vollständige Produktstory. */
+/** Öffentliche Landing — editorial, Premium Medical Infrastruktur. */
 export function YdHomeDesktop({
   initialPlan,
   inviteToken = "",
@@ -31,29 +28,23 @@ export function YdHomeDesktop({
   dashboardHref = null,
 }: YdHomeDesktopProps) {
   return (
-    <article className="yd-clinical-page yd-public-site-page yd-clinical-desktop-only">
+    <article className="yd-clinical-page yd-public-site-page yd-public-site-page--editorial yd-clinical-desktop-only">
       <YdPublicSiteHeader dashboardHref={dashboardHref} />
 
       <YdPublicSiteHero />
 
-      <YdPublicSiteProblem />
+      <YdPublicSitePraxisalltag />
 
-      <YdPublicSitePerspective />
+      <YdPublicSitePatienten />
 
-      <YdPracticeDemo />
+      <YdPublicSiteTeam />
 
-      <YdPublicSiteNutzen />
+      <YdPublicSiteLoesung />
 
-      <YdPublicSiteCommandShowcase />
-
-      <YdEcosystemRelayCommand />
-
-      <YdPublicSiteFuerWen />
-
-      <YdPublicSiteEinfuehrung />
+      <YdPublicSitePlattform />
 
       <YdPublicPricingStage
-        fieldIndex={7}
+        fieldIndex={5}
         initialPlan={initialPlan}
         inviteToken={inviteToken}
         prefilledEmail={prefilledEmail}

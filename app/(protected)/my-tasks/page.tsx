@@ -17,6 +17,8 @@ export default async function MyTasksPage({ searchParams }: MyTasksPageProps) {
       columns={data.columns}
       counts={data.counts}
       assignableMembers={data.assignableMembers}
+      conversations={data.conversations}
+      journalDrafts={data.journalDrafts}
       submissionDraftStatus={data.submissionDraftStatus}
     />
   );

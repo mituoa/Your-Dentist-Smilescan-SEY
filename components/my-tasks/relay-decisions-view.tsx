@@ -1,22 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
+import {
+  RelayHandoverCreateTrigger,
+  RelayHandoverThread,
+} from "@/components/my-tasks/relay-handover-thread";
 import type { MyTask } from "@/lib/queries/my-tasks";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
+import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type { AssignableMember } from "@/lib/queries/team-members";
+import type { JournalEntry } from "@/lib/types/journal-entry";
 import {
-  buildRelayDecisionsSnapshot,
-  type RelayDecisionBucket,
-  type RelayDecisionRow,
-  type RelayDecisionsSnapshot,
-} from "@/lib/relay/build-relay-decisions-snapshot";
+  buildRelayPracticeSnapshot,
+  type RelayWorkRow,
+} from "@/lib/relay/build-relay-practice-snapshot";
 import { cn } from "@/lib/utils";
 
 type RelayDecisionsViewProps = {
   basePath: "/my-tasks" | "/relay";
+  userId: string;
   isDoctor: boolean;
   columns: {
     open: MyTask[];
@@ -24,59 +29,28 @@ type RelayDecisionsViewProps = {
     done: MyTask[];
   };
   assignableMembers: AssignableMember[];
+  conversations?: RelayConversationRow[];
+  journalDrafts?: JournalEntry[];
   submissionDraftStatus?: Record<string, MessageDraftListStatus>;
 };
 
-type MobileFilter = "all" | RelayDecisionBucket | "today";
-
-const SECTION_META: {
-  id: RelayDecisionBucket;
-  title: string;
-  empty: string;
-}[] = [
-  {
-    id: "patient_waiting",
-    title: "Patient wartet",
-    empty: "Kein Patient wartet derzeit auf die Praxis.",
-  },
-  {
-    id: "team_waiting",
-    title: "Team wartet",
-    empty: "Keine offenen Teamentscheidungen.",
-  },
-  {
-    id: "approvals",
-    title: "Freigaben",
-    empty: "Keine ausstehenden Freigaben.",
-  },
-  {
-    id: "overdue",
-    title: "Überfällig",
-    empty: "",
-  },
-];
-
-function sectionRows(snapshot: RelayDecisionsSnapshot, id: RelayDecisionBucket): RelayDecisionRow[] {
-  switch (id) {
-    case "patient_waiting":
-      return snapshot.patientWaiting;
-    case "team_waiting":
-      return snapshot.teamWaiting;
-    case "approvals":
-      return snapshot.approvals;
-    case "overdue":
-      return snapshot.overdue;
-  }
-}
-
-function RelayDecisionRowItem({ row }: { row: RelayDecisionRow }) {
+function RelayWorkRowItem({ row }: { row: RelayWorkRow }) {
   return (
     <li>
-      <Link href={row.href} className="yd-relay-decisions__row">
+      <Link
+        href={row.href}
+        className={cn(
+          "yd-relay-decisions__row",
+          row.isGhost && "yd-relay-decisions__row--ghost",
+          row.isCritical && "yd-relay-decisions__row--critical"
+        )}
+      >
         <span className="yd-relay-decisions__row-main">
           <span className="yd-relay-decisions__row-top">
             <span className="yd-relay-decisions__row-primary">{row.primaryLabel}</span>
-            <span className="yd-relay-decisions__row-wait">{row.waitingLabel}</span>
+            {row.timeLabel ? (
+              <span className="yd-relay-decisions__row-wait">{row.timeLabel}</span>
+            ) : null}
           </span>
           <span className="yd-relay-decisions__row-context">{row.context}</span>
         </span>
@@ -86,83 +60,86 @@ function RelayDecisionRowItem({ row }: { row: RelayDecisionRow }) {
   );
 }
 
-function RelayDecisionSection({
+function RelayWorkSection({
   title,
   rows,
-  emptyCopy,
-  hideWhenEmpty = false,
+  ghosts,
+  createHref,
+  createLabel,
+  secondaryAction,
 }: {
   title: string;
-  rows: RelayDecisionRow[];
-  emptyCopy?: string;
-  hideWhenEmpty?: boolean;
+  rows: RelayWorkRow[];
+  ghosts: RelayWorkRow[];
+  createHref?: string;
+  createLabel?: string;
+  secondaryAction?: ReactNode;
 }) {
-  if (hideWhenEmpty && rows.length === 0) return null;
+  const displayRows = rows.length > 0 ? rows : ghosts;
 
   return (
     <section className="yd-relay-decisions__section" aria-label={title}>
       <h2 className="yd-relay-decisions__section-title">{title}</h2>
-      {rows.length === 0 ? (
-        emptyCopy ? <p className="yd-relay-decisions__section-empty">{emptyCopy}</p> : null
-      ) : (
-        <ul className="yd-relay-decisions__list">
-          {rows.map((row) => (
-            <RelayDecisionRowItem key={row.id} row={row} />
-          ))}
-        </ul>
-      )}
+      <ul className="yd-relay-decisions__list">
+        {displayRows.map((row) => (
+          <RelayWorkRowItem key={row.id} row={row} />
+        ))}
+      </ul>
+      {rows.length === 0 && ghosts.length > 0 ? (
+        <p className="yd-relay-decisions__section-hint">
+          Beispiele — so erscheinen Vorgänge, sobald das Team arbeitet.
+        </p>
+      ) : null}
+      <div className="yd-relay-decisions__section-actions">
+        {createHref && createLabel ? (
+          <Link href={createHref} className="yd-relay-decisions__section-cta">
+            {createLabel}
+          </Link>
+        ) : null}
+        {secondaryAction}
+      </div>
     </section>
   );
 }
 
 export function RelayDecisionsView({
   basePath,
+  userId,
   isDoctor,
   columns,
   assignableMembers,
+  conversations = [],
+  journalDrafts = [],
   submissionDraftStatus = {},
 }: RelayDecisionsViewProps) {
   const isRelay = basePath === "/relay";
-  const [mobileFilter, setMobileFilter] = useState<MobileFilter>("all");
 
   const snapshot = useMemo(
     () =>
-      buildRelayDecisionsSnapshot({
+      buildRelayPracticeSnapshot({
         open: columns.open,
         pending: columns.pending,
         members: assignableMembers,
         draftBySubmissionId: submissionDraftStatus,
+        conversations: isRelay ? conversations : [],
+        journalDrafts,
         isDoctor,
+        userId,
+        basePath,
       }),
-    [columns.open, columns.pending, assignableMembers, submissionDraftStatus, isDoctor]
+    [
+      columns.open,
+      columns.pending,
+      assignableMembers,
+      submissionDraftStatus,
+      conversations,
+      journalDrafts,
+      isDoctor,
+      userId,
+      basePath,
+      isRelay,
+    ]
   );
-
-  const mobileFilters: { id: MobileFilter; label: string; count?: number }[] = [
-    { id: "all", label: "Heute" },
-    {
-      id: "patient_waiting",
-      label: "Patient wartet",
-      count: snapshot.summary.patientWaiting,
-    },
-    {
-      id: "team_waiting",
-      label: "Team wartet",
-      count: snapshot.summary.teamWaiting,
-    },
-    {
-      id: "approvals",
-      label: "Freigaben",
-      count: snapshot.summary.approvals,
-    },
-    ...(snapshot.summary.overdue > 0
-      ? [{ id: "overdue" as const, label: "Überfällig", count: snapshot.summary.overdue }]
-      : []),
-  ];
-
-  const showSection = (id: RelayDecisionBucket) =>
-    mobileFilter === "all" || mobileFilter === id;
-
-  const allClear = snapshot.summary.areaCount === 0;
 
   return (
     <div className="yd-relay yd-relay-shell yd-relay-decisions flex min-h-0 flex-1 flex-col">
@@ -171,80 +148,66 @@ export function RelayDecisionsView({
         <header className="yd-relay-decisions__head">
           <h1 className="yd-relay-decisions__title">{isRelay ? "Relay" : "Meine Aufgaben"}</h1>
           <p className="yd-relay-decisions__lead">
-            {isRelay
-              ? "Wo heute Ihre Entscheidung benötigt wird."
-              : isDoctor
-                ? "Entscheidungen und Freigaben für Ihre Praxis."
-                : "Offene Schritte, die auf die Praxis warten."}
+            Praxiszentrale
+            {snapshot.summaryLine ? (
+              <>
+                {" "}
+                · <span className="yd-relay-decisions__summary">{snapshot.summaryLine}</span>
+              </>
+            ) : null}
+          </p>
+          <p className="yd-relay-decisions__lead-sub">
+            Alle offenen Übergaben, Freigaben und Teamaufgaben an einem Ort.
           </p>
         </header>
 
-        <section className="yd-relay-decisions__today" aria-label="Heute">
-          {allClear ? (
-            <>
-              <p className="yd-relay-decisions__today-intro">Heute ist alles entschieden.</p>
-              <p className="yd-relay-decisions__today-line yd-relay-decisions__today-line--calm">
-                Neue Entscheidungen erscheinen hier, sobald Patienten oder Team auf Sie warten.
-              </p>
-            </>
-          ) : (
-            <>
-              {snapshot.summary.intro ? (
-                <p className="yd-relay-decisions__today-intro">{snapshot.summary.intro}</p>
-              ) : null}
-              <ul className="yd-relay-decisions__today-lines">
-                {snapshot.summary.lines.map((line) => (
-                  <li key={line} className="yd-relay-decisions__today-line">
-                    {line}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </section>
-
-        <div
-          className="yd-relay-decisions__filters md:hidden"
-          role="tablist"
-          aria-label="Entscheidungsbereiche"
-        >
-          {mobileFilters.map((chip) => {
-            const active = mobileFilter === chip.id;
-            return (
-              <button
-                key={chip.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                className={cn(
-                  "yd-relay-decisions__filter",
-                  active && "yd-relay-decisions__filter--active"
-                )}
-                onClick={() => setMobileFilter(chip.id)}
-              >
-                {chip.label}
-                {chip.count != null && chip.count > 0 ? (
-                  <span className="yd-relay-decisions__filter-count">{chip.count}</span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-
         <div className="yd-relay-decisions__body min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
-          {SECTION_META.map((section) => {
-            const rows = sectionRows(snapshot, section.id);
-            if (!showSection(section.id)) return null;
-            return (
-              <RelayDecisionSection
-                key={section.id}
-                title={section.title}
-                rows={rows}
-                emptyCopy={section.empty}
-                hideWhenEmpty={section.id === "overdue"}
-              />
-            );
-          })}
+          <RelayWorkSection
+            title="Benötigt Ihre Aufmerksamkeit"
+            rows={snapshot.attention}
+            ghosts={snapshot.ghostAttention}
+            createHref={isDoctor ? "/journal/new" : "/my-tasks/new"}
+            createLabel={isDoctor ? "Journal-Entwurf anlegen" : "Praxisaufgabe erstellen"}
+          />
+
+          <RelayWorkSection
+            title="Team wartet"
+            rows={snapshot.teamwork}
+            ghosts={snapshot.ghostTeamwork}
+            createHref="/my-tasks/new"
+            createLabel="Teamaufgabe zuweisen"
+          />
+
+          <RelayWorkSection
+            title="Übergaben"
+            rows={snapshot.handovers}
+            ghosts={snapshot.ghostHandovers}
+            secondaryAction={
+              isRelay ? (
+                <RelayHandoverCreateTrigger
+                  assignableMembers={assignableMembers}
+                  currentUserId={userId}
+                />
+              ) : undefined
+            }
+          />
+
+          {isRelay ? (
+            <RelayHandoverThread
+              basePath={basePath}
+              conversations={conversations}
+              assignableMembers={assignableMembers}
+              currentUserId={userId}
+            />
+          ) : null}
+
+          <RelayWorkSection
+            title="Praxisaufgaben"
+            rows={snapshot.practiceTasks}
+            ghosts={snapshot.ghostPractice}
+            createHref="/my-tasks/new"
+            createLabel="Praxisaufgabe erstellen"
+          />
         </div>
       </div>
     </div>

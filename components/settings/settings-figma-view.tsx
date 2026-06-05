@@ -20,6 +20,7 @@ import { setThemePreference } from "@/app/actions/theme";
 import { signOutWithFullPageRedirect } from "@/lib/auth/sign-out-client";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 import { SettingsMobileNav } from "@/components/settings/settings-mobile-nav";
+import { SettingsOpeningHoursPanel } from "@/components/settings/settings-opening-hours-panel";
 import { SettingsPracticeProfilePanel } from "@/components/settings/settings-practice-profile-panel";
 import {
   SettingsPlaceholderPanel,
@@ -34,6 +35,7 @@ import {
 } from "@/lib/settings/settings-navigation";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
 import type { ThemePreference } from "@/lib/theme";
+import type { OpeningHoursConfig } from "@/lib/settings/opening-hours";
 
 function profileDocPath(slug: string): string {
   return `/doc/${slug}`;
@@ -60,6 +62,7 @@ interface SettingsFigmaViewProps {
   initialAppointmentLink: string | null;
   logoUrl: string | null;
   initialAccentColor: string;
+  initialOpeningHours: OpeningHoursConfig | null;
   userEmail: string;
   initialTheme: ThemePreference;
   members: TeamMember[];
@@ -74,6 +77,7 @@ export function SettingsFigmaView({
   initialAppointmentLink,
   logoUrl,
   initialAccentColor,
+  initialOpeningHours,
   userEmail,
   initialTheme,
   members,
@@ -407,11 +411,11 @@ export function SettingsFigmaView({
         );
       case "oeffnungszeiten":
         return (
-          <SettingsPlaceholderPanel
-            title="Öffnungszeiten"
-            description="Sprechzeiten und Erreichbarkeit hinterlegen Sie im Profil-Editor."
-            href="/profile/editor"
-            hrefLabel="Öffnungszeiten bearbeiten"
+          <SettingsOpeningHoursPanel
+            initialConfig={initialOpeningHours}
+            appointmentLink={initialAppointmentLink}
+            onError={setFormError}
+            onSaved={() => router.refresh()}
           />
         );
       case "team-rollen":

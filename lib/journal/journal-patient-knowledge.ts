@@ -3,6 +3,10 @@ import {
   inferContentType,
   type JournalContentType,
 } from "@/lib/journal/content-categories";
+import {
+  inferClinicalArea,
+  type ClinicalAreaId,
+} from "@/lib/journal/clinical-areas";
 import { getRecommendedTopicsMissing, type RecommendedTopic } from "@/lib/journal/recommended-topics";
 import { journalEntryTitle } from "@/lib/journal/workspace-display";
 import type { JournalEntry } from "@/lib/types/journal-entry";
@@ -188,6 +192,170 @@ export function groupPublishedByType(
   }
 
   return grouped;
+}
+
+export const JOURNAL_FREQUENT_CARDS: {
+  id: JournalContentType;
+  title: string;
+  hint: string;
+}[] = [
+  { id: "faq", title: "FAQs", hint: "Häufige Patientenfragen" },
+  { id: "nachsorge", title: "Nachsorge", hint: "Verhalten nach Behandlungen" },
+  { id: "erklaerung", title: "Erklärungen", hint: "Behandlungen verständlich" },
+  { id: "praxiswissen", title: "Praxiswissen", hint: "Recall, Termine, Kontakt" },
+];
+
+export type JournalFrequentCard = {
+  id: JournalContentType;
+  title: string;
+  hint: string;
+  count: number;
+  latestEntryId?: string;
+};
+
+export type JournalKnowledgeAreaId =
+  | "implantologie"
+  | "endodontie"
+  | "parodontologie"
+  | "prophylaxe"
+  | "kinderzahnheilkunde"
+  | "aesthetik";
+
+export type JournalKnowledgeAreaCard = {
+  id: JournalKnowledgeAreaId;
+  label: string;
+  count: number;
+  coveragePct: number;
+  gapHint: string;
+};
+
+export const JOURNAL_KNOWLEDGE_AREAS: {
+  id: JournalKnowledgeAreaId;
+  label: string;
+  gapHint: string;
+  clinicalAreas: ClinicalAreaId[];
+  titleKeywords: string[];
+}[] = [
+  {
+    id: "implantologie",
+    label: "Implantologie",
+    gapHint: "Implantate und prothetische Versorgung",
+    clinicalAreas: ["implantologie", "prothetik"],
+    titleKeywords: ["implant", "krone", "brücke"],
+  },
+  {
+    id: "endodontie",
+    label: "Endodontie",
+    gapHint: "Wurzelbehandlung und Schmerztherapie",
+    clinicalAreas: ["oralchirurgie"],
+    titleKeywords: ["wurzel", "endodont", "devital", "wurzelkanal"],
+  },
+  {
+    id: "parodontologie",
+    label: "Parodontologie",
+    gapHint: "Zahnfleisch und Zahnhalteapparat",
+    clinicalAreas: ["parodontologie"],
+    titleKeywords: ["parodont", "zahnfleisch"],
+  },
+  {
+    id: "prophylaxe",
+    label: "Prophylaxe",
+    gapHint: "Vorsorge, PZR und Recall",
+    clinicalAreas: ["vorsorge"],
+    titleKeywords: ["prophylaxe", "pzr", "reinigung", "vorsorge", "recall"],
+  },
+  {
+    id: "kinderzahnheilkunde",
+    label: "Kinderzahnheilkunde",
+    gapHint: "Kinder, Eltern und erste Besuche",
+    clinicalAreas: ["kinderzahnheilkunde"],
+    titleKeywords: ["kind", "kinder"],
+  },
+  {
+    id: "aesthetik",
+    label: "Ästhetik",
+    gapHint: "Bleaching, Veneers und Smile Design",
+    clinicalAreas: ["aesthetik"],
+    titleKeywords: ["ästhet", "bleaching", "veneer", "smile"],
+  },
+];
+
+function entryMatchesKnowledgeArea(entry: JournalEntry, area: (typeof JOURNAL_KNOWLEDGE_AREAS)[number]): boolean {
+  const clinical = inferClinicalArea(entry);
+  if (clinical && area.clinicalAreas.includes(clinical)) return true;
+  const title = (journalEntryTitle(entry)).toLowerCase();
+  return area.titleKeywords.some((kw) => title.includes(kw));
+}
+
+export function buildJournalFrequentCards(entries: JournalEntry[]): JournalFrequentCard[] {
+  const published = entries.filter((e) => e.status === "published");
+
+  return JOURNAL_FREQUENT_CARDS.map((card) => {
+    const typed = published
+      .filter((e) => inferContentType(e) === card.id)
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+    return {
+      ...card,
+      count: typed.length,
+      latestEntryId: typed[0]?.id,
+    };
+  });
+}
+
+export function buildJournalKnowledgeAreas(entries: JournalEntry[]): JournalKnowledgeAreaCard[] {
+  const published = entries.filter((e) => e.status === "published");
+  const targetPerArea = 3;
+
+  return JOURNAL_KNOWLEDGE_AREAS.map((area) => {
+    const matched = published.filter((e) => entryMatchesKnowledgeArea(e, area));
+    const count = matched.length;
+    const coveragePct = Math.min(100, Math.round((count / targetPerArea) * 100));
+
+    return {
+      id: area.id,
+      label: area.label,
+      count,
+      coveragePct,
+      gapHint: count > 0 ? `${count} ${count === 1 ? "Text" : "Texte"} veröffentlicht` : area.gapHint,
+    };
+  });
+}
+
+export function buildRecentlyEdited(entries: JournalEntry[], limit = 6): JournalEntry[] {
+  return [...entries]
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    .slice(0, limit);
+}
+
+export function searchJournalEntries(entries: JournalEntry[], query: string): JournalEntry[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+
+  return entries
+    .filter((e) => matchesJournalSearch(e, q))
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+}
+
+export function filterEntriesByContentType(
+  entries: JournalEntry[],
+  type: JournalContentType
+): JournalEntry[] {
+  return entries
+    .filter((e) => e.status === "published" && inferContentType(e) === type)
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+}
+
+export function filterEntriesByKnowledgeArea(
+  entries: JournalEntry[],
+  areaId: JournalKnowledgeAreaId
+): JournalEntry[] {
+  const area = JOURNAL_KNOWLEDGE_AREAS.find((a) => a.id === areaId);
+  if (!area) return [];
+
+  return entries
+    .filter((e) => e.status === "published" && entryMatchesKnowledgeArea(e, area))
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 }
 
 export function journalSectionEmptyCopy(type: JournalContentType): string {

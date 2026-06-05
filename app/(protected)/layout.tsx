@@ -22,6 +22,13 @@ import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
 import { buildDashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
 import type { DashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
+import { buildRelayPracticeSnapshot } from "@/lib/relay/build-relay-practice-snapshot";
+import { buildRelayHeaderSummary } from "@/lib/relay/relay-header-summary";
+import type { RelayHeaderSummary } from "@/lib/relay/relay-header-summary";
+import { getMyTasks } from "@/lib/queries/my-tasks";
+import { getMessageDraftStatusMapForSubmissions } from "@/lib/queries/message-drafts";
+import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
+import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import {
   countPreparedAwaitingReview,
   countTasksNeedingDecision,
@@ -131,12 +138,19 @@ export default async function ProtectedLayout({
   }[] = [];
   let trackerHeaderSummary = null;
   let dashboardHeaderSummary: DashboardHeaderSummary | null = null;
+  let relayHeaderSummary: RelayHeaderSummary | null = null;
 
   if (workspace) {
-    const [inboxRes, tasksRes, journals] = await Promise.all([
+    const isDoctor = role === "doctor";
+    const [inboxRes, tasksRes, journals, relayOpen, relayPending, relayConversations, relayMembers] =
+      await Promise.all([
       getInboxSubmissions(workspace.workspace_id),
       getOpenTasks(workspace.workspace_id),
-      role === "doctor" ? listJournalForWorkspace(workspace.workspace_id) : Promise.resolve([]),
+      isDoctor ? listJournalForWorkspace(workspace.workspace_id) : Promise.resolve([]),
+      getMyTasks(user.id, workspace.workspace_id, isDoctor, "open"),
+      getMyTasks(user.id, workspace.workspace_id, isDoctor, "pending_review"),
+      getRelayConversationsForUser(workspace.workspace_id, user.id),
+      getAssignableWorkspaceMembers(workspace.workspace_id, user.id),
     ]);
 
     if (inboxRes.ok) {
@@ -176,6 +190,33 @@ export default async function ProtectedLayout({
         tasksNeedingDecision,
       });
     }
+
+    const journalDrafts = journals.filter((entry) => entry.status === "draft");
+    const relaySubmissionIds = [
+      ...new Set(
+        [...relayOpen, ...relayPending]
+          .map((t) => t.submission_id)
+          .filter((id): id is string => Boolean(id))
+      ),
+    ];
+    const relayDraftMap = await getMessageDraftStatusMapForSubmissions(
+      workspace.workspace_id,
+      relaySubmissionIds
+    );
+    const relaySnapshot = buildRelayPracticeSnapshot({
+      open: relayOpen,
+      pending: relayPending,
+      members: relayMembers,
+      draftBySubmissionId: relayDraftMap.available
+        ? relayDraftMap.statusBySubmissionId
+        : {},
+      conversations: relayConversations,
+      journalDrafts,
+      isDoctor,
+      userId: user.id,
+      basePath: "/relay",
+    });
+    relayHeaderSummary = buildRelayHeaderSummary(relaySnapshot);
 
     navAmbient = buildNavAmbientPreviews({
       inboxItems: inboxRes.ok ? inboxRes.items : [],
@@ -240,6 +281,7 @@ export default async function ProtectedLayout({
                     inboxCount={inboxCount}
                     trackerHeaderSummary={trackerHeaderSummary}
                     dashboardHeaderSummary={dashboardHeaderSummary}
+                    relayHeaderSummary={relayHeaderSummary}
                   />
                   {children}
                 </HcAppCanvas>

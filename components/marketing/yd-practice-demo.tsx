@@ -13,7 +13,7 @@ export function YdPracticeDemo({ compact = false }: YdPracticeDemoProps) {
 
   return (
     <section
-      id={PUBLIC_SITE_SECTIONS.ablauf}
+      id={PUBLIC_SITE_SECTIONS.loesung}
       className={cn(
         "yd-practice-demo yd-clinical-act yd-public-os-awaken-field yd-public-site-scroll-anchor",
         compact && "yd-practice-demo--compact"

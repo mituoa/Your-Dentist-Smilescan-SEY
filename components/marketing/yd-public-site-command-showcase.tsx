@@ -9,7 +9,7 @@ import {
 export function YdPublicSiteCommandShowcase() {
   return (
     <section
-      id={PUBLIC_SITE_SECTIONS.command}
+      id={PUBLIC_SITE_SECTIONS.plattform}
       className="yd-public-site-section yd-public-site-section--command yd-public-os-awaken-field yd-public-site-scroll-anchor"
       style={{ ["--yd-public-field-i" as string]: "3" }}
       aria-labelledby="yd-public-command-title"

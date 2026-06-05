@@ -1126,7 +1126,7 @@
 }
 
 .yd-journal-pk__frame {
-  max-width: 40rem;
+  max-width: 72rem;
   margin-inline: auto;
   width: 100%;
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
@@ -1134,9 +1134,265 @@
 
 @media (min-width: 768px) {
   .yd-journal-pk__frame {
-    max-width: 44rem;
+    max-width: 72rem;
   }
 }
+
+/* ── Häufig genutzt (Summary-Karten) ── */
+.yd-journal-pk__frequent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.875rem;
+}
+
+@media (min-width: 768px) {
+  .yd-journal-pk__frequent-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.yd-journal-pk__frequent-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-height: 7.5rem;
+  padding: 1rem 1rem 0.875rem;
+  border: 1px solid rgba(160, 178, 198, 0.38);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.08);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.yd-journal-pk__frequent-card:hover {
+  border-color: rgba(26, 79, 156, 0.22);
+}
+
+.yd-journal-pk__frequent-card--active {
+  border-color: rgba(26, 79, 156, 0.32);
+  box-shadow:
+    inset 3px 0 0 var(--yd-brand-accent-deep, #1a4f9c),
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.08);
+}
+
+.yd-journal-pk__frequent-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 10px;
+  background: rgba(47, 128, 237, 0.09);
+  color: var(--yd-brand-accent-deep, #1a4f9c);
+}
+
+.yd-journal-pk__frequent-count {
+  margin-top: 0.35rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.625rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--yd-journal-ink, #0c1929);
+}
+
+.yd-journal-pk__frequent-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--yd-journal-ink, #0c1929);
+}
+
+.yd-journal-pk__frequent-hint {
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--yd-journal-faint, #8ba3b8);
+}
+
+/* ── Benötigt Aufmerksamkeit ── */
+.yd-journal-pk__attention-list {
+  margin: 0.875rem 0 0;
+  padding: 0.35rem 0;
+  list-style: none;
+  border: 1px solid rgba(160, 178, 198, 0.38);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.08);
+  overflow: hidden;
+}
+
+.yd-journal-pk__attention-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.22);
+  background: transparent;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--yd-brand-accent-deep, #1a4f9c);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.yd-journal-pk__attention-list li:last-child .yd-journal-pk__attention-row {
+  border-bottom: none;
+}
+
+.yd-journal-pk__attention-row:hover:not(:disabled) {
+  background: rgba(248, 252, 255, 0.85);
+}
+
+.yd-journal-pk__attention-icon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--yd-brand-accent-deep, #1a4f9c);
+  opacity: 0.85;
+}
+
+.yd-journal-pk__attention-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.yd-journal-pk__attention-chevron {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: var(--yd-journal-faint, #8ba3b8);
+  opacity: 0.65;
+}
+
+/* ── Zuletzt bearbeitet (Apple Notes) ── */
+.yd-journal-pk__recent-list {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-journal-pk__recent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-height: 3.125rem;
+  padding: 0.625rem 0;
+  border: none;
+  border-bottom: 1px solid rgba(180, 198, 218, 0.2);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 160ms ease;
+}
+
+.yd-journal-pk__recent-row:hover {
+  opacity: 0.82;
+}
+
+.yd-journal-pk__recent-list li:last-child .yd-journal-pk__recent-row {
+  border-bottom: none;
+}
+
+.yd-journal-pk__recent-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yd-journal-pk__recent-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--yd-journal-ink, #0c1929);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-journal-pk__recent-meta {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--yd-journal-faint, #8ba3b8);
+}
+
+.yd-journal-pk__recent-time {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--yd-journal-faint, #8ba3b8);
+}
+
+.yd-journal-pk__recent-empty,
+.yd-journal-pk__browse-empty {
+  margin-top: 0.75rem;
+  padding: 1.25rem 0;
+}
+
+/* ── Browse panel (Karte → Inhalte) ── */
+.yd-journal-pk__browse {
+  padding: 1rem 0 0;
+  border-top: 1px solid rgba(180, 198, 218, 0.28);
+}
+
+.yd-journal-pk__browse-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.yd-journal-pk__browse-title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--yd-journal-ink, #0c1929);
+}
+
+.yd-journal-pk__browse-close {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--yd-journal-muted, #5e7389);
+  cursor: pointer;
+}
+
+.yd-journal-pk__section + .yd-journal-pk__section {
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .yd-journal-pk__section {
+    margin-bottom: 2.25rem;
+  }
+}
+
 
 .yd-journal-pk__error {
   margin-bottom: 1rem;

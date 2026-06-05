@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { ArrowRight, Check, MoreHorizontal, Plus, Shield } from "lucide-react";
+import { ArrowRight, Check, Plus, Shield } from "lucide-react";
 
 import {
   displayNameFromEmail,
@@ -156,81 +156,59 @@ export function SettingsTeamPanel({
 
       {tab === "rollen" ? (
         <div className="yd-settings-v2__tab-panel" role="tabpanel">
-          <div className="yd-settings-v2__roles-table-wrap">
-            <table className="yd-settings-v2__roles-table">
-              <thead>
-                <tr>
-                  <th scope="col">Rolle</th>
-                  <th scope="col">Mitglieder</th>
-                  <th scope="col">Berechtigungen</th>
-                  <th scope="col" className="sr-only">
-                    Aktionen
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {REFERENCE_ROLES.map((role) => {
-                  const Icon = role.icon;
-                  let emails: string[] = [];
-                  let extra = 0;
+          <div className="yd-settings-v2__roles-grid">
+            {REFERENCE_ROLES.map((role) => {
+              const Icon = role.icon;
+              let emails: string[] = [];
+              let extra = 0;
 
-                  if (role.memberRole === "doctor") {
-                    emails = roleMembers.doctors;
-                    extra = Math.max(0, roleMembers.doctors.length - 2);
-                  } else if (role.memberRole === "team") {
-                    emails = roleMembers.team;
-                    extra = Math.max(0, roleMembers.team.length - 2);
-                  }
+              if (role.memberRole === "doctor") {
+                emails = roleMembers.doctors;
+                extra = Math.max(0, roleMembers.doctors.length - 2);
+              } else if (role.memberRole === "team") {
+                emails = roleMembers.team;
+                extra = Math.max(0, roleMembers.team.length - 2);
+              }
 
-                  const memberCount =
-                    role.memberRole === "doctor"
-                      ? roleMembers.doctors.length
-                      : role.memberRole === "team"
-                        ? roleMembers.team.length
-                        : 0;
+              const memberCount =
+                role.memberRole === "doctor"
+                  ? roleMembers.doctors.length
+                  : role.memberRole === "team"
+                    ? roleMembers.team.length
+                    : 0;
 
-                  return (
-                    <tr key={role.id}>
-                      <td>
-                        <div className="yd-settings-v2__role-cell">
-                          <span className="yd-settings-v2__role-icon">
-                            <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                          </span>
-                          <span>
-                            <span className="yd-settings-v2__role-name">{role.label}</span>
-                            <span className="yd-settings-v2__role-desc">{role.description}</span>
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        {memberCount > 0 ? (
-                          <MemberAvatars emails={emails} extra={extra} />
-                        ) : (
-                          <span className="yd-settings-v2__role-empty">—</span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="yd-settings-v2__perm-list">
-                          {role.permissions.map((p) => (
-                            <PermissionPill key={p} label={p} />
-                          ))}
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="yd-settings-v2__row-menu"
-                          aria-label={`Optionen für Rolle ${role.label}`}
-                          disabled
-                        >
-                          <MoreHorizontal className="h-4 w-4" strokeWidth={1.75} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+              return (
+                <article key={role.id} className="yd-settings-v2__role-card">
+                  <div className="yd-settings-v2__role-cell">
+                    <span className="yd-settings-v2__role-icon">
+                      <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                    </span>
+                    <span>
+                      <span className="yd-settings-v2__role-name">{role.label}</span>
+                      <span className="yd-settings-v2__role-desc">{role.description}</span>
+                    </span>
+                  </div>
+
+                  <div className="yd-settings-v2__role-card-section">
+                    <p className="yd-settings-v2__role-card-label">Mitglieder</p>
+                    {memberCount > 0 ? (
+                      <MemberAvatars emails={emails} extra={extra} />
+                    ) : (
+                      <span className="yd-settings-v2__role-empty">Noch keine Zuordnung</span>
+                    )}
+                  </div>
+
+                  <div className="yd-settings-v2__role-card-section">
+                    <p className="yd-settings-v2__role-card-label">Berechtigungen</p>
+                    <div className="yd-settings-v2__perm-list">
+                      {role.permissions.map((p) => (
+                        <PermissionPill key={p} label={p} />
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
 
           <div className="yd-settings-v2__info-banner">
