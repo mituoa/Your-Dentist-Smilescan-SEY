@@ -1,0 +1,369 @@
+/**
+ * Mobile-native Module UX (max-width: 767px only)
+ * Dashboard · Tracker · Relay · Profil — ohne Desktop zu berühren
+ */
+
+@media (max-width: 767px) {
+  /* —— Shared mobile row cards —— */
+  .yd-mobile-row-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem 1rem;
+    min-width: 0;
+  }
+
+  .yd-mobile-row-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.875rem 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    background: #ffffff;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    transition:
+      box-shadow 180ms ease,
+      transform 180ms ease;
+    touch-action: manipulation;
+    min-width: 0;
+  }
+
+  a.yd-mobile-row-card:active {
+    transform: scale(0.992);
+  }
+
+  .yd-mobile-row-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+
+  .yd-mobile-row-card__title {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    color: #0f172a;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .yd-mobile-row-card__line {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: #64748b;
+    word-break: break-word;
+  }
+
+  .yd-mobile-row-card__meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+    margin-top: 0.15rem;
+  }
+
+  .yd-mobile-row-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.7);
+  }
+
+  .yd-mobile-row-card__date {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .yd-mobile-row-card__cta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2f80ed;
+  }
+
+  .yd-mobile-row-card__label {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  .yd-mobile-row-card__value {
+    font-size: 0.75rem;
+    color: #475569;
+  }
+
+  .yd-mobile-row-card--critical {
+    border-color: rgba(239, 68, 68, 0.22);
+    background: linear-gradient(165deg, #fffbfb 0%, #ffffff 100%);
+  }
+
+  .yd-mobile-empty {
+    padding: 2rem 1.25rem;
+    text-align: center;
+  }
+
+  .yd-mobile-empty__title {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .yd-mobile-empty__copy {
+    margin: 0.35rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #64748b;
+  }
+
+  /* —— Workspace canvas rhythm (mobile) —— */
+  .yd-workspace main:has(.yd-inbox-workspace),
+  .yd-workspace main:has(.yd-relay-shell),
+  .yd-workspace main:has(.yd-profile-hub),
+  .yd-workspace main:has(.yd-profile-editor-workspace) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas {
+    padding: 0.375rem max(0.75rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left)) !important;
+    border-radius: 22px !important;
+  }
+
+  /* —— Dashboard: hide forced table width —— */
+  .yd-dash-mobile__submissions .overflow-x-auto {
+    overflow-x: hidden !important;
+  }
+
+  .yd-dash-mobile__submissions table {
+    min-width: 0 !important;
+  }
+
+  /* —— Tracker: list + detail —— */
+  .yd-inbox-workspace {
+    min-height: 0;
+    overflow-x: hidden;
+  }
+
+  .yd-tracker-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-x: hidden;
+  }
+
+  .yd-tracker-shell__inbox,
+  .yd-tracker-shell__workspace {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .yd-tracker-v4-inbox {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .yd-tracker-v4-inbox__list {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .yd-tracker-v4-inbox-card {
+    border-radius: 16px;
+  }
+
+  .yd-tracker-filter-scroll {
+    margin-inline: 0;
+    padding-inline: max(0.25rem, env(safe-area-inset-left)) max(0.25rem, env(safe-area-inset-right));
+    scroll-padding-inline: 0.5rem;
+  }
+
+  .yd-tracker-v4-detail {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden !important;
+  }
+
+  .yd-tracker-v4-detail__bar {
+    flex-shrink: 0;
+    background: rgba(248, 251, 254, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.65);
+  }
+
+  .yd-tracker-v4-detail__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  main:has(.yd-inbox-workspace) {
+    overflow: hidden !important;
+    height: 100%;
+    max-height: 100dvh;
+  }
+
+  main:has(.yd-inbox-workspace) .yd-awaken-canvas,
+  main:has(.yd-inbox-workspace) .yd-awaken-canvas > .relative {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden !important;
+  }
+
+  .yd-inbox-workspace {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  /* —— Relay —— */
+  .yd-relay-shell {
+    min-height: 0 !important;
+    overflow-x: hidden;
+  }
+
+  .yd-relay-shell > div {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .yd-relay-ops-header-bar {
+    margin-bottom: 0.625rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.55);
+  }
+
+  .yd-relay-ops-header-bar .yd-relay-page-title {
+    font-size: 1.1875rem;
+    line-height: 1.25;
+  }
+
+  .yd-relay-v3-subtitle {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    margin-top: 0.25rem;
+  }
+
+  .yd-relay-header-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: 0.625rem;
+  }
+
+  .yd-relay-tab-strip {
+    display: flex;
+    width: 100%;
+    gap: 0.35rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    padding-bottom: 0.125rem;
+  }
+
+  .yd-relay-tab-btn {
+    flex: 1 1 auto;
+    min-height: 44px;
+    min-width: max-content;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+
+  .yd-relay-work-table-wrap,
+  .yd-relay-handoffs-table-wrap {
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  .yd-relay-work-surface,
+  .yd-relay-messages-surface {
+    border-radius: 18px !important;
+    overflow: hidden;
+  }
+
+  .yd-relay-ops-band {
+    margin-bottom: 0.625rem;
+  }
+
+  .yd-relay-handoffs-layout {
+    gap: 0.625rem !important;
+  }
+
+  /* —— Profil Hub —— */
+  .yd-profile-hub {
+    padding-top: 0.25rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .yd-profile-hub .yd-awaken-canvas:has(.yd-profile-hub),
+  main:has(.yd-profile-hub) .yd-awaken-canvas {
+    padding: 0.5rem max(0.875rem, env(safe-area-inset-right)) max(1.25rem, env(safe-area-inset-bottom))
+      max(0.875rem, env(safe-area-inset-left)) !important;
+    border-radius: 22px !important;
+  }
+
+  main:has(.yd-profile-hub) {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .yd-profile-hub__intro {
+    margin-bottom: 0.25rem;
+  }
+
+  .yd-profile-hub__title {
+    font-size: 1.375rem !important;
+    line-height: 1.28 !important;
+  }
+
+  .yd-profile-hub__lead {
+    font-size: 0.8125rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .yd-profile-hub__cards {
+    gap: 0.75rem !important;
+  }
+
+  .yd-profile-hub__card {
+    min-height: auto !important;
+    padding: 1.125rem 1.125rem !important;
+    border-radius: 18px !important;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+  }
+
+  .yd-profile-hub__card h2 {
+    font-size: 1rem !important;
+  }
+
+  .yd-profile-hub__card-url {
+    font-size: 0.625rem !important;
+    line-height: 1.4 !important;
+  }
+}

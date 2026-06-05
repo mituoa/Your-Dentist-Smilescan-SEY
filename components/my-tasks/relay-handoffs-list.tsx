@@ -32,7 +32,46 @@ export function RelayHandoffsList({ items, isDoctor }: RelayHandoffsListProps) {
         </div>
       </div>
 
-      <table className="yd-relay-work-table w-full min-w-[1020px] border-collapse text-left">
+      <div className="yd-relay-handoffs-mobile md:hidden">
+        {items.length === 0 ? (
+          <div className="yd-mobile-empty">
+            <p className="yd-mobile-empty__title">Keine offenen Vorgänge in dieser Ansicht.</p>
+            <p className="yd-mobile-empty__copy">
+              Übergaben entstehen bei Wartezuständen, Freigaben oder internen Weitergaben.
+            </p>
+          </div>
+        ) : (
+          <div className="yd-mobile-row-cards">
+            {items.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                prefetch
+                className={cn("yd-mobile-row-card", item.isCritical && "yd-mobile-row-card--critical")}
+              >
+                <div className="yd-mobile-row-card__head">
+                  <p className="yd-mobile-row-card__title">{item.title}</p>
+                  <YdStatusPill
+                    label={item.statusLabel}
+                    variant={item.isCritical ? "urgent" : "pending"}
+                    className="shrink-0 text-[10px] font-medium"
+                  />
+                </div>
+                <p className="yd-mobile-row-card__line">
+                  {item.fromLabel} → {item.toLabel}
+                </p>
+                <p className="yd-mobile-row-card__line">{item.reasonLabel}</p>
+                <div className="yd-mobile-row-card__foot">
+                  <span className="yd-mobile-row-card__date">{item.timeLabel}</span>
+                  <span className="yd-mobile-row-card__cta">{item.nextStepLabel}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <table className="yd-relay-work-table hidden w-full min-w-[1020px] border-collapse text-left md:table">
         <thead>
           <tr>
             {COLUMNS.map((col) => (

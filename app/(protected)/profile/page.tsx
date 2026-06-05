@@ -190,26 +190,26 @@ export default async function ProfilePage() {
   const patientLinkLoadFailed = Boolean(wsError);
 
   return (
-    <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
+    <div className={`yd-profile-hub ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
       <div className="mx-auto w-full min-w-0 max-w-4xl space-y-8 overflow-x-hidden">
-        <div className="min-w-0">
+        <div className="yd-profile-hub__intro min-w-0">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748B]">
             Praxis · Patientenunterlagen
           </p>
-          <h1 className="mb-3 text-balance text-[1.625rem] font-semibold leading-snug tracking-[-0.02em] text-[#0F172A] md:text-[1.875rem]">
+          <h1 className="yd-profile-hub__title mb-3 text-balance text-[1.625rem] font-semibold leading-snug tracking-[-0.02em] text-[#0F172A] md:text-[1.875rem]">
             Praxisangaben und freigegebener Patientenbereich
           </h1>
-          <p className="max-w-xl text-[14px] leading-relaxed text-[#475569] md:text-[15px]">
+          <p className="yd-profile-hub__lead max-w-xl text-[14px] leading-relaxed text-[#475569] md:text-[15px]">
             Bearbeiten Sie Praxisangaben im geschützten Editor. Der öffentliche Bereich unter Ihrer Kurzadresse dient
             ausschließlich der dokumentierten Einsendung von Unterlagen — nicht einer allgemeinen Webpräsenz. Nach dem
             Speichern sind die Angaben dort sichtbar; eine getrennte Vorschau gibt es in diesem MVP nicht.
           </p>
         </div>
 
-        <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch md:gap-4">
+        <div className="yd-profile-hub__cards grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch md:gap-4">
           <Link
             href="/profile/editor"
-            className="flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-5 transition-colors hover:border-[rgba(15,23,42,0.12)] sm:p-6 md:min-h-[220px]"
+            className="yd-profile-hub__card flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-5 transition-colors hover:border-[rgba(15,23,42,0.12)] sm:p-6 md:min-h-[220px]"
           >
             <PencilLine className="mb-3 h-5 w-5 text-[#2F80ED]" strokeWidth={1.75} aria-hidden />
             <h2 className="mb-1 text-[17px] font-semibold tracking-[-0.01em] text-[#0F172A]">
@@ -228,14 +228,14 @@ export default async function ProfilePage() {
               rel="noopener noreferrer"
               referrerPolicy="no-referrer"
               aria-label="Patientenbereich für dokumentierte Einsendungen in neuem Fenster öffnen"
-              className="flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-5 transition-colors hover:border-[rgba(15,23,42,0.12)] sm:p-6 md:min-h-[220px]"
+              className="yd-profile-hub__card flex min-h-[200px] min-w-0 touch-manipulation flex-col rounded-lg border border-[rgba(15,23,42,0.08)] bg-white p-5 transition-colors hover:border-[rgba(15,23,42,0.12)] sm:p-6 md:min-h-[220px]"
             >
               <ExternalLink className="mb-3 h-5 w-5 text-[#2F80ED]" strokeWidth={1.75} aria-hidden />
               <h2 className="mb-1 text-[17px] font-semibold tracking-[-0.01em] text-[#0F172A]">
                 Patientenbereich öffnen
               </h2>
               <p className="mb-1.5 text-[12px] font-medium text-[#64748B]">Öffentliche Adresse (Weitergabe an Patientinnen)</p>
-              <p className="break-words [overflow-wrap:anywhere] font-mono text-[11px] leading-snug text-[#94A3B8]">
+              <p className="yd-profile-hub__card-url break-words [overflow-wrap:anywhere] font-mono text-[11px] leading-snug text-[#94A3B8]">
                 {publicUrlLabel}
               </p>
               <p className="mt-3 text-[12px] leading-relaxed text-[#475569]">
@@ -244,7 +244,7 @@ export default async function ProfilePage() {
             </Link>
           ) : patientLinkLoadFailed ? (
             <div
-              className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#FAFBFC] p-5 sm:p-6 md:min-h-[220px]"
+              className="yd-profile-hub__card flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#FAFBFC] p-5 sm:p-6 md:min-h-[220px]"
               role="status"
               aria-live="polite"
               aria-atomic="true"
@@ -260,7 +260,7 @@ export default async function ProfilePage() {
             </div>
           ) : (
             <div
-              className="flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#FAFBFC] p-5 sm:p-6 md:min-h-[220px]"
+              className="yd-profile-hub__card flex min-h-[200px] min-w-0 flex-col rounded-lg border border-dashed border-[rgba(15,23,42,0.1)] bg-[#FAFBFC] p-5 sm:p-6 md:min-h-[220px]"
               role="region"
               aria-labelledby="profile-patient-empty-setup"
             >

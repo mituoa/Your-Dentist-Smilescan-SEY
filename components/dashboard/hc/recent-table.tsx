@@ -75,7 +75,62 @@ export function HcRecentTable({ rows, preparationById = {} }: RecentTableProps) 
         </Link>
       </div>
 
-      <div className="max-w-full overflow-x-auto overscroll-x-contain">
+      <div className="yd-dash-recent-mobile md:hidden">
+        {orderedRows === null ? (
+          <div className="yd-mobile-empty">
+            <p className="yd-mobile-empty__title">Übersicht momentan nicht verfügbar</p>
+            <p className="yd-mobile-empty__copy">
+              Bitte Seite erneut laden — Ihre Patientenfälle bleiben unverändert.
+            </p>
+          </div>
+        ) : orderedRows.length === 0 ? (
+          <div className="yd-mobile-empty">
+            <p className="yd-mobile-empty__title">Keine offenen Vorgänge</p>
+            <p className="yd-mobile-empty__copy">
+              Alle Patientenfälle sind bearbeitet. Neue Einsendungen erscheinen automatisch hier.
+            </p>
+          </div>
+        ) : (
+          <div className="yd-mobile-row-cards">
+            {orderedRows.map((row) => {
+              const name = row.patient_name?.trim() || "Patient";
+              const issue = deriveSubmissionIssueShortLine(row.patient_notes, row.patient_name, {
+                maxLen: 80,
+                emptyLabel: "—",
+              });
+              const date = new Date(row.created_at).toLocaleDateString("de-DE", {
+                day: "2-digit",
+                month: "short",
+              });
+              const preparation = preparationById[row.id];
+              const status = resolveSubmissionStatus(row, preparation);
+              const actionLabel = preparation?.readyForReview ? "Prüfen" : "Fall öffnen";
+
+              return (
+                <Link key={row.id} href={`/inbox/${row.id}`} prefetch className="yd-mobile-row-card">
+                  <div className="yd-mobile-row-card__head">
+                    <p className="yd-mobile-row-card__title">{name}</p>
+                    <YdStatusPill label={status.label} variant={status.variant} className="shrink-0 text-[10px] font-medium" />
+                  </div>
+                  <p className="yd-mobile-row-card__line">{issue}</p>
+                  <div className="yd-mobile-row-card__meta-row">
+                    <MessageDraftStatusBadge
+                      draftStatus={row.message_draft_status ?? "none"}
+                      readyForReview={preparation?.readyForReview ?? isSubmissionReadyForReview(row)}
+                    />
+                  </div>
+                  <div className="yd-mobile-row-card__foot">
+                    <span className="yd-mobile-row-card__date">{date}</span>
+                    <span className="yd-mobile-row-card__cta">{actionLabel}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="hidden max-w-full overflow-x-auto overscroll-x-contain md:block">
         <table className="w-full min-w-[760px] border-collapse text-left">
           <thead>
             <tr>

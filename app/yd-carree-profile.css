@@ -1144,6 +1144,16 @@ a.yd-carree-hero__contact-value:hover {
     -webkit-overflow-scrolling: touch;
     scroll-padding-bottom: 2.5rem;
   }
+
+  .yd-profile-editor-save-bar {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem 1rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(244, 243, 240, 0.98);
+  }
 }
 
 /* Mobil: gesamte Seite scrollt über main */
@@ -1191,10 +1201,132 @@ a.yd-carree-hero__contact-value:hover {
 
   .yd-profile-editor-curate-scroll {
     overflow: visible;
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .yd-profile-editor-preview {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    padding: 0.5rem 0.65rem 0.35rem;
+  }
+
+  .yd-carree-editor-preview-frame {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.25rem 0.15rem 0.45rem;
+  }
+
+  .yd-carree-profile--editor-preview {
+    border-radius: 18px;
+    box-shadow:
+      0 2px 18px rgba(26, 43, 74, 0.055),
+      0 0 0 1px rgba(26, 43, 74, 0.04);
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-profile__body-wrap {
+    padding: 0.65rem 1rem 1.1rem;
   }
 
   .yd-carree-hero--compact {
     min-height: auto;
+    padding: 1.2rem 1.1rem 0;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__headline {
+    font-size: clamp(2.15rem, 9.5cqw, 3.35rem);
+    line-height: 0.92;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__inner {
+    max-width: 100%;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__portrait-stage {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    height: clamp(240px, 58vw, 320px);
+    margin-top: 0.65rem;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__portrait {
+    left: 0;
+    right: 0;
+    -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__portrait img {
+    object-position: center 12%;
+    transform: none;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__watermark {
+    padding-left: 0;
+    padding-right: 6%;
+    justify-content: flex-end;
+    align-items: flex-end;
+    opacity: 0.85;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__watermark-letters {
+    opacity: 0.28;
+    font-size: clamp(7.5rem, 44vw, 11rem);
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__watermark-logo {
+    width: clamp(7rem, 40vw, 10rem);
+    opacity: 0.08;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__contact-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .yd-carree-hero--compact .yd-carree-hero__chip:nth-child(3) {
+    grid-column: auto;
+    flex: 1 1 100%;
+  }
+
+  .yd-profile-editor-curate {
+    position: relative;
+    border-top: 1px solid rgba(148, 163, 184, 0.22);
+  }
+
+  .yd-profile-editor-curate-scroll {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1.25rem;
+  }
+
+  .yd-pe-section__trigger {
+    min-height: 48px;
+  }
+
+  .yd-pe-section__panel {
+    padding-bottom: 1.25rem;
+  }
+
+  .yd-profile-editor-save-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.65rem 1rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(244, 243, 240, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 -6px 24px rgba(26, 43, 74, 0.07);
   }
 }
 

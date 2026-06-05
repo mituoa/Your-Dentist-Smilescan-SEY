@@ -70,6 +70,48 @@ function sanitizeCareerPath(raw: unknown): string[] {
     .filter(Boolean);
 }
 
+function isSchemaColumnError(error: { code?: string; message?: string }): boolean {
+  const code = error.code ?? "";
+  const msg = (error.message ?? "").toLowerCase();
+  return (
+    code === "PGRST204" ||
+    code === "42703" ||
+    (msg.includes("column") && msg.includes("does not exist"))
+  );
+}
+
+type ProfileDataUpsertRow = Record<string, unknown>;
+
+async function upsertProfileRow(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  row: ProfileDataUpsertRow
+): Promise<{ error: { code?: string; message?: string } | null }> {
+  const { error } = await supabase
+    .from("profile_data")
+    .upsert(row as never, { onConflict: "workspace_id" });
+
+  if (!error || !isSchemaColumnError(error)) {
+    return { error };
+  }
+
+  const legacy = { ...row };
+  delete legacy.profile_personal_approach;
+  delete legacy.profile_career_path;
+  const retryV3 = await supabase
+    .from("profile_data")
+    .upsert(legacy as never, { onConflict: "workspace_id" });
+  if (!retryV3.error || !isSchemaColumnError(retryV3.error)) {
+    return { error: retryV3.error };
+  }
+
+  delete legacy.practice_subtitle;
+  delete legacy.profile_credentials;
+  const retryCarree = await supabase
+    .from("profile_data")
+    .upsert(legacy as never, { onConflict: "workspace_id" });
+  return { error: retryCarree.error };
+}
+
 function sanitizeSavePayload(payload: SaveProfilePayload): SaveProfilePayload {
   return {
     first_name: clampStr(payload.first_name, PROFILE_LIMITS.first_name),
@@ -173,12 +215,10 @@ export async function saveProfileData(
     profile_background_color: p.profile_background_color,
   };
 
-  const { error } = await supabase
-    .from("profile_data")
-    .upsert(row as never, { onConflict: "workspace_id" });
+  const { error } = await upsertProfileRow(supabase, row);
 
   if (error) {
-    console.error("[saveProfile]", (error as { code?: string }).code ?? "unknown");
+    console.error("[saveProfile]", error.code ?? "unknown");
     return { error: "Speichern fehlgeschlagen." };
   }
 

@@ -426,16 +426,6 @@ export function ProfileEditorShell({
                         </div>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      disabled={interactionLocked}
-                      onClick={() => void performSave()}
-                      className="yd-profile-editor-save inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-4 text-[12px] font-semibold tracking-[0.02em] text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
-                      style={{ background: themeInk }}
-                    >
-                      <Check className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-                      {saveStatus === "saving" ? "Wird gespeichert…" : "Speichern"}
-                    </button>
                   </div>
                 </ProfileEditorSection>
 
@@ -654,11 +644,30 @@ export function ProfileEditorShell({
                   />
                 </ProfileEditorSection>
               </div>
-
-              <div className="mt-6 flex min-h-[2.5rem] flex-col justify-end border-t border-slate-300/25 pt-4">
-                <AutoSaveIndicator status={saveStatus} lastSavedAt={lastSavedAt} errorMessage={errorMessage} />
-              </div>
             </div>
+          </div>
+
+          <div className="yd-profile-editor-save-bar">
+            <button
+              type="button"
+              disabled={interactionLocked}
+              onClick={() => void performSave()}
+              className="yd-profile-editor-save inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-4 text-[12px] font-semibold tracking-[0.02em] text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
+              style={{ background: themeInk }}
+              aria-busy={saveStatus === "saving"}
+            >
+              <Check className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+              {saveStatus === "saving"
+                ? "Wird gespeichert…"
+                : saveStatus === "error"
+                  ? "Erneut speichern"
+                  : "Speichern"}
+            </button>
+            <AutoSaveIndicator
+              status={saveStatus}
+              lastSavedAt={lastSavedAt}
+              errorMessage={errorMessage}
+            />
           </div>
         </div>
       </div>
