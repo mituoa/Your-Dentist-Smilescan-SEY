@@ -21,7 +21,7 @@ export default async function InboxLayout({ children }: InboxLayoutProps) {
   const submissions = listResult.ok ? listResult.items : [];
 
   const list = (
-    <div className="flex h-full min-h-0 flex-col px-0 pb-0 md:px-2 md:pb-2">
+    <div className="flex h-full min-h-0 flex-1 flex-col px-0 pb-0 md:px-2 md:pb-2">
       {listFailed ? (
         <TrackerEmptyState
           title="Einsendungen können momentan nicht geladen werden"

@@ -168,6 +168,60 @@
   .yd-inbox-workspace {
     min-height: 0;
     overflow-x: hidden;
+    flex: 1 1 auto;
+  }
+
+  main:has(.yd-inbox-workspace) .yd-awaken-canvas > .relative {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .yd-tracker-shell--mobile-list,
+  .yd-tracker-shell--mobile-detail {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .yd-tracker-shell--mobile-list .yd-tracker-shell__inbox,
+  .yd-tracker-shell--mobile-detail .yd-tracker-shell__workspace {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .yd-tracker-shell--mobile-detail .yd-tracker-shell__workspace {
+    border-radius: 0;
+    background: linear-gradient(
+      168deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(248, 252, 255, 0.96) 100%
+    );
+  }
+
+  .yd-tracker-mobile-case-view {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    background: transparent;
+  }
+
+  .yd-tracker-mobile-case-view__bar {
+    padding-top: 0.375rem !important;
+    padding-inline: max(0.875rem, env(safe-area-inset-left)) max(0.875rem, env(safe-area-inset-right)) !important;
+  }
+
+  .yd-tracker-mobile-back {
+    color: #1a4f9c;
+    text-decoration: none;
+  }
+
+  .yd-tracker-mobile-back:active {
+    opacity: 0.88;
   }
 
   .yd-tracker-shell {

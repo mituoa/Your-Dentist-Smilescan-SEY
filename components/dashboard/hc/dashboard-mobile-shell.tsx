@@ -1,23 +1,12 @@
 import Link from "next/link";
-import { ClipboardList, ListTodo, BookOpen, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
-import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import { MorningBriefing } from "@/components/dashboard/hc/morning-briefing";
-import {
-  buildDecisionsKpiValue,
-  buildNewSubmissionsKpiValue,
-  buildPreparedKpiValue,
-  buildMobilePriorityLine,
-} from "@/lib/dashboard/dashboard-status-copy";
-import {
-  buildNewSubmissionsWorkContext,
-  buildOpenTasksWorkContext,
-} from "@/lib/dashboard/kpi-work-context";
+import { buildMobilePriorityLine } from "@/lib/dashboard/dashboard-status-copy";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { createCaseFromQuery } from "@/lib/create-case-return";
 import type { PracticeBriefing } from "@/lib/command-ai/practice-intelligence";
 import type { DashboardPriorityItem, OpenTaskRow } from "@/lib/queries/dashboard";
-import type { KpiWorkContextData } from "@/components/dashboard/hc/kpi-work-context-preview";
 
 type DashboardMobileShellProps = {
   greeting: string;
@@ -29,8 +18,6 @@ type DashboardMobileShellProps = {
   priorityItems: DashboardPriorityItem[] | null;
   openTasks: OpenTaskRow[] | null;
   briefing?: PracticeBriefing | null;
-  newSubmissionsContext?: KpiWorkContextData;
-  openTasksContext?: KpiWorkContextData;
 };
 
 const MOBILE_INBOX_PREVIEW_LIMIT = 5;
@@ -54,8 +41,6 @@ export function DashboardMobileShell({
   priorityItems,
   openTasks,
   briefing = null,
-  newSubmissionsContext,
-  openTasksContext,
 }: DashboardMobileShellProps) {
   const newItems = (priorityItems ?? []).filter((item) => !item.seen_at);
   const inboxPreview = newItems.slice(0, MOBILE_INBOX_PREVIEW_LIMIT);
@@ -74,43 +59,6 @@ export function DashboardMobileShell({
     (preparedAwaitingCount ?? 0) > 0 ||
     (decisionCount ?? 0) > 0;
 
-  const actionTiles = [
-    {
-      href: "/inbox",
-      icon: ClipboardList,
-      label: "Tracker",
-      sub:
-        (unseenCount ?? 0) > 0
-          ? `${unseenCount} neu eingegangen`
-          : "Einsendungen & Fälle",
-      highlight: (unseenCount ?? 0) > 0,
-    },
-    {
-      href: "/relay",
-      icon: ListTodo,
-      label: "Relay",
-      sub:
-        decisionCount > 0
-          ? `${decisionCount} wartet auf Sie`
-          : "Aufgaben & Freigaben",
-      highlight: decisionCount > 0,
-    },
-    {
-      href: `/create-case?from=${createCaseFromQuery("/dashboard")}`,
-      icon: Plus,
-      label: "Fall anlegen",
-      sub: "Neuer Patient",
-      highlight: false,
-    },
-    {
-      href: "/journal",
-      icon: BookOpen,
-      label: "Journal",
-      sub: "Praxiswissen",
-      highlight: false,
-    },
-  ] as const;
-
   return (
     <div className="yd-dash-mobile md:hidden">
       <header className="yd-dash-mobile__hero">
@@ -128,6 +76,12 @@ export function DashboardMobileShell({
         )}
       </header>
 
+      {briefing ? (
+        <section className="yd-dash-mobile__briefing" aria-label="Tagesüberblick">
+          <MorningBriefing briefing={briefing} />
+        </section>
+      ) : null}
+
       <section className="yd-dash-mobile__inbox" aria-label="Neu eingegangen">
         <div className="yd-dash-mobile__section-head">
           <div className="yd-dash-mobile__section-head-main">
@@ -140,9 +94,11 @@ export function DashboardMobileShell({
               </span>
             ) : null}
           </div>
-          <Link href="/inbox" className="yd-dash-mobile__section-link">
-            Alle
-          </Link>
+          {(unseenCount ?? 0) > 0 ? (
+            <Link href="/inbox" className="yd-dash-mobile__section-link">
+              Alle
+            </Link>
+          ) : null}
         </div>
 
         {inboxPreview.length > 0 ? (
@@ -185,85 +141,20 @@ export function DashboardMobileShell({
             ) : null}
           </>
         ) : (
-          <Link href="/inbox" className="yd-dash-mobile-inbox-empty">
-            <span className="yd-dash-mobile-inbox-empty__title">Keine neuen Einsendungen</span>
-            <span className="yd-dash-mobile-inbox-empty__sub">Tracker öffnen</span>
-          </Link>
+          <p className="yd-dash-mobile-inbox-quiet" role="status">
+            Keine neuen Einsendungen — alles erledigt für den Moment.
+          </p>
         )}
-      </section>
-
-      <section className="yd-dash-mobile__actions" aria-label="Wichtige Aktionen">
-        <h2 className="yd-dash-mobile__section-title yd-dash-mobile__section-title--prominent">
-          Wichtige Aktionen
-        </h2>
-        <ul className="yd-dash-mobile-action-grid">
-          {actionTiles.map((tile) => {
-            const Icon = tile.icon;
-            return (
-              <li key={tile.href} className="yd-dash-mobile-action-grid__item">
-                <Link
-                  href={tile.href}
-                  className={
-                    tile.highlight
-                      ? "yd-dash-mobile-action-tile yd-dash-mobile-action-tile--highlight"
-                      : "yd-dash-mobile-action-tile"
-                  }
-                >
-                  <span className="yd-dash-mobile-action-tile__icon-shell" aria-hidden>
-                    <Icon className="yd-dash-mobile-action-tile__icon" strokeWidth={1.75} />
-                  </span>
-                  <span className="yd-dash-mobile-action-tile__stack">
-                    <span className="yd-dash-mobile-action-tile__label">{tile.label}</span>
-                    <span className="yd-dash-mobile-action-tile__sub">{tile.sub}</span>
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <section className="yd-dash-mobile__kpis yd-dash-mobile__kpis--secondary" aria-label="Überblick">
-        <h2 className="yd-dash-mobile__section-title">Überblick</h2>
-        <div className="yd-dash-mobile__kpi-grid">
-          <HcStatCard
-            href="/inbox"
-            title="Neue Anfragen"
-            value={buildNewSubmissionsKpiValue(unseenCount)}
-            valueVariant="prose"
-            iconName="clipboard-list"
-            footnote="Heute eingegangen"
-            workContext={newSubmissionsContext}
-            hoverHint="Neue Patientenanfragen, die noch nicht gesehen wurden."
-          />
-          <HcStatCard
-            href="/inbox"
-            title="Wartet auf Freigabe"
-            value={buildPreparedKpiValue(preparedAwaitingCount)}
-            valueVariant="prose"
-            iconName="sparkles"
-            footnote="Von Ihnen freigeben"
-            hoverHint="Antworten und nächste Schritte warten auf Ihre Freigabe."
-          />
-          <HcStatCard
-            href="/relay"
-            title="Patient wartet"
-            value={buildDecisionsKpiValue(decisionCount)}
-            valueVariant="prose"
-            iconName="list-todo"
-            footnote="Rückmeldung ausstehend"
-            workContext={openTasksContext}
-            hoverHint="Patienten, die auf Ihre Antwort warten."
-          />
-        </div>
       </section>
 
       {taskRows.length > 0 ? (
         <section className="yd-dash-mobile__tasks" aria-label="Offene Aufgaben">
           <div className="yd-dash-mobile__section-head">
-            <h2 className="yd-dash-mobile__section-title">Offene Aufgaben</h2>
+            <h2 className="yd-dash-mobile__section-title yd-dash-mobile__section-title--prominent">
+              Offene Aufgaben
+            </h2>
             <Link href="/relay" className="yd-dash-mobile__section-link">
-              Relay
+              Alle
             </Link>
           </div>
           <ul className="yd-dash-mobile-inbox-cards">
@@ -281,11 +172,15 @@ export function DashboardMobileShell({
         </section>
       ) : null}
 
-      {briefing ? (
-        <section className="yd-dash-mobile__briefing" aria-label="Tagesüberblick">
-          <MorningBriefing briefing={briefing} />
-        </section>
-      ) : null}
+      <div className="yd-dash-mobile__footer-action">
+        <Link
+          href={`/create-case?from=${createCaseFromQuery("/dashboard")}`}
+          className="yd-dash-mobile-create-case"
+        >
+          <Plus className="yd-dash-mobile-create-case__icon" strokeWidth={1.75} aria-hidden />
+          Fall anlegen
+        </Link>
+      </div>
     </div>
   );
 }

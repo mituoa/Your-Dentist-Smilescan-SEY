@@ -16,11 +16,18 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
   const isCaseDetail = pathname.startsWith("/inbox/") && pathname !== "/inbox";
 
   return (
-    <div className="yd-tracker-shell">
+    <div
+      className={cn(
+        "yd-tracker-shell",
+        isInboxIndex && "yd-tracker-shell--mobile-list",
+        isCaseDetail && "yd-tracker-shell--mobile-detail"
+      )}
+    >
       <div
         className={cn(
           "yd-tracker-shell__inbox",
-          isCaseDetail && "max-md:hidden"
+          isCaseDetail && "max-md:hidden",
+          isInboxIndex && "max-md:flex max-md:min-h-0 max-md:flex-1 max-md:flex-col"
         )}
       >
         {list}
@@ -28,7 +35,9 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
       <div
         className={cn(
           "yd-tracker-shell__workspace",
-          isInboxIndex && "max-md:hidden"
+          isInboxIndex && "max-md:hidden",
+          isCaseDetail &&
+            "max-md:flex max-md:min-h-0 max-md:w-full max-md:flex-1 max-md:flex-col"
         )}
       >
         {detail}

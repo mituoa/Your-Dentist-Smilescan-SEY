@@ -148,6 +148,19 @@ export function isTeamSection(section: SettingsSectionId): boolean {
   return section === "team-rollen" || section === "einladungen";
 }
 
+/** Anzeigename für Mobile-Panel-Header und Zurück-Link. */
+export function getSettingsSectionLabel(section: SettingsSectionId): string {
+  for (const group of SETTINGS_NAV_GROUPS) {
+    const item = group.items.find((entry) => entry.id === section);
+    if (item) return item.label;
+  }
+  for (const group of SETTINGS_MOBILE_NAV_GROUPS) {
+    const item = group.items.find((entry) => entry.id === section);
+    if (item) return item.label;
+  }
+  return "Einstellungen";
+}
+
 /** Mobile IA — grouped hub (desktop nav unchanged). */
 function pickNavItems(ids: SettingsSectionId[]): SettingsNavItem[] {
   const flat = SETTINGS_NAV_GROUPS.flatMap((g) => g.items);

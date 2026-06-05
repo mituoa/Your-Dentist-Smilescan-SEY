@@ -19,6 +19,7 @@ import {
 import { setThemePreference } from "@/app/actions/theme";
 import { signOutWithFullPageRedirect } from "@/lib/auth/sign-out-client";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
+import { SettingsMobileBack } from "@/components/settings/settings-mobile-back";
 import { SettingsMobileNav } from "@/components/settings/settings-mobile-nav";
 import { SettingsOpeningHoursPanel } from "@/components/settings/settings-opening-hours-panel";
 import { SettingsPracticeProfilePanel } from "@/components/settings/settings-practice-profile-panel";
@@ -29,10 +30,12 @@ import {
 import { SettingsTeamPanel } from "@/components/settings/settings-team-panel";
 import {
   defaultTeamTabForSection,
+  getSettingsSectionLabel,
   isSettingsSectionId,
   SETTINGS_NAV_GROUPS,
   type SettingsSectionId,
 } from "@/lib/settings/settings-navigation";
+import { cn } from "@/lib/utils";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
 import type { ThemePreference } from "@/lib/theme";
 import type { OpeningHoursConfig } from "@/lib/settings/opening-hours";
@@ -91,6 +94,9 @@ export function SettingsFigmaView({
   const [activeSection, setActiveSection] = useState<SettingsSectionId>(
     isSettingsSectionId(sectionFromUrl) ? sectionFromUrl : "team-rollen"
   );
+  const [mobileShowPanel, setMobileShowPanel] = useState(() =>
+    isSettingsSectionId(sectionFromUrl)
+  );
 
   const [slug, setSlug] = useState(initialSlug);
   const [workspaceName, setWorkspaceName] = useState(initialWorkspaceName);
@@ -111,9 +117,20 @@ export function SettingsFigmaView({
 
   const contentRef = useRef<HTMLDivElement>(null);
 
+  const scrollMobileSettingsToTop = useCallback(() => {
+    if (typeof window === "undefined") return;
+    window.requestAnimationFrame(() => {
+      document.querySelector(".yd-workspace main")?.scrollTo({ top: 0, behavior: "auto" });
+      contentRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    });
+  }, []);
+
   useEffect(() => {
     if (isSettingsSectionId(sectionFromUrl)) {
       setActiveSection(sectionFromUrl);
+      setMobileShowPanel(true);
+    } else {
+      setMobileShowPanel(false);
     }
   }, [sectionFromUrl]);
 
@@ -134,7 +151,15 @@ export function SettingsFigmaView({
 
   const navigateSection = (section: SettingsSectionId) => {
     setActiveSection(section);
+    setMobileShowPanel(true);
     router.replace(`/settings?section=${section}`, { scroll: false });
+    scrollMobileSettingsToTop();
+  };
+
+  const closeMobileHub = () => {
+    setMobileShowPanel(false);
+    router.replace("/settings", { scroll: false });
+    scrollMobileSettingsToTop();
   };
 
   const persistSlug = useCallback(
@@ -503,7 +528,14 @@ export function SettingsFigmaView({
           </div>
         ) : null}
 
-        <div className="yd-settings-v2__layout">
+        <div
+          className={cn(
+            "yd-settings-v2__layout",
+            mobileShowPanel
+              ? "yd-settings-v2__layout--mobile-panel"
+              : "yd-settings-v2__layout--mobile-hub"
+          )}
+        >
           <nav className="yd-settings-v2__nav yd-settings-v2__nav--desktop hidden md:block" aria-label="Einstellungsbereiche">
             {SETTINGS_NAV_GROUPS.map((group) => (
               <div key={group.label} className="yd-settings-v2__nav-group">
@@ -537,6 +569,14 @@ export function SettingsFigmaView({
           <SettingsMobileNav activeSection={activeSection} onNavigate={navigateSection} />
 
           <div ref={contentRef} className="yd-settings-v2__content">
+            {mobileShowPanel ? (
+              <header className="yd-settings-mobile-panel-head md:hidden">
+                <SettingsMobileBack onBack={closeMobileHub} />
+                <h2 className="yd-settings-mobile-panel-head__title">
+                  {getSettingsSectionLabel(activeSection)}
+                </h2>
+              </header>
+            ) : null}
             {panel}
           </div>
         </div>

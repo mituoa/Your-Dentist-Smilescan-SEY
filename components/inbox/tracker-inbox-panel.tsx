@@ -80,7 +80,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
 
   return (
     <>
-      <div className="md:hidden flex h-full min-h-0 flex-col">
+      <div className="md:hidden flex h-full min-h-0 flex-1 flex-col">
         <TrackerMobileInbox items={items} />
       </div>
       <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-tracker-v12-inbox yd-tracker-v14-inbox yd-tracker-v15-inbox yd-tracker-v16-triage yd-clinical-control hidden h-full min-h-0 flex-col md:flex">

@@ -135,8 +135,8 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
       />
       <CaseCreatedToast />
 
-      <div className="yd-tracker-v4-detail flex h-full min-h-0 flex-1 flex-col overflow-hidden max-md:overflow-hidden">
-        <div className="yd-tracker-v4-detail__bar shrink-0 px-4 pb-2 pt-1 md:px-6 md:pt-4">
+      <div className="yd-tracker-v4-detail yd-tracker-mobile-case-view flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="yd-tracker-v4-detail__bar yd-tracker-mobile-case-view__bar shrink-0 px-4 pb-2 pt-1 md:px-6 md:pt-4">
           <Suspense fallback={null}>
             <InboxMobileBack />
           </Suspense>

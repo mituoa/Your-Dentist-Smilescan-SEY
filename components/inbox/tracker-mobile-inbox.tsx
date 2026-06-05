@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
 import {
@@ -10,6 +11,7 @@ import {
   TRACKER_FILTER_HINTS,
   TRACKER_OPTIONAL_FILTER_CHIPS,
   countByTrackerFilter,
+  inboxUrgencyVisualTier,
   matchesTrackerFilter,
   matchesTrackerSearch,
   sortTrackerInboxItems,
@@ -26,9 +28,12 @@ type TrackerMobileInboxProps = {
   items: SubmissionListItem[];
 };
 
-/** Mobile Tracker-Liste — Karten wie Desktop V16, klare Triage-Hierarchie. */
+function caseHref(id: string, q?: string | null): string {
+  return q ? `/inbox/${id}?q=${encodeURIComponent(q)}` : `/inbox/${id}`;
+}
+
+/** Mobile Tracker-Liste — Desktop-V16-Karten, Tap öffnet Vollbild-Fall. */
 export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
-  const router = useRouter();
   const pathname = usePathname() || "";
   const searchParams = useSearchParams();
   const q = searchParams.get("q")?.trim();
@@ -68,51 +73,52 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
     setFilter("all");
   }, [qLower]);
 
-  const goToCase = (id: string) => {
-    const href = q ? `/inbox/${id}?q=${encodeURIComponent(q)}` : `/inbox/${id}`;
-    router.push(href);
-  };
-
   const emptyCopy =
     filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
 
   return (
-    <div className="yd-tracker-mobile-inbox flex h-full min-h-0 flex-col">
+    <div className="yd-tracker-mobile-inbox flex h-full min-h-0 flex-1 flex-col">
       <header className="yd-tracker-mobile-inbox__head shrink-0">
         <h1 className="yd-tracker-mobile-inbox__title">{headerSummary.lead}</h1>
         <p className="yd-tracker-mobile-inbox__lead">{headerSummary.breakdown}</p>
       </header>
 
-      <div
-        className="yd-tracker-mobile-inbox__filters shrink-0"
-        role="tablist"
-        aria-label="Filter"
-      >
-        {[...TRACKER_FILTER_CHIPS, ...optionalChips].map((chip) => {
-          const count = countByTrackerFilter(searchScoped, chip.id);
-          const active = filter === chip.id;
-          const hint = TRACKER_FILTER_HINTS[chip.id];
-          return (
-            <button
-              key={chip.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              title={hint}
-              aria-description={hint}
-              className={cn(
-                "yd-tracker-mobile-inbox__filter",
-                active && "yd-tracker-mobile-inbox__filter--active"
-              )}
-              onClick={() => setFilter(chip.id)}
-            >
-              {chip.label}
-              {count > 0 ? (
-                <span className="yd-tracker-mobile-inbox__filter-count">{count}</span>
-              ) : null}
-            </button>
-          );
-        })}
+      <div className="yd-tracker-mobile-inbox__filters shrink-0">
+        <div className="yd-tracker-filter-scroll">
+          <div
+            className="yd-tracker-filter-chips"
+            role="tablist"
+            aria-label="Arbeit in der Liste filtern"
+          >
+            {[...TRACKER_FILTER_CHIPS, ...optionalChips].map((chip) => {
+              const count = countByTrackerFilter(searchScoped, chip.id);
+              const active = filter === chip.id;
+              const hint = TRACKER_FILTER_HINTS[chip.id];
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  title={hint}
+                  aria-description={hint}
+                  className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
+                  onClick={() => setFilter(chip.id)}
+                >
+                  <span>{chip.label}</span>
+                  <span
+                    className={cn(
+                      "yd-tracker-filter-chip__count",
+                      count === 0 && "yd-tracker-filter-chip__count--zero"
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <ul
@@ -129,34 +135,53 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
             const work = trackerInboxWorkType(item);
             const attention = trackerInboxAttentionTier(item);
             const timeLabel = formatTrackerRelativeIngress(item.created_at);
+            const urgencyTier = inboxUrgencyVisualTier(item.urgency);
+            const href = caseHref(item.id, q);
 
             return (
               <li key={item.id} className="yd-tracker-mobile-inbox__item">
-                <button
-                  type="button"
+                <Link
+                  href={href}
                   className={cn(
-                    "yd-tracker-mobile-card",
-                    `yd-tracker-mobile-card--${attention}`,
-                    isActive && "yd-tracker-mobile-card--active",
-                    isFresh && "yd-tracker-mobile-card--fresh"
+                    "yd-tracker-v4-inbox-card",
+                    "yd-tracker-v8-inbox-card",
+                    "yd-tracker-v10-inbox-card",
+                    "yd-tracker-v12-inbox-card",
+                    "yd-tracker-v14-inbox-card",
+                    "yd-tracker-v15-inbox-card",
+                    "yd-tracker-v16-inbox-card",
+                    "yd-tracker-mobile-inbox-card",
+                    `yd-tracker-v15-inbox-card--urgency-${urgencyTier}`,
+                    `yd-tracker-v16-inbox-card--attention-${attention}`,
+                    isFresh && "yd-tracker-v15-inbox-card--fresh",
+                    isActive && "yd-tracker-v4-inbox-card--active",
+                    isActive && "yd-tracker-v8-inbox-card--active",
+                    isActive && "yd-tracker-v10-inbox-card--active",
+                    isActive && "yd-tracker-v12-inbox-card--active"
                   )}
-                  onClick={() => goToCase(item.id)}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <span className="yd-tracker-mobile-card__headline-row">
-                    <span className="yd-tracker-mobile-card__headline">{work.headline}</span>
-                    {isFresh ? (
-                      <span className="yd-tracker-mobile-card__fresh" aria-label="Neu">
-                        Neu
+                  <span className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body yd-tracker-v16-inbox-card__body">
+                    <span className="yd-tracker-v15-inbox-card__urgency-rail" aria-hidden />
+                    <span className="yd-tracker-v16-inbox-card__scan">
+                      <span className="yd-tracker-v16-inbox-card__headline-row">
+                        <span className="yd-tracker-v16-inbox-card__headline">{work.headline}</span>
+                        {isFresh ? (
+                          <span className="yd-tracker-v14-inbox-card__fresh-badge" aria-label="Neu">
+                            Neu
+                          </span>
+                        ) : null}
+                        <span className="yd-tracker-v16-inbox-card__time">{timeLabel}</span>
                       </span>
-                    ) : null}
-                    <span className="yd-tracker-mobile-card__time">{timeLabel}</span>
+                      <span className="yd-tracker-v16-inbox-card__patient">{patientName}</span>
+                      {work.context ? (
+                        <span className="yd-tracker-v16-inbox-card__context" title={work.context}>
+                          {work.context}
+                        </span>
+                      ) : null}
+                    </span>
                   </span>
-                  <span className="yd-tracker-mobile-card__patient">{patientName}</span>
-                  {work.context ? (
-                    <span className="yd-tracker-mobile-card__context">{work.context}</span>
-                  ) : null}
-                </button>
+                </Link>
               </li>
             );
           })
@@ -164,4 +189,5 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
       </ul>
     </div>
   );
+
 }
