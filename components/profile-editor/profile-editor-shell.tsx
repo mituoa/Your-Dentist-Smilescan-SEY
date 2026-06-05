@@ -6,7 +6,10 @@ import { Camera } from "lucide-react";
 
 import { AutoSaveIndicator, type SaveStatus } from "./auto-save-indicator";
 import { FigmaTextInput } from "./figma-form-fields";
+import { ProfileBackgroundPicker } from "@/components/profile-editor/profile-background-picker";
 import { ProfileFigmaLivePreview } from "@/components/profile-editor/profile-figma-live-preview";
+import { ProfileServicesPicker } from "@/components/profile-editor/profile-services-picker";
+import { ProfileSpecializationPicker } from "@/components/profile-editor/profile-specialization-picker";
 import { saveProfileData, uploadPortraitPhoto } from "@/app/(protected)/profile/editor/actions";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
 import {
@@ -16,26 +19,23 @@ import {
   parseWorkingStyleVita,
   statementIdsToThreeLines,
 } from "@/lib/profile/working-style-library";
-import {
-  FIGMA_PRIMARY_SPECIALTY_IDS,
-  FIGMA_SPECIALTY_OPTIONS,
-  MAX_FIGMA_SPECIALTY_SELECTIONS,
-  figmaSpecialtyLabel,
-} from "@/lib/profile/figma-specialties";
 import { mergePracticeAddressBlock, parsePracticeAddressBlock } from "@/lib/profile/practice-address-split";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 
 interface ProfileEditorShellProps {
   initialData: ProfileEditorData;
+  workspaceName?: string;
 }
 
 type WorkingFormState = ReturnType<typeof parseWorkingStyleVita>;
 
-export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
+export function ProfileEditorShell({
+  initialData,
+  workspaceName = "Ihre Praxis",
+}: ProfileEditorShellProps) {
   const [data, setData] = useState<ProfileEditorData>(initialData);
   const [working, setWorking] = useState<WorkingFormState>(() => parseWorkingStyleVita(initialData.vita_markdown));
   const [showStatementLibrary, setShowStatementLibrary] = useState(false);
-  const [showAllSpecialties, setShowAllSpecialties] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -88,6 +88,7 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
         practice_email: d.practice_email || "",
         practice_website: d.practice_website || "",
         practice_hours: d.practice_hours || "",
+        profile_background_color: d.profile_background_color,
       });
 
       if (seq !== saveSeqRef.current) {
@@ -128,19 +129,6 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
   }, [data, working]);
 
   const addr = parsePracticeAddressBlock(data.practice_address);
-
-  const toggleSpecialty = (id: string) => {
-    const sel = data.specializations;
-    if (sel.includes(id)) {
-      updateField(
-        "specializations",
-        sel.filter((x) => x !== id)
-      );
-      return;
-    }
-    if (sel.length >= MAX_FIGMA_SPECIALTY_SELECTIONS) return;
-    updateField("specializations", [...sel, id]);
-  };
 
   const toggleStatement = (id: string) => {
     setWorking((prev) => {
@@ -192,29 +180,29 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
 
   return (
     <div
-      className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden pb-[max(0px,env(safe-area-inset-bottom))]"
+      className="yd-profile-editor-shell relative flex min-h-0 w-full flex-1 flex-col overflow-hidden pb-[max(0px,env(safe-area-inset-bottom))] md:h-full"
       style={{ backgroundColor: "#EDECE8" }}
     >
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_50%_at_50%_0%,rgba(255,255,255,0.5),transparent_50%)]"
         aria-hidden
       />
-      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto overflow-y-auto overscroll-y-contain lg:flex-row lg:overflow-hidden">
+      <div className="yd-profile-editor-body relative flex min-h-0 min-w-0 flex-1 flex-col md:flex-row md:overflow-hidden">
         {/* Bühne — zuerst im DOM: liest sich als Profil, nicht als Formular */}
         <div
-          className="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain lg:order-1"
+          className="yd-profile-editor-preview order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] md:order-1"
           role="region"
           aria-label="Öffentliche Profildarstellung"
         >
-          <ProfileFigmaLivePreview data={mergedProfile} />
+          <ProfileFigmaLivePreview data={mergedProfile} workspaceName={workspaceName} />
         </div>
 
         {/* Kuratieren — schmal, visuell zurückgenommen */}
         <div
-          className="order-2 flex min-h-0 w-full shrink-0 flex-col overflow-y-auto scroll-pb-10 border-slate-300/20 bg-[#F4F3F0] max-lg:border-t lg:order-2 lg:w-[min(100%,320px)] lg:max-w-[360px] lg:border-l lg:border-t-0 xl:max-w-[380px]"
+          className="yd-profile-editor-curate order-2 flex min-h-0 w-full shrink-0 flex-col border-slate-300/20 bg-[#F4F3F0] max-md:border-t md:order-2 md:w-[min(100%,320px)] md:max-w-[360px] md:border-l md:border-t-0 xl:max-w-[380px]"
           aria-busy={saveStatus === "saving" || photoUploading}
         >
-          <div className="px-5 py-8 sm:px-6 sm:py-9">
+          <div className="yd-profile-editor-curate-scroll px-5 py-8 sm:px-6 sm:py-9">
             <header className="border-b border-slate-300/25 pb-5">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Öffentliche Präsenz</p>
               <h1 className="mt-1.5 font-serif text-[1.25rem] font-light leading-snug tracking-[-0.02em] text-slate-900 sm:text-[1.35rem]">
@@ -314,6 +302,91 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                 </div>
               </section>
 
+              {/* Praxis — oben, steuert die Headline in der Vorschau */}
+              <section aria-labelledby="pe-practice-label">
+                <h2
+                  id="pe-practice-label"
+                  className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                >
+                  Praxis
+                </h2>
+                <p className="mb-4 text-[12px] leading-snug text-slate-500">
+                  Praxisname erscheint in der großen Headline der Patientenansicht.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label
+                      htmlFor="pe-practice-name"
+                      className="mb-1.5 block text-[11px] font-medium text-slate-600"
+                    >
+                      Praxisname
+                    </label>
+                    <FigmaTextInput
+                      id="pe-practice-name"
+                      variant="quiet"
+                      placeholder="z. B. Carree Dental"
+                      maxLength={PROFILE_LIMITS.practice_name}
+                      value={data.practice_name || ""}
+                      onChange={(e) => updateField("practice_name", e.target.value || null)}
+                    />
+                  </div>
+                  <ProfileBackgroundPicker
+                    value={data.profile_background_color}
+                    onChange={(hex) => updateField("profile_background_color", hex)}
+                    disabled={interactionLocked}
+                  />
+                  <FigmaTextInput
+                    variant="quiet"
+                    placeholder="Straße, Nr."
+                    maxLength={120}
+                    value={addr.street}
+                    onChange={(e) =>
+                      updatePracticeField(
+                        "practice_address",
+                        mergePracticeAddressBlock(e.target.value, addr.postalCode, addr.city)
+                      )
+                    }
+                  />
+                  <div className="grid grid-cols-3 gap-x-3 gap-y-3">
+                    <FigmaTextInput
+                      variant="quiet"
+                      placeholder="PLZ"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      maxLength={12}
+                      value={addr.postalCode}
+                      onChange={(e) =>
+                        updatePracticeField(
+                          "practice_address",
+                          mergePracticeAddressBlock(addr.street, e.target.value, addr.city)
+                        )
+                      }
+                    />
+                    <FigmaTextInput
+                      variant="quiet"
+                      placeholder="Stadt"
+                      maxLength={80}
+                      value={addr.city}
+                      onChange={(e) =>
+                        updatePracticeField(
+                          "practice_address",
+                          mergePracticeAddressBlock(addr.street, addr.postalCode, e.target.value)
+                        )
+                      }
+                      className="col-span-2 w-full"
+                    />
+                  </div>
+                  <FigmaTextInput
+                    variant="quiet"
+                    placeholder="Öffnungszeiten"
+                    maxLength={PROFILE_LIMITS.practice_hours}
+                    value={data.practice_hours || ""}
+                    onChange={(e) => updateField("practice_hours", e.target.value || null)}
+                  />
+                </div>
+              </section>
+
               {/* Arbeitsweise */}
               <section aria-labelledby="pe-work-label">
                 <h2 id="pe-work-label" className="sr-only">
@@ -397,133 +470,22 @@ export function ProfileEditorShell({ initialData }: ProfileEditorShellProps) {
                 ) : null}
               </section>
 
-              {/* Schwerpunkte */}
+              {/* Schwerpunkte — vollständige Masterliste, gruppiert */}
               <section aria-labelledby="pe-spec-label">
-                <div className="mb-3 flex items-baseline justify-between gap-2">
-                  <h2 id="pe-spec-label" className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                    Schwerpunkte
-                  </h2>
-                  <span className="text-[10px] font-medium tabular-nums text-slate-400">
-                    {data.specializations.length}/{MAX_FIGMA_SPECIALTY_SELECTIONS}
-                  </span>
-                </div>
-                <ul className="max-h-[min(52vh,22rem)] divide-y divide-slate-300/25 overflow-y-auto overscroll-y-contain border-y border-slate-300/25 [-webkit-overflow-scrolling:touch]">
-                  {FIGMA_SPECIALTY_OPTIONS.filter(
-                    (s) =>
-                      showAllSpecialties ||
-                      FIGMA_PRIMARY_SPECIALTY_IDS.includes(s.id) ||
-                      data.specializations.includes(s.id)
-                  ).map((specialty) => {
-                    const isSelected = data.specializations.includes(specialty.id);
-                    const isDisabled = !isSelected && data.specializations.length >= MAX_FIGMA_SPECIALTY_SELECTIONS;
-                    const rowMuted = isDisabled || interactionLocked;
-                    return (
-                      <li key={specialty.id}>
-                        <button
-                          type="button"
-                          disabled={rowMuted}
-                          aria-pressed={isSelected}
-                          onClick={() => !rowMuted && toggleSpecialty(specialty.id)}
-                          className="flex w-full items-center justify-between gap-3 py-3 pr-1 text-left text-[13px] font-normal leading-snug tracking-[-0.01em] text-slate-800 transition-colors disabled:cursor-not-allowed disabled:opacity-35 hover:bg-white/40"
-                        >
-                          <span className={isSelected ? "font-medium text-slate-950" : "text-slate-600"}>
-                            {specialty.label}
-                          </span>
-                          <span className="flex h-4 w-5 shrink-0 items-center justify-end" aria-hidden>
-                            {isSelected ? (
-                              <span className="h-1.5 w-1.5 rounded-full bg-slate-700/90" />
-                            ) : null}
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-                {!showAllSpecialties && FIGMA_SPECIALTY_OPTIONS.length > FIGMA_PRIMARY_SPECIALTY_IDS.length ? (
-                  <button
-                    type="button"
-                    disabled={interactionLocked}
-                    onClick={() => setShowAllSpecialties(true)}
-                    className="mt-4 inline-flex min-h-[44px] items-center text-[12px] font-medium text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 touch-manipulation disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Weitere anzeigen
-                  </button>
-                ) : null}
-
-                {data.specializations.some((id) => !FIGMA_SPECIALTY_OPTIONS.some((o) => o.id === id)) ? (
-                  <div className="mt-4 rounded-xl border border-dashed border-slate-200/80 bg-white/60 px-3 py-2.5 text-[11px] leading-relaxed text-slate-600">
-                    Weitere gespeicherte Schwerpunkte:{" "}
-                    {data.specializations
-                      .filter((id) => !FIGMA_SPECIALTY_OPTIONS.some((o) => o.id === id))
-                      .map((id) => figmaSpecialtyLabel(id))
-                      .join(", ")}
-                  </div>
-                ) : null}
+                <ProfileSpecializationPicker
+                  selected={data.specializations}
+                  onChange={(ids) => updateField("specializations", ids)}
+                  disabled={interactionLocked}
+                />
               </section>
 
-              {/* Praxis */}
-              <section aria-labelledby="pe-practice-label">
-                <h2 id="pe-practice-label" className="sr-only">
-                  Praxis
-                </h2>
-                <div className="flex flex-col gap-3">
-                  <FigmaTextInput
-                    variant="quiet"
-                    placeholder="Praxisname"
-                    maxLength={PROFILE_LIMITS.practice_name}
-                    value={data.practice_name || ""}
-                    onChange={(e) => updateField("practice_name", e.target.value || null)}
-                  />
-                  <FigmaTextInput
-                    variant="quiet"
-                    placeholder="Straße, Nr."
-                    maxLength={120}
-                    value={addr.street}
-                    onChange={(e) =>
-                      updatePracticeField(
-                        "practice_address",
-                        mergePracticeAddressBlock(e.target.value, addr.postalCode, addr.city)
-                      )
-                    }
-                  />
-                  <div className="grid grid-cols-3 gap-x-3 gap-y-3">
-                    <FigmaTextInput
-                      variant="quiet"
-                      placeholder="PLZ"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="postal-code"
-                      maxLength={12}
-                      value={addr.postalCode}
-                      onChange={(e) =>
-                        updatePracticeField(
-                          "practice_address",
-                          mergePracticeAddressBlock(addr.street, e.target.value, addr.city)
-                        )
-                      }
-                    />
-                    <FigmaTextInput
-                      variant="quiet"
-                      placeholder="Stadt"
-                      maxLength={80}
-                      value={addr.city}
-                      onChange={(e) =>
-                        updatePracticeField(
-                          "practice_address",
-                          mergePracticeAddressBlock(addr.street, addr.postalCode, e.target.value)
-                        )
-                      }
-                      className="col-span-2 w-full"
-                    />
-                  </div>
-                  <FigmaTextInput
-                    variant="quiet"
-                    placeholder="Öffnungszeiten"
-                    maxLength={PROFILE_LIMITS.practice_hours}
-                    value={data.practice_hours || ""}
-                    onChange={(e) => updateField("practice_hours", e.target.value || null)}
-                  />
-                </div>
+              {/* Leistungen — SERVICE_MASTER (12 Fachbereiche) */}
+              <section aria-labelledby="pe-services-label" className="mt-9">
+                <ProfileServicesPicker
+                  services={data.services_structured}
+                  onChange={(services) => updateField("services_structured", services)}
+                  disabled={interactionLocked}
+                />
               </section>
 
               <div className="mt-10 flex min-h-[2.5rem] flex-col justify-end border-t border-slate-300/25 pt-6">

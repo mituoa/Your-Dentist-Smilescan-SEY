@@ -1,36 +1,27 @@
 import { getSpecializationLabel } from "@/lib/masterdata/specializations";
+import {
+  PRIMARY_SPECIALIZATION_IDS,
+  SPECIALIZATION_PICKER_GROUPS,
+  MAX_SPECIALIZATION_SELECTIONS,
+  specializationPickerLabel,
+} from "@/lib/profile/specialization-picker-data";
 
-/** Figma-aligned picker: stable ids (master or custom:label), first six “primary”. */
+/** @deprecated Use SPECIALIZATION_PICKER_GROUPS — kept for bestehende Imports. */
 export interface FigmaSpecialtyOption {
   id: string;
   label: string;
 }
 
-export const FIGMA_SPECIALTY_OPTIONS: FigmaSpecialtyOption[] = [
-  { id: "custom:Ästhetische Zahnmedizin", label: "Ästhetische Zahnmedizin" },
-  { id: "implantology", label: "Implantologie" },
-  { id: "periodontology", label: "Parodontologie" },
-  { id: "endodontics", label: "Endodontie" },
-  { id: "orthodontics", label: "Kieferorthopädie" },
-  { id: "oral-surgery", label: "Oralchirurgie" },
-  { id: "prosthodontics", label: "Prothetik" },
-  { id: "pediatric-dentistry", label: "Kinderzahnheilkunde" },
-  { id: "custom:Alterszahnheilkunde", label: "Alterszahnheilkunde" },
-  { id: "custom:Funktionsdiagnostik", label: "Funktionsdiagnostik" },
-  { id: "custom:Laserbehandlung", label: "Laserbehandlung" },
-  { id: "custom:Prophylaxe", label: "Prophylaxe" },
-  { id: "custom:Sportmundschutz", label: "Sportmundschutz" },
-  { id: "custom:Schmerztherapie", label: "Schmerztherapie" },
-  { id: "custom:Zahnerhaltung", label: "Zahnerhaltung" },
-];
+export const FIGMA_SPECIALTY_OPTIONS: FigmaSpecialtyOption[] = SPECIALIZATION_PICKER_GROUPS.flatMap(
+  (g) => g.items
+);
 
-export const FIGMA_PRIMARY_SPECIALTY_IDS = FIGMA_SPECIALTY_OPTIONS.slice(0, 6).map((s) => s.id);
+export const FIGMA_PRIMARY_SPECIALTY_IDS = [...PRIMARY_SPECIALIZATION_IDS];
 
-export const MAX_FIGMA_SPECIALTY_SELECTIONS = 5;
+export const MAX_FIGMA_SPECIALTY_SELECTIONS = MAX_SPECIALIZATION_SELECTIONS;
 
 export function figmaSpecialtyLabel(id: string): string {
-  const hit = FIGMA_SPECIALTY_OPTIONS.find((o) => o.id === id);
-  if (hit) return hit.label;
-  if (id.startsWith("custom:")) return id.slice("custom:".length);
+  const fromPicker = specializationPickerLabel(id);
+  if (fromPicker !== id || id.startsWith("custom:")) return fromPicker;
   return getSpecializationLabel(id);
 }

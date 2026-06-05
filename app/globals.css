@@ -26,6 +26,8 @@
 @import "./yd-relay-messages.css";
 @import "./yd-relay-enterprise.css";
 @import "./yd-clinical-controls.css";
+@import "./yd-settings-team.css";
+@import "./yd-carree-profile.css";
 
 @layer base {
   :root {

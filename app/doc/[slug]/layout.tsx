@@ -3,5 +3,5 @@ export default function PublicDoctorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="min-h-screen bg-surface-page">{children}</div>;
+  return <div className="min-h-screen">{children}</div>;
 }

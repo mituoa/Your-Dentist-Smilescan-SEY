@@ -25,4 +25,6 @@ export interface ProfileEditorData {
   practice_hours: string | null;
   logo_url: string | null;
   accent_color: string | null;
+  profile_background_color: string | null;
+  appointment_link: string | null;
 }

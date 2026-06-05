@@ -50,9 +50,16 @@ export default async function ProfileEditorPage() {
     );
   }
 
+  // @ts-expect-error — workspaces ist Supabase-Join
+  const rawWorkspaceName = workspace.workspaces?.name as string | undefined;
+  const workspaceName =
+    typeof rawWorkspaceName === "string" && rawWorkspaceName.trim()
+      ? rawWorkspaceName.trim()
+      : "Ihre Praxis";
+
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
-      <ProfileEditorShell initialData={data} />
+    <div className="yd-profile-editor-workspace flex min-h-0 w-full flex-1 flex-col md:h-full">
+      <ProfileEditorShell initialData={data} workspaceName={workspaceName} />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { generateSlug, isSafeDocPathSlug } from "@/lib/slug";
 import { MAX_FIGMA_SPECIALTY_SELECTIONS } from "@/lib/profile/figma-specialties";
+import { normalizeProfileBackgroundHex } from "@/lib/profile/carree-theme";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { revalidatePath } from "next/cache";
 
@@ -74,6 +75,7 @@ function sanitizeSavePayload(payload: SaveProfilePayload): SaveProfilePayload {
     practice_email: clampStr(payload.practice_email, PROFILE_LIMITS.practice_email),
     practice_website: clampStr(payload.practice_website, PROFILE_LIMITS.practice_website),
     practice_hours: clampStr(payload.practice_hours, PROFILE_LIMITS.practice_hours),
+    profile_background_color: normalizeProfileBackgroundHex(payload.profile_background_color),
   };
 }
 
@@ -97,6 +99,7 @@ export interface SaveProfilePayload {
   practice_email: string;
   practice_website: string;
   practice_hours: string;
+  profile_background_color: string | null;
 }
 
 export async function saveProfileData(
@@ -138,6 +141,7 @@ export async function saveProfileData(
     practice_hours: p.practice_hours || null,
     logo_url: existingBranding?.logo_url ?? null,
     accent_color: existingBranding?.accent_color ?? null,
+    profile_background_color: p.profile_background_color,
   };
 
   const { error } = await supabase

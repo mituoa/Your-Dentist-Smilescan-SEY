@@ -68,5 +68,7 @@ function mapToEditor(data: Record<string, unknown>): ProfileEditorData {
     practice_hours: (data.practice_hours as string | null) ?? null,
     logo_url: (data.logo_url as string | null) ?? null,
     accent_color: (data.accent_color as string | null) ?? null,
+    profile_background_color: (data.profile_background_color as string | null) ?? null,
+    appointment_link: (data.appointment_link as string | null) ?? null,
   };
 }

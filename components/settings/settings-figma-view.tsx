@@ -25,6 +25,7 @@ import {
   clinicalWorkspaceFrame,
   clinicalWorkspaceVerticalPadding,
 } from "@/lib/clinical-ui";
+import { SettingsTeamMemberCard } from "@/components/settings/settings-team-member-card";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -34,19 +35,6 @@ const ACCENT_PRESETS = [
   { value: "#95A5A6" },
   { value: "#5D6D7E" },
 ];
-
-function nameFromEmail(email: string): string {
-  const local = email.split("@")[0] || email;
-  return local
-    .split(/[._-]+/)
-    .filter(Boolean)
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
-    .join(" ");
-}
-
-function roleLabelDoctorTeam(role: "doctor" | "team"): string {
-  return role === "doctor" ? "Administrator" : "Bearbeiter";
-}
 
 function profileDocPath(slug: string): string {
   return `/doc/${slug}`;
@@ -321,36 +309,6 @@ export function SettingsFigmaView({
     return a.email.localeCompare(b.email);
   });
 
-  const listRows: Array<{
-    key: string;
-    name: string;
-    email: string;
-    right: string;
-    pending?: boolean;
-    invitationId?: string;
-    memberUserId?: string;
-  }> = [];
-
-  for (const m of sortedMembers) {
-    listRows.push({
-      key: `m-${m.user_id}`,
-      name: nameFromEmail(m.email),
-      email: m.email,
-      right: roleLabelDoctorTeam(m.role),
-      memberUserId: m.user_id,
-    });
-  }
-  for (const inv of invitations) {
-    listRows.push({
-      key: `i-${inv.id}`,
-      name: nameFromEmail(inv.email),
-      email: inv.email,
-      right: "Ausstehend",
-      pending: true,
-      invitationId: inv.id,
-    });
-  }
-
   const hostPrefix = hostDocPrefix(appBaseUrl);
   const profileCopyUrl = fullProfileUrl(appBaseUrl, slug);
 
@@ -573,57 +531,19 @@ export function SettingsFigmaView({
               Team & Zugriff
             </h2>
 
-            <div style={{ marginBottom: 32 }}>
-              {listRows.map((row, index) => (
-                <div
-                  key={row.key}
-                  className="flex items-start justify-between gap-3"
-                  style={{
-                    paddingTop: index === 0 ? 0 : 24,
-                    paddingBottom: 24,
-                    borderBottom: index < listRows.length - 1 ? "1px solid rgba(0,0,0,0.04)" : "none",
-                  }}
-                >
-                  <div className="min-w-0 flex-1">
-                    <p
-                      style={{
-                        fontSize: 15,
-                        color: row.pending ? "#999999" : "#1A1A1A",
-                        marginBottom: 4,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {row.name}
-                    </p>
-                    <p style={{ fontSize: 13, color: "#CCCCCC", lineHeight: 1.5 }}>{row.email}</p>
-                    {row.invitationId ? (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        className="mt-1 text-[11px] text-[#CCCCCC] underline-offset-2 hover:text-[#999999] hover:underline disabled:opacity-50"
-                        onClick={() => {
-                          if (!confirm("Einladung widerrufen?")) return;
-                          void (async () => {
-                            setBusy(true);
-                            try {
-                              const r = await revokeInvitation(row.invitationId!);
-                              if (r.error) setFormError(r.error);
-                              else router.refresh();
-                            } finally {
-                              setBusy(false);
-                            }
-                          })();
-                        }}
-                      >
-                        Widerrufen
-                      </button>
-                    ) : null}
-                    {row.memberUserId && row.memberUserId !== currentUserId ? (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        className="mt-1 text-[11px] text-[#CCCCCC] underline-offset-2 hover:text-[#999999] hover:underline disabled:opacity-50"
-                        onClick={() => {
+            <div className="yd-settings-team-grid" style={{ marginBottom: 32 }}>
+              {sortedMembers.map((m) => (
+                <SettingsTeamMemberCard
+                  key={m.user_id}
+                  email={m.email}
+                  role={m.role}
+                  joinedAt={m.joined_at}
+                  workspaceName={workspaceName}
+                  isCurrentUser={m.user_id === currentUserId}
+                  busy={busy}
+                  onRemove={
+                    m.user_id !== currentUserId
+                      ? () => {
                           if (
                             !confirm(
                               "Mitglied entfernen? Der Account bleibt bestehen, der Zugriff auf diesen Workspace endet."
@@ -633,64 +553,63 @@ export function SettingsFigmaView({
                           void (async () => {
                             setBusy(true);
                             try {
-                              const r = await removeTeamMember(row.memberUserId!);
+                              const r = await removeTeamMember(m.user_id);
                               if (r.error) setFormError(r.error);
                               else router.refresh();
                             } finally {
                               setBusy(false);
                             }
                           })();
-                        }}
-                      >
-                        Entfernen
-                      </button>
-                    ) : null}
-                  </div>
-                  <p
-                    className="shrink-0 text-right"
-                    style={{ fontSize: 13, color: row.pending ? "#CCCCCC" : "#999999", lineHeight: 1.5 }}
-                  >
-                    {row.right}
-                  </p>
-                </div>
+                        }
+                      : undefined
+                  }
+                />
+              ))}
+              {invitations.map((inv) => (
+                <SettingsTeamMemberCard
+                  key={inv.id}
+                  email={inv.email}
+                  role={inv.role}
+                  joinedAt={inv.created_at}
+                  workspaceName={workspaceName}
+                  pending
+                  busy={busy}
+                  onRevoke={() => {
+                    if (!confirm("Einladung widerrufen?")) return;
+                    void (async () => {
+                      setBusy(true);
+                      try {
+                        const r = await revokeInvitation(inv.id);
+                        if (r.error) setFormError(r.error);
+                        else router.refresh();
+                      } finally {
+                        setBusy(false);
+                      }
+                    })();
+                  }}
+                />
               ))}
             </div>
 
-            <div>
-              <label className="block" style={{ fontSize: 13, color: "#999999", marginBottom: 8 }}>
+            <div className="yd-settings-team-invite-panel">
+              <label className="yd-settings-team-invite-panel__label" htmlFor="settings-invite-email">
                 Neues Mitglied einladen
               </label>
               <input
+                id="settings-invite-email"
                 type="email"
                 placeholder="E-Mail-Adresse"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                className="w-full focus:outline-none"
-                style={{
-                  padding: "12px 14px",
-                  background: "#F7F7F5",
-                  borderRadius: 10,
-                  fontSize: 16,
-                  color: "#1A1A1A",
-                  marginBottom: 16,
-                  border: "none",
-                }}
+                className="yd-settings-team-invite-panel__input"
                 disabled={busy}
               />
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value as "doctor" | "team")}
-                className="w-full cursor-pointer focus:outline-none"
-                style={{
-                  padding: "12px 14px",
-                  background: "#F7F7F5",
-                  borderRadius: 10,
-                  fontSize: 16,
-                  color: "#1A1A1A",
-                  marginBottom: 16,
-                  border: "none",
-                }}
+                className="yd-settings-team-invite-panel__select"
                 disabled={busy}
+                aria-label="Rolle für Einladung"
               >
                 <option value="doctor">Administrator</option>
                 <option value="team">Bearbeiter</option>
@@ -699,17 +618,7 @@ export function SettingsFigmaView({
                 type="button"
                 onClick={handleInvite}
                 disabled={!inviteEmail.trim() || busy}
-                className="w-full font-medium transition-colors"
-                style={{
-                  padding: "12px 14px",
-                  height: 44,
-                  background: inviteEmail.trim() ? "#2F80ED" : "rgba(0,0,0,0.04)",
-                  color: inviteEmail.trim() ? "#FFFFFF" : "#CCCCCC",
-                  fontSize: 15,
-                  borderRadius: 10,
-                  border: "none",
-                  cursor: inviteEmail.trim() ? "pointer" : "not-allowed",
-                }}
+                className="yd-settings-team-invite-panel__submit"
               >
                 Einladung senden
               </button>

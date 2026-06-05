@@ -72,6 +72,14 @@ export function resolveWorkspaceIntegratedHeader(
       showSearch: false,
     };
   }
+  if (pathname.startsWith("/profile/editor")) {
+    return {
+      eyebrow: "Profil",
+      subtitle: "Patientenbereich bearbeiten",
+      showSearch: false,
+      hideOnDesktop: true,
+    };
+  }
   if (pathname.startsWith("/profile")) {
     return {
       eyebrow: "Profil",

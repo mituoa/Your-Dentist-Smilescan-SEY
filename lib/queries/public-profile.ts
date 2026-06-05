@@ -28,6 +28,8 @@ export interface PublicProfile {
   practice_hours: string | null;
   logo_url: string | null;
   accent_color: string | null;
+  profile_background_color: string | null;
+  appointment_link: string | null;
 }
 
 function normalizeServices(raw: unknown): string[] {
@@ -58,6 +60,8 @@ export function publicProfileToEditorData(
     practice_hours: profile.practice_hours,
     logo_url: profile.logo_url,
     accent_color: profile.accent_color,
+    profile_background_color: profile.profile_background_color,
+    appointment_link: profile.appointment_link,
   };
 }
 
@@ -89,6 +93,8 @@ function mapProfileRow(
       practice_hours: null,
       logo_url: null,
       accent_color: null,
+      profile_background_color: null,
+      appointment_link: null,
     };
   }
 
@@ -119,11 +125,13 @@ function mapProfileRow(
     practice_hours: (profile.practice_hours as string | null) ?? null,
     logo_url: (profile.logo_url as string | null) ?? null,
     accent_color: (profile.accent_color as string | null) ?? null,
+    profile_background_color: (profile.profile_background_color as string | null) ?? null,
+    appointment_link: (profile.appointment_link as string | null) ?? null,
   };
 }
 
 const PUBLIC_PROFILE_FIELDS =
-  "display_name, title, photo_url, vita_markdown, services, first_name, last_name, founding_year, specializations, services_structured, practice_name, practice_address, practice_employment_status, practice_phone, practice_email, practice_website, practice_hours, logo_url, accent_color" as const;
+  "display_name, title, photo_url, vita_markdown, services, first_name, last_name, founding_year, specializations, services_structured, practice_name, practice_address, practice_employment_status, practice_phone, practice_email, practice_website, practice_hours, logo_url, accent_color, profile_background_color, appointment_link" as const;
 
 export async function getPublicProfileBySlug(
   slug: string

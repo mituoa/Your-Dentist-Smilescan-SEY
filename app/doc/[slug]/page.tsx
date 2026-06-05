@@ -21,6 +21,7 @@ export default async function PublicProfilePage({
       data={data}
       workspaceName={profile.workspace_name}
       slug={profile.slug}
+      appointmentLink={profile.appointment_link}
       journalEntries={journalEntries}
     />
   );
