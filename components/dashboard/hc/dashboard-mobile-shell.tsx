@@ -1,10 +1,23 @@
 import Link from "next/link";
 import { ChevronRight, ClipboardList, ListTodo, BookOpen, Plus } from "lucide-react";
 
-import { buildMobilePriorityLine } from "@/lib/dashboard/dashboard-status-copy";
+import { HcStatCard } from "@/components/dashboard/hc/stat-card";
+import { MorningBriefing } from "@/components/dashboard/hc/morning-briefing";
+import {
+  buildDecisionsKpiValue,
+  buildNewSubmissionsKpiValue,
+  buildPreparedKpiValue,
+  buildMobilePriorityLine,
+} from "@/lib/dashboard/dashboard-status-copy";
+import {
+  buildNewSubmissionsWorkContext,
+  buildOpenTasksWorkContext,
+} from "@/lib/dashboard/kpi-work-context";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { createCaseFromQuery } from "@/lib/create-case-return";
+import type { PracticeBriefing } from "@/lib/command-ai/practice-intelligence";
 import type { DashboardPriorityItem, OpenTaskRow } from "@/lib/queries/dashboard";
+import type { KpiWorkContextData } from "@/components/dashboard/hc/kpi-work-context-preview";
 
 type DashboardMobileShellProps = {
   greeting: string;
@@ -15,6 +28,9 @@ type DashboardMobileShellProps = {
   tasksNeedingDecision: number | null;
   priorityItems: DashboardPriorityItem[] | null;
   openTasks: OpenTaskRow[] | null;
+  briefing?: PracticeBriefing | null;
+  newSubmissionsContext?: KpiWorkContextData;
+  openTasksContext?: KpiWorkContextData;
 };
 
 function formatRelativeDate(iso: string): string {
@@ -35,6 +51,9 @@ export function DashboardMobileShell({
   tasksNeedingDecision,
   priorityItems,
   openTasks,
+  briefing = null,
+  newSubmissionsContext,
+  openTasksContext,
 }: DashboardMobileShellProps) {
   const attentionItems = (priorityItems ?? [])
     .filter((item) => !item.seen_at)
@@ -68,6 +87,49 @@ export function DashboardMobileShell({
           </p>
         )}
       </header>
+
+      {briefing ? (
+        <section className="yd-dash-mobile__briefing" aria-label="Tagesüberblick">
+          <MorningBriefing briefing={briefing} />
+        </section>
+      ) : null}
+
+      <section className="yd-dash-mobile__kpis" aria-label="Kennzahlen">
+        <h2 className="yd-dash-mobile__section-title">Überblick</h2>
+        <div className="yd-dash-mobile__kpi-grid">
+          <HcStatCard
+            href="/inbox"
+            title="Neue Anfragen"
+            value={buildNewSubmissionsKpiValue(unseenCount)}
+            valueVariant="prose"
+            iconName="clipboard-list"
+            footnote="Heute eingegangen"
+            workContext={newSubmissionsContext}
+            hoverHint="Neue Patientenanfragen, die noch nicht gesehen wurden."
+          />
+          <HcStatCard
+            href="/inbox"
+            title="Wartet auf Freigabe"
+            value={buildPreparedKpiValue(preparedAwaitingCount)}
+            valueVariant="prose"
+            iconName="sparkles"
+            footnote="Von Ihnen freigeben"
+            hoverHint="Antworten und nächste Schritte warten auf Ihre Freigabe."
+          />
+          <HcStatCard
+            href="/relay"
+            title="Patient wartet"
+            value={buildDecisionsKpiValue(
+              tasksNeedingDecision !== null ? tasksNeedingDecision : openTaskCount
+            )}
+            valueVariant="prose"
+            iconName="list-todo"
+            footnote="Rückmeldung ausstehend"
+            workContext={openTasksContext}
+            hoverHint="Patienten, die auf Ihre Antwort warten."
+          />
+        </div>
+      </section>
 
       {taskRows.length > 0 ? (
         <section className="yd-dash-mobile__tasks" aria-label="Offene Aufgaben">

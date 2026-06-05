@@ -196,6 +196,9 @@ export default async function DashboardPage() {
         tasksNeedingDecision={tasksNeedingDecision}
         priorityItems={priorityItems}
         openTasks={openTasks}
+        briefing={briefing}
+        newSubmissionsContext={newSubmissionsContext}
+        openTasksContext={openTasksContext}
       />
 
       <div className="hidden md:contents">

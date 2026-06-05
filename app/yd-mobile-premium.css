@@ -4,87 +4,217 @@
  */
 
 @media (max-width: 767px) {
-  /* —— Shell: bottom shortcuts + safe scroll —— */
-  .yd-workspace main {
-    padding-bottom: max(4.5rem, calc(env(safe-area-inset-bottom) + 3.75rem)) !important;
+  /* —— Shell: bottom rail (Sidebar-DNA) + safe scroll —— */
+  .yd-workspace {
+    --yd-mobile-bottom-nav-h: calc(4.375rem + env(safe-area-inset-bottom, 0px));
   }
 
-  .yd-ws-mobile-shortcuts {
+  .yd-workspace main {
+    padding-bottom: max(5.75rem, calc(var(--yd-mobile-bottom-nav-h) + 1.25rem)) !important;
+  }
+
+  /* Bottom navigation — gleiche Sprache wie Desktop-Sidebar */
+  .yd-mobile-bottom-rail {
     position: fixed;
     z-index: 45;
     left: 0;
     right: 0;
     bottom: 0;
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-    padding: 0.25rem 0.125rem max(0.25rem, env(safe-area-inset-bottom));
-    border-radius: 0;
-    border: none;
-    border-top: 1px solid rgba(180, 198, 218, 0.28);
-    background: rgba(255, 252, 248, 0.94);
-    box-shadow: 0 -4px 24px rgba(30, 58, 95, 0.06);
-    backdrop-filter: blur(18px) saturate(1.06);
-    -webkit-backdrop-filter: blur(18px) saturate(1.06);
+    pointer-events: none;
   }
 
-  .yd-ws-mobile-shortcuts__item {
+  .yd-mobile-bottom-rail__surface {
     position: relative;
-    flex: 1;
     display: flex;
-    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 0.125rem;
+    margin: 0 0.375rem max(0.375rem, env(safe-area-inset-bottom));
+    padding: 0.375rem 0.25rem 0.25rem;
+    border-radius: 28px;
+    border: 1px solid var(--yd-sidebar-border, rgba(255, 255, 255, 0.72));
+    background: var(--yd-sidebar-glass, rgba(255, 255, 255, 0.82));
+    box-shadow: var(--yd-sidebar-shadow, 0 -8px 32px rgba(15, 35, 58, 0.1)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(22px) saturate(1.08);
+    -webkit-backdrop-filter: blur(22px) saturate(1.08);
+    pointer-events: auto;
+    overflow: hidden;
+  }
+
+  .yd-mobile-bottom-rail__glow {
+    position: absolute;
+    left: 50%;
+    bottom: -35%;
+    width: 85%;
+    height: 70%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center bottom,
+      rgba(47, 128, 237, 0.22) 0%,
+      transparent 72%
+    );
+    filter: blur(18px);
+  }
+
+  .yd-mobile-bottom-nav__item {
+    min-height: 3.5rem;
+    padding: 0.125rem 0.125rem 0.0625rem;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .yd-mobile-bottom-nav__item:active {
+    opacity: 0.92;
+  }
+
+  .yd-mobile-bottom-nav__halo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .yd-mobile-bottom-nav__icon-shell {
+    background: transparent;
+  }
+
+  .yd-mobile-bottom-nav__item--active .yd-mobile-bottom-nav__icon-shell {
+    box-shadow: 0 2px 10px rgba(47, 128, 237, 0.12);
+  }
+
+  .yd-mobile-bottom-nav__label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* Mehr-Sheet */
+  .yd-mobile-more-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0.75rem max(0.75rem, env(safe-area-inset-bottom));
+    background: rgba(12, 25, 41, 0.22);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .yd-mobile-more-sheet {
+    width: 100%;
+    max-width: 24rem;
+    border-radius: 24px;
+    border: 1px solid rgba(180, 198, 218, 0.32);
+    background: linear-gradient(168deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 252, 255, 0.98) 100%);
+    box-shadow: 0 16px 48px rgba(15, 35, 58, 0.14);
+    overflow: hidden;
+  }
+
+  .yd-mobile-more-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1rem 0.625rem;
+  }
+
+  .yd-mobile-more-sheet__title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #0c1929;
+  }
+
+  .yd-mobile-more-sheet__close {
+    display: inline-flex;
+    height: 2rem;
+    width: 2rem;
     align-items: center;
     justify-content: center;
-    gap: 0.15rem;
-    min-height: 3rem;
-    min-width: 0;
-    padding: 0.25rem 0.125rem;
     border-radius: 10px;
+    border: 1px solid rgba(180, 198, 218, 0.28);
+    background: rgba(255, 255, 255, 0.8);
+    color: #64748b;
+  }
+
+  .yd-mobile-more-sheet__list {
+    margin: 0;
+    padding: 0.25rem 0.5rem 0;
+    list-style: none;
+  }
+
+  .yd-mobile-more-sheet__link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: 14px;
     text-decoration: none;
-    color: var(--yd-brand-muted, #5e7389);
     touch-action: manipulation;
   }
 
-  .yd-ws-mobile-shortcuts__label {
-    font-size: 0.5rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    line-height: 1.15;
-    text-align: center;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .yd-mobile-more-sheet__link:active {
+    background: rgba(47, 128, 237, 0.05);
   }
 
-  .yd-ws-mobile-shortcuts__icon {
+  .yd-mobile-more-sheet__link-icon-shell {
+    display: flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(47, 128, 237, 0.06);
+    color: #1a4f9c;
+  }
+
+  .yd-mobile-more-sheet__link-icon {
     width: 1.125rem;
     height: 1.125rem;
   }
 
-  .yd-ws-mobile-shortcuts__badge {
-    position: absolute;
-    top: 0.2rem;
-    right: calc(50% - 1.35rem);
-    min-width: 1.125rem;
-    height: 1.125rem;
-    padding: 0 0.25rem;
-    border-radius: 999px;
-    font-size: 0.5625rem;
-    font-weight: 700;
-    line-height: 1.125rem;
-    text-align: center;
-    color: #fff;
-    background: linear-gradient(168deg, #5a7f98 0%, #3f5f74 100%);
-    box-shadow: 0 1px 4px rgba(30, 58, 95, 0.2);
+  .yd-mobile-more-sheet__link-text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.0625rem;
   }
 
-  .yd-ws-mobile-shortcuts__item:active {
-    opacity: 0.88;
+  .yd-mobile-more-sheet__link-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0c1929;
   }
 
-  .yd-ws-mobile-shortcuts__item--active {
-    color: var(--yd-brand-accent-deep, #1a4f9c);
+  .yd-mobile-more-sheet__link-hint {
+    font-size: 0.75rem;
+    color: #7a92a8;
+  }
+
+  .yd-mobile-more-sheet__logout-wrap {
+    padding: 0.625rem 0.75rem 1rem;
+    border-top: 1px solid rgba(180, 198, 218, 0.18);
+    margin-top: 0.375rem;
+  }
+
+  .yd-mobile-more-sheet__logout-wrap form {
+    width: 100%;
+  }
+
+  .yd-mobile-more-sheet__logout-wrap button {
+    min-height: 2.75rem;
+    border-radius: 12px;
+  }
+
+  /* Legacy class alias — nicht mehr genutzt */
+  .yd-ws-mobile-shortcuts {
+    display: none !important;
   }
 
   .yd-workspace.yd-awaken-page {
@@ -116,6 +246,32 @@
   }
 
   /* —— Dashboard mobile (native hierarchy) —— */
+  .yd-dash-mobile__briefing .yd-morning-briefing {
+    margin-bottom: 0;
+    border-radius: 18px;
+  }
+
+  .yd-dash-mobile__kpis {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .yd-dash-mobile__kpi-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+
+  .yd-dash-mobile__kpi-grid .yd-dash-kpi-card {
+    min-height: 0;
+  }
+
+  .yd-dash-mobile__kpi-grid .yd-dash-kpi-float-preview {
+    display: none;
+  }
+
   .yd-dash-mobile {
     display: flex;
     flex-direction: column;
@@ -999,6 +1155,7 @@
 }
 
 @media (min-width: 768px) {
+  .yd-mobile-bottom-rail,
   .yd-ws-mobile-shortcuts {
     display: none !important;
   }

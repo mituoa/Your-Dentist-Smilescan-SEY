@@ -254,10 +254,6 @@
     padding: 0;
   }
 
-  .yd-command-assist-fab-host {
-    display: none !important;
-  }
-
   html[data-mobile-nav-open] .yd-mobile-workspace-topbar {
     z-index: 75;
   }

@@ -1,3 +1,4 @@
+import { SignOutIconForm } from "@/components/app-shell/sign-out-form";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -57,6 +58,9 @@ export function UserMenu({
   return (
     <div className="flex min-w-0 items-center gap-2 md:gap-3">
       <ThemeToggle initialTheme={initialTheme} />
+      <div className="md:hidden">
+        <SignOutIconForm />
+      </div>
       <div className="hidden text-right leading-tight sm:block">
         <div className="text-sm font-medium text-text-primary">
           {displayName || workspaceName}
