@@ -30,6 +30,8 @@ const SECTION_ID_ALIASES: Record<string, string> = {
 const SECTION_SCROLL_FALLBACKS: Record<string, string> = {
   [PUBLIC_SITE_SECTIONS.patienten]: PUBLIC_SITE_SECTIONS.praxisalltag,
   [PUBLIC_SITE_SECTIONS.team]: PUBLIC_SITE_SECTIONS.praxisalltag,
+  [PUBLIC_SITE_SECTIONS.loesung]: PUBLIC_SITE_SECTIONS.praxisalltag,
+  [PUBLIC_SITE_SECTIONS.plattform]: PUBLIC_SITE_SECTIONS.praxisalltag,
 };
 
 function isDesktopPublicSite(): boolean {

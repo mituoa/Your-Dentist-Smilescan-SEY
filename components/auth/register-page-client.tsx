@@ -49,6 +49,7 @@ export function RegisterPageClient(props: RegisterPageClientProps) {
       skipPaymentAtSignup={props.skipPaymentAtSignup}
       licenseStepOptional={props.licenseStepOptional}
       wizardOpen={wizardOpen}
+      presentation="page"
     />
   );
 }

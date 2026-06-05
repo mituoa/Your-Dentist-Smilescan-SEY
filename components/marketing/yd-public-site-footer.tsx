@@ -6,8 +6,9 @@ import { useCallback } from "react";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { PUBLIC_SITE_FOOTER } from "@/lib/marketing/public-site-ia";
 import { scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
+import { cn } from "@/lib/utils";
 
-export function YdPublicSiteFooter() {
+export function YdPublicSiteFooter({ compact = false }: { compact?: boolean }) {
   const onAnchorClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
       if (typeof window === "undefined" || window.location.pathname !== "/") return;
@@ -18,7 +19,12 @@ export function YdPublicSiteFooter() {
   );
 
   return (
-    <footer className="yd-public-site-footer yd-public-os-awaken-field">
+    <footer
+      className={cn(
+        "yd-public-site-footer yd-public-os-awaken-field",
+        compact && "yd-public-site-footer--compact"
+      )}
+    >
       <div className="yd-public-site-footer-inner">
         <div className="yd-public-site-footer-brand">
           <YourDentistBrandLockup size="sm" tagline={PUBLIC_SITE_FOOTER.tagline} />

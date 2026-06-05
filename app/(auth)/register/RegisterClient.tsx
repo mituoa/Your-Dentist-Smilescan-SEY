@@ -99,7 +99,10 @@ export function RegisterClient(props: {
   licenseStepOptional?: boolean;
   /** Wizard overlay only when step or success is active (pricing stays on page). */
   wizardOpen: boolean;
+  /** Inline page card on /register; overlay reserved for modal contexts. */
+  presentation?: "page" | "overlay";
 }) {
+  const presentation = props.presentation ?? "page";
   const router = useRouter();
   const searchParams = useSearchParams();
   const loginBackHref = props.loginHref;
@@ -688,21 +691,35 @@ export function RegisterClient(props: {
     }
   };
 
-  const [portalReady, setPortalReady] = React.useState(false);
+  const [portalTarget, setPortalTarget] = React.useState<HTMLElement | null>(null);
   React.useEffect(() => {
-    setPortalReady(true);
-  }, []);
+    if (presentation !== "overlay") return;
+    setPortalTarget(document.body);
+  }, [presentation]);
+
+  React.useEffect(() => {
+    if (presentation !== "overlay" || !props.wizardOpen) return;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+    };
+  }, [presentation, props.wizardOpen]);
 
   if (!props.wizardOpen) {
     return null;
   }
 
-  const registerOverlay = (
-    <div className="yd-auth-register-overlay">
-        <div className="yd-auth-register-backdrop" aria-hidden />
-
-        <div className="yd-auth-register-stage">
-          <div className="yd-auth-register-panel">
+  const registerPanel = (
+          <div
+            className={cn(
+              "yd-auth-register-panel",
+              presentation === "page" && "yd-auth-register-panel--page"
+            )}
+          >
           <button
             type="button"
             onClick={handleRegistrationModalClose}
@@ -1521,14 +1538,23 @@ export function RegisterClient(props: {
             ) : null}
             </div>
           </div>
-        </div>
-      </div>
   );
 
-  if (!portalReady) {
-    return null;
+  if (presentation === "page") {
+    return registerPanel;
   }
 
-  return createPortal(registerOverlay, document.body);
+  const registerOverlay = (
+    <div className="yd-auth-register-overlay">
+      <div className="yd-auth-register-backdrop" aria-hidden />
+      <div className="yd-auth-register-stage">{registerPanel}</div>
+    </div>
+  );
+
+  if (!portalTarget) {
+    return registerOverlay;
+  }
+
+  return createPortal(registerOverlay, portalTarget);
 }
 

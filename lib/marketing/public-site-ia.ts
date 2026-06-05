@@ -25,8 +25,8 @@ export const PUBLIC_SITE_NAV = [
 
 export const PUBLIC_SITE_NAV_MOBILE = [
   { label: "Warum", sectionId: PUBLIC_SITE_SECTIONS.praxisalltag },
-  { label: "Plattform", sectionId: PUBLIC_SITE_SECTIONS.plattform },
   { label: "Preise", sectionId: PUBLIC_SITE_SECTIONS.pricing },
+  { label: "Gespräch", sectionId: PUBLIC_SITE_SECTIONS.demo },
 ] as const;
 
 export const PUBLIC_SITE_HERO = {
@@ -36,6 +36,8 @@ export const PUBLIC_SITE_HERO = {
   titleMobile: "Ruhe im Praxisalltag. Vertrauen bei Patient:innen.",
   lead:
     "Your Dentist ist die digitale Schicht Ihrer Praxis — nicht ein weiteres System, sondern Struktur für Kommunikation, Verantwortung und Übersicht.",
+  leadMobile:
+    "Struktur für Kommunikation, Verantwortung und Übersicht — ohne ein weiteres System.",
   primaryCta: "Gespräch vereinbaren",
   secondaryCta: "Praxiszugang anfordern",
   signInPrefix: "Bereits registriert?",
@@ -45,6 +47,9 @@ export const PUBLIC_SITE_HERO = {
 export const PUBLIC_SITE_PRAXISALLTAG = {
   eyebrow: "Der Alltag",
   title: "Informationen gehen verloren — nicht aus Nachlässigkeit, sondern aus Tempo.",
+  /** Mobile — ein Absatz, kein Scroll-Marathon */
+  bodyMobile:
+    "Telefon, Messenger und Zettel laufen parallel — Details fehlen, wenn es schnell gehen muss. Your Dentist bündelt Eingänge, Übergaben und Verantwortung an einem Ort.",
   paragraphs: [
     "Zwischen Telefon, Messenger, Zetteln und Rückfragen entsteht Lücken. Details fehlen, wenn es im Behandlungszimmer schnell gehen muss. Bilder verlaufen sich auf privaten Geräten. Übergaben erreichen nicht die richtige Person.",
     "Das ist kein Organisationsproblem Ihres Teams. Es ist die Realität moderner Zahnarztpraxen — zu viele Kanäle, zu wenig gemeinsamer Kontext.",

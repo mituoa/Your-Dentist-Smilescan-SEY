@@ -1416,6 +1416,44 @@
   max-width: 52rem;
 }
 
+.yd-clinical-world.yd-public-os--register .yd-product-entry {
+  flex: none;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0 0 max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.yd-auth-register-page-card {
+  position: relative;
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: 0;
+  overflow: visible;
+}
+
+.yd-auth-register-panel--page {
+  animation: none;
+  max-height: none;
+  flex: none;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.yd-auth-register-panel--page .yd-auth-register-header {
+  display: none;
+}
+
+.yd-auth-register-panel--page .yd-auth-register-body {
+  flex: none;
+  min-height: auto;
+  overflow: visible;
+  padding: 0.25rem 0 max(0.5rem, env(safe-area-inset-bottom));
+}
+
 .yd-clinical-register-stage {
   padding: 0.5rem 0 2rem;
 }

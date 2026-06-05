@@ -23,7 +23,27 @@ export function YdPublicSiteHeroMobile() {
       <h1 id="yd-public-hero-mobile-title" className="yd-public-site-editorial-title">
         {PUBLIC_SITE_HERO.titleMobile}
       </h1>
-      <p className="yd-public-site-editorial-lead">{PUBLIC_SITE_HERO.lead}</p>
+      <p className="yd-public-site-editorial-lead">{PUBLIC_SITE_HERO.leadMobile}</p>
+    </section>
+  );
+}
+
+/** Mobile — kompaktes „Warum“, ein Absatz. */
+export function YdPublicSitePraxisalltagMobile() {
+  return (
+    <section
+      id={PUBLIC_SITE_SECTIONS.praxisalltag}
+      className="yd-public-site-editorial yd-public-site-editorial--mobile-compact yd-public-os-awaken-field yd-public-site-scroll-anchor"
+      style={{ ["--yd-public-field-i" as string]: "1.5" }}
+      aria-labelledby="yd-public-praxisalltag-mobile-title"
+    >
+      <div className="yd-public-site-editorial-inner">
+        <p className="yd-clinical-eyebrow">{PUBLIC_SITE_PRAXISALLTAG.eyebrow}</p>
+        <h2 id="yd-public-praxisalltag-mobile-title" className="yd-public-site-editorial-act">
+          {PUBLIC_SITE_PRAXISALLTAG.title}
+        </h2>
+        <p className="yd-public-site-editorial-body">{PUBLIC_SITE_PRAXISALLTAG.bodyMobile}</p>
+      </div>
     </section>
   );
 }

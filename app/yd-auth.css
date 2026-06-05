@@ -1302,6 +1302,21 @@
 }
 
 @media (max-width: 767px) {
+  .yd-clinical-world.yd-public-os--register .yd-public-os-content {
+    max-width: 100%;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  .yd-auth-register-page-card {
+    border-radius: 1.25rem;
+  }
+
+  .yd-auth-register-panel--page .yd-auth-register-body {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+
   .yd-auth-register-overlay {
     height: 100dvh;
     max-height: 100dvh;
@@ -1320,6 +1335,7 @@
     min-height: 0;
     max-height: 100%;
     flex: 1 1 auto;
+    overflow: hidden;
     border-radius: 1.25rem;
   }
 
@@ -1349,8 +1365,12 @@
 
   .yd-auth-register-body {
     min-height: 0;
-    flex: 1 1 auto;
-    overflow: hidden;
+    flex: 1 1 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: max(1rem, env(safe-area-inset-bottom));
     padding: 0 0.875rem max(0.875rem, env(safe-area-inset-bottom));
   }
 

@@ -66,34 +66,36 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   return (
     <YdPublicOsEnvironment mode="register" scroll>
       <YdProductChrome variant="entry" />
-      <div className="yd-clinical-register-stage">
-        <Suspense
-          fallback={
-            <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
-              <YdAuthLoadingState label="Registrierung wird geladen …" />
-            </div>
-          }
-        >
-          <RegisterPageClient
-          signUpAction={signUp}
-          resendConfirmationAction={resendSignupConfirmation}
-          inviteToken={inviteToken}
-          prefilledEmail={prefilledEmail}
-          initialPlan={params.plan}
-          queryError={queryError}
-          success={success}
-          resent={resent}
-          initialWizardStep={initialWizardStep}
-          fromPricing={fromPricing}
-          loginHref={loginHrefPlain}
-          exitHref="/"
-          registrationDemoUi={registrationDemoUi}
-          registrationDemoServer={isRegistrationDemoMode()}
-          skipPaymentAtSignup={skipPaymentAtSignup()}
-          licenseStepOptional={isRegistrationDemoMode()}
-          />
-        </Suspense>
-      </div>
+      <main className="yd-product-entry yd-clinical-entry">
+        <section className="yd-product-entry-card yd-clinical-entry-panel yd-auth-register-page-card">
+          <Suspense
+            fallback={
+              <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">
+                <YdAuthLoadingState label="Registrierung wird geladen …" />
+              </div>
+            }
+          >
+            <RegisterPageClient
+              signUpAction={signUp}
+              resendConfirmationAction={resendSignupConfirmation}
+              inviteToken={inviteToken}
+              prefilledEmail={prefilledEmail}
+              initialPlan={params.plan}
+              queryError={queryError}
+              success={success}
+              resent={resent}
+              initialWizardStep={initialWizardStep}
+              fromPricing={fromPricing}
+              loginHref={loginHrefPlain}
+              exitHref="/"
+              registrationDemoUi={registrationDemoUi}
+              registrationDemoServer={isRegistrationDemoMode()}
+              skipPaymentAtSignup={skipPaymentAtSignup()}
+              licenseStepOptional={isRegistrationDemoMode()}
+            />
+          </Suspense>
+        </section>
+      </main>
     </YdPublicOsEnvironment>
   );
 }

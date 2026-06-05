@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { YdHomeDesktop } from "@/components/marketing/yd-home-desktop";
 import { YdHomeMobile } from "@/components/marketing/yd-home-mobile";
@@ -24,16 +24,6 @@ export function YdHomePage({
   prefilledEmail,
   dashboardHref = null,
 }: YdHomePageProps) {
-  const [scroll, setScroll] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 900px)");
-    const apply = () => setScroll(mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, []);
-
   useEffect(() => {
     if (!window.location.hash) return;
     const run = () => {
@@ -44,10 +34,10 @@ export function YdHomePage({
     const onHash = () => scrollToPublicSectionFromHash();
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
-  }, [scroll]);
+  }, []);
 
   return (
-    <YdPublicOsEnvironment scroll={scroll}>
+    <YdPublicOsEnvironment scroll>
       <YdHomeMobile
         initialPlan={initialPlan}
         inviteToken={inviteToken}

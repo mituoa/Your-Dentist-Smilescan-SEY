@@ -9,11 +9,7 @@ import { PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
 import {
   YdPublicSiteDemo,
   YdPublicSiteHeroMobile,
-  YdPublicSiteLoesung,
-  YdPublicSitePatienten,
-  YdPublicSitePlattform,
-  YdPublicSitePraxisalltag,
-  YdPublicSiteTeam,
+  YdPublicSitePraxisalltagMobile,
 } from "@/components/marketing/yd-public-site-sections";
 
 type YdHomeMobileProps = {
@@ -23,7 +19,7 @@ type YdHomeMobileProps = {
   dashboardHref?: string | null;
 };
 
-/** Mobile Landing — dieselbe Story, kompakter Rhythmus. */
+/** Mobile Landing — Hero, Warum, Preise, Gespräch. Kein Desktop-Squeeze. */
 export function YdHomeMobile({
   initialPlan,
   inviteToken = "",
@@ -34,22 +30,14 @@ export function YdHomeMobile({
 
   return (
     <div className="yd-public-site-page yd-public-site-page--editorial yd-public-site-mobile-page yd-clinical-mobile-only">
-      <YdPublicSiteHeader dashboardHref={dashboardHref} />
+      <YdPublicSiteHeader dashboardHref={dashboardHref} mobileNav />
 
       <main className="yd-public-site-mobile-main" id="yd-public-mobile-main">
         <YdPublicSiteHeroMobile />
 
         <YdPublicSiteMobileCtas dashboardHref={dashboardHref} />
 
-        <YdPublicSitePraxisalltag />
-
-        <YdPublicSitePatienten />
-
-        <YdPublicSiteTeam />
-
-        <YdPublicSiteLoesung />
-
-        <YdPublicSitePlattform />
+        <YdPublicSitePraxisalltagMobile />
 
         <section
           id={PUBLIC_SITE_SECTIONS.pricing}
@@ -66,7 +54,7 @@ export function YdHomeMobile({
         <YdPublicSiteDemo />
       </main>
 
-      <YdPublicSiteFooter />
+      <YdPublicSiteFooter compact />
     </div>
   );
 }

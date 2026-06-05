@@ -10,6 +10,7 @@ import {
   PUBLIC_SITE_FOOTER,
   PUBLIC_SITE_HERO,
   PUBLIC_SITE_NAV,
+  PUBLIC_SITE_NAV_MOBILE,
   PUBLIC_SITE_SECTIONS,
 } from "@/lib/marketing/public-site-ia";
 import { getPublicSiteScrollRoot, scrollToPublicSection } from "@/lib/marketing/public-site-scroll";
@@ -19,9 +20,15 @@ type YdPublicSiteHeaderProps = {
   className?: string;
   /** Session aktiv — kleiner Link, Landing bleibt sichtbar. */
   dashboardHref?: string | null;
+  /** Mobile Landing — kompakte Nav + Mark ohne Tagline. */
+  mobileNav?: boolean;
 };
 
-export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublicSiteHeaderProps) {
+export function YdPublicSiteHeader({
+  className,
+  dashboardHref = null,
+  mobileNav = false,
+}: YdPublicSiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -81,7 +88,11 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
       >
         <div className="yd-public-site-header-inner">
           <Link href="/" className="yd-public-site-header-brand min-w-0" aria-label="Startseite">
-            <YourDentistBrandLockup size="sm" tagline={PUBLIC_SITE_FOOTER.tagline} />
+            <YourDentistBrandLockup
+              size="sm"
+              tagline={mobileNav ? undefined : PUBLIC_SITE_FOOTER.tagline}
+              markOnly={mobileNav}
+            />
           </Link>
 
           <nav
@@ -159,7 +170,7 @@ export function YdPublicSiteHeader({ className, dashboardHref = null }: YdPublic
         />
         <div className="yd-public-site-mobile-panel">
           <nav className="flex flex-col gap-1 p-4" aria-label="Mobile Navigation">
-            {PUBLIC_SITE_NAV.map((item) => (
+            {(mobileNav ? PUBLIC_SITE_NAV_MOBILE : PUBLIC_SITE_NAV).map((item) => (
               <button
                 key={item.sectionId}
                 type="button"
