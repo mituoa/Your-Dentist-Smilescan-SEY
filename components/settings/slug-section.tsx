@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Globe, Check, Loader2, AlertTriangle } from "lucide-react";
+import { Globe, Check, AlertTriangle } from "lucide-react";
+
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 import { changeSlug, checkSlugAvailability } from "@/app/(protected)/settings/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -168,7 +170,7 @@ export function SlugSection({ currentSlug, appBaseUrl }: SlugSectionProps) {
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={isPending} size="sm">
                 {isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <YdInlineBusy />
                 ) : (
                   "Ja, ändern"
                 )}

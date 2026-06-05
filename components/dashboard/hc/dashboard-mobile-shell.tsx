@@ -66,6 +66,18 @@ export function DashboardMobileShell({
 
   return (
     <div className="yd-dash-mobile md:hidden">
+      {reviewCount > 0 ? (
+        <Link href="/inbox" className="yd-dash-mobile-critical">
+          <div className="min-w-0">
+            <p className="yd-dash-mobile-critical__label">Kritisch · Heute</p>
+            <p className="yd-dash-mobile-critical__title">
+              {reviewCount} {reviewCount === 1 ? "Einsendung" : "Einsendungen"} zur Durchsicht
+            </p>
+          </div>
+          <span className="yd-dash-mobile-critical__cta">Öffnen</span>
+        </Link>
+      ) : null}
+
       <header className="yd-dash-mobile__header">
         <p className="yd-dash-mobile__eyebrow">Praxisüberblick</p>
         <h1 className="yd-dash-mobile__title">

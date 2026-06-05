@@ -55,8 +55,11 @@ export function EditorialProfile({
       {hasCarreeBody ? <CarreeProfileBody data={data} /> : null}
 
       {visibleServices.length > 0 ? (
-        <section className="yd-carree-profile__section" aria-labelledby="carree-services">
-          <p className="yd-carree-profile__section-label">III · Leistungen</p>
+        <section
+          className="yd-carree-profile__section yd-carree-profile__section--services"
+          aria-labelledby="carree-services"
+        >
+          <p className="yd-carree-profile__section-label">Leistungen</p>
           <h2 id="carree-services" className="yd-carree-profile__section-title">
             Was ich <em>anbiete</em>.
           </h2>
@@ -75,62 +78,88 @@ export function EditorialProfile({
         </section>
       ) : null}
 
-      {journalEntries && journalEntries.length > 0 ? (
-        <JournalPreviewList entries={journalEntries} slug={slug} />
-      ) : null}
+      {(() => {
+        const hasJournal = Boolean(journalEntries && journalEntries.length > 0);
+        const hasPracticeBlock = Boolean(
+          data.practice_address || data.practice_hours || data.practice_email
+        );
+        const hasUploadCta = !previewMode;
+        const hasSecondary = hasJournal || hasPracticeBlock || hasUploadCta;
 
-      {(data.practice_address || data.practice_hours || data.practice_email) && (
-        <section className="yd-carree-profile__section" aria-labelledby="carree-practice">
-          <p className="yd-carree-profile__section-label">IV · Praxis</p>
-          <h2 id="carree-practice" className="yd-carree-profile__section-title">
-            {data.practice_name ? (
-              <>
-                {data.practice_name.split(" ")[0]}{" "}
-                <em>{data.practice_name.split(" ").slice(1).join(" ") || "."}</em>
-              </>
-            ) : (
-              <>
-                Ihre <em>Praxis</em>.
-              </>
-            )}
-          </h2>
-          <div className="yd-carree-profile__body space-y-4">
-            {data.practice_address ? (
-              <p className="whitespace-pre-line">{data.practice_address}</p>
-            ) : null}
-            {data.practice_hours ? (
-              <p className="whitespace-pre-line text-[rgba(26,26,26,0.62)]">{data.practice_hours}</p>
-            ) : null}
-            {data.practice_email ? (
-              <p>
-                <span className="mr-3 text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-[#9a7b4f]">
-                  E-Mail
-                </span>
-                <a href={`mailto:${data.practice_email}`} className="underline-offset-2 hover:underline">
-                  {data.practice_email}
-                </a>
-              </p>
-            ) : null}
-          </div>
-        </section>
-      )}
+        const practiceSection =
+          hasPracticeBlock ? (
+            <section className="yd-carree-profile__section" aria-labelledby="carree-practice">
+              <p className="yd-carree-profile__section-label">Praxis</p>
+              <h2 id="carree-practice" className="yd-carree-profile__section-title">
+                {data.practice_name ? (
+                  <>
+                    {data.practice_name.split(" ")[0]}{" "}
+                    <em>{data.practice_name.split(" ").slice(1).join(" ") || "."}</em>
+                  </>
+                ) : (
+                  <>
+                    Ihre <em>Praxis</em>.
+                  </>
+                )}
+              </h2>
+              <div className="yd-carree-profile__body space-y-4">
+                {data.practice_address ? (
+                  <p className="whitespace-pre-line">{data.practice_address}</p>
+                ) : null}
+                {data.practice_hours ? (
+                  <p className="whitespace-pre-line text-[rgba(26,26,26,0.62)]">{data.practice_hours}</p>
+                ) : null}
+                {data.practice_email ? (
+                  <p>
+                    <span className="mr-3 text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-[#9a7b4f]">
+                      E-Mail
+                    </span>
+                    <a href={`mailto:${data.practice_email}`} className="underline-offset-2 hover:underline">
+                      {data.practice_email}
+                    </a>
+                  </p>
+                ) : null}
+              </div>
+            </section>
+          ) : null;
 
-      {!previewMode ? (
-        <section className="yd-carree-profile__upload-cta">
-          <h2 className="yd-carree-profile__upload-title">
-            Unterlagen <em>einreichen</em>.
-          </h2>
-          <p className="mx-auto mb-8 max-w-md text-[15px] leading-relaxed text-[rgba(26,26,26,0.55)]">
-            Senden Sie Fotos und Unterlagen diskret und verschlüsselt direkt an die Praxis.
-          </p>
-          <Link href={`/doc/${slug}/upload`} className="yd-carree-hero__cta inline-flex">
-            Jetzt einsenden
-          </Link>
-          <p className="mt-8 text-[0.625rem] uppercase tracking-[0.18em] text-[rgba(26,26,26,0.35)]">
-            Ende-zu-Ende verschlüsselt · DSGVO-konform
-          </p>
-        </section>
-      ) : null}
+        const uploadSection = hasUploadCta ? (
+          <section className="yd-carree-profile__upload-cta">
+            <h2 className="yd-carree-profile__upload-title">
+              Unterlagen <em>einreichen</em>.
+            </h2>
+            <p className="mx-auto mb-8 max-w-md text-[15px] leading-relaxed text-[rgba(26,26,26,0.55)]">
+              Senden Sie Fotos und Unterlagen diskret und verschlüsselt direkt an die Praxis.
+            </p>
+            <Link href={`/doc/${slug}/upload`} className="yd-carree-hero__cta inline-flex">
+              Jetzt einsenden
+            </Link>
+            <p className="mt-8 text-[0.625rem] uppercase tracking-[0.18em] text-[rgba(26,26,26,0.35)]">
+              Ende-zu-Ende verschlüsselt · DSGVO-konform
+            </p>
+          </section>
+        ) : null;
+
+        if (!hasSecondary) return null;
+
+        const secondaryContent = (
+          <>
+            {hasJournal ? <JournalPreviewList entries={journalEntries!} slug={slug} /> : null}
+            {practiceSection}
+            {uploadSection}
+          </>
+        );
+
+        return (
+          <>
+            <details className="yd-carree-mobile-more md:hidden">
+              <summary className="yd-carree-mobile-more__summary">Mehr anzeigen</summary>
+              <div className="yd-carree-mobile-more__panel">{secondaryContent}</div>
+            </details>
+            <div className="hidden md:contents">{secondaryContent}</div>
+          </>
+        );
+      })()}
 
       <footer className="yd-carree-profile__footer">
         <span>© {new Date().getFullYear()} {data.practice_name || workspaceName}</span>

@@ -82,11 +82,8 @@ export function ProfileBackgroundPicker({
 
   return (
     <div>
-      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
         Grundfarbe
-      </p>
-      <p className="mb-3 text-[11px] leading-snug text-slate-500">
-        Wählen Sie die Grundfarbe Ihrer öffentlichen Präsenz.
       </p>
       <div
         className="grid max-w-[10.5rem] grid-cols-5 gap-2.5"

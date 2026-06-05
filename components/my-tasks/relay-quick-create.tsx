@@ -21,6 +21,7 @@ import {
   subscribeRelayQuickCreate,
   type RelayQuickCreateMode,
 } from "@/lib/relay/relay-quick-create-bus";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import type { TaskRecurrenceType } from "@/lib/tasks/recurrence";
 import { cn } from "@/lib/utils";
 
@@ -114,8 +115,20 @@ function RelayQuickCreatePopover({
   const [msgDomainId, setMsgDomainId] = useState<RelayTaskCategory>(defaultDomainForSection(section));
 
   const domains = relayDomainsForRole(isDoctor);
+  const isMobile = useIsMobile();
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (isMobile) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+    return undefined;
+  }, [isMobile]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -127,12 +140,12 @@ function RelayQuickCreatePopover({
       }
     };
     document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onClick);
+    if (!isMobile) document.addEventListener("mousedown", onClick);
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onClick);
+      if (!isMobile) document.removeEventListener("mousedown", onClick);
     };
-  }, [isPending, onClose]);
+  }, [isPending, isMobile, onClose]);
 
   const panelWidth = 400;
   const left = Math.min(
@@ -236,15 +249,16 @@ function RelayQuickCreatePopover({
 
   if (!mounted) return null;
 
-  return createPortal(
+  const panel = (
     <div
       ref={panelRef}
       id="relay-quick-create"
       role="dialog"
       aria-modal="true"
       aria-label="Schnellerfassung"
-      className="yd-relay-qc-popover"
-      style={{ top, left, width: panelWidth }}
+      className={cn("yd-relay-qc-popover", isMobile && "yd-relay-qc-popover--sheet")}
+      style={isMobile ? undefined : { top, left, width: panelWidth }}
+      onMouseDown={isMobile ? (e) => e.stopPropagation() : undefined}
     >
       <div className="yd-relay-qc-popover__head">
         <div className="yd-relay-qc-popover__modes" role="tablist">
@@ -561,7 +575,23 @@ function RelayQuickCreatePopover({
           </button>
         </div>
       </fieldset>
-    </div>,
-    document.body
+    </div>
   );
+
+  if (isMobile) {
+    return createPortal(
+      <div
+        className="yd-relay-qc-sheet-backdrop"
+        role="presentation"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget && !isPending) onClose();
+        }}
+      >
+        {panel}
+      </div>,
+      document.body
+    );
+  }
+
+  return createPortal(panel, document.body);
 }

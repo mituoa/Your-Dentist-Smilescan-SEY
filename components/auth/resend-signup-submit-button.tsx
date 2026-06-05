@@ -2,7 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 
-import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 
 /** Submit für Bestätigungsmail erneut senden — pending kommt aus Server Action, kein künstlicher Cooldown vor Submit. */
 export function ResendSignupSubmitButton(props: {
@@ -24,7 +24,7 @@ export function ResendSignupSubmitButton(props: {
     >
       {pending ? (
         <span className="inline-flex items-center justify-center gap-2">
-          <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-[#0284C7]/80 motion-reduce:animate-none motion-reduce:opacity-80" />
+          <YdInlineBusy />
           {pendingText}
         </span>
       ) : (

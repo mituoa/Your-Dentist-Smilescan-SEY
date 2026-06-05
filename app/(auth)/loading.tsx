@@ -3,7 +3,6 @@ import { YdAuthLoadingState } from "@/components/auth/yd-auth-ui";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
-/** Route-Wechsel im Auth-Bereich — gleiche OS-Atmosphäre, ambientes Laden. */
 export default function AuthLoading() {
   return (
     <YdPublicOsEnvironment mode="focus">
@@ -12,7 +11,7 @@ export default function AuthLoading() {
         <section className="yd-product-entry-card">
           <div className="flex flex-col items-center gap-5 py-10">
             <YourDentistBrandLockup size="md" centered markOnly priority />
-            <YdAuthLoadingState label="Wird geladen …" />
+            <YdAuthLoadingState />
           </div>
         </section>
       </main>

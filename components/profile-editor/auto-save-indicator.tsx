@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
+
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -9,6 +11,7 @@ interface AutoSaveIndicatorProps {
   lastSavedAt: Date | null;
   errorMessage?: string | null;
   warningMessage?: string | null;
+  isDirty?: boolean;
 }
 
 export function AutoSaveIndicator({
@@ -16,12 +19,13 @@ export function AutoSaveIndicator({
   lastSavedAt,
   errorMessage,
   warningMessage,
+  isDirty = false,
 }: AutoSaveIndicatorProps) {
   if (status === "saving") {
     return (
       <div className="flex items-center gap-2 text-xs text-text-tertiary">
-        <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2} />
-        Speichern…
+        <YdInlineBusy />
+        <span>Speichern…</span>
       </div>
     );
   }
@@ -52,6 +56,14 @@ export function AutoSaveIndicator({
         <p className="font-medium text-amber-900">Teilweise gespeichert</p>
         <p className="mt-1 text-amber-800/90">{warningMessage.trim()}</p>
       </div>
+    );
+  }
+
+  if (isDirty) {
+    return (
+      <p className="text-xs leading-relaxed text-slate-500" role="status">
+        Ungespeicherte Änderungen — bitte Speichern klicken, bevor Sie die Seite verlassen.
+      </p>
     );
   }
 

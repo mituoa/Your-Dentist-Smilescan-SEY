@@ -139,7 +139,6 @@ export function CarreeEditorialHero({
 
         {hasContact ? (
           <div className="yd-carree-hero__contact-block">
-            <p className="yd-carree-hero__contact-heading">Kontakt zur Praxis</p>
             <div className="yd-carree-hero__contact-chips">
               {terminLabel ? (
                 <div className="yd-carree-hero__chip">
@@ -161,13 +160,13 @@ export function CarreeEditorialHero({
                   </a>
                 </div>
               ) : null}
-              {addressLine ? (
-                <div className="yd-carree-hero__chip yd-carree-hero__chip--address">
-                  <MapPin className="yd-carree-hero__chip-icon" strokeWidth={1.5} aria-hidden />
-                  <span className="yd-carree-hero__chip-value">{addressLine}</span>
-                </div>
-              ) : null}
             </div>
+            {addressLine ? (
+              <p className="yd-carree-hero__address-line">
+                <MapPin className="yd-carree-hero__address-icon" strokeWidth={1.5} aria-hidden />
+                <span>{addressLine}</span>
+              </p>
+            ) : null}
           </div>
         ) : null}
 

@@ -3,12 +3,6 @@
 import { FigmaTextarea } from "@/components/profile-editor/figma-form-fields";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 
-const APPROACH_PROMPTS = [
-  "Was ist Ihnen in der Behandlung wichtig?",
-  "Wie möchten Sie mit Patienten umgehen?",
-  "Welche Philosophie verfolgen Sie?",
-] as const;
-
 type ProfilePersonalApproachEditorProps = {
   value: string;
   onChange: (value: string) => void;
@@ -27,29 +21,11 @@ export function ProfilePersonalApproachEditor({
 
   return (
     <div>
-      {embedded ? (
-        <p className="mb-4 text-[11px] leading-snug text-slate-500">
-          Ihr Behandlungsansatz in eigenen Worten — persönlich, sachlich, ohne Werbesprache.
+      {!embedded ? (
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          Persönliche Worte
         </p>
-      ) : (
-        <>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-            Persönliche Worte
-          </p>
-          <p className="mb-3 text-[11px] leading-snug text-slate-500">
-            Optional — warum Zahnmedizin, was Ihnen in der Behandlung wichtig ist, wie Sie mit
-            Patienten umgehen.
-          </p>
-        </>
-      )}
-
-      <ul className="mb-3 flex flex-col gap-1">
-        {APPROACH_PROMPTS.map((prompt) => (
-          <li key={prompt} className="text-[10px] leading-snug text-slate-400">
-            · {prompt}
-          </li>
-        ))}
-      </ul>
+      ) : null}
 
       <FigmaTextarea
         variant="quiet"

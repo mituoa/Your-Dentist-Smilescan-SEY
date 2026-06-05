@@ -1,79 +1,99 @@
 import { clinicalWorkspaceFrame, clinicalWorkspaceVerticalPadding } from "@/lib/clinical-ui";
-
-/**
- * Subtle blue-gray loading placeholders — aligned with Tracker / Figma (no warm paper blocks).
- */
-const pulse = "animate-[clinicalSkeletonPulse_2s_ease-in-out_infinite]";
-
-const pulseDashboard =
-  "animate-[clinicalSkeletonPulseDashboard_3.2s_ease-in-out_infinite]";
-
-const bar = (className: string) => (
-  <div
-    className={`rounded-lg bg-[#E2E8F7]/45 ${pulse} dark:bg-slate-600/25 ${className}`}
-    aria-hidden
-  />
-);
-
-const barDashboard = (className: string) => (
-  <div
-    className={`rounded-lg bg-[#E2E8F7]/40 ${pulseDashboard} dark:bg-slate-600/25 ${className}`}
-    aria-hidden
-  />
-);
+import {
+  YdSkeleton,
+  YdSkeletonPage,
+  YdSkeletonProfileEditor,
+  YdSkeletonRelayWorkspace,
+  YdSkeletonTableRows,
+  YdSkeletonTableShell,
+} from "@/components/design-system/yd-skeleton";
 
 export function ClinicalMinimalSkeleton() {
   return (
-    <div className="flex min-h-[240px] flex-col items-center justify-center px-6" style={{ background: "#F7F9FC" }}>
-      <div
-        className={`h-9 w-44 rounded-lg bg-[#DDE6F8]/50 dark:bg-slate-600/30 ${pulse}`}
-        aria-hidden
-      />
-      <div
-        className={`mt-4 h-3 w-56 max-w-full rounded bg-[#E2E8F7]/40 dark:bg-slate-600/20 ${pulse}`}
-        aria-hidden
-      />
+    <YdSkeletonPage
+      label="Inhalt wird geladen"
+      className="flex min-h-[280px] flex-col gap-4 px-6 py-10"
+      style={{ background: "#F7F9FC" }}
+    >
+      <YdSkeleton className="h-9 w-44" />
+      <YdSkeleton className="h-3 w-56 max-w-full" variant="calm" />
+      <YdSkeleton className="h-24 w-full max-w-md rounded-xl" variant="calm" />
+    </YdSkeletonPage>
+  );
+}
+
+export function ClinicalDashboardSkeleton() {
+  return (
+    <div className="relative min-h-screen overflow-x-hidden md:hidden" style={{ background: "#F7F9FC" }}>
+      <YdSkeletonPage
+        label="Übersicht wird geladen"
+        className={`clinical-dashboard-skeleton relative min-w-0 touch-manipulation ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}
+      >
+        <div className="min-w-0 w-full max-w-full space-y-4">
+          <div className="space-y-2 border-b border-[rgba(226,232,240,0.6)] pb-4">
+            <YdSkeleton className="h-3 w-24" variant="calm" />
+            <YdSkeleton className="h-7 w-48 max-w-full" />
+            <YdSkeleton className="h-3.5 w-56 max-w-full" variant="calm" />
+          </div>
+          <YdSkeleton className="h-[4.5rem] w-full rounded-2xl" variant="calm" />
+          <div className="grid grid-cols-2 gap-3">
+            <YdSkeleton className="h-24 rounded-2xl" variant="calm" />
+            <YdSkeleton className="h-24 rounded-2xl" variant="calm" />
+          </div>
+          <YdSkeletonCardRows rows={3} />
+        </div>
+      </YdSkeletonPage>
     </div>
   );
 }
 
-/**
- * @deprecated Dashboard nutzt wieder das historische `loading.tsx`-Gerüst; Export kann entfernt werden, wenn ungenutzt.
- * Ladegerüst ausschließlich für `/dashboard` — spiegelt **Rahmen und Abstände** der echten Seite
- * (keine KPI-Ziffern, keine Chronik-Inhalte): reduziert Layout-Sprung und wirkt sachlich statt
- * „Analytics-Dashboard-Platzhalter“. **Mobile:** gleiche `min-w-0`/`gap`-Staffel und Karten-Padding wie
- * die fertige Route (enge Viewports, keine horizontalen Überläufe).
- */
-export function ClinicalDashboardSkeleton() {
+function YdSkeletonCardRows({ rows }: { rows: number }) {
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#F7F9FC" }}>
+    <div className="yd-skeleton-card space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <YdSkeleton className="h-5 w-28" />
+        <YdSkeleton className="h-3 w-16" variant="calm" />
+      </div>
+      <div className="space-y-2">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="flex items-start gap-2.5 py-1">
+            <YdSkeleton className="h-9 w-9 shrink-0 rounded-lg" variant="calm" />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <YdSkeleton className="h-3 w-full max-w-xs" />
+              <YdSkeleton className="h-2.5 w-20" variant="calm" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ClinicalDashboardDesktopSkeleton() {
+  return (
+    <div className="relative hidden min-h-screen overflow-x-hidden md:block" style={{ background: "#F7F9FC" }}>
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "radial-gradient(circle at top right, rgba(47,128,237,0.035), transparent 34%)",
+          background: "radial-gradient(circle at top right, rgba(47,128,237,0.035), transparent 34%)",
         }}
       />
-      <section
+      <YdSkeletonPage
+        label="Übersicht wird geladen"
         className={`clinical-dashboard-skeleton relative min-w-0 touch-manipulation ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}
-        aria-busy="true"
-        aria-label="Übersicht wird geladen"
       >
         <div className="min-w-0 w-full max-w-full">
-          <div
-            className="mb-5 overflow-hidden pb-4"
-            style={{ borderBottom: "1px solid rgba(226,232,240,0.6)" }}
-          >
-            {barDashboard("mb-1.5 h-8 max-w-[min(100%,20rem)]")}
-            {barDashboard("mb-4 h-3 w-52 max-w-full")}
+          <div className="mb-5 overflow-hidden border-b border-[rgba(226,232,240,0.6)] pb-4">
+            <YdSkeleton className="mb-1.5 h-8 max-w-[min(100%,20rem)]" variant="calm" />
+            <YdSkeleton className="mb-4 h-3 w-52 max-w-full" variant="calm" />
             <div className="grid max-w-md grid-cols-2 gap-3 sm:gap-10">
               <div className="min-w-0 space-y-1.5">
-                {barDashboard("h-9 w-20 rounded-md")}
-                {barDashboard("h-2 w-16")}
+                <YdSkeleton className="h-9 w-20" variant="calm" />
+                <YdSkeleton className="h-2 w-16" variant="calm" />
               </div>
               <div className="min-w-0 space-y-1.5">
-                {barDashboard("h-9 w-20 rounded-md")}
-                {barDashboard("h-2 w-20")}
+                <YdSkeleton className="h-9 w-20" variant="calm" />
+                <YdSkeleton className="h-2 w-20" variant="calm" />
               </div>
             </div>
           </div>
@@ -86,12 +106,12 @@ export function ClinicalDashboardSkeleton() {
                 boxShadow: "0 1px 8px rgba(15, 23, 42, 0.05)",
               }}
             >
-              {barDashboard("mb-2 h-2 w-28")}
+              <YdSkeleton className="mb-2 h-2 w-28" variant="calm" />
               <div className="flex flex-wrap items-end justify-between gap-2">
-                {barDashboard("h-16 max-w-[7rem] rounded-lg")}
-                {barDashboard("h-3.5 w-24")}
+                <YdSkeleton className="h-16 max-w-[7rem] rounded-lg" variant="calm" />
+                <YdSkeleton className="h-3.5 w-24" variant="calm" />
               </div>
-              {barDashboard("mt-2 h-2.5 w-20")}
+              <YdSkeleton className="mt-2 h-2.5 w-20" variant="calm" />
             </div>
 
             <div className="col-span-12 flex min-h-0 min-w-0 flex-col gap-3 sm:gap-4 lg:col-span-5">
@@ -100,47 +120,27 @@ export function ClinicalDashboardSkeleton() {
                   key={i}
                   className="min-h-[92px] min-w-0 rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4"
                 >
-                  {barDashboard("mb-1 h-2 w-20")}
+                  <YdSkeleton className="mb-1 h-2 w-20" variant="calm" />
                   <div className="flex items-end justify-between gap-2">
-                    {barDashboard("h-10 w-16 rounded-md")}
-                    {barDashboard("h-3 w-6")}
+                    <YdSkeleton className="h-10 w-16" variant="calm" />
+                    <YdSkeleton className="h-3 w-6" variant="calm" />
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="min-h-[140px] min-w-0 rounded-xl border border-[#EEF2F6] bg-white p-3.5 shadow-[0_1px_6px_rgba(15,23,42,0.04)] sm:p-4">
-            <div className="mb-2 flex min-w-0 flex-col gap-2 border-b border-[#F1F5F9] pb-2 sm:flex-row sm:items-center sm:justify-between">
-              {barDashboard("h-5 w-24")}
-              {barDashboard("h-9 w-28 shrink-0 rounded-md")}
-            </div>
-            <div className="space-y-1 pt-2">
-              {[0, 1].map((row) => (
-                <div key={row} className="flex items-start gap-2 py-1 sm:gap-2.5">
-                  {barDashboard("h-8 w-8 shrink-0 rounded-md sm:h-9 sm:w-9")}
-                  <div className="min-w-0 flex-1 space-y-1 pt-0.5">
-                    {barDashboard("h-2.5 w-full max-w-xl")}
-                    {barDashboard("h-2 w-24")}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <YdSkeletonCardRows rows={2} />
         </div>
-      </section>
+      </YdSkeletonPage>
     </div>
   );
 }
 
 export function ClinicalInboxSkeleton() {
   return (
-    <div className="flex h-full min-h-[320px] flex-col px-6 py-10" style={{ background: "#F7F9FC" }}>
-      {bar("mx-auto h-10 w-48")}
-      <div className="mx-auto mt-8 w-full max-w-md space-y-2">
-        {bar("h-3.5 w-full")}
-        {bar("h-3.5 w-4/5")}
-      </div>
+    <div className="flex h-full min-h-[320px] flex-col px-3 py-3 md:px-0 md:py-0" style={{ background: "#F7F9FC" }}>
+      <YdSkeletonTableShell label="Praxis-Inbox wird geladen" rows={7} chipCount={5} />
     </div>
   );
 }
@@ -151,56 +151,164 @@ export function ClinicalInboxDetailSkeleton() {
       className="yd-inbox-detail-root flex h-full min-h-0 flex-col overflow-hidden"
       style={{ background: "#F7F9FC" }}
     >
-      <div className="border-b border-[rgba(15,23,42,0.06)] bg-white/90 px-6 py-8 md:px-10">
-        {bar("mb-3 h-8 max-w-lg")}
-        {bar("h-3.5 w-44")}
-      </div>
-      <div className="flex-1 space-y-6 overflow-y-auto bg-white px-6 py-8 md:px-10">
-        {bar("h-48 max-w-xl rounded-xl")}
-        {bar("h-24 max-w-xl rounded-lg")}
-      </div>
+      <YdSkeletonPage label="Patientenfall wird geladen" className="flex h-full min-h-0 flex-col">
+        <div className="border-b border-[rgba(15,23,42,0.06)] bg-white/90 px-5 py-6 md:px-10 md:py-8">
+          <YdSkeleton className="mb-3 h-8 max-w-lg" />
+          <YdSkeleton className="h-3.5 w-44" variant="calm" />
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[0, 1, 2].map((i) => (
+              <YdSkeleton key={i} className="h-8 w-24" rounded="full" variant="calm" />
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 space-y-4 overflow-y-auto bg-white px-5 py-6 md:px-10 md:py-8">
+          <YdSkeleton className="h-40 max-w-xl rounded-xl" variant="calm" />
+          <YdSkeleton className="h-28 max-w-xl rounded-xl" variant="calm" />
+          <div className="yd-skeleton-card max-w-xl">
+            <YdSkeleton className="mb-3 h-4 w-32" />
+            <YdSkeleton className="h-20 w-full" variant="calm" />
+          </div>
+        </div>
+      </YdSkeletonPage>
     </div>
   );
 }
 
-/** Relay board: three slim columns, same radii as real board. */
 export function ClinicalTaskDetailSkeleton() {
   return (
-    <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`} style={{ background: "#F7F9FC" }}>
+    <YdSkeletonPage
+      label="Aufgabe wird geladen"
+      className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}
+      style={{ background: "#F7F9FC" }}
+    >
       <div className="mx-auto w-full max-w-4xl">
-      {bar("mb-6 h-4 w-40")}
-      <div className="space-y-4 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white/[0.97] p-5 shadow-sm">
-        {bar("h-8 max-w-md")}
-        {bar("mt-4 h-24 w-full")}
-        {bar("mt-6 h-10 w-full rounded-lg")}
+        <YdSkeleton className="mb-6 h-4 w-40" variant="calm" />
+        <div className="space-y-4 rounded-xl border border-[rgba(15,23,42,0.06)] bg-white/[0.97] p-5 shadow-sm">
+          <YdSkeleton className="h-8 max-w-md" />
+          <YdSkeleton className="h-24 w-full" variant="calm" />
+          <YdSkeleton className="h-10 w-full rounded-lg" variant="calm" />
+        </div>
       </div>
-      </div>
-    </div>
+    </YdSkeletonPage>
   );
 }
 
 export function ClinicalRelayBoardSkeleton() {
+  return <YdSkeletonRelayWorkspace />;
+}
+
+export function ClinicalProfileHubSkeleton() {
   return (
-    <div
-      className={`yd-relay flex min-h-[50vh] flex-1 flex-col ${clinicalWorkspaceFrame} py-2 md:py-3`}
-      style={{ background: "#F7F9FC" }}
+    <YdSkeletonPage
+      label="Praxisübersicht wird geladen"
+      className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}
     >
-      <div className="mb-2 flex items-center justify-between border-b border-[rgba(176,192,208,0.22)] pb-2">
-        {bar("h-7 w-24")}
-        {bar("h-8 w-40 rounded-lg")}
-      </div>
-      {bar("h-4 w-full max-w-2xl")}
-      {bar("h-9 w-full rounded-xl")}
-      <div className="mt-2 min-h-0 flex-1 overflow-hidden rounded-[24px] border border-[rgba(160,178,198,0.38)] bg-white shadow-sm">
-        {bar("h-9 w-full rounded-none")}
-        <div className="space-y-0 divide-y divide-[rgba(180,198,218,0.22)]">
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="px-5 py-3.5">
-              {bar("h-4 w-full")}
+      <div className="mx-auto w-full min-w-0 max-w-4xl space-y-8 overflow-x-hidden">
+        <div className="min-h-[10.5rem] space-y-3 md:min-h-[11.5rem]">
+          <YdSkeleton className="h-2.5 w-24" variant="calm" />
+          <YdSkeleton className="min-h-[2rem] max-w-md md:min-h-[2.25rem]" />
+          <YdSkeleton className="h-2.5 max-w-xl" variant="calm" />
+          <YdSkeleton className="h-2.5 max-w-lg" variant="calm" />
+        </div>
+        <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch md:gap-4">
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className={`flex min-h-[200px] min-w-0 flex-col rounded-lg border bg-surface-card p-5 sm:p-6 md:min-h-[220px] ${
+                i === 1 ? "border-dashed border-border" : "border-border"
+              }`}
+            >
+              <YdSkeleton className="mb-3 h-5 w-5 shrink-0" variant="calm" />
+              <YdSkeleton className="mb-2 h-5 max-w-[14rem]" />
+              <YdSkeleton className="h-3 max-w-full" variant="calm" />
+              <YdSkeleton className="mt-1.5 h-3 max-w-[90%]" variant="calm" />
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </YdSkeletonPage>
   );
 }
+
+export function ClinicalProfileEditorSkeleton() {
+  return <YdSkeletonProfileEditor />;
+}
+
+export function ClinicalSettingsSkeleton() {
+  return (
+    <YdSkeletonPage
+      label="Einstellungen werden geladen"
+      className="relative flex min-h-0 flex-1 flex-col overflow-auto"
+      style={{ background: "#F7F9FC" }}
+    >
+      <div className="mx-auto w-full max-w-[640px] px-4 py-6 pb-24 sm:px-6 md:px-10 md:py-8">
+        <div className="mb-16 space-y-3 pt-8">
+          <YdSkeleton className="h-10 w-48" />
+          <YdSkeleton className="h-4 w-64" variant="calm" />
+        </div>
+        {[28, 32, 28, 16].map((titleW, section) => (
+          <div key={section} className="mb-16 space-y-6">
+            <YdSkeleton className={`h-5 w-${titleW}`} style={{ width: `${titleW * 4}px` }} variant="calm" />
+            <YdSkeleton className="h-11 w-full rounded-[10px]" variant="calm" />
+            <YdSkeleton className="h-[120px] w-full rounded-[10px]" variant="calm" />
+          </div>
+        ))}
+      </div>
+    </YdSkeletonPage>
+  );
+}
+
+export function ClinicalJournalSkeleton() {
+  return (
+    <YdSkeletonPage
+      label="Journal wird geladen"
+      className="relative flex min-h-0 flex-1 flex-col overflow-auto"
+      style={{ background: "#F7F9FC" }}
+    >
+      <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} pb-16 md:pb-24`}>
+        <div className="mx-auto w-full max-w-[min(760px,100%)]">
+          <div className="mb-12 space-y-3">
+            <YdSkeleton className="h-9 w-56" />
+            <YdSkeleton className="h-4 w-72" variant="calm" />
+          </div>
+          <div className="mb-16 flex gap-2">
+            {[20, 28, 24].map((w, i) => (
+              <YdSkeleton key={i} className="h-9 rounded-full" style={{ width: `${w * 4}px` }} variant="calm" />
+            ))}
+          </div>
+          <div className="space-y-4">
+            {[0, 1, 2].map((i) => (
+              <YdSkeleton key={i} className="h-14 w-full rounded-xl" variant="calm" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </YdSkeletonPage>
+  );
+}
+
+export function ClinicalCreateCaseSkeleton() {
+  return (
+    <YdSkeletonPage
+      label="Formular wird geladen"
+      className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} py-10`}
+      style={{ background: "#F7F9FC" }}
+    >
+      <div className="mx-auto w-full max-w-2xl space-y-6">
+        <YdSkeleton className="h-8 w-56" />
+        <YdSkeleton className="h-4 w-72" variant="calm" />
+        <div className="yd-skeleton-card space-y-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="space-y-2">
+              <YdSkeleton className="h-3 w-24" variant="calm" />
+              <YdSkeleton className="h-11 w-full rounded-[10px]" variant="calm" />
+            </div>
+          ))}
+          <YdSkeleton className="h-11 w-36 rounded-lg" />
+        </div>
+      </div>
+    </YdSkeletonPage>
+  );
+}
+
+export { YdSkeletonTableRows };

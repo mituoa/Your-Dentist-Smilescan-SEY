@@ -1,5 +1,5 @@
-import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { YdSkeleton } from "@/components/design-system/yd-skeleton";
 import {
   ACCEPT_INVITE_INNER_CLASS,
   ACCEPT_INVITE_LOADING_CARD_CLASS,
@@ -8,7 +8,6 @@ import {
   acceptInviteCardShadow,
 } from "./accept-invite-shell";
 
-/** Segment-Loading: gleicher visueller Rahmen wie die Einladungskarte (ruhig, ohne Auth-Canvas-Sprung). */
 export default function AcceptInviteLoading() {
   return (
     <div className={ACCEPT_INVITE_OUTER_CLASS}>
@@ -19,15 +18,16 @@ export default function AcceptInviteLoading() {
             <YourDentistBrandLockup size="sm" centered priority />
           </div>
           <div
-            className="flex min-w-0 w-full flex-1 flex-col items-center justify-center gap-4 px-1 py-4 text-center"
+            className="flex min-w-0 w-full flex-1 flex-col gap-4 px-2 py-4"
             role="status"
             aria-live="polite"
             aria-busy="true"
+            aria-label="Einladung wird geprüft"
           >
-            <AuthLoadingSpinner className="h-6 w-6 shrink-0 text-slate-500/75 motion-reduce:animate-none motion-reduce:opacity-75" />
-            <p className="w-full min-w-0 max-w-sm text-pretty text-sm leading-relaxed text-slate-600 [overflow-wrap:anywhere]">
-              Einladung wird geprüft&nbsp;…
-            </p>
+            <YdSkeleton className="mx-auto h-4 w-40" variant="calm" />
+            <YdSkeleton className="h-11 w-full rounded-xl" variant="calm" />
+            <YdSkeleton className="h-11 w-full rounded-xl" variant="calm" />
+            <div className="yd-auth-loading-pulse-v2 mx-auto w-full max-w-xs" aria-hidden />
           </div>
         </div>
       </div>

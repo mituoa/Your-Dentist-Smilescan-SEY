@@ -1,10 +1,10 @@
-/** @deprecated Prefer `YdAuthLoadingState` — thin wrapper for legacy imports. */
+/** @deprecated Prefer `YdInlineBusy` or `YdAuthLoadingState` — legacy wrapper ohne Spinner. */
 export function AuthLoadingSpinner(props: { className?: string }) {
   return (
     <div
-      className={props.className ?? "yd-auth-loading-pulse"}
+      className={props.className ?? "yd-auth-loading-pulse-v2"}
       role="status"
-      aria-hidden={!props.className}
+      aria-label="Wird geladen"
     />
   );
 }

@@ -1,0 +1,305 @@
+/**
+ * Your Dentist — Loading States V2
+ * Navy-blue skeletons, soft pulse/shimmer — keine Spinner als Hauptlösung.
+ */
+
+@keyframes ydSkeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes ydSkeletonPulse {
+  0%,
+  100% {
+    opacity: 0.58;
+  }
+  50% {
+    opacity: 0.92;
+  }
+}
+
+@keyframes ydSkeletonPulseCalm {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  50% {
+    opacity: 0.78;
+  }
+}
+
+@keyframes ydInlineBusy {
+  0%,
+  100% {
+    transform: scaleX(0.35);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 0.95;
+  }
+}
+
+.yd-skeleton {
+  display: block;
+  border-radius: 10px;
+  background: linear-gradient(
+    105deg,
+    rgba(221, 230, 248, 0.55) 0%,
+    rgba(232, 241, 252, 0.85) 42%,
+    rgba(200, 216, 240, 0.6) 78%,
+    rgba(221, 230, 248, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  animation: ydSkeletonShimmer 2.2s ease-in-out infinite;
+}
+
+.yd-skeleton--pulse {
+  background: rgba(221, 230, 248, 0.62);
+  background-size: auto;
+  animation: ydSkeletonPulse 2s ease-in-out infinite;
+}
+
+.yd-skeleton--calm {
+  animation: ydSkeletonPulseCalm 3s ease-in-out infinite;
+  background: rgba(226, 232, 247, 0.5);
+  background-size: auto;
+}
+
+.yd-skeleton--rounded-sm {
+  border-radius: 6px;
+}
+
+.yd-skeleton--rounded-lg {
+  border-radius: 14px;
+}
+
+.yd-skeleton--rounded-xl {
+  border-radius: 18px;
+}
+
+.yd-skeleton--rounded-full {
+  border-radius: 9999px;
+}
+
+.yd-skeleton-page {
+  min-height: 0;
+  flex: 1;
+  width: 100%;
+}
+
+.yd-skeleton-table {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #ffffff;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+}
+
+.yd-skeleton-table__head {
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.yd-skeleton-table__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.yd-skeleton-table__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.yd-skeleton-table__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.yd-skeleton-table__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(241, 245, 249, 0.95);
+  background: #ffffff;
+}
+
+.yd-skeleton-table__row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.yd-skeleton-table__row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+.yd-skeleton-card {
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  padding: 1rem 1.125rem;
+}
+
+.yd-skeleton-profile-split {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: #faf8f5;
+  box-shadow: 0 2px 18px rgba(26, 43, 74, 0.055);
+}
+
+.yd-skeleton-profile-split__preview {
+  padding: 1.25rem 1.1rem 1rem;
+}
+
+.yd-skeleton-profile-split__portrait {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+}
+
+.yd-skeleton-profile-split__editor {
+  padding: 1rem 1.125rem 1.25rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  background: #f4f3f0;
+}
+
+.yd-skeleton-accordion-item {
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.42);
+  min-height: 48px;
+  padding: 0.75rem 0.875rem;
+}
+
+.yd-skeleton-thread-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.yd-skeleton-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.875rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+}
+
+.yd-inline-busy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 0.1875rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(26, 79, 156, 0.12);
+}
+
+.yd-inline-busy__bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1a4f9c 0%, #2f80ed 50%, #1a4f9c 100%);
+  transform-origin: center;
+  animation: ydInlineBusy 1.6s ease-in-out infinite;
+}
+
+.yd-inline-busy--inverse {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.yd-inline-busy--inverse .yd-inline-busy__bar {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.45) 0%, #ffffff 50%, rgba(255, 255, 255, 0.45) 100%);
+}
+
+.yd-auth-loading-pulse-v2 {
+  width: 100%;
+  max-width: 18rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: rgba(221, 230, 248, 0.55);
+  overflow: hidden;
+}
+
+.yd-auth-loading-pulse-v2::after {
+  content: "";
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(47, 128, 237, 0.45), transparent);
+  animation: ydSkeletonShimmer 1.8s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .yd-skeleton-profile-split {
+    flex-direction: row;
+    min-height: min(56dvh, 560px);
+  }
+
+  .yd-skeleton-profile-split__preview {
+    flex: 1.35;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem 1.25rem 1.25rem;
+    border-top: none;
+    border-right: 1px solid rgba(148, 163, 184, 0.18);
+  }
+
+  .yd-skeleton-profile-split__editor {
+    width: min(100%, 340px);
+    flex-shrink: 0;
+    border-top: none;
+    border-left: 1px solid rgba(148, 163, 184, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-skeleton,
+  .yd-skeleton--pulse,
+  .yd-skeleton--calm,
+  .yd-inline-busy__bar,
+  .yd-auth-loading-pulse-v2::after {
+    animation: none !important;
+  }
+
+  .yd-skeleton,
+  .yd-skeleton--pulse,
+  .yd-skeleton--calm {
+    opacity: 0.72;
+  }
+}

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Calendar, Check, Loader2 } from "lucide-react";
+import { Calendar, Check } from "lucide-react";
+
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 import { saveAppointmentLink } from "@/app/(protected)/settings/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,7 +60,7 @@ export function TerminlinkSection({ initial }: TerminlinkSectionProps) {
           </div>
           <Button onClick={handleSave} disabled={isPending}>
             {isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <YdInlineBusy />
             ) : saved ? (
               <Check className="w-4 h-4" />
             ) : (

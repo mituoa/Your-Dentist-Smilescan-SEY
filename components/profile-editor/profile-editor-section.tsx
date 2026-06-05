@@ -8,6 +8,7 @@ type ProfileEditorSectionProps = {
   summary?: string;
   isOpen: boolean;
   onToggle: () => void;
+  className?: string;
   children: React.ReactNode;
 };
 
@@ -17,10 +18,13 @@ export function ProfileEditorSection({
   summary,
   isOpen,
   onToggle,
+  className,
   children,
 }: ProfileEditorSectionProps) {
   return (
-    <section className={`yd-pe-section${isOpen ? " yd-pe-section--open" : ""}`}>
+    <section
+      className={`yd-pe-section${isOpen ? " yd-pe-section--open" : ""}${className ? ` ${className}` : ""}`}
+    >
       <button
         type="button"
         id={`yd-pe-section-${id}`}

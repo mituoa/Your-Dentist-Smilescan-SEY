@@ -13,6 +13,7 @@ import {
 import { NewRelayMessageModal } from "@/components/my-tasks/new-relay-message-modal";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayConversationRow, RelayMessageRow } from "@/lib/queries/relay-messages";
+import { YdSkeletonThreadList } from "@/components/design-system/yd-skeleton";
 import { RelayReadStatusCompact } from "@/components/my-tasks/relay-read-status-compact";
 import { formatRelayMessageTimestamp } from "@/lib/relay/read-receipt-display";
 import { cn } from "@/lib/utils";
@@ -216,7 +217,9 @@ export function RelayMessagesPanel({
 
             <div className="relay-messages-scroll">
               {loadingThread ? (
-                <p className="px-4 py-8 text-center text-[13px] text-[#64748B]">Wird geladen …</p>
+                <div className="px-2 py-4" role="status" aria-label="Nachrichten werden geladen">
+                  <YdSkeletonThreadList rows={5} />
+                </div>
               ) : loadError ? (
                 <p className="mx-4 my-6 rounded-lg border border-[rgba(220,38,38,0.12)] bg-[rgba(254,242,242,0.5)] px-3 py-2 text-[13px] text-[#991B1B]">
                   {loadError}

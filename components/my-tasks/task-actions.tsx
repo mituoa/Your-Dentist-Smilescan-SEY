@@ -22,7 +22,9 @@
  * **Punkt 11 (MVP):** Rückweisungs-UI sachlich (Begründung, kein „Team-Channel“-Ton); s. `page.tsx` (Punkt 11).
  */
 
-import { Check, Loader2, X } from "lucide-react";
+import { Check, X } from "lucide-react";
+
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -120,11 +122,7 @@ export function TaskActions({
           disabled={isPending}
           className="inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-lg bg-[#2F80ED] px-5 py-2.5 text-sm font-medium text-white shadow-sm ring-1 ring-[rgba(43,111,232,0.12)] transition-colors hover:bg-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] focus-visible:ring-offset-2 disabled:opacity-50 sm:w-auto"
         >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
-          ) : (
-            <Check className="h-4 w-4" aria-hidden />
-          )}
+          {isPending ? <YdInlineBusy inverse /> : <Check className="h-4 w-4" aria-hidden />}
           {doctorSelfTask ? "Abschließen" : "Zur Bestätigung einreichen"}
         </button>
       )}
@@ -137,11 +135,7 @@ export function TaskActions({
             disabled={isPending}
             className="inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-lg bg-[#2F80ED] px-5 py-2.5 text-sm font-medium text-white shadow-sm ring-1 ring-[rgba(43,111,232,0.12)] transition-colors hover:bg-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
-            ) : (
-              <Check className="h-4 w-4" aria-hidden />
-            )}
+            {isPending ? <YdInlineBusy inverse /> : <Check className="h-4 w-4" aria-hidden />}
             Erledigung bestätigen
           </button>
           <button

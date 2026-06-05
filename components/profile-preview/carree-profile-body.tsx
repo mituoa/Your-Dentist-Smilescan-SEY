@@ -1,5 +1,8 @@
+import { Check } from "lucide-react";
+
 import { SpecializationIcon } from "@/components/profile-preview/specialization-icon";
-import { specializationPickerLabel } from "@/lib/profile/specialization-picker-data";
+import { parseCareerTimelineLine } from "@/lib/profile/career-timeline-display";
+import { patientFacingSpecializationLabel } from "@/lib/profile/patient-facing-labels";
 import { expandWorkingStyleVitaForDisplay } from "@/lib/profile/working-style-library";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
@@ -55,29 +58,30 @@ export function CarreeProfileBody({ data }: CarreeProfileBodyProps) {
       ) : null}
 
       {personalApproach ? (
-        <section
-          className="yd-carree-profile__approach-panel"
-          aria-label="Persönliche Worte"
-        >
-          <p className="yd-carree-profile__section-label">Persönliche Worte</p>
+        <section className="yd-carree-profile__approach-panel" aria-label="Was mir wichtig ist">
+          <p className="yd-carree-profile__section-label">Was mir wichtig ist</p>
           <p className="yd-carree-profile__approach-text">{personalApproach}</p>
         </section>
       ) : null}
 
       {careerPath.length > 0 ? (
-        <section
-          className="yd-carree-profile__career-panel"
-          aria-label="Ausbildung und Werdegang"
-        >
-          <p className="yd-carree-profile__section-label">Ausbildung &amp; Werdegang</p>
-          <ul className="yd-carree-profile__career-list">
-            {careerPath.map((line) => (
-              <li key={line} className="yd-carree-profile__career-item">
-                <span className="yd-carree-profile__career-marker" aria-hidden />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
+        <section className="yd-carree-profile__career-panel" aria-label="Ausbildung und Erfahrung">
+          <p className="yd-carree-profile__section-label">Ausbildung &amp; Erfahrung</p>
+          <ol className="yd-carree-profile__career-timeline">
+            {careerPath.map((line) => {
+              const entry = parseCareerTimelineLine(line);
+              return (
+                <li key={line} className="yd-carree-profile__career-timeline-item">
+                  {entry.period ? (
+                    <span className="yd-carree-profile__career-period">{entry.period}</span>
+                  ) : (
+                    <span className="yd-carree-profile__career-period yd-carree-profile__career-period--open" aria-hidden />
+                  )}
+                  <span className="yd-carree-profile__career-title">{entry.title}</span>
+                </li>
+              );
+            })}
+          </ol>
         </section>
       ) : null}
 
@@ -98,7 +102,7 @@ export function CarreeProfileBody({ data }: CarreeProfileBodyProps) {
                       <SpecializationIcon id={id} className="h-[15px] w-[15px]" />
                     </span>
                     <span className="yd-carree-profile__spec-label">
-                      {specializationPickerLabel(id)}
+                      {patientFacingSpecializationLabel(id)}
                     </span>
                   </li>
                 ))}
@@ -109,14 +113,15 @@ export function CarreeProfileBody({ data }: CarreeProfileBodyProps) {
           {hasCredentials ? (
             <section
               className="yd-carree-profile__dual-col yd-carree-profile__panel yd-carree-profile__panel--credentials"
-              aria-label="Auszeichnungen und Zertifikate"
+              aria-label="Fortbildungen und Zertifikate"
             >
-              <p className="yd-carree-profile__section-label">
-                Fortbildungen &amp; Zertifikate
-              </p>
-              <ul className="yd-carree-profile__cred-list">
+              <p className="yd-carree-profile__section-label">Fortbildungen &amp; Zertifikate</p>
+              <ul className="yd-carree-profile__cred-badges">
                 {credentials.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line} className="yd-carree-profile__cred-badge">
+                    <Check className="yd-carree-profile__cred-badge-icon" strokeWidth={2.25} aria-hidden />
+                    <span>{line}</span>
+                  </li>
                 ))}
               </ul>
             </section>

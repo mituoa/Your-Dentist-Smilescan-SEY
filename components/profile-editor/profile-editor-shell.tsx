@@ -1,7 +1,7 @@
 "use client";
 
 /** Öffentliche Präsenz: Bühne (Vorschau) dominant, Kuratieren in schmaler Nebenspur. */
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { Check } from "lucide-react";
 
 import { AutoSaveIndicator, type SaveStatus } from "./auto-save-indicator";
@@ -18,7 +18,9 @@ import { ProfileSpecializationPicker } from "@/components/profile-editor/profile
 import { resolveCarreeTheme } from "@/lib/profile/carree-theme";
 import { specializationPickerLabel } from "@/lib/profile/specialization-picker-data";
 import { saveProfileData, uploadPortraitPhoto } from "@/app/(protected)/profile/editor/actions";
+import { buildProfileEditorSnapshot } from "@/lib/profile/profile-editor-snapshot";
 import type { ProfileEditorData } from "@/lib/types/profile-editor-data";
+import { useProfileUnsavedGuard } from "@/components/profile-editor/use-profile-unsaved-guard";
 import {
   MAX_WORKING_STYLE_SELECTIONS,
   buildWorkingStyleVita,
@@ -27,6 +29,7 @@ import {
   statementIdsToThreeLines,
 } from "@/lib/profile/working-style-library";
 import { mergePracticeAddressBlock, parsePracticeAddressBlock } from "@/lib/profile/practice-address-split";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 
 interface ProfileEditorShellProps {
@@ -38,7 +41,9 @@ type WorkingFormState = ReturnType<typeof parseWorkingStyleVita>;
 
 type EditorSectionId =
   | "praxis"
+  | "kontakt"
   | "arzt"
+  | "branding"
   | "approach"
   | "career"
   | "fach"
@@ -57,7 +62,13 @@ export function ProfileEditorShell({
 }: ProfileEditorShellProps) {
   const [data, setData] = useState<ProfileEditorData>(initialData);
   const [working, setWorking] = useState<WorkingFormState>(() => parseWorkingStyleVita(initialData.vita_markdown));
-  const [openSection, setOpenSection] = useState<EditorSectionId>("praxis");
+  const isMobile = useIsMobile();
+  const [openSection, setOpenSection] = useState<EditorSectionId | null>(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+      return null;
+    }
+    return "praxis";
+  });
   const [showStatementLibrary, setShowStatementLibrary] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -67,9 +78,13 @@ export function ProfileEditorShell({
   const [photoError, setPhotoError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveSeqRef = useRef(0);
   const latestDataRef = useRef(data);
+  const latestWorkingRef = useRef(working);
+  latestWorkingRef.current = working;
+  const savedSnapshotRef = useRef(
+    buildProfileEditorSnapshot(initialData, parseWorkingStyleVita(initialData.vita_markdown))
+  );
   const mergedProfile = useMemo(
     () => ({
       ...data,
@@ -79,7 +94,12 @@ export function ProfileEditorShell({
   );
   latestDataRef.current = mergedProfile;
 
-  const skipInitialSave = useRef(true);
+  const isDirty = useMemo(
+    () => buildProfileEditorSnapshot(data, working) !== savedSnapshotRef.current,
+    [data, working]
+  );
+
+  useProfileUnsavedGuard(isDirty);
 
   const updateField = useCallback(<K extends keyof ProfileEditorData>(field: K, value: ProfileEditorData[K]) => {
     setData((prev) => ({ ...prev, [field]: value }));
@@ -90,7 +110,7 @@ export function ProfileEditorShell({
   }, []);
 
   const openEditorSection = useCallback((id: EditorSectionId) => {
-    setOpenSection(id);
+    setOpenSection((prev) => (prev === id ? null : id));
     setShowStatementLibrary(false);
   }, []);
 
@@ -131,6 +151,10 @@ export function ProfileEditorShell({
         setErrorMessage(result.error);
         setWarningMessage(null);
       } else {
+        savedSnapshotRef.current = buildProfileEditorSnapshot(
+          latestDataRef.current,
+          latestWorkingRef.current
+        );
         setSaveStatus("saved");
         setLastSavedAt(new Date());
         setWarningMessage(result.warning ?? null);
@@ -141,23 +165,6 @@ export function ProfileEditorShell({
       setErrorMessage("Speichern fehlgeschlagen.");
     }
   }, []);
-
-  useEffect(() => {
-    if (skipInitialSave.current) {
-      skipInitialSave.current = false;
-      return;
-    }
-
-    if (saveTimeout.current) clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => {
-      void performSave();
-    }, 2000);
-
-    return () => {
-      if (saveTimeout.current) clearTimeout(saveTimeout.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, working]);
 
   const addr = parsePracticeAddressBlock(data.practice_address);
 
@@ -214,9 +221,14 @@ export function ProfileEditorShell({
   const credFilled = (data.profile_credentials ?? []).filter((c) => c.trim()).length;
   const approachFilled = (data.profile_personal_approach ?? "").trim();
 
+  const contactHint =
+    data.practice_phone?.trim() || data.practice_email?.trim() || addr.city.trim() || "Kontakt";
+
   const sectionSummaries = {
     praxis: truncateSummary(data.practice_name || workspaceName) || "Praxis",
+    kontakt: truncateSummary(contactHint),
     arzt: truncateSummary(doctorName) || "Arztprofil",
+    branding: data.profile_background_color ? "Grundfarbe" : "Standard",
     approach: approachFilled ? truncateSummary(approachFilled) : "Optional",
     career:
       careerFilled > 0
@@ -259,12 +271,9 @@ export function ProfileEditorShell({
           aria-busy={saveStatus === "saving" || photoUploading}
         >
           <div className="yd-profile-editor-curate-scroll px-5 py-8 sm:px-6 sm:py-9">
-            <header className="border-b border-slate-300/25 pb-5">
+            <header className="border-b border-slate-300/25 pb-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-700">
                 Öffentliche Präsenz
-              </p>
-              <p className="mt-2 text-[11px] leading-snug text-slate-500">
-                Bereich für Bereich kuratieren — Änderungen werden automatisch übernommen.
               </p>
             </header>
 
@@ -291,6 +300,7 @@ export function ProfileEditorShell({
               ) : null}
 
               <div className="yd-pe-sections flex flex-col gap-2">
+                {!isMobile ? (
                 <ProfileEditorSection
                   id="praxis"
                   title="Praxisprofil"
@@ -336,111 +346,57 @@ export function ProfileEditorShell({
                         onChange={(e) => updateField("practice_subtitle", e.target.value || null)}
                       />
                     </div>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div>
-                        <label
-                          htmlFor="pe-practice-phone"
-                          className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
-                        >
-                          Telefon
-                        </label>
-                        <FigmaTextInput
-                          id="pe-practice-phone"
-                          variant="quiet"
-                          placeholder="z. B. 0221 - 123 45 67"
-                          type="tel"
-                          maxLength={PROFILE_LIMITS.practice_phone}
-                          value={data.practice_phone || ""}
-                          onChange={(e) => updateField("practice_phone", e.target.value || null)}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="pe-practice-email"
-                          className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
-                        >
-                          E-Mail
-                        </label>
-                        <FigmaTextInput
-                          id="pe-practice-email"
-                          variant="quiet"
-                          placeholder="z. B. info@praxis.de"
-                          type="email"
-                          maxLength={PROFILE_LIMITS.practice_email}
-                          value={data.practice_email || ""}
-                          onChange={(e) => updateField("practice_email", e.target.value || null)}
-                        />
-                      </div>
-                    </div>
-                    <ProfileBackgroundPicker
-                      value={data.profile_background_color}
-                      onChange={(hex) => updateField("profile_background_color", hex)}
-                      disabled={interactionLocked}
-                    />
-                    <div>
-                      <label
-                        htmlFor="pe-practice-address"
-                        className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
-                      >
-                        Anschrift
-                      </label>
-                      <div className="flex flex-col gap-3">
-                        <FigmaTextInput
-                          id="pe-practice-address"
-                          variant="quiet"
-                          placeholder="Straße, Nr."
-                          maxLength={120}
-                          value={addr.street}
-                          onChange={(e) =>
-                            updatePracticeField(
-                              "practice_address",
-                              mergePracticeAddressBlock(e.target.value, addr.postalCode, addr.city)
-                            )
-                          }
-                        />
-                        <div className="grid grid-cols-3 gap-x-3 gap-y-3">
-                          <FigmaTextInput
-                            variant="quiet"
-                            placeholder="PLZ"
-                            type="text"
-                            inputMode="numeric"
-                            autoComplete="postal-code"
-                            maxLength={12}
-                            value={addr.postalCode}
-                            onChange={(e) =>
-                              updatePracticeField(
-                                "practice_address",
-                                mergePracticeAddressBlock(addr.street, e.target.value, addr.city)
-                              )
-                            }
-                          />
-                          <FigmaTextInput
-                            variant="quiet"
-                            placeholder="Stadt"
-                            maxLength={80}
-                            value={addr.city}
-                            onChange={(e) =>
-                              updatePracticeField(
-                                "practice_address",
-                                mergePracticeAddressBlock(addr.street, addr.postalCode, e.target.value)
-                              )
-                            }
-                            className="col-span-2 w-full"
-                          />
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </ProfileEditorSection>
+                ) : null}
 
                 <ProfileEditorSection
                   id="arzt"
                   title="Arztprofil"
-                  summary={sectionSummaries.arzt}
+                  summary={
+                    isMobile
+                      ? truncateSummary(
+                          [sectionSummaries.praxis, sectionSummaries.arzt].filter(Boolean).join(" · ")
+                        ) || "Arztprofil"
+                      : sectionSummaries.arzt
+                  }
                   isOpen={openSection === "arzt"}
                   onToggle={() => openEditorSection("arzt")}
+                  className="yd-pe-section--order-arzt"
                 >
                   <div className="flex flex-col gap-5">
+                    {isMobile ? (
+                      <div className="flex flex-col gap-5 border-b border-slate-200/60 pb-5">
+                        <ProfileLogoUpload
+                          logoUrl={data.logo_url}
+                          onLogoChange={(url) => updateField("logo_url", url)}
+                          disabled={interactionLocked}
+                        />
+                        <div>
+                          <label
+                            htmlFor="pe-practice-name-mobile"
+                            className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                          >
+                            Praxisname
+                          </label>
+                          <FigmaTextInput
+                            id="pe-practice-name-mobile"
+                            variant="quiet"
+                            placeholder="z. B. Carree Dental"
+                            maxLength={PROFILE_LIMITS.practice_name}
+                            value={data.practice_name || ""}
+                            onChange={(e) => updateField("practice_name", e.target.value || null)}
+                          />
+                        </div>
+                        <FigmaTextInput
+                          variant="quiet"
+                          placeholder="Untertitel"
+                          maxLength={PROFILE_LIMITS.practice_subtitle}
+                          value={data.practice_subtitle || ""}
+                          onChange={(e) => updateField("practice_subtitle", e.target.value || null)}
+                        />
+                      </div>
+                    ) : null}
                     <div className="flex flex-col gap-3">
                       <FigmaTextInput
                         variant="quiet"
@@ -465,28 +421,11 @@ export function ProfileEditorShell({
                           onChange={(e) => updateField("last_name", e.target.value || null)}
                         />
                       </div>
-                      <FigmaTextInput
-                        variant="quiet"
-                        placeholder="Website"
-                        maxLength={PROFILE_LIMITS.practice_website}
-                        value={data.practice_website || ""}
-                        onChange={(e) => updateField("practice_website", e.target.value || null)}
-                      />
-                      <FigmaTextInput
-                        variant="quiet"
-                        placeholder="Öffnungszeiten"
-                        maxLength={PROFILE_LIMITS.practice_hours}
-                        value={data.practice_hours || ""}
-                        onChange={(e) => updateField("practice_hours", e.target.value || null)}
-                      />
                     </div>
 
                     <div>
-                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                         Vita / Arbeitsweise
-                      </p>
-                      <p className="mb-3 text-[11px] leading-snug text-slate-500">
-                        Drei Sätze, die Patienten auf Ihrer Profilseite lesen.
                       </p>
                       <div className="flex flex-col gap-3">
                         {([0, 1, 2] as const).map((i) => (
@@ -574,11 +513,142 @@ export function ProfileEditorShell({
                 </ProfileEditorSection>
 
                 <ProfileEditorSection
+                  id="kontakt"
+                  title="Kontakt"
+                  summary={sectionSummaries.kontakt}
+                  isOpen={openSection === "kontakt"}
+                  onToggle={() => openEditorSection("kontakt")}
+                  className="yd-pe-section--order-kontakt"
+                >
+                  <div className="flex flex-col gap-5">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label
+                          htmlFor="pe-practice-phone"
+                          className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                        >
+                          Telefon
+                        </label>
+                        <FigmaTextInput
+                          id="pe-practice-phone"
+                          variant="quiet"
+                          placeholder="z. B. 0221 - 123 45 67"
+                          type="tel"
+                          maxLength={PROFILE_LIMITS.practice_phone}
+                          value={data.practice_phone || ""}
+                          onChange={(e) => updateField("practice_phone", e.target.value || null)}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="pe-practice-email"
+                          className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                        >
+                          E-Mail
+                        </label>
+                        <FigmaTextInput
+                          id="pe-practice-email"
+                          variant="quiet"
+                          placeholder="z. B. info@praxis.de"
+                          type="email"
+                          maxLength={PROFILE_LIMITS.practice_email}
+                          value={data.practice_email || ""}
+                          onChange={(e) => updateField("practice_email", e.target.value || null)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="pe-practice-address"
+                        className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+                      >
+                        Anschrift
+                      </label>
+                      <div className="flex flex-col gap-3">
+                        <FigmaTextInput
+                          id="pe-practice-address"
+                          variant="quiet"
+                          placeholder="Straße, Nr."
+                          maxLength={120}
+                          value={addr.street}
+                          onChange={(e) =>
+                            updatePracticeField(
+                              "practice_address",
+                              mergePracticeAddressBlock(e.target.value, addr.postalCode, addr.city)
+                            )
+                          }
+                        />
+                        <div className="grid grid-cols-3 gap-x-3 gap-y-3">
+                          <FigmaTextInput
+                            variant="quiet"
+                            placeholder="PLZ"
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="postal-code"
+                            maxLength={12}
+                            value={addr.postalCode}
+                            onChange={(e) =>
+                              updatePracticeField(
+                                "practice_address",
+                                mergePracticeAddressBlock(addr.street, e.target.value, addr.city)
+                              )
+                            }
+                          />
+                          <FigmaTextInput
+                            variant="quiet"
+                            placeholder="Stadt"
+                            maxLength={80}
+                            value={addr.city}
+                            onChange={(e) =>
+                              updatePracticeField(
+                                "practice_address",
+                                mergePracticeAddressBlock(addr.street, addr.postalCode, e.target.value)
+                              )
+                            }
+                            className="col-span-2 w-full"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <FigmaTextInput
+                      variant="quiet"
+                      placeholder="Website"
+                      maxLength={PROFILE_LIMITS.practice_website}
+                      value={data.practice_website || ""}
+                      onChange={(e) => updateField("practice_website", e.target.value || null)}
+                    />
+                    <FigmaTextInput
+                      variant="quiet"
+                      placeholder="Öffnungszeiten"
+                      maxLength={PROFILE_LIMITS.practice_hours}
+                      value={data.practice_hours || ""}
+                      onChange={(e) => updateField("practice_hours", e.target.value || null)}
+                    />
+                  </div>
+                </ProfileEditorSection>
+
+                <ProfileEditorSection
+                  id="branding"
+                  title="Farben & Branding"
+                  summary={sectionSummaries.branding}
+                  isOpen={openSection === "branding"}
+                  onToggle={() => openEditorSection("branding")}
+                  className="yd-pe-section--order-branding"
+                >
+                  <ProfileBackgroundPicker
+                    value={data.profile_background_color}
+                    onChange={(hex) => updateField("profile_background_color", hex)}
+                    disabled={interactionLocked}
+                  />
+                </ProfileEditorSection>
+
+                <ProfileEditorSection
                   id="approach"
                   title="Persönliche Worte"
                   summary={sectionSummaries.approach}
                   isOpen={openSection === "approach"}
                   onToggle={() => openEditorSection("approach")}
+                  className="yd-pe-section--order-approach"
                 >
                   <ProfilePersonalApproachEditor
                     embedded
@@ -590,10 +660,11 @@ export function ProfileEditorShell({
 
                 <ProfileEditorSection
                   id="career"
-                  title="Ausbildung & Werdegang"
+                  title="Ausbildung & Erfahrung"
                   summary={sectionSummaries.career}
                   isOpen={openSection === "career"}
                   onToggle={() => openEditorSection("career")}
+                  className="yd-pe-section--order-career"
                 >
                   <ProfileCareerPathEditor
                     embedded
@@ -609,6 +680,7 @@ export function ProfileEditorShell({
                   summary={sectionSummaries.fach}
                   isOpen={openSection === "fach"}
                   onToggle={() => openEditorSection("fach")}
+                  className="yd-pe-section--order-fach"
                 >
                   <ProfileSpecializationPicker
                     embedded
@@ -624,6 +696,7 @@ export function ProfileEditorShell({
                   summary={sectionSummaries.leistungen}
                   isOpen={openSection === "leistungen"}
                   onToggle={() => openEditorSection("leistungen")}
+                  className="yd-pe-section--order-leistungen"
                 >
                   <ProfileServicesPicker
                     embedded
@@ -635,10 +708,11 @@ export function ProfileEditorShell({
 
                 <ProfileEditorSection
                   id="certs"
-                  title="Fortbildungen & Zertifikate"
+                  title="Fortbildungen"
                   summary={sectionSummaries.certs}
                   isOpen={openSection === "certs"}
                   onToggle={() => openEditorSection("certs")}
+                  className="yd-pe-section--order-certs"
                 >
                   <ProfileCredentialsEditor
                     embedded
@@ -654,7 +728,7 @@ export function ProfileEditorShell({
           <div className="yd-profile-editor-save-bar">
             <button
               type="button"
-              disabled={interactionLocked}
+              disabled={interactionLocked || (!isDirty && saveStatus !== "error")}
               onClick={() => void performSave()}
               className="yd-profile-editor-save inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-4 text-[12px] font-semibold tracking-[0.02em] text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
               style={{ background: themeInk }}
@@ -665,13 +739,16 @@ export function ProfileEditorShell({
                 ? "Wird gespeichert…"
                 : saveStatus === "error"
                   ? "Erneut speichern"
-                  : "Speichern"}
+                  : isDirty
+                    ? "Änderungen speichern"
+                    : "Gespeichert"}
             </button>
             <AutoSaveIndicator
               status={saveStatus}
               lastSavedAt={lastSavedAt}
               errorMessage={errorMessage}
               warningMessage={warningMessage}
+              isDirty={isDirty}
             />
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronRight, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, ChevronRight, Plus, X } from "lucide-react";
 
 import { FigmaTextInput } from "@/components/profile-editor/figma-form-fields";
 import {
@@ -10,6 +10,7 @@ import {
   MAX_SPECIALIZATION_SELECTIONS,
   specializationPickerLabel,
 } from "@/lib/profile/specialization-picker-data";
+import { cn } from "@/lib/utils";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 
 type ProfileSpecializationPickerProps = {
@@ -25,7 +26,15 @@ export function ProfileSpecializationPicker({
   disabled = false,
   embedded = false,
 }: ProfileSpecializationPickerProps) {
-  const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const groupsWithSelection = useMemo(
+    () =>
+      FACHBEREICH_GROUPS.filter((group) =>
+        group.items.some((item) => selected.includes(item.id))
+      ).map((group) => group.id),
+    [selected]
+  );
+
+  const [openGroups, setOpenGroups] = useState<string[]>(groupsWithSelection);
   const [showExtended, setShowExtended] = useState(false);
   const [customInput, setCustomInput] = useState("");
 
@@ -47,16 +56,10 @@ export function ProfileSpecializationPicker({
 
   const allGroups = [...FACHBEREICH_GROUPS, ...(showExtended ? FACHBEREICH_EXTENDED_GROUPS : [])];
 
-  const knownIds = new Set(
-    [...FACHBEREICH_GROUPS, ...FACHBEREICH_EXTENDED_GROUPS].flatMap((g) =>
-      g.items.map((i) => i.id)
-    )
-  );
-
   const renderRow = (id: string, label: string) => {
     const isSelected = selected.includes(id);
-    const isDisabled = !isSelected && selected.length >= MAX_SPECIALIZATION_SELECTIONS;
-    const rowMuted = isDisabled || disabled;
+    const atLimit = !isSelected && selected.length >= MAX_SPECIALIZATION_SELECTIONS;
+    const rowMuted = atLimit || disabled;
 
     return (
       <li key={id}>
@@ -64,14 +67,26 @@ export function ProfileSpecializationPicker({
           type="button"
           disabled={rowMuted}
           aria-pressed={isSelected}
-          onClick={() => !rowMuted && toggle(id)}
-          className="flex w-full items-center justify-between gap-3 py-2.5 pr-1 text-left text-[13px] font-normal leading-snug tracking-[-0.01em] transition-colors disabled:cursor-not-allowed disabled:opacity-35 hover:bg-white/40"
+          onClick={() => toggle(id)}
+          className={cn(
+            "flex w-full items-center justify-between gap-3 rounded-lg py-2.5 pl-1 pr-2 text-left text-[13px] leading-snug tracking-[-0.01em] transition-colors touch-manipulation",
+            isSelected
+              ? "bg-slate-900/[0.04] font-medium text-slate-950"
+              : "font-normal text-slate-600 hover:bg-white/40",
+            rowMuted && !isSelected && "cursor-not-allowed opacity-35"
+          )}
         >
-          <span className={isSelected ? "font-medium text-slate-950" : "text-slate-600"}>
-            {label}
-          </span>
-          <span className="flex h-4 w-5 shrink-0 items-center justify-end" aria-hidden>
-            {isSelected ? <span className="h-1.5 w-1.5 rounded-full bg-slate-700/90" /> : null}
+          <span className="min-w-0">{label}</span>
+          <span
+            className={cn(
+              "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+              isSelected
+                ? "border-slate-700 bg-slate-800 text-white"
+                : "border-slate-300/70 bg-white/60 text-transparent"
+            )}
+            aria-hidden
+          >
+            <Check className="h-3 w-3" strokeWidth={2.5} />
           </span>
         </button>
       </li>
@@ -92,7 +107,7 @@ export function ProfileSpecializationPicker({
           <span>
             {label}
             {selectedInGroup > 0 ? (
-              <span className="ml-2 text-[10px] font-normal tabular-nums text-slate-400">
+              <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-slate-800/90 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
                 {selectedInGroup}
               </span>
             ) : null}
@@ -112,8 +127,6 @@ export function ProfileSpecializationPicker({
     );
   };
 
-  const unknownSelected = selected.filter((id) => !knownIds.has(id) && id.startsWith("custom:"));
-
   return (
     <div>
       {!embedded ? (
@@ -126,14 +139,38 @@ export function ProfileSpecializationPicker({
           </span>
         </div>
       ) : (
-        <p className="mb-3 flex items-baseline justify-between gap-2 text-[11px] leading-snug text-slate-500">
-          <span>Wofür steht Ihre Praxis? Schwerpunkte und Kompetenzfelder.</span>
-          <span className="shrink-0 text-[10px] font-medium tabular-nums text-slate-400">
-            {selected.length}/{MAX_SPECIALIZATION_SELECTIONS}
-          </span>
+        <p className="mb-3 text-right text-[10px] font-medium tabular-nums text-slate-400">
+          {selected.length}/{MAX_SPECIALIZATION_SELECTIONS}
         </p>
       )}
 
+      {selected.length > 0 ? (
+        <div className="mb-4">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            Ausgewählte Schwerpunkte
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {selected.map((id) => (
+              <button
+                key={id}
+                type="button"
+                disabled={disabled}
+                onClick={() => toggle(id)}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-700/15 bg-slate-900/[0.05] px-3 py-1.5 text-[11px] font-medium text-slate-800 transition-colors hover:border-slate-700/25 hover:bg-slate-900/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={`${specializationPickerLabel(id)} entfernen`}
+              >
+                <Check className="h-3 w-3 shrink-0 text-slate-600" strokeWidth={2.25} aria-hidden />
+                <span className="truncate">{specializationPickerLabel(id)}</span>
+                <X className="h-3 w-3 shrink-0 text-slate-400" strokeWidth={2} aria-hidden />
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+        Fachbereiche durchsuchen
+      </p>
       <div className="rounded-lg border border-slate-300/25 bg-white/35 px-2">
         {allGroups.map((group) => renderGroup(group.id, group.label, group.items))}
       </div>
@@ -147,25 +184,6 @@ export function ProfileSpecializationPicker({
         >
           Weitere Fachgebiete
         </button>
-      ) : null}
-
-      {unknownSelected.length > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {unknownSelected.map((id) => (
-            <button
-              key={id}
-              type="button"
-              disabled={disabled}
-              onClick={() => onChange(selected.filter((x) => x !== id))}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300/40 bg-white/70 px-2.5 py-1 text-[11px] text-slate-700 transition-colors hover:border-slate-400/50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {specializationPickerLabel(id)}
-              <span className="text-slate-400" aria-hidden>
-                ×
-              </span>
-            </button>
-          ))}
-        </div>
       ) : null}
 
       <div className="mt-4">

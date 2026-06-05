@@ -18,8 +18,8 @@
   --yd-carree-faint: rgba(26, 43, 74, 0.34);
   --yd-carree-upload-bg: #f5f2ed;
   --yd-carree-portrait-mid: #ece8e2;
-  --yd-carree-text-col: 40%;
-  --yd-carree-portrait-col: 60%;
+  --yd-carree-text-col: 44%;
+  --yd-carree-portrait-col: 56%;
   background: var(--yd-carree-cream);
   color: var(--yd-carree-ink);
 }
@@ -121,13 +121,13 @@
 }
 
 .yd-carree-hero__watermark-logo {
-  width: clamp(9rem, 28cqw, 13.5rem);
+  width: clamp(11rem, 34cqw, 17rem);
   height: auto;
-  max-height: 72%;
+  max-height: 78%;
   object-fit: contain;
-  opacity: 0.09;
-  filter: grayscale(0.35) saturate(0.55);
-  transform: translate(2%, 2%);
+  opacity: 0.06;
+  filter: grayscale(0.45) saturate(0.4);
+  transform: translate(4%, 4%);
 }
 
 .yd-carree-hero__brand {
@@ -155,9 +155,9 @@
 
 .yd-carree-hero__logo-text {
   font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--yd-carree-gold);
   white-space: nowrap;
@@ -252,18 +252,8 @@
 }
 
 .yd-carree-hero__contact-block {
-  margin-top: 1.35rem;
+  margin-top: clamp(1.5rem, 3vw, 2rem);
   max-width: 100%;
-}
-
-.yd-carree-hero__contact-heading {
-  margin: 0 0 0.55rem;
-  font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--yd-carree-gold) 82%, transparent);
 }
 
 .yd-carree-hero__contact-chips {
@@ -276,17 +266,33 @@
 .yd-carree-hero__chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2.125rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: 11px;
-  background: color-mix(in srgb, var(--yd-carree-ink) 3.5%, transparent);
-  border: 1px solid color-mix(in srgb, var(--yd-carree-ink) 6%, transparent);
+  gap: 0.4rem;
+  min-height: 1.9rem;
+  padding: 0.38rem 0.65rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--yd-carree-ink) 2.5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--yd-carree-ink) 5%, transparent);
   max-width: 100%;
 }
 
-.yd-carree-hero__chip--address {
-  flex: 1 1 100%;
+.yd-carree-hero__address-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0;
+  max-width: 100%;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--yd-carree-ink) 52%, transparent);
+}
+
+.yd-carree-hero__address-icon {
+  width: 0.7rem;
+  height: 0.7rem;
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+  opacity: 0.55;
 }
 
 .yd-carree-hero__chip-icon {
@@ -417,8 +423,8 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-hero--compact .yd-carree-hero__portrait-stage {
-  left: 38%;
-  right: 0;
+  left: 42%;
+  right: 4%;
 }
 
 .yd-carree-hero--compact .yd-carree-hero__watermark {
@@ -437,25 +443,27 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-hero--compact .yd-carree-hero__watermark-logo {
-  opacity: 0.1;
-  width: clamp(10rem, 30cqw, 14rem);
+  opacity: 0.06;
+  width: clamp(12rem, 36cqw, 17rem);
 }
 
 .yd-carree-hero--compact .yd-carree-hero__headline {
-  font-size: clamp(3rem, 11.5cqw, 4.5rem);
+  font-size: clamp(3.1rem, 12cqw, 4.75rem);
   line-height: 0.9;
   font-weight: 400;
   letter-spacing: -0.042em;
 }
 
 .yd-carree-hero--compact .yd-carree-hero__eyebrow {
-  font-size: 0.9rem;
-  margin-bottom: 0.55rem;
-  opacity: 0.92;
+  font-size: 0.8125rem;
+  margin-bottom: 0.65rem;
+  font-style: italic;
+  color: color-mix(in srgb, var(--yd-carree-gold) 78%, transparent);
+  opacity: 0.88;
 }
 
 .yd-carree-hero--compact .yd-carree-hero__name {
-  margin-top: 1.25rem;
+  margin-top: clamp(1.5rem, 4cqw, 2rem);
   font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
   font-size: clamp(0.875rem, 3.2cqw, 1.0625rem);
   font-weight: 500;
@@ -471,16 +479,10 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-hero--compact .yd-carree-hero__contact-chips {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  gap: 0.38rem 0.42rem;
-  margin-top: 1.05rem;
-}
-
-.yd-carree-hero--compact .yd-carree-hero__chip:nth-child(3) {
-  grid-column: 1 / -1;
-  width: 100%;
-  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.4rem;
+  margin-top: 1.15rem;
 }
 
 .yd-carree-hero--compact .yd-carree-hero__chip {
@@ -504,15 +506,15 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-hero--compact .yd-carree-hero__portrait {
-  left: 36%;
+  left: 8%;
   right: 0;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 100%);
 }
 
 .yd-carree-hero--compact .yd-carree-hero__portrait img {
-  object-position: 70% 2%;
-  transform: scale(1.02);
+  object-position: 58% 4%;
+  transform: scale(0.96);
 }
 
 .yd-carree-hero--compact .yd-carree-hero__portrait-fade {
@@ -716,15 +718,15 @@ a.yd-carree-hero__contact-value:hover {
 .yd-carree-profile__vita-panel {
   display: grid;
   grid-template-columns: auto 1fr;
-  column-gap: 0.85rem;
+  column-gap: 1rem;
   align-items: start;
   width: 100%;
-  margin-bottom: 1.35rem;
-  padding: 1.55rem 1.65rem 1.6rem;
+  margin-bottom: 1.5rem;
+  padding: 1.75rem 1.85rem 1.8rem;
   border-radius: 18px;
   background: var(--yd-carree-vita-bg);
   border: 1px solid var(--yd-carree-panel-border);
-  box-shadow: 0 2px 10px rgba(26, 43, 74, 0.045);
+  box-shadow: 0 2px 12px rgba(26, 43, 74, 0.04);
 }
 
 .yd-carree-profile__vita-quote {
@@ -749,39 +751,40 @@ a.yd-carree-hero__contact-value:hover {
 .yd-carree-profile__vita-text-block {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.1rem;
 }
 
 .yd-carree-profile__vita-text {
   margin: 0;
   font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.1875rem;
-  line-height: 1.68;
+  font-size: 1.2rem;
+  line-height: 1.78;
   font-weight: 400;
-  color: color-mix(in srgb, var(--yd-carree-ink) 90%, transparent);
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--yd-carree-ink) 88%, transparent);
 }
 
 .yd-carree-profile--editor-preview .yd-carree-profile__vita-text {
-  font-size: 1.2rem;
-  line-height: 1.64;
+  font-size: 1.22rem;
+  line-height: 1.76;
 }
 
 /* Persönliche Worte */
 .yd-carree-profile__approach-panel {
   width: 100%;
-  margin-bottom: 1.25rem;
-  padding: 1.2rem 1.35rem 1.3rem;
+  margin-bottom: 1.35rem;
+  padding: 1.35rem 1.45rem 1.4rem;
   border-radius: 16px;
   background: var(--yd-carree-card-surface);
   border: 1px solid var(--yd-carree-panel-border);
 }
 
 .yd-carree-profile__approach-text {
-  margin: 0.55rem 0 0;
+  margin: 0.65rem 0 0;
   font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.0625rem;
-  line-height: 1.72;
-  color: color-mix(in srgb, var(--yd-carree-ink) 84%, transparent);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: color-mix(in srgb, var(--yd-carree-ink) 82%, transparent);
 }
 
 /* Ausbildung & Werdegang */
@@ -794,38 +797,78 @@ a.yd-carree-hero__contact-value:hover {
   border: 1px solid var(--yd-carree-panel-border);
 }
 
-.yd-carree-profile__career-list {
+.yd-carree-profile__career-timeline {
   list-style: none;
-  margin: 0.65rem 0 0;
-  padding: 0 0 0 0.15rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
-.yd-carree-profile__career-item {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  padding: 0.7rem 0 0.7rem 0.15rem;
+.yd-carree-profile__career-timeline-item {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 5.75rem) 1fr;
+  gap: 0.85rem 1rem;
+  align-items: baseline;
+  padding: 0.8rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--yd-carree-ink) 6%, transparent);
+}
+
+.yd-carree-profile__career-timeline-item:first-child {
+  border-top: 0;
+  padding-top: 0.15rem;
+}
+
+.yd-carree-profile__career-period {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--yd-carree-gold) 88%, transparent);
+  white-space: nowrap;
+}
+
+.yd-carree-profile__career-period--open {
+  opacity: 0;
+}
+
+.yd-carree-profile__career-title {
   font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 0.875rem;
-  line-height: 1.5;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--yd-carree-ink) 80%, transparent);
+}
+
+.yd-carree-profile__cred-badges {
+  list-style: none;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.yd-carree-profile__cred-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--yd-carree-ink) 8%, transparent);
+  background: color-mix(in srgb, var(--yd-carree-card-surface) 92%, white);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.35;
   color: color-mix(in srgb, var(--yd-carree-ink) 78%, transparent);
 }
 
-.yd-carree-profile__career-item + .yd-carree-profile__career-item {
-  border-top: 1px solid color-mix(in srgb, var(--yd-carree-ink) 7%, transparent);
-}
-
-.yd-carree-profile__career-marker {
+.yd-carree-profile__cred-badge-icon {
+  width: 0.75rem;
+  height: 0.75rem;
   flex-shrink: 0;
-  width: 0.35rem;
-  height: 0.35rem;
-  margin-top: 0.45em;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--yd-carree-gold) 70%, transparent);
+  color: color-mix(in srgb, var(--yd-carree-gold) 90%, transparent);
 }
 
 .yd-carree-profile--editor-preview .yd-carree-profile__section-label {

@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Check, AlertCircle } from "lucide-react";
+
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 
 interface ComposerTopBarProps {
   status: "draft" | "published";
@@ -30,7 +32,7 @@ export function ComposerTopBar({
     if (saveStatus === "saving") {
       return (
         <span className="text-xs text-slate-400 flex items-center gap-1.5">
-          <Loader2 className="w-3 h-3 animate-spin" strokeWidth={2} />
+          <YdInlineBusy inverse />
           Speichern…
         </span>
       );

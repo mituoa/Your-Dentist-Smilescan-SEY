@@ -2,7 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 
-import { AuthLoadingSpinner } from "@/components/auth/auth-loading-spinner";
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 import { Button } from "@/components/ui/button";
 import { AUTH_SIGN_OUT_PATH } from "@/lib/auth/sign-out-constants";
 import { LogOut } from "lucide-react";
@@ -19,7 +19,7 @@ function SignOutIconSubmit() {
       className="flex h-9 w-9 items-center justify-center rounded border border-white/70 bg-white/75 text-text-secondary shadow-[0px_6px_14px_rgba(15,23,42,0.08)] transition-colors hover:bg-white hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
-        <AuthLoadingSpinner className="h-4 w-4 shrink-0 animate-spin text-text-secondary motion-reduce:animate-none motion-reduce:opacity-80" />
+        <YdInlineBusy />
       ) : (
         <LogOut className="w-4 h-4" strokeWidth={1.75} />
       )}
@@ -60,7 +60,7 @@ function SignOutRailSubmit() {
       className="flex h-10 w-10 items-center justify-center rounded-full text-[#8BA3C7] transition hover:bg-white/50 hover:text-[#5C6F82] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
-        <AuthLoadingSpinner className="h-4 w-4 shrink-0 animate-spin motion-reduce:animate-none" />
+        <YdInlineBusy />
       ) : (
         <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
       )}
@@ -107,8 +107,8 @@ function SignOutWideSubmit() {
     >
       {pending ? (
         <span className="flex items-center justify-center gap-3">
-          <AuthLoadingSpinner className="h-5 w-5 shrink-0 animate-spin text-slate-700 motion-reduce:animate-none motion-reduce:opacity-80" />
-          Wird abgemeldet…
+          <YdInlineBusy />
+          <span>Abmeldung…</span>
         </span>
       ) : (
         <>

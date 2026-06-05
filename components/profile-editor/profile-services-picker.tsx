@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronRight, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, ChevronRight, Plus, X } from "lucide-react";
 
 import { SERVICE_MASTER, findServiceById } from "@/lib/masterdata/services";
 import { FigmaTextInput } from "@/components/profile-editor/figma-form-fields";
+import { cn } from "@/lib/utils";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import type { ServiceStructured } from "@/lib/types/profile-editor-data";
 
@@ -21,7 +22,15 @@ export function ProfileServicesPicker({
   disabled = false,
   embedded = false,
 }: ProfileServicesPickerProps) {
-  const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const groupsWithSelection = useMemo(
+    () =>
+      SERVICE_MASTER.filter((group) =>
+        group.services.some((service) => services.some((s) => s.id === service.id))
+      ).map((group) => group.id),
+    [services]
+  );
+
+  const [openGroups, setOpenGroups] = useState<string[]>(groupsWithSelection);
   const [customName, setCustomName] = useState("");
 
   const toggleGroup = (groupId: string) => {
@@ -32,8 +41,12 @@ export function ProfileServicesPicker({
 
   const isSelected = (serviceId: string) => services.some((s) => s.id === serviceId);
 
-  const addFromMaster = (serviceId: string) => {
-    if (disabled || isSelected(serviceId)) return;
+  const toggleMaster = (serviceId: string) => {
+    if (disabled) return;
+    if (isSelected(serviceId)) {
+      onChange(services.filter((s) => s.id !== serviceId));
+      return;
+    }
     const found = findServiceById(serviceId);
     if (!found) return;
     onChange([
@@ -75,32 +88,36 @@ export function ProfileServicesPicker({
           </span>
         </div>
       ) : (
-        <p className="mb-3 flex items-baseline justify-between gap-2 text-[11px] leading-snug text-slate-500">
-          <span>Was wird konkret angeboten? Getrennt von Ihren Fachbereichen.</span>
-          <span
-            className={`shrink-0 text-[10px] font-medium tabular-nums ${overLimit ? "text-amber-700" : "text-slate-400"}`}
-          >
-            {services.length}
-          </span>
+        <p
+          className={`mb-3 text-right text-[10px] font-medium tabular-nums ${overLimit ? "text-amber-700" : "text-slate-400"}`}
+        >
+          {services.length}
+          {overLimit ? ` · max. ${PROFILE_LIMITS.MAX_VISIBLE_SERVICES} sichtbar` : ""}
         </p>
       )}
 
       {services.length > 0 ? (
-        <ul className="mb-4 divide-y divide-slate-300/25 border-y border-slate-300/25">
-          {services.map((s) => (
-            <li key={s.id} className="flex items-center justify-between gap-2 py-2.5">
-              <span className="min-w-0 text-[13px] leading-snug text-slate-800">{s.name}</span>
+        <div className="mb-4">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            Ausgewählte Leistungen
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {services.map((s) => (
               <button
+                key={s.id}
                 type="button"
                 disabled={disabled}
                 onClick={() => remove(s.id)}
-                className="shrink-0 text-[11px] font-medium text-slate-400 transition-colors hover:text-slate-700 disabled:opacity-40"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-700/15 bg-slate-900/[0.05] px-3 py-1.5 text-[11px] font-medium text-slate-800 transition-colors hover:border-slate-700/25 hover:bg-slate-900/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={`${s.name} entfernen`}
               >
-                Entfernen
+                <Check className="h-3 w-3 shrink-0 text-slate-600" strokeWidth={2.25} aria-hidden />
+                <span className="truncate">{s.name}</span>
+                <X className="h-3 w-3 shrink-0 text-slate-400" strokeWidth={2} aria-hidden />
               </button>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -120,7 +137,7 @@ export function ProfileServicesPicker({
                 <span>
                   {group.label}
                   {count > 0 ? (
-                    <span className="ml-2 text-[10px] font-normal tabular-nums text-slate-400">
+                    <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-slate-800/90 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">
                       {count}
                     </span>
                   ) : null}
@@ -139,18 +156,29 @@ export function ProfileServicesPicker({
                       <li key={service.id}>
                         <button
                           type="button"
-                          disabled={disabled || picked}
-                          onClick={() => addFromMaster(service.id)}
-                          className="flex w-full items-center justify-between gap-3 py-2.5 pr-1 text-left text-[13px] leading-snug transition-colors disabled:cursor-default disabled:opacity-45 hover:bg-white/40"
-                        >
-                          <span className={picked ? "font-medium text-slate-950" : "text-slate-600"}>
-                            {service.label}
-                          </span>
-                          {picked ? (
-                            <span className="h-1.5 w-1.5 rounded-full bg-slate-700/90" aria-hidden />
-                          ) : (
-                            <Plus className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.75} aria-hidden />
+                          disabled={disabled}
+                          onClick={() => toggleMaster(service.id)}
+                          className={cn(
+                            "flex w-full items-center justify-between gap-3 rounded-lg py-2.5 pl-1 pr-2 text-left text-[13px] leading-snug transition-colors touch-manipulation",
+                            picked
+                              ? "bg-slate-900/[0.04] font-medium text-slate-950"
+                              : "font-normal text-slate-600 hover:bg-white/40",
+                            disabled && "cursor-not-allowed opacity-50"
                           )}
+                          aria-pressed={picked}
+                        >
+                          <span className="min-w-0">{service.label}</span>
+                          <span
+                            className={cn(
+                              "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+                              picked
+                                ? "border-slate-700 bg-slate-800 text-white"
+                                : "border-slate-300/70 bg-white/60 text-transparent"
+                            )}
+                            aria-hidden
+                          >
+                            <Check className="h-3 w-3" strokeWidth={2.5} />
+                          </span>
                         </button>
                       </li>
                     );

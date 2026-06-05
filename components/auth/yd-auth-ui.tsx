@@ -107,13 +107,16 @@ export function YdAuthLoadingState(props: {
 }) {
   return (
     <div
-      className={cn("yd-auth-loading-state", props.className)}
+      className={cn("yd-auth-loading-state w-full max-w-sm space-y-3 px-2", props.className)}
       role="status"
       aria-live="polite"
       aria-busy="true"
+      aria-label={props.label ?? "Inhalt wird geladen"}
     >
-      <div className="yd-auth-loading-pulse" aria-hidden />
-      {props.label ? <p className="yd-auth-loading-label">{props.label}</p> : null}
+      <div className="yd-skeleton h-3 w-32 rounded-md" aria-hidden />
+      <div className="yd-skeleton h-11 w-full rounded-xl yd-skeleton--calm" aria-hidden />
+      <div className="yd-skeleton h-11 w-full rounded-xl yd-skeleton--calm" aria-hidden />
+      <div className="yd-auth-loading-pulse-v2" aria-hidden />
     </div>
   );
 }

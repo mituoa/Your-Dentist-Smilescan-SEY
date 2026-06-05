@@ -1,43 +1,38 @@
+import { YdSkeleton, YdSkeletonPage } from "@/components/design-system/yd-skeleton";
+
 export default function EditArticleLoading() {
   return (
-    <div
-      className="min-h-screen bg-slate-50"
-      aria-busy="true"
-      aria-label="Editor wird geladen"
+    <YdSkeletonPage
+      label="Editor wird geladen"
+      className="min-h-screen"
+      style={{ background: "#F7F9FC" }}
     >
       <header className="fixed top-0 left-0 right-0 z-30 border-b border-slate-800 bg-slate-900/95">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 md:px-6">
           <div className="flex items-center gap-4">
-            <div className="h-5 w-16 rounded bg-slate-700/60" />
-            <div className="h-5 w-14 rounded bg-slate-700/40" />
+            <YdSkeleton className="h-5 w-16 opacity-40" variant="calm" />
+            <YdSkeleton className="h-5 w-14 opacity-30" variant="calm" />
           </div>
-          <div className="h-8 w-28 rounded-lg bg-slate-700/50" />
+          <YdSkeleton className="h-8 w-28 rounded-lg opacity-35" variant="calm" />
         </div>
       </header>
       <div className="mx-auto max-w-4xl px-4 pt-20 pb-12 md:px-6">
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
-          <div className="h-5 w-32 rounded bg-slate-100/80" />
+        <div className="yd-skeleton-card mb-6">
+          <YdSkeleton className="h-5 w-32" />
           <div className="mt-4 flex gap-2">
-            <div className="h-8 w-24 rounded-lg bg-slate-100/60" />
-            <div className="h-8 w-28 rounded-lg bg-slate-100/40" />
-            <div className="h-8 w-20 rounded-lg bg-slate-100/40" />
+            <YdSkeleton className="h-8 w-24 rounded-lg" variant="calm" />
+            <YdSkeleton className="h-8 w-28 rounded-lg" variant="calm" />
+            <YdSkeleton className="h-8 w-20 rounded-lg" variant="calm" />
           </div>
         </div>
-        <div className="mb-6">
-          <div className="h-12 w-3/4 rounded bg-slate-100/50" />
-          <div className="mt-3 h-4 w-16 rounded bg-slate-100/40" />
-        </div>
-        <div className="mb-12">
-          <div className="h-5 w-2/3 rounded bg-slate-100/40" />
-        </div>
-        <div className="space-y-4 pt-8">
-          <div className="h-5 w-full rounded bg-slate-100/30" />
-          <div className="h-5 w-5/6 rounded bg-slate-100/25" />
-          <div className="h-5 w-4/5 rounded bg-slate-100/20" />
-          <div className="h-5 w-full rounded bg-slate-100/20" />
-          <div className="h-5 w-3/4 rounded bg-slate-100/15" />
+        <YdSkeleton className="mb-3 h-12 w-3/4 max-w-xl" />
+        <YdSkeleton className="mb-12 h-4 w-16" variant="calm" />
+        <div className="space-y-4 pt-4">
+          {[100, 83, 80, 100, 75].map((w, i) => (
+            <YdSkeleton key={i} className="h-5" style={{ width: `${w}%` }} variant="calm" />
+          ))}
         </div>
       </div>
-    </div>
+    </YdSkeletonPage>
   );
 }

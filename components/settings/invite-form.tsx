@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { UserPlus, Loader2 } from "lucide-react";
+import { UserPlus } from "lucide-react";
+
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 import { inviteTeamMember } from "@/app/(protected)/settings/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,7 +55,10 @@ export function InviteForm() {
         </select>
         <Button onClick={handleSubmit} disabled={isPending || !email}>
           {isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="inline-flex items-center gap-2">
+              <YdInlineBusy />
+              <span>Einladen…</span>
+            </span>
           ) : (
             "Einladen"
           )}

@@ -22,7 +22,7 @@
  * `page.tsx` (Punkt 9).
  */
 
-import { Loader2 } from "lucide-react";
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -81,7 +81,7 @@ export function CommentForm({ taskId }: CommentFormProps) {
           className="inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-lg border border-[rgba(15,23,42,0.12)] bg-white px-4 py-2 text-sm font-medium text-[#0F172A] shadow-sm transition-colors hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.22)] disabled:opacity-50 sm:w-auto"
         >
           {isPending ? (
-            <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
+            <YdInlineBusy />
           ) : null}
           Kommentar hinzufügen
         </button>

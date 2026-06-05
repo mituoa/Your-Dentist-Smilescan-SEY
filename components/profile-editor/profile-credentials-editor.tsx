@@ -39,21 +39,11 @@ export function ProfileCredentialsEditor({
 
   return (
     <div>
-      {embedded ? (
-        <p className="mb-4 text-[11px] leading-snug text-slate-500">
-          Fortbildungen, Zertifizierungen oder Mitgliedschaften — kompakt, nur bei Einträgen
-          sichtbar im Profil.
+      {!embedded ? (
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          Fortbildungen &amp; Zertifikate
         </p>
-      ) : (
-        <>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-            Fortbildungen &amp; Zertifikate
-          </p>
-          <p className="mb-3 text-[11px] leading-snug text-slate-500">
-            Optional — Fortbildungen, Zertifizierungen oder Mitgliedschaften.
-          </p>
-        </>
-      )}
+      ) : null}
 
       {credentials.length === 0 ? (
         <button

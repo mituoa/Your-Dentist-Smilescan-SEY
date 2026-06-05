@@ -1,0 +1,518 @@
+/**
+ * Mobile V2 — native iPhone-grade UX (max-width: 767px only)
+ * Desktop unverändert. Alle Regeln strikt mobil.
+ */
+
+@media (max-width: 767px) {
+  /* —— Typografie & Rhythmus —— */
+  .yd-workspace main {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .yd-dash-mobile__title {
+    font-size: 1.375rem;
+    line-height: 1.22;
+    letter-spacing: -0.03em;
+  }
+
+  .yd-dash-mobile__status-line {
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  /* —— Dashboard: Kritisch zuerst —— */
+  .yd-dash-mobile-critical {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    padding: 0.875rem 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: linear-gradient(165deg, #fff8f8 0%, #ffffff 100%);
+    text-decoration: none;
+    color: inherit;
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+
+  .yd-dash-mobile-critical__label {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #b91c1c;
+  }
+
+  .yd-dash-mobile-critical__title {
+    margin: 0.15rem 0 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #0f172a;
+  }
+
+  .yd-dash-mobile-critical__cta {
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #1a4f9c;
+  }
+
+  .yd-dash-mobile__kpis {
+    order: 2;
+  }
+
+  .yd-dash-mobile__submissions {
+    order: 3;
+  }
+
+  .yd-dash-mobile__fold {
+    order: 4;
+  }
+
+  .yd-dash-mobile {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yd-dash-mobile__header {
+    order: 1;
+  }
+
+  .yd-dash-mobile-critical {
+    order: 0;
+  }
+
+  /* —— Carree Profil: native mobile IA —— */
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+    padding: max(1rem, env(safe-area-inset-top)) 1.15rem 1.5rem;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__top {
+    order: 0;
+    margin-bottom: 0.35rem;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__portrait-stage {
+    order: 1;
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    height: clamp(280px, 72vw, 380px);
+    margin: 0.5rem -0.15rem 0;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__inner {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    margin-top: 1.1rem;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__headline {
+    order: 1;
+    font-size: clamp(2.35rem, 10vw, 3.5rem);
+    margin-top: 0;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__eyebrow {
+    order: 2;
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    opacity: 0.92;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__name {
+    order: 3;
+    margin-top: 1.15rem;
+    font-size: clamp(1.05rem, 4.2vw, 1.25rem);
+    letter-spacing: 0.14em;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__role {
+    order: 4;
+    margin-top: 0.35rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    opacity: 0.72;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__contact-block {
+    order: 5;
+    margin-top: 1.25rem;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__cta-row {
+    order: 6;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__portrait {
+    -webkit-mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 78%, transparent 100%);
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-hero:not(.yd-carree-hero--compact) .yd-carree-hero__chip {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Editor-Preview: Portrait zuerst, kompakt */
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__portrait-stage {
+    order: 1;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__top {
+    order: 0;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__inner {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__headline {
+    order: 1;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__eyebrow {
+    order: 2;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__name {
+    order: 3;
+    margin-top: 0.85rem;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__role {
+    order: 4;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-hero--compact .yd-carree-hero__contact-block {
+    order: 5;
+  }
+
+  /* Body: Lesbarkeit + Reihenfolge */
+  .yd-carree-profile__body-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0.75rem 1.1rem 1rem;
+  }
+
+  .yd-carree-profile__vita-panel {
+    order: 1;
+  }
+
+  .yd-carree-profile__approach-panel {
+    order: 2;
+  }
+
+  .yd-carree-profile__dual-grid {
+    order: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .yd-carree-profile__dual-grid .yd-carree-profile__panel:not(.yd-carree-profile__panel--credentials) {
+    order: 1;
+  }
+
+  .yd-carree-profile__dual-grid .yd-carree-profile__panel--credentials {
+    order: 2;
+  }
+
+  .yd-carree-profile__career-panel {
+    order: 4;
+  }
+
+  .yd-carree-profile__section--services {
+    order: 5;
+  }
+
+  .yd-carree-profile__vita-text {
+    font-size: 1rem;
+    line-height: 1.78;
+  }
+
+  .yd-carree-profile__approach-text {
+    font-size: 0.9375rem;
+    line-height: 1.72;
+  }
+
+  /* Mehr anzeigen */
+  .yd-carree-mobile-more {
+    order: 6;
+    margin: 0.25rem 1.1rem 1.25rem;
+    border-radius: 16px;
+    border: 1px solid var(--yd-carree-panel-border, rgba(26, 43, 74, 0.07));
+    background: var(--yd-carree-panel-bg, #fffcfa);
+    overflow: hidden;
+  }
+
+  .yd-carree-mobile-more__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--yd-carree-ink);
+    cursor: pointer;
+    list-style: none;
+    touch-action: manipulation;
+  }
+
+  .yd-carree-mobile-more__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .yd-carree-mobile-more__panel {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid var(--yd-carree-panel-border, rgba(26, 43, 74, 0.07));
+  }
+
+  .yd-carree-mobile-more__panel .yd-carree-profile__section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* —— Profile Editor: Accordion mobil —— */
+  .yd-profile-editor-curate .yd-pe-sections {
+    gap: 0.4rem;
+  }
+
+  .yd-profile-editor-curate .yd-pe-section__trigger {
+    min-height: 48px;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .yd-profile-editor-curate .yd-pe-section__title {
+    font-size: 0.8125rem;
+  }
+
+  .yd-profile-editor-curate .yd-pe-section__summary {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .yd-profile-editor-curate .yd-pe-section__panel {
+    padding: 0.75rem 0.875rem 1rem;
+  }
+
+  .yd-profile-editor-curate .yd-pe-section--mobile-merged {
+    display: none;
+  }
+
+  .yd-profile-editor-curate .yd-pe-sections {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yd-pe-section--order-arzt {
+    order: 1;
+  }
+
+  .yd-pe-section--order-kontakt {
+    order: 2;
+  }
+
+  .yd-pe-section--order-approach {
+    order: 3;
+  }
+
+  .yd-pe-section--order-fach {
+    order: 4;
+  }
+
+  .yd-pe-section--order-leistungen {
+    order: 5;
+  }
+
+  .yd-pe-section--order-career {
+    order: 6;
+  }
+
+  .yd-pe-section--order-certs {
+    order: 7;
+  }
+
+  .yd-pe-section--order-branding {
+    order: 8;
+  }
+
+  /* —— Tracker Mobile V2 —— */
+  .yd-tracker-mobile-card--v2 {
+    min-height: 48px;
+    padding: 0.9375rem 1rem;
+    border-radius: 16px;
+  }
+
+  .yd-tracker-mobile-v2__status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .yd-tracker-mobile-v2__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .yd-tracker-mobile-v2__patient {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+  }
+
+  .yd-tracker-mobile-v2__action-line {
+    margin: 0.35rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #64748b;
+  }
+
+  .yd-tracker-mobile-v2__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(241, 245, 249, 0.95);
+    min-height: 44px;
+  }
+
+  .yd-tracker-new-case-btn {
+    min-height: 44px;
+    padding: 0.5rem 0.875rem;
+  }
+
+  /* —— Relay Quick Create: Bottom Sheet —— */
+  .yd-relay-qc-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: rgba(12, 25, 41, 0.22);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .yd-relay-qc-popover--sheet {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: min(92dvh, 720px);
+    margin: 0;
+    border-radius: 22px 22px 0 0;
+    border: 1px solid rgba(180, 198, 218, 0.32);
+    border-bottom: none;
+    box-shadow: 0 -12px 40px rgba(15, 35, 58, 0.14);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yd-relay-qc-popover--sheet .yd-relay-qc-popover__body {
+    overflow-y: auto;
+    overscroll-y: contain;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(92dvh - 8rem);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .yd-relay-qc-popover--sheet .yd-relay-qc-popover__close {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .yd-relay-routines-mobile {
+    display: block;
+  }
+
+  .yd-relay-work-table-wrap:has(.yd-relay-routines-mobile) > table {
+    display: none;
+  }
+
+  /* —— Relay Messages: native list/detail —— */
+  .relay-messages.yd-relay-v4-messages {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .relay-messages-list {
+    flex: 0 0 auto;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  }
+
+  .relay-messages-thread-pane {
+    flex: 1 1 auto;
+    min-height: 50dvh;
+  }
+
+  .relay-messages-thread,
+  .relay-messages-new-btn {
+    min-height: 48px;
+  }
+
+  .relay-messages-input,
+  .relay-messages-send {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  /* —— Settings touch —— */
+  .yd-settings-team,
+  .yd-profile-hub {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  .yd-settings-team button,
+  .yd-settings-team input,
+  .yd-settings-team select,
+  .yd-profile-hub a {
+    min-height: 44px;
+  }
+
+  /* —— Relay tabs touch —— */
+  .yd-relay-v4-tab {
+    min-height: 44px;
+  }
+}

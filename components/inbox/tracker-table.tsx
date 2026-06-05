@@ -40,6 +40,39 @@ type TrackerTableProps = {
   showCreateCase?: boolean;
 };
 
+function TrackerMobileCardContent({ item }: { item: EnrichedSubmissionListItem }) {
+  const status = trackerStatusForRow(item);
+  const concern = deriveSubmissionIssueShortLine(item.patient_notes, item.patient_name, {
+    maxLen: 88,
+    emptyLabel: "Nächste Aktion noch offen",
+  });
+  const tasksHint = openTasksHintLabel(item.open_task_count);
+  const nextAction = tasksHint || concern;
+
+  return (
+    <>
+      <div className="yd-tracker-mobile-v2__status-row">
+        <span className={cn("yd-tracker-mobile-v2__status", status.className)}>
+          <span className="yd-tracker-table__status-dot" aria-hidden />
+          {status.label}
+        </span>
+        <span className="yd-tracker-table__date">{formatTrackerListDate(item.created_at)}</span>
+      </div>
+      <p className="yd-tracker-mobile-v2__patient">
+        {item.patient_name?.trim() || "Unbekannter Patient"}
+      </p>
+      <p className="yd-tracker-mobile-v2__action-line">{nextAction}</p>
+      <div className="yd-tracker-mobile-v2__foot">
+        <span className="yd-tracker-table__intake-pill">{intakeChannelLabel(item.intake_channel)}</span>
+        <span className="yd-tracker-row__action">
+          Öffnen
+          <ChevronRight className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
+        </span>
+      </div>
+    </>
+  );
+}
+
 function TrackerRowContent({
   item,
   isActive,
@@ -217,12 +250,12 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
                     key={item.id}
                     type="button"
                     className={cn(
-                      "yd-tracker-mobile-card",
+                      "yd-tracker-mobile-card yd-tracker-mobile-card--v2",
                       isActive && "yd-tracker-mobile-card--active"
                     )}
                     onClick={() => goToCase(item.id)}
                   >
-                    <TrackerRowContent item={item} isActive={isActive} />
+                    <TrackerMobileCardContent item={item} />
                   </button>
                 );
               })}

@@ -25,7 +25,7 @@ function item(id: string): SpecializationPickerItem {
   return { id, label: getSpecializationLabel(id) };
 }
 
-/** Zwölf praxisnahe Fachbereiche — jeder kann später Leistungen enthalten. */
+/** Achtzehn Oberbereiche — verschachtelt, praxisnah, filterbar mit Leistungen. */
 export const FACHBEREICH_GROUPS: SpecializationPickerGroup[] = [
   {
     id: "general",
@@ -35,37 +35,58 @@ export const FACHBEREICH_GROUPS: SpecializationPickerGroup[] = [
   {
     id: "conservation",
     label: "Zahnerhalt",
-    items: [item("restorative"), item("endodontics")],
+    items: [item("restorative"), item("minimally-invasive")],
+  },
+  {
+    id: "endo",
+    label: "Endodontie",
+    items: [item("endodontics")],
   },
   {
     id: "perio",
     label: "Parodontologie",
-    items: [item("periodontology")],
+    items: [item("periodontology"), item("periodontology-surgery")],
   },
   {
     id: "implant",
     label: "Implantologie",
-    items: [item("implantology")],
-  },
-  {
-    id: "aesthetic",
-    label: "Ästhetische Zahnmedizin",
-    items: [item("aesthetic-dentistry")],
+    items: [
+      item("implantology"),
+      item("guided-implantology"),
+      item("immediate-implants"),
+    ],
   },
   {
     id: "prosthetics",
     label: "Prothetik",
-    items: [item("prosthodontics")],
+    items: [
+      item("prosthodontics"),
+      item("cad-cam-prosthetics"),
+      item("removable-prosthetics"),
+    ],
+  },
+  {
+    id: "aesthetic",
+    label: "Ästhetische Zahnmedizin",
+    items: [item("aesthetic-dentistry"), item("digital-smile-design")],
   },
   {
     id: "ortho",
     label: "Kieferorthopädie",
-    items: [item("orthodontics")],
+    items: [
+      item("orthodontics"),
+      item("lingual-orthodontics"),
+      item("interceptive-ortho"),
+    ],
   },
   {
     id: "surgery",
     label: "Oralchirurgie",
-    items: [item("oral-surgery"), item("maxillofacial-surgery")],
+    items: [
+      item("oral-surgery"),
+      item("maxillofacial-surgery"),
+      item("wisdom-teeth-surgery"),
+    ],
   },
   {
     id: "pediatric",
@@ -74,8 +95,8 @@ export const FACHBEREICH_GROUPS: SpecializationPickerGroup[] = [
   },
   {
     id: "cmd",
-    label: "Funktionsdiagnostik / CMD",
-    items: [item("orofacial-pain"), item("dental-radiology")],
+    label: "CMD / Funktionsdiagnostik",
+    items: [item("functional-diagnostics"), item("dental-radiology")],
   },
   {
     id: "sedation",
@@ -83,9 +104,39 @@ export const FACHBEREICH_GROUPS: SpecializationPickerGroup[] = [
     items: [item("anesthesia")],
   },
   {
+    id: "geriatric",
+    label: "Alterszahnmedizin",
+    items: [item("geriatric-dentistry")],
+  },
+  {
+    id: "prevention",
+    label: "Prävention",
+    items: [item("preventive-dentistry")],
+  },
+  {
+    id: "splint",
+    label: "Schienentherapie",
+    items: [item("splint-therapy"), item("bruxism-therapy")],
+  },
+  {
+    id: "pain",
+    label: "Schmerztherapie",
+    items: [item("orofacial-pain"), item("pain-therapy")],
+  },
+  {
     id: "special-groups",
     label: "Besondere Patientengruppen",
-    items: [item("special-care")],
+    items: [
+      item("special-care"),
+      item("anxiety-patients"),
+      item("sleep-medicine-dental"),
+      item("sports-dentistry"),
+    ],
+  },
+  {
+    id: "digital",
+    label: "Digitale Zahnmedizin",
+    items: [item("digital-dentistry"), item("laser-dentistry")],
   },
 ];
 

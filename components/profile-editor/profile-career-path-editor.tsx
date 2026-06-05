@@ -17,12 +17,12 @@ const STATION_HINTS = [
 ] as const;
 
 const STATION_PLACEHOLDERS = [
-  "z. B. Studium Zahnmedizin, Universität Köln",
-  "z. B. Promotion zum Dr. med. dent.",
-  "z. B. Assistenzarzt, Uniklinik Bonn",
-  "z. B. Fachzahnarzt für Oralchirurgie",
-  "z. B. Curriculum Implantologie",
-  "z. B. Niedergelassen in eigener Praxis",
+  "z. B. 2010–2015 Studium Zahnmedizin, Universität Köln",
+  "z. B. 2016–2018 Assistenzzahnarzt, Uniklinik Bonn",
+  "z. B. 2019 Fachzahnarzt für Oralchirurgie",
+  "z. B. 2020–2022 Curriculum Implantologie",
+  "z. B. 2023– Carree Dental",
+  "z. B. 2015 Promotion zum Dr. med. dent.",
 ] as const;
 
 type ProfileCareerPathEditorProps = {
@@ -57,32 +57,19 @@ export function ProfileCareerPathEditor({
 
   return (
     <div>
-      {embedded ? (
-        <p className="mb-4 text-[11px] leading-snug text-slate-500">
-          Relevante Stationen in chronologischer Reihenfolge — ohne Jahreszahlen-Pflicht.
+      {!embedded ? (
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          Ausbildung &amp; Erfahrung
         </p>
-      ) : (
-        <>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-            Ausbildung &amp; Werdegang
-          </p>
-          <p className="mb-3 text-[11px] leading-snug text-slate-500">
-            Optional — nur relevante Stationen, z. B. Studium, Promotion, Kliniken oder
-            Spezialisierungen.
-          </p>
-        </>
-      )}
+      ) : null}
 
       {displayItems.length === 0 ? (
-        <div className="yd-pe-career-empty rounded-xl border border-dashed border-slate-300/35 bg-white/30 px-4 py-5">
-          <p className="text-[12px] leading-relaxed text-slate-500">
-            Noch keine Stationen. Fügen Sie Studium, Klinik oder Spezialisierung hinzu.
-          </p>
+        <div className="yd-pe-career-empty rounded-xl border border-dashed border-slate-300/35 bg-white/30 px-4 py-4">
           <button
             type="button"
             disabled={disabled}
             onClick={addRow}
-            className="mt-3 inline-flex min-h-[40px] items-center gap-1.5 text-[12px] font-medium text-slate-600 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[40px] items-center gap-1.5 text-[12px] font-medium text-slate-600 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
             Erste Station hinzufügen

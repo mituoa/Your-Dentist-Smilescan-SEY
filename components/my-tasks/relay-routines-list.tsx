@@ -30,7 +30,49 @@ export function RelayRoutinesList({ items }: RelayRoutinesListProps) {
         </div>
       </div>
 
-      <table className="yd-relay-work-table w-full min-w-[880px] border-collapse text-left">
+      <div className="yd-relay-routines-mobile md:hidden">
+        {items.length === 0 ? (
+          <div className="yd-mobile-empty">
+            <p className="yd-mobile-empty__title">Keine offenen Vorgänge in dieser Ansicht.</p>
+            <p className="yd-mobile-empty__copy">
+              Wiederkehrende Aufgaben aus Recall, Nachsorge oder QM erscheinen hier bei Fälligkeit.
+            </p>
+          </div>
+        ) : (
+          <div className="yd-mobile-row-cards">
+            {items.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                prefetch
+                className={cn("yd-mobile-row-card", item.isCritical && "yd-mobile-row-card--critical")}
+              >
+                <div className="yd-mobile-row-card__head">
+                  <p className="yd-mobile-row-card__title">{item.title}</p>
+                  <YdStatusPill
+                    label={item.statusLabel}
+                    variant={item.isCritical ? "urgent" : "calm"}
+                    className="shrink-0 text-[10px] font-medium"
+                  />
+                </div>
+                <div className="yd-mobile-row-card__meta-row">
+                  <span className="yd-mobile-row-card__label">Rhythmus</span>
+                  <span className="yd-mobile-row-card__value">{item.rhythmLabel}</span>
+                </div>
+                <div className="yd-mobile-row-card__foot">
+                  <span className="yd-mobile-row-card__line">
+                    {item.assigneeLabel}
+                    {item.nextDueLabel ? ` · ${item.nextDueLabel}` : ""}
+                  </span>
+                  <span className="yd-mobile-row-card__cta">Öffnen</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <table className="yd-relay-work-table hidden w-full min-w-[880px] border-collapse text-left md:table">
         <thead>
           <tr>
             {COLUMNS.map((col) => (
