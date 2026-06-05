@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -14,6 +15,14 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
   const pathname = usePathname() || "";
   const isInboxIndex = pathname === "/inbox";
   const isCaseDetail = pathname.startsWith("/inbox/") && pathname !== "/inbox";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isCaseDetail) return;
+    window.requestAnimationFrame(() => {
+      document.querySelector(".yd-workspace main")?.scrollTo({ top: 0, behavior: "auto" });
+    });
+  }, [isCaseDetail, pathname]);
 
   return (
     <div

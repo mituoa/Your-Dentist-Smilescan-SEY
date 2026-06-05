@@ -194,20 +194,65 @@
   }
 
   .yd-tracker-shell--mobile-detail .yd-tracker-shell__workspace {
+    position: fixed;
+    z-index: 50;
+    top: var(--yd-mobile-topbar-h, calc(2.75rem + env(safe-area-inset-top, 0px)));
+    right: 0;
+    bottom: var(--yd-mobile-bottom-nav-h, calc(3.375rem + env(safe-area-inset-bottom, 0px)));
+    left: 0;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    margin: 0;
+    border: none;
     border-radius: 0;
+    box-shadow: none;
     background: linear-gradient(
       168deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(248, 252, 255, 0.96) 100%
+      rgba(255, 255, 255, 0.99) 0%,
+      rgba(248, 252, 255, 0.98) 100%
     );
   }
 
-  .yd-tracker-mobile-case-view {
+  .yd-tracker-shell--mobile-detail .yd-tracker-shell__workspace::before {
+    display: none;
+  }
+
+  .yd-tracker-shell--mobile-detail .yd-tracker-mobile-case-view,
+  .yd-tracker-shell--mobile-detail .yd-tracker-v4-detail {
     flex: 1 1 auto;
     min-height: 0;
-    height: 100%;
-    max-height: 100%;
-    background: transparent;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden;
+  }
+
+  .yd-tracker-shell--mobile-detail .yd-tracker-v4-detail__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 1.25rem;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Fotos groß genug für klinische Beurteilung */
+  .yd-tracker-mobile-case-view .yd-tracker-v8-evidence .yd-tracker-v4-photo-stage__viewer,
+  .yd-tracker-mobile-case-view .yd-tracker-v7-evidence .yd-tracker-v4-photo-stage__viewer,
+  .yd-tracker-mobile-case-view .yd-tracker-v8-evidence .yd-tracker-v4-photo-stage__viewer img,
+  .yd-tracker-mobile-case-view .yd-tracker-v7-evidence .yd-tracker-v4-photo-stage__viewer img {
+    max-height: min(52dvh, 440px) !important;
+    min-height: min(36dvh, 300px) !important;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v4-photo-stage--dominant .yd-tracker-v4-photo-stage__viewer {
+    min-height: min(36dvh, 300px);
   }
 
   .yd-tracker-mobile-case-view__bar {
@@ -262,9 +307,12 @@
     flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
+    overflow: hidden !important;
+  }
+
+  .yd-tracker-shell:not(.yd-tracker-shell--mobile-detail) .yd-tracker-v4-detail {
     height: auto !important;
     max-height: none !important;
-    overflow: hidden !important;
   }
 
   .yd-tracker-v4-detail__bar {
@@ -285,6 +333,9 @@
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+
+  .yd-tracker-shell:not(.yd-tracker-shell--mobile-detail) .yd-tracker-v4-detail__scroll {
     scroll-padding-bottom: calc(var(--yd-mobile-bottom-nav-h, 3.375rem) + 1rem);
     padding-bottom: calc(var(--yd-mobile-bottom-nav-h, 3.375rem) + 1rem) !important;
   }
