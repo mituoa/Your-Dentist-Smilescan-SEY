@@ -1053,7 +1053,157 @@
   }
 }
 
-/* —— Relay Ops Center (V2) —— */
+/* —— Relay Ops Center — Dashboard/Sidebar parity —— */
+
+.yd-relay {
+  --yd-relay-title: #0a1628;
+  --yd-relay-body: #475569;
+  --yd-relay-faint: #94a3b8;
+}
+
+.yd-relay-shell {
+  min-height: calc(100dvh - 12.5rem);
+}
+
+@media (min-width: 768px) {
+  .yd-relay-shell {
+    min-height: calc(100dvh - 10.5rem);
+  }
+}
+
+.yd-relay .yd-dash-title {
+  color: var(--yd-relay-title);
+  font-weight: 600;
+  letter-spacing: -0.032em;
+  line-height: 1.12;
+}
+
+.yd-relay .yd-dash-status-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  max-width: 100%;
+  margin: 0;
+  color: #5e7389;
+  font-weight: 500;
+}
+
+.yd-relay .yd-dash-status-line__sep {
+  margin: 0 0.35rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.yd-relay .yd-dash-surface {
+  background: #ffffff !important;
+  border: 1px solid rgba(160, 178, 198, 0.38) !important;
+  border-radius: 24px !important;
+  box-shadow:
+    0 1px 2px rgba(15, 35, 58, 0.04),
+    0 10px 28px rgba(30, 91, 189, 0.08) !important;
+}
+
+.yd-relay .yd-dash-surface .pointer-events-none {
+  opacity: 0.28;
+}
+
+.yd-relay-ops-header-bar {
+  margin-bottom: 0.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(176, 192, 208, 0.22);
+}
+
+.yd-relay-ops-primary {
+  gap: 0;
+  min-height: 0;
+}
+
+.yd-relay-ops-strip {
+  flex-shrink: 0;
+  padding: 0.5rem 0 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.yd-relay-ops-strip__item {
+  display: inline;
+  white-space: nowrap;
+}
+
+.yd-relay-ops-strip__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: #334155;
+}
+
+.yd-relay-ops-strip__value--hot {
+  color: #1a4f9c;
+}
+
+.yd-relay-ops-strip__label {
+  color: #8ba3b8;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.yd-relay-quick-create-inline .yd-relay-quick-create {
+  padding: 0.35rem 0 0.5rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.yd-relay-quick-create-inline .yd-relay-quick-create__input {
+  font-size: 0.875rem;
+  border-radius: 12px;
+  border-color: rgba(180, 198, 218, 0.45);
+  background: rgba(255, 253, 250, 0.78);
+}
+
+.yd-relay-work-surface {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 0.35rem;
+}
+
+.yd-relay-work-table-wrap {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yd-relay-work-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, #f4f8fc 0%, #ebf2f8 100%);
+  border-bottom: 1px solid rgba(180, 198, 218, 0.22);
+}
+
+.yd-relay-work-table tbody tr {
+  transition: background-color 220ms ease;
+}
+
+@media (hover: hover) {
+  .yd-relay-work-table tbody tr:hover {
+    background: rgba(248, 252, 255, 0.92);
+  }
+}
+
+.yd-relay-work-table__row--critical {
+  background: rgba(239, 246, 255, 0.42);
+}
+
+@media (hover: hover) {
+  .yd-relay-work-table__row--critical:hover {
+    background: rgba(239, 246, 255, 0.62);
+  }
+}
+
+.yd-relay-messages-surface {
+  margin-top: 0.35rem;
+}
 
 .yd-relay-ops-page {
   gap: 0.625rem;

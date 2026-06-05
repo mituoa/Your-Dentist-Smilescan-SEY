@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { YdStatusPill } from "@/components/design-system/yd-status-pill";
+import { YD } from "@/lib/design/yd-design-tokens";
 import type { RelayOpsWorkRow } from "@/lib/relay/build-relay-ops-snapshot";
 import type { RelayOpsStatus } from "@/lib/relay/relay-ops-status";
 import { cn } from "@/lib/utils";
@@ -10,92 +12,141 @@ type RelayOpsWorkListProps = {
   items: RelayOpsWorkRow[];
 };
 
-const STATUS_CLASS: Record<RelayOpsStatus, string> = {
-  new: "yd-relay-ops-status--new",
-  in_progress: "yd-relay-ops-status--progress",
-  waiting_patient: "yd-relay-ops-status--patient",
-  waiting_practice: "yd-relay-ops-status--practice",
-  overdue: "yd-relay-ops-status--overdue",
-  done: "yd-relay-ops-status--done",
-};
+const COLUMNS = [
+  "Aufgabe",
+  "Patient",
+  "Status",
+  "Verantwortlich",
+  "Fällig",
+  "Aktivität",
+  "Herkunft",
+] as const;
 
-function OpsStatus({ status, label, critical }: { status: RelayOpsStatus; label: string; critical: boolean }) {
-  return (
-    <span className={cn("yd-relay-ops-status", STATUS_CLASS[status], critical && "yd-relay-ops-status--critical")}>
-      <span className="yd-relay-ops-status__dot" aria-hidden />
-      <span className="yd-relay-ops-status__label">{critical && status !== "done" ? `Kritisch · ${label}` : label}</span>
-    </span>
-  );
+function statusPillVariant(
+  status: RelayOpsStatus,
+  critical: boolean
+): "urgent" | "active" | "calm" | "done" | "pending" {
+  if (status === "done") return "done";
+  if (status === "overdue" || critical) return "urgent";
+  if (status === "new") return "active";
+  if (status === "in_progress") return "calm";
+  return "pending";
+}
+
+function statusPillLabel(item: RelayOpsWorkRow): string {
+  if (item.isCritical && item.status !== "done") {
+    return `Kritisch · ${item.statusLabel}`;
+  }
+  return item.statusLabel;
 }
 
 export function RelayOpsWorkList({ items }: RelayOpsWorkListProps) {
-  if (items.length === 0) {
-    return (
-      <div className="yd-relay-empty-state">
-        <p className="yd-relay-empty-state__title">Praxisbetrieb unter Kontrolle</p>
-        <p className="yd-relay-empty-state__text">
-          Alle Aufgaben erledigt — heute keine offenen Vorgänge in dieser Ansicht.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="yd-relay-ops-work">
-      <div className="yd-relay-ops-work__head" aria-hidden>
-        <span className="yd-relay-ops-work__col yd-relay-ops-work__col--status">Status</span>
-        <span className="yd-relay-ops-work__col yd-relay-ops-work__col--task">Aufgabe</span>
-        <span className="yd-relay-ops-work__col yd-relay-ops-work__col--patient">Patient</span>
-        <span className="yd-relay-ops-work__col yd-relay-ops-work__col--assignee">Verantwortlich</span>
-        <span className="yd-relay-ops-work__col yd-relay-ops-work__col--due">Fällig</span>
-        <span className="yd-relay-ops-work__col yd-relay-ops-work__col--activity">Aktivität</span>
-      </div>
-      <ul className="yd-relay-ops-work__list">
-        {items.map((item) => (
-          <li key={item.id}>
-            <Link
-              href={item.href}
-              className={cn("yd-relay-ops-work__row", item.isDone && "yd-relay-ops-work__row--done")}
-            >
-              <span className="yd-relay-ops-work__col yd-relay-ops-work__col--status">
-                <OpsStatus status={item.status} label={item.statusLabel} critical={item.isCritical} />
-              </span>
-              <span className="yd-relay-ops-work__col yd-relay-ops-work__col--task">
-                <span className="yd-relay-ops-work__title">{item.title}</span>
-                {item.descriptionPreview ? (
-                  <span className="yd-relay-ops-work__desc">{item.descriptionPreview}</span>
-                ) : null}
-                {item.recommendation ? (
-                  <span className="yd-relay-ops-work__rec">Empfehlung: {item.recommendation}</span>
-                ) : null}
-                {item.submissionRef ? (
-                  <span className="yd-relay-ops-work__ref">Tracker · {item.submissionRef}</span>
-                ) : null}
-                {item.completionLine ? (
-                  <span className="yd-relay-ops-work__done-line">{item.completionLine}</span>
-                ) : null}
-              </span>
-              <span className="yd-relay-ops-work__col yd-relay-ops-work__col--patient">
-                {item.patientLabel ?? "—"}
-              </span>
-              <span className="yd-relay-ops-work__col yd-relay-ops-work__col--assignee">
-                {item.assigneeLabel}
-              </span>
-              <span
-                className={cn(
-                  "yd-relay-ops-work__col yd-relay-ops-work__col--due",
-                  item.status === "overdue" && "yd-relay-ops-work__due--overdue"
-                )}
+    <div className="yd-relay-work-table-wrap min-h-0 flex-1 overflow-x-auto overflow-y-auto overscroll-x-contain">
+      <table className="yd-relay-work-table w-full min-w-[920px] border-collapse text-left">
+        <thead>
+          <tr>
+            {COLUMNS.map((col) => (
+              <th
+                key={col}
+                className="whitespace-nowrap px-4 py-3 text-[10px] font-medium uppercase tracking-[0.07em] md:px-5"
+                style={{ color: YD.text.faint }}
               >
-                {item.dueLabel ?? "—"}
-              </span>
-              <span className="yd-relay-ops-work__col yd-relay-ops-work__col--activity">
-                {item.lastActivityLabel}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+                {col}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {items.length === 0 ? (
+            <tr>
+              <td
+                colSpan={COLUMNS.length}
+                className="px-5 py-4 text-[12px] font-medium"
+                style={{ color: YD.text.faint }}
+              >
+                Keine Vorgänge in dieser Ansicht.
+              </td>
+            </tr>
+          ) : (
+            items.map((item) => (
+              <tr
+                key={item.id}
+                className={cn(
+                  "group border-t transition-colors duration-200",
+                  item.isCritical && !item.isDone && "yd-relay-work-table__row--critical"
+                )}
+                style={{ borderColor: "rgba(180, 198, 218, 0.22)" }}
+              >
+                <td className="min-w-[180px] max-w-[280px] px-4 py-3 md:px-5">
+                  <Link
+                    href={item.href}
+                    prefetch
+                    className="block min-w-0 no-underline transition hover:opacity-80"
+                  >
+                    <span
+                      className="yd-relay-work-table__title block truncate text-[13px] font-semibold leading-snug"
+                      style={{ color: YD.text.primary }}
+                    >
+                      {item.title}
+                    </span>
+                    {item.submissionRef ? (
+                      <span
+                        className="mt-0.5 block truncate text-[11px] font-medium"
+                        style={{ color: YD.text.faint }}
+                      >
+                        {item.submissionRef}
+                      </span>
+                    ) : null}
+                  </Link>
+                </td>
+                <td
+                  className="min-w-[108px] max-w-[160px] truncate px-4 py-3 text-[12px] md:px-5"
+                  style={{ color: YD.text.secondary }}
+                >
+                  {item.patientLabel ?? "—"}
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 md:px-5">
+                  <YdStatusPill
+                    label={statusPillLabel(item)}
+                    variant={statusPillVariant(item.status, item.isCritical)}
+                    className="text-[10px] font-medium"
+                  />
+                </td>
+                <td
+                  className="min-w-[96px] max-w-[140px] truncate px-4 py-3 text-[12px] md:px-5"
+                  style={{ color: YD.text.secondary }}
+                >
+                  {item.assigneeLabel}
+                </td>
+                <td
+                  className={cn(
+                    "whitespace-nowrap px-4 py-3 text-[12px] tabular-nums md:px-5",
+                    item.status === "overdue" && "font-semibold"
+                  )}
+                  style={{
+                    color: item.status === "overdue" ? "#B91C1C" : YD.text.muted,
+                  }}
+                >
+                  {item.dueLabel ?? "—"}
+                </td>
+                <td
+                  className="whitespace-nowrap px-4 py-3 text-[12px] tabular-nums md:px-5"
+                  style={{ color: YD.text.muted }}
+                >
+                  {item.lastActivityLabel}
+                </td>
+                <td
+                  className="whitespace-nowrap px-4 py-3 text-[12px] font-medium md:px-5"
+                  style={{ color: item.sourceLabel === "Tracker" ? YD.accent.deep : YD.text.faint }}
+                >
+                  {item.sourceLabel ?? "—"}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

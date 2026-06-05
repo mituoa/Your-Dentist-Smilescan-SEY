@@ -181,21 +181,24 @@ export function ClinicalTaskDetailSkeleton() {
 
 export function ClinicalRelayBoardSkeleton() {
   return (
-    <div className={`min-h-[50vh] ${clinicalWorkspaceFrame} py-3 md:py-4`} style={{ background: "#F7F9FC" }}>
-      <div className="yd-relay-ops-page">
-        <div className="mb-2 space-y-2">
-          {bar("h-6 w-24")}
-          {bar("h-3 w-48 max-w-full")}
-        </div>
-        {bar("h-14 w-full rounded-xl")}
-        <div className="grid gap-2 md:grid-cols-2">
-          {bar("h-24 w-full rounded-xl")}
-          {bar("h-24 w-full rounded-xl")}
-        </div>
-        {bar("h-11 w-full rounded-xl")}
-        <div className="grid gap-2 lg:grid-cols-[1fr_240px]">
-          {bar("h-64 w-full rounded-xl")}
-          {bar("h-32 w-full rounded-xl")}
+    <div
+      className={`yd-relay flex min-h-[50vh] flex-1 flex-col ${clinicalWorkspaceFrame} py-2 md:py-3`}
+      style={{ background: "#F7F9FC" }}
+    >
+      <div className="mb-2 flex items-center justify-between border-b border-[rgba(176,192,208,0.22)] pb-2">
+        {bar("h-7 w-24")}
+        {bar("h-8 w-40 rounded-lg")}
+      </div>
+      {bar("h-4 w-full max-w-2xl")}
+      {bar("h-9 w-full rounded-xl")}
+      <div className="mt-2 min-h-0 flex-1 overflow-hidden rounded-[24px] border border-[rgba(160,178,198,0.38)] bg-white shadow-sm">
+        {bar("h-9 w-full rounded-none")}
+        <div className="space-y-0 divide-y divide-[rgba(180,198,218,0.22)]">
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="px-5 py-3.5">
+              {bar("h-4 w-full")}
+            </div>
+          ))}
         </div>
       </div>
     </div>

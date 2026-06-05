@@ -229,6 +229,34 @@
   background: rgba(255, 253, 250, 0.92);
 }
 
+/* Relay — gleiche Tabellen-Materialität wie Dashboard */
+.yd-workspace .yd-relay .yd-relay-work-table thead th {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--yd-ws-text-faint);
+}
+
+.yd-workspace .yd-relay .yd-relay-work-table tbody tr td {
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+}
+
+@media (min-width: 768px) {
+  .yd-workspace .yd-relay .yd-relay-work-table tbody tr td {
+    padding-top: 0.9375rem;
+    padding-bottom: 0.9375rem;
+  }
+}
+
+.yd-workspace .yd-relay .yd-status-pill {
+  padding: 0.3125rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
 .yd-workspace .yd-status-pill {
   padding: 0.3125rem 0.75rem;
   font-size: 0.6875rem;
