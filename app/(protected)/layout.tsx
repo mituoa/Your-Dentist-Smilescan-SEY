@@ -20,6 +20,16 @@ import { WorkspaceMobileShortcutsBar } from "@/components/workspace/workspace-mo
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
 import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
+import { buildDashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
+import type { DashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
+import {
+  countPreparedAwaitingReview,
+  countTasksNeedingDecision,
+} from "@/lib/command-ai/submission-preparation";
+import {
+  getRecentSubmissionsPreview,
+  getTotalUnseenSubmissions,
+} from "@/lib/queries/dashboard";
 import type { EnrichedSubmissionListItem } from "@/lib/inbox/tracker-inbox-logic";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
@@ -120,6 +130,7 @@ export default async function ProtectedLayout({
     patient_notes: string | null;
   }[] = [];
   let trackerHeaderSummary = null;
+  let dashboardHeaderSummary: DashboardHeaderSummary | null = null;
 
   if (workspace) {
     const [inboxRes, tasksRes, journals] = await Promise.all([
@@ -137,6 +148,33 @@ export default async function ProtectedLayout({
       trackerHeaderSummary = buildTrackerHeaderSummary(
         inboxRes.items as EnrichedSubmissionListItem[]
       );
+    }
+
+    if (role === "doctor") {
+      const [unseenRes, previewRes] = await Promise.all([
+        getTotalUnseenSubmissions(workspace.workspace_id),
+        getRecentSubmissionsPreview(workspace.workspace_id),
+      ]);
+      const unseenCount = unseenRes.ok ? unseenRes.count : 0;
+      const previewRows = previewRes.ok ? previewRes.rows : [];
+      const preparedAwaitingCount = countPreparedAwaitingReview(
+        previewRows.map((row) => ({
+          id: row.id,
+          patient_name: row.patient_name,
+          patient_notes: row.patient_notes,
+          seen_at: row.seen_at,
+          photo_count: 0,
+        }))
+      );
+      const tasksNeedingDecision = tasksRes.ok
+        ? countTasksNeedingDecision(tasksRes.tasks)
+        : 0;
+
+      dashboardHeaderSummary = buildDashboardHeaderSummary({
+        unseenCount,
+        preparedAwaitingCount,
+        tasksNeedingDecision,
+      });
     }
 
     navAmbient = buildNavAmbientPreviews({
@@ -201,6 +239,7 @@ export default async function ProtectedLayout({
                     avatarUrl={profileData?.photo_url ?? null}
                     inboxCount={inboxCount}
                     trackerHeaderSummary={trackerHeaderSummary}
+                    dashboardHeaderSummary={dashboardHeaderSummary}
                   />
                   {children}
                 </HcAppCanvas>

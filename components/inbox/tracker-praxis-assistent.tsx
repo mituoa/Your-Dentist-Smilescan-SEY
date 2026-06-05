@@ -1,19 +1,32 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { TrackerClinicalUrgency } from "@/components/inbox/tracker-clinical-urgency";
+import {
+  prepareMessageDraftForSubmission,
+  saveMessageDraftBody,
+} from "@/app/(protected)/inbox/[id]/message-draft-actions";
+import { updateSubmissionUrgency } from "@/app/(protected)/inbox/[id]/actions";
 import {
   TrackerClinicalActionSheet,
-  openTrackerTaskFlow,
 } from "@/components/inbox/tracker-clinical-action-sheet";
+import { useTrackerWorkflow } from "@/components/inbox/tracker-workflow-context";
+import { stashWorkflowDraftForSubmission } from "@/lib/command-ai/draft-bridge";
+import {
+  buildBeobachtenDraft,
+  buildRuckfrageDraftForSnippet,
+  buildTerminOfferDraft,
+  TRACKER_RUCKFRAGE_RAIL_CHIPS,
+  type UrgencyKey,
+} from "@/lib/clinical/message-templates";
+import { clinicalPriorityLabel } from "@/lib/inbox/tracker-clinical-priority-label";
 import type { TrackerActionIntent } from "@/lib/inbox/tracker-clinical-decision";
 import {
   buildTrackerV9ClinicalModel,
+  CLINICAL_URGENCY_OPTIONS,
   normalizeClinicalUrgency,
   type ClinicalUrgencyId,
-  type TrackerNextStepItem,
 } from "@/lib/inbox/tracker-v9-clinical";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { IntakeChannel } from "@/lib/submissions/intake-channel";
@@ -48,13 +61,14 @@ type ActionNotice = {
   message: string;
 };
 
-const MORE_OPTION_IDS = ["rueckfrage", "foto", "aufgabe"] as const;
+function toUrgencyKey(id: ClinicalUrgencyId): UrgencyKey {
+  return id;
+}
 
-/** V12 — Entscheidung: Empfehlung → Handlung → Dringlichkeit → Vorbereitet. */
+/** Entscheidungsleiste — Progressive Disclosure, Enterprise Medical Workflow. */
 export function TrackerPraxisAssistent({
   submissionId,
   trackerBackboneAvailable = true,
-  hasOutboundReplySent = false,
   isDoctor,
   photoCount,
   isApprovalPending,
@@ -74,11 +88,13 @@ export function TrackerPraxisAssistent({
   initialDraftBody,
 }: TrackerPraxisAssistentProps) {
   const router = useRouter();
+  const { responsePath, setResponsePath, applyDraftToPanel } = useTrackerWorkflow();
   const [sheetIntent, setSheetIntent] = useState<TrackerActionIntent | null>(null);
   const [clinicalUrgency, setClinicalUrgency] = useState<ClinicalUrgencyId>(
     normalizeClinicalUrgency(urgency) ?? "this_week"
   );
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const clinical = useMemo(
     () =>
@@ -113,34 +129,126 @@ export function TrackerPraxisAssistent({
     ]
   );
 
-  const { primary, secondary } = clinical.actionPlan;
+  const priorityLabel = useMemo(
+    () =>
+      clinicalPriorityLabel({
+        patient_notes: patientNotes,
+        urgency: clinicalUrgency,
+        intake_channel: intakeChannel,
+      }),
+    [patientNotes, clinicalUrgency, intakeChannel]
+  );
 
-  const moreOptions = useMemo(() => {
-    const pool = [...secondary];
-    return MORE_OPTION_IDS.map((id) => pool.find((item) => item.id === id)).filter(
-      (item): item is TrackerNextStepItem => Boolean(item)
-    );
-  }, [secondary]);
+  const draftParams = useMemo(
+    () => ({
+      patientName,
+      urgency: toUrgencyKey(clinicalUrgency),
+      practicePhone: practicePhone || "",
+      appointmentUrl,
+    }),
+    [patientName, clinicalUrgency, practicePhone, appointmentUrl]
+  );
 
-  const runStep = (item: TrackerNextStepItem) => {
-    setActionNotice(null);
-    if (item.intent) {
-      setSheetIntent(item.intent);
-      return;
-    }
-    if (item.href) {
-      if (item.id === "aufgabe") {
-        openTrackerTaskFlow({
-          router,
-          submissionId,
-          patientName,
-          patientNotes,
-          primaryAction: clinical.decision.primaryAction,
+  const commitDraft = useCallback(
+    async (
+      body: string,
+      path: "termin" | "ruckfrage" | "beobachten",
+      meta?: { urgency?: string | null; snippetId?: string | null }
+    ) => {
+      if (!draftsAvailable) {
+        setActionNotice({
+          type: "error",
+          message: "Antwortentwürfe sind aktuell nicht verfügbar.",
         });
         return;
       }
-      router.push(item.href);
+
+      if (!editableDraftId) {
+        const prep = await prepareMessageDraftForSubmission(submissionId);
+        if (!prep.ok) {
+          setActionNotice({ type: "error", message: prep.error });
+          return;
+        }
+        stashWorkflowDraftForSubmission(submissionId, body);
+        router.refresh();
+        return;
+      }
+
+      const saveRes = await saveMessageDraftBody({
+        draftId: editableDraftId,
+        submissionId,
+        body,
+      });
+      if (!saveRes.ok) {
+        setActionNotice({ type: "error", message: saveRes.error });
+        return;
+      }
+
+      applyDraftToPanel({
+        body,
+        path,
+        urgency: meta?.urgency ?? clinicalUrgency,
+        snippetId: meta?.snippetId ?? null,
+      });
+      router.refresh();
+    },
+    [
+      applyDraftToPanel,
+      clinicalUrgency,
+      draftsAvailable,
+      editableDraftId,
+      router,
+      submissionId,
+    ]
+  );
+
+  const pushDraft = useCallback(
+    (
+      body: string,
+      path: "termin" | "ruckfrage" | "beobachten",
+      meta?: { urgency?: string | null; snippetId?: string | null }
+    ) => {
+      setActionNotice(null);
+      startTransition(async () => {
+        await commitDraft(body, path, meta);
+      });
+    },
+    [commitDraft]
+  );
+
+  const selectPath = (path: "termin" | "ruckfrage" | "beobachten") => {
+    setResponsePath(path);
+    if (path === "beobachten") {
+      pushDraft(
+        buildBeobachtenDraft({
+          patientName,
+          appointmentUrl,
+        }),
+        "beobachten"
+      );
     }
+  };
+
+  const applyTerminUrgency = (id: ClinicalUrgencyId) => {
+    setClinicalUrgency(id);
+    setActionNotice(null);
+    startTransition(async () => {
+      const res = await updateSubmissionUrgency(submissionId, id);
+      if (res.error) {
+        setActionNotice({ type: "error", message: res.error });
+        return;
+      }
+      const body = buildTerminOfferDraft({
+        ...draftParams,
+        urgency: toUrgencyKey(id),
+      });
+      await commitDraft(body, "termin", { urgency: id });
+    });
+  };
+
+  const applyRuckfrageChip = (snippetId: string) => {
+    const body = buildRuckfrageDraftForSnippet(snippetId, draftParams);
+    pushDraft(body, "ruckfrage", { snippetId });
   };
 
   return (
@@ -149,7 +257,7 @@ export function TrackerPraxisAssistent({
         id="tracker-entscheidung"
         className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail yd-tracker-v14-rail yd-tracker-v15-rail"
         aria-label="Entscheidung"
-        aria-busy={sheetIntent !== null}
+        aria-busy={pending || sheetIntent !== null}
       >
         <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--empfehlung">
           <h2 className="yd-tracker-v12-rail__label">Empfohlene nächste Aktion</h2>
@@ -158,67 +266,101 @@ export function TrackerPraxisAssistent({
           </p>
         </section>
 
+        <section className="yd-tracker-v12-rail__block">
+          <h2 className="yd-tracker-v12-rail__label">Klinische Einschätzung</h2>
+          <p className="yd-tracker-v12-rail__label yd-tracker-v12-rail__label--muted">
+            {priorityLabel}
+          </p>
+        </section>
+
         <section className="yd-tracker-v12-rail__block yd-tracker-v14-rail__block--action">
-          <p className="yd-tracker-v16-rail__action-label">Aktion ausführen</p>
-          <button
-            id="tracker-v10-primary-action"
-            type="button"
-            className="yd-tracker-v12-primary-action yd-tracker-v14-primary-action yd-tracker-v15-primary-action"
-            aria-haspopup="dialog"
-            onClick={() => runStep(primary)}
-          >
-            {primary.label}
-          </button>
+          <p className="yd-tracker-v16-rail__action-label">Wie möchten Sie reagieren?</p>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              className={cn(
+                "yd-tracker-v12-primary-action yd-tracker-v14-primary-action yd-tracker-v15-primary-action",
+                responsePath === "termin" && "yd-tracker-v15-primary-action--active"
+              )}
+              disabled={pending}
+              onClick={() => selectPath("termin")}
+            >
+              Termin anbieten
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "yd-tracker-v12-primary-action yd-tracker-v14-primary-action yd-tracker-v15-primary-action",
+                responsePath === "ruckfrage" && "yd-tracker-v15-primary-action--active"
+              )}
+              disabled={pending}
+              onClick={() => selectPath("ruckfrage")}
+            >
+              Rückfrage stellen
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "yd-tracker-v12-primary-action yd-tracker-v14-primary-action yd-tracker-v15-primary-action",
+                responsePath === "beobachten" && "yd-tracker-v15-primary-action--active"
+              )}
+              disabled={pending}
+              onClick={() => selectPath("beobachten")}
+            >
+              Beobachten
+            </button>
+          </div>
         </section>
 
-        <section className="yd-tracker-v12-rail__block">
-          <h2 className="yd-tracker-v12-rail__label">Dringlichkeit</h2>
-          <TrackerClinicalUrgency
-            submissionId={submissionId}
-            initialUrgency={urgency}
-            suggestedUrgency={clinical.suggestedUrgency}
-            onUrgencyChange={setClinicalUrgency}
-          />
-        </section>
-
-        <section className="yd-tracker-v12-rail__block">
-          <h2 className="yd-tracker-v12-rail__label">Vorbereitet</h2>
-          <ul className="yd-tracker-v12-status-list">
-            {clinical.statusLines.map((line) => (
-              <li
-                key={line.label}
-                className={cn(
-                  "yd-tracker-v12-status-line",
-                  line.kind === "warn" && "yd-tracker-v12-status-line--warn"
-                )}
-              >
-                <span className="yd-tracker-v12-status-line__mark" aria-hidden>
-                  {line.kind === "done" ? "✓" : "⚠"}
-                </span>
-                {line.label}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {moreOptions.length > 0 ? (
-          <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--more">
-            <h2 className="yd-tracker-v12-rail__label yd-tracker-v12-rail__label--muted">
-              Weitere Optionen
-            </h2>
-            <ul className="yd-tracker-v12-more-list">
-              {moreOptions.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className="yd-tracker-v12-more-action yd-tracker-v14-more-action"
-                    onClick={() => runStep(item)}
-                  >
-                    {item.label}
-                  </button>
-                </li>
+        {responsePath === "termin" ? (
+          <section className="yd-tracker-v12-rail__block">
+            <h2 className="yd-tracker-v12-rail__label">Terminzeitpunkt</h2>
+            <div className="flex flex-wrap gap-2">
+              {CLINICAL_URGENCY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  disabled={pending}
+                  className={cn(
+                    "yd-tracker-v12-more-action yd-tracker-v14-more-action",
+                    clinicalUrgency === opt.id &&
+                      "yd-tracker-v14-more-action--emphasized"
+                  )}
+                  onClick={() => applyTerminUrgency(opt.id)}
+                >
+                  {opt.label}
+                </button>
               ))}
-            </ul>
+            </div>
+          </section>
+        ) : null}
+
+        {responsePath === "ruckfrage" ? (
+          <section className="yd-tracker-v12-rail__block">
+            <h2 className="yd-tracker-v12-rail__label">Was möchten Sie erfragen?</h2>
+            <div className="flex flex-wrap gap-2">
+              {TRACKER_RUCKFRAGE_RAIL_CHIPS.map((chip) => (
+                <button
+                  key={chip.id}
+                  type="button"
+                  disabled={pending}
+                  className="yd-tracker-v12-more-action yd-tracker-v14-more-action"
+                  onClick={() => applyRuckfrageChip(chip.id)}
+                >
+                  {chip.label}
+                </button>
+              ))}
+              {photoCount === 0 ? (
+                <button
+                  type="button"
+                  disabled={pending}
+                  className="yd-tracker-v12-more-action yd-tracker-v14-more-action"
+                  onClick={() => setSheetIntent("foto")}
+                >
+                  Foto anfordern
+                </button>
+              ) : null}
+            </div>
           </section>
         ) : null}
 

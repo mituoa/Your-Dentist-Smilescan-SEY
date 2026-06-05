@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Plus, X, Check } from "lucide-react";
-import { SPECIALIZATION_MASTER } from "@/lib/masterdata/specializations";
+import {
+  getProfileSchwerpunktePickerOptions,
+} from "@/lib/masterdata/specializations";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { Input } from "@/components/ui/input";
 
@@ -63,7 +65,7 @@ export function SectionSpecializations({
           Aus der Liste wählen
         </div>
         <div className="flex flex-wrap gap-2">
-          {SPECIALIZATION_MASTER.map((spec) => {
+          {getProfileSchwerpunktePickerOptions().map((spec) => {
             const isSelected = selected.includes(spec.id);
             return (
               <button

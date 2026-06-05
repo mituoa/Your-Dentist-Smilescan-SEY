@@ -148,7 +148,7 @@ function buildContextLine(
   );
 
   if (kind === "ki_freigabe") {
-    return "KI Antwort vorbereitet";
+    return "Antwort zur Prüfung";
   }
 
   if (kind === "nachsorge") {

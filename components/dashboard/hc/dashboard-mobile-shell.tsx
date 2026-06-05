@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, ClipboardList, ListTodo, BookOpen, Plus } from "lucide-react";
 
+import { buildMobilePriorityLine } from "@/lib/dashboard/dashboard-status-copy";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { createCaseFromQuery } from "@/lib/create-case-return";
 import type { DashboardPriorityItem, OpenTaskRow } from "@/lib/queries/dashboard";
@@ -8,8 +9,10 @@ import type { DashboardPriorityItem, OpenTaskRow } from "@/lib/queries/dashboard
 type DashboardMobileShellProps = {
   greeting: string;
   displayName: string;
+  unseenCount: number | null;
   openTaskCount: number;
   preparedAwaitingCount: number | null;
+  tasksNeedingDecision: number | null;
   priorityItems: DashboardPriorityItem[] | null;
   openTasks: OpenTaskRow[] | null;
 };
@@ -26,8 +29,10 @@ function formatRelativeDate(iso: string): string {
 export function DashboardMobileShell({
   greeting,
   displayName,
+  unseenCount,
   openTaskCount,
   preparedAwaitingCount,
+  tasksNeedingDecision,
   priorityItems,
   openTasks,
 }: DashboardMobileShellProps) {
@@ -37,14 +42,15 @@ export function DashboardMobileShell({
 
   const taskRows = (openTasks ?? []).slice(0, 3);
 
-  const statusLine =
-    openTaskCount > 0 && preparedAwaitingCount != null && preparedAwaitingCount > 0
-      ? `${openTaskCount} ${openTaskCount === 1 ? "Aufgabe" : "Aufgaben"} · ${preparedAwaitingCount} ${preparedAwaitingCount === 1 ? "Antwort" : "Antworten"} warten`
-      : openTaskCount > 0
-        ? `${openTaskCount} ${openTaskCount === 1 ? "offene Aufgabe" : "offene Aufgaben"}`
-        : preparedAwaitingCount != null && preparedAwaitingCount > 0
-          ? `${preparedAwaitingCount} ${preparedAwaitingCount === 1 ? "Antwort wartet" : "Antworten warten"}`
-          : null;
+  const statusLine = buildMobilePriorityLine(
+    unseenCount,
+    preparedAwaitingCount,
+    tasksNeedingDecision ?? openTaskCount
+  );
+  const hasAttention =
+    (unseenCount ?? 0) > 0 ||
+    (preparedAwaitingCount ?? 0) > 0 ||
+    (tasksNeedingDecision ?? 0) > 0;
 
   return (
     <div className="yd-dash-mobile md:hidden">
@@ -52,13 +58,13 @@ export function DashboardMobileShell({
         <h1 className="yd-dash-mobile__title">
           {greeting}, {displayName}
         </h1>
-        {statusLine ? (
+        {hasAttention ? (
           <p className="yd-dash-mobile__status-line" role="status">
             {statusLine}
           </p>
         ) : (
           <p className="yd-dash-mobile__status-empty" role="status">
-            Alles erledigt für heute
+            Heute liegen keine dringenden Vorgänge vor.
           </p>
         )}
       </header>

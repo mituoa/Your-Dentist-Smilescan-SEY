@@ -44,9 +44,9 @@ export function buildNewSubmissionsWorkContext(
       : fromPreview;
 
   return {
-    heading: "Neue Patientenfälle",
+    heading: "Neue Anfragen",
     items: itemsOut,
-    emptyMessage: "Keine neuen Einsendungen — alle Fälle sind in Bearbeitung.",
+    emptyMessage: "Keine neuen Anfragen — alles ist in Bearbeitung.",
     ctaLabel: "Alle öffnen",
     ctaHref: "/inbox",
   };
@@ -83,14 +83,14 @@ export function buildOpenTasksWorkContext(tasks: OpenTaskRow[] | null): KpiWorkC
   const open = (tasks ?? []).slice(0, 3);
 
   return {
-    heading: "Heute",
+    heading: "Patient wartet",
     items: open.map((task) => ({
-      name: truncate(task.content || "Aufgabe"),
+      name: truncate(task.content || "Rückmeldung"),
       detail: task.patient_name
         ? `Patient ${patientName(task.patient_name)}`
         : "Praxisintern",
     })),
-    emptyMessage: "Keine offenen Aufgaben — Praxisworkflow ist auf Stand.",
+    emptyMessage: "Keine Patienten warten auf Rückmeldung.",
     ctaLabel: "Relay öffnen",
     ctaHref: "/relay",
   };

@@ -11,11 +11,13 @@ import {
 import { sendTrackerPatientMessage } from "@/app/(protected)/inbox/[id]/patient-message-actions";
 import {
   buildFollowUpDraft,
-  buildRuckfrageDraftForSnippet,
-  FOLLOW_UP_SNIPPETS,
   type UrgencyKey,
 } from "@/lib/clinical/message-templates";
-import { consumeCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
+import { useTrackerWorkflow } from "@/components/inbox/tracker-workflow-context";
+import {
+  consumeCommandDraftForSubmission,
+  consumeWorkflowDraftForSubmission,
+} from "@/lib/command-ai/draft-bridge";
 import type { MessageDraftRow } from "@/lib/queries/message-drafts";
 import { formatTrackerRelativeIngress } from "@/lib/inbox/tracker-v9-clinical";
 import { cn } from "@/lib/utils";
@@ -35,11 +37,18 @@ type SubmissionMessageDraftPanelProps = {
 };
 
 function toUrgencyKey(urgency: string | null): UrgencyKey {
-  if (urgency === "today" || urgency === "this_week" || urgency === "not_urgent") {
+  if (
+    urgency === "today" ||
+    urgency === "within_24h" ||
+    urgency === "this_week" ||
+    urgency === "not_urgent"
+  ) {
     return urgency;
   }
   return null;
 }
+
+type DraftPath = "standard" | "termin" | "ruckfrage" | "snippet" | "custom";
 
 function historyStatusLabel(status: MessageDraftRow["status"]): string {
   if (status === "approved") return "Antwort freigegeben (noch nicht versendet)";
@@ -102,6 +111,9 @@ export function SubmissionMessageDraftPanel({
   const [editableDraft, setEditableDraft] = useState(initialEditableDraft);
   const [historyDraft, setHistoryDraft] = useState(initialHistoryDraft);
   const [body, setBody] = useState(initialEditableDraft?.body ?? canonicalBase);
+  const [draftPath, setDraftPath] = useState<DraftPath>(
+    initialEditableDraft ? "custom" : "standard"
+  );
   const [activeSnippetId, setActiveSnippetId] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -109,8 +121,10 @@ export function SubmissionMessageDraftPanel({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { draftApplyRequest } = useTrackerWorkflow();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const commandDraftApplied = useRef(false);
+  const lastAppliedRevision = useRef(0);
 
   const refreshAfterMutation = useCallback(() => {
     router.refresh();
@@ -126,12 +140,32 @@ export function SubmissionMessageDraftPanel({
 
   useEffect(() => {
     if (commandDraftApplied.current || !editableDraft) return;
-    const pending = consumeCommandDraftForSubmission(submissionId);
+    const pending =
+      consumeCommandDraftForSubmission(submissionId) ??
+      consumeWorkflowDraftForSubmission(submissionId);
     if (pending) {
       setBody(pending);
+      setDraftPath("custom");
       commandDraftApplied.current = true;
     }
   }, [submissionId, editableDraft]);
+
+  useEffect(() => {
+    if (!draftApplyRequest || !editableDraft) return;
+    if (draftApplyRequest.revision === lastAppliedRevision.current) return;
+    lastAppliedRevision.current = draftApplyRequest.revision;
+    setBody(draftApplyRequest.body);
+    setDraftPath(
+      draftApplyRequest.path === "termin"
+        ? "termin"
+        : draftApplyRequest.path === "ruckfrage"
+          ? "ruckfrage"
+          : "standard"
+    );
+    setActiveSnippetId(draftApplyRequest.snippetId ?? null);
+    setFlash(true);
+    window.setTimeout(() => setFlash(false), 200);
+  }, [draftApplyRequest, editableDraft]);
 
   const scrollDraftIntoView = useCallback(() => {
     const el = textareaRef.current;
@@ -144,23 +178,11 @@ export function SubmissionMessageDraftPanel({
     });
   }, []);
 
-  const applySnippet = useCallback(
-    (snippetId: string) => {
-      const next = buildRuckfrageDraftForSnippet(snippetId, params);
-      setActiveSnippetId(snippetId);
-      setBody(next);
-      setFlash(true);
-      window.setTimeout(() => setFlash(false), 200);
-    },
-    [params]
-  );
-
-  const resetToStandard = useCallback(() => {
+  useEffect(() => {
+    if (draftPath === "custom") return;
+    if (draftApplyRequest) return;
     setBody(canonicalBase);
-    setActiveSnippetId(null);
-    setFlash(true);
-    window.setTimeout(() => setFlash(false), 200);
-  }, [canonicalBase]);
+  }, [canonicalBase, draftPath, draftApplyRequest]);
 
   const copy = async () => {
     try {
@@ -171,19 +193,6 @@ export function SubmissionMessageDraftPanel({
       /* no-op */
     }
   };
-
-  const chip = (active: boolean) =>
-    active
-      ? {
-          border: "1px solid rgba(12, 25, 41, 0.18)",
-          background: "#F8FAFC",
-          color: "#1A4F9C",
-        }
-      : {
-          border: "1px solid #E5E7EB",
-          background: "#FFFFFF",
-          color: "#64748B",
-        };
 
   if (!draftsAvailable) {
     return (
@@ -232,7 +241,7 @@ export function SubmissionMessageDraftPanel({
             }}
             className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] border border-[#E5E7EB] bg-white px-4 text-[14px] font-medium text-[#0F172A] transition disabled:opacity-60"
           >
-            {isPending ? "Wird gesendet …" : "Freigeben und senden"}
+            {isPending ? "Wird gesendet …" : "Antwort prüfen und senden"}
           </button>
         ) : null}
         {isDoctor && historyDraft.status === "approved" && !patientEmail?.trim() ? (
@@ -260,7 +269,7 @@ export function SubmissionMessageDraftPanel({
       <div className="touch-manipulation space-y-3">
         <div className="yd-tracker-v11-comm-empty">
           <p className="yd-tracker-v11-comm-empty__title">
-            Es wurde noch keine Nachricht vorbereitet.
+            Noch kein Vorschlag — wählen Sie links einen Antwortweg.
           </p>
         </div>
         <PrepareDraftButton
@@ -273,7 +282,7 @@ export function SubmissionMessageDraftPanel({
         />
         <StatusBanners statusMessage={statusMessage} errorMessage={errorMessage} />
         <p className="text-[12px] leading-relaxed text-slate-500">
-          Die Plattform bereitet einen Entwurf vor — Versand erfolgt erst nach Prüfung und Senden.
+          Formulierung erfolgt aus Ihrer Entscheidung — Versand erst nach Prüfung durch Zahnärzt:innen.
         </p>
       </div>
     );
@@ -286,7 +295,7 @@ export function SubmissionMessageDraftPanel({
     <div className="touch-manipulation space-y-3 lg:space-y-4">
       <div className="yd-tracker-v11-comm-card">
         <div className="yd-tracker-v11-comm-card__copy">
-          <p className="yd-tracker-v11-comm-card__title">Entwurf bereit</p>
+          <p className="yd-tracker-v11-comm-card__title">Vorschlag für Patientenantwort</p>
           {updatedMeta ? (
             <p className="yd-tracker-v11-comm-card__meta">{updatedMeta}</p>
           ) : null}
@@ -319,6 +328,7 @@ export function SubmissionMessageDraftPanel({
           value={body}
           onChange={(e) => {
             setBody(e.target.value);
+            setDraftPath("custom");
             setActiveSnippetId("custom");
           }}
           onFocus={scrollDraftIntoView}
@@ -339,54 +349,9 @@ export function SubmissionMessageDraftPanel({
       </div>
       <p className="text-[12px] leading-relaxed text-slate-500">
         {patientEmail?.trim()
-          ? "Versand an den Patienten nur nach ausdrücklichem Senden durch Zahnärzt:innen."
+          ? "Bitte prüfen Sie den Vorschlag — Versand nur nach ausdrücklicher Freigabe."
           : "Für diesen Patienten ist keine E-Mail-Adresse hinterlegt — nur Entwurf speicherbar."}
       </p>
-
-      <div>
-        <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-slate-500">
-          Textbausteine
-        </p>
-        <div className="flex flex-col gap-1.5">
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={resetToStandard}
-            style={{
-              padding: "10px 12px",
-              borderRadius: "8px",
-              fontSize: "13px",
-              fontWeight: 500,
-              textAlign: "left",
-              width: "100%",
-              ...chip(activeSnippetId === null),
-            }}
-            className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.15)] disabled:opacity-60"
-          >
-            Standard
-          </button>
-          {FOLLOW_UP_SNIPPETS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              disabled={isPending}
-              onClick={() => applySnippet(s.id)}
-              style={{
-                padding: "10px 12px",
-                borderRadius: "8px",
-                fontSize: "13px",
-                fontWeight: 500,
-                textAlign: "left",
-                width: "100%",
-                ...chip(activeSnippetId === s.id),
-              }}
-              className="min-h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.15)] disabled:opacity-60"
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       <div className="flex flex-col gap-2">
         <button
@@ -448,7 +413,7 @@ export function SubmissionMessageDraftPanel({
             }}
             className="inline-flex min-h-10 w-full items-center justify-center rounded-[9px] border border-[#CBD5E1] bg-white px-4 text-[14px] font-medium text-[#1A4F9C] transition disabled:opacity-60"
           >
-            {isPending ? "Wird gesendet …" : "Freigeben und senden"}
+            {isPending ? "Wird gesendet …" : "Antwort prüfen und senden"}
           </button>
         ) : (
           <p className="text-[12px] leading-relaxed text-slate-500" role="note">

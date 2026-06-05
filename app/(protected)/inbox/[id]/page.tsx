@@ -158,6 +158,8 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
               created_at: submission.created_at,
               is_draft: submission.is_draft,
               intake_channel: submission.intake_channel,
+              practice_status: submission.practice_status,
+              seen_at: submission.seen_at,
               photos: submission.photos.map(
                 ({ id: photoId, sort_order, created_at, signed_url }) => ({
                   id: photoId,

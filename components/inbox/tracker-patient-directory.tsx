@@ -9,6 +9,7 @@ import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
+  TRACKER_FILTER_HINTS,
   countByTrackerFilter,
   formatPatientAgeYears,
   formatTrackerCaseRef,
@@ -149,12 +150,15 @@ export function TrackerPatientDirectory({
             {TRACKER_FILTER_CHIPS.map((chip) => {
               const count = countByTrackerFilter(searchScoped, chip.id);
               const active = filter === chip.id;
+              const hint = TRACKER_FILTER_HINTS[chip.id];
               return (
                 <button
                   key={chip.id}
                   type="button"
                   role="tab"
                   aria-selected={active}
+                  title={hint}
+                  aria-description={hint}
                   className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
                   onClick={() => setFilter(chip.id)}
                 >

@@ -80,8 +80,12 @@ function buildPatientMessageWork(
     wantsPhoto: intent.messageSignals?.wantsPhoto ?? false,
     wantsAppointment: intent.messageSignals?.wantsAppointment ?? false,
     wantsThisWeek: intent.messageSignals?.wantsThisWeek ?? false,
+    wantsToday: intent.messageSignals?.wantsToday ?? false,
+    wantsRuckfrage: intent.messageSignals?.wantsRuckfrage ?? false,
+    wantsWatch: intent.messageSignals?.wantsWatch ?? false,
     wantsTeamHandoff: intent.messageSignals?.wantsTeamHandoff ?? false,
     wantsCallback: intent.messageSignals?.wantsCallback ?? false,
+    ruckfrageTopicId: intent.messageSignals?.ruckfrageTopicId ?? null,
   };
 
   const messageDraft = buildCommandMessageDraft({

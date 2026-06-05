@@ -12,6 +12,11 @@ import { HcPracticeStatus } from "@/components/dashboard/hc/practice-status";
 import { HcRecentTable } from "@/components/dashboard/hc/recent-table";
 import { HcStatCard } from "@/components/dashboard/hc/stat-card";
 import {
+  buildDecisionsKpiValue,
+  buildNewSubmissionsKpiValue,
+  buildPreparedKpiValue,
+} from "@/lib/dashboard/dashboard-status-copy";
+import {
   buildNewSubmissionsWorkContext,
   buildOpenTasksWorkContext,
 } from "@/lib/dashboard/kpi-work-context";
@@ -185,8 +190,10 @@ export default async function DashboardPage() {
       <DashboardMobileShell
         greeting={greeting}
         displayName={doctorLabel}
+        unseenCount={unseenCount}
         openTaskCount={openTaskCount}
         preparedAwaitingCount={preparedAwaitingCount}
+        tasksNeedingDecision={tasksNeedingDecision}
         priorityItems={priorityItems}
         openTasks={openTasks}
       />
@@ -208,29 +215,34 @@ export default async function DashboardPage() {
           <div className="yd-dash-zone yd-dash-zone--kpis yd-dash-kpi-row grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
             <HcStatCard
               href="/inbox"
-              title="Neue Einsendungen"
-              value={unseenCount === null ? "—" : unseenCount}
+              title="Neue Anfragen"
+              value={buildNewSubmissionsKpiValue(unseenCount)}
+              valueVariant="prose"
               iconName="clipboard-list"
-              footnote="Neue Patientenfälle zur Sichtung"
+              footnote="Heute eingegangen"
               workContext={newSubmissionsContext}
-              hoverHint="Patientenfälle, die noch geprüft werden müssen."
+              hoverHint="Neue Patientenanfragen, die noch nicht gesehen wurden."
             />
             <HcStatCard
               href="/inbox"
-              title="AI vorbereitet"
-              value={preparedAwaitingCount === null ? "—" : preparedAwaitingCount}
+              title="Wartet auf Freigabe"
+              value={buildPreparedKpiValue(preparedAwaitingCount)}
+              valueVariant="prose"
               iconName="sparkles"
-              footnote="Antworten & nächste Schritte vorbereitet"
-              hoverHint="Vorbereitete Entwürfe und nächste Schritte — zur Freigabe im Tracker."
+              footnote="Von Ihnen freigeben"
+              hoverHint="Antworten und nächste Schritte warten auf Ihre Freigabe."
             />
             <HcStatCard
               href="/relay"
-              title="Offene Entscheidungen"
-              value={tasksNeedingDecision === null ? openTaskCount : tasksNeedingDecision}
+              title="Patient wartet"
+              value={buildDecisionsKpiValue(
+                tasksNeedingDecision !== null ? tasksNeedingDecision : openTaskCount
+              )}
+              valueVariant="prose"
               iconName="list-todo"
-              footnote="Freigaben durch Sie erforderlich"
+              footnote="Rückmeldung ausstehend"
               workContext={openTasksContext}
-              hoverHint="Vorgänge, die Ihre Freigabe oder Entscheidung benötigen."
+              hoverHint="Patienten, die auf Ihre Antwort warten."
             />
           </div>
         </DashboardAmbientKpis>

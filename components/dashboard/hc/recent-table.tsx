@@ -1,33 +1,15 @@
 import Link from "next/link";
 
-import { MessageDraftStatusBadge } from "@/components/inbox/message-draft-status-badge";
-import { PreparationStatusBlock } from "@/components/command-ai/preparation-status-block";
-import { isSubmissionReadyForReview } from "@/lib/message-drafts/list-status";
 import { HcCard } from "@/components/design/hc-card";
-import { YdStatusPill } from "@/components/design-system/yd-status-pill";
+import {
+  buildDashboardAttentionRowCopy,
+  dashboardRowNeedsAttention,
+} from "@/lib/dashboard/dashboard-status-copy";
 import type { SubmissionPreparation } from "@/lib/command-ai/types";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
 import { YD } from "@/lib/design/yd-design-tokens";
 import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
 import { cn } from "@/lib/utils";
-
-type SubmissionStatus = {
-  label: string;
-  variant: "active" | "calm" | "done" | "pending";
-};
-
-function resolveSubmissionStatus(
-  row: SubmissionPreviewRow,
-  preparation?: SubmissionPreparation
-): SubmissionStatus {
-  if (preparation?.readyForReview) {
-    return { label: "Freigabe ausstehend", variant: "pending" };
-  }
-  if (!row.seen_at) {
-    return { label: "Neu", variant: "active" };
-  }
-  return { label: "In Bearbeitung", variant: "calm" };
-}
 
 type RecentTableProps = {
   rows: SubmissionPreviewRow[] | null;
@@ -38,35 +20,74 @@ type RecentTableProps = {
   compactMobile?: boolean;
 };
 
+function sortAttentionRows(
+  rows: SubmissionPreviewRow[],
+  preparationById: Record<string, SubmissionPreparation>
+): SubmissionPreviewRow[] {
+  return [...rows].sort((a, b) => {
+    const copyA = buildDashboardAttentionRowCopy(a, preparationById[a.id]);
+    const copyB = buildDashboardAttentionRowCopy(b, preparationById[b.id]);
+    if (copyA.priority !== copyB.priority) return copyA.priority - copyB.priority;
+    const aUnseen = !a.seen_at ? 1 : 0;
+    const bUnseen = !b.seen_at ? 1 : 0;
+    if (aUnseen !== bUnseen) return bUnseen - aUnseen;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
+
+function AttentionRow({
+  row,
+  preparation,
+  className,
+}: {
+  row: SubmissionPreviewRow;
+  preparation?: SubmissionPreparation;
+  className?: string;
+}) {
+  const name = row.patient_name?.trim() || "Patient";
+  const issue = deriveSubmissionIssueShortLine(row.patient_notes, row.patient_name, {
+    maxLen: 80,
+    emptyLabel: "Patientenanliegen",
+  });
+  const { preparationLine, actionLabel } = buildDashboardAttentionRowCopy(row, preparation);
+
+  return (
+    <Link
+      href={`/inbox/${row.id}`}
+      prefetch
+      className={cn("yd-dash-attention-row", className)}
+    >
+      <div className="yd-dash-attention-row__main">
+        <p className="yd-dash-attention-row__name">{name}</p>
+        <p className="yd-dash-attention-row__issue">{issue}</p>
+        <p className="yd-dash-attention-row__prep">{preparationLine}</p>
+      </div>
+      <span className="yd-dash-attention-row__action">{actionLabel}</span>
+    </Link>
+  );
+}
+
 export function HcRecentTable({
   rows,
   preparationById = {},
   mobileLimit,
   compactMobile = false,
 }: RecentTableProps) {
-  const columns = ["Patient", "Anliegen", "Vorbereitung", "Status", "Datum", "Aktion"] as const;
-  const orderedRows =
+  const attentionRows =
     rows === null
       ? null
-      : [...rows].sort((a, b) => {
-          const pa = preparationById[a.id];
-          const pb = preparationById[b.id];
-          const aNeeds = pa?.readyForReview ? 1 : 0;
-          const bNeeds = pb?.readyForReview ? 1 : 0;
-          if (aNeeds !== bNeeds) return bNeeds - aNeeds;
-          const aUnseen = !a.seen_at ? 1 : 0;
-          const bUnseen = !b.seen_at ? 1 : 0;
-          if (aUnseen !== bUnseen) return bUnseen - aUnseen;
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        });
+      : sortAttentionRows(
+          rows.filter((row) => dashboardRowNeedsAttention(row, preparationById[row.id])),
+          preparationById
+        );
 
   const mobileRows =
-    orderedRows === null || mobileLimit == null
-      ? orderedRows
-      : orderedRows.slice(0, mobileLimit);
+    attentionRows === null || mobileLimit == null
+      ? attentionRows
+      : attentionRows.slice(0, mobileLimit);
   const mobileOverflow =
-    orderedRows !== null && mobileLimit != null && orderedRows.length > mobileLimit
-      ? orderedRows.length - mobileLimit
+    attentionRows !== null && mobileLimit != null && attentionRows.length > mobileLimit
+      ? attentionRows.length - mobileLimit
       : 0;
 
   return (
@@ -89,14 +110,17 @@ export function HcRecentTable({
         }}
       >
         <div className="min-w-0">
-          <p className="yd-dash-section yd-dash-section--primary">Aktuelle Einsendungen</p>
+          <p className="yd-dash-section yd-dash-section--primary">Aufmerksamkeit benötigt</p>
           {!compactMobile ? (
             <p className="mt-1 text-[11px] font-medium leading-snug" style={{ color: YD.text.muted }}>
-              Vorbereitung wird automatisch erstellt — Sie prüfen und geben frei.
+              Was heute Ihre Entscheidung oder Freigabe erwartet — vollständige Fälle im Tracker.
             </p>
           ) : (
-            <p className="mt-0.5 text-[10px] font-medium leading-snug max-md:block md:hidden" style={{ color: YD.text.muted }}>
-              Zur Durchsicht — Vollständige Liste im Tracker
+            <p
+              className="mt-0.5 text-[10px] font-medium leading-snug max-md:block md:hidden"
+              style={{ color: YD.text.muted }}
+            >
+              Vollständige Liste im Tracker
             </p>
           )}
         </div>
@@ -120,47 +144,20 @@ export function HcRecentTable({
           </div>
         ) : mobileRows.length === 0 ? (
           <div className="yd-mobile-empty">
-            <p className="yd-mobile-empty__title">Keine offenen Vorgänge</p>
+            <p className="yd-mobile-empty__title">Keine dringenden Vorgänge</p>
             <p className="yd-mobile-empty__copy">
-              Alle Patientenfälle sind bearbeitet. Neue Einsendungen erscheinen automatisch hier.
+              Heute liegt nichts vor, das sofort Ihre Aufmerksamkeit benötigt.
             </p>
           </div>
         ) : (
-          <div className="yd-mobile-row-cards">
-            {mobileRows.map((row) => {
-              const name = row.patient_name?.trim() || "Patient";
-              const issue = deriveSubmissionIssueShortLine(row.patient_notes, row.patient_name, {
-                maxLen: 80,
-                emptyLabel: "—",
-              });
-              const date = new Date(row.created_at).toLocaleDateString("de-DE", {
-                day: "2-digit",
-                month: "short",
-              });
-              const preparation = preparationById[row.id];
-              const status = resolveSubmissionStatus(row, preparation);
-              const actionLabel = preparation?.readyForReview ? "Prüfen" : "Fall öffnen";
-
-              return (
-                <Link key={row.id} href={`/inbox/${row.id}`} prefetch className="yd-mobile-row-card">
-                  <div className="yd-mobile-row-card__head">
-                    <p className="yd-mobile-row-card__title">{name}</p>
-                    <YdStatusPill label={status.label} variant={status.variant} className="shrink-0 text-[10px] font-medium" />
-                  </div>
-                  <p className="yd-mobile-row-card__line">{issue}</p>
-                  <div className="yd-mobile-row-card__meta-row">
-                    <MessageDraftStatusBadge
-                      draftStatus={row.message_draft_status ?? "none"}
-                      readyForReview={preparation?.readyForReview ?? isSubmissionReadyForReview(row)}
-                    />
-                  </div>
-                  <div className="yd-mobile-row-card__foot">
-                    <span className="yd-mobile-row-card__date">{date}</span>
-                    <span className="yd-mobile-row-card__cta">{actionLabel}</span>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="yd-dash-attention-list">
+            {mobileRows.map((row) => (
+              <AttentionRow
+                key={row.id}
+                row={row}
+                preparation={preparationById[row.id]}
+              />
+            ))}
           </div>
         )}
         {mobileOverflow > 0 ? (
@@ -170,150 +167,42 @@ export function HcRecentTable({
               prefetch
               className="inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-[rgba(180,198,218,0.32)] bg-[rgba(248,251,254,0.9)] text-[12px] font-semibold text-[#2F80ED] no-underline"
             >
-              {mobileOverflow} weitere {mobileOverflow === 1 ? "Einsendung" : "Einsendungen"} im Tracker
+              {mobileOverflow} weitere {mobileOverflow === 1 ? "Vorgang" : "Vorgänge"} im Tracker
             </Link>
           </div>
         ) : null}
       </div>
 
-      <div className="hidden max-w-full overflow-x-auto overscroll-x-contain md:block">
-        <table className="w-full min-w-[760px] border-collapse text-left">
-          <thead>
-            <tr>
-              {columns.map((col) => (
-                <th
-                  key={col}
-                  className="whitespace-nowrap px-5 py-3 text-[10px] font-medium uppercase tracking-[0.07em] md:px-6"
-                  style={{ color: YD.text.faint }}
-                >
-                  {col}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {orderedRows === null ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-12">
-                  <div className="yd-dash-empty-state mx-auto max-w-sm text-center">
-                    <p className="text-[13px] font-medium" style={{ color: YD.text.primary }}>
-                      Übersicht momentan nicht verfügbar
-                    </p>
-                    <p className="mt-1 text-[12px] leading-relaxed" style={{ color: YD.text.muted }}>
-                      Bitte Seite erneut laden — Ihre Patientenfälle bleiben unverändert.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            ) : orderedRows.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-12">
-                  <div className="yd-dash-empty-state mx-auto max-w-sm text-center">
-                    <p className="text-[13px] font-medium" style={{ color: YD.text.primary }}>
-                      Keine offenen Vorgänge
-                    </p>
-                    <p className="mt-1 text-[12px] leading-relaxed" style={{ color: YD.text.muted }}>
-                      Alle Patientenfälle sind bearbeitet. Neue Einsendungen erscheinen automatisch hier.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              orderedRows.map((row) => {
-                const name = row.patient_name?.trim() || "Patient";
-                const issue = deriveSubmissionIssueShortLine(row.patient_notes, row.patient_name, {
-                  maxLen: 52,
-                  emptyLabel: "—",
-                });
-                const date = new Date(row.created_at).toLocaleDateString("de-DE", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                });
-                const preparation = preparationById[row.id];
-                const status = resolveSubmissionStatus(row, preparation);
-                const actionLabel = preparation?.readyForReview ? "Prüfen" : "Fall öffnen";
-                const doneChecks = preparation?.checks?.filter((c) => c.done).length ?? 0;
-                const prepSummary = preparation
-                  ? preparation.readyForReview
-                    ? "Vorbereitet · Freigabe ausstehend"
-                    : doneChecks > 0
-                      ? `Vorarbeit vorhanden · ${doneChecks} ${doneChecks === 1 ? "Schritt" : "Schritte"}`
-                      : "Noch keine Vorarbeit"
-                  : "Noch keine Vorarbeit";
-
-                return (
-                  <tr
-                    key={row.id}
-                    className="group border-t transition-colors duration-200 hover:bg-[rgba(248,252,255,0.94)]"
-                    style={{ borderColor: "rgba(180, 198, 218, 0.22)" }}
-                  >
-                    <td className="min-w-[128px] px-5 py-3.5 md:px-6">
-                      <span
-                        className="yd-dash-patient-name block truncate text-[13px] font-semibold leading-snug"
-                        style={{ color: YD.text.primary }}
-                      >
-                        {name}
-                      </span>
-                    </td>
-                    <td
-                      className="max-w-[180px] truncate px-5 py-3.5 text-[12px] leading-snug md:px-6"
-                      style={{ color: YD.text.secondary }}
-                      title={issue}
-                    >
-                      {issue}
-                    </td>
-                    <td className="min-w-[168px] max-w-[220px] px-5 py-3.5 md:px-6">
-                      <div className="yd-dash-prep-cell min-w-0">
-                        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                          <span className="yd-dash-prep-summary text-[11px]" style={{ color: YD.text.faint }}>
-                            {prepSummary}
-                          </span>
-                          <MessageDraftStatusBadge
-                            draftStatus={row.message_draft_status ?? "none"}
-                            readyForReview={
-                              preparation?.readyForReview ?? isSubmissionReadyForReview(row)
-                            }
-                          />
-                        </div>
-                        {preparation ? (
-                          <div className="yd-dash-prep-details mt-1">
-                            <PreparationStatusBlock preparation={preparation} compact />
-                          </div>
-                        ) : null}
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 md:px-6">
-                      <YdStatusPill
-                        label={status.label}
-                        variant={status.variant}
-                        className="text-[10px] font-medium"
-                      />
-                    </td>
-                    <td
-                      className="whitespace-nowrap px-5 py-3.5 text-[12px] tabular-nums md:px-6"
-                      style={{ color: YD.text.muted }}
-                    >
-                      {date}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 md:px-6">
-                      <Link
-                        href={`/inbox/${row.id}`}
-                        prefetch
-                        className="yd-dash-table-action text-[12px] font-medium no-underline transition hover:opacity-75"
-                        style={{
-                          color: preparation?.readyForReview ? YD.accent.core : YD.text.secondary,
-                        }}
-                      >
-                        {actionLabel}
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+      <div className="hidden md:block">
+        {attentionRows === null ? (
+          <div className="yd-dash-empty-state px-6 py-12 text-center">
+            <p className="text-[13px] font-medium" style={{ color: YD.text.primary }}>
+              Übersicht momentan nicht verfügbar
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed" style={{ color: YD.text.muted }}>
+              Bitte Seite erneut laden — Ihre Patientenfälle bleiben unverändert.
+            </p>
+          </div>
+        ) : attentionRows.length === 0 ? (
+          <div className="yd-dash-empty-state px-6 py-12 text-center">
+            <p className="text-[13px] font-medium" style={{ color: YD.text.primary }}>
+              Keine dringenden Vorgänge
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed" style={{ color: YD.text.muted }}>
+              Heute liegt nichts vor, das sofort Ihre Aufmerksamkeit benötigt.
+            </p>
+          </div>
+        ) : (
+          <div className="yd-dash-attention-list">
+            {attentionRows.map((row) => (
+              <AttentionRow
+                key={row.id}
+                row={row}
+                preparation={preparationById[row.id]}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </HcCard>
   );

@@ -220,6 +220,29 @@ export const SERVICE_MASTER: ServiceGroup[] = [
   },
 ];
 
+/** Leistungs-Kategorien A–J — patientenverständliche Hauptbereiche im Profil-Editor. */
+export const PROFILE_LEISTUNGEN_PICKER_GROUP_IDS = [
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+] as const;
+
+export function getProfileLeistungenPickerGroups(): ServiceGroup[] {
+  const primary = new Set<string>(PROFILE_LEISTUNGEN_PICKER_GROUP_IDS);
+  const primaryGroups = PROFILE_LEISTUNGEN_PICKER_GROUP_IDS.map((id) =>
+    SERVICE_MASTER.find((group) => group.id === id)
+  ).filter((group): group is ServiceGroup => Boolean(group));
+  const extendedGroups = SERVICE_MASTER.filter((group) => !primary.has(group.id));
+  return [...primaryGroups, ...extendedGroups];
+}
+
 export function findServiceById(
   id: string
 ): { service: ServiceOption; group: ServiceGroup } | null {

@@ -18,7 +18,7 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
     return {
       eyebrow: "Praxisüberblick",
-      subtitle: "Praxis aktiv · Vorgänge und Patienten im Überblick",
+      subtitle: "Was heute Ihre Aufmerksamkeit benötigt",
       showSearch: true,
     };
   }

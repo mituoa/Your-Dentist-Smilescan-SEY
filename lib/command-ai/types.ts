@@ -34,6 +34,10 @@ export type CommandMessageSignals = {
   wantsPhoto: boolean;
   wantsAppointment: boolean;
   wantsThisWeek: boolean;
+  wantsToday?: boolean;
+  wantsRuckfrage?: boolean;
+  wantsWatch?: boolean;
+  ruckfrageTopicId?: string | null;
   wantsTeamHandoff: boolean;
   wantsCallback?: boolean;
 };

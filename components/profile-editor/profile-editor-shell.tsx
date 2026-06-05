@@ -676,7 +676,7 @@ export function ProfileEditorShell({
 
                 <ProfileEditorSection
                   id="fach"
-                  title="Fachbereiche"
+                  title="Schwerpunkte"
                   summary={sectionSummaries.fach}
                   isOpen={openSection === "fach"}
                   onToggle={() => openEditorSection("fach")}

@@ -306,6 +306,21 @@
   line-height: 1;
 }
 
+.yd-dashboard .yd-dash-kpi--prose {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.35;
+  color: #0b1828;
+  font-variant-numeric: normal;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-kpi--prose {
+    font-size: 1.125rem;
+  }
+}
+
 @media (min-width: 768px) {
   .yd-dashboard .yd-dash-kpi--balanced {
     font-size: 2.55rem;
@@ -326,6 +341,76 @@
 
 .yd-dashboard .yd-dash-table-action {
   letter-spacing: -0.01em;
+}
+
+.yd-dashboard .yd-dash-attention-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.yd-dashboard .yd-dash-attention-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(180, 198, 218, 0.22);
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+
+@media (min-width: 768px) {
+  .yd-dashboard .yd-dash-attention-row {
+    padding: 1.125rem 1.5rem;
+  }
+}
+
+.yd-dashboard .yd-dash-attention-row:first-child {
+  border-top: none;
+}
+
+@media (hover: hover) {
+  .yd-dashboard .yd-dash-attention-row:hover {
+    background: rgba(248, 252, 255, 0.94);
+  }
+}
+
+.yd-dashboard .yd-dash-attention-row__main {
+  min-width: 0;
+  flex: 1;
+}
+
+.yd-dashboard .yd-dash-attention-row__name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: #0f172a;
+}
+
+.yd-dashboard .yd-dash-attention-row__issue {
+  margin: 0.25rem 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.yd-dashboard .yd-dash-attention-row__prep {
+  margin: 0.375rem 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.yd-dashboard .yd-dash-attention-row__action {
+  flex-shrink: 0;
+  align-self: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #2f80ed;
 }
 
 .yd-dashboard .yd-dash-interactive-card {

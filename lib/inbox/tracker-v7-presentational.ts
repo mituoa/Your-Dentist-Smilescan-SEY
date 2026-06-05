@@ -4,6 +4,7 @@
  */
 import { formatBirthDateDe } from "@/lib/inbox/tracker-overview-status";
 import {
+  clinicalRiskSubTier,
   hasPhotoTrail,
   isApprovalPending,
   type EnrichedSubmissionListItem,
@@ -185,6 +186,8 @@ export function sortTrackerQueueItems(
   return [...items].sort((a, b) => {
     const diff = score(a) - score(b);
     if (diff !== 0) return diff;
+    const riskDiff = clinicalRiskSubTier(a) - clinicalRiskSubTier(b);
+    if (riskDiff !== 0) return riskDiff;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 }

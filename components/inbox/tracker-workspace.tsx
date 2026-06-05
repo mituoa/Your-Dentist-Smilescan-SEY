@@ -1,3 +1,5 @@
+import { TrackerCaseMetaControls } from "@/components/inbox/tracker-case-meta-controls";
+import { TrackerWorkflowProvider } from "@/components/inbox/tracker-workflow-context";
 import { TrackerCaseTimeline } from "@/components/inbox/tracker-case-timeline";
 import { TrackerDraftWorkspace } from "@/components/inbox/tracker-draft-workspace";
 import { TrackerPatientHeader } from "@/components/inbox/tracker-patient-header";
@@ -5,7 +7,7 @@ import { TrackerPhotoStage } from "@/components/inbox/tracker-photo-stage";
 import { TrackerPraxisAssistent } from "@/components/inbox/tracker-praxis-assistent";
 import { TrackerUrgencyChips } from "@/components/inbox/tracker-urgency-chips";
 import { deriveSubmissionConcernDisplay } from "@/lib/inbox/derive-submission-issue-short-line";
-import { buildTrackerCaseTimeline } from "@/lib/inbox/build-tracker-workspace";
+import { buildTrackerCaseTimelineSections } from "@/lib/inbox/build-tracker-workspace";
 import type { OutboundMessageRow } from "@/lib/outbound-messages/types";
 import {
   isApprovalPending,
@@ -31,6 +33,8 @@ type TrackerWorkspaceProps = {
     created_at: string;
     is_draft: boolean;
     intake_channel: IntakeChannel;
+    practice_status?: string | null;
+    seen_at?: string | null;
     photos: {
       id: string;
       sort_order: number;
@@ -92,13 +96,13 @@ export function TrackerWorkspace({
     urgency: submission.urgency,
     is_draft: submission.is_draft,
     created_at: submission.created_at,
-    seen_at: null,
+    seen_at: submission.seen_at ?? null,
     photo_count: submission.photos.length,
     message_draft_status: messageDraftStatus,
     intake_channel: submission.intake_channel,
     open_task_count: openTaskCount,
     photo_documentation: null,
-    practice_status: null,
+    practice_status: submission.practice_status ?? null,
     photo_request_requested_at: null,
     follow_up_series_id: null,
   };
@@ -107,7 +111,7 @@ export function TrackerWorkspace({
     submission.photos.length >= 2 && hasMultiDayPhotos(submission.photos);
   const approvalPending = isApprovalPending(statusRow);
 
-  const timeline = buildTrackerCaseTimeline({
+  const timelineSections = buildTrackerCaseTimelineSections({
     createdAt: submission.created_at,
     photos: submission.photos,
     patientNotes: submission.patient_notes,
@@ -140,6 +144,7 @@ export function TrackerWorkspace({
     editableMessageDraft?.body?.trim() || historyMessageDraft?.body?.trim() || null;
 
   return (
+    <TrackerWorkflowProvider>
     <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v12-workspace yd-tracker-v14-workspace yd-tracker-v15-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
@@ -149,6 +154,12 @@ export function TrackerWorkspace({
         concern={concern || null}
         createdAt={submission.created_at}
         isDraft={submission.is_draft}
+      />
+      <TrackerCaseMetaControls
+        submissionId={submission.id}
+        practiceStatus={submission.practice_status ?? null}
+        seenAt={submission.seen_at ?? null}
+        className="mb-3 px-1"
       />
 
       <div className="yd-tracker-v8-clinical-row">
@@ -218,10 +229,10 @@ export function TrackerWorkspace({
           <details className="yd-tracker-v6-docs" open={false}>
             <summary>Dokumentation & Verlauf</summary>
             <div className="yd-tracker-v6-docs__body">
-              <TrackerCaseTimeline events={timeline} className="yd-tracker-v4-timeline--deferred" />
+              <TrackerCaseTimeline sections={timelineSections} className="yd-tracker-v4-timeline--deferred" />
               {note ? (
-                <details className="yd-tracker-v4-note yd-tracker-v4-note--original">
-                  <summary>Originalanliegen</summary>
+                <details className="yd-tracker-v4-note yd-tracker-v4-note--original" open>
+                  <summary>Vollständiges Originalanliegen</summary>
                   <p className="yd-tracker-v4-note__text">{note}</p>
                 </details>
               ) : null}
@@ -259,5 +270,6 @@ export function TrackerWorkspace({
           </details>
       </div>
     </div>
+    </TrackerWorkflowProvider>
   );
 }

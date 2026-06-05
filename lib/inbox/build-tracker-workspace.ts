@@ -65,6 +65,109 @@ function formatTimelineDate(iso: string): string {
   });
 }
 
+export type TrackerTimelineSection = {
+  id: string;
+  title: string;
+  events: TrackerTimelineEvent[];
+};
+
+export function buildTrackerCaseTimelineSections(input: {
+  createdAt: string;
+  photos: { id: string; created_at: string }[];
+  patientNotes: string | null;
+  messageDraftStatus?: MessageDraftListStatus;
+  isApprovalPending?: boolean;
+  outboundSent?: { id: string; message_kind: OutboundMessageKind; sent_at: string | null }[];
+}): TrackerTimelineSection[] {
+  const note = input.patientNotes?.trim();
+  const sections: TrackerTimelineSection[] = [];
+
+  sections.push({
+    id: "intake",
+    title: "Originalanliegen",
+    events: [
+      {
+        id: "intake",
+        dateLabel: formatTimelineDate(input.createdAt),
+        title: "Anfrage eingegangen",
+        detail:
+          note && note.length > 24
+            ? note.length > 120
+              ? `${note.slice(0, 120).trimEnd()}…`
+              : note
+            : undefined,
+      },
+    ],
+  });
+
+  const sorted = [...input.photos].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+  const photoEvents: TrackerTimelineEvent[] = [];
+  const patientReplyEvents: TrackerTimelineEvent[] = [];
+  const byDay = new Map<string, { ids: string[]; iso: string }>();
+  for (const photo of sorted) {
+    const key = photo.created_at.slice(0, 10);
+    const prev = byDay.get(key);
+    if (prev) prev.ids.push(photo.id);
+    else byDay.set(key, { ids: [photo.id], iso: photo.created_at });
+  }
+  const dayKeys = [...byDay.keys()].sort();
+  const firstDayKey = dayKeys[0];
+  for (const key of dayKeys) {
+    const group = byDay.get(key)!;
+    const count = group.ids.length;
+    const event: TrackerTimelineEvent = {
+      id: `photo-${group.iso}`,
+      dateLabel: formatTimelineDate(group.iso),
+      title: count === 1 ? "Bilder erhalten" : `${count} Bilder erhalten`,
+    };
+    if (key === firstDayKey) {
+      photoEvents.push(event);
+    } else {
+      patientReplyEvents.push({
+        ...event,
+        id: `patient-reply-${group.iso}`,
+        title:
+          count === 1
+            ? "Patientenantwort — neues Bild"
+            : `Patientenantwort — ${count} neue Bilder`,
+      });
+    }
+  }
+  if (photoEvents.length > 0) {
+    sections.push({ id: "photos", title: "Fotos", events: photoEvents });
+  }
+  if (patientReplyEvents.length > 0) {
+    sections.push({
+      id: "patient_replies",
+      title: "Patientenantworten",
+      events: patientReplyEvents,
+    });
+  }
+
+  const outboundEvents: TrackerTimelineEvent[] = [];
+  const sentOutbound = (input.outboundSent ?? []).filter((m) => m.sent_at);
+  for (const msg of sentOutbound) {
+    outboundEvents.push({
+      id: `outbound-${msg.id}`,
+      dateLabel: formatTimelineDate(msg.sent_at!),
+      title: outboundKindTimelineTitle(msg.message_kind),
+    });
+  }
+
+  if (outboundEvents.length > 0) {
+    sections.push({
+      id: "outbound",
+      title: "Versandte Nachrichten",
+      events: outboundEvents,
+    });
+  }
+
+  return sections;
+}
+
+/** @deprecated Nutze buildTrackerCaseTimelineSections für gruppierte Dokumentation. */
 export function buildTrackerCaseTimeline(input: {
   createdAt: string;
   photos: { id: string; created_at: string }[];
@@ -124,7 +227,7 @@ export function buildTrackerCaseTimeline(input: {
     events.push({
       id: "draft-ready",
       dateLabel: "Heute",
-      title: "Entwurf bereit",
+      title: "Vorschlag für Patientenantwort formuliert",
     });
   }
 

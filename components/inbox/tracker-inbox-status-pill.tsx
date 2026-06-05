@@ -8,9 +8,11 @@ import {
   type InboxPracticeStatusValue,
 } from "@/app/(protected)/inbox/[id]/actions";
 import {
-  INBOX_PRACTICE_STATUS_OPTIONS,
-  type InboxPracticeStatusId,
-} from "@/lib/inbox/tracker-v9-clinical";
+  TRACKER_ENTERPRISE_STATUS_OPTIONS,
+  displayPracticeStatusForCase,
+  enterpriseStatusLabel,
+} from "@/lib/inbox/tracker-enterprise-status";
+import type { InboxPracticeStatusId } from "@/lib/inbox/tracker-v9-clinical";
 import { cn } from "@/lib/utils";
 
 type TrackerInboxStatusPillProps = {
@@ -31,8 +33,8 @@ export function TrackerInboxStatusPill({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const label =
-    INBOX_PRACTICE_STATUS_OPTIONS.find((o) => o.id === status)?.label ?? status;
+  const displayStatus = displayPracticeStatusForCase(status);
+  const label = enterpriseStatusLabel(displayStatus);
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +49,7 @@ export function TrackerInboxStatusPill({
 
   const apply = (next: InboxPracticeStatusValue) => {
     if (pending) return;
-    if (next === status) {
+    if (next === displayStatus) {
       setOpen(false);
       return;
     }
@@ -75,7 +77,7 @@ export function TrackerInboxStatusPill({
         type="button"
         className={cn(
           "yd-tracker-v10-inbox-status__trigger",
-          `yd-tracker-v10-inbox-status__trigger--${status}`,
+          `yd-tracker-v10-inbox-status__trigger--${displayStatus}`,
           open && "yd-tracker-v10-inbox-status__trigger--open",
           pending && "yd-tracker-v10-inbox-status__trigger--pending"
         )}
@@ -90,10 +92,10 @@ export function TrackerInboxStatusPill({
         <div
           className="yd-tracker-v10-inbox-status__segments"
           role="listbox"
-          aria-label="Praxisstatus"
+          aria-label="Fallstatus"
         >
-          {INBOX_PRACTICE_STATUS_OPTIONS.map((opt) => {
-            const isActive = opt.id === status;
+          {TRACKER_ENTERPRISE_STATUS_OPTIONS.map((opt) => {
+            const isActive = opt.id === displayStatus;
             return (
               <button
                 key={opt.id}

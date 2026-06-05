@@ -17,7 +17,6 @@ export function buildFollowUpDraft(params: {
   appointmentUrl: string | null;
 }): string {
   const name = params.patientName.trim() || "Patient";
-  const tel = params.practicePhone.trim() || "[Praxisnummer]";
   const link = params.appointmentUrl?.trim();
 
   const timing =
@@ -36,7 +35,7 @@ export function buildFollowUpDraft(params: {
   return (
     `Sehr geehrte/r ${name},\n\n` +
     `vielen Dank für Ihre Einsendung. ${timing}\n\n` +
-    `Bitte kontaktieren Sie uns telefonisch unter ${tel} oder nutzen Sie unseren Online-Termin.\n` +
+    `Bitte buchen Sie Ihren Termin über unsere Online-Terminbuchung:\n` +
     `${linkLine}\n\n` +
     `Mit freundlichen Grüßen\n` +
     `Ihr Praxisteam`
@@ -93,6 +92,11 @@ export const FOLLOW_UP_SNIPPETS: { id: string; label: string; text: string }[] =
     id: "custom",
     label: "Freitext",
     text: "[Ihre Rückfrage hier formulieren]",
+  },
+  {
+    id: "info_request",
+    label: "Allgemeine Rückfrage",
+    text: "Bitte teilen Sie uns noch folgende Informationen mit, damit wir Ihr Anliegen sicher einordnen können.",
   },
 ];
 
@@ -211,7 +215,6 @@ export function buildRuckfrageDraftForSnippet(
   }
 ): string {
   const name = params.patientName.trim() || "Patient";
-  const tel = params.practicePhone.trim() || "[Praxisnummer]";
   const link = params.appointmentUrl?.trim();
   const linkLine = link
     ? `Online-Terminbuchung: ${link}`
@@ -225,12 +228,58 @@ export function buildRuckfrageDraftForSnippet(
     `vielen Dank für Ihre Einsendung. ${timingLine(params.urgency)}\n\n` +
     `Damit wir Sie bestmöglich beraten können, bitten wir Sie um eine kurze Rückmeldung:\n\n` +
     `${core}\n\n` +
-    `Sie erreichen uns telefonisch unter ${tel}. Gerne können Sie auch unseren Online-Termin nutzen:\n` +
+    `Bitte antworten Sie uns über den Patienteneingang. Bei Bedarf können Sie auch direkt einen Termin buchen:\n` +
     `${linkLine}\n\n` +
     `Mit freundlichen Grüßen\n` +
     `Ihr Praxisteam`
   );
 }
+
+/** Allgemeine Rückfrage ohne festen Textbaustein — Dringlichkeit fließt in den Entwurf ein. */
+export function buildGenericRuckfrageDraft(params: {
+  patientName: string;
+  urgency: UrgencyKey;
+  appointmentUrl: string | null;
+}): string {
+  return buildRuckfrageDraftForSnippet("info_request", {
+    patientName: params.patientName,
+    urgency: params.urgency,
+    practicePhone: "",
+    appointmentUrl: params.appointmentUrl,
+  });
+}
+
+/** Beobachten — Verlauf abwarten, bei Verschlechterung Termin. */
+export function buildBeobachtenDraft(params: {
+  patientName: string;
+  appointmentUrl: string | null;
+}): string {
+  const name = params.patientName.trim() || "Patient";
+  const link = params.appointmentUrl?.trim();
+  const linkLine = link
+    ? `Online-Terminbuchung: ${link}`
+    : "Online-Terminbuchung: [Link einfügen]";
+
+  return (
+    `Sehr geehrte/r ${name},\n\n` +
+    `vielen Dank für Ihre Einsendung. Wir empfehlen, den Verlauf vorerst zu beobachten.\n\n` +
+    `Bitte melden Sie sich, falls sich die Beschwerden verschlechtern oder neue Symptome auftreten. ` +
+    `In diesem Fall buchen Sie bitte umgehend einen Termin:\n` +
+    `${linkLine}\n\n` +
+    `Mit freundlichen Grüßen\n` +
+    `Ihr Praxisteam`
+  );
+}
+
+/** Kompakte Chip-Labels für die Entscheidungsleiste (Progressive Disclosure). */
+export const TRACKER_RUCKFRAGE_RAIL_CHIPS: { id: RuckfrageTopicId; label: string }[] = [
+  { id: "pain", label: "Schmerzen?" },
+  { id: "course", label: "Seit wann?" },
+  { id: "swelling", label: "Schwellung?" },
+  { id: "fever", label: "Fieber?" },
+  { id: "meds", label: "Medikamente?" },
+  { id: "photo", label: "Weiteres Foto?" },
+];
 
 export type AssistQuickActionId =
   | "invite_today"
@@ -257,7 +306,6 @@ export function buildTerminOfferDraft(params: {
   appointmentUrl: string | null;
 }): string {
   const name = params.patientName.trim() || "Patient";
-  const tel = params.practicePhone.trim() || "[Praxisnummer]";
   const link = params.appointmentUrl?.trim();
   const linkLine = link
     ? `Online-Terminbuchung: ${link}`
@@ -284,7 +332,7 @@ export function buildTerminOfferDraft(params: {
   return (
     `Sehr geehrte/r ${name},\n\n` +
     `vielen Dank für Ihre Einsendung. ${recommendation}\n\n` +
-    `${timing} Bitte kontaktieren Sie uns unter ${tel} oder nutzen Sie unseren Online-Termin:\n` +
+    `${timing} Bitte buchen Sie Ihren Termin über unsere Online-Terminbuchung:\n` +
     `${linkLine}\n\n` +
     `Mit freundlichen Grüßen\n` +
     `Ihr Praxisteam`

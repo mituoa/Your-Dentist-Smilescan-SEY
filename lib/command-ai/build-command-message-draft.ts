@@ -1,4 +1,5 @@
 import {
+  buildBeobachtenDraft,
   buildFollowUpDraft,
   buildRuckfrageDraftForSnippet,
   type UrgencyKey,
@@ -66,18 +67,42 @@ export function buildCommandMessageDraft(params: CommandMessageDraftParams): str
   const linkLine = link ? `Online-Termin: ${link}` : "Online-Termin: [Link einfügen]";
   const replyIntent = params.replyIntent;
 
-  const urgency: UrgencyKey = params.signals.wantsThisWeek
-    ? "this_week"
-    : params.submissionUrgency === "today"
-      ? "today"
-      : params.submissionUrgency === "this_week"
-        ? "this_week"
-        : params.signals.wantsAppointment
-          ? "this_week"
-          : params.submissionUrgency ?? "not_urgent";
+  const urgency: UrgencyKey = params.signals.wantsToday
+    ? "today"
+    : params.signals.wantsThisWeek
+      ? "this_week"
+      : params.submissionUrgency === "today"
+        ? "today"
+        : params.submissionUrgency === "within_24h"
+          ? "within_24h"
+          : params.submissionUrgency === "this_week"
+            ? "this_week"
+            : params.signals.wantsAppointment
+              ? "this_week"
+              : params.submissionUrgency ?? "not_urgent";
 
   if (replyIntent === "prepare_callback" || params.signals.wantsCallback) {
     return buildCallbackPrepareDraft({ patientName: name, practicePhone: tel });
+  }
+
+  if (replyIntent === "watch_and_observe" || params.signals.wantsWatch) {
+    return buildBeobachtenDraft({
+      patientName: name,
+      appointmentUrl: params.appointmentUrl,
+    });
+  }
+
+  if (
+    replyIntent === "request_ruckfrage" ||
+    params.signals.wantsRuckfrage
+  ) {
+    const snippetId = params.signals.ruckfrageTopicId ?? "info_request";
+    return buildRuckfrageDraftForSnippet(snippetId, {
+      patientName: name,
+      urgency,
+      practicePhone: tel,
+      appointmentUrl: params.appointmentUrl,
+    });
   }
 
   if (replyIntent === "request_photo" || (params.signals.wantsPhoto && !params.signals.wantsAppointment)) {
@@ -121,7 +146,11 @@ export function buildCommandMessageDraft(params: CommandMessageDraftParams): str
   ) {
     return buildFollowUpDraft({
       patientName: name,
-      urgency: params.signals.wantsThisWeek ? "this_week" : urgency,
+      urgency: params.signals.wantsToday
+        ? "today"
+        : params.signals.wantsThisWeek
+          ? "this_week"
+          : urgency,
       practicePhone: tel,
       appointmentUrl: params.appointmentUrl,
     });

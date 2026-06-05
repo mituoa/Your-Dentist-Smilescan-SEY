@@ -33,7 +33,12 @@ export type PersistCommandMessageDraftResult =
   | { ok: false; error: string };
 
 function toUrgencyKey(urgency: string | null | undefined): UrgencyKey {
-  if (urgency === "today" || urgency === "this_week" || urgency === "not_urgent") {
+  if (
+    urgency === "today" ||
+    urgency === "within_24h" ||
+    urgency === "this_week" ||
+    urgency === "not_urgent"
+  ) {
     return urgency;
   }
   return null;

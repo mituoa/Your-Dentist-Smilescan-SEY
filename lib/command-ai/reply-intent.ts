@@ -3,6 +3,8 @@ import type { MessageSignals } from "./message-signals";
 /** Antwort-Intent für persistente Patientenentwürfe (Command AI). */
 export type CommandReplyIntent =
   | "offer_appointment"
+  | "request_ruckfrage"
+  | "watch_and_observe"
   | "request_photo"
   | "prepare_callback"
   | "general_reply";
@@ -23,6 +25,23 @@ export function resolveCommandReplyIntent(
 
   if (signals.wantsCallback) {
     return "prepare_callback";
+  }
+
+  if (
+    signals.wantsWatch ||
+    /(beobachten|beobachtung|abwarten|verlauf).*(lassen|empfehl|weiter)/.test(t) ||
+    /(verschlechterung|schlechter).*(termin|melden|praxis)/.test(t)
+  ) {
+    return "watch_and_observe";
+  }
+
+  if (
+    signals.wantsRuckfrage ||
+    /(nach|wegen|bezüglich|zu).*(fieber|temperatur|schmerz|schwellung|medikament)/.test(t) ||
+    /(fragen|nachfragen|rückfrage).*(fieber|temperatur|schmerz|schwellung)/.test(t) ||
+    /bitte.*(fragen|nachfragen)/.test(t)
+  ) {
+    return "request_ruckfrage";
   }
 
   if (signals.wantsPhoto && !signals.wantsAppointment) {

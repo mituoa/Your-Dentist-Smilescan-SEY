@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronRight, Plus } from "lucide-react";
-import { SERVICE_MASTER, findServiceById } from "@/lib/masterdata/services";
+import { getProfileLeistungenPickerGroups, findServiceById } from "@/lib/masterdata/services";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 import { ServiceItemEditor } from "./service-item-editor";
 import { Input } from "@/components/ui/input";
@@ -110,7 +110,7 @@ export function SectionServices({ services, onUpdate }: SectionServicesProps) {
           Aus Kategorien wählen
         </div>
         <div className="space-y-2">
-          {SERVICE_MASTER.map((group) => {
+          {getProfileLeistungenPickerGroups().map((group) => {
             const isOpen = selectedGroups.includes(group.id);
             return (
               <div key={group.id} className="border border-border rounded">

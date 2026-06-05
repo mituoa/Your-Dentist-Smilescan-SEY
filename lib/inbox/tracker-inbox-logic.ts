@@ -80,7 +80,7 @@ export const TRACKER_OPTIONAL_FILTER_CHIPS: TrackerFilterChip[] = [
 
 export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
   all: "Keine offene Arbeit in der Arbeitsliste.",
-  waiting_on_me: "Keine Fälle warten auf Ihre Entscheidung.",
+  waiting_on_me: "Keine Fälle warten auf Ihre Entscheidung oder Freigabe.",
   patient_waiting: "Kein Patient wartet derzeit auf die Praxis.",
   in_progress: "Keine Fälle in Bearbeitung.",
   completed: "Keine erledigten Fälle in dieser Ansicht.",
@@ -95,6 +95,18 @@ export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
   follow_up: "Keine aktiven Verlaufskontrollen.",
   rueckfrage: "Keine offenen Rückfragen.",
   practice_cases: "Keine Praxisfälle ohne Patienteneingang.",
+};
+
+/** Kurz erklärt, was ein Filter meint (Tooltip / aria-description). */
+export const TRACKER_FILTER_HINTS: Partial<Record<TrackerInboxFilter, string>> = {
+  all: "Alle offenen Fälle — erledigte sind ausgeblendet.",
+  waiting_on_me:
+    "Ihre Entscheidung oder Freigabe: neue Eingänge, Antworten zur Freigabe, noch nicht gesichtet.",
+  patient_waiting: "Antwort freigegeben oder vorbereitet — Patient wartet auf Versand oder Rückmeldung.",
+  in_progress: "Praxis arbeitet am Fall oder wartet auf Patientendaten.",
+  completed: "Abgeschlossen oder beantwortet — nur zur Nachsicht.",
+  today: "Heute eingegangen und noch offen.",
+  overdue: "Offen seit mehr als 48 Stunden — zeitnah bearbeiten.",
 };
 
 export function isApprovalPending(item: EnrichedSubmissionListItem): boolean {
@@ -283,6 +295,65 @@ function isArchivedCompleted(item: EnrichedSubmissionListItem): boolean {
   return item.message_draft_status === "sent" && Boolean(item.seen_at);
 }
 
+function noteMentionsClinicalFever(notes: string): boolean {
+  return /fieber|temperatur|wärme|heiß/i.test(notes);
+}
+
+function noteMentionsClinicalSwelling(notes: string): boolean {
+  return /schwell|anschwell|geschwollen/i.test(notes);
+}
+
+function noteMentionsClinicalPain(notes: string): boolean {
+  return /schmerz|weh|druck|pochend/i.test(notes);
+}
+
+function noteMentionsClinicalBleeding(notes: string): boolean {
+  return /blut|blutung/i.test(notes);
+}
+
+function isRoutineClinicalCase(item: EnrichedSubmissionListItem, notes: string): boolean {
+  if (item.intake_channel === "follow_up") return true;
+  return (
+    /bleaching|aufhell|kontrolle nach|nachsorge|verlaufskontrolle|kontrolltermin/i.test(
+      notes
+    ) &&
+    !noteMentionsClinicalPain(notes) &&
+    !noteMentionsClinicalSwelling(notes) &&
+    !noteMentionsClinicalFever(notes)
+  );
+}
+
+/**
+ * Fein-Sortierung nach klinischem Risiko aus Anliegen (ohne neue UI-Farben).
+ * Niedrigere Zahl = höhere Priorität innerhalb gleicher Aufmerksamkeitsstufe.
+ */
+export function clinicalRiskSubTier(item: EnrichedSubmissionListItem): number {
+  const notes = item.patient_notes ?? "";
+
+  if (noteMentionsClinicalFever(notes) && noteMentionsClinicalSwelling(notes)) {
+    return 0;
+  }
+  if (
+    noteMentionsClinicalFever(notes) ||
+    (noteMentionsClinicalPain(notes) && noteMentionsClinicalSwelling(notes))
+  ) {
+    return 1;
+  }
+  if (
+    noteMentionsClinicalPain(notes) ||
+    noteMentionsClinicalSwelling(notes) ||
+    noteMentionsClinicalBleeding(notes)
+  ) {
+    return 2;
+  }
+  if (item.urgency === "today") return 3;
+  if (item.urgency === "within_24h") return 4;
+  if (item.urgency === "this_week") return 5;
+  if (isRoutineClinicalCase(item, notes)) return 8;
+  if (item.urgency === "not_urgent") return 7;
+  return 6;
+}
+
 /** Tagesliste: Handlungsbedarf oben, erledigt unten. */
 function priorityTier(item: EnrichedSubmissionListItem): number {
   const tier = trackerInboxAttentionTier(item);
@@ -299,6 +370,8 @@ export function sortTrackerInboxItems(
   return [...items].sort((a, b) => {
     const tierDiff = priorityTier(a) - priorityTier(b);
     if (tierDiff !== 0) return tierDiff;
+    const riskDiff = clinicalRiskSubTier(a) - clinicalRiskSubTier(b);
+    if (riskDiff !== 0) return riskDiff;
     const archivedDiff = Number(isArchivedCompleted(a)) - Number(isArchivedCompleted(b));
     if (archivedDiff !== 0) return archivedDiff;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();

@@ -8,6 +8,7 @@ import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
+  TRACKER_FILTER_HINTS,
   TRACKER_OPTIONAL_FILTER_CHIPS,
   countByTrackerFilter,
   inboxUrgencyVisualTier,
@@ -99,12 +100,15 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
               {[...TRACKER_FILTER_CHIPS, ...optionalChips].map((chip) => {
                 const count = countByTrackerFilter(searchScoped, chip.id);
                 const active = filter === chip.id;
+                const hint = TRACKER_FILTER_HINTS[chip.id];
                 return (
                   <button
                     key={chip.id}
                     type="button"
                     role="tab"
                     aria-selected={active}
+                    title={hint}
+                    aria-description={hint}
                     className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
                     onClick={() => setFilter(chip.id)}
                   >
@@ -141,6 +145,8 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
               const timeLabel = formatTrackerRelativeIngress(item.created_at);
               const urgencyTier = inboxUrgencyVisualTier(item.urgency);
 
+              const isFresh = !item.seen_at && !item.is_draft;
+
               return (
                 <li key={item.id}>
                   <div
@@ -154,6 +160,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                       "yd-tracker-v16-inbox-card",
                       `yd-tracker-v15-inbox-card--urgency-${urgencyTier}`,
                       `yd-tracker-v16-inbox-card--attention-${attention}`,
+                      isFresh && "yd-tracker-v15-inbox-card--fresh",
                       isActive && "yd-tracker-v4-inbox-card--active",
                       isActive && "yd-tracker-v8-inbox-card--active",
                       isActive && "yd-tracker-v10-inbox-card--active",
@@ -181,6 +188,14 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                           <span className="yd-tracker-v16-inbox-card__headline">
                             {work.headline}
                           </span>
+                          {isFresh ? (
+                            <span
+                              className="yd-tracker-v14-inbox-card__fresh-badge"
+                              aria-label="Neu"
+                            >
+                              Neu
+                            </span>
+                          ) : null}
                           <span className="yd-tracker-v16-inbox-card__time">{timeLabel}</span>
                         </span>
                         <span className="yd-tracker-v16-inbox-card__patient">{patientName}</span>

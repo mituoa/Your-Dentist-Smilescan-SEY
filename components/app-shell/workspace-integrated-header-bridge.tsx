@@ -7,6 +7,7 @@ import {
   resolveWorkspaceGreeting,
   resolveWorkspaceIntegratedHeader,
 } from "@/lib/app-shell/workspace-integrated-header-context";
+import type { DashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
 import type { TrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -21,6 +22,7 @@ type WorkspaceIntegratedHeaderBridgeProps = {
   avatarUrl?: string | null;
   inboxCount?: number;
   trackerHeaderSummary?: TrackerHeaderSummary | null;
+  dashboardHeaderSummary?: DashboardHeaderSummary | null;
 };
 
 /** Route-aware integrierte Headline — Desktop md+, ersetzt die alte Toolbar. */
@@ -33,14 +35,18 @@ export function WorkspaceIntegratedHeaderBridge({
   avatarUrl,
   inboxCount,
   trackerHeaderSummary,
+  dashboardHeaderSummary,
 }: WorkspaceIntegratedHeaderBridgeProps) {
   const pathname = usePathname() || "";
   const ctx = resolveWorkspaceIntegratedHeader(pathname);
   const onTracker = pathname.startsWith("/inbox");
+  const onDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const subtitle =
     onTracker && trackerHeaderSummary
       ? trackerHeaderSummary.lead
-      : ctx.subtitle;
+      : onDashboard && dashboardHeaderSummary
+        ? dashboardHeaderSummary.subtitle
+        : ctx.subtitle;
   const subtitleMeta =
     onTracker && trackerHeaderSummary
       ? trackerHeaderSummary.breakdown

@@ -50,7 +50,7 @@ export function MorningBriefing({ briefing }: MorningBriefingProps) {
           href="/inbox"
           className="inline-flex shrink-0 items-center justify-center rounded-xl border border-[rgba(22,61,122,0.2)] bg-gradient-to-b from-[#2a5f9e] to-[#163d7a] px-4 py-2.25 text-[13px] font-medium text-white shadow-[0_2px_10px_rgba(22,61,122,0.22)] transition-[box-shadow,filter] hover:brightness-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(22,61,122,0.28)]"
         >
-          Überblick öffnen
+          Tracker öffnen
         </Link>
       </div>
     </section>

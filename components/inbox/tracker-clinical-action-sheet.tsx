@@ -93,7 +93,7 @@ function toUrgencyKey(urgency: string | null): UrgencyKey {
 function AssistReadyBanner({ canSend }: { canSend: boolean }) {
   return (
     <div className="yd-tracker-v13-assist-ready" role="status">
-      <p className="yd-tracker-v13-assist-ready__title">Entwurf bereit</p>
+      <p className="yd-tracker-v13-assist-ready__title">Vorschlag für Patientenantwort</p>
       <p className="yd-tracker-v13-assist-ready__hint">
         {canSend
           ? "Bitte prüfen und anpassen — Versand erfolgt erst nach Ihrer Bestätigung."

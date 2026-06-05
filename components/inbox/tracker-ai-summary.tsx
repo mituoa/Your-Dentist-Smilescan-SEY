@@ -40,7 +40,7 @@ export function TrackerAiSummary({
       className="scroll-mt-6 rounded-2xl border border-[rgba(180,198,218,0.28)] bg-white px-4 py-4 md:px-5 md:py-5"
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#64748B]">
-        AI vorbereitet
+        Vorschlag zur Prüfung
       </p>
 
       {preparation.responseSummary ? (

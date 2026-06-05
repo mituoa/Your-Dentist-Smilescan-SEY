@@ -113,7 +113,7 @@ export function buildClinicalStatusLines(
     !input.isApprovalPending &&
     lines.length < 3
   ) {
-    lines.push({ kind: "done", label: "Entwurf bereit" });
+    lines.push({ kind: "done", label: "Vorschlag formuliert" });
   }
 
   return lines.slice(0, 3);

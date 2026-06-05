@@ -3,7 +3,11 @@
 import { useMemo, useState } from "react";
 import { Check, ChevronRight, Plus, X } from "lucide-react";
 
-import { SERVICE_MASTER, findServiceById } from "@/lib/masterdata/services";
+import {
+  findServiceById,
+  getProfileLeistungenPickerGroups,
+  PROFILE_LEISTUNGEN_PICKER_GROUP_IDS,
+} from "@/lib/masterdata/services";
 import { FigmaTextInput } from "@/components/profile-editor/figma-form-fields";
 import { cn } from "@/lib/utils";
 import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
@@ -22,12 +26,20 @@ export function ProfileServicesPicker({
   disabled = false,
   embedded = false,
 }: ProfileServicesPickerProps) {
+  const serviceGroups = useMemo(() => getProfileLeistungenPickerGroups(), []);
+  const primaryGroupIds = useMemo(
+    () => new Set<string>(PROFILE_LEISTUNGEN_PICKER_GROUP_IDS),
+    []
+  );
+
   const groupsWithSelection = useMemo(
     () =>
-      SERVICE_MASTER.filter((group) =>
-        group.services.some((service) => services.some((s) => s.id === service.id))
-      ).map((group) => group.id),
-    [services]
+      serviceGroups
+        .filter((group) =>
+          group.services.some((service) => services.some((s) => s.id === service.id))
+        )
+        .map((group) => group.id),
+    [serviceGroups, services]
   );
 
   const [openGroups, setOpenGroups] = useState<string[]>(groupsWithSelection);
@@ -121,12 +133,13 @@ export function ProfileServicesPicker({
       ) : null}
 
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-        Nach Fachbereich wählen
+        Aus Kategorien wählen
       </p>
       <div className="rounded-lg border border-slate-300/25 bg-white/35 px-2">
-        {SERVICE_MASTER.map((group) => {
+        {serviceGroups.map((group) => {
           const isOpen = openGroups.includes(group.id);
           const count = group.services.filter((s) => isSelected(s.id)).length;
+          const isPrimary = primaryGroupIds.has(group.id);
           return (
             <div key={group.id} className="border-b border-slate-300/20 last:border-b-0">
               <button
@@ -135,6 +148,11 @@ export function ProfileServicesPicker({
                 className="flex w-full items-center justify-between gap-2 py-2.5 text-left text-[12px] font-medium text-slate-700 transition-colors hover:text-slate-900"
               >
                 <span>
+                  {isPrimary ? (
+                    <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                      {group.id.toUpperCase()}
+                    </span>
+                  ) : null}
                   {group.label}
                   {count > 0 ? (
                     <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-slate-800/90 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-white">

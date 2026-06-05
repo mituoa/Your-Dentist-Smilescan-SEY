@@ -55,7 +55,6 @@ export function buildPracticeBriefing(input: {
 }): PracticeBriefing {
   const casesAnalyzed = input.priorityItems.length;
   const responsesPrepared = input.preparedAwaitingCount;
-  const tasksRecognized = input.tasksNeedingDecision;
   const staleUnseenCount = countStaleUnseen(input.previewRows);
   const criticalDelays = staleUnseenCount;
   const calmPractice = criticalDelays === 0 && input.tasksNeedingDecision === 0;
@@ -63,39 +62,54 @@ export function buildPracticeBriefing(input: {
   const checks: PracticeBriefingCheck[] = [
     {
       id: "cases",
-      label: `${casesAnalyzed} Patientenfälle analysiert`,
+      label:
+        casesAnalyzed === 0
+          ? "Keine Fälle zur Vorbereitung."
+          : casesAnalyzed === 1
+            ? "1 Fall wurde vorbereitet."
+            : `${casesAnalyzed} Fälle wurden vorbereitet.`,
       done: casesAnalyzed > 0,
     },
     {
       id: "responses",
-      label: `${responsesPrepared} Antworten vorbereitet`,
-      done: responsesPrepared > 0,
-    },
-    {
-      id: "tasks",
-      label: `${tasksRecognized} Aufgaben erkannt`,
-      done: true,
+      label:
+        responsesPrepared === 0
+          ? "Keine offenen Freigaben."
+          : responsesPrepared === 1
+            ? "1 Antwort wartet auf Freigabe."
+            : `${responsesPrepared} Antworten warten auf Freigabe.`,
+      done: responsesPrepared === 0,
     },
     {
       id: "delays",
       label:
         criticalDelays === 0
-          ? "Keine kritischen Verzögerungen"
-          : `${criticalDelays} Fälle >24h ohne Rückmeldung`,
+          ? "Keine kritischen Fälle erkannt."
+          : `${criticalDelays} ${criticalDelays === 1 ? "Fall wartet" : "Fälle warten"} seit über 24 Stunden.`,
       done: criticalDelays === 0,
+    },
+    {
+      id: "current",
+      label:
+        calmPractice && criticalDelays === 0
+          ? "Alle Vorgänge sind aktuell."
+          : input.tasksNeedingDecision > 0
+            ? `${input.tasksNeedingDecision} ${input.tasksNeedingDecision === 1 ? "Entscheidung" : "Entscheidungen"} offen.`
+            : "Alle Vorgänge sind aktuell.",
+      done: calmPractice && criticalDelays === 0,
     },
   ];
 
   return {
     headline: `${input.greeting}, ${input.displayName}`,
     subline: calmPractice
-      ? "Assistenz hat den Überblick — aktuell keine Freigaben offen."
-      : `Assistenz hat vorbereitet: ${responsesPrepared} Entwürfe · ${tasksRecognized} Entscheidungen offen.`,
+      ? "Kurzüberblick — Ihre Praxis ist auf Stand."
+      : "Kurzüberblick für den heutigen Praxistag.",
     checks,
     calmPractice,
     casesAnalyzed,
     responsesPrepared,
-    tasksRecognized,
+    tasksRecognized: input.tasksNeedingDecision,
     staleUnseenCount,
   };
 }

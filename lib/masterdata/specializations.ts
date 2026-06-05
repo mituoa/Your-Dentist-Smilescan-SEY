@@ -55,6 +55,44 @@ export const SPECIALIZATION_MASTER: SpecializationOption[] = [
   },
 ];
 
+/**
+ * Primäre Schwerpunkte im Profil-Editor — flache Auswahl, praxisnah.
+ * Keine geschützten Fachzahnarzt-Titel; max. 6 sichtbar auf dem Profil.
+ */
+export const PROFILE_SCHWERPUNKTE_PICKER_IDS = [
+  "general-dentistry",
+  "pediatric-dentistry",
+  "periodontology",
+  "endodontics",
+  "prosthodontics",
+  "restorative",
+  "implantology",
+  "special-care",
+  "public-health",
+  "oral-pathology",
+  "oral-microbiology",
+  "anesthesia",
+  "orthodontics",
+  "oral-surgery",
+  "maxillofacial-surgery",
+  "oral-medicine",
+  "orofacial-pain",
+  "dental-radiology",
+] as const;
+
+const specializationById = new Map(
+  SPECIALIZATION_MASTER.map((entry) => [entry.id, entry] as const)
+);
+
+export function getProfileSchwerpunktePickerOptions(): SpecializationOption[] {
+  const primary = PROFILE_SCHWERPUNKTE_PICKER_IDS.map(
+    (id) => specializationById.get(id) ?? { id, label: id }
+  );
+  const primaryIds = new Set<string>(PROFILE_SCHWERPUNKTE_PICKER_IDS);
+  const extended = SPECIALIZATION_MASTER.filter((entry) => !primaryIds.has(entry.id));
+  return [...primary, ...extended];
+}
+
 export function getSpecializationLabel(id: string): string {
   const match = SPECIALIZATION_MASTER.find((s) => s.id === id);
   return match?.label || id;

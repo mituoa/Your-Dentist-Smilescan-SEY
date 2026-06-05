@@ -33,6 +33,7 @@ const KPI_ICON_BY_NAME: Record<DashboardKpiIconName, LucideIcon> = {
 type StatCardProps = {
   title: string;
   value: string | number;
+  valueVariant?: "numeric" | "prose";
   iconName: DashboardKpiIconName;
   footnote?: string;
   href?: string;
@@ -45,6 +46,7 @@ type StatCardProps = {
 export function HcStatCard({
   title,
   value,
+  valueVariant = "numeric",
   iconName,
   footnote,
   href,
@@ -79,7 +81,16 @@ export function HcStatCard({
         </p>
       </div>
       <div className="yd-dash-kpi-card__body mt-auto pt-4 md:pt-[1.125rem]">
-        <p className="yd-dash-kpi yd-dash-kpi--balanced font-semibold">{value}</p>
+        <p
+          className={cn(
+            "yd-dash-kpi font-semibold",
+            valueVariant === "prose"
+              ? "yd-dash-kpi--prose"
+              : "yd-dash-kpi--balanced"
+          )}
+        >
+          {value}
+        </p>
         {footnote ? (
           <p className="yd-dash-kpi-card__footnote mt-1.5 text-[11px] font-medium leading-snug md:text-[12px]">
             {footnote}
