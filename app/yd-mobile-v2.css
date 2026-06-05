@@ -217,6 +217,10 @@
 
   .yd-carree-profile__vita-panel {
     order: 1;
+    margin-top: 0.35rem;
+    margin-bottom: 0.75rem;
+    padding: 1rem 1.1rem 1.05rem;
+    border-radius: 14px;
   }
 
   .yd-carree-profile__approach-panel {
@@ -228,6 +232,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    margin-bottom: 0.2rem;
   }
 
   .yd-carree-profile__dual-grid .yd-carree-profile__panel:not(.yd-carree-profile__panel--credentials) {
@@ -246,14 +251,67 @@
     order: 5;
   }
 
+  .yd-carree-profile__vita-quote {
+    font-size: clamp(2.2rem, 7.5cqw, 2.85rem);
+    transform: translateY(-0.1rem);
+  }
+
   .yd-carree-profile__vita-text {
-    font-size: 1rem;
-    line-height: 1.78;
+    font-size: 0.9375rem;
+    line-height: 1.68;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-profile__vita-text {
+    font-size: 0.95rem;
+    line-height: 1.66;
+  }
+
+  .yd-carree-profile__vita-text-block {
+    gap: 0.65rem;
   }
 
   .yd-carree-profile__approach-text {
     font-size: 0.9375rem;
     line-height: 1.72;
+  }
+
+  /* Fortbildungen: volle Box, kein Clip am Kartenrand */
+  .yd-carree-profile--editor-preview {
+    padding-bottom: 0.4rem;
+  }
+
+  .yd-carree-profile--editor-preview .yd-carree-profile__body-wrap {
+    padding-bottom: 1.45rem;
+  }
+
+  .yd-carree-profile:not(.yd-carree-profile--editor-preview) .yd-carree-profile__body-wrap {
+    padding-bottom: 1.25rem;
+  }
+
+  .yd-carree-profile__panel--credentials {
+    padding-bottom: 1.2rem;
+    overflow: visible;
+  }
+
+  .yd-carree-profile__cred-badges {
+    margin-bottom: 0.1rem;
+    gap: 0.4rem;
+  }
+
+  .yd-carree-profile__cred-badge {
+    max-width: 100%;
+    padding: 0.38rem 0.6rem;
+    font-size: 0.6875rem;
+    line-height: 1.4;
+  }
+
+  .yd-carree-profile__cred-badge span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .yd-carree-editor-preview-frame {
+    padding-bottom: 0.75rem;
   }
 
   /* Mehr anzeigen */

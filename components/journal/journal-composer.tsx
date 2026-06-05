@@ -10,14 +10,24 @@ import Typography from "@tiptap/extension-typography";
 import TurndownService from "turndown";
 import { marked } from "marked";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Check, AlertCircle } from "lucide-react";
 import {
   saveArticle,
   publishArticle,
   unpublishArticle,
 } from "@/app/(protected)/journal/actions";
-import { ComposerTopBar } from "./composer-topbar";
-import { TopicSelector } from "./topic-selector";
+import {
+  inferClinicalArea,
+  isClinicalAreaId,
+  type ClinicalAreaId,
+} from "@/lib/journal/clinical-areas";
+import { inferContentType, type JournalContentType } from "@/lib/journal/content-categories";
+import { excerptFromMarkdown } from "@/lib/journal/excerpt-from-markdown";
+import { calculateReadingTime, countWords } from "@/lib/validation/journal-limits";
 import { CoverPhotoUpload } from "./cover-photo-upload";
+import { JournalComposerSidebar } from "./journal-composer-sidebar";
+import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
+import { clinicalWorkspaceFrame } from "@/lib/clinical-ui";
 import { JOURNAL_LIMITS } from "@/lib/validation/journal-limits";
 import type { JournalEntry } from "@/lib/types/journal-entry";
 
@@ -33,8 +43,13 @@ const turndown = new TurndownService({
 export function JournalComposer({ article }: JournalComposerProps) {
   const router = useRouter();
   const [title, setTitle] = useState(article.title || "");
-  const [excerpt, setExcerpt] = useState(article.excerpt || "");
-  const [topic, setTopic] = useState(article.topic);
+  const [subtitle, setSubtitle] = useState(article.excerpt || "");
+  const [clinicalArea, setClinicalArea] = useState<ClinicalAreaId | null>(
+    isClinicalAreaId(article.clinical_area) ? article.clinical_area : inferClinicalArea(article)
+  );
+  const [contentType, setContentType] = useState<JournalContentType>(
+    inferContentType(article)
+  );
   const [coverUrl, setCoverUrl] = useState(article.cover_photo_url);
   const [contentMd, setContentMd] = useState(article.content_markdown || "");
   const [saveStatus, setSaveStatus] = useState<
@@ -56,7 +71,8 @@ export function JournalComposer({ article }: JournalComposerProps) {
           heading: { levels: [2, 3] },
         }),
         (Placeholder as any).configure({
-          placeholder: "Schreiben Sie Ihre Erklärung…",
+          placeholder:
+            "Erklären Sie Ihren Patienten ruhig und verständlich, was sie wissen müssen…",
         }),
         (Link as any).configure({
           openOnClick: false,
@@ -72,8 +88,7 @@ export function JournalComposer({ article }: JournalComposerProps) {
     content: initialHtml,
     editorProps: {
       attributes: {
-        class:
-          "prose prose-invert prose-lg max-w-none focus:outline-none min-h-[60vh] font-serif",
+        class: "prose max-w-none focus:outline-none",
       },
     },
     onUpdate: ({ editor: ed }: { editor: { getHTML: () => string } }) => {
@@ -87,6 +102,17 @@ export function JournalComposer({ article }: JournalComposerProps) {
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRenderRef = useRef(true);
 
+  const resolvedSubtitle = useMemo(() => {
+    const trimmed = subtitle.trim();
+    if (trimmed) return trimmed.slice(0, JOURNAL_LIMITS.excerpt);
+    return excerptFromMarkdown(contentMd).slice(0, JOURNAL_LIMITS.excerpt);
+  }, [subtitle, contentMd]);
+
+  const readingTimeMinutes = useMemo(
+    () => calculateReadingTime(countWords(contentMd)),
+    [contentMd]
+  );
+
   const performSave = useCallback(async (): Promise<boolean> => {
     setSaveStatus("saving");
     setSaveError(null);
@@ -94,9 +120,11 @@ export function JournalComposer({ article }: JournalComposerProps) {
       const result = await saveArticle({
         id: article.id,
         title,
-        excerpt,
+        excerpt: resolvedSubtitle,
         content_markdown: contentMd,
-        topic,
+        topic: article.topic,
+        clinical_area: clinicalArea,
+        content_type: contentType,
         cover_photo_url: coverUrl,
       });
       if (result.error) {
@@ -112,7 +140,16 @@ export function JournalComposer({ article }: JournalComposerProps) {
       setSaveError("Verbindungsfehler. Bitte versuchen Sie es erneut.");
       return false;
     }
-  }, [article.id, title, excerpt, contentMd, topic, coverUrl]);
+  }, [
+    article.id,
+    article.topic,
+    title,
+    resolvedSubtitle,
+    contentMd,
+    clinicalArea,
+    contentType,
+    coverUrl,
+  ]);
 
   useEffect(() => {
     if (firstRenderRef.current) {
@@ -124,9 +161,9 @@ export function JournalComposer({ article }: JournalComposerProps) {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [title, excerpt, contentMd, topic, coverUrl, performSave]);
+  }, [title, subtitle, contentMd, clinicalArea, contentType, coverUrl, performSave]);
 
-  const canPublish = Boolean(title.trim() && contentMd.trim() && topic);
+  const canPublish = Boolean(title.trim() && contentMd.trim() && clinicalArea);
 
   const handlePublish = async () => {
     if (isPending) return;
@@ -179,144 +216,106 @@ export function JournalComposer({ article }: JournalComposerProps) {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
-      <ComposerTopBar
-        status={article.status}
-        saveStatus={saveStatus}
-        lastSavedAt={lastSavedAt}
-        saveError={saveError}
-        canPublish={canPublish}
-        isPending={isPending}
-        onPublish={handlePublish}
-        onUnpublish={handleUnpublish}
-      />
+  const renderSaveStatus = () => {
+    if (saveStatus === "saving") {
+      return (
+        <span className="yd-journal-composer-v6__save flex items-center gap-1.5">
+          <YdInlineBusy />
+          Speichern…
+        </span>
+      );
+    }
+    if (saveStatus === "error") {
+      return (
+        <span className="yd-journal-composer-v6__save flex items-center gap-1.5 text-red-600">
+          <AlertCircle className="h-3 w-3" strokeWidth={2} />
+          {saveError}
+        </span>
+      );
+    }
+    if (saveStatus === "saved" && lastSavedAt) {
+      // eslint-disable-next-line react-hooks/purity -- wall clock for relative save label
+      const seconds = Math.floor((Date.now() - lastSavedAt.getTime()) / 1000);
+      const label =
+        seconds < 5
+          ? "gerade eben"
+          : seconds < 60
+            ? `vor ${seconds}s`
+            : `vor ${Math.floor(seconds / 60)} Min.`;
+      return (
+        <span className="yd-journal-composer-v6__save flex items-center gap-1.5 text-emerald-700">
+          <Check className="h-3 w-3" strokeWidth={2} />
+          Gespeichert {label}
+        </span>
+      );
+    }
+    return null;
+  };
 
-      <div className="mx-auto max-w-4xl px-4 pt-20 pb-8 md:px-6 md:pb-12">
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-          <div className="space-y-8">
-          <TopicSelector value={topic} onChange={setTopic} required />
-          <CoverPhotoUpload coverUrl={coverUrl} onChange={setCoverUrl} />
+  return (
+    <div className="yd-journal-composer-v6">
+      <header className="yd-journal-composer-v6__bar">
+        <div className="yd-journal-composer-v6__bar-inner">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.push("/journal")}
+              className="yd-journal-composer-v6__back"
+            >
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+              Journal
+            </button>
+            {renderSaveStatus()}
           </div>
         </div>
+      </header>
 
-        <div className="mb-6">
+      <div className={`yd-journal-composer-v6__body ${clinicalWorkspaceFrame}`}>
+        <main className="yd-journal-composer-v6__main">
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Titel"
+            placeholder="Titel Ihres Patientenartikels"
             maxLength={JOURNAL_LIMITS.title}
-            className="w-full border-none bg-transparent p-0 font-serif text-4xl font-light leading-tight tracking-tight text-slate-900 outline-none placeholder:text-slate-300 md:text-5xl dark:text-white dark:placeholder:text-slate-700"
+            className="yd-journal-composer-v6__title"
+            aria-label="Titel"
           />
-          {title.length > JOURNAL_LIMITS.title * 0.8 && (
-            <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
-              {title.length}/{JOURNAL_LIMITS.title}
-            </div>
-          )}
-        </div>
 
-        <div className="mb-12">
           <textarea
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            placeholder="Kurzbeschreibung für die Übersicht"
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+            placeholder="Kurze Einleitung für Patienten (optional)"
             maxLength={JOURNAL_LIMITS.excerpt}
             rows={2}
-            className="w-full resize-none border-none bg-transparent p-0 text-base leading-relaxed text-slate-600 outline-none placeholder:text-slate-300 dark:text-slate-400 dark:placeholder:text-slate-700"
+            className="yd-journal-composer-v6__subtitle"
+            aria-label="Untertitel"
           />
-          {excerpt.length > JOURNAL_LIMITS.excerpt * 0.8 && (
-            <div className="mt-2 text-xs text-slate-400 dark:text-slate-600">
-              {excerpt.length}/{JOURNAL_LIMITS.excerpt}
-            </div>
-          )}
-        </div>
 
-        <hr className="mb-8 border-slate-200 dark:border-slate-800" />
+          <div className="yd-journal-composer-v6__content">
+            <EditorContent editor={editor} />
+          </div>
 
-        <div className="composer-content">
-          <EditorContent editor={editor} />
-        </div>
+          <div className="yd-journal-composer-v6__media">
+            <p className="yd-journal-composer-v6__media-label">Bild</p>
+            <CoverPhotoUpload coverUrl={coverUrl} onChange={setCoverUrl} />
+          </div>
+        </main>
+
+        <JournalComposerSidebar
+          article={article}
+          clinicalArea={clinicalArea}
+          contentType={contentType}
+          readingTimeMinutes={readingTimeMinutes}
+          canPublish={canPublish}
+          isPending={isPending}
+          status={article.status}
+          onClinicalAreaChange={setClinicalArea}
+          onContentTypeChange={setContentType}
+          onPublish={handlePublish}
+          onUnpublish={handleUnpublish}
+        />
       </div>
-
-      <style jsx global>{`
-        .composer-content .ProseMirror {
-          color: rgb(15 23 42);
-          min-height: 400px;
-        }
-        .dark .composer-content .ProseMirror {
-          color: rgb(241 245 249);
-        }
-        .composer-content .ProseMirror p.is-editor-empty:first-child::before {
-          color: rgb(148 163 184);
-          content: attr(data-placeholder);
-          float: left;
-          height: 0;
-          pointer-events: none;
-        }
-        .dark .composer-content .ProseMirror p.is-editor-empty:first-child::before {
-          color: rgb(71 85 105);
-        }
-        .composer-content .ProseMirror h2 {
-          font-family: Fraunces, serif;
-          font-size: 2.25rem;
-          font-weight: 300;
-          margin-top: 2.5rem;
-          margin-bottom: 1rem;
-          letter-spacing: -0.02em;
-        }
-        .composer-content .ProseMirror h3 {
-          font-family: Fraunces, serif;
-          font-size: 1.75rem;
-          font-weight: 300;
-          margin-top: 2rem;
-          margin-bottom: 0.75rem;
-        }
-        .composer-content .ProseMirror p {
-          font-size: 1.25rem;
-          line-height: 1.7;
-          margin-bottom: 1.5rem;
-        }
-        .composer-content .ProseMirror blockquote {
-          border-left: 2px solid rgb(203 213 225);
-          padding-left: 1.5rem;
-          font-style: italic;
-          color: rgb(71 85 105);
-          margin: 2rem 0;
-        }
-        .dark .composer-content .ProseMirror blockquote {
-          border-left: 2px solid rgba(255, 255, 255, 0.3);
-          color: rgba(255, 255, 255, 0.8);
-        }
-        .composer-content .ProseMirror a {
-          color: rgb(15 23 42);
-          border-bottom: 1px solid rgb(148 163 184);
-          text-decoration: none;
-        }
-        .dark .composer-content .ProseMirror a {
-          color: #f5f2ec;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .composer-content .ProseMirror a:hover {
-          border-bottom-color: rgb(15 23 42);
-        }
-        .dark .composer-content .ProseMirror a:hover {
-          border-bottom-color: #f5f2ec;
-        }
-        .composer-content .ProseMirror ul,
-        .composer-content .ProseMirror ol {
-          padding-left: 1.5rem;
-          margin-bottom: 1.5rem;
-        }
-        .composer-content .ProseMirror li {
-          font-size: 1.25rem;
-          line-height: 1.7;
-          margin-bottom: 0.5rem;
-        }
-        .composer-content .ProseMirror strong {
-          font-weight: 500;
-        }
-      `}</style>
     </div>
   );
 }

@@ -10,6 +10,8 @@ import {
   countWords,
   JOURNAL_LIMITS,
 } from "@/lib/validation/journal-limits";
+import { isClinicalAreaId } from "@/lib/journal/clinical-areas";
+import { isContentType } from "@/lib/journal/content-categories";
 import { JOURNAL_TOPICS } from "@/lib/masterdata/journal-topics";
 
 const VALID_TOPIC_IDS = new Set(JOURNAL_TOPICS.map((t) => t.id));
@@ -17,6 +19,16 @@ const VALID_TOPIC_IDS = new Set(JOURNAL_TOPICS.map((t) => t.id));
 function sanitizeTopic(topic: string | null | undefined): string | null {
   if (!topic) return null;
   return VALID_TOPIC_IDS.has(topic) ? topic : null;
+}
+
+function sanitizeClinicalArea(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return isClinicalAreaId(value) ? value : null;
+}
+
+function sanitizeContentType(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return isContentType(value) ? value : null;
 }
 
 function isAllowedCoverUrl(url: string | null | undefined): boolean {
@@ -80,6 +92,8 @@ export interface SaveArticlePayload {
   excerpt: string;
   content_markdown: string;
   topic: string | null;
+  clinical_area: string | null;
+  content_type: string | null;
   cover_photo_url: string | null;
 }
 
@@ -122,6 +136,8 @@ export async function saveArticle(
   }
 
   const safeTopic = sanitizeTopic(payload.topic);
+  const safeClinicalArea = sanitizeClinicalArea(payload.clinical_area);
+  const safeContentType = sanitizeContentType(payload.content_type);
   const safeCoverUrl = isAllowedCoverUrl(payload.cover_photo_url)
     ? payload.cover_photo_url
     : null;
@@ -134,6 +150,8 @@ export async function saveArticle(
       excerpt: safeExcerpt,
       content_markdown: safeContent,
       topic: safeTopic,
+      clinical_area: safeClinicalArea,
+      content_type: safeContentType,
       cover_photo_url: safeCoverUrl,
       word_count: wordCount,
       reading_time_minutes: readingTime,
@@ -188,8 +206,11 @@ export async function publishArticle(
   if (!article.title) return { error: "Titel erforderlich zum Veröffentlichen." };
   if (!article.content_markdown)
     return { error: "Inhalt erforderlich zum Veröffentlichen." };
-  if (!article.topic || !VALID_TOPIC_IDS.has(article.topic))
-    return { error: "Gültiges Thema erforderlich zum Veröffentlichen." };
+  const hasClinicalArea =
+    article.clinical_area && isClinicalAreaId(article.clinical_area as string);
+  const hasLegacyTopic = article.topic && VALID_TOPIC_IDS.has(article.topic);
+  if (!hasClinicalArea && !hasLegacyTopic)
+    return { error: "Themenbereich erforderlich zum Veröffentlichen." };
   if (!article.slug) return { error: "Slug fehlt. Bitte Titel speichern." };
 
   const { error } = await supabase

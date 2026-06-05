@@ -262,24 +262,24 @@ export function ClinicalJournalSkeleton() {
   return (
     <YdSkeletonPage
       label="Journal wird geladen"
-      className="relative flex min-h-0 flex-1 flex-col overflow-auto"
-      style={{ background: "#F7F9FC" }}
+      className="yd-journal-v6 relative flex min-h-0 flex-1 flex-col overflow-auto"
     >
-      <div className={`${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding} pb-16 md:pb-24`}>
-        <div className="mx-auto w-full max-w-[min(760px,100%)]">
-          <div className="mb-12 space-y-3">
-            <YdSkeleton className="h-9 w-56" />
-            <YdSkeleton className="h-4 w-72" variant="calm" />
-          </div>
-          <div className="mb-16 flex gap-2">
-            {[20, 28, 24].map((w, i) => (
-              <YdSkeleton key={i} className="h-9 rounded-full" style={{ width: `${w * 4}px` }} variant="calm" />
-            ))}
-          </div>
-          <div className="space-y-4">
-            {[0, 1, 2].map((i) => (
-              <YdSkeleton key={i} className="h-14 w-full rounded-xl" variant="calm" />
-            ))}
+      <div className={`yd-journal-v6__frame ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
+        <div className="yd-journal-v6__hero space-y-3 border-b border-[rgba(26,43,74,0.06)] pb-8">
+          <YdSkeleton className="h-3 w-24" variant="calm" />
+          <YdSkeleton className="h-10 w-40" />
+          <YdSkeleton className="h-4 w-72 max-w-full" variant="calm" />
+          <YdSkeleton className="h-3 w-56" variant="calm" />
+        </div>
+        <div className="yd-journal-v6__body pt-8">
+          <div className="space-y-6">
+            <YdSkeleton className="h-4 w-32" variant="calm" />
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <YdSkeleton key={i} className="h-16 rounded-xl" variant="calm" />
+              ))}
+            </div>
+            <YdSkeleton className="h-48 w-full rounded-2xl" variant="calm" />
           </div>
         </div>
       </div>

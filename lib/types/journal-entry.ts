@@ -8,6 +8,8 @@ export interface JournalEntry {
   content_markdown: string | null;
   cover_photo_url: string | null;
   topic: string | null;
+  clinical_area: string | null;
+  content_type: string | null;
   status: "draft" | "published";
   published_at: string | null;
   created_at: string;
