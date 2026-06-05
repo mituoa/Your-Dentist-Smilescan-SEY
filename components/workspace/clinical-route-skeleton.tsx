@@ -258,21 +258,19 @@ export function ClinicalJournalSkeleton() {
   return (
     <YdSkeletonPage
       label="Journal wird geladen"
-      className="yd-journal-v6 yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto"
+      className="yd-journal-v6 yd-journal-pk yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto"
     >
-      <div className={`yd-journal-v6__frame ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
-        <div className="mb-10 space-y-3 border-b border-[rgba(26,43,74,0.06)] pb-10">
-          <YdSkeleton className="h-3 w-24" variant="calm" />
-          <YdSkeleton className="h-12 w-40" />
-          <YdSkeleton className="h-5 w-56" />
+      <div className={`yd-journal-pk__frame ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
+        <div className="mb-6 space-y-2">
+          <YdSkeleton className="h-9 w-32" />
+          <YdSkeleton className="h-5 w-48" />
           <YdSkeleton className="h-4 w-full max-w-sm" variant="calm" />
-          <YdSkeleton className="h-3 w-64" variant="calm" />
         </div>
         <YdSkeleton className="mb-8 h-12 w-full rounded-[14px]" variant="calm" />
-        <div className="space-y-4">
-          <YdSkeleton className="h-8 w-48" />
-          {[0, 1, 2].map((i) => (
-            <YdSkeleton key={i} className="h-16 w-full" variant="calm" />
+        <YdSkeleton className="mb-3 h-3 w-28" variant="calm" />
+        <div className="space-y-0 border-t border-[rgba(180,198,218,0.28)]">
+          {[0, 1, 2, 3].map((i) => (
+            <YdSkeleton key={i} className="my-2 h-11 w-full" variant="calm" />
           ))}
         </div>
       </div>

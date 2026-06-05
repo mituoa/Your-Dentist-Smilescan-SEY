@@ -128,28 +128,30 @@ export function YdSkeletonRelayWorkspace({ label = "Relay wird geladen" }: { lab
   return (
     <YdSkeletonPage
       label={label}
-      className="yd-relay flex min-h-[50vh] flex-1 flex-col py-2 md:py-3"
-      style={{ background: "#F7F9FC" }}
+      className="yd-relay yd-relay-decisions flex min-h-[50vh] flex-1 flex-col"
     >
-      <div className="mb-3 flex items-center justify-between gap-3 border-b border-[rgba(176,192,208,0.22)] pb-2.5">
-        <YdSkeleton className="h-7 w-28" />
-        <YdSkeleton className="h-9 w-36 rounded-lg" variant="calm" />
-      </div>
-      <div className="mb-2 flex gap-2">
-        {[0, 1, 2].map((i) => (
-          <YdSkeleton key={i} className="h-9 w-24" rounded="full" variant="calm" />
-        ))}
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden rounded-[24px] border border-[rgba(160,178,198,0.38)] bg-white shadow-sm">
-        <YdSkeleton className="h-10 w-full rounded-none" variant="calm" />
-        <div className="divide-y divide-[rgba(180,198,218,0.22)]">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 px-5 py-3.5">
+      <div className="yd-relay-decisions__frame mx-auto w-full max-w-[42rem] px-4 py-3 md:px-6 md:py-4">
+        <div className="mb-6 space-y-2">
+          <YdSkeleton className="h-9 w-32" />
+          <YdSkeleton className="h-4 w-56" variant="calm" />
+        </div>
+        <div className="mb-8 space-y-2 border-b border-[rgba(180,198,218,0.28)] pb-6">
+          <YdSkeleton className="h-5 w-full max-w-md" />
+          <YdSkeleton className="h-4 w-48" variant="calm" />
+          <YdSkeleton className="h-4 w-40" variant="calm" />
+        </div>
+        <YdSkeleton className="mb-3 h-3 w-28" variant="calm" />
+        <div className="border-t border-[rgba(180,198,218,0.28)]">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 border-b border-[rgba(180,198,218,0.22)] py-3"
+            >
               <div className="min-w-0 flex-1 space-y-1.5">
-                <YdSkeleton className="h-3.5 w-full max-w-md" />
-                <YdSkeleton className="h-3 w-32" variant="calm" />
+                <YdSkeleton className="h-4 w-full max-w-xs" />
+                <YdSkeleton className="h-3.5 w-40" variant="calm" />
               </div>
-              <YdSkeleton className="h-5 w-16" rounded="full" variant="calm" />
+              <YdSkeleton className="h-4 w-16" variant="calm" />
             </div>
           ))}
         </div>

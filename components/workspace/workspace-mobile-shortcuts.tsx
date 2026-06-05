@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ClipboardList, LayoutDashboard, ListTodo } from "lucide-react";
+import {
+  BookOpen,
+  ClipboardList,
+  LayoutDashboard,
+  ListTodo,
+  Settings,
+  UserCircle,
+} from "lucide-react";
 
-import { WorkspaceMobileMoreSheet } from "@/components/workspace/workspace-mobile-more-sheet";
 import { cn } from "@/lib/utils";
 
 type WorkspaceMobileShortcutsProps = {
-  /** Arzt: Übersicht → Dashboard; Team: → My Tasks */
   overviewHref?: string;
   showJournal?: boolean;
   inboxBadge?: number;
@@ -25,33 +30,22 @@ export function WorkspaceMobileShortcuts({
 }: WorkspaceMobileShortcutsProps) {
   const pathname = usePathname() || "";
 
-  const isOverview =
-    pathname.startsWith(overviewHref) ||
-    (overviewHref === "/dashboard" && pathname === "/dashboard");
-  const isInbox = pathname === "/inbox" || pathname.startsWith("/inbox/");
-  const isRelay =
-    pathname.startsWith("/relay") || pathname.startsWith("/my-tasks");
-  const isJournal = pathname.startsWith("/journal");
-  const isMore =
-    pathname.startsWith("/settings") ||
-    pathname.startsWith("/profile") ||
-    pathname === "/datenschutz";
-
   const tabs = [
     {
       id: "overview",
       href: overviewHref,
       label: "Übersicht",
       icon: LayoutDashboard,
-      active: isOverview,
-      badge: undefined as number | undefined,
+      active:
+        pathname.startsWith(overviewHref) ||
+        (overviewHref === "/dashboard" && pathname === "/dashboard"),
     },
     {
       id: "inbox",
       href: "/inbox",
       label: "Tracker",
       icon: ClipboardList,
-      active: isInbox,
+      active: pathname === "/inbox" || pathname.startsWith("/inbox/"),
       badge: inboxBadge,
     },
     {
@@ -59,7 +53,7 @@ export function WorkspaceMobileShortcuts({
       href: "/relay",
       label: "Relay",
       icon: ListTodo,
-      active: isRelay,
+      active: pathname.startsWith("/relay") || pathname.startsWith("/my-tasks"),
       badge: relayBadge,
     },
     ...(showJournal
@@ -69,11 +63,26 @@ export function WorkspaceMobileShortcuts({
             href: "/journal",
             label: "Journal",
             icon: BookOpen,
-            active: isJournal,
-            badge: undefined as number | undefined,
+            active: pathname.startsWith("/journal"),
           },
         ]
       : []),
+    {
+      id: "profile",
+      href: "/profile",
+      label: "Profil",
+      icon: UserCircle,
+      active:
+        pathname.startsWith("/profile") ||
+        pathname.startsWith("/doc/"),
+    },
+    {
+      id: "settings",
+      href: "/settings",
+      label: "Einstellungen",
+      icon: Settings,
+      active: pathname.startsWith("/settings"),
+    },
   ] as const;
 
   return (
@@ -83,6 +92,7 @@ export function WorkspaceMobileShortcuts({
     >
       {tabs.map((item) => {
         const Icon = item.icon;
+        const badge = "badge" in item ? item.badge : undefined;
         return (
           <Link
             key={item.id}
@@ -95,15 +105,14 @@ export function WorkspaceMobileShortcuts({
           >
             <Icon className="yd-ws-mobile-shortcuts__icon" strokeWidth={1.85} aria-hidden />
             <span className="yd-ws-mobile-shortcuts__label">{item.label}</span>
-            {item.badge != null && item.badge > 0 ? (
-              <span className="yd-ws-mobile-shortcuts__badge" aria-label={`${item.badge} offen`}>
-                {item.badge > 9 ? "9+" : item.badge}
+            {badge != null && badge > 0 ? (
+              <span className="yd-ws-mobile-shortcuts__badge" aria-label={`${badge} offen`}>
+                {badge > 9 ? "9+" : badge}
               </span>
             ) : null}
           </Link>
         );
       })}
-      <WorkspaceMobileMoreSheet active={isMore} />
     </nav>
   );
 }

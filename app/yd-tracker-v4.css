@@ -5351,3 +5351,158 @@
     padding: 0.55rem 0.45rem 0.55rem 0 !important;
   }
 }
+
+/* —— V16 Triage: Handlungsbedarf vor Patient —— */
+.yd-tracker-v16-inbox__head {
+  margin-bottom: 0.35rem;
+}
+
+.yd-tracker-v16-inbox__title {
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.35 !important;
+  color: #0c1929 !important;
+}
+
+.yd-tracker-v16-inbox__breakdown {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #5e7389;
+}
+
+.yd-tracker-v16-inbox-card__body {
+  cursor: pointer;
+}
+
+.yd-tracker-v16-inbox-card__scan {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.12rem 0.45rem 0.14rem 0.35rem;
+}
+
+.yd-tracker-v16-inbox-card__headline-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.yd-tracker-v16-inbox-card__headline {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: #1a4f9c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-tracker-v16-inbox-card__time {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #8ba3b8;
+  white-space: nowrap;
+}
+
+.yd-tracker-v16-inbox-card__patient {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: #0c1929;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-tracker-v16-inbox-card__context {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #5e7389;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yd-tracker-v16-inbox-card--attention-decision .yd-tracker-v16-inbox-card__headline {
+  color: #1a4f9c;
+}
+
+.yd-tracker-v16-inbox-card--attention-patient_waiting .yd-tracker-v16-inbox-card__headline {
+  color: #2f6085;
+}
+
+.yd-tracker-v16-inbox-card--attention-in_progress .yd-tracker-v16-inbox-card__headline {
+  font-weight: 500;
+  color: #5e7389;
+}
+
+.yd-tracker-v16-inbox-card--attention-completed .yd-tracker-v16-inbox-card__headline,
+.yd-tracker-v16-inbox-card--attention-completed .yd-tracker-v16-inbox-card__patient {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.yd-tracker-v16-inbox-card--attention-completed .yd-tracker-v16-inbox-card__context {
+  color: #b0bcc9;
+}
+
+/* Fallansicht — Anliegen zuerst */
+.yd-tracker-v16-hero__concern {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.35;
+  color: #0c1929;
+}
+
+.yd-tracker-v16-hero__ingress {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: #8ba3b8;
+}
+
+.yd-tracker-v16-hero__patient {
+  margin: 0.75rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #334155;
+}
+
+.yd-tracker-v16-hero__demographics {
+  margin-top: 0.5rem;
+}
+
+.yd-tracker-v16-hero__demographics .yd-tracker-v14-hero__demographics-row {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+/* Entscheidungsrail — klinische Empfehlung vor technischer Aktion */
+.yd-tracker-v16-rail__recommendation {
+  font-size: 0.9375rem !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: #0c1929 !important;
+}
+
+.yd-tracker-v16-rail__action-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8ba3b8;
+}

@@ -1,4 +1,5 @@
 import { formatPatientAgeYears } from "@/lib/inbox/tracker-inbox-logic";
+import { formatTrackerRelativeIngress } from "@/lib/inbox/tracker-v9-clinical";
 
 type TrackerPatientHeaderProps = {
   patientName: string | null;
@@ -6,6 +7,7 @@ type TrackerPatientHeaderProps = {
   patientEmail: string | null;
   patientPhone: string | null;
   concern: string | null;
+  createdAt?: string | null;
   isDraft?: boolean;
 };
 
@@ -28,13 +30,21 @@ function telHref(phone: string): string {
   return digits.startsWith("+") ? `tel:${digits}` : `tel:${digits}`;
 }
 
-/** V14 — Patient → Anliegen → Stammdaten (Premium Medical). */
+function formatIngressLine(iso: string): string {
+  const rel = formatTrackerRelativeIngress(iso);
+  if (rel === "Heute" || rel === "Gestern") return `Eingereicht ${rel.toLowerCase()}`;
+  if (rel.startsWith("Vor ")) return `Eingereicht ${rel.toLowerCase()}`;
+  return `Eingereicht ${rel}`;
+}
+
+/** V16 — Anliegen zuerst, Stammdaten danach (klinische Triage). */
 export function TrackerPatientHeader({
   patientName,
   birthDate,
   patientEmail,
   patientPhone,
   concern,
+  createdAt,
   isDraft,
 }: TrackerPatientHeaderProps) {
   const displayName = patientName?.trim() || "Unbekannter Patient";
@@ -44,21 +54,21 @@ export function TrackerPatientHeader({
     concern?.trim() ||
     "Eingang ohne dokumentiertes Anliegen — bitte Bilder und Verlauf prüfen.";
 
+  const ingressLabel = createdAt ? formatIngressLine(createdAt) : null;
   const phoneTrim = patientPhone?.trim();
   const emailTrim = patientEmail?.trim();
   const ageBirthLine = [age, birthLabel].filter(Boolean).join(" · ");
   const hasDemographics = Boolean(ageBirthLine || phoneTrim || emailTrim || isDraft);
 
   return (
-    <header className="yd-tracker-v6-hero yd-tracker-v8-hero yd-tracker-v12-hero yd-tracker-v14-hero">
-      <h1 className="yd-tracker-v6-hero__name yd-tracker-v8-hero__name yd-tracker-v12-hero__name yd-tracker-v14-hero__name">
-        {displayName}
-      </h1>
-      <p className="yd-tracker-v6-hero__fallgrund yd-tracker-v8-hero__fallgrund yd-tracker-v12-hero__concern yd-tracker-v14-hero__concern">
-        {caseHeadline}
-      </p>
+    <header className="yd-tracker-v6-hero yd-tracker-v8-hero yd-tracker-v12-hero yd-tracker-v14-hero yd-tracker-v16-hero">
+      <h1 className="yd-tracker-v16-hero__concern">{caseHeadline}</h1>
+      {ingressLabel ? (
+        <p className="yd-tracker-v16-hero__ingress">{ingressLabel}</p>
+      ) : null}
+      <p className="yd-tracker-v16-hero__patient">{displayName}</p>
       {hasDemographics ? (
-        <div className="yd-tracker-v14-hero__demographics">
+        <div className="yd-tracker-v14-hero__demographics yd-tracker-v16-hero__demographics">
           {ageBirthLine ? (
             <p className="yd-tracker-v8-hero__meta-line yd-tracker-v14-hero__demographics-row">
               {ageBirthLine}

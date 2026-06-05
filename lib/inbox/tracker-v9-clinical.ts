@@ -119,22 +119,36 @@ export function buildClinicalStatusLines(
   return lines.slice(0, 3);
 }
 
-/** V10 — eine Empfehlungszeile für die rechte Spalte. */
+/** V10 — klinische Empfehlung für die rechte Spalte (kein Workflow-Jargon). */
 export function buildShortRecommendationLabel(
   primaryAction: string,
-  photoCount: number
+  photoCount: number,
+  urgency?: string | null
 ): string {
-  if (/freigeben/i.test(primaryAction)) return "Antwort freigeben";
-  if (/foto|bild/i.test(primaryAction)) {
-    if (photoCount === 0) return "Foto ergänzen";
-    if (photoCount === 1) return "Weiteres Foto";
-    return "Weitere Fotos";
+  if (/freigeb/i.test(primaryAction)) {
+    return "Antwort prüfen und an Patient:innen senden.";
   }
-  if (/rückfrage/i.test(primaryAction)) return "Rückfrage stellen";
-  if (/termin/i.test(primaryAction)) return "Termin anbieten";
-  if (/verlauf|beobachten/i.test(primaryAction)) return "Verlauf beobachten";
-  if (/aufgabe/i.test(primaryAction)) return "Praxisaufgabe";
-  return "Fall prüfen";
+  if (/foto|bild/i.test(primaryAction)) {
+    if (photoCount === 0) return "Weitere Aufnahme zur klinischen Einordnung empfohlen.";
+    if (photoCount === 1) return "Zusätzliche Aufnahme aus anderem Blickwinkel sinnvoll.";
+    return "Weitere Fotos können die Einordnung absichern.";
+  }
+  if (/rückfrage/i.test(primaryAction)) {
+    return "Rückfrage zum Schmerzverlauf sinnvoll.";
+  }
+  if (/termin/i.test(primaryAction)) {
+    if (urgency === "today" || urgency === "within_24h") {
+      return "Patient sollte zeitnah — idealerweise heute — untersucht werden.";
+    }
+    return "Patient sollte in den nächsten Tagen eingeplant werden.";
+  }
+  if (/verlauf|beobachten/i.test(primaryAction)) {
+    return "Verlauf dokumentieren und Veränderung beobachten.";
+  }
+  if (/aufgabe/i.test(primaryAction)) {
+    return "Praxisinterne Umsetzung klären, bevor der Fall ruht.";
+  }
+  return "Fall klinisch einordnen und nächsten Schritt festlegen.";
 }
 
 function primaryActionToItemId(primaryAction: string): string {
@@ -424,7 +438,8 @@ export function buildTrackerV9ClinicalModel(
     statusLines: buildClinicalStatusLines(input),
     recommendationLabel: buildShortRecommendationLabel(
       decision.primaryAction,
-      input.photoCount
+      input.photoCount,
+      input.urgency
     ),
     suggestedUrgency,
     prioritizedRuckfrageTopics: prioritizeRuckfrageTopics(input, decision),
@@ -480,7 +495,8 @@ export function buildTrackerV9FromListItem(
     statusLines: buildClinicalStatusLines(input),
     recommendationLabel: buildShortRecommendationLabel(
       decision.primaryAction,
-      input.photoCount
+      input.photoCount,
+      input.urgency
     ),
     suggestedUrgency,
     prioritizedRuckfrageTopics: prioritizeRuckfrageTopics(input, decision),

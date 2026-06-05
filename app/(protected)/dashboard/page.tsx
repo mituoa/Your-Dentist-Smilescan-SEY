@@ -186,11 +186,9 @@ export default async function DashboardPage() {
         greeting={greeting}
         displayName={doctorLabel}
         openTaskCount={openTaskCount}
-        unseenCount={unseenCount}
-        seenCount={seenCount}
         preparedAwaitingCount={preparedAwaitingCount}
         priorityItems={priorityItems}
-        previewRows={previewRows}
+        openTasks={openTasks}
       />
 
       <div className="hidden md:contents">

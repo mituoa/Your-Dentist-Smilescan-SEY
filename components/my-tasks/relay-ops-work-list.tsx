@@ -51,7 +51,7 @@ export function RelayOpsWorkList({ items, isDoctor }: RelayOpsWorkListProps) {
   return (
     <div className="yd-relay-work-table-wrap min-h-0 flex-1 overflow-x-auto overflow-y-auto overscroll-x-contain">
       <div
-        className="yd-relay-work-table__bar"
+        className="yd-relay-work-table__bar hidden md:block"
         style={{
           background: YD.surface.tableHead,
           borderBottom: `1px solid ${YD.border.soft}`,

@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { listJournalForWorkspace } from "@/lib/queries/journal";
-import { JournalKnowledgeCenter } from "@/components/journal/journal-knowledge-center";
-import { JournalMobileHub } from "@/components/journal/journal-mobile-hub";
+import { JournalPatientKnowledge } from "@/components/journal/journal-patient-knowledge";
 
 export default async function JournalPage() {
   const workspace = await getCurrentWorkspace();
@@ -14,11 +13,8 @@ export default async function JournalPage() {
   const entries = await listJournalForWorkspace(workspace.workspace_id);
 
   return (
-    <>
-      <JournalMobileHub initialEntries={entries} />
-      <div className="hidden min-h-0 flex-1 flex-col md:flex">
-        <JournalKnowledgeCenter initialEntries={entries} />
-      </div>
-    </>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <JournalPatientKnowledge initialEntries={entries} />
+    </div>
   );
 }

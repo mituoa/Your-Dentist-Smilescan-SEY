@@ -152,11 +152,14 @@ export function TrackerPraxisAssistent({
         aria-busy={sheetIntent !== null}
       >
         <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--empfehlung">
-          <h2 className="yd-tracker-v12-rail__label">Empfehlung</h2>
-          <p className="yd-tracker-v12-rail__headline">{clinical.recommendationLabel}</p>
+          <h2 className="yd-tracker-v12-rail__label">Empfohlene nächste Aktion</h2>
+          <p className="yd-tracker-v12-rail__headline yd-tracker-v16-rail__recommendation">
+            {clinical.recommendationLabel}
+          </p>
         </section>
 
         <section className="yd-tracker-v12-rail__block yd-tracker-v14-rail__block--action">
+          <p className="yd-tracker-v16-rail__action-label">Aktion ausführen</p>
           <button
             id="tracker-v10-primary-action"
             type="button"

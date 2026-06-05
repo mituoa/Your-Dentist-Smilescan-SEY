@@ -1,72 +1,50 @@
 import Link from "next/link";
+import { ChevronRight, ClipboardList, ListTodo, BookOpen, Plus } from "lucide-react";
 
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
-import type { DashboardPriorityItem } from "@/lib/queries/dashboard";
-import type { SubmissionPreviewRow } from "@/lib/queries/dashboard";
+import { createCaseFromQuery } from "@/lib/create-case-return";
+import type { DashboardPriorityItem, OpenTaskRow } from "@/lib/queries/dashboard";
 
 type DashboardMobileShellProps = {
   greeting: string;
   displayName: string;
   openTaskCount: number;
-  unseenCount: number | null;
-  seenCount: number | null;
   preparedAwaitingCount: number | null;
   priorityItems: DashboardPriorityItem[] | null;
-  previewRows: SubmissionPreviewRow[] | null;
+  openTasks: OpenTaskRow[] | null;
 };
 
 function formatRelativeDate(iso: string): string {
   const date = new Date(iso);
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
   if (diffDays === 0) return "Heute";
   if (diffDays === 1) return "Gestern";
   return date.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
-}
-
-function buildStatusParts(
-  seenCount: number | null,
-  openTaskCount: number,
-  preparedAwaitingCount: number | null
-): string[] {
-  const parts: string[] = [];
-  if (seenCount != null && seenCount > 0) {
-    parts.push(
-      seenCount === 1 ? "1 aktiver Fall" : `${seenCount} aktive Fälle`
-    );
-  }
-  if (openTaskCount > 0) {
-    parts.push(
-      openTaskCount === 1 ? "1 offene Aufgabe" : `${openTaskCount} offene Aufgaben`
-    );
-  }
-  if (preparedAwaitingCount != null && preparedAwaitingCount > 0) {
-    parts.push(
-      preparedAwaitingCount === 1
-        ? "1 Antwort wartet"
-        : `${preparedAwaitingCount} Antworten warten`
-    );
-  }
-  return parts;
 }
 
 export function DashboardMobileShell({
   greeting,
   displayName,
   openTaskCount,
-  unseenCount,
-  seenCount,
   preparedAwaitingCount,
   priorityItems,
-  previewRows,
+  openTasks,
 }: DashboardMobileShellProps) {
-  const statusParts = buildStatusParts(seenCount, openTaskCount, preparedAwaitingCount);
   const attentionItems = (priorityItems ?? [])
     .filter((item) => !item.seen_at)
     .slice(0, 3);
 
-  const submissionRows = previewRows?.slice(0, 6) ?? [];
+  const taskRows = (openTasks ?? []).slice(0, 3);
+
+  const statusLine =
+    openTaskCount > 0 && preparedAwaitingCount != null && preparedAwaitingCount > 0
+      ? `${openTaskCount} ${openTaskCount === 1 ? "Aufgabe" : "Aufgaben"} · ${preparedAwaitingCount} ${preparedAwaitingCount === 1 ? "Antwort" : "Antworten"} warten`
+      : openTaskCount > 0
+        ? `${openTaskCount} ${openTaskCount === 1 ? "offene Aufgabe" : "offene Aufgaben"}`
+        : preparedAwaitingCount != null && preparedAwaitingCount > 0
+          ? `${preparedAwaitingCount} ${preparedAwaitingCount === 1 ? "Antwort wartet" : "Antworten warten"}`
+          : null;
 
   return (
     <div className="yd-dash-mobile md:hidden">
@@ -74,42 +52,66 @@ export function DashboardMobileShell({
         <h1 className="yd-dash-mobile__title">
           {greeting}, {displayName}
         </h1>
-        {statusParts.length > 0 ? (
-          <ul className="yd-dash-mobile__status-list" role="status">
-            {statusParts.map((part) => (
-              <li key={part}>{part}</li>
-            ))}
-          </ul>
+        {statusLine ? (
+          <p className="yd-dash-mobile__status-line" role="status">
+            {statusLine}
+          </p>
         ) : (
           <p className="yd-dash-mobile__status-empty" role="status">
-            Praxis aktiv — keine offenen Vorgänge
+            Alles erledigt für heute
           </p>
         )}
       </header>
 
+      {taskRows.length > 0 ? (
+        <section className="yd-dash-mobile__tasks" aria-label="Offene Aufgaben">
+          <div className="yd-dash-mobile__section-head">
+            <h2 className="yd-dash-mobile__section-title">Offene Aufgaben</h2>
+            <Link href="/relay" className="yd-dash-mobile__section-link">
+              Relay
+            </Link>
+          </div>
+          <ul className="yd-dash-mobile-plain-list">
+            {taskRows.map((task) => (
+              <li key={task.id}>
+                <Link href={`/my-tasks/${task.id}`} className="yd-dash-mobile-plain-row">
+                  <span className="yd-dash-mobile-plain-row__main">{task.content}</span>
+                  <ChevronRight className="yd-dash-mobile-plain-row__chevron" strokeWidth={1.75} aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {attentionItems.length > 0 ? (
         <section className="yd-dash-mobile__attention" aria-label="Benötigt Aufmerksamkeit">
-          <h2 className="yd-dash-mobile__section-title">Benötigt Aufmerksamkeit</h2>
-          <ul className="yd-dash-mobile-attention-list">
+          <div className="yd-dash-mobile__section-head">
+            <h2 className="yd-dash-mobile__section-title">Benötigt Aufmerksamkeit</h2>
+            <Link href="/inbox" className="yd-dash-mobile__section-link">
+              Tracker
+            </Link>
+          </div>
+          <ul className="yd-dash-mobile-plain-list">
             {attentionItems.map((item) => {
               const name = item.patient_name?.trim() || "Unbekannter Patient";
               const subject = deriveSubmissionIssueShortLine(
                 item.patient_notes,
                 item.patient_name,
-                { maxLen: 72, emptyLabel: "Einsendung" }
+                { maxLen: 64, emptyLabel: "Einsendung" }
               );
               return (
                 <li key={item.id}>
-                  <Link href={`/inbox/${item.id}`} className="yd-dash-mobile-attention-row">
-                    <span className="yd-dash-mobile-attention-row__main">
-                      <span className="yd-dash-mobile-attention-row__name">{name}</span>
+                  <Link href={`/inbox/${item.id}`} className="yd-dash-mobile-plain-row">
+                    <span className="yd-dash-mobile-plain-row__stack">
+                      <span className="yd-dash-mobile-plain-row__title">{name}</span>
                       {subject ? (
-                        <span className="yd-dash-mobile-attention-row__subject">{subject}</span>
+                        <span className="yd-dash-mobile-plain-row__sub">{subject}</span>
                       ) : null}
                     </span>
-                    <span className="yd-dash-mobile-attention-row__meta">
-                      <span className="yd-dash-mobile-attention-row__badge">Neu</span>
-                      <span className="yd-dash-mobile-attention-row__date">
+                    <span className="yd-dash-mobile-plain-row__meta">
+                      <span className="yd-dash-mobile-plain-row__badge">Neu</span>
+                      <span className="yd-dash-mobile-plain-row__date">
                         {formatRelativeDate(item.created_at)}
                       </span>
                     </span>
@@ -121,68 +123,41 @@ export function DashboardMobileShell({
         </section>
       ) : null}
 
-      <section className="yd-dash-mobile__inbox" aria-label="Aktuelle Einsendungen">
-        <div className="yd-dash-mobile__section-head">
-          <h2 className="yd-dash-mobile__section-title">Aktuelle Einsendungen</h2>
-          <Link href="/inbox" className="yd-dash-mobile__section-link">
-            Alle
-          </Link>
-        </div>
-        {submissionRows.length > 0 ? (
-          <ul className="yd-dash-mobile-inbox-list">
-            {submissionRows.map((row) => {
-              const name = row.patient_name?.trim() || "Unbekannter Patient";
-              const subject = deriveSubmissionIssueShortLine(
-                row.patient_notes,
-                row.patient_name,
-                { maxLen: 72, emptyLabel: "Einsendung" }
-              );
-              const isNew = !row.seen_at;
-              return (
-                <li key={row.id}>
-                  <Link href={`/inbox/${row.id}`} className="yd-dash-mobile-inbox-row">
-                    <span className="yd-dash-mobile-inbox-row__name">{name}</span>
-                    <span className="yd-dash-mobile-inbox-row__subject">
-                      {subject || "Einsendung"}
-                    </span>
-                    <span className="yd-dash-mobile-inbox-row__status">
-                      {isNew ? "Neu" : "In Bearbeitung"}
-                    </span>
-                    <span className="yd-dash-mobile-inbox-row__date">
-                      {formatRelativeDate(row.created_at)}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="yd-dash-mobile__empty">Keine aktuellen Einsendungen.</p>
-        )}
-      </section>
-
-      <section className="yd-dash-mobile__overview" aria-label="Praxisübersicht">
-        <h2 className="yd-dash-mobile__section-title yd-dash-mobile__section-title--subtle">
-          Praxisübersicht
-        </h2>
-        <div className="yd-dash-mobile-overview-grid">
-          <Link href="/inbox" className="yd-dash-mobile-overview-stat">
-            <span className="yd-dash-mobile-overview-stat__value">
-              {seenCount === null ? "—" : seenCount}
-            </span>
-            <span className="yd-dash-mobile-overview-stat__label">Aktive Fälle</span>
-          </Link>
-          <Link href="/relay" className="yd-dash-mobile-overview-stat">
-            <span className="yd-dash-mobile-overview-stat__value">{openTaskCount}</span>
-            <span className="yd-dash-mobile-overview-stat__label">Offene Aufgaben</span>
-          </Link>
-          <Link href="/inbox" className="yd-dash-mobile-overview-stat">
-            <span className="yd-dash-mobile-overview-stat__value">
-              {unseenCount === null ? "—" : unseenCount}
-            </span>
-            <span className="yd-dash-mobile-overview-stat__label">Neue Einsendungen</span>
-          </Link>
-        </div>
+      <section className="yd-dash-mobile__actions" aria-label="Wichtige Aktionen">
+        <h2 className="yd-dash-mobile__section-title">Wichtige Aktionen</h2>
+        <ul className="yd-dash-mobile-action-list">
+          <li>
+            <Link href="/inbox" className="yd-dash-mobile-action-row">
+              <ClipboardList className="yd-dash-mobile-action-row__icon" strokeWidth={1.75} aria-hidden />
+              <span>Tracker öffnen</span>
+              <ChevronRight className="yd-dash-mobile-action-row__chevron" strokeWidth={1.75} aria-hidden />
+            </Link>
+          </li>
+          <li>
+            <Link href="/relay" className="yd-dash-mobile-action-row">
+              <ListTodo className="yd-dash-mobile-action-row__icon" strokeWidth={1.75} aria-hidden />
+              <span>Relay — Aufgaben & Entscheidungen</span>
+              <ChevronRight className="yd-dash-mobile-action-row__chevron" strokeWidth={1.75} aria-hidden />
+            </Link>
+          </li>
+          <li>
+            <Link href="/journal" className="yd-dash-mobile-action-row">
+              <BookOpen className="yd-dash-mobile-action-row__icon" strokeWidth={1.75} aria-hidden />
+              <span>Journal — Praxiswissen</span>
+              <ChevronRight className="yd-dash-mobile-action-row__chevron" strokeWidth={1.75} aria-hidden />
+            </Link>
+          </li>
+          <li>
+            <Link
+              href={`/create-case?from=${createCaseFromQuery("/dashboard")}`}
+              className="yd-dash-mobile-action-row"
+            >
+              <Plus className="yd-dash-mobile-action-row__icon" strokeWidth={1.75} aria-hidden />
+              <span>Fall anlegen</span>
+              <ChevronRight className="yd-dash-mobile-action-row__chevron" strokeWidth={1.75} aria-hidden />
+            </Link>
+          </li>
+        </ul>
       </section>
     </div>
   );

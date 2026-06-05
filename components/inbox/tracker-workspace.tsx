@@ -147,6 +147,7 @@ export function TrackerWorkspace({
         patientEmail={submission.patient_email}
         patientPhone={submission.patient_phone}
         concern={concern || null}
+        createdAt={submission.created_at}
         isDraft={submission.is_draft}
       />
 

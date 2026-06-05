@@ -24,6 +24,7 @@
  */
 import { redirect } from "next/navigation";
 
+import { InboxDesktopAutoSelect } from "@/components/inbox/inbox-desktop-auto-select";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import {
   inboxSearchQueryFromParam,
@@ -80,7 +81,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
 
   if (submissions.length > 0 && !qTrimmed) {
     const sorted = sortTrackerInboxItems(submissions as EnrichedSubmissionListItem[]);
-    redirect(`/inbox/${sorted[0]!.id}`);
+    return <InboxDesktopAutoSelect href={`/inbox/${sorted[0]!.id}`} />;
   }
 
   if (qTrimmed) {
