@@ -1,38 +1,38 @@
 /** Desktop breakpoint — matches .yd-clinical-desktop-only visibility. */
 export const PUBLIC_SITE_DESKTOP_MQ = "(min-width: 900px)";
 
-import { PUBLIC_SITE_SECTIONS } from "@/lib/marketing/public-site-ia";
-
-/** Legacy-Hashes und Nav-Keys → kanonische Section-IDs */
+/** Legacy-Hashes und Nav-Keys → kanonische Bento-Section-IDs */
 const SECTION_ID_ALIASES: Record<string, string> = {
-  preise: PUBLIC_SITE_SECTIONS.pricing,
-  pakete: PUBLIC_SITE_SECTIONS.pricing,
-  pricing: PUBLIC_SITE_SECTIONS.pricing,
-  demo: PUBLIC_SITE_SECTIONS.demo,
-  problem: PUBLIC_SITE_SECTIONS.praxisalltag,
-  praxisalltag: PUBLIC_SITE_SECTIONS.praxisalltag,
-  patienten: PUBLIC_SITE_SECTIONS.patienten,
-  perspektive: PUBLIC_SITE_SECTIONS.patienten,
-  team: PUBLIC_SITE_SECTIONS.team,
-  loesung: PUBLIC_SITE_SECTIONS.loesung,
-  ablauf: PUBLIC_SITE_SECTIONS.loesung,
-  nutzen: PUBLIC_SITE_SECTIONS.loesung,
-  funktionen: PUBLIC_SITE_SECTIONS.plattform,
-  command: PUBLIC_SITE_SECTIONS.plattform,
-  "command-ai": PUBLIC_SITE_SECTIONS.plattform,
-  plattform: PUBLIC_SITE_SECTIONS.plattform,
-  "fuer-wen": PUBLIC_SITE_SECTIONS.demo,
-  "fuer-praxen": PUBLIC_SITE_SECTIONS.demo,
-  einfuehrung: PUBLIC_SITE_SECTIONS.demo,
+  preise: "demo",
+  pakete: "demo",
+  pricing: "demo",
+  demo: "demo",
+  hero: "hero",
+  plattform: "plattform",
+  journey: "journey",
+  heilung: "heilung",
+  command: "command",
+  "command-ai": "command",
+  automation: "automation",
+  services: "services",
+  warum: "warum",
+  faq: "faq",
+  problem: "warum",
+  praxisalltag: "warum",
+  patienten: "journey",
+  perspektive: "journey",
+  team: "relay",
+  loesung: "plattform",
+  ablauf: "journey",
+  nutzen: "plattform",
+  funktionen: "plattform",
+  "fuer-wen": "demo",
+  "fuer-praxen": "demo",
+  einfuehrung: "demo",
 };
 
 /** Mobile — fehlende Sektionen auf sinnvolle Ziele mappen */
-const SECTION_SCROLL_FALLBACKS: Record<string, string> = {
-  [PUBLIC_SITE_SECTIONS.patienten]: PUBLIC_SITE_SECTIONS.praxisalltag,
-  [PUBLIC_SITE_SECTIONS.team]: PUBLIC_SITE_SECTIONS.praxisalltag,
-  [PUBLIC_SITE_SECTIONS.loesung]: PUBLIC_SITE_SECTIONS.praxisalltag,
-  [PUBLIC_SITE_SECTIONS.plattform]: PUBLIC_SITE_SECTIONS.praxisalltag,
-};
+const SECTION_SCROLL_FALLBACKS: Record<string, string> = {};
 
 function isDesktopPublicSite(): boolean {
   if (typeof window === "undefined") return false;
@@ -42,8 +42,8 @@ function isDesktopPublicSite(): boolean {
 function getPublicSiteScope(): ParentNode {
   if (typeof document === "undefined") return document;
   const homeSelector = isDesktopPublicSite()
-    ? ".yd-clinical-desktop-only"
-    : ".yd-public-site-mobile-page";
+    ? ".yd-bento-page, .yd-clinical-desktop-only"
+    : ".yd-bento-page, .yd-public-site-mobile-page";
   const homeScope = document.querySelector(homeSelector);
   if (homeScope) return homeScope;
   const clinicalPage = document.querySelector(".yd-clinical-page");

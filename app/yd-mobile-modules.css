@@ -133,6 +133,7 @@
   /* —— Workspace canvas rhythm (mobile) —— */
   .yd-workspace main:has(.yd-inbox-workspace),
   .yd-workspace main:has(.yd-relay-shell),
+  .yd-workspace main:has(.relay-ws),
   .yd-workspace main:has(.yd-profile-hub),
   .yd-workspace main:has(.yd-profile-editor-workspace) {
     padding-left: 0 !important;
@@ -140,7 +141,8 @@
   }
 
   .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas,
-  .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas {
+  .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas,
+  .yd-workspace main:has(.relay-ws) .yd-awaken-canvas {
     padding: 0.375rem max(0.75rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom))
       max(0.75rem, env(safe-area-inset-left)) !important;
     border-radius: 22px !important;
@@ -198,7 +200,10 @@
     z-index: 50;
     top: var(--yd-mobile-topbar-h, calc(2.75rem + env(safe-area-inset-top, 0px)));
     right: 0;
-    bottom: var(--yd-mobile-bottom-nav-h, calc(3.375rem + env(safe-area-inset-bottom, 0px)));
+    bottom: var(
+      --yd-mobile-bottom-nav-h,
+      calc(3.625rem + var(--yd-mobile-safe-bottom, env(safe-area-inset-bottom, 0px)))
+    );
     left: 0;
     display: flex;
     flex: none;

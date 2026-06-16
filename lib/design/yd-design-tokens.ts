@@ -1,109 +1,85 @@
 /**
- * Your Dentist — Premium Medical OS Design System (YD)
- * Atmospheric, icy, luminous — NOT generic enterprise SaaS.
+ * Your Dentist — Clinical OS Design System (YD)
+ * Medical Enterprise: ruhige Flächen, kontrolliertes Medical Blue.
  */
+import { CLINICAL_BRIEFING } from "@/lib/design/clinical-briefing-tokens";
+
 export const YD = {
-  /* —— Atmosphere —— */
   atmosphere: {
-    page: "#9AABB9",
-    pageGradient:
-      "radial-gradient(ellipse 90% 70% at 82% 0%, rgba(47,128,237,0.16) 0%, transparent 55%), radial-gradient(ellipse 55% 50% at 8% 92%, rgba(255,250,244,0.12) 0%, transparent 50%), linear-gradient(168deg, #A8B6C4 0%, #94A5B2 100%)",
-    canvas:
-      "linear-gradient(168deg, #F8FBFE 0%, #F1F7FC 44%, #E8F1F8 100%)",
-    canvasGlow:
-      "radial-gradient(ellipse 85% 55% at 92% 8%, rgba(91,156,245,0.12) 0%, transparent 58%)",
-    vignette:
-      "radial-gradient(ellipse 120% 80% at 50% 100%, rgba(30,58,95,0.06) 0%, transparent 55%)",
+    page: "#E8EFF6",
+    pageGradient: "linear-gradient(180deg, #EDF3F9 0%, #E2EBF4 100%)",
+    canvas: "linear-gradient(180deg, #F8FBFD 0%, #F5F8FB 50%, #EDF5FD 100%)",
+    canvasGlow: "none",
+    vignette: "none",
   },
 
-  /* —— Surfaces (never pure #FFF page bg) —— */
   surface: {
-    island: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,252,255,0.88) 100%)",
-    card:
-      "linear-gradient(165deg, #FFFFFF 0%, #F8FBFE 48%, #EFF5FA 100%)",
-    cardPrimary:
-      "linear-gradient(168deg, #FFFFFF 0%, #FAFCFF 38%, #EBF3FA 100%)",
-    cardQuiet:
-      "linear-gradient(165deg, #FAFCFE 0%, #F2F7FB 52%, #EAF1F7 100%)",
-    cardHover:
-      "linear-gradient(165deg, #FFFFFF 0%, #F8FBFE 55%, #F0F7FD 100%)",
-    elevated:
-      "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(241,248,255,0.94) 100%)",
-    sunken: "#D8E4EF",
-    search: "linear-gradient(180deg, #E2EBF4 0%, #D6E3EF 100%)",
-    tableHead: "linear-gradient(180deg, #F4F8FC 0%, #EBF2F8 100%)",
+    island: CLINICAL_BRIEFING.color.page,
+    card: CLINICAL_BRIEFING.color.surface,
+    cardPrimary: CLINICAL_BRIEFING.color.ice,
+    cardQuiet: CLINICAL_BRIEFING.color.iceMid,
+    cardHover: CLINICAL_BRIEFING.color.ice,
+    elevated: CLINICAL_BRIEFING.color.surface,
+    sunken: CLINICAL_BRIEFING.color.surfaceSunken,
+    search: CLINICAL_BRIEFING.color.iceDeep,
+    tableHead: CLINICAL_BRIEFING.color.iceMid,
   },
 
-  /* —— Luminous blue (not corporate #2563eb flat) —— */
   accent: {
-    core: "#2F80ED",
-    deep: "#1A4F9C",
-    mid: "#2563EB",
-    light: "#7EB8FF",
-    ice: "#B8DCFF",
-    glow: "rgba(47, 128, 237, 0.35)",
-    glowSoft: "rgba(125, 211, 252, 0.22)",
-    iconGradient: "linear-gradient(145deg, #6BA8F5 0%, #2F80ED 42%, #1A4F9C 100%)",
-    navActive: "linear-gradient(180deg, #4A9AF0 0%, #2F80ED 48%, #1E5BB8 100%)",
-    chartBar: "linear-gradient(180deg, #1A4F9C 0%, #2F80ED 38%, #6BA8F5 100%)",
-    chartBarSoft: "linear-gradient(180deg, #7EB8FF 0%, #B8DCFF 100%)",
+    core: CLINICAL_BRIEFING.color.accent,
+    deep: "#254E94",
+    mid: "#3A6FA8",
+    light: "#6A94C4",
+    ice: CLINICAL_BRIEFING.color.iceDeep,
+    glow: "rgba(47, 99, 183, 0.12)",
+    glowSoft: "rgba(47, 99, 183, 0.06)",
+    iconGradient: "linear-gradient(145deg, #4A7BB5 0%, #2F63B7 100%)",
+    navActive: CLINICAL_BRIEFING.color.accent,
+    chartBar: "linear-gradient(180deg, #254E94 0%, #2F63B7 100%)",
+    chartBarSoft: "linear-gradient(180deg, #A8BFD4 0%, #DCE8F5 100%)",
     chartStripe:
-      "repeating-linear-gradient(-45deg, #4A90E8, #4A90E8 3px, #8EC0FA 3px, #8EC0FA 6px)",
-    arc: ["#1A4F9C", "#2F80ED", "#6BA8F5"] as const,
-    arcSoft: ["#93C5FD", "#C7E2FF"] as const,
+      "repeating-linear-gradient(-45deg, #4A7BB5, #4A7BB5 3px, #B8CDE0 3px, #B8CDE0 6px)",
+    arc: ["#254E94", "#2F63B7", "#6A94C4"] as const,
+    arcSoft: ["#B8CDE0", "#DCE8F5"] as const,
   },
 
-  /* —— Typography colors —— */
   text: {
-    primary: "#0C1929",
-    secondary: "#3D5266",
-    muted: "#5E7389",
-    faint: "#8BA3B8",
-    brand: "#0F172A",
+    primary: CLINICAL_BRIEFING.color.textPrimary,
+    secondary: CLINICAL_BRIEFING.color.textSecondary,
+    muted: CLINICAL_BRIEFING.color.textMuted,
+    faint: CLINICAL_BRIEFING.color.textFaint,
+    brand: CLINICAL_BRIEFING.color.textPrimary,
   },
 
-  /* —— Borders (soft, rarely harsh) —— */
   border: {
-    whisper: "rgba(255, 255, 255, 0.72)",
-    soft: "rgba(180, 198, 218, 0.55)",
-    focus: "rgba(47, 128, 237, 0.45)",
+    whisper: "rgba(255, 255, 255, 0.9)",
+    soft: CLINICAL_BRIEFING.color.borderSoft,
+    focus: "rgba(47, 99, 183, 0.35)",
   },
 
   /* —— Depth —— */
   shadow: {
-    island:
-      "0 16px 48px rgba(15, 35, 58, 0.14), 0 4px 16px rgba(47, 128, 237, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
-    card:
-      "0 2px 4px rgba(15, 35, 58, 0.04), 0 12px 36px rgba(30, 91, 189, 0.1), inset 0 1px 0 rgba(255,255,255,0.9)",
-    cardLift:
-      "0 8px 28px rgba(30, 91, 189, 0.14), 0 2px 8px rgba(15, 35, 58, 0.06)",
-    sidebar:
-      "0 14px 48px rgba(15, 35, 58, 0.16), 0 6px 20px rgba(47, 128, 237, 0.1), inset 0 1px 0 rgba(255,255,255,0.65)",
-    glowFocus: "0 0 0 1px rgba(255,255,255,0.5), 0 0 28px rgba(47,128,237,0.2)",
-    cardPrimary:
-      "0 4px 6px rgba(15,35,58,0.03), 0 16px 44px rgba(47,128,237,0.12), inset 0 1px 0 rgba(255,255,255,0.95)",
-    cardQuiet:
-      "0 2px 4px rgba(15,35,58,0.03), 0 8px 24px rgba(30,91,189,0.06), inset 0 1px 0 rgba(255,255,255,0.7)",
+    island: CLINICAL_BRIEFING.shadow.card,
+    card: CLINICAL_BRIEFING.shadow.card,
+    cardLift: CLINICAL_BRIEFING.shadow.lift,
+    sidebar: "0 4px 20px rgba(10, 16, 24, 0.06)",
+    glowFocus: "0 0 0 3px rgba(61, 109, 153, 0.12)",
+    cardPrimary: CLINICAL_BRIEFING.shadow.card,
+    cardQuiet: CLINICAL_BRIEFING.shadow.card,
   },
 
   /* —— Sidebar rail —— */
   sidebar: {
     width: 108,
     radius: "44px",
-    glass: "rgba(252, 254, 255, 0.52)",
-    flow:
-      "linear-gradient(180deg, rgba(255,253,250,0.38) 0%, rgba(232,242,252,0.9) 42%, rgba(210,228,244,0.98) 100%)",
-    edgeGlow:
-      "linear-gradient(180deg, transparent 0%, rgba(47,128,237,0.14) 50%, rgba(30,91,189,0.28) 100%)",
-    iconIdle: "#6B849C",
-    iconActive: "#2F80ED",
-    /** Legacy solid orb — avoid for ambient rail */
-    navActiveSolid:
-      "linear-gradient(180deg, #4A9AF0 0%, #2F80ED 48%, #1E5BB8 100%)",
-    /** Soft glass + glow (preferred active) */
-    navActiveGlass: "rgba(255, 255, 255, 0.22)",
-    navActiveGlow:
-      "0 0 0 1px rgba(255, 255, 255, 0.42), 0 0 32px rgba(47, 128, 237, 0.24), 0 0 14px rgba(125, 211, 252, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.55)",
+    glass: "rgba(250, 251, 252, 0.94)",
+    flow: "linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(240,242,245,0.95) 100%)",
+    edgeGlow: "none",
+    iconIdle: "#8A96A3",
+    iconActive: CLINICAL_BRIEFING.color.accent,
+    navActiveSolid: CLINICAL_BRIEFING.color.clinicalBlue,
+    navActiveGlass: "rgba(255, 255, 255, 0.35)",
+    navActiveGlow: "0 0 0 1px rgba(19, 35, 55, 0.08)",
   },
 
   /* —— Radius —— */
@@ -124,13 +100,12 @@ export const YD = {
     contentMax: 1340,
   },
 
-  /* —— Status (medical, soft pills) —— */
   status: {
-    urgent: { bg: "#FEE8E8", text: "#B91C1C", dot: "#EF4444" },
-    active: { bg: "#E0EDFE", text: "#1D4ED8", dot: "#3B82F6" },
-    calm: { bg: "#E0F2F5", text: "#0E7490", dot: "#06B6D4" },
-    done: { bg: "#DCFCE7", text: "#15803D", dot: "#22C55E" },
-    pending: { bg: "#FEF3C7", text: "#B45309", dot: "#F59E0B" },
+    urgent: { bg: CLINICAL_BRIEFING.color.dangerBg, text: "#7A3535", dot: CLINICAL_BRIEFING.color.danger },
+    active: { bg: CLINICAL_BRIEFING.status.review.bg, text: CLINICAL_BRIEFING.status.review.text, dot: CLINICAL_BRIEFING.status.review.dot },
+    calm: { bg: "#EEF2F5", text: "#3D5A6A", dot: "#5A7A8A" },
+    done: { bg: CLINICAL_BRIEFING.status.done.bg, text: CLINICAL_BRIEFING.status.done.text, dot: CLINICAL_BRIEFING.status.done.dot },
+    pending: { bg: CLINICAL_BRIEFING.status.submitted.bg, text: CLINICAL_BRIEFING.status.submitted.text, dot: CLINICAL_BRIEFING.status.submitted.dot },
   },
 
   trend: {

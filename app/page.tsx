@@ -1,4 +1,4 @@
-import { YdHomePage } from "@/components/marketing/yd-home-page";
+import { YdBentoHomePage } from "@/components/marketing/yd-bento-home-page";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { resolveHomeDashboardHref } from "@/lib/public-entry/resolve-home-dashboard-href";
 
@@ -13,10 +13,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const dashboardHref = user ? await resolveHomeDashboardHref(user) : null;
 
   return (
-    <YdHomePage
-      initialPlan={params.plan}
-      inviteToken={params.invite}
-      prefilledEmail={params.email}
+    <YdBentoHomePage
       dashboardHref={dashboardHref}
     />
   );

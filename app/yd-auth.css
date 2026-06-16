@@ -590,7 +590,7 @@
 .yd-public-os--focus:has(.yd-clinical-entry--login) .yd-public-os-content {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   width: 100%;
   max-width: 28rem;
@@ -620,6 +620,30 @@
 
 .yd-clinical-world.yd-public-os--focus:has(.yd-clinical-entry--login).yd-public-os--scroll .yd-public-os-content {
   min-height: 100dvh;
+}
+
+.yd-public-os--focus:has(.yd-login-page-entry) .yd-login-page-entry {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  width: 100%;
+  padding: 0;
+}
+
+.yd-login-page-entry .yd-product-chrome {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 0 0.125rem;
+  justify-content: center;
+}
+
+.yd-login-page-entry .yd-product-chrome--entry .yd-auth-brand-link {
+  margin-inline: auto;
 }
 
 .yd-public-os--focus:has(.yd-clinical-entry--login) .yd-product-chrome {
@@ -818,16 +842,18 @@
       max(1rem, env(safe-area-inset-right, 0px));
   }
 
+  .yd-public-os--focus:has(.yd-login-page-entry) .yd-login-page-entry {
+    gap: 0.625rem;
+  }
+
+  .yd-login-page-entry .yd-product-chrome {
+    padding-bottom: 0;
+  }
+
   .yd-public-os--focus:has(.yd-clinical-entry--login) .yd-product-chrome {
     flex-shrink: 0;
     padding-bottom: 0.25rem;
     margin-bottom: 0;
-  }
-
-  .yd-public-os--focus:has(.yd-clinical-entry--login) .yd-product-entry {
-    flex: 1 1 auto;
-    justify-content: center;
-    padding: 0.25rem 0 max(1rem, env(safe-area-inset-bottom));
   }
 
   .yd-public-os--focus:has(.yd-clinical-entry--login) .yd-product-chrome [data-brand="your-dentist"] {

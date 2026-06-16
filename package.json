@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:share": "node scripts/generate-brand-share-assets.mjs"
+    "generate:share": "node scripts/generate-brand-share-assets.mjs",
+    "db:seed-design-briefing": "npx tsx scripts/seed-platform-design-briefing.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -49,6 +50,7 @@
     "eslint-config-next": "16.2.4",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

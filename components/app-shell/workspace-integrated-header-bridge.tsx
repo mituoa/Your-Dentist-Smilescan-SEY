@@ -45,6 +45,9 @@ export function WorkspaceIntegratedHeaderBridge({
   const onTracker = pathname.startsWith("/inbox");
   const onDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const onRelay = pathname === "/relay" || pathname.startsWith("/relay/");
+  const dashboardEditorial =
+    onDashboard && dashboardHeaderSummary ? dashboardHeaderSummary.editorial : null;
+
   const subtitle =
     onTracker && trackerHeaderSummary
       ? trackerHeaderSummary.lead
@@ -77,6 +80,7 @@ export function WorkspaceIntegratedHeaderBridge({
         displayName={displayName}
         subtitle={subtitle}
         subtitleMeta={subtitleMeta}
+        dashboardEditorial={dashboardEditorial}
         email={email}
         workspaceName={workspaceName}
         role={role}

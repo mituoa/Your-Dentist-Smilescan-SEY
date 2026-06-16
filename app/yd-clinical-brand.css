@@ -11,18 +11,16 @@
   --yd-brand-body: #3d5266;
   --yd-brand-muted: #5e7389;
   --yd-brand-faint: #8ba3b8;
-  --yd-brand-accent: #2f80ed;
-  --yd-brand-accent-deep: #1a4f9c;
-  --yd-brand-accent-mid: #163d7a;
+  --yd-brand-accent: #2f63b7;
+  --yd-brand-accent-deep: #254e94;
+  --yd-brand-accent-mid: #1a4a7a;
   --yd-brand-border: rgba(180, 198, 218, 0.55);
   --yd-brand-border-soft: rgba(180, 198, 218, 0.38);
   --yd-brand-ivory: rgba(255, 253, 250, 0.96);
   --yd-brand-ice: rgba(248, 252, 255, 0.94);
   --yd-brand-stone: #eef4fa;
   --yd-brand-canvas: linear-gradient(168deg, #eef4fa 0%, #f8fbfe 46%, #f1f7fc 100%);
-  --yd-brand-canvas-glow:
-    radial-gradient(ellipse 88% 68% at 78% 4%, rgba(47, 128, 237, 0.08) 0%, transparent 52%),
-    radial-gradient(ellipse 55% 50% at 8% 92%, rgba(255, 250, 244, 0.12) 0%, transparent 50%);
+  --yd-brand-canvas-glow: none;
   --yd-brand-card-bg: linear-gradient(
     165deg,
     rgba(255, 255, 255, 0.97) 0%,

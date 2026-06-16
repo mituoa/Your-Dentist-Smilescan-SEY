@@ -77,8 +77,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <YdPublicOsEnvironment mode="focus" scroll>
-      <YdProductChrome variant="entry" />
-      <main className="yd-product-entry">
+      <main className="yd-product-entry yd-login-page-entry">
+        <YdProductChrome variant="entry" />
         <section className="yd-product-entry-card yd-clinical-entry--login yd-clinical-entry-panel--login-entrance">
           <LoginPageClient
             queryError={queryError}

@@ -141,6 +141,24 @@ Für **Schreibpfade** (Auth, Register, Invite, Uploads, Cases, Inbox/Tasks, Rela
 
 Bei **neuen** kritischen Aktionen diesen Standard prüfen und analog umsetzen.
 
+### Internes Design-Briefing (verbindlich)
+
+Das **interne Design-Briefing** (UI/UX, Website, visuelle Markenführung für zahnmedizinische Zielgruppen) ist in der Datenbank versioniert und bearbeitbar:
+
+| Quelle | Pfad |
+|--------|------|
+| **DB (Runtime)** | Tabellen `platform_design_briefings`, `platform_design_briefing_sections`, `platform_design_briefing_areas` |
+| **Seed (Initial)** | `lib/design/platform-design-briefing/seed-data.ts` |
+| **Abfragen** | `lib/queries/platform-design-briefing.ts` — `getPlatformDesignBriefingBundle()`, `getPlatformDesignBriefingForArea()`, `formatPlatformDesignBriefingMarkdown()` |
+| **Bearbeitung** | `/settings/design-briefing` (nur Ärzt:innen) |
+| **Seed-Befehl** | `npm run db:seed-design-briefing` (nach Migration `044_platform_design_briefings.sql`) |
+
+**11 Geltungsbereiche:** Softwareoberflächen, Website, Landingpages, Partner, Patient, PDF/Reports, visuelle Kommunikation, Bildauswahl, Komponenten, Layouts, digitale Marke — jeweils mit zugeordneten Abschnitten 1–19.
+
+Vor visuellen Änderungen: relevante Abschnitte aus der DB laden; Gestaltung muss **klinische Ruhe, technische Präzision und institutionelle Wertigkeit** stützen — nicht werblich, nicht SaaS-Template, nicht dekorativ.
+
+**Visuelle Umsetzung (Code):** `lib/design/clinical-briefing-tokens.ts`, `app/yd-clinical-briefing-system.css` (global import in `globals.css`), angepasste `lib/design/yd-design-tokens.ts`. Kein grell-blaues SaaS-Glow; Graphit/Navy/gedämpftes Klinik-Blau.
+
 ### Checkliste vor Merge (Selbstprüfung)
 
 - [ ] **Premium UX / Trust / Recovery:** Für alle berührten **kritischen Oberflächen** die Kriterien im Abschnitt *„Premium UX, Trust & Recovery“* erfüllt (nicht nur „baut ohne Fehler“)?

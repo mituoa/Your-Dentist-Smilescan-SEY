@@ -10,6 +10,7 @@ Dieser Ordner ist die **Quelle der Wahrheit** für visuelle Richtung, Tokens, Um
 
 | Datei | Inhalt |
 |-------|--------|
+| **DB: `platform_design_briefings`** | **Internes Design-Briefing v1** — 19 Abschnitte, 11 Geltungsbereiche; Bearbeitung unter `/settings/design-briefing` |
 | **[YOUR-DENTIST-BRAND-BIBLE.md](./YOUR-DENTIST-BRAND-BIBLE.md)** | **Master-Design-Bible** — reverse-engineered aus dem Live-Dashboard (41 Regelbereiche) |
 | [DESIGN-TOKENS-REFERENCE.md](./DESIGN-TOKENS-REFERENCE.md) | Vollständige Token-Tabellen + CSS-Klassen |
 | [YOUR-DENTIST-DESIGN-SYSTEM.md](./YOUR-DENTIST-DESIGN-SYSTEM.md) | Technischer Index, Vision, Code-Map |

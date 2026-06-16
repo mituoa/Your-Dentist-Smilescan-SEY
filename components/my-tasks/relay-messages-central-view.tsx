@@ -12,11 +12,13 @@ import {
 } from "@/app/(protected)/my-tasks/messages-actions";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { RelayConversationRow, RelayMessageRow } from "@/lib/queries/relay-messages";
+import { RelayPremiumEmpty } from "@/components/my-tasks/relay-premium-empty";
 import { RelayReadStatusCompact } from "@/components/my-tasks/relay-read-status-compact";
+import { RelayWorkRowIcon } from "@/components/my-tasks/relay-work-row-icon";
 import { formatRelayMessageTimestamp } from "@/lib/relay/read-receipt-display";
 import { cn } from "@/lib/utils";
 
-type MessageFilter = "all" | "unread" | "direct" | "team" | "group";
+type MessageFilter = "direct" | "group" | "cases";
 
 type RelayMessagesCentralViewProps = {
   conversations: RelayConversationRow[];
@@ -25,18 +27,10 @@ type RelayMessagesCentralViewProps = {
 };
 
 const FILTERS: { id: MessageFilter; label: string }[] = [
-  { id: "all", label: "Alle" },
-  { id: "unread", label: "Ungelesen" },
   { id: "direct", label: "Direkt" },
-  { id: "team", label: "Team" },
   { id: "group", label: "Gruppen" },
+  { id: "cases", label: "Fälle" },
 ];
-
-const TRACKER_CARD =
-  "yd-tracker-v4-inbox-card yd-tracker-v8-inbox-card yd-tracker-v10-inbox-card yd-tracker-v12-inbox-card yd-tracker-v14-inbox-card yd-tracker-v15-inbox-card yd-tracker-v16-inbox-card";
-
-const TRACKER_BODY =
-  "yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body yd-tracker-v16-inbox-card__body";
 
 function senderDisplayName(email: string | null): string {
   if (!email) return "Team";
@@ -55,18 +49,11 @@ function conversationLabel(c: RelayConversationRow): string {
   return c.kind === "group" ? "Gruppe" : "Direktnachricht";
 }
 
-function conversationContext(c: RelayConversationRow): string {
-  const preview = c.last_message_preview?.trim();
-  if (!preview) return "Noch keine Nachricht";
-  return preview.length > 72 ? `${preview.slice(0, 69)}…` : preview;
-}
 
 function matchesFilter(c: RelayConversationRow, filter: MessageFilter): boolean {
-  if (filter === "all") return true;
-  if (filter === "unread") return c.unread_count > 0;
   if (filter === "direct") return c.kind === "direct";
   if (filter === "group") return c.kind === "group";
-  if (filter === "team") return c.kind === "group" || c.member_emails.length > 2;
+  if (filter === "cases") return Boolean(c.submission_id);
   return true;
 }
 
@@ -76,7 +63,7 @@ export function RelayMessagesCentralView({
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeId = searchParams.get("conversation");
-  const filterParam = (searchParams.get("msgFilter") as MessageFilter | null) ?? "all";
+  const filterParam = (searchParams.get("msgFilter") as MessageFilter | null) ?? "direct";
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<RelayMessageRow[]>([]);
   const [threadTitle, setThreadTitle] = useState("");
@@ -104,15 +91,14 @@ export function RelayMessagesCentralView({
 
   const setFilter = (filter: MessageFilter) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", "nachrichten");
-    if (filter === "all") params.delete("msgFilter");
-    else params.set("msgFilter", filter);
+    params.set("bereich", "handovers");
+    params.set("msgFilter", filter);
     router.replace(`/relay?${params.toString()}`, { scroll: false });
   };
 
   const openConversation = (id: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", "nachrichten");
+    params.set("bereich", "handovers");
     params.set("conversation", id);
     router.replace(`/relay?${params.toString()}`, { scroll: false });
   };
@@ -156,224 +142,255 @@ export function RelayMessagesCentralView({
     });
   };
 
-  const unreadTotal = conversations.reduce((n, c) => n + c.unread_count, 0);
-
   return (
-    <div className="yd-relay-practice__messages yd-tracker-v12-inbox yd-tracker-v15-inbox yd-tracker-v16-triage min-h-0 flex-1 flex flex-col">
-      <div className="yd-relay-practice__messages-shell yd-dash-surface yd-clinical-control min-h-0 flex-1 flex flex-col">
-        <div className="yd-relay-practice__messages-toolbar">
-          <div className="yd-relay-practice__messages-search">
-            <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+    <div className="yd-relay-v6-shell yd-relay-v3-shell yd-tracker-shell flex min-h-0 flex-1 overflow-hidden">
+      <div
+        className={cn(
+          "yd-relay-v3-shell__list yd-relay-v6-messages-list yd-tracker-shell__inbox flex min-h-0 flex-col",
+          activeConversation && "max-lg:hidden"
+        )}
+      >
+        <div className="yd-relay-v6-messages-list__tools">
+          <div className="yd-relay-v6-messages-list__search">
+            <Search className="h-4 w-4 shrink-0 opacity-60" strokeWidth={1.75} aria-hidden />
             <input
               type="search"
-              className="yd-relay-practice__messages-search-input"
-              placeholder="Nachrichten suchen …"
+              className="yd-relay-v6-messages-list__search-input"
+              placeholder="Suchen …"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-label="Nachrichten suchen"
             />
           </div>
-          <div className="yd-tracker-filter-scroll">
-            <div
-              className="yd-tracker-filter-chips"
-              role="tablist"
-              aria-label="Nachrichten filtern"
-            >
-              {FILTERS.map((f) => {
-                const active = filterParam === f.id;
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    className={cn(
-                      "yd-tracker-filter-chip",
-                      active && "yd-tracker-filter-chip--active"
-                    )}
-                    onClick={() => setFilter(f.id)}
-                  >
-                    <span>{f.label}</span>
-                    {f.id === "unread" && unreadTotal > 0 ? (
-                      <span className="yd-tracker-filter-chip__count">{unreadTotal}</span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="yd-relay-v6-messages-list__filters" role="tablist" aria-label="Nachrichten filtern">
+            {FILTERS.map((f) => {
+              const active = filterParam === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  className={cn("yd-relay-v6-messages-list__filter", active && "yd-relay-v6-messages-list__filter--active")}
+                  onClick={() => setFilter(f.id)}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-
-        <div className="yd-relay-practice__messages-body">
-          <div className="yd-relay-practice__messages-list-pane" aria-label="Konversationen">
-            {filtered.length === 0 ? (
-              <div className="yd-tracker-empty yd-relay-practice__panel-empty">
-                <p className="yd-tracker-empty__title">
-                  {query.trim()
-                    ? "Keine Nachrichten zu dieser Suche"
-                    : "Noch keine Nachrichten in diesem Filter"}
-                </p>
-                <p className="yd-tracker-empty__text">
-                  Interne Nachrichten und Übergaben erscheinen hier — oder über „Erstellen“
-                  senden.
-                </p>
-              </div>
-            ) : (
-              <ul className="yd-tracker-v4-inbox__list yd-tracker-v12-inbox__list yd-relay-practice__panel-list">
-                {filtered.map((c) => {
-                  const active = c.id === activeId;
-                  const unread = c.unread_count > 0;
-                  return (
-                    <li key={c.id} className="yd-relay-practice__card-item">
-                      <div
-                        className={cn(
-                          TRACKER_CARD,
-                          active && "yd-tracker-v4-inbox-card--active yd-tracker-v12-inbox-card--active",
-                          unread && "yd-tracker-v15-inbox-card--fresh",
-                          unread && "yd-tracker-v16-inbox-card--attention-patient_waiting"
-                        )}
-                      >
-                        <button
-                          type="button"
-                          className={cn(TRACKER_BODY, "yd-relay-practice__card-link")}
-                          onClick={() => openConversation(c.id)}
-                        >
-                          <span className="yd-tracker-v15-inbox-card__urgency-rail" aria-hidden />
-                          <span className="yd-tracker-v16-inbox-card__scan">
-                            <span className="yd-tracker-v16-inbox-card__headline-row">
-                              <span className="yd-tracker-v16-inbox-card__headline">
-                                {conversationLabel(c)}
-                              </span>
-                              {c.last_message_at ? (
-                                <span className="yd-tracker-v16-inbox-card__time">
-                                  {formatRelayMessageTimestamp(c.last_message_at)}
-                                </span>
-                              ) : null}
-                            </span>
-                            <span className="yd-tracker-v16-inbox-card__patient">
-                              {conversationContext(c)}
-                            </span>
-                            {unread ? (
-                              <span className="yd-tracker-v16-inbox-card__context">
-                                {c.unread_count === 1
-                                  ? "1 ungelesen"
-                                  : `${c.unread_count} ungelesen`}
-                              </span>
-                            ) : null}
-                          </span>
-                          <span className="yd-relay-practice__card-action">
-                            {unread ? "Antworten" : "Öffnen"}
-                          </span>
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-
-          <section className="yd-relay-practice__messages-thread-pane" aria-label="Verlauf">
-            {!activeConversation ? (
-              <div className="yd-tracker-empty yd-relay-practice__panel-empty yd-relay-practice__panel-empty--thread">
-                <p className="yd-tracker-empty__title">Unterhaltung wählen</p>
-                <p className="yd-tracker-empty__text">
-                  Links eine Nachricht öffnen — oder über „Erstellen“ eine neue Nachricht senden.
-                </p>
-              </div>
-            ) : (
-              <div className="yd-relay-practice__thread-panel yd-dash-surface yd-clinical-control">
-                <header className="yd-relay-practice__thread-head">
-                  <div className="yd-relay-practice__thread-head-main">
+        <div className="yd-relay-v6-list__scroll min-h-0 flex-1 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <RelayPremiumEmpty
+              variant="inline"
+              title={query.trim() ? "Keine Nachrichten zu dieser Suche." : "Keine Nachrichten mit Handlungsbedarf."}
+              text={
+                query.trim()
+                  ? "Passen Sie die Suche an oder starten Sie über „Erstellen“ eine neue Nachricht."
+                  : "Interne Kommunikation erscheint hier, sobald eine Rückmeldung nötig ist."
+              }
+            />
+          ) : (
+            <ul className="yd-relay-v6-list__items">
+              {filtered.map((c) => {
+                const active = c.id === activeId;
+                const unread = c.unread_count > 0;
+                const from = senderDisplayName(c.other_party_email ?? c.member_emails[0] ?? null);
+                const to =
+                  c.kind === "group"
+                    ? "Gruppe"
+                    : senderDisplayName(c.member_emails.find((e) => e !== c.other_party_email) ?? null);
+                return (
+                  <li key={c.id}>
                     <button
                       type="button"
-                      className="yd-relay-practice__thread-back md:hidden"
-                      onClick={() => {
-                        const params = new URLSearchParams(searchParams.toString());
-                        params.delete("conversation");
-                        router.replace(`/relay?${params.toString()}`, { scroll: false });
-                      }}
+                      className={cn(
+                        "yd-relay-v6-row yd-relay-v7-row",
+                        active && "yd-relay-v6-row--active yd-relay-v7-row--active",
+                        unread && "yd-relay-v6-row--urgent"
+                      )}
+                      onClick={() => openConversation(c.id)}
                     >
-                      Zurück
+                      <RelayWorkRowIcon
+                        row={{
+                          id: `msg-${c.id}`,
+                          href: "",
+                          primaryLabel: conversationLabel(c),
+                          context: "",
+                          timeLabel: "",
+                          actionLabel: "",
+                          statusLabel: "",
+                          typeLabel: "Nachricht",
+                          groupLabel: "",
+                          fromLabel: from,
+                          toLabel: to,
+                          dueLabel: null,
+                          kind: "message",
+                        }}
+                      />
+                      <span className="yd-relay-v6-row__body">
+                        <span className="yd-relay-v7-row__type">Nachricht</span>
+                        <span className="yd-relay-v6-row__title">{conversationLabel(c)}</span>
+                        <span className="yd-relay-v6-row__route">
+                          {from} → {to}
+                        </span>
+                        <span className="yd-relay-v6-row__meta">
+                          {[
+                            c.submission_id ? "Fallbezug" : null,
+                            unread ? "Neu" : null,
+                            c.last_message_at ? formatRelayMessageTimestamp(c.last_message_at) : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      </span>
                     </button>
-                    <h3 className="yd-dash-section yd-relay-practice__panel-title">
-                      {threadTitle || conversationLabel(activeConversation)}
-                    </h3>
-                  </div>
-                  {(activeConversation.task_id || activeConversation.submission_id) && (
-                    <span className="yd-relay-practice__thread-links">
-                      {activeConversation.task_id ? (
-                        <Link href={`/my-tasks/${activeConversation.task_id}`}>Aufgabe</Link>
-                      ) : null}
-                      {activeConversation.submission_id ? (
-                        <Link href={`/inbox/${activeConversation.submission_id}`}>Fall</Link>
-                      ) : null}
-                    </span>
-                  )}
-                </header>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
 
-                <div className="yd-relay-practice__thread-scroll">
-                  {loadingThread ? (
-                    <p className="yd-relay-practice__thread-status">Wird geladen …</p>
-                  ) : loadError ? (
-                    <p className="yd-relay-practice__thread-status yd-relay-practice__thread-status--error">
-                      {loadError}
-                    </p>
-                  ) : messages.length === 0 ? (
-                    <p className="yd-relay-practice__thread-status">Noch keine Nachrichten.</p>
-                  ) : (
-                    <ul className="yd-relay-practice__thread-messages">
-                      {messages.map((m) => (
-                        <li
-                          key={m.id}
-                          className={cn(
-                            "yd-relay-practice__thread-message",
-                            m.is_own && "yd-relay-practice__thread-message--own"
-                          )}
-                        >
-                          <span className="yd-relay-practice__thread-message-meta">
+      <div
+        className={cn(
+          "yd-relay-v3-shell__workspace max-lg:min-h-0 max-lg:flex-1",
+          !activeConversation && "max-lg:hidden",
+          activeConversation && "max-lg:flex max-lg:flex-col"
+        )}
+      >
+        <div className="yd-relay-v3-shell__context yd-relay-v6-messages-thread">
+          {!activeConversation ? (
+            <RelayPremiumEmpty
+              variant="detail"
+              title="Konversation wählen"
+              text="Links eine Unterhaltung auswählen — der Verlauf erscheint hier."
+            />
+          ) : (
+            <>
+              <header className="yd-relay-v6-messages-thread__head">
+                <button
+                  type="button"
+                  className="yd-relay-v6-messages-thread__back md:hidden"
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.delete("conversation");
+                    router.replace(`/relay?${params.toString()}`, { scroll: false });
+                  }}
+                >
+                  Zurück
+                </button>
+                <h2 className="yd-relay-v6-messages-thread__title">
+                  {threadTitle || conversationLabel(activeConversation)}
+                </h2>
+              </header>
+
+              <div className="yd-relay-v6-messages-thread__scroll">
+                {loadingThread ? (
+                  <p className="yd-relay-v6-messages-thread__status">Wird geladen …</p>
+                ) : loadError ? (
+                  <p className="yd-relay-v6-messages-thread__status yd-relay-v6-messages-thread__status--error">
+                    {loadError}
+                  </p>
+                ) : messages.length === 0 ? (
+                  <p className="yd-relay-v6-messages-thread__status">Noch keine Nachrichten.</p>
+                ) : (
+                  <ul className="yd-relay-v6-messages-log">
+                    {messages.map((m) => (
+                      <li key={m.id} className="yd-relay-v6-messages-log__entry">
+                        <div className="yd-relay-v6-messages-log__head">
+                          <span className="yd-relay-v6-messages-log__author">
                             {m.is_own ? "Sie" : senderDisplayName(m.sender_email)}
                           </span>
-                          <p className="yd-relay-practice__thread-message-body">{m.body}</p>
-                          <RelayReadStatusCompact
-                            receipts={m.read_receipts}
-                            isGroup={m.is_group_thread}
-                          />
-                          <span className="yd-relay-practice__thread-message-meta">
+                          <span className="yd-relay-v6-messages-log__time">
                             {formatRelayMessageTimestamp(m.created_at)}
                           </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <footer className="yd-relay-practice__thread-compose">
-                  {sendError ? (
-                    <p className="yd-relay-practice__thread-status yd-relay-practice__thread-status--error">
-                      {sendError}
-                    </p>
-                  ) : null}
-                  <textarea
-                    className="yd-clinical-control yd-relay-practice__thread-input"
-                    rows={2}
-                    value={composer}
-                    onChange={(e) => setComposer(e.target.value)}
-                    placeholder="Nachricht schreiben …"
-                    disabled={isPending || loadingThread}
-                  />
-                  <button
-                    type="button"
-                    className="yd-tracker-v4-new-case yd-relay-practice__thread-send"
-                    onClick={handleSend}
-                    disabled={isPending || loadingThread || !composer.trim()}
-                  >
-                    {isPending ? "…" : "Senden"}
-                  </button>
-                </footer>
+                        </div>
+                        <p className="yd-relay-v6-messages-log__body">{m.body}</p>
+                        <RelayReadStatusCompact
+                          receipts={m.read_receipts}
+                          isGroup={m.is_group_thread}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            )}
-          </section>
+
+              <footer className="yd-relay-v6-messages-thread__compose">
+                {sendError ? (
+                  <p className="yd-relay-v6-messages-thread__status yd-relay-v6-messages-thread__status--error">
+                    {sendError}
+                  </p>
+                ) : null}
+                <textarea
+                  className="yd-relay-v6-messages-thread__input"
+                  rows={2}
+                  value={composer}
+                  onChange={(e) => setComposer(e.target.value)}
+                  placeholder="Nachricht schreiben …"
+                  disabled={isPending || loadingThread}
+                />
+                <button
+                  type="button"
+                  className="yd-relay-v6-messages-thread__send"
+                  onClick={handleSend}
+                  disabled={isPending || loadingThread || !composer.trim()}
+                >
+                  {isPending ? "…" : "Senden"}
+                </button>
+              </footer>
+            </>
+          )}
         </div>
+
+        <aside className="yd-relay-v3-shell__actions yd-relay-v6-messages-details" aria-label="Details">
+          {!activeConversation ? (
+            <p className="yd-relay-v6-messages-details__empty">Details zur Unterhaltung</p>
+          ) : (
+            <>
+              <h2 className="yd-relay-v3-actions__title">Details</h2>
+              <dl className="yd-relay-v3-context__facts">
+                <div>
+                  <dt>Typ</dt>
+                  <dd>{activeConversation.kind === "group" ? "Gruppe" : "Direkt"}</dd>
+                </div>
+                {activeConversation.member_emails.length > 0 ? (
+                  <div>
+                    <dt>Mitglieder</dt>
+                    <dd>
+                      {activeConversation.member_emails.map((e) => senderDisplayName(e)).join(", ")}
+                    </dd>
+                  </div>
+                ) : null}
+                {activeConversation.submission_id ? (
+                  <div>
+                    <dt>Patientenbezug</dt>
+                    <dd>
+                      <Link href={`/inbox/${activeConversation.submission_id}`}>Fall öffnen</Link>
+                    </dd>
+                  </div>
+                ) : null}
+                {activeConversation.task_id ? (
+                  <div>
+                    <dt>Aufgabe</dt>
+                    <dd>
+                      <Link href={`/my-tasks/${activeConversation.task_id}`}>Verknüpfte Aufgabe</Link>
+                    </dd>
+                  </div>
+                ) : null}
+                {activeConversation.unread_count > 0 ? (
+                  <div>
+                    <dt>Ungelesen</dt>
+                    <dd>{activeConversation.unread_count}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </>
+          )}
+        </aside>
       </div>
     </div>
   );

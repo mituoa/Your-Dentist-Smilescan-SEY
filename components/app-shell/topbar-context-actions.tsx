@@ -1,10 +1,10 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { createCaseFromQuery } from "@/lib/create-case-return";
-import { NewTaskModalTrigger } from "@/components/my-tasks/new-task-modal";
+import { RelayCreateMenu } from "@/components/my-tasks/relay-create-menu";
 
 type ActionVariant = "both" | "newCase" | "newTask" | "none";
 
@@ -68,6 +68,7 @@ type TopbarContextActionsProps = {
 /** Globale Schnellaktionen — Workspace-Toolbar oder integrierte Dashboard-Headline. */
 export function TopbarContextActions({ role, variant = "toolbar" }: TopbarContextActionsProps) {
   const pathname = usePathname() || "";
+  const router = useRouter();
   const actionVariant = resolveVariant(pathname, role);
 
   if (actionVariant === "none") return null;
@@ -81,10 +82,10 @@ export function TopbarContextActions({ role, variant = "toolbar" }: TopbarContex
       }
     >
       {(actionVariant === "both" || actionVariant === "newTask") && (
-        <NewTaskModalTrigger
-          className={actionClasses(variant, "secondary")}
-          label="Praxisaufgabe erstellen"
-          showIcon
+        <RelayCreateMenu
+          placement={variant === "dashboard" ? "header" : "toolbar"}
+          isDoctor={role === "doctor"}
+          onMessageCreated={() => router.push("/relay?bereich=teamwork")}
         />
       )}
       {(actionVariant === "both" || actionVariant === "newCase") && (

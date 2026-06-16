@@ -18,8 +18,10 @@ function sectionIcon(section: RelayPracticeSection) {
       return FileText;
     case "teamwork":
       return Users;
-    case "handovers":
+    case "patient_waiting":
       return MessageSquare;
+    case "routines":
+      return ClipboardList;
     case "practice":
       return ClipboardList;
   }

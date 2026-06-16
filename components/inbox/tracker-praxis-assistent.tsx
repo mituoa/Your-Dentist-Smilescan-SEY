@@ -54,6 +54,8 @@ type TrackerPraxisAssistentProps = {
   canSendAppointmentLink: boolean;
   editableDraftId: string | null;
   initialDraftBody: string | null;
+  /** Mobile: große Aktionsfläche, weniger Text. */
+  mobileLayout?: boolean;
 };
 
 type ActionNotice = {
@@ -86,6 +88,7 @@ export function TrackerPraxisAssistent({
   canSendAppointmentLink,
   editableDraftId,
   initialDraftBody,
+  mobileLayout = false,
 }: TrackerPraxisAssistentProps) {
   const router = useRouter();
   const { responsePath, setResponsePath, applyDraftToPanel } = useTrackerWorkflow();
@@ -255,26 +258,35 @@ export function TrackerPraxisAssistent({
     <>
       <aside
         id="tracker-entscheidung"
-        className="yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail yd-tracker-v14-rail yd-tracker-v15-rail"
+        className={cn(
+          "yd-tracker-v7-rail yd-tracker-v8-rail yd-tracker-v12-rail yd-tracker-v14-rail yd-tracker-v15-rail",
+          mobileLayout && "yd-m-tracker-rail"
+        )}
         aria-label="Entscheidung"
         aria-busy={pending || sheetIntent !== null}
       >
         <section className="yd-tracker-v12-rail__block yd-tracker-v12-rail__block--empfehlung">
-          <h2 className="yd-tracker-v12-rail__label">Empfohlene nächste Aktion</h2>
+          <h2 className="yd-tracker-v12-rail__label">
+            {mobileLayout ? "Empfohlene Aktion" : "Empfohlene nächste Aktion"}
+          </h2>
           <p className="yd-tracker-v12-rail__headline yd-tracker-v16-rail__recommendation">
             {clinical.recommendationLabel}
           </p>
         </section>
 
-        <section className="yd-tracker-v12-rail__block">
-          <h2 className="yd-tracker-v12-rail__label">Klinische Einschätzung</h2>
-          <p className="yd-tracker-v12-rail__label yd-tracker-v12-rail__label--muted">
-            {priorityLabel}
-          </p>
-        </section>
+        {!mobileLayout ? (
+          <section className="yd-tracker-v12-rail__block">
+            <h2 className="yd-tracker-v12-rail__label">Klinische Einschätzung</h2>
+            <p className="yd-tracker-v12-rail__label yd-tracker-v12-rail__label--muted">
+              {priorityLabel}
+            </p>
+          </section>
+        ) : null}
 
         <section className="yd-tracker-v12-rail__block yd-tracker-v14-rail__block--action">
-          <p className="yd-tracker-v16-rail__action-label">Wie möchten Sie reagieren?</p>
+          {!mobileLayout ? (
+            <p className="yd-tracker-v16-rail__action-label">Wie möchten Sie reagieren?</p>
+          ) : null}
           <div className="flex flex-col gap-2">
             <button
               type="button"

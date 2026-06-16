@@ -20,7 +20,9 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
     if (typeof window === "undefined") return;
     if (!isCaseDetail) return;
     window.requestAnimationFrame(() => {
-      document.querySelector(".yd-workspace main")?.scrollTo({ top: 0, behavior: "auto" });
+      document
+        .querySelector(".yd-tracker-v4-detail__scroll")
+        ?.scrollTo({ top: 0, behavior: "auto" });
     });
   }, [isCaseDetail, pathname]);
 

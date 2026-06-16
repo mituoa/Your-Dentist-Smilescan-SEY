@@ -1,6 +1,5 @@
 import { Check } from "lucide-react";
 
-import { SpecializationIcon } from "@/components/profile-preview/specialization-icon";
 import { parseCareerTimelineLine } from "@/lib/profile/career-timeline-display";
 import { patientFacingSpecializationLabel } from "@/lib/profile/patient-facing-labels";
 import { expandWorkingStyleVitaForDisplay } from "@/lib/profile/working-style-library";
@@ -98,9 +97,6 @@ export function CarreeProfileBody({ data }: CarreeProfileBodyProps) {
               <ul className="yd-carree-profile__spec-list">
                 {specs.map((id) => (
                   <li key={id} className="yd-carree-profile__spec-item">
-                    <span className="yd-carree-profile__spec-icon">
-                      <SpecializationIcon id={id} className="h-[15px] w-[15px]" />
-                    </span>
                     <span className="yd-carree-profile__spec-label">
                       {patientFacingSpecializationLabel(id)}
                     </span>
@@ -115,15 +111,12 @@ export function CarreeProfileBody({ data }: CarreeProfileBodyProps) {
               className="yd-carree-profile__dual-col yd-carree-profile__panel yd-carree-profile__panel--credentials"
               aria-label="Fortbildungen und Zertifikate"
             >
-              <p className="yd-carree-profile__section-label yd-carree-profile__section-label--split">
-                <span>Fortbildungen</span>
-                <span>&amp; Zertifikate</span>
-              </p>
-              <ul className="yd-carree-profile__cred-badges">
+              <p className="yd-carree-profile__section-label">Fortbildungen &amp; Zertifikate</p>
+              <ul className="yd-carree-profile__cred-list">
                 {credentials.map((line) => (
-                  <li key={line} className="yd-carree-profile__cred-badge">
-                    <Check className="yd-carree-profile__cred-badge-icon" strokeWidth={2.25} aria-hidden />
-                    <span>{line}</span>
+                  <li key={line} className="yd-carree-profile__cred-item">
+                    <Check className="yd-carree-profile__cred-item-icon" strokeWidth={2} aria-hidden />
+                    <span className="yd-carree-profile__cred-item-label">{line}</span>
                   </li>
                 ))}
               </ul>

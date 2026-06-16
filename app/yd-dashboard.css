@@ -4,10 +4,10 @@
  */
 
 .yd-dashboard {
-  --yd-dash-title: #0a1628;
-  --yd-dash-body: #475569;
-  --yd-dash-label: #64748b;
-  --yd-dash-faint: #94a3b8;
+  --yd-dash-title: #243446;
+  --yd-dash-body: #516170;
+  --yd-dash-label: #7c8a98;
+  --yd-dash-faint: #9aa6b2;
 }
 
 .yd-dashboard .yd-dash-title {
@@ -833,4 +833,545 @@ main:has(.yd-dashboard--reference) {
   width: min(30vw, 280px);
   height: min(30vw, 280px);
   background: radial-gradient(circle, rgba(47, 128, 237, 0.08) 0%, transparent 70%);
+}
+
+/* —— Bento Dashboard — Neumorphic Referenz (eine Fläche, keine Karteninsel) —— */
+.yd-workspace .yd-awaken-canvas:has(.yd-dashboard--bento) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.yd-workspace .yd-awaken-canvas:has(.yd-dashboard--bento) > div:first-child,
+.yd-workspace .yd-awaken-canvas:has(.yd-dashboard--bento) > div:nth-child(2) {
+  display: none !important;
+}
+
+
+main:has(.yd-dashboard--bento) {
+  padding-top: 0 !important;
+}
+
+main:has(.yd-dashboard--bento) .yd-dash-header-premium {
+  padding-bottom: 1.35rem !important;
+}
+
+main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
+  opacity: 0.92;
+}
+
+.yd-dashboard--bento {
+  --bento-base: #f4f8fc;
+  --bento-raised:
+    7px 7px 18px rgba(36, 52, 70, 0.055),
+    -6px -6px 16px rgba(255, 255, 255, 0.96);
+  --bento-inset:
+    inset 5px 5px 12px rgba(36, 52, 70, 0.045),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.88);
+  --bento-radius: 24px;
+}
+
+.yd-dash-bento-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-dash-bento-canvas {
+    gap: 1.25rem;
+  }
+}
+
+.yd-dashboard--bento .yd-dash-zone--kpis {
+  margin: 0;
+}
+
+/* —— Status row — gleich hoch, Medical-Blue-Linie rechts —— */
+.yd-dash-bento-status-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .yd-dash-bento-status-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.yd-dash-bento-status {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 7.5rem;
+  padding: 1.125rem 1.25rem 1rem;
+  border-radius: var(--bento-radius);
+  background: var(--bento-base);
+  box-shadow: var(--bento-raised);
+  text-decoration: none;
+  transition: box-shadow 180ms ease;
+  overflow: hidden;
+}
+
+.yd-dash-bento-status__top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.yd-dash-bento-status__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: rgba(47, 99, 183, 0.08);
+  color: #2f63b7;
+  flex-shrink: 0;
+}
+
+.yd-dash-bento-status__icon svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+.yd-dash-bento-status__title {
+  margin: 0;
+  color: #7c8a98;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.yd-dash-bento-status__value {
+  margin: 0;
+  color: #243446;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.yd-dash-bento-status__detail {
+  margin: 0.125rem 0 0;
+  color: #516170;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+@media (hover: hover) {
+  .yd-dash-bento-status:hover {
+    box-shadow:
+      8px 8px 20px rgba(36, 52, 70, 0.065),
+      -7px -7px 18px rgba(255, 255, 255, 0.98);
+  }
+}
+
+/* —— Referenz-Zeile 2: zwei Geschwister-Karten 70/30 —— */
+.yd-dash-ref-main-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .yd-dash-ref-main-row {
+    grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
+    align-items: stretch;
+    min-height: 22rem;
+  }
+}
+
+/* Eine Karte = eine Referenz-Fläche */
+.yd-dash-ref-card {
+  border-radius: var(--bento-radius);
+  background: var(--bento-base);
+  box-shadow: var(--bento-raised);
+  padding: 1.25rem 1.375rem 1.125rem;
+  min-width: 0;
+}
+
+.yd-dash-ref-card__head {
+  margin-bottom: 1rem;
+}
+
+.yd-dash-ref-card__head--row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.yd-dash-ref-card__title {
+  margin: 0;
+  color: #243446;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.yd-dash-ref-card__meta {
+  margin: 0.25rem 0 0;
+  color: #7c8a98;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.yd-dash-ref-card__empty {
+  margin: 0;
+  color: #7c8a98;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.yd-dash-ref-card__link {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  color: #2f63b7;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.yd-dash-ref-card__link--inline {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+/* Praxiszustand — Balkendiagramm im Inset */
+.yd-dash-ref-card--hero {
+  display: flex;
+  flex-direction: column;
+  min-height: 24rem;
+}
+
+.yd-dash-state-visual {
+  flex: 1;
+  margin-top: 0.25rem;
+  padding: 1rem 1.125rem 1.125rem;
+  border-radius: 18px;
+  background: var(--bento-base);
+  box-shadow: var(--bento-inset);
+  min-height: 16rem;
+}
+
+.yd-dash-state-chart {
+  position: relative;
+  height: 100%;
+  min-height: 14rem;
+}
+
+.yd-dash-state-chart__grid {
+  position: absolute;
+  inset: 0 0 2.75rem;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(36, 52, 70, 0.05) 1px,
+    transparent 1px
+  );
+  background-size: 100% 2.5rem;
+  pointer-events: none;
+}
+
+.yd-dash-state-chart__plot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.625rem;
+  align-items: end;
+  height: 100%;
+  min-height: 14rem;
+  padding-top: 0.5rem;
+}
+
+.yd-dash-state-chart__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  height: 100%;
+  text-decoration: none;
+}
+
+.yd-dash-state-chart__bar-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  min-height: 9rem;
+}
+
+.yd-dash-state-chart__bar {
+  display: block;
+  width: min(2.25rem, 72%);
+  border-radius: 10px 10px 6px 6px;
+  background: linear-gradient(180deg, #2f63b7 0%, rgba(47, 99, 183, 0.35) 100%);
+  min-height: 0.75rem;
+  transition: height 200ms ease;
+}
+
+.yd-dash-state-chart__count {
+  color: #243446;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.yd-dash-state-chart__label {
+  color: #7c8a98;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.25;
+}
+
+/* Schedule-Panel */
+.yd-dash-ref-card--schedule {
+  display: flex;
+  flex-direction: column;
+}
+
+.yd-dash-week-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  padding: 0.125rem 0;
+}
+
+.yd-dash-week-strip__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 2rem;
+}
+
+.yd-dash-week-strip__label {
+  color: #9aa6b2;
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.yd-dash-week-strip__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  color: #516170;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.yd-dash-week-strip__day--active .yd-dash-week-strip__num {
+  background: #2f63b7;
+  color: #fff;
+}
+
+.yd-dash-schedule-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+}
+
+.yd-dash-schedule-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.625rem 0.75rem;
+  align-items: start;
+  padding: 0.65rem 0;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(36, 52, 70, 0.05);
+}
+
+.yd-dash-schedule-item:last-child {
+  border-bottom: none;
+}
+
+.yd-dash-schedule-item__dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  margin-top: 0.35rem;
+  border-radius: 50%;
+  background: #2f63b7;
+}
+
+.yd-dash-schedule-item__dot--routine {
+  background: #7c8a98;
+}
+
+.yd-dash-schedule-item__label {
+  color: #243446;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.yd-dash-schedule-item__when {
+  color: #7c8a98;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* Aktive Vorgänge — Gantt-Timeline */
+.yd-dash-ref-card--timeline {
+  padding-bottom: 1.25rem;
+}
+
+.yd-dash-gantt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.yd-dash-gantt__axis {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  .yd-dash-gantt__axis {
+    display: grid;
+    grid-template-columns: minmax(8rem, 11rem) repeat(7, minmax(0, 1fr)) minmax(6rem, 8rem);
+    gap: 0.75rem 0.5rem;
+    padding: 0 0 0.35rem;
+    border-bottom: 1px solid rgba(36, 52, 70, 0.06);
+    align-items: end;
+  }
+
+  .yd-dash-gantt__axis-day {
+    color: #9aa6b2;
+    font-size: 0.625rem;
+    font-weight: 500;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+}
+
+.yd-dash-gantt__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr) minmax(6rem, 8rem);
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(36, 52, 70, 0.05);
+}
+
+.yd-dash-gantt__row:last-child {
+  border-bottom: none;
+}
+
+.yd-dash-gantt__type {
+  margin: 0;
+  color: #9aa6b2;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.yd-dash-gantt__title {
+  margin: 0.15rem 0 0;
+  color: #243446;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.yd-dash-gantt__track {
+  position: relative;
+  min-height: 1.25rem;
+}
+
+.yd-dash-gantt__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.yd-dash-gantt__bar-link {
+  position: relative;
+  z-index: 1;
+  display: block;
+  height: 0.625rem;
+  margin-top: 0.3125rem;
+  text-decoration: none;
+}
+
+.yd-dash-gantt__bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2f63b7 0%, rgba(47, 99, 183, 0.5) 100%);
+  min-width: 1.5rem;
+  transition: width 200ms ease;
+}
+
+.yd-dash-gantt__route,
+.yd-dash-gantt__when {
+  margin: 0;
+  color: #7c8a98;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: right;
+}
+
+@media (min-width: 901px) {
+  .yd-dash-gantt__row {
+    grid-template-columns: minmax(8rem, 11rem) repeat(7, minmax(0, 1fr)) minmax(6rem, 8rem);
+    gap: 0.75rem 0.5rem;
+  }
+
+  .yd-dash-gantt__track {
+    grid-column: 2 / span 7;
+  }
+
+  .yd-dash-gantt__grid {
+    background-image: repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent calc(100% / 7 - 1px),
+      rgba(36, 52, 70, 0.06) calc(100% / 7 - 1px),
+      rgba(36, 52, 70, 0.06) calc(100% / 7)
+    );
+    border-radius: 999px;
+    background-color: rgba(36, 52, 70, 0.04);
+  }
+}
+
+@media (max-width: 900px) {
+  .yd-dash-gantt__row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .yd-dash-gantt__route,
+  .yd-dash-gantt__when {
+    text-align: left;
+  }
 }

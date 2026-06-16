@@ -102,12 +102,12 @@ const HEADER_DIVIDER =
   "border-b border-black/[0.05] dark:border-white/[0.06]";
 
 const FAB =
-  "pointer-events-auto flex h-12 w-12 touch-manipulation items-center justify-center rounded-2xl border border-black/[0.06] bg-white/[0.82] text-[#2563EB] shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08),0_8px_24px_-12px_rgba(43,111,232,0.15),0_0_0_1px_rgba(255,255,255,0.7)_inset] backdrop-blur-xl backdrop-saturate-150 " +
+  "pointer-events-auto flex h-12 w-12 touch-manipulation items-center justify-center rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[#163d7a] text-white shadow-[0_2px_8px_-2px_rgba(12,25,41,0.2),0_10px_28px_-12px_rgba(22,61,122,0.45),0_0_0_1px_rgba(255,255,255,0.08)_inset] " +
   "transition-[transform,box-shadow,background-color,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none " +
-  "hover:border-[rgba(43,111,232,0.18)] hover:bg-white/[0.92] hover:shadow-[0_4px_14px_-4px_rgba(15,23,42,0.1),0_12px_32px_-16px_rgba(43,111,232,0.18)] " +
-  "active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.28)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent " +
+  "hover:border-[rgba(255,255,255,0.16)] hover:bg-[#1a4f9c] hover:shadow-[0_4px_14px_-4px_rgba(12,25,41,0.22),0_14px_36px_-16px_rgba(22,61,122,0.5)] " +
+  "active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,95,167,0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent " +
   "md:h-[52px] md:w-[52px] md:rounded-[14px] " +
-  "dark:border-white/[0.1] dark:bg-[rgb(28_30_34/0.88)] dark:text-[#93C5FD] dark:shadow-[0_12px_36px_-20px_rgba(0,0,0,0.45)]";
+  "dark:border-white/[0.12] dark:bg-[#1e4a82] dark:text-white dark:shadow-[0_12px_36px_-20px_rgba(0,0,0,0.55)]";
 
 const ICON_WRAP =
   "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.1)] " +

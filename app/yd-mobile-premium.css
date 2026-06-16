@@ -6,7 +6,13 @@
 @media (max-width: 767px) {
   /* —— Shell: bottom rail (Sidebar-DNA) + safe scroll —— */
   .yd-workspace {
-    --yd-mobile-bottom-nav-h: calc(3.375rem + env(safe-area-inset-bottom, 0px));
+    --yd-browser-bottom-inset: 0px;
+    --yd-mobile-safe-bottom: max(
+      env(safe-area-inset-bottom, 0px),
+      var(--yd-browser-bottom-inset),
+      0.75rem
+    );
+    --yd-mobile-bottom-nav-h: calc(3.625rem + var(--yd-mobile-safe-bottom));
     --yd-mobile-topbar-h: calc(2.75rem + env(safe-area-inset-top, 0px));
   }
 
@@ -51,11 +57,15 @@
   /* Bottom navigation — kompakt, 6 Items nebeneinander */
   .yd-mobile-bottom-rail {
     position: fixed;
-    z-index: 45;
+    z-index: 52;
     left: 0;
     right: 0;
     bottom: 0;
+    padding: 0 max(0.25rem, env(safe-area-inset-right, 0px)) var(--yd-mobile-safe-bottom)
+      max(0.25rem, env(safe-area-inset-left, 0px));
     pointer-events: none;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   .yd-mobile-bottom-rail__surface {
@@ -64,7 +74,7 @@
     align-items: stretch;
     justify-content: space-between;
     gap: 0;
-    margin: 0 0.25rem max(0.25rem, env(safe-area-inset-bottom));
+    margin: 0 0 0.25rem;
     padding: 0.1875rem 0.125rem 0.125rem;
     border-radius: 22px;
     border: 1px solid var(--yd-sidebar-border, rgba(255, 255, 255, 0.72));

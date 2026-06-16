@@ -140,7 +140,7 @@
 
 @media (max-width: 767px) {
   .yd-workspace {
-    --yd-mobile-bottom-nav-h: calc(3.375rem + env(safe-area-inset-bottom, 0px));
+    --yd-mobile-bottom-nav-h: calc(3.625rem + var(--yd-mobile-safe-bottom, env(safe-area-inset-bottom, 0px)));
   }
 
   .yd-command-assist-fab-host {

@@ -10,10 +10,10 @@ import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { getOpenTasks } from "@/lib/queries/dashboard";
 import { listJournalForWorkspace } from "@/lib/queries/journal";
 import { Sidebar } from "@/components/app-shell/sidebar";
-import {
-  MobileNavProvider,
+import { MobileNavProvider,
   MobileSidebarFrame,
 } from "@/components/app-shell/mobile-nav";
+import { MobileScrollFoundation } from "@/components/app-shell/mobile-scroll-foundation";
 import { WorkspaceIntegratedHeaderBridge } from "@/components/app-shell/workspace-integrated-header-bridge";
 import { ProtectedTopbar } from "@/components/app-shell/protected-topbar";
 import { WorkspaceMobileShortcutsBar } from "@/components/workspace/workspace-mobile-shortcuts-bar";
@@ -188,6 +188,7 @@ export default async function ProtectedLayout({
         unseenCount,
         preparedAwaitingCount,
         tasksNeedingDecision,
+        preparedCasesCount: previewRows.length,
       });
     }
 
@@ -237,62 +238,64 @@ export default async function ProtectedLayout({
       />
       <YdWorkspaceAwakening>
         <MobileNavProvider>
-          <Suspense fallback={null}>
-            <YdAwakenBootstrap />
-          </Suspense>
-          <div
-            className="yd-workspace yd-awaken-page relative flex h-[100dvh] flex-col overflow-hidden"
-            style={{ background: YD.atmosphere.pageGradient }}
-          >
-            <div className="yd-app-shell-row relative flex min-h-0 flex-1 flex-row overflow-hidden">
-              <MobileSidebarFrame>
-                <Sidebar
-                  role={role}
-                  inboxCount={inboxCount}
-                  myTasksCount={myTasksCount}
-                  myTasksOverdueCount={myTasksOverdueCount}
-                  avatarUrl={profileData?.photo_url ?? null}
-                  displayName={profileData?.display_name ?? null}
-                  email={user.email || ""}
-                  navAmbient={navAmbient}
-                />
-              </MobileSidebarFrame>
+          <MobileScrollFoundation>
+            <Suspense fallback={null}>
+              <YdAwakenBootstrap />
+            </Suspense>
+            <div
+              className="yd-workspace yd-awaken-page relative flex h-[100dvh] flex-col overflow-hidden"
+              style={{ background: YD.atmosphere.pageGradient }}
+            >
+              <div className="yd-app-shell-row relative flex min-h-0 flex-1 flex-row overflow-hidden">
+                <MobileSidebarFrame>
+                  <Sidebar
+                    role={role}
+                    inboxCount={inboxCount}
+                    myTasksCount={myTasksCount}
+                    myTasksOverdueCount={myTasksOverdueCount}
+                    avatarUrl={profileData?.photo_url ?? null}
+                    displayName={profileData?.display_name ?? null}
+                    email={user.email || ""}
+                    navAmbient={navAmbient}
+                  />
+                </MobileSidebarFrame>
 
-            <div className="yd-app-shell-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-              <ProtectedTopbar
-                email={user.email || ""}
-                workspaceName={workspaceName}
-                role={role}
-                initialTheme={theme}
-                avatarUrl={profileData?.photo_url ?? null}
-                displayName={profileData?.display_name ?? null}
-                inboxCount={inboxCount}
-              />
-
-              <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(3rem,env(safe-area-inset-bottom)+2rem)] md:p-5 md:pb-6">
-                <HcAppCanvas>
-                  <WorkspaceIntegratedHeaderBridge
+                <div className="yd-app-shell-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+                  <ProtectedTopbar
                     email={user.email || ""}
                     workspaceName={workspaceName}
                     role={role}
                     initialTheme={theme}
-                    displayName={doctorLabel}
                     avatarUrl={profileData?.photo_url ?? null}
+                    displayName={profileData?.display_name ?? null}
                     inboxCount={inboxCount}
-                    trackerHeaderSummary={trackerHeaderSummary}
-                    dashboardHeaderSummary={dashboardHeaderSummary}
-                    relayHeaderSummary={relayHeaderSummary}
                   />
-                  {children}
-                </HcAppCanvas>
-              </main>
+
+                  <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(3rem,env(safe-area-inset-bottom)+2rem)] md:p-5 md:pb-6">
+                    <HcAppCanvas>
+                      <WorkspaceIntegratedHeaderBridge
+                        email={user.email || ""}
+                        workspaceName={workspaceName}
+                        role={role}
+                        initialTheme={theme}
+                        displayName={doctorLabel}
+                        avatarUrl={profileData?.photo_url ?? null}
+                        inboxCount={inboxCount}
+                        trackerHeaderSummary={trackerHeaderSummary}
+                        dashboardHeaderSummary={dashboardHeaderSummary}
+                        relayHeaderSummary={relayHeaderSummary}
+                      />
+                      {children}
+                    </HcAppCanvas>
+                  </main>
+                </div>
+              </div>
               <Suspense fallback={null}>
                 <WorkspaceMobileShortcutsBar />
               </Suspense>
             </div>
-          </div>
-        </div>
-      </MobileNavProvider>
+          </MobileScrollFoundation>
+        </MobileNavProvider>
       </YdWorkspaceAwakening>
     </AssistShell>
   );

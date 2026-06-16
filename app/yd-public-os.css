@@ -1881,15 +1881,10 @@
   padding: 0.5rem 0 1.5rem;
 }
 
-.yd-public-os--focus:has(.yd-clinical-entry--login) .yd-product-entry {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
+.yd-public-os--focus:has(.yd-clinical-entry--login) .yd-product-entry:not(.yd-login-page-entry) {
+  flex: 0 0 auto;
   justify-content: center;
-  align-items: center;
-  width: 100%;
-  min-height: 0;
-  padding: 0.5rem 0 max(1.25rem, env(safe-area-inset-bottom));
+  padding: 0;
 }
 
 .yd-product-entry-card {

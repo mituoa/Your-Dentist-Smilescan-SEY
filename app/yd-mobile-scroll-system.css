@@ -1,0 +1,85 @@
+/* Mobile scroll system — one owner per screen, native iOS momentum */
+
+@media (max-width: 767px) {
+  .yd-mobile-scroll-pane {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+
+  /* Primary app scroll (dashboard, journal, profile…) */
+  html[data-yd-scroll-owner="main"] .yd-workspace main {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    touch-action: pan-y;
+  }
+
+  /* Module routes: main is a flex frame, inner panes scroll */
+  html[data-yd-scroll-owner="module"] .yd-workspace main {
+    overflow: hidden !important;
+    min-height: 0;
+    touch-action: none;
+  }
+
+  html[data-yd-scroll-owner="module"] main .yd-awaken-canvas,
+  html[data-yd-scroll-owner="module"] main .yd-awaken-canvas > .relative {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden !important;
+  }
+
+  /* Tracker list */
+  .yd-tracker-mobile-inbox {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .yd-tracker-mobile-inbox__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+
+  /* Tracker detail — single scroll pane inside fixed shell */
+  .yd-tracker-shell--mobile-detail .yd-tracker-v4-detail__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    scroll-padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
+  .yd-tracker-shell--mobile-detail .yd-tracker-v4-detail,
+  .yd-tracker-shell--mobile-detail .yd-tracker-mobile-case-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden !important;
+  }
+
+  /* Prevent nested scroll bleed inside tracker detail */
+  .yd-tracker-mobile-case-view .yd-tracker-v8-evidence,
+  .yd-tracker-mobile-case-view .yd-tracker-v6-communication {
+    overflow: visible;
+  }
+}

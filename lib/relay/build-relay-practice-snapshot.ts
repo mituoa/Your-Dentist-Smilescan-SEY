@@ -7,16 +7,18 @@ import type { JournalEntry } from "@/lib/types/journal-entry";
 import { assigneeLabelForTask } from "@/lib/relay/build-relay-snapshot";
 import { buildSubmissionEnrichmentMap } from "@/lib/relay/build-relay-ops-snapshot";
 import { isRelayHandoffTask } from "@/lib/relay/build-relay-v3-snapshot";
+import { recurrenceBadgeLabel } from "@/lib/tasks/recurrence";
 import {
   formatRelayRelativeTime,
   inferTrackerRecommendation,
   isWaitingOnDoctorTask,
+  isWaitingOnPatientTask,
   resolveRelayOpsStatus,
   taskLastActivityAt,
   type RelayTaskEnrichment,
 } from "@/lib/relay/relay-ops-status";
 import { relayCategoryLabel, resolveRelayTaskCategory } from "@/lib/relay/relay-task-category";
-import { recurrenceBadgeLabel } from "@/lib/tasks/recurrence";
+import { enrichRelayWorkRowDisplay } from "@/lib/relay/relay-work-object";
 
 export type RelayWorkRowKind = "task" | "journal" | "message";
 
@@ -28,22 +30,42 @@ export type RelayWorkRow = {
   timeLabel: string;
   actionLabel: string;
   statusLabel: string;
+  typeLabel: string;
+  groupLabel: string;
+  fromLabel: string;
+  toLabel: string;
+  dueLabel: string | null;
   kind: RelayWorkRowKind;
+  /** V8 — Arbeitstyp für Liste (JOURNAL-FREIGABE …). */
+  workTypeLabel?: string;
+  /** V8 — Kurzbeschreibung / Anliegen. */
+  concernLine?: string;
+  /** V8 — z. B. „wartet seit 23 Std.“ */
+  waitingLabel?: string;
   isGhost?: boolean;
   isCritical?: boolean;
 };
 
-export type RelayPracticeSection = "attention" | "teamwork" | "handovers" | "practice";
+export type RelayWorkspaceArea = "eingang" | "team" | "nachrichten";
+
+export type RelayPracticeSection =
+  | "attention"
+  | "practice"
+  | "teamwork"
+  | "patient_waiting"
+  | "routines";
 
 export type RelayPracticeSnapshot = {
   summaryLine: string | null;
   attention: RelayWorkRow[];
   teamwork: RelayWorkRow[];
-  handovers: RelayWorkRow[];
+  patientWaiting: RelayWorkRow[];
+  routines: RelayWorkRow[];
   practiceTasks: RelayWorkRow[];
   ghostAttention: RelayWorkRow[];
   ghostTeamwork: RelayWorkRow[];
-  ghostHandovers: RelayWorkRow[];
+  ghostPatientWaiting: RelayWorkRow[];
+  ghostRoutines: RelayWorkRow[];
   ghostPractice: RelayWorkRow[];
   hasAnyWork: boolean;
 };
@@ -111,6 +133,50 @@ function inferStatusLabel(
   return "Wartet auf Sie";
 }
 
+function displayNameFromEmail(email: string): string {
+  const local = email.split("@")[0] ?? email;
+  const token = local.split(/[._-]/)[0] ?? local;
+  if (!token) return "Praxis";
+  return token.charAt(0).toUpperCase() + token.slice(1);
+}
+
+function creatorLabelForTask(
+  task: MyTask,
+  membersById: Map<string, AssignableMember>
+): string {
+  const member = membersById.get(task.created_by);
+  if (member) return displayNameFromEmail(member.email);
+  return "Praxis";
+}
+
+function dueLabelForTask(task: MyTask): string | null {
+  if (!task.due_date) return null;
+  const key = task.due_date.slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  if (key === today) return "Heute";
+  if (key < today) return "Überfällig";
+  const d = new Date(`${key}T12:00:00`);
+  return d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function taskTypeLabel(
+  task: MyTask,
+  enrichment: RelayTaskEnrichment | undefined
+): string {
+  if (task.recurrence_type !== "once") return "Routine";
+  if (isRelayHandoffTask(task, enrichment)) return "Übergabe";
+  return "Aufgabe";
+}
+
+function taskGroupLabel(
+  task: MyTask,
+  membersById: Map<string, AssignableMember>
+): string {
+  const assignee = assigneeLabelForTask(task, membersById);
+  if (assignee !== "—") return assignee;
+  return relayCategoryLabel(task);
+}
+
 function mapTaskRow(
   task: MyTask,
   membersById: Map<string, AssignableMember>,
@@ -131,6 +197,11 @@ function mapTaskRow(
     timeLabel: formatRelayRelativeTime(waitingAt),
     actionLabel: inferTaskAction(task, enrichment, isDoctor),
     statusLabel: inferStatusLabel(task, enrichment, isDoctor),
+    typeLabel: taskTypeLabel(task, enrichment),
+    groupLabel: taskGroupLabel(task, membersById),
+    fromLabel: creatorLabelForTask(task, membersById),
+    toLabel: taskGroupLabel(task, membersById),
+    dueLabel: dueLabelForTask(task),
     kind: "task",
     isCritical: meta.isCritical,
   };
@@ -141,23 +212,19 @@ function mapJournalRow(entry: JournalEntry): RelayWorkRow {
   const typeLabel = getContentTypeLabel(contentType);
   const title = entry.title?.trim() || "Ohne Titel";
 
-  let primaryLabel: string;
-  if (contentType === "faq") {
-    primaryLabel = `${title} wartet auf Freigabe`;
-  } else if (contentType === "nachsorge") {
-    primaryLabel = `Nachsorgevorlage „${title}" geändert`;
-  } else {
-    primaryLabel = `${typeLabel}: ${title}`;
-  }
-
   return {
     id: `journal-${entry.id}`,
     href: `/journal/${entry.id}/edit`,
-    primaryLabel,
-    context: `Entwurf · ${typeLabel}`,
+    primaryLabel: title,
+    context: typeLabel,
     timeLabel: formatRelayRelativeTime(entry.updated_at),
-    actionLabel: contentType === "faq" ? "Freigeben" : "Prüfen",
+    actionLabel: "Freigeben",
     statusLabel: "Freigabe erforderlich",
+    typeLabel,
+    groupLabel: "Journal",
+    fromLabel: "ZFA Maria",
+    toLabel: "Arzt",
+    dueLabel: null,
     kind: "journal",
   };
 }
@@ -172,23 +239,68 @@ function conversationTitle(c: RelayConversationRow): string {
   return "Interne Übergabe";
 }
 
-function mapConversationRow(c: RelayConversationRow, basePath: "/relay" | "/my-tasks"): RelayWorkRow {
+function mapConversationRow(
+  c: RelayConversationRow,
+  basePath: "/relay" | "/my-tasks",
+  section: RelayPracticeSection
+): RelayWorkRow {
   const from =
     c.other_party_email?.split("@")[0] ??
     (c.member_emails.length > 1 ? c.member_emails[0]?.split("@")[0] : "Team");
   const preview = c.last_message_preview?.trim() ?? "Praxisübergabe";
+  const bereich = section === "patient_waiting" ? "patient-wartet" : "team";
 
   return {
     id: `msg-${c.id}`,
-    href: `${basePath}?tab=nachrichten&conversation=${c.id}`,
+    href: `${basePath}?bereich=${bereich}&item=msg-${c.id}`,
     primaryLabel: conversationTitle(c),
-    context: `${from ?? "Team"} → Team · ${preview.length > 48 ? `${preview.slice(0, 45)}…` : preview}`,
+    context: preview.length > 48 ? `${preview.slice(0, 45)}…` : preview,
     timeLabel: c.last_message_at ? formatRelayRelativeTime(c.last_message_at) : "",
     actionLabel: c.unread_count > 0 ? "Antworten" : "Öffnen",
     statusLabel: c.unread_count > 0 ? "Ungelesen" : "Übergabe",
+    typeLabel: "Übergabe",
+    groupLabel: from ?? "Team",
+    fromLabel: from ?? "Team",
+    toLabel: "Praxis",
+    dueLabel: c.unread_count > 0 ? "Neu" : null,
     kind: "message",
     isCritical: c.unread_count > 0,
   };
+}
+
+function needsDoctorAttention(
+  task: MyTask,
+  enrichment: RelayTaskEnrichment | undefined,
+  isDoctor: boolean
+): boolean {
+  if (!isDoctor) return false;
+  const draftStatus = enrichment?.messageDraftStatus ?? "none";
+  if (task.status === "pending_review") return true;
+  if (task.submission_id && draftStatus === "draft") return true;
+  if (task.recipient_type === "doctor_only" && task.status === "open") return true;
+  if (isWaitingOnDoctorTask(task, enrichment)) return true;
+  if (resolveRelayTaskCategory(task) === "clinical_decision" && task.status === "open") return true;
+  return false;
+}
+
+function isPatientWaitingWork(
+  task: MyTask,
+  enrichment: RelayTaskEnrichment | undefined,
+  isDoctor: boolean
+): boolean {
+  if (!task.submission_id || task.status === "done") return false;
+  if (needsDoctorAttention(task, enrichment, isDoctor)) return false;
+
+  const meta = resolveRelayOpsStatus(task, enrichment);
+  const draftStatus = enrichment?.messageDraftStatus ?? "none";
+
+  if (draftStatus === "approved") return true;
+  if (meta.label === "Wartet auf Praxis") return true;
+  if (meta.status === "new" || meta.status === "in_progress") return true;
+  if (meta.isCritical && task.submission_patient_name) return true;
+  if (isWaitingOnPatientTask(task, enrichment)) return false;
+
+  return Boolean(task.submission_patient_name);
 }
 
 function classifyTask(
@@ -198,37 +310,30 @@ function classifyTask(
   userId: string
 ): RelayPracticeSection | null {
   if (!taskVisible(task, isDoctor, enrichment)) return null;
+  if (task.status === "done") return null;
+
+  if (task.recurrence_type !== "once") return "routines";
+
+  if (needsDoctorAttention(task, enrichment, isDoctor)) return "attention";
+
+  if (isPatientWaitingWork(task, enrichment, isDoctor)) return "patient_waiting";
 
   const meta = resolveRelayOpsStatus(task, enrichment);
   const assignedToMe = isAssignedToUser(task, userId);
   const handoff = isRelayHandoffTask(task, enrichment);
-  const isInternal = !task.submission_id;
-  const isRoutine = task.recurrence_type !== "once";
 
-  if (task.status === "pending_review" && isDoctor) return "attention";
-  if (task.recipient_type === "doctor_only" && isDoctor && task.status === "open") return "attention";
-  if (isWaitingOnDoctorTask(task, enrichment) && isDoctor) return "attention";
-  if (assignedToMe && (task.priority === "important" || task.status === "pending_review")) {
-    return "attention";
-  }
+  if (handoff) return "teamwork";
+  if (meta.status === "waiting_practice" || meta.label === "Wartet auf Praxis") return "teamwork";
+  if (!assignedToMe && task.status === "open") return "teamwork";
 
-  if (handoff && task.status !== "pending_review") return "handovers";
-
-  if (isInternal || isRoutine) return "practice";
-
-  if (
-    meta.status === "waiting_practice" ||
-    meta.label === "Wartet auf Praxis" ||
-    (!assignedToMe && task.status === "open")
-  ) {
-    return "teamwork";
-  }
-
-  if (assignedToMe && task.status === "open") return "attention";
-
-  if (task.submission_id) return "teamwork";
+  if (assignedToMe && task.status === "open") return "practice";
 
   return "practice";
+}
+
+function classifyConversation(c: RelayConversationRow): RelayPracticeSection {
+  if (c.submission_id) return "patient_waiting";
+  return "teamwork";
 }
 
 function taskPriorityScore(task: MyTask, enrichment?: RelayTaskEnrichment): number {
@@ -277,9 +382,14 @@ const GHOST_ATTENTION: RelayWorkRow[] = [
     href: "/journal/new",
     primaryLabel: "FAQ Implantologie wartet auf Freigabe",
     context: "Entwurf · ZFA Maria · vor 2 Tagen",
-    timeLabel: "",
+    timeLabel: "vor 2 T.",
     actionLabel: "Freigeben",
-    statusLabel: "Freigabe erforderlich",
+    statusLabel: "Offen",
+    typeLabel: "Freigabe",
+    groupLabel: "Journal",
+    fromLabel: "ZFA Maria",
+    toLabel: "Arzt",
+    dueLabel: null,
     kind: "journal",
     isGhost: true,
   },
@@ -288,9 +398,14 @@ const GHOST_ATTENTION: RelayWorkRow[] = [
     href: "/my-tasks/new",
     primaryLabel: "Recall-Serie Q2 — 12 Patienten bestätigen",
     context: "Ärztliche Entscheidung · ZMP · vor 5 Tagen",
-    timeLabel: "",
+    timeLabel: "vor 5 T.",
     actionLabel: "Entscheiden",
-    statusLabel: "Entscheidung erforderlich",
+    statusLabel: "Offen",
+    typeLabel: "Aufgabe",
+    groupLabel: "Prophylaxe",
+    fromLabel: "ZMP",
+    toLabel: "Arzt",
+    dueLabel: "Freitag",
     kind: "task",
     isGhost: true,
   },
@@ -302,24 +417,53 @@ const GHOST_TEAMWORK: RelayWorkRow[] = [
     href: "/my-tasks/new",
     primaryLabel: "Empfang wartet auf Rückmeldung",
     context: "Patientenkontakt · Offen · ZFA Anna",
-    timeLabel: "",
+    timeLabel: "Heute",
     actionLabel: "Bearbeiten",
-    statusLabel: "Wartet auf Sie",
+    statusLabel: "Offen",
+    typeLabel: "Übergabe",
+    groupLabel: "Empfang",
+    fromLabel: "Empfang",
+    toLabel: "Arzt",
+    dueLabel: "Heute",
     kind: "task",
     isGhost: true,
   },
 ];
 
-const GHOST_HANDOVERS: RelayWorkRow[] = [
+const GHOST_PATIENT_WAITING: RelayWorkRow[] = [
   {
-    id: "ghost-callback",
+    id: "ghost-patient",
+    href: "/inbox",
+    primaryLabel: "Berk Baysal",
+    context: "Schwellung nach OP",
+    timeLabel: "vor 3 Std.",
+    actionLabel: "Antwort senden",
+    statusLabel: "Patient wartet",
+    typeLabel: "Patientenanfrage",
+    groupLabel: "Tracker",
+    fromLabel: "Patient",
+    toLabel: "Praxis",
+    dueLabel: null,
+    kind: "task",
+    isGhost: true,
+  },
+];
+
+const GHOST_ROUTINES: RelayWorkRow[] = [
+  {
+    id: "ghost-routine",
     href: "/my-tasks/new",
-    primaryLabel: "Patient ruft morgen zurück",
-    context: "Rezeption → Team · Bitte Rückruf 09:00 notieren",
-    timeLabel: "",
+    primaryLabel: "Recall-Liste prüfen",
+    context: "Wöchentlich",
+    timeLabel: "Mo.",
     actionLabel: "Öffnen",
-    statusLabel: "Übergabe",
-    kind: "message",
+    statusLabel: "Offen",
+    typeLabel: "Routine",
+    groupLabel: "Prophylaxe",
+    fromLabel: "Praxisleitung",
+    toLabel: "Empfang",
+    dueLabel: "Montag",
+    kind: "task",
     isGhost: true,
   },
 ];
@@ -330,9 +474,14 @@ const GHOST_PRACTICE: RelayWorkRow[] = [
     href: "/my-tasks/new",
     primaryLabel: "Hygiene-Checkliste prüfen",
     context: "QM · Wöchentlich · ZFA · nächste: Mo.",
-    timeLabel: "",
+    timeLabel: "Mo.",
     actionLabel: "Öffnen",
-    statusLabel: "Fällig heute",
+    statusLabel: "Offen",
+    typeLabel: "Routine",
+    groupLabel: "Verwaltung",
+    fromLabel: "Praxisleitung",
+    toLabel: "Verwaltung",
+    dueLabel: "Montag",
     kind: "task",
     isGhost: true,
   },
@@ -341,9 +490,14 @@ const GHOST_PRACTICE: RelayWorkRow[] = [
     href: "/my-tasks/new",
     primaryLabel: "Mitarbeitergespräch vorbereiten",
     context: "Praxisorganisation · fällig Fr. · einmalig",
-    timeLabel: "",
+    timeLabel: "Fr.",
     actionLabel: "Öffnen",
-    statusLabel: "Fällig in 3 Tagen",
+    statusLabel: "Offen",
+    typeLabel: "Aufgabe",
+    groupLabel: "Praxisleitung",
+    fromLabel: "Praxisleitung",
+    toLabel: "Arzt",
+    dueLabel: "Freitag",
     kind: "task",
     isGhost: true,
   },
@@ -352,29 +506,35 @@ const GHOST_PRACTICE: RelayWorkRow[] = [
 function buildSummaryLine(counts: {
   attention: number;
   teamwork: number;
-  handovers: number;
+  patientWaiting: number;
+  routines: number;
   practice: number;
 }): string | null {
   const parts: string[] = [];
   if (counts.attention > 0) {
     parts.push(
-      counts.attention === 1 ? "1 Freigabe" : `${counts.attention} Freigaben`
+      counts.attention === 1 ? "1 Entscheidung offen" : `${counts.attention} Entscheidungen offen`
+    );
+  }
+  if (counts.patientWaiting > 0) {
+    parts.push(
+      counts.patientWaiting === 1
+        ? "1 Patient wartet"
+        : `${counts.patientWaiting} Patienten warten`
     );
   }
   if (counts.teamwork > 0) {
     parts.push(
-      counts.teamwork === 1 ? "1 Teamaufgabe" : `${counts.teamwork} Teamaufgaben`
-    );
-  }
-  if (counts.handovers > 0) {
-    parts.push(
-      counts.handovers === 1 ? "1 Übergabe" : `${counts.handovers} Übergaben`
+      counts.teamwork === 1 ? "1 Team-Blockade" : `${counts.teamwork} Team-Blockaden`
     );
   }
   if (counts.practice > 0) {
     parts.push(
-      counts.practice === 1 ? "1 Praxisaufgabe" : `${counts.practice} Praxisaufgaben`
+      counts.practice === 1 ? "1 Aufgabe zu erledigen" : `${counts.practice} Aufgaben zu erledigen`
     );
+  }
+  if (counts.routines > 0) {
+    parts.push(counts.routines === 1 ? "1 Routine offen" : `${counts.routines} Routinen offen`);
   }
   if (parts.length === 0) return null;
   return parts.join(" · ");
@@ -397,12 +557,14 @@ export function buildRelayPracticeSnapshot(input: {
 
   const attention: RelayWorkRow[] = [];
   const teamwork: RelayWorkRow[] = [];
-  const handovers: RelayWorkRow[] = [];
+  const patientWaiting: RelayWorkRow[] = [];
+  const routines: RelayWorkRow[] = [];
   const practiceTasks: RelayWorkRow[] = [];
 
   if (input.isDoctor) {
     for (const entry of input.journalDrafts) {
-      attention.push(mapJournalRow(entry));
+      const row = enrichRelayWorkRowDisplay(mapJournalRow(entry), { journal: entry });
+      attention.push(row);
     }
   }
 
@@ -420,31 +582,50 @@ export function buildRelayPracticeSnapshot(input: {
     if (!section || seenTaskIds.has(task.id)) continue;
     seenTaskIds.add(task.id);
 
-    const row =
-      section === "practice"
+    const draftStatus = task.submission_id
+      ? input.draftBySubmissionId[task.submission_id]
+      : undefined;
+
+    const baseRow =
+      section === "practice" || section === "routines"
         ? mapPracticeTaskRow(task, membersById, enrichment, input.isDoctor)
         : mapTaskRow(task, membersById, enrichment, input.isDoctor);
 
+    const row = enrichRelayWorkRowDisplay(baseRow, {
+      task,
+      messageDraftStatus: draftStatus,
+    });
+
     if (section === "attention") attention.push(row);
     else if (section === "teamwork") teamwork.push(row);
-    else if (section === "handovers") handovers.push(row);
+    else if (section === "patient_waiting") patientWaiting.push(row);
+    else if (section === "routines") routines.push(row);
     else practiceTasks.push(row);
   }
 
   for (const conversation of input.conversations) {
-    handovers.push(mapConversationRow(conversation, input.basePath));
+    const section = classifyConversation(conversation);
+    const row = enrichRelayWorkRowDisplay(
+      mapConversationRow(conversation, input.basePath, section)
+    );
+    if (section === "patient_waiting") patientWaiting.push(row);
+    else teamwork.push(row);
   }
 
-  handovers.sort((a, b) => {
+  const sortCritical = (a: RelayWorkRow, b: RelayWorkRow) => {
     if (a.isCritical && !b.isCritical) return -1;
     if (!a.isCritical && b.isCritical) return 1;
     return 0;
-  });
+  };
+
+  teamwork.sort(sortCritical);
+  patientWaiting.sort(sortCritical);
 
   const counts = {
     attention: attention.length,
     teamwork: teamwork.length,
-    handovers: handovers.length,
+    patientWaiting: patientWaiting.length,
+    routines: routines.length,
     practice: practiceTasks.length,
   };
 
@@ -454,12 +635,102 @@ export function buildRelayPracticeSnapshot(input: {
     summaryLine: buildSummaryLine(counts),
     attention,
     teamwork,
-    handovers,
+    patientWaiting,
+    routines,
     practiceTasks,
     ghostAttention: GHOST_ATTENTION,
     ghostTeamwork: GHOST_TEAMWORK,
-    ghostHandovers: GHOST_HANDOVERS,
+    ghostPatientWaiting: GHOST_PATIENT_WAITING,
+    ghostRoutines: GHOST_ROUTINES,
     ghostPractice: GHOST_PRACTICE,
     hasAnyWork,
   };
+}
+
+export function parseRelayPracticeSection(param: string | null): RelayPracticeSection {
+  if (param === "practice" || param === "eingang" || param === "zu-erledigen") return "practice";
+  if (param === "teamwork" || param === "team") return "teamwork";
+  if (
+    param === "patient_waiting" ||
+    param === "patient-wartet" ||
+    param === "patient"
+  ) {
+    return "patient_waiting";
+  }
+  if (param === "routines" || param === "routine") return "routines";
+  if (param === "handovers" || param === "nachrichten") return "teamwork";
+  if (param === "attention" || param === "wartet") return "attention";
+  return "attention";
+}
+
+export function relaySectionRows(
+  snapshot: RelayPracticeSnapshot,
+  section: RelayPracticeSection
+): RelayWorkRow[] {
+  switch (section) {
+    case "attention":
+      return snapshot.attention.filter((r) => !r.isGhost);
+    case "practice":
+      return snapshot.practiceTasks.filter((r) => !r.isGhost);
+    case "teamwork":
+      return snapshot.teamwork.filter((r) => !r.isGhost);
+    case "patient_waiting":
+      return snapshot.patientWaiting.filter((r) => !r.isGhost);
+    case "routines":
+      return snapshot.routines.filter((r) => !r.isGhost);
+  }
+}
+
+export function relaySectionCount(
+  snapshot: RelayPracticeSnapshot,
+  section: RelayPracticeSection
+): number {
+  return relaySectionRows(snapshot, section).length;
+}
+
+export function parseRelayWorkspaceArea(param: string | null): RelayWorkspaceArea {
+  if (param === "team" || param === "teamwork") return "team";
+  if (param === "nachrichten" || param === "handovers") return "nachrichten";
+  return "eingang";
+}
+
+function dedupeRows(rows: RelayWorkRow[]): RelayWorkRow[] {
+  const seen = new Set<string>();
+  const out: RelayWorkRow[] = [];
+  for (const row of rows) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+    out.push(row);
+  }
+  return out;
+}
+
+export function relayWorkspaceRows(
+  snapshot: RelayPracticeSnapshot,
+  area: RelayWorkspaceArea
+): RelayWorkRow[] {
+  if (area === "eingang") {
+    const real = dedupeRows([...snapshot.attention, ...snapshot.practiceTasks]);
+    if (real.length > 0) return real;
+    return [...snapshot.ghostAttention, ...snapshot.ghostPractice];
+  }
+  if (area === "team") {
+    if (snapshot.teamwork.length > 0) return snapshot.teamwork;
+    return snapshot.ghostTeamwork;
+  }
+  return [];
+}
+
+export function relayWorkspaceAreaCount(
+  snapshot: RelayPracticeSnapshot,
+  area: RelayWorkspaceArea
+): number {
+  if (area === "eingang") {
+    return dedupeRows([...snapshot.attention, ...snapshot.practiceTasks]).filter((r) => !r.isGhost)
+      .length;
+  }
+  if (area === "team") {
+    return snapshot.teamwork.filter((r) => !r.isGhost).length;
+  }
+  return snapshot.patientWaiting.filter((r) => !r.isGhost).length;
 }

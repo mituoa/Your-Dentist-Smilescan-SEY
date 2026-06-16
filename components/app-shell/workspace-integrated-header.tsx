@@ -1,5 +1,7 @@
 import { WorkspaceHeaderControls } from "./workspace-header-controls";
+import type { DashboardEditorialHeader } from "@/lib/dashboard/dashboard-header-summary";
 import type { ThemePreference } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export type WorkspaceIntegratedHeaderProps = {
   eyebrow: string;
@@ -8,6 +10,7 @@ export type WorkspaceIntegratedHeaderProps = {
   displayName: string;
   subtitle: string;
   subtitleMeta?: string;
+  dashboardEditorial?: DashboardEditorialHeader | null;
   email: string;
   workspaceName: string;
   role: "doctor" | "team";
@@ -32,21 +35,47 @@ export function WorkspaceIntegratedHeader({
   avatarUrl,
   inboxCount,
   showSearch = true,
+  dashboardEditorial = null,
 }: WorkspaceIntegratedHeaderProps) {
+  const editorial = dashboardEditorial;
+
   return (
-    <header className="yd-dash-header-premium yd-workspace-integrated-header w-full min-w-0 max-w-full">
+    <header
+      className={cn(
+        "yd-dash-header-premium yd-workspace-integrated-header w-full min-w-0 max-w-full",
+        editorial && "yd-dash-header-premium--editorial"
+      )}
+    >
       <div className="yd-dash-header-premium__grid">
         <div className="yd-dash-header-premium__identity">
-          <h1 className="yd-dash-header-premium__headline">{eyebrow}</h1>
-          {hideGreeting ? null : (
-            <p className="yd-dash-header-premium__greeting">
-              {greeting}, {displayName}
-            </p>
+          {editorial ? (
+            <>
+              <h1 className="yd-dash-header-premium__editorial-greeting">
+                {greeting}, {displayName}
+              </h1>
+              <p className="yd-dash-header-premium__editorial-label">{editorial.statusTitle}</p>
+              <p className="yd-dash-header-premium__editorial-primary">{editorial.statusPrimary}</p>
+              {editorial.statusSecondary ? (
+                <p className="yd-dash-header-premium__editorial-secondary">
+                  {editorial.statusSecondary}
+                </p>
+              ) : null}
+              <p className="yd-dash-header-premium__editorial-metrics">{editorial.metricsLine}</p>
+            </>
+          ) : (
+            <>
+              <h1 className="yd-dash-header-premium__headline">{eyebrow}</h1>
+              {hideGreeting ? null : (
+                <p className="yd-dash-header-premium__greeting">
+                  {greeting}, {displayName}
+                </p>
+              )}
+              <p className="yd-dash-header-premium__subtitle">{subtitle}</p>
+              {subtitleMeta ? (
+                <p className="yd-dash-header-premium__subtitle-meta">{subtitleMeta}</p>
+              ) : null}
+            </>
           )}
-          <p className="yd-dash-header-premium__subtitle">{subtitle}</p>
-          {subtitleMeta ? (
-            <p className="yd-dash-header-premium__subtitle-meta">{subtitleMeta}</p>
-          ) : null}
         </div>
 
         <WorkspaceHeaderControls

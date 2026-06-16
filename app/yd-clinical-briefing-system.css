@@ -1,0 +1,532 @@
+/**
+ * Medical Enterprise — globale visuelle Ordnung
+ * Klinisches Arbeitsinstrument · keine SaaS-Optik
+ * Schritt 1–6: Tokens → Dashboard → Tracker → Relay → Journal → Settings
+ */
+
+:root,
+.yd-workspace,
+.yd-clinical-brand,
+.yd-public-clinical,
+.yd-public-os {
+  /* —— Palette —— */
+  --me-ice: #f4f8fc;
+  --me-ice-mid: #edf5fd;
+  --me-ice-deep: #dce8f5;
+  --me-page: #f8fbfd;
+  --me-page-alt: #f5f8fb;
+  --me-surface: #ffffff;
+  --me-accent: #2f63b7;
+  --me-accent-subtle: rgba(47, 99, 183, 0.1);
+  --me-text: #243446;
+  --me-text-secondary: #516170;
+  --me-text-muted: #7c8a98;
+  --me-border: rgba(36, 52, 70, 0.08);
+  --me-border-soft: rgba(36, 52, 70, 0.05);
+  --me-radius: 16px;
+  --me-radius-sm: 10px;
+  --me-shadow-card:
+    0 1px 2px rgba(36, 52, 70, 0.03),
+    0 4px 14px rgba(36, 52, 70, 0.05),
+    0 12px 32px rgba(36, 52, 70, 0.04);
+  --me-shadow-lift:
+    0 2px 6px rgba(36, 52, 70, 0.04),
+    0 10px 28px rgba(36, 52, 70, 0.07);
+  --me-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Legacy-Alias */
+  --cb-ink: var(--me-text);
+  --cb-graphite: var(--me-text);
+  --cb-navy: var(--me-text);
+  --cb-clinical-blue: var(--me-accent);
+  --cb-accent: var(--me-accent);
+  --cb-accent-subtle: var(--me-accent-subtle);
+  --cb-mineral: var(--me-text-muted);
+  --cb-silver: var(--me-text-muted);
+  --cb-off-white: var(--me-page);
+  --cb-surface: var(--me-surface);
+  --cb-surface-sunken: var(--me-ice-mid);
+  --cb-border: var(--me-border);
+  --cb-border-soft: var(--me-border-soft);
+  --cb-radius: var(--me-radius);
+  --cb-radius-sm: var(--me-radius-sm);
+  --cb-shadow-card: var(--me-shadow-card);
+  --cb-ease: var(--me-ease);
+
+  --yd-text-primary: var(--me-text);
+  --yd-text-secondary: var(--me-text-secondary);
+  --yd-text-muted: var(--me-text-muted);
+  --yd-text-faint: #9aa6b2;
+  --yd-relay-ink: var(--me-text);
+  --yd-relay-muted: var(--me-text-muted);
+  --yd-relay-blue-accent: var(--me-accent);
+  --yd-brand-ink: var(--me-text);
+  --yd-brand-body: var(--me-text-secondary);
+  --yd-brand-muted: var(--me-text-muted);
+  --yd-brand-faint: #9aa6b2;
+  --yd-brand-accent: var(--me-accent);
+  --yd-brand-accent-deep: #254e94;
+  --yd-brand-border: var(--me-border);
+  --yd-brand-border-soft: var(--me-border-soft);
+  --yd-brand-stone: var(--me-ice-mid);
+  --yd-brand-ivory: var(--me-page);
+  --yd-brand-ice: var(--me-ice);
+  --yd-brand-card-radius: var(--me-radius);
+  --yd-brand-card-shadow: var(--me-shadow-card);
+  --yd-brand-canvas: linear-gradient(180deg, var(--me-page) 0%, var(--me-page-alt) 100%);
+  --yd-brand-canvas-glow: none;
+  --yd-brand-card-bg: var(--me-surface);
+
+  --surface-page: 248 251 253;
+  --surface-card: 255 255 255;
+  --surface-sunken: 237 245 253;
+  --border-default: 220 232 245;
+  --text-primary: 36 52 70;
+  --text-secondary: 81 97 112;
+  --text-tertiary: 124 138 152;
+  --brand-primary: 47 99 183;
+  --brand-glow: 37 78 148;
+}
+
+/* —— Schritt 1: Workspace-Atmosphäre —— */
+.yd-workspace {
+  --yd-ws-page-warm: #dce8f5;
+  --yd-ws-canvas-top: var(--me-page);
+  --yd-ws-canvas-mid: var(--me-page-alt);
+  --yd-ws-canvas-end: var(--me-ice-mid);
+  --yd-ws-text-primary: var(--me-text);
+  --yd-ws-text-body: var(--me-text-secondary);
+  --yd-ws-text-label: var(--me-text-muted);
+  --yd-ws-text-faint: #9aa6b2;
+  --yd-ws-border-soft: var(--me-border-soft);
+  --yd-ws-surface-whisper: var(--me-surface);
+  --yd-ws-shadow-soft: var(--me-shadow-card);
+  --yd-ws-shadow-lift: var(--me-shadow-lift);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  line-height: 1.62;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+.yd-workspace.yd-awaken-page {
+  background: linear-gradient(180deg, #e4edf6 0%, #d8e4ef 100%) !important;
+}
+
+.yd-workspace .yd-awaken-canvas {
+  background: linear-gradient(
+    180deg,
+    var(--yd-ws-canvas-top) 0%,
+    var(--yd-ws-canvas-mid) 50%,
+    var(--yd-ws-canvas-end) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: var(--me-shadow-lift), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  border-radius: 20px !important;
+}
+
+.yd-workspace .yd-awaken-canvas > div:first-child,
+.yd-workspace .yd-awaken-canvas > div:nth-child(2) {
+  background: none !important;
+}
+
+.yd-workspace .yd-awaken-sidebar {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: var(--me-border-soft) !important;
+  box-shadow: var(--me-shadow-card) !important;
+}
+
+.yd-workspace .yd-awaken-sidebar > div:first-child {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(244, 248, 252, 0.95) 100%) !important;
+}
+
+.yd-workspace .yd-glow-pulse {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+/* Typografie — weniger Lautstärke */
+.yd-workspace h1,
+.yd-workspace h2,
+.yd-workspace h3 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--me-text);
+  line-height: 1.38;
+}
+
+.yd-workspace p,
+.yd-workspace li,
+.yd-workspace dd {
+  font-weight: 400;
+}
+
+.yd-workspace .font-bold,
+.yd-workspace .font-semibold {
+  font-weight: 600;
+}
+
+.yd-workspace .font-medium {
+  font-weight: 500;
+}
+
+/* —— Flächen & Karten — weiche Ebenen, keine harten Borders —— */
+.yd-workspace .yd-dash-surface,
+.yd-workspace .yd-ambient-card,
+.yd-workspace .yd-hc-card,
+.yd-workspace .yd-tracker-shell,
+.yd-workspace .yd-relay-v6-shell,
+.yd-workspace .yd-relay-v3-shell,
+.yd-workspace .yd-relay-v4-shell,
+.yd-workspace .yd-relay-v5-shell,
+.yd-workspace .yd-relay-tracker-shell,
+.yd-workspace .yd-inbox-workspace .yd-tracker-shell {
+  background: var(--me-surface) !important;
+  border: none !important;
+  box-shadow: var(--me-shadow-card) !important;
+  border-radius: var(--me-radius) !important;
+}
+
+/* —— Buttons — sachlich —— */
+.yd-workspace .yd-tracker-v8-decision-btn,
+.yd-workspace .yd-relay-v7-action--primary,
+.yd-workspace button[class*="bg-[#2F80ED]"],
+.yd-workspace button[class*="bg-[#2563EB]"],
+.yd-workspace a.yd-relay-v7-action--primary {
+  background: var(--me-accent) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 1px 3px rgba(47, 99, 183, 0.2) !important;
+  border-radius: var(--me-radius-sm) !important;
+  font-weight: 500 !important;
+  transition: background-color var(--me-ease) 140ms !important;
+}
+
+.yd-workspace .yd-tracker-v8-decision-btn:hover,
+.yd-workspace .yd-relay-v7-action--primary:hover {
+  background: #254e94 !important;
+  transform: none !important;
+}
+
+.yd-workspace .yd-relay-v7-action--outline,
+.yd-workspace .yd-tracker-v8-decision-btn:not(.yd-tracker-v8-decision-btn--primary) {
+  background: var(--me-surface) !important;
+  border: none !important;
+  box-shadow: 0 0 0 1px var(--me-border) inset !important;
+  color: var(--me-accent) !important;
+}
+
+/* —— Status — zurückhaltend —— */
+.yd-status-pill--submitted,
+.yd-status-pill--pending {
+  background: var(--me-ice-mid) !important;
+  color: var(--me-text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+.yd-status-pill--active,
+.yd-status-pill--review {
+  background: var(--me-ice-deep) !important;
+  color: var(--me-accent) !important;
+}
+
+.yd-status-pill--urgent {
+  background: #f8efef !important;
+  color: #9b4a4a !important;
+}
+
+.yd-status-pill--done {
+  background: #edf4ef !important;
+  color: #3d6b52 !important;
+}
+
+.yd-status-pill--calm {
+  background: var(--me-ice) !important;
+  color: var(--me-text-secondary) !important;
+}
+
+/* —— Schritt 2: Dashboard —— */
+.yd-workspace .yd-dashboard {
+  --yd-dash-title: var(--me-text);
+  --yd-dash-body: var(--me-text-secondary);
+  --yd-dash-label: var(--me-text-muted);
+  --yd-dash-faint: #9aa6b2;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-title,
+.yd-workspace .yd-dashboard .yd-dash-section {
+  font-weight: 600 !important;
+  color: var(--me-text) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-subtitle,
+.yd-workspace .yd-dashboard .yd-dash-kpi-title,
+.yd-workspace .yd-dashboard .yd-dash-meta {
+  font-weight: 400 !important;
+  color: var(--me-text-muted) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-label {
+  font-weight: 500 !important;
+  color: var(--me-text-muted) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-surface,
+.yd-workspace .yd-dashboard .yd-dash-kpi-card {
+  border: none !important;
+  box-shadow: var(--me-shadow-card) !important;
+  background: var(--me-surface) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-kpi {
+  font-weight: 600 !important;
+  color: var(--me-text) !important;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-header-premium__greeting {
+  font-weight: 600 !important;
+  letter-spacing: -0.025em;
+}
+
+.yd-workspace .yd-dashboard .yd-dash-header-premium__subtitle,
+.yd-workspace .yd-dashboard .yd-dash-header-premium__subtitle-meta {
+  font-weight: 400 !important;
+  color: var(--me-text-muted) !important;
+}
+
+/* —— Schritt 3: Tracker —— */
+.yd-workspace .yd-tracker-v4,
+.yd-workspace .yd-inbox-workspace {
+  color: var(--me-text);
+}
+
+.yd-workspace .yd-tracker-v4 [class*="font-semibold"],
+.yd-workspace .yd-tracker-v4 [class*="font-bold"] {
+  font-weight: 600 !important;
+}
+
+.yd-workspace .yd-tracker-v4-card,
+.yd-workspace .yd-tracker-v4-panel,
+.yd-workspace .yd-tracker-v8-rail {
+  border: none !important;
+  box-shadow: var(--me-shadow-card) !important;
+  background: var(--me-surface) !important;
+}
+
+.yd-workspace .yd-tracker-filter-chip--active {
+  background: var(--me-accent-subtle) !important;
+  border: none !important;
+  box-shadow: 0 0 0 1px rgba(47, 99, 183, 0.12) inset !important;
+  color: var(--me-accent) !important;
+  font-weight: 500 !important;
+}
+
+.yd-workspace .yd-tracker-v4 .yd-tracker-v4-row__name,
+.yd-workspace .yd-tracker-v4 .yd-tracker-v4-detail__title {
+  font-weight: 600 !important;
+  color: var(--me-text) !important;
+  letter-spacing: -0.02em;
+}
+
+.yd-workspace .yd-tracker-v4 .yd-tracker-v4-row__meta,
+.yd-workspace .yd-tracker-v4 .yd-tracker-v4-detail__meta {
+  font-weight: 400 !important;
+  color: var(--me-text-muted) !important;
+}
+
+/* —— Schritt 4: Relay —— */
+.yd-workspace .yd-relay-v8 .yd-relay-v6-nav__item--active {
+  color: var(--me-accent) !important;
+  border-bottom-color: var(--me-accent) !important;
+  font-weight: 500 !important;
+}
+
+.yd-workspace .yd-relay-v8-row {
+  gap: 0.25rem !important;
+  padding: 0.6875rem 0.9375rem !important;
+  border-bottom: 1px solid var(--me-border-soft) !important;
+}
+
+.yd-workspace .yd-relay-v8-row--active {
+  background: var(--me-accent-subtle) !important;
+  box-shadow: inset 3px 0 0 var(--me-accent) !important;
+}
+
+.yd-workspace .yd-relay-v8-row__type {
+  font-size: 0.6875rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: var(--me-text-muted) !important;
+}
+
+.yd-workspace .yd-relay-v8-row--active .yd-relay-v8-row__type {
+  color: var(--me-accent) !important;
+}
+
+.yd-workspace .yd-relay-v8-row__route {
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  color: var(--me-text) !important;
+  letter-spacing: -0.01em;
+}
+
+.yd-workspace .yd-relay-v8-row__time {
+  font-size: 0.6875rem !important;
+  font-weight: 400 !important;
+  color: var(--me-text-muted) !important;
+}
+
+.yd-workspace .yd-relay-v8-context__kind {
+  font-weight: 500 !important;
+  color: var(--me-text-muted) !important;
+  letter-spacing: 0.03em;
+}
+
+.yd-workspace .yd-relay-v8-context__title {
+  font-weight: 600 !important;
+  color: var(--me-text) !important;
+  letter-spacing: -0.025em;
+  line-height: 1.35;
+}
+
+.yd-workspace .yd-relay-v8-context__brief {
+  gap: 1.125rem !important;
+}
+
+.yd-workspace .yd-relay-v8-context__brief-label {
+  font-size: 0.6875rem !important;
+  font-weight: 500 !important;
+  color: var(--me-text-muted) !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.yd-workspace .yd-relay-v8-context__brief-text {
+  font-size: 0.9375rem !important;
+  font-weight: 400 !important;
+  line-height: 1.62 !important;
+  color: var(--me-text-secondary) !important;
+}
+
+.yd-workspace .yd-relay-v8-decisions {
+  border: none !important;
+  box-shadow: var(--me-shadow-card) !important;
+  background: var(--me-surface) !important;
+}
+
+.yd-workspace .yd-relay-v8-decisions__title {
+  font-weight: 500 !important;
+  color: var(--me-text-muted) !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.6875rem !important;
+}
+
+.yd-workspace .yd-relay-v7-action {
+  font-weight: 500 !important;
+}
+
+/* —— Schritt 5: Journal —— */
+.yd-awaken-canvas:has(.yd-journal-v6) {
+  background: linear-gradient(180deg, var(--me-page) 0%, var(--me-page-alt) 100%) !important;
+  box-shadow: var(--me-shadow-lift) !important;
+}
+
+.yd-awaken-canvas:has(.yd-journal-v6)::after {
+  display: none !important;
+}
+
+.yd-workspace .yd-journal-v6 {
+  color: var(--me-text);
+}
+
+.yd-workspace .yd-journal-v6 [class*="font-bold"] {
+  font-weight: 600 !important;
+}
+
+.yd-workspace .yd-journal-v6-card,
+.yd-workspace .yd-journal-v6-panel {
+  border: none !important;
+  box-shadow: var(--me-shadow-card) !important;
+}
+
+/* —— Schritt 6: Settings — Apple-Gruppen, keine Kartenlandschaft —— */
+.yd-workspace .yd-settings-v2 {
+  color: var(--me-text);
+}
+
+.yd-workspace .yd-settings-v2__nav-link {
+  font-weight: 500 !important;
+  color: var(--me-text-secondary) !important;
+}
+
+.yd-workspace .yd-settings-v2__nav-link--active {
+  color: var(--me-accent) !important;
+  font-weight: 500 !important;
+}
+
+.yd-workspace .yd-settings-v2__group-title {
+  font-weight: 500 !important;
+  color: var(--me-text-muted) !important;
+  letter-spacing: 0.04em;
+}
+
+.yd-workspace .yd-settings-v2__row,
+.yd-workspace .yd-settings-v2__card {
+  border: none !important;
+  box-shadow: 0 0 0 1px var(--me-border-soft) inset !important;
+  background: var(--me-surface) !important;
+}
+
+.yd-workspace .yd-settings-v2__row-title {
+  font-weight: 500 !important;
+  color: var(--me-text) !important;
+}
+
+.yd-workspace .yd-settings-v2__row-desc {
+  font-weight: 400 !important;
+  color: var(--me-text-muted) !important;
+}
+
+.yd-settings-design-briefing {
+  color: var(--me-text);
+}
+
+.yd-settings-design-briefing button[class*="bg-slate-900"] {
+  background: var(--me-accent) !important;
+  font-weight: 500 !important;
+}
+
+/* Formulare */
+.yd-clinical-control input,
+.yd-clinical-control select,
+.yd-clinical-control textarea {
+  border: none !important;
+  box-shadow: 0 0 0 1px var(--me-border) inset !important;
+  border-radius: var(--me-radius-sm) !important;
+  color: var(--me-text) !important;
+  font-weight: 400 !important;
+}
+
+.yd-clinical-control input:focus,
+.yd-clinical-control select:focus,
+.yd-clinical-control textarea:focus {
+  box-shadow:
+    0 0 0 1px rgba(47, 99, 183, 0.35) inset,
+    0 0 0 3px rgba(47, 99, 183, 0.08) !important;
+}
+
+.yd-public-clinical,
+.yd-public-os,
+.yd-public-site {
+  --yd-brand-canvas-glow: none;
+  color: var(--me-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-workspace *,
+  .yd-workspace.yd-awakening-active * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}

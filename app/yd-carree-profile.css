@@ -890,34 +890,44 @@ a.yd-carree-hero__contact-value:hover {
   color: color-mix(in srgb, var(--yd-carree-ink) 80%, transparent);
 }
 
-.yd-carree-profile__cred-badges {
+.yd-carree-profile__cred-list {
   list-style: none;
-  margin: 0.7rem 0 0;
+  margin: 0.55rem 0 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  flex-direction: column;
+  gap: 0;
 }
 
-.yd-carree-profile__cred-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--yd-carree-ink) 8%, transparent);
-  background: color-mix(in srgb, var(--yd-carree-card-surface) 92%, white);
+.yd-carree-profile__cred-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.72rem 0 0.72rem 0.05rem;
+  border-top: 1px solid color-mix(in srgb, var(--yd-carree-ink) 7%, transparent);
   font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: 0.75rem;
-  line-height: 1.35;
-  color: color-mix(in srgb, var(--yd-carree-ink) 78%, transparent);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--yd-carree-ink) 80%, transparent);
 }
 
-.yd-carree-profile__cred-badge-icon {
-  width: 0.75rem;
-  height: 0.75rem;
+.yd-carree-profile__cred-item:first-child {
+  border-top: none;
+  padding-top: 0.15rem;
+}
+
+.yd-carree-profile__cred-item-icon {
+  width: 0.8125rem;
+  height: 0.8125rem;
   flex-shrink: 0;
-  color: color-mix(in srgb, var(--yd-carree-gold) 90%, transparent);
+  margin-top: 0.2rem;
+  color: color-mix(in srgb, var(--yd-carree-gold) 92%, transparent);
+}
+
+.yd-carree-profile__cred-item-label {
+  flex: 1;
+  min-width: 0;
+  text-wrap: pretty;
 }
 
 .yd-carree-profile--editor-preview .yd-carree-profile__section-label {
@@ -927,11 +937,15 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-profile--editor-preview .yd-carree-profile__spec-item {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .yd-carree-profile--editor-preview .yd-carree-profile__spec-list {
-  margin-top: 0.55rem;
+  margin-top: 0.45rem;
+}
+
+.yd-carree-profile--editor-preview .yd-carree-profile__cred-list {
+  margin-top: 0.45rem;
 }
 
 .yd-carree-profile--editor-preview .yd-carree-profile__dual-grid {
@@ -953,11 +967,32 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-profile__panel {
-  padding: 1.1rem 1.2rem 1.2rem;
+  position: relative;
+  padding: 1.15rem 1.25rem 1.2rem;
   border-radius: 16px;
   background: var(--yd-carree-card-surface);
   border: 1px solid var(--yd-carree-panel-border);
-  box-shadow: 0 1px 5px rgba(26, 43, 74, 0.035);
+  box-shadow:
+    0 1px 2px rgba(26, 43, 74, 0.03),
+    0 6px 20px rgba(26, 43, 74, 0.035);
+}
+
+.yd-carree-profile__panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--yd-carree-gold) 45%, transparent) 18%,
+    color-mix(in srgb, var(--yd-carree-gold) 45%, transparent) 82%,
+    transparent 100%
+  );
+  opacity: 0.65;
+  pointer-events: none;
 }
 
 .yd-carree-profile--editor-preview .yd-carree-profile__panel {
@@ -969,10 +1004,10 @@ a.yd-carree-hero__contact-value:hover {
   align-self: start;
 }
 
-/* Schwerpunkte als Kompetenzfelder */
+/* Schwerpunkte — typografisch, ohne Icons */
 .yd-carree-profile__spec-list {
   list-style: none;
-  margin: 0.6rem 0 0;
+  margin: 0.5rem 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -980,18 +1015,32 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-profile__spec-item {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.8rem 0.15rem;
+  align-items: baseline;
+  padding: 0.68rem 0 0.68rem 1.15rem;
   font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: 0.875rem;
-  line-height: 1.42;
-  color: color-mix(in srgb, var(--yd-carree-ink) 82%, transparent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.48;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--yd-carree-ink) 84%, transparent);
 }
 
 .yd-carree-profile__spec-item + .yd-carree-profile__spec-item {
-  border-top: 1px solid color-mix(in srgb, var(--yd-carree-ink) 7%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--yd-carree-ink) 6%, transparent);
+}
+
+.yd-carree-profile__spec-item::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  top: 0.68rem;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.48;
+  color: color-mix(in srgb, var(--yd-carree-gold) 88%, transparent);
 }
 
 .yd-carree-profile__spec-label {
@@ -1000,33 +1049,7 @@ a.yd-carree-hero__contact-value:hover {
 }
 
 .yd-carree-profile__spec-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: color-mix(in srgb, var(--yd-carree-ink) 72%, transparent);
-  opacity: 0.85;
-}
-
-.yd-carree-profile__cred-list {
-  list-style: none;
-  margin: 0.6rem 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.yd-carree-profile__cred-list li {
-  position: relative;
-  padding: 0.65rem 0 0.65rem 0.15rem;
-  font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: 0.8125rem;
-  line-height: 1.48;
-  color: color-mix(in srgb, var(--yd-carree-ink) 76%, transparent);
-}
-
-.yd-carree-profile__cred-list li + li {
-  border-top: 1px solid color-mix(in srgb, var(--yd-carree-ink) 6%, transparent);
+  display: none;
 }
 
 /* Vorschau unterhalb Hero: ohne Linien — nur Luft + Label */

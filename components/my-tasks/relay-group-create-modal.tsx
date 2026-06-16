@@ -63,7 +63,7 @@ export function RelayGroupCreateModal({
       }
       if (res.conversationId) {
         onCreated?.(res.conversationId);
-        router.replace(`/relay?panel=messages&conversation=${res.conversationId}`);
+        router.replace(`/relay?bereich=teamwork&item=msg-${res.conversationId}`);
       }
       onClose();
       router.refresh();

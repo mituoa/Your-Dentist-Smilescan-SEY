@@ -4,10 +4,6 @@ import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 
 import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
-import {
-  RelayHandoverCreateTrigger,
-  RelayHandoverThread,
-} from "@/components/my-tasks/relay-handover-thread";
 import type { MyTask } from "@/lib/queries/my-tasks";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { RelayConversationRow } from "@/lib/queries/relay-messages";
@@ -179,27 +175,18 @@ export function RelayDecisionsView({
           />
 
           <RelayWorkSection
-            title="Übergaben"
-            rows={snapshot.handovers}
-            ghosts={snapshot.ghostHandovers}
-            secondaryAction={
-              isRelay ? (
-                <RelayHandoverCreateTrigger
-                  assignableMembers={assignableMembers}
-                  currentUserId={userId}
-                />
-              ) : undefined
-            }
+            title="Patient wartet"
+            rows={snapshot.patientWaiting}
+            ghosts={snapshot.ghostPatientWaiting}
           />
 
-          {isRelay ? (
-            <RelayHandoverThread
-              basePath={basePath}
-              conversations={conversations}
-              assignableMembers={assignableMembers}
-              currentUserId={userId}
-            />
-          ) : null}
+          <RelayWorkSection
+            title="Routinen"
+            rows={snapshot.routines}
+            ghosts={snapshot.ghostRoutines}
+            createHref="/my-tasks/new"
+            createLabel="Routine anlegen"
+          />
 
           <RelayWorkSection
             title="Praxisaufgaben"
