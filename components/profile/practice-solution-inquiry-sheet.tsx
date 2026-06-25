@@ -7,6 +7,7 @@ import { Check, ChevronRight } from "lucide-react";
 
 import { MedicalFormShell } from "@/components/forms/medical-form-shell";
 import { MedicalFormFooterActions, MedicalFormTextarea } from "@/components/forms/medical-form-ui";
+import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { LandingInquiryLivePreview } from "@/components/profile/landing-inquiry-live-preview";
 import { submitPracticeSolutionRequest } from "@/app/(protected)/profile/solutions/actions";
 import {
@@ -39,7 +40,19 @@ export type { InquiryTarget, PracticeSolutionInquiryContext } from "@/lib/practi
 type SubmitState = "idle" | "pending" | "success" | "error";
 
 const ADVANCE_DELAY_MS = 320;
-const CHECKBOX_ADVANCE_MS = 1400;
+const BRIEFING_NARROW_MQ = "(max-width: 959px)";
+
+function useBriefingNarrow(): boolean {
+  return React.useSyncExternalStore(
+    (onStoreChange) => {
+      const mq = window.matchMedia(BRIEFING_NARROW_MQ);
+      mq.addEventListener("change", onStoreChange);
+      return () => mq.removeEventListener("change", onStoreChange);
+    },
+    () => window.matchMedia(BRIEFING_NARROW_MQ).matches,
+    () => false
+  );
+}
 
 export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryContext) {
   const [target, setTarget] = React.useState<InquiryTarget | null>(null);
@@ -96,6 +109,7 @@ type StudioProps = {
 };
 
 function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
+  const isNarrow = useBriefingNarrow();
   const config = React.useMemo(() => getLandingConfig(target.configId), [target.configId]);
   const briefingFields = React.useMemo(() => getBriefingFields(config), [config]);
 
@@ -106,8 +120,8 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
   const [summaryVisible, setSummaryVisible] = React.useState(false);
   const [submitState, setSubmitState] = React.useState<SubmitState>("idle");
   const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const checkboxTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const advanceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const summaryRef = React.useRef<HTMLDivElement>(null);
 
   const busy = submitState === "pending";
   const city = profileCityLine(context);
@@ -132,12 +146,25 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
 
   const canSubmit = profileComplete && summaryVisible && isLandingConfigComplete(config, fieldValues);
 
+  const livePreview = (
+    <LandingInquiryLivePreview
+      variant="studio"
+      config={config}
+      fieldValues={fieldValues}
+      profile={context}
+    />
+  );
+
   React.useEffect(() => {
     return () => {
-      if (checkboxTimerRef.current) clearTimeout(checkboxTimerRef.current);
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (!summaryVisible) return;
+    summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [summaryVisible]);
 
   const advanceToNext = React.useCallback(() => {
     setExpandedIndex((current) => {
@@ -156,17 +183,20 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
 
   const handleFieldComplete = React.useCallback(
     (field: LandingFieldDef, nextValues: LandingFieldValues) => {
+      if (field.type !== "radio") return;
       if (!isConfiguratorFieldComplete(field, nextValues)) return;
-
-      if (field.type === "checkbox") {
-        if (checkboxTimerRef.current) clearTimeout(checkboxTimerRef.current);
-        checkboxTimerRef.current = setTimeout(scheduleAdvance, CHECKBOX_ADVANCE_MS);
-        return;
-      }
-
       scheduleAdvance();
     },
     [scheduleAdvance]
+  );
+
+  const continueField = React.useCallback(
+    (field: LandingFieldDef) => {
+      if (!isConfiguratorFieldComplete(field, fieldValues)) return;
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      advanceToNext();
+    },
+    [fieldValues, advanceToNext]
   );
 
   const setRadio = (field: LandingFieldDef, fieldId: string, value: string) => {
@@ -185,30 +215,18 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
       const nextSelected = current.includes(optionId)
         ? current.filter((id) => id !== optionId)
         : [...current, optionId];
-      const next = { ...prev, checkbox: { ...prev.checkbox, [fieldId]: nextSelected } };
-      if (expandedIndex === briefingFields.findIndex((f) => f.id === fieldId)) {
-        handleFieldComplete(field, next);
-      }
-      return next;
+      return { ...prev, checkbox: { ...prev.checkbox, [fieldId]: nextSelected } };
     });
   };
 
   const setText = (field: LandingFieldDef, fieldId: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, text: { ...prev.text, [fieldId]: value } }));
-    if (field.type === "text" && field.optional && !value.trim() && checkboxTimerRef.current) {
-      clearTimeout(checkboxTimerRef.current);
-    }
   };
 
-  const skipOptionalField = (field: LandingFieldDef) => {
-    if (field.type !== "text" || !field.optional) return;
-    scheduleAdvance();
-  };
 
   const reopenField = (index: number) => {
     setSummaryVisible(false);
     setExpandedIndex(index);
-    if (checkboxTimerRef.current) clearTimeout(checkboxTimerRef.current);
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
   };
 
@@ -255,11 +273,11 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
   if (submitState === "success") {
     return (
       <MedicalFormShell
-        title="Vielen Dank."
-        subtitle="Ihr Briefing wurde an unser Kreativteam übermittelt."
+        title=" "
+        subtitle=""
         onClose={onClose}
-        ariaLabel="Briefing übermittelt"
-        panelClassName="yd-medical-form-panel--landing-briefing"
+        ariaLabel="Anfrage übermittelt"
+        panelClassName="yd-medical-form-panel--landing-briefing yd-medical-form-panel--landing-success"
         footer={
           <div className="yd-medical-form-footer__row">
             <button type="button" className="yd-auth-btn-primary w-full" onClick={onClose}>
@@ -268,11 +286,18 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
           </div>
         }
       >
-        <p className="yd-lp-briefing-success__lead">
-          Innerhalb der nächsten Werktage erstellen wir eine individuelle Landingpage auf Basis
-          Ihrer Angaben und Ihres Praxisprofils. Sie erhalten anschließend eine Vorschau zur
-          Freigabe.
-        </p>
+        <div className="yd-lp-briefing-success" role="status">
+          <div className="yd-lp-briefing-success__icon" aria-hidden>
+            <Check className="h-5 w-5" strokeWidth={2.25} />
+          </div>
+          <YourDentistBrandLockup size="md" centered priority />
+          <h2 className="yd-lp-briefing-success__title">Ihre Anfrage wurde übermittelt</h2>
+          <p className="yd-lp-briefing-success__lead">
+            In den nächsten Tagen erhalten Sie Ihre individuelle Landingpage zur Freigabe. Sobald Sie
+            freigeben, schalten wir sie für Ihre Praxis — mit messbarer Nachverfolgung Ihrer
+            Anfragen.
+          </p>
+        </div>
       </MedicalFormShell>
     );
   }
@@ -284,7 +309,10 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
       onClose={onClose}
       closeDisabled={busy}
       ariaLabel={config.modalTitle}
-      panelClassName="yd-medical-form-panel--landing-briefing"
+      panelClassName={cn(
+        "yd-medical-form-panel--landing-briefing",
+        summaryVisible && "yd-medical-form-panel--summary"
+      )}
       footer={
         summaryVisible ? (
           <MedicalFormFooterActions
@@ -313,6 +341,13 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
             doctorLine={doctorLine}
             city={city}
           />
+
+          {isNarrow ? (
+            <details className="yd-lp-briefing-mobile-preview">
+              <summary>Live-Vorschau anzeigen</summary>
+              <div className="yd-lp-briefing-mobile-preview__frame">{livePreview}</div>
+            </details>
+          ) : null}
 
           {submitError ? (
             <p className="yd-medical-form-alert" role="alert">
@@ -363,7 +398,7 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
                         onRadio={(fieldId, value) => setRadio(field, fieldId, value)}
                         onToggle={(fieldId, optionId) => toggleChip(field, fieldId, optionId)}
                         onText={(fieldId, value) => setText(field, fieldId, value)}
-                        onSkipOptional={() => skipOptionalField(field)}
+                        onContinue={() => continueField(field)}
                         disabled={busy}
                       />
                     );
@@ -374,7 +409,7 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
               </div>
             </>
           ) : (
-            <div className="yd-lp-briefing-summary-block">
+            <div ref={summaryRef} className="yd-lp-briefing-summary-block">
               <h2 className="yd-lp-briefing-summary-block__title">
                 Zusammenfassung Ihres Briefings
               </h2>
@@ -398,14 +433,11 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
           </label>
         </div>
 
-        <aside className="yd-lp-briefing-studio__preview" aria-label="Live-Vorschau">
-          <LandingInquiryLivePreview
-            variant="studio"
-            config={config}
-            fieldValues={fieldValues}
-            profile={context}
-          />
-        </aside>
+        {!isNarrow ? (
+          <aside className="yd-lp-briefing-studio__preview" aria-label="Live-Vorschau">
+            {livePreview}
+          </aside>
+        ) : null}
       </div>
     </MedicalFormShell>
   );
@@ -460,7 +492,7 @@ function ActiveBriefingStep({
   onRadio,
   onToggle,
   onText,
-  onSkipOptional,
+  onContinue,
   disabled,
 }: {
   field: LandingFieldDef;
@@ -468,9 +500,11 @@ function ActiveBriefingStep({
   onRadio: (fieldId: string, value: string) => void;
   onToggle: (fieldId: string, optionId: string) => void;
   onText: (fieldId: string, value: string) => void;
-  onSkipOptional: () => void;
+  onContinue: () => void;
   disabled?: boolean;
 }) {
+  const canContinue = isConfiguratorFieldComplete(field, fieldValues);
+
   if (field.type === "text") {
     return (
       <div className="yd-lp-briefing-question yd-lp-briefing-question--active">
@@ -484,11 +518,16 @@ function ActiveBriefingStep({
           disabled={disabled}
           aria-label={field.label}
         />
-        {field.optional ? (
-          <button type="button" className="yd-lp-briefing-skip" onClick={onSkipOptional} disabled={disabled}>
-            Ohne Angaben fortfahren
+        <div className="yd-lp-briefing-question__actions">
+          <button
+            type="button"
+            className="yd-lp-briefing-continue"
+            onClick={onContinue}
+            disabled={disabled || !canContinue}
+          >
+            Weiter
           </button>
-        ) : null}
+        </div>
       </div>
     );
   }
@@ -532,6 +571,18 @@ function ActiveBriefingStep({
           );
         })}
       </div>
+      {!isRadio ? (
+        <div className="yd-lp-briefing-question__actions">
+          <button
+            type="button"
+            className="yd-lp-briefing-continue"
+            onClick={onContinue}
+            disabled={disabled || !canContinue}
+          >
+            Weiter
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

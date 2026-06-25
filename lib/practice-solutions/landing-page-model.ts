@@ -1,276 +1,194 @@
 import type { PracticeSolutionId } from "@/lib/practice-solutions/catalog";
+import { LANDING_IMG } from "@/lib/practice-solutions/landing-configs/shared-images";
+
+export type LandingCategoryTier = "featured" | "standard";
 
 export type LandingCategory = {
   id: PracticeSolutionId | string;
+  categoryLabel: string;
   title: string;
-  description: string;
-  status: string;
+  tagline: string;
   image: string;
+  imagePosition?: string;
   inquiryId: PracticeSolutionId;
-  /** Bento-Span für asymmetrisches Grid */
-  span?: "wide" | "tall";
+  tier: LandingCategoryTier;
+  badge?: string;
 };
 
-export type PopularCampaign = {
-  id: string;
+export type LandingBenefit = {
   title: string;
-  description: string;
-  image: string;
-  inquiryId: PracticeSolutionId;
-};
-
-export type ProcessStep = {
-  step: string;
-  title: string;
-  description: string;
-};
-
-export type GalleryMockup = {
-  id: string;
-  label: string;
-  image: string;
-  device: "desktop" | "tablet" | "mobile";
 };
 
 export const LANDING_HERO = {
-  eyebrow: "Kampagnen & Landingpages",
   title: "Digitale Patientengewinnung für moderne Zahnarztpraxen",
-  lead: "Professionelle Landingpages, Kampagnen und digitale Behandlungskommunikation für mehr Sichtbarkeit, bessere Patientenaufklärung und nachhaltiges Praxiswachstum.",
-  pillars: [
-    { label: "Mehr Neupatienten", detail: "Gezielte Ansprache" },
-    { label: "Bessere Aufklärung", detail: "Vertrauen vor dem Termin" },
-    { label: "Weniger Telefonate", detail: "Qualifizierte Anfragen" },
-  ],
+  subtitle: "Individuell konzipierte Landingpages — von unserem Kreativteam für Ihre Praxis.",
+  benefits: [
+    { title: "Individuell erstellt" },
+    { title: "Medizinisch geprüft" },
+    { title: "Mehr qualifizierte Anfragen" },
+    { title: "Persönliche Begleitung" },
+  ] satisfies readonly LandingBenefit[],
 } as const;
 
 export const LANDING_CATEGORIES: readonly LandingCategory[] = [
   {
     id: "smilescan",
-    title: "SmileScan",
-    description: "Digitale Ersteinschätzung und strukturierter Patienteneinstieg.",
-    status: "Beliebt",
-    image: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1400&q=80",
+    categoryLabel: "SmileScan",
+    title: "Digitale Ersteinschätzung",
+    tagline:
+      "Professionelle Landingpage für digitale Ersteinschätzung mit individueller Anpassung an Ihre Praxis.",
+    image: LANDING_IMG.smilescan,
+    imagePosition: "55% 35%",
     inquiryId: "smilescan",
-    span: "wide",
+    tier: "featured",
+    badge: "Bestseller",
   },
   {
     id: "aligner",
-    title: "Aligner",
-    description: "Unsichtbare Zahnkorrektur professionell positioniert.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Aligner",
+    title: "Unsichtbare Zahnkorrektur",
+    tagline:
+      "Professionelle Landingpage für transparente Alignertherapie mit individueller Anpassung an Ihre Praxis.",
+    image: LANDING_IMG.aligner,
+    imagePosition: "50% 25%",
     inquiryId: "aligner",
+    tier: "standard",
   },
   {
     id: "implantologie",
-    title: "Implantologie",
-    description: "Vertrauen aufbauen und Implantat-Beratungen qualifizieren.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Implantologie",
+    title: "Fester Zahnersatz",
+    tagline:
+      "Professionelle Landingpage für Implantologie mit Vertrauensaufbau und individueller Praxisanpassung.",
+    image: LANDING_IMG.implantologie,
+    imagePosition: "60% 30%",
     inquiryId: "implantologie",
+    tier: "standard",
   },
   {
     id: "aesthetik",
+    categoryLabel: "Ästhetik",
     title: "Ästhetische Zahnmedizin",
-    description: "Bleaching, Veneers und Smile Design hochwertig erklärt.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1629909613654-28e737c036b6?auto=format&fit=crop&w=1200&q=80",
+    tagline:
+      "Professionelle Landingpage für ästhetische Behandlungen — medizinisch seriös und individuell gestaltet.",
+    image: LANDING_IMG.bleaching,
+    imagePosition: "45% 20%",
     inquiryId: "aesthetik",
+    tier: "standard",
   },
   {
     id: "parodontologie",
-    title: "Parodontologie",
-    description: "Parodontale Gesundheit verständlich und seriös kommuniziert.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Parodontologie",
+    title: "Parodontale Gesundheit",
+    tagline:
+      "Professionelle Landingpage für parodontale Betreuung mit verständlicher Aufklärung für Ihre Patienten.",
+    image: LANDING_IMG.parodontologie,
+    imagePosition: "50% 40%",
     inquiryId: "individuell",
+    tier: "standard",
   },
   {
     id: "kinderzahnheilkunde",
+    categoryLabel: "Kinder",
     title: "Kinderzahnheilkunde",
-    description: "Warme Familienansprache ohne verspielte Template-Optik.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1631217868264-e5b1a5fe1c89?auto=format&fit=crop&w=1200&q=80",
+    tagline:
+      "Professionelle Landingpage für Familien mit warmer Ansprache und medizinischer Seriosität.",
+    image: LANDING_IMG.kinder,
+    imagePosition: "50% 30%",
     inquiryId: "kinderzahnheilkunde",
+    tier: "standard",
   },
   {
     id: "prophylaxe",
-    title: "Prophylaxe",
-    description: "Recall, PZR und Prävention digital begleiten.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Prophylaxe",
+    title: "Professionelle Zahnreinigung",
+    tagline:
+      "Professionelle Landingpage für PZR und Recall — digital begleitet und auf Ihre Praxis zugeschnitten.",
+    image: LANDING_IMG.prophylaxe,
+    imagePosition: "55% 25%",
     inquiryId: "prophylaxe",
+    tier: "standard",
   },
   {
     id: "oral-health-pass",
-    title: "Oral Health Pass",
-    description: "Präventionsprogramme für Betriebe und Institutionen.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Oral Health Pass",
+    title: "Präventionsprogramme",
+    tagline:
+      "Professionelle Landingpage für institutionelle Präventionsprogramme und B2B-Partnerschaften.",
+    image: LANDING_IMG.oralHealth,
+    imagePosition: "50% 35%",
     inquiryId: "oral-health-pass",
+    tier: "standard",
   },
   {
     id: "praxiswebsite",
-    title: "Praxiswebsite",
-    description: "Ihre Praxis als digitale Visitenkarte — ruhig und vertrauenswürdig.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Praxiswebsite",
+    title: "Ihre Praxis online",
+    tagline:
+      "Professionelle Praxiswebsite — ruhig, vertrauenswürdig und individuell auf Ihre Identität abgestimmt.",
+    image: LANDING_IMG.praxiswebsite,
+    imagePosition: "50% 50%",
     inquiryId: "individuell",
+    tier: "standard",
   },
   {
     id: "karriere",
-    title: "Karriere Landingpage",
-    description: "Teamgewinnung mit klarer Praxisidentität und Bewerbungsflow.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Karriere",
+    title: "Teamgewinnung",
+    tagline:
+      "Professionelle Karriereseite mit klarer Praxisidentität und individueller Ansprache an Fachkräfte.",
+    image: LANDING_IMG.karriere,
+    imagePosition: "40% 30%",
     inquiryId: "individuell",
+    tier: "standard",
   },
   {
     id: "standort",
-    title: "Standort Landingpage",
-    description: "Lokale Sichtbarkeit und Anfahrt für neue Patientinnen.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Standort",
+    title: "Lokale Sichtbarkeit",
+    tagline:
+      "Professionelle Standortseite für Anfahrt, Erreichbarkeit und regionale Präsenz Ihrer Praxis.",
+    image: LANDING_IMG.standort,
+    imagePosition: "50% 60%",
     inquiryId: "individuell",
+    tier: "standard",
   },
   {
     id: "patientenratgeber",
-    title: "Patientenratgeber",
-    description: "Aufklärung und Vertrauen durch hochwertige Inhalte.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Ratgeber",
+    title: "Patientenaufklärung",
+    tagline:
+      "Professionelle Ratgeberseite mit hochwertigen medizinischen Inhalten für Ihre Patienten.",
+    image: LANDING_IMG.ratgeber,
+    imagePosition: "50% 25%",
     inquiryId: "individuell",
+    tier: "standard",
   },
   {
     id: "vorher-nachher",
-    title: "Vorher/Nachher Kampagne",
-    description: "Ergebnisse zeigen — medizinisch seriös und rechtssicher.",
-    status: "Verfügbar",
-    image: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Vorher / Nachher",
+    title: "Ergebnisse zeigen",
+    tagline:
+      "Professionelle Ergebnisseite — medizinisch seriös, rechtssicher und individuell kommuniziert.",
+    image: LANDING_IMG.vorherNachher,
+    imagePosition: "50% 35%",
     inquiryId: "aesthetik",
+    tier: "standard",
   },
   {
     id: "individuelle-kampagne",
-    title: "Individuelle Kampagne",
-    description: "Maßgeschneidert für Ihren Schwerpunkt und Ihre Zielgruppe.",
-    status: "Auf Anfrage",
-    image: "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80",
+    categoryLabel: "Individuell",
+    title: "Maßgeschneiderte Kampagne",
+    tagline:
+      "Professionelle Kampagne für Ihren Schwerpunkt — individuell konzipiert für Ihre Zielgruppe.",
+    image: LANDING_IMG.individuell,
+    imagePosition: "45% 40%",
     inquiryId: "individuell",
+    tier: "standard",
   },
-] as const;
-
-export const POPULAR_CAMPAIGNS: readonly PopularCampaign[] = [
-  {
-    id: "aligner-campaign",
-    title: "Unsichtbare Zahnkorrektur",
-    description: "Qualifizierte Aligner-Anfragen mit klarer Erwartungshaltung.",
-    image: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&w=1400&q=80",
-    inquiryId: "aligner",
-  },
-  {
-    id: "implant-same-day",
-    title: "Feste Zähne an einem Tag",
-    description: "Implantat-Patientinnen informieren und Beratungstermine anstoßen.",
-    image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1400&q=80",
-    inquiryId: "implantologie",
-  },
-  {
-    id: "pzr",
-    title: "Professionelle Zahnreinigung",
-    description: "Recall und PZR mit ruhiger, vertrauenswürdiger Ansprache.",
-    image: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1400&q=80",
-    inquiryId: "prophylaxe",
-  },
-  {
-    id: "implants",
-    title: "Zahnimplantate",
-    description: "Premium-Landing für Implantologie mit Aufklärung und Vertrauen.",
-    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1400&q=80",
-    inquiryId: "implantologie",
-  },
-  {
-    id: "kids",
-    title: "Kinderzahnmedizin",
-    description: "Familienorientierte Kommunikation für Eltern und Kinder.",
-    image: "https://images.unsplash.com/photo-1631217868264-e5b1a5fe1c89?auto=format&fit=crop&w=1400&q=80",
-    inquiryId: "kinderzahnheilkunde",
-  },
-  {
-    id: "aesthetic",
-    title: "Ästhetische Zahnmedizin",
-    description: "Bleaching und Smile Design ohne Beauty-Salon-Anmutung.",
-    image: "https://images.unsplash.com/photo-1629909613654-28e737c036b6?auto=format&fit=crop&w=1400&q=80",
-    inquiryId: "aesthetik",
-  },
-] as const;
-
-export const LANDING_PROCESS_STEPS: readonly ProcessStep[] = [
-  {
-    step: "01",
-    title: "Anfrage senden",
-    description: "Sie wählen eine Landingpage oder Kampagne und senden Ihre Anfrage — wir melden uns persönlich.",
-  },
-  {
-    step: "02",
-    title: "Konzept erhalten",
-    description: "Gemeinsam entwickeln wir Struktur, Inhalte und Patientenjourney passend zu Ihrer Praxis.",
-  },
-  {
-    step: "03",
-    title: "Landingpage veröffentlichen",
-    description: "Nach Freigabe geht Ihre Seite live — integriert in Ihre digitale Praxiskommunikation.",
-  },
-] as const;
-
-export const LANDING_GALLERY: readonly GalleryMockup[] = [
-  {
-    id: "g1",
-    label: "SmileScan",
-    device: "desktop",
-    image: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1600&q=80",
-  },
-  {
-    id: "g2",
-    label: "Implantologie",
-    device: "tablet",
-    image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    id: "g3",
-    label: "Aligner",
-    device: "mobile",
-    image: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "g4",
-    label: "Ästhetik",
-    device: "desktop",
-    image: "https://images.unsplash.com/photo-1629909613654-28e737c036b6?auto=format&fit=crop&w=1600&q=80",
-  },
-  {
-    id: "g5",
-    label: "Prophylaxe",
-    device: "tablet",
-    image: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    id: "g6",
-    label: "Kinderzahnheilkunde",
-    device: "mobile",
-    image: "https://images.unsplash.com/photo-1631217868264-e5b1a5fe1c89?auto=format&fit=crop&w=800&q=80",
-  },
-] as const;
-
-export const LANDING_CUSTOM_FEATURES = [
-  "Individuelles Design",
-  "Eigene Inhalte",
-  "SEO-Optimierung",
-  "Terminbuchung",
-  "SmileScan Integration",
-  "Oral Health Pass Integration",
 ] as const;
 
 export const LANDING_CLOSING = {
-  title: "Bereit für mehr Sichtbarkeit?",
-  lead: "Professionelle Landingpages und Kampagnen für moderne Zahnarztpraxen.",
+  title: "Nicht das Passende gefunden?",
+  lead: "Wir entwickeln individuelle Landingpages, Kampagnen und digitale Patientenkommunikation speziell für Ihre Praxis.",
 } as const;
