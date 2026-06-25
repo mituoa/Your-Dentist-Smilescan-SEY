@@ -35,8 +35,8 @@ export function buildRelayHeaderSummary(
   if (attentionCount > 0) {
     leadParts.push(
       attentionCount === 1
-        ? "1 Vorgang wartet auf Sie"
-        : `${attentionCount} Vorgänge warten auf Sie`
+        ? "1 Vorgang wartet auf Ihre Entscheidung"
+        : `${attentionCount} Vorgänge warten auf Ihre Entscheidung`
     );
   } else if (patientCount > 0) {
     leadParts.push(

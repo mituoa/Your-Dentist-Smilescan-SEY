@@ -1,22 +1,37 @@
 export default function RelayLoading() {
   return (
-    <div className="relay-ws relay-ws--loading" aria-busy="true" aria-label="Relay wird geladen">
-      <div className="relay-ws__grid">
-        <aside className="relay-ws__nav p-2">
-          <div className="relay-ws__skel h-8 w-16" />
-          <div className="relay-ws__skel mt-2 h-6 w-full" />
-          <div className="relay-ws__skel mt-1 h-6 w-full" />
-        </aside>
-        <section className="relay-ws__inv p-2">
-          <div className="relay-ws__skel h-6 w-full" />
-          <div className="relay-ws__skel mt-1 h-9 w-full" />
-          <div className="relay-ws__skel mt-1 h-9 w-full" />
-          <div className="relay-ws__skel mt-1 h-9 w-full" />
-        </section>
-        <section className="relay-ws__ctx p-3">
-          <div className="relay-ws__skel h-5 w-2/3" />
-          <div className="relay-ws__skel mt-3 h-16 w-full" />
-        </section>
+    <div className="relay-center relay-center--loading" aria-busy="true" aria-label="Relay wird geladen">
+      <div className="relay-center__layout">
+        <div className="relay-center__areas relay-center__skel" style={{ minHeight: "8rem" }} />
+        <div className="relay-center__main">
+          <div className="relay-center__panel">
+            <div className="relay-center__panel-head">
+              <div className="relay-center__skel" style={{ width: "8rem", height: "1.25rem" }} />
+              <div className="relay-center__skel" style={{ width: "10rem", height: "1.75rem" }} />
+            </div>
+            <div className="relay-kanban">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="relay-kanban__col">
+                  <div className="relay-center__skel" style={{ height: "1rem", margin: "0.75rem" }} />
+                  <div className="relay-center__skel" style={{ height: "5rem", margin: "0.5rem" }} />
+                  <div className="relay-center__skel" style={{ height: "5rem", margin: "0.5rem" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="relay-center__panel">
+            <div className="relay-center__panel-head">
+              <div className="relay-center__skel" style={{ width: "12rem", height: "1.25rem" }} />
+            </div>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="relay-center__skel"
+                style={{ height: "3.25rem", margin: "0 1.125rem 0.5rem" }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

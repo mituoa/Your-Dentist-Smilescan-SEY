@@ -15,6 +15,8 @@ type YdProductChromeProps = {
   showSetupInHeader?: boolean;
   /** entry = login focus (no pricing CTA in chrome) */
   variant?: "marketing" | "entry";
+  /** Product line under wordmark; pass null to hide. */
+  tagline?: string | null;
 };
 
 /** Shared product chrome — same atmosphere on public, pricing, login. */
@@ -24,6 +26,7 @@ export function YdProductChrome({
   setupLabel = "Praxis registrieren",
   showSetupInHeader = true,
   variant = "marketing",
+  tagline = PUBLIC_BRAND_TAGLINE,
 }: YdProductChromeProps) {
   return (
     <header

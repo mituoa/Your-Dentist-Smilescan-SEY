@@ -35,8 +35,12 @@
 @import "./yd-relay-decision-workspace.css";
 @import "./yd-relay-clinical-workspace.css";
 @import "./yd-relay-workspace.css";
+@import "./yd-relay-decision-center.css";
+@import "./yd-relay-work-center.css";
 @import "./yd-relay-practice-central.css";
 @import "./yd-clinical-controls.css";
+@import "./yd-profile-solutions.css";
+@import "./yd-campaigns-landing.css";
 @import "./yd-settings-team.css";
 @import "./yd-settings-v2.css";
 @import "./yd-carree-profile.css";

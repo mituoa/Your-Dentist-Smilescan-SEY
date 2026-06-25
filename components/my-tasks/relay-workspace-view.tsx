@@ -1,6 +1,6 @@
 "use client";
 
-import { RelayWorkspace } from "@/components/relay/relay-workspace";
+import { RelayWorkCenter } from "@/components/relay/relay-work-center";
 import { RelayDecisionsView } from "@/components/my-tasks/relay-decisions-view";
 import type { MyTask } from "@/lib/queries/my-tasks";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
@@ -47,7 +47,7 @@ export function RelayWorkspaceView({
 }: RelayWorkspaceViewProps) {
   if (basePath === "/relay") {
     return (
-      <RelayWorkspace
+      <RelayWorkCenter
         userId={userId}
         isDoctor={isDoctor}
         columns={columns}

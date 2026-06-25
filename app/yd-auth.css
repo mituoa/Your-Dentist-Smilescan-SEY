@@ -1346,8 +1346,141 @@
 .yd-auth-register-page-top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   flex-shrink: 0;
-  padding: 0.375rem 0 0.25rem;
+  padding: 0 0 0.625rem;
+  margin-bottom: 0.125rem;
+}
+
+.yd-reg-wizard--minimal {
+  margin-bottom: 1.125rem;
+}
+
+.yd-reg-wizard--minimal .yd-reg-wizard__track {
+  height: 0.1875rem;
+}
+
+.yd-auth-register-page-meta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(12, 25, 41, 0.38);
+  font-variant-numeric: tabular-nums;
+}
+
+.yd-auth-register-page-title {
+  margin: 0 0 0.875rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0c1929;
+  text-align: center;
+}
+
+.yd-auth-register-approval-note {
+  margin: 0 0 1.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(12, 25, 41, 0.48);
+  text-align: center;
+}
+
+.yd-reg-wizard {
+  margin-bottom: 1.75rem;
+}
+
+.yd-reg-wizard__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.625rem;
+}
+
+.yd-reg-wizard__eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(12, 25, 41, 0.42);
+}
+
+.yd-reg-wizard__meta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(26, 79, 156, 0.78);
+}
+
+.yd-reg-wizard__track {
+  height: 0.25rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(12, 25, 41, 0.07);
+}
+
+.yd-reg-wizard__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3d8ef0 0%, #2f80ed 52%, #1a4f9c 100%);
+  transition: width 520ms var(--yd-auth-ease-spatial);
+}
+
+.yd-reg-wizard__label {
+  margin: 0.625rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(12, 25, 41, 0.52);
+  text-align: center;
+}
+
+.yd-auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+}
+
+.yd-auth-field > label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(36, 52, 70, 0.9);
+}
+
+.yd-auth-register-panel--page .yd-auth-input,
+.yd-auth-register-page-card .yd-auth-input {
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.yd-auth-register-panel--page .yd-auth-btn-primary {
+  margin-top: 0.5rem;
+  height: 3rem;
+  border-radius: 0.875rem;
+}
+
+.yd-auth-register-step-intro {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-register-step-intro {
+    margin-bottom: 1.75rem;
+  }
+}
+
+.yd-auth-register-page-card .yd-auth-register-title {
+  font-size: 1.375rem;
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .yd-auth-register-page-card .yd-auth-register-title {
+    font-size: 1.5rem;
+  }
 }
 
 .yd-auth-register-page-back {
@@ -1383,27 +1516,15 @@
 
   .yd-auth-register-page-card {
     border-radius: 1.25rem;
-    padding-top: 0.25rem;
+    padding: 1.25rem 1.125rem 1.375rem;
   }
 
   .yd-auth-register-panel--page .yd-auth-register-page-top {
-    padding: 0.125rem 0.875rem 0;
+    padding: 0 0 0.375rem;
   }
 
-  .yd-auth-register-panel--page .yd-auth-register-body {
-    padding-top: 0;
-    padding-left: 0.875rem;
-    padding-right: 0.875rem;
-  }
-
-  .yd-auth-register-wizard {
-    margin-bottom: 1rem !important;
-  }
-
-  .yd-auth-register-wizard .flex.h-8.w-8 {
-    height: 1.75rem;
-    width: 1.75rem;
-    font-size: 0.6875rem;
+  .yd-reg-wizard {
+    margin-bottom: 1.25rem;
   }
 
   .yd-auth-register-overlay {

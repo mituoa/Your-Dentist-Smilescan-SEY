@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getProfileForEditor } from "@/lib/queries/profile-editor";
+import { createClient } from "@/lib/supabase/server";
 import { ProfileEditorShell } from "@/components/profile-editor/profile-editor-shell";
 import {
   clinicalWorkspaceFrame,
@@ -57,9 +58,18 @@ export default async function ProfileEditorPage() {
       ? rawWorkspaceName.trim()
       : "Ihre Praxis";
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="yd-profile-editor-workspace flex min-h-0 w-full flex-1 flex-col md:h-full">
-      <ProfileEditorShell initialData={data} workspaceName={workspaceName} />
+      <ProfileEditorShell
+        initialData={data}
+        workspaceName={workspaceName}
+        userEmail={user?.email ?? ""}
+      />
     </div>
   );
 }

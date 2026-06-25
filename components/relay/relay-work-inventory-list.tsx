@@ -1,20 +1,22 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 import type { RelayWorkRow } from "@/lib/relay/build-relay-practice-snapshot";
-import { computeInventoryStats } from "@/lib/relay/relay-inventory-stats";
+import {
+  RELAY_WORK_STATUS_TABS,
+  countRowsByStatus,
+  filterRowsByStatus,
+  type RelayWorkStatusId,
+} from "@/lib/relay/relay-work-status";
 import { cn } from "@/lib/utils";
 
 type Props = {
+  areaTitle: string;
   rows: RelayWorkRow[];
   selectedId: string | null;
   onSelect: (rowId: string) => void;
 };
-
-function priority(row: RelayWorkRow): { label: string; tone: "urgent" | "due" | "normal" } {
-  if (row.isCritical) return { label: "Dringend", tone: "urgent" };
-  if (row.dueLabel) return { label: "Fällig", tone: "due" };
-  return { label: "Normal", tone: "normal" };
-}
 
 function InventoryRow({
   row,
@@ -25,51 +27,70 @@ function InventoryRow({
   active: boolean;
   onSelect: (id: string) => void;
 }) {
-  const desc = row.concernLine?.trim() || row.context?.trim() || row.typeLabel || "";
+  const subtitle = row.concernLine?.trim() || row.context?.trim() || row.typeLabel;
   const wait = row.waitingLabel ?? row.dueLabel ?? row.timeLabel;
-  const responsible = row.toLabel;
-  const prio = priority(row);
-  const subline = [desc, responsible, wait].filter(Boolean).join(" · ");
+  const meta = [subtitle, wait].filter(Boolean).join(" · ");
 
   return (
     <li>
       <button
         type="button"
-        className={cn("rw-inv__row", active && "rw-inv__row--active", prio.tone === "urgent" && "rw-inv__row--urgent")}
+        className={cn(
+          "rw-inv__row",
+          active && "rw-inv__row--active",
+          row.isCritical && "rw-inv__row--urgent"
+        )}
         onClick={() => onSelect(row.id)}
       >
-        <span className="rw-inv__row-line1">
-          <span className="rw-inv__title">{row.primaryLabel}</span>
-        </span>
-        <span className={cn("rw-inv__prio", `rw-inv__prio--${prio.tone}`)}>{prio.label}</span>
-        {subline ? <span className="rw-inv__desc">{subline}</span> : null}
+        <span className="rw-inv__title">{row.primaryLabel}</span>
+        {meta ? <span className="rw-inv__desc">{meta}</span> : null}
       </button>
     </li>
   );
 }
 
-export function RelayWorkInventoryList({ rows, selectedId, onSelect }: Props) {
-  const workRows = rows.filter((r) => !r.isGhost);
-  const stats = computeInventoryStats(rows);
+export function RelayWorkInventoryList({ areaTitle, rows, selectedId, onSelect }: Props) {
+  const [statusFilter, setStatusFilter] = useState<RelayWorkStatusId>("all");
+
+  const statusCounts = useMemo(() => countRowsByStatus(rows), [rows]);
+  const filteredRows = useMemo(
+    () => filterRowsByStatus(rows, statusFilter),
+    [rows, statusFilter]
+  );
 
   return (
     <div className="rw-inv">
       <header className="rw-inv__head">
-        <span className="rw-inv__stat">{stats.total} Vorgänge</span>
-        {stats.urgent > 0 ? (
-          <span className="rw-inv__stat rw-inv__stat--urgent">{stats.urgent} dringend</span>
-        ) : null}
-        {stats.due > 0 ? <span className="rw-inv__stat">{stats.due} fällig</span> : null}
-        {stats.oldestWait ? (
-          <span className="rw-inv__stat rw-inv__stat--faint">ältester: {stats.oldestWait}</span>
-        ) : null}
+        <h2 className="rw-inv__area-title">{areaTitle}</h2>
+        <div className="rw-inv__status-tabs" role="tablist" aria-label="Status">
+          {RELAY_WORK_STATUS_TABS.map((tab) => {
+            const count = statusCounts[tab.id];
+            if (tab.id !== "all" && count === 0) return null;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={statusFilter === tab.id}
+                className={cn(
+                  "rw-inv__status-tab",
+                  statusFilter === tab.id && "rw-inv__status-tab--active"
+                )}
+                onClick={() => setStatusFilter(tab.id)}
+              >
+                {tab.label}
+                {count > 0 ? <span className="rw-inv__status-count">{count}</span> : null}
+              </button>
+            );
+          })}
+        </div>
       </header>
       <div className="rw-inv__scroll">
-        {workRows.length === 0 ? (
+        {filteredRows.length === 0 ? (
           <p className="rw-inv__empty">Keine Vorgänge in diesem Bereich.</p>
         ) : (
           <ul className="rw-inv__list">
-            {workRows.map((row) => (
+            {filteredRows.map((row) => (
               <InventoryRow
                 key={row.id}
                 row={row}

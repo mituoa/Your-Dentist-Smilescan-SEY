@@ -15,9 +15,9 @@ export function DashboardPracticeState({ domains }: Props) {
       <header className="yd-dash-ref-card__head yd-dash-ref-card__head--row">
         <div>
           <h2 className="yd-dash-ref-card__title">Praxiszustand</h2>
-          <p className="yd-dash-ref-card__meta">
-            {total === 0 ? "Alle Bereiche ruhig" : `${total} offene Vorgänge`}
-          </p>
+          {total > 0 ? (
+            <p className="yd-dash-ref-card__meta">{total} offene Vorgänge</p>
+          ) : null}
         </div>
       </header>
 

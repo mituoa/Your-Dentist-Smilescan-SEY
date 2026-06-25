@@ -15,6 +15,7 @@ import type { JournalEntry } from "@/lib/types/journal-entry";
 import { buildRelayPracticeSnapshot } from "@/lib/relay/build-relay-practice-snapshot";
 import {
   parseRelayWorkArea,
+  relayWorkAreaConfig,
   relayWorkAreaRows,
   type RelayWorkAreaId,
 } from "@/lib/relay/relay-work-areas";
@@ -152,6 +153,7 @@ export function RelayWorkspace({
         </aside>
         <section className={cn("relay-ws__inv", !showInv && "max-md:hidden")}>
           <RelayWorkInventoryList
+            areaTitle={relayWorkAreaConfig(activeArea).title}
             rows={areaRows}
             selectedId={effectiveRowId}
             onSelect={selectRow}

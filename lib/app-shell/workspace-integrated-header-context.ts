@@ -32,7 +32,7 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname === "/relay" || pathname.startsWith("/relay/")) {
     return {
       eyebrow: "Relay",
-      subtitle: "Praxiszentrale — Aufgaben, Freigaben und Team an einem Ort",
+      subtitle: "",
       showSearch: true,
     };
   }

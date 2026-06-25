@@ -3,9 +3,6 @@ export const PUBLIC_SITE_DESKTOP_MQ = "(min-width: 900px)";
 
 /** Legacy-Hashes und Nav-Keys → kanonische Bento-Section-IDs */
 const SECTION_ID_ALIASES: Record<string, string> = {
-  preise: "demo",
-  pakete: "demo",
-  pricing: "demo",
   demo: "demo",
   hero: "hero",
   plattform: "plattform",

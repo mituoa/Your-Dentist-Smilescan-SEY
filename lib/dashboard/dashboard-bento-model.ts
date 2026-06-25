@@ -69,7 +69,7 @@ export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): Dash
       title: "Wartet auf mich",
       value: attention.length,
       detail: waitingDetail,
-      href: "/relay?section=attention",
+      href: "/relay?bereich=praxis",
       icon: "attention",
     },
     {
@@ -77,7 +77,7 @@ export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): Dash
       title: "Team wartet",
       value: teamCount,
       detail: teamCount === 1 ? "1 Aufgabe offen" : `${teamCount} Aufgaben offen`,
-      href: "/relay?section=teamwork",
+      href: "/relay?bereich=team",
       icon: "team",
     },
     {
@@ -90,7 +90,7 @@ export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): Dash
           : patientCount === 1
             ? "1 Rückmeldung offen"
             : `${patientCount} Rückmeldungen offen`,
-      href: "/relay?section=patient_waiting",
+      href: "/relay?bereich=patienten",
       icon: "patient",
     },
     {
@@ -103,7 +103,7 @@ export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): Dash
           : routineCount === 1
             ? "1 fällige Routine"
             : `${routineCount} fällige Routinen`,
-      href: "/relay?section=routines",
+      href: "/relay?bereich=praxis",
       icon: "routines",
     },
   ];
@@ -118,31 +118,31 @@ export function buildPracticeStateDomains(snapshot: RelayPracticeSnapshot): Prac
       id: "patienten",
       label: "Patienten",
       count: nonGhost(snapshot.patientWaiting).length,
-      href: "/inbox",
+      href: "/relay?bereich=patienten",
     },
     {
       id: "journal",
       label: "Journal",
       count: journalRows.length,
-      href: "/journal",
+      href: "/relay?bereich=journal",
     },
     {
       id: "team",
       label: "Team",
       count: nonGhost(snapshot.teamwork).length,
-      href: "/relay?section=teamwork",
+      href: "/relay?bereich=team",
     },
     {
       id: "freigaben",
       label: "Freigaben",
       count: freigabeRows.length,
-      href: "/relay?section=attention",
+      href: "/relay?bereich=journal",
     },
     {
       id: "routinen",
       label: "Routinen",
       count: nonGhost(snapshot.routines).length,
-      href: "/relay?section=routines",
+      href: "/relay?bereich=praxis",
     },
   ];
 }

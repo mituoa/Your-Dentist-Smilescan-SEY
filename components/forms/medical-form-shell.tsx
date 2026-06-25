@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
+import { cn } from "@/lib/utils";
 
 export type MedicalFormShellProps = {
   title: string;
@@ -15,6 +16,8 @@ export type MedicalFormShellProps = {
   footer: React.ReactNode;
   /** Screen reader label for the dialog */
   ariaLabel?: string;
+  /** Wider panel for split layouts (e.g. landing inquiry + preview) */
+  panelClassName?: string;
 };
 
 /**
@@ -28,6 +31,7 @@ export function MedicalFormShell({
   children,
   footer,
   ariaLabel,
+  panelClassName,
 }: MedicalFormShellProps) {
   const [mounted, setMounted] = React.useState(false);
   const titleId = React.useId();
@@ -61,7 +65,7 @@ export function MedicalFormShell({
 
       <div className="yd-auth-register-stage">
         <div
-          className="yd-auth-register-panel yd-medical-form-panel"
+          className={cn("yd-auth-register-panel yd-medical-form-panel", panelClassName)}
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}

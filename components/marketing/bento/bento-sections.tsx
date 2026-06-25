@@ -435,18 +435,32 @@ export function BentoCtaSection() {
   );
 }
 
-export function BentoFooter() {
+export function BentoFooter({ onPricingClick }: { onPricingClick?: () => void }) {
   return (
     <footer className="yd-bento-footer">
       <BentoContainer>
         <div className="yd-bento-footer__inner">
           <YourDentistBrandLockup size="sm" />
           <nav className="yd-bento-footer__nav" aria-label="Footer">
-            {BENTO_FOOTER.links.map((link) => (
-              <Link key={link.href} href={link.href} className="yd-bento-footer__link">
-                {link.label}
-              </Link>
-            ))}
+            {BENTO_FOOTER.links.map((link) =>
+              link.label === "Preise" && onPricingClick ? (
+                <Link
+                  key={link.href}
+                  href="/#preise"
+                  className="yd-bento-footer__link"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    onPricingClick();
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <Link key={link.href} href={link.href} className="yd-bento-footer__link">
+                  {link.label}
+                </Link>
+              )
+            )}
           </nav>
         </div>
       </BentoContainer>

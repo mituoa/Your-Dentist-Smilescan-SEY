@@ -15,6 +15,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <YdBentoHomePage
       dashboardHref={dashboardHref}
+      initialPlan={params.plan}
+      inviteToken={params.invite?.trim() ?? ""}
+      prefilledEmail={params.email?.trim() ?? ""}
     />
   );
 }

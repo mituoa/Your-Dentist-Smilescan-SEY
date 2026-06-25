@@ -7,6 +7,7 @@ import {
   BookOpen,
   CalendarDays,
   Home,
+  Layers,
   MessageSquare,
   Settings,
   Users,
@@ -25,6 +26,7 @@ const ICON_BY_NAME: Record<string, LucideIcon> = {
   tasks: CalendarDays,
   relay: CalendarDays,
   profile: MessageSquare,
+  solutions: Layers,
   settings: Settings,
   journal: BookOpen,
 };

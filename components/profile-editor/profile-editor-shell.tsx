@@ -12,6 +12,8 @@ import { ProfileCredentialsEditor } from "@/components/profile-editor/profile-cr
 import { ProfileEditorSection } from "@/components/profile-editor/profile-editor-section";
 import { ProfilePersonalApproachEditor } from "@/components/profile-editor/profile-personal-approach-editor";
 import { ProfileFigmaLivePreview } from "@/components/profile-editor/profile-figma-live-preview";
+import { ProfileSolutionsShowcase } from "@/components/profile-editor/profile-solutions-showcase";
+import { buildInquiryContextFromProfile } from "@/lib/practice-solutions/inquiry-context";
 import { ProfileLogoUpload } from "@/components/profile-editor/profile-logo-upload";
 import { ProfileServicesPicker } from "@/components/profile-editor/profile-services-picker";
 import { ProfileSpecializationPicker } from "@/components/profile-editor/profile-specialization-picker";
@@ -35,6 +37,7 @@ import { PROFILE_LIMITS } from "@/lib/validation/profile-limits";
 interface ProfileEditorShellProps {
   initialData: ProfileEditorData;
   workspaceName?: string;
+  userEmail?: string;
 }
 
 type WorkingFormState = ReturnType<typeof parseWorkingStyleVita>;
@@ -59,6 +62,7 @@ function truncateSummary(text: string, max = 28): string {
 export function ProfileEditorShell({
   initialData,
   workspaceName = "Ihre Praxis",
+  userEmail = "",
 }: ProfileEditorShellProps) {
   const [data, setData] = useState<ProfileEditorData>(initialData);
   const [working, setWorking] = useState<WorkingFormState>(() => parseWorkingStyleVita(initialData.vita_markdown));
@@ -93,6 +97,11 @@ export function ProfileEditorShell({
     [data, working]
   );
   latestDataRef.current = mergedProfile;
+
+  const inquiryContact = useMemo(
+    () => buildInquiryContextFromProfile(data, { workspaceName, userEmail }),
+    [data, workspaceName, userEmail]
+  );
 
   const isDirty = useMemo(
     () => buildProfileEditorSnapshot(data, working) !== savedSnapshotRef.current,
@@ -251,10 +260,10 @@ export function ProfileEditorShell({
   };
 
   return (
-    <div className="yd-profile-editor-shell relative flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent pb-[max(0px,env(safe-area-inset-bottom))] md:h-full">
-      <div className="yd-profile-editor-body relative flex min-h-0 min-w-0 flex-1 flex-col md:flex-row md:overflow-hidden">
+    <div className="yd-profile-editor-shell relative flex w-full flex-1 flex-col bg-transparent pb-[max(0px,env(safe-area-inset-bottom))]">
+      <div className="yd-profile-editor-body relative flex min-w-0 flex-col md:flex-row md:items-start">
         <div
-          className="yd-profile-editor-preview order-1 flex min-h-0 min-w-0 flex-[1.35] flex-col items-start overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] md:order-1"
+          className="yd-profile-editor-preview order-1 flex min-w-0 flex-[1.35] flex-col items-start md:order-1"
           role="region"
           aria-label="Öffentliche Profildarstellung"
         >
@@ -267,7 +276,7 @@ export function ProfileEditorShell({
         </div>
 
         <div
-          className="yd-profile-editor-curate order-2 flex min-h-0 w-full shrink-0 flex-col border-slate-300/20 bg-[#F4F3F0] max-md:border-t md:order-2 md:w-[min(100%,320px)] md:max-w-[360px] md:border-l md:border-t-0 xl:max-w-[380px]"
+          className="yd-profile-editor-curate order-2 flex w-full shrink-0 flex-col border-slate-300/20 bg-[#F4F3F0] max-md:border-t md:order-2 md:w-[min(100%,320px)] md:max-w-[360px] md:border-l md:border-t-0 xl:max-w-[380px]"
           aria-busy={saveStatus === "saving" || photoUploading}
         >
           <div className="yd-profile-editor-curate-scroll px-5 py-8 sm:px-6 sm:py-9">
@@ -752,6 +761,15 @@ export function ProfileEditorShell({
             />
           </div>
         </div>
+      </div>
+
+      <div className="yd-profile-editor-growth-zone">
+        <div className="yd-profile-editor-growth-zone__bridge" aria-hidden>
+          <span className="yd-profile-editor-growth-zone__line" />
+          <span className="yd-profile-editor-growth-zone__label">Kampagnen & Landingpages</span>
+          <span className="yd-profile-editor-growth-zone__line" />
+        </div>
+        <ProfileSolutionsShowcase inquiryContext={inquiryContact} />
       </div>
     </div>
   );

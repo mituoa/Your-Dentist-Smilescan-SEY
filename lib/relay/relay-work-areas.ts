@@ -18,7 +18,7 @@ export type RelayWorkAreaConfig = {
   emptyBody: string;
 };
 
-/** Verbindliche Reihenfolge — 5 Arbeitsbereiche (kein „Zu erledigen“). */
+/** Verbindliche Reihenfolge — Referenz-Navigation. */
 export const RELAY_WORK_AREAS: RelayWorkAreaConfig[] = [
   {
     id: "attention",
@@ -27,16 +27,16 @@ export const RELAY_WORK_AREAS: RelayWorkAreaConfig[] = [
     emptyBody: "Entscheidungen und persönliche Praxisarbeit erscheinen hier.",
   },
   {
-    id: "teamwork",
-    title: "Team wartet",
-    emptyTitle: "Kein Team wartet",
-    emptyBody: "Teamübergaben erscheinen hier.",
+    id: "patient_waiting",
+    title: "Patienten",
+    emptyTitle: "Kein Patient wartet",
+    emptyBody: "Patientenfälle und Anfragen erscheinen hier.",
   },
   {
-    id: "patient_waiting",
-    title: "Patient wartet",
-    emptyTitle: "Kein Patient wartet",
-    emptyBody: "Patientenfälle erscheinen hier.",
+    id: "teamwork",
+    title: "Team",
+    emptyTitle: "Kein Team wartet",
+    emptyBody: "Teamübergaben erscheinen hier.",
   },
   {
     id: "freigaben",

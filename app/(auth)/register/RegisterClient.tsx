@@ -48,6 +48,13 @@ type RegistrationStep = 1 | 2 | 3 | 4;
 
 const REGISTER_WIZARD_MAX_STEP_KEY = "yd-reg-max-wizard-step";
 
+const REGISTER_STEP_LABELS = [
+  "Ansprechperson & Zugang",
+  "Praxis",
+  "Verifizierung",
+  "Praxiszugang",
+] as const;
+
 type SignUpAction = (formData: FormData) => void | Promise<void>;
 type ResendAction = (formData: FormData) => void | Promise<void>;
 
@@ -729,6 +736,11 @@ export function RegisterClient(props: {
               >
                 {registrationStep > 1 && !props.success ? "Zurück" : "Schließen"}
               </button>
+              {!props.success ? (
+                <span className="yd-auth-register-page-meta">
+                  {registrationStep}/4
+                </span>
+              ) : null}
             </div>
           ) : (
             <button
@@ -749,6 +761,10 @@ export function RegisterClient(props: {
               </svg>
             </button>
           )}
+
+          {presentation === "page" && !props.success ? (
+            <h1 className="yd-auth-register-page-title">Registrierung</h1>
+          ) : null}
 
             <div className="yd-auth-register-header">
               <div className="mb-5 flex justify-center pb-1 md:mb-6">
@@ -784,96 +800,69 @@ export function RegisterClient(props: {
                 </p>
               ) : null}
 
-              <div className="yd-auth-register-wizard mb-8 max-md:mb-5">
-                <div className="mb-4 max-md:mb-3">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                      Ablauf
-                    </span>
-                    <span className="shrink-0 text-right text-[11px] font-semibold tabular-nums yd-auth-link">
-                      Schritt {registrationStep} von 4 · {Math.round(((registrationStep - 1) / 3) * 100)}%
+              <div
+                className={cn(
+                  "yd-reg-wizard",
+                  presentation === "page" && "yd-reg-wizard--minimal"
+                )}
+                aria-label={`Schritt ${registrationStep} von 4`}
+              >
+                {presentation !== "page" ? (
+                  <div className="yd-reg-wizard__head">
+                    <span className="yd-reg-wizard__eyebrow">Registrierung</span>
+                    <span className="yd-reg-wizard__meta">
+                      {Math.round(((registrationStep - 1) / 3) * 100)} % abgeschlossen
                     </span>
                   </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-                    <div
-                      className="h-full rounded-full transition-all duration-500 ease-out"
-                      style={{
-                        width: `${((registrationStep - 1) / 3) * 100}%`,
-                        background: "linear-gradient(to right, #0284C7, #0369A1)",
-                      }}
-                    />
-                  </div>
+                ) : null}
+                <div
+                  className="yd-reg-wizard__track"
+                  role="progressbar"
+                  aria-valuemin={1}
+                  aria-valuemax={4}
+                  aria-valuenow={registrationStep}
+                  aria-valuetext={REGISTER_STEP_LABELS[registrationStep - 1]}
+                >
+                  <div
+                    className="yd-reg-wizard__fill"
+                    style={{ width: `${((registrationStep - 1) / 3) * 100}%` }}
+                  />
                 </div>
-
-                <div className="flex min-w-0 items-center justify-center px-0.5">
-                  {[1, 2, 3, 4].map((step) => (
-                    <div key={step} className="flex min-w-0 shrink-0 items-center">
-                      <div
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 ${
-                          registrationStep === step
-                            ? "bg-gradient-to-b from-[#0284C7] to-[#0369A1] text-white shadow-md max-md:scale-105 md:scale-110"
-                            : registrationStep > step
-                              ? "bg-gradient-to-b from-green-500 to-green-600 text-white"
-                              : "bg-gray-100 text-gray-400"
-                        }`}
-                        style={{ animation: "none" }}
-                      >
-                        {registrationStep > step ? (
-                          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" style={{ animation: "checkmark 0.3s ease-out" }}>
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <span className="text-[12px] font-semibold">{step}</span>
-                        )}
-                      </div>
-                      {step < 4 ? (
-                        <div
-                          className={`mx-1.5 h-[2px] w-8 shrink rounded-full transition-all duration-500 max-md:mx-1 max-md:w-6 ${
-                            registrationStep > step
-                              ? "bg-gradient-to-r from-green-500 to-green-600"
-                              : "bg-gray-200"
-                          }`}
-                        />
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 text-center text-[12px] font-medium text-gray-500">
-                  {registrationStep === 1 && "Ansprechperson & Zugang"}
-                  {registrationStep === 2 && "Praxis"}
-                  {registrationStep === 3 && "Verifizierung"}
-                  {registrationStep === 4 && "Praxiszugang"}
-                </div>
+                {presentation !== "page" ? (
+                  <p className="yd-reg-wizard__label">{REGISTER_STEP_LABELS[registrationStep - 1]}</p>
+                ) : null}
               </div>
 
               {registrationStep === 1 ? (
                 <div className="yd-auth-awaken-field">
-                  <div className="mb-7 max-md:mb-5 text-center">
-                    <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900 max-md:text-[20px]">
-                      Geschützten Praxiszugang einrichten
-                    </h3>
-                    <p className="text-[13px] leading-relaxed text-gray-500">
-                      {props.inviteToken ? (
-                        <>
-                          Team-Einladung: Bitte dieselbe E-Mail-Adresse wie in der Einladung verwenden. Die
-                          Freischaltung erfolgt nach fachlicher Prüfung.
-                        </>
-                      ) : (
-                        <>
-                          Erstellen Sie den Zugang für Ihre Praxis. Die Freischaltung erfolgt nach fachlicher
-                          Prüfung.
-                        </>
-                      )}
-                    </p>
-                  </div>
+                  {presentation !== "page" ? (
+                    <div className="yd-auth-register-step-intro">
+                      <h3 className="yd-auth-register-title">
+                        Geschützten Praxiszugang einrichten
+                      </h3>
+                      <p className="yd-auth-register-subtitle">
+                        {props.inviteToken ? (
+                          <>
+                            Team-Einladung: Bitte dieselbe E-Mail-Adresse wie in der Einladung verwenden. Die
+                            Freischaltung erfolgt nach fachlicher Prüfung.
+                          </>
+                        ) : (
+                          <>
+                            Erstellen Sie den Zugang für Ihre Praxis. Die Freischaltung erfolgt nach fachlicher
+                            Prüfung.
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  ) : null}
 
                   <form
                     onSubmit={onStep1Submit}
-                    className="space-y-5"
+                    className="space-y-4"
                     aria-busy={emailCheckStatus === "checking"}
                   >
-                    <div>
-                      <label htmlFor="reg-name" className="mb-2 block text-[13px] font-medium text-gray-700">
+                    <div className="yd-auth-field">
+                      <label htmlFor="reg-name">
                         Name Ansprechpartner/in *
                       </label>
                       <input
@@ -882,20 +871,20 @@ export function RegisterClient(props: {
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
                         autoComplete="name"
-                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        className="yd-auth-input scroll-mt-8"
                         required
                       />
                     </div>
 
-                    <div>
-                      <label htmlFor="reg-role" className="mb-2 block text-[13px] font-medium text-gray-700">
+                    <div className="yd-auth-field">
+                      <label htmlFor="reg-role">
                         Rolle in der Praxis *
                       </label>
                       <select
                         id="reg-role"
                         value={regRole}
                         onChange={(e) => setRegRole(e.target.value)}
-                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        className="yd-auth-input scroll-mt-8"
                         required
                       >
                         <option value="">Bitte wählen</option>
@@ -907,8 +896,8 @@ export function RegisterClient(props: {
                       </select>
                     </div>
 
-                    <div>
-                      <label htmlFor="reg-email" className="mb-2 block text-[13px] font-medium text-gray-700">
+                    <div className="yd-auth-field">
+                      <label htmlFor="reg-email">
                         E-Mail *
                       </label>
                       <input
@@ -920,7 +909,7 @@ export function RegisterClient(props: {
                         autoComplete="email"
                         inputMode="email"
                         aria-invalid={showEmailValidationHints && emailCheckStatus === "invalid"}
-                        className={`yd-auth-input h-[52px] scroll-mt-8 ${
+                        className={`yd-auth-input scroll-mt-8 ${
                           emailCheckStatus === "ready" && isRegisterEmailFormatValid(regEmail)
                             ? "border-green-300/80"
                             : ""
@@ -984,8 +973,8 @@ export function RegisterClient(props: {
                       ) : null}
                     </div>
 
-                    <div>
-                      <label htmlFor="reg-password" className="mb-2 block text-[13px] font-medium text-gray-700">
+                    <div className="yd-auth-field">
+                      <label htmlFor="reg-password">
                         Passwort *
                       </label>
                       <input
@@ -998,18 +987,15 @@ export function RegisterClient(props: {
                         }}
                         autoComplete="new-password"
                         minLength={8}
-                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        className="yd-auth-input scroll-mt-8"
                         required
                       />
 
                       <RegisterPasswordGuidance password={regPassword} />
                     </div>
 
-                    <div>
-                      <label
-                        htmlFor="reg-password-confirm"
-                        className="mb-2 block text-[13px] font-medium text-gray-700"
-                      >
+                    <div className="yd-auth-field">
+                      <label htmlFor="reg-password-confirm">
                         Passwort bestätigen *
                       </label>
                       <input
@@ -1022,7 +1008,7 @@ export function RegisterClient(props: {
                         }}
                         autoComplete="new-password"
                         minLength={8}
-                        className="yd-auth-input h-[52px] scroll-mt-8"
+                        className="yd-auth-input scroll-mt-8"
                         required
                       />
                       {passwordPairError ? (
@@ -1047,24 +1033,35 @@ export function RegisterClient(props: {
                         !allPasswordRequirementsMet(regPassword) ||
                         !passwordsMatch
                       }
-                      className="yd-auth-btn-primary mt-8 h-[56px]"
+                      className="yd-auth-btn-primary mt-2 w-full"
                     >
                       Weiter
                     </button>
                   </form>
+
+                  {!props.inviteToken ? (
+                    <p className="yd-auth-register-footer">
+                      Bereits registriert?{" "}
+                      <Link href={loginBackHref} className="yd-auth-link">
+                        Anmelden
+                      </Link>
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
               {registrationStep === 2 ? (
                 <div className="yd-auth-awaken-field">
-                  <div className="mb-7 text-center">
-                    <h3 className="mb-1.5 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Praxisinformationen
-                    </h3>
-                    <p className="text-[13px] text-gray-500">
-                      Angaben zur Praxis, für die der Zugang eingerichtet wird.
-                    </p>
-                  </div>
+                  {presentation !== "page" ? (
+                    <div className="yd-auth-register-step-intro">
+                      <h3 className="yd-auth-register-title">
+                        Praxisinformationen
+                      </h3>
+                      <p className="yd-auth-register-subtitle">
+                        Angaben zur Praxis, für die der Zugang eingerichtet wird.
+                      </p>
+                    </div>
+                  ) : null}
 
                   <form onSubmit={onStep2Submit} className="space-y-5">
                     <div>
@@ -1091,9 +1088,11 @@ export function RegisterClient(props: {
                       <label htmlFor="reg-phone" className="mb-2 block text-[13px] font-medium text-gray-700">
                         Telefonnummer
                       </label>
-                      <p className="mb-2 text-[12px] leading-relaxed text-slate-500">
-                        Telefonnummer für Rückfragen zur Freischaltung.
-                      </p>
+                      {presentation !== "page" ? (
+                        <p className="mb-2 text-[12px] leading-relaxed text-slate-500">
+                          Telefonnummer für Rückfragen zur Freischaltung.
+                        </p>
+                      ) : null}
                       <input
                         id="reg-phone"
                         type="tel"
@@ -1140,17 +1139,17 @@ export function RegisterClient(props: {
 
               {registrationStep === 3 ? (
                 <div className="yd-auth-awaken-field">
-                  <div className="mb-7 text-center">
-                    <h3 className="mb-2 text-[24px] font-semibold tracking-tight text-gray-900">
-                      Berufliche Verifizierung
-                    </h3>
-                    <p className="mx-auto max-w-md text-[13px] leading-relaxed text-gray-600">
-                      Laden Sie Ihren Zahnarztausweis oder Ihre Approbationsurkunde hoch.
-                    </p>
-                    <p className="mx-auto mt-2 max-w-md text-[12px] leading-relaxed text-gray-500">
-                      Wir prüfen Ihre Angaben vor der Freischaltung Ihres Praxiszugangs.
-                    </p>
-                  </div>
+                  {presentation !== "page" ? (
+                    <div className="yd-auth-register-step-intro">
+                      <h3 className="yd-auth-register-title">
+                        Berufliche Verifizierung
+                      </h3>
+                      <p className="yd-auth-register-subtitle">
+                        Laden Sie Ihren Zahnarztausweis oder Ihre Approbationsurkunde hoch. Wir prüfen Ihre
+                        Angaben vor der Freischaltung Ihres Praxiszugangs.
+                      </p>
+                    </div>
+                  ) : null}
 
                   <form onSubmit={onStep3Submit} className="min-w-0 space-y-5" aria-busy={licenseUploading}>
 
@@ -1296,16 +1295,18 @@ export function RegisterClient(props: {
 
               {registrationStep === 4 ? (
                 <div className="yd-auth-awaken-field">
-                  <header className="mb-4 text-center md:mb-5">
-                    <h3 className="text-[22px] font-semibold leading-snug tracking-tight text-slate-900 md:text-[23px]">
-                      Praxiszugang vorbereiten
-                    </h3>
-                    <p className="mx-auto mt-2.5 max-w-md text-[13px] leading-relaxed text-slate-600">
-                      Abrechnung vorbereiten. Aktivierung nach Prüfung Ihrer Praxis.
-                    </p>
-                  </header>
+                  {presentation !== "page" ? (
+                    <header className="mb-4 text-center md:mb-5">
+                      <h3 className="text-[22px] font-semibold leading-snug tracking-tight text-slate-900 md:text-[23px]">
+                        Praxiszugang vorbereiten
+                      </h3>
+                      <p className="mx-auto mt-2.5 max-w-md text-[13px] leading-relaxed text-slate-600">
+                        Abrechnung vorbereiten. Aktivierung nach Prüfung Ihrer Praxis.
+                      </p>
+                    </header>
+                  ) : null}
 
-                  <RegisterStep4TrustStatus />
+                  {presentation !== "page" ? <RegisterStep4TrustStatus /> : null}
 
                   <form
                     action={props.signUpAction}
@@ -1483,6 +1484,12 @@ export function RegisterClient(props: {
                     />
                     {props.inviteToken ? (
                       <input type="hidden" name="invite_token" value={props.inviteToken} />
+                    ) : null}
+
+                    {presentation === "page" ? (
+                      <p className="yd-auth-register-approval-note" role="note">
+                        Freischaltung nach fachlicher Prüfung Ihrer Angaben.
+                      </p>
                     ) : null}
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">

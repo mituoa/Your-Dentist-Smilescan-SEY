@@ -65,11 +65,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
 
   return (
     <YdPublicOsEnvironment mode="register" scroll>
-      <div className="yd-auth-register-page-chrome max-md:hidden">
-        <YdProductChrome variant="entry" />
-      </div>
       <main className="yd-product-entry yd-clinical-entry yd-auth-register-page-main">
-        <section className="yd-product-entry-card yd-clinical-entry-panel yd-auth-register-page-card">
+        <YdProductChrome variant="entry" tagline={null} />
+        <section className="yd-product-entry-card yd-auth-register-page-card">
           <Suspense
             fallback={
               <div className="flex min-h-[min(480px,75dvh)] flex-col items-center justify-center py-16">

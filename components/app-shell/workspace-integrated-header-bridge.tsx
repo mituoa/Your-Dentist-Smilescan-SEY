@@ -49,18 +49,18 @@ export function WorkspaceIntegratedHeaderBridge({
     onDashboard && dashboardHeaderSummary ? dashboardHeaderSummary.editorial : null;
 
   const subtitle =
-    onTracker && trackerHeaderSummary
-      ? trackerHeaderSummary.lead
-      : onDashboard && dashboardHeaderSummary
-        ? dashboardHeaderSummary.subtitle
-        : onRelay && relayHeaderSummary
-          ? relayHeaderSummary.lead
+    onRelay && relayHeaderSummary
+      ? relayHeaderSummary.lead
+      : onTracker && trackerHeaderSummary
+        ? trackerHeaderSummary.lead
+        : onDashboard
+          ? ""
           : ctx.subtitle;
   const subtitleMeta =
-    onTracker && trackerHeaderSummary
-      ? trackerHeaderSummary.breakdown
-      : onRelay && relayHeaderSummary
-        ? relayHeaderSummary.breakdown
+    onRelay && relayHeaderSummary
+      ? relayHeaderSummary.breakdown
+      : onTracker && trackerHeaderSummary
+        ? trackerHeaderSummary.breakdown
         : ctx.subtitleMeta;
 
   const greeting = useMemo(() => {

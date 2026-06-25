@@ -280,7 +280,7 @@ export const BENTO_FOOTER = {
   links: [
     { label: "Datenschutz", href: "/datenschutz" },
     { label: "Impressum", href: "/impressum" },
-    { label: "Preise", href: "/pricing" },
+    { label: "Preise", href: "/#preise" },
     { label: "Anmelden", href: "/login" },
   ],
 } as const;
