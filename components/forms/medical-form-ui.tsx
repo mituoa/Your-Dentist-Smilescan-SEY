@@ -155,7 +155,7 @@ export function MedicalFormFooterActions(props: {
 
 export function MedicalFormUploadEmpty(props: {
   title: string;
-  hint: string;
+  hint?: string;
   dragActive?: boolean;
   disabled?: boolean;
   inputProps: React.InputHTMLAttributes<HTMLInputElement>;
@@ -185,7 +185,7 @@ export function MedicalFormUploadEmpty(props: {
       <div className="yd-medical-upload__inner">
         {props.icon}
         <p className="yd-medical-upload__title">{props.title}</p>
-        <p className="yd-medical-upload__hint">{props.hint}</p>
+        {props.hint ? <p className="yd-medical-upload__hint">{props.hint}</p> : null}
       </div>
     </div>
   );

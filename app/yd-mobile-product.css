@@ -72,10 +72,7 @@
   }
 
   .yd-dash-m__card-meta {
-    margin: 0.25rem 0 0;
-    font-size: 0.75rem;
-    font-weight: 400;
-    color: #7c8a98;
+    display: none;
   }
 
   .yd-dash-m__card-link {
@@ -83,7 +80,7 @@
     margin-top: 0.875rem;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #2f63b7;
+    color: #1a4f9c;
     text-decoration: none;
   }
 
@@ -124,7 +121,7 @@
     height: 2.25rem;
     border-radius: 999px;
     background: rgba(47, 99, 183, 0.08);
-    color: #2f63b7;
+    color: #1a4f9c;
     flex-shrink: 0;
   }
 
@@ -216,7 +213,7 @@
     width: 100%;
     max-width: 1.75rem;
     border-radius: 0.5rem 0.5rem 0.25rem 0.25rem;
-    background: linear-gradient(180deg, #4a7fd4 0%, #2f63b7 100%);
+    background: linear-gradient(180deg, #1a4f9c 0%, #163d7a 100%);
     min-height: 6px;
   }
 
@@ -279,7 +276,7 @@
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    color: #2f63b7;
+    color: #1a4f9c;
     background: rgba(47, 99, 183, 0.08);
     border-radius: 999px;
   }
@@ -377,7 +374,7 @@
   }
 
   .yd-dash-m__spark-bar--today {
-    background: #2f63b7;
+    background: #1a4f9c;
   }
 
   .yd-dash-m__spark-day {
@@ -397,7 +394,7 @@
     display: block;
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #4a7fd4 0%, #2f63b7 100%);
+    background: linear-gradient(90deg, #1a4f9c 0%, #163d7a 100%);
   }
 
   .yd-dash-m__activity-fill--journal {

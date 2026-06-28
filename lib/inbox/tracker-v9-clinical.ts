@@ -547,4 +547,35 @@ export function formatTrackerRelativeIngress(iso: string): string {
   return then.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
 }
 
+/** KI-Dringlichkeit für Listenzeilen — gespeichert oder aus Anliegen abgeleitet. */
+export function suggestClinicalUrgencyFromListItem(
+  item: EnrichedSubmissionListItem
+): ClinicalUrgencyId {
+  return suggestClinicalUrgency({
+    patientNotes: item.patient_notes,
+    patientName: item.patient_name,
+    photoCount: item.photo_count ?? 0,
+    hasMultiDayPhotos: Boolean(
+      item.photo_documentation &&
+        item.photo_documentation.dayCount >= 2 &&
+        item.photo_documentation.photoCount >= 2
+    ),
+    hasPhotoTrail: hasPhotoTrail(item),
+    messageDraftStatus: item.message_draft_status,
+    draftsAvailable: item.message_draft_status !== "none",
+    urgency: item.urgency,
+    intakeChannel: item.intake_channel,
+    isApprovalPending: isApprovalPending(item),
+    isDoctor: true,
+    openTaskCount: item.open_task_count ?? 0,
+    photoDocumentation: item.photo_documentation,
+  });
+}
+
+export function inboxListUrgencyTier(
+  item: EnrichedSubmissionListItem
+): ClinicalUrgencyId {
+  return normalizeClinicalUrgency(item.urgency) ?? suggestClinicalUrgencyFromListItem(item);
+}
+
 export { buildTrackerClinicalDecisionFromListItem };

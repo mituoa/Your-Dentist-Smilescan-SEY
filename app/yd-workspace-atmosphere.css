@@ -309,3 +309,32 @@
     padding-bottom: max(3.25rem, env(safe-area-inset-bottom) + 2.25rem) !important;
   }
 }
+
+/* Tracker & Module — gleiche Canvas-Atmosphäre wie Dashboard */
+.yd-tracker-page,
+.yd-inbox-workspace,
+.yd-tracker-v3-root,
+.yd-tracker-v8-root,
+.yd-tracker-v10-root,
+.yd-tracker-v11-root,
+.yd-tracker-queue-root {
+  background: transparent !important;
+}
+
+.yd-tracker-page .yd-awaken-canvas,
+.yd-inbox-workspace .yd-awaken-canvas,
+.yd-tracker-v3-root .yd-awaken-canvas,
+.yd-tracker-v8-root .yd-awaken-canvas,
+.yd-tracker-v10-root .yd-awaken-canvas,
+.yd-tracker-v11-root .yd-awaken-canvas,
+.yd-tracker-queue-root .yd-awaken-canvas,
+.yd-awaken-canvas:has(.relay-center),
+.yd-awaken-canvas:has(.yd-journal-v6),
+.yd-awaken-canvas:has(.care-center) {
+  background: linear-gradient(
+    168deg,
+    var(--yd-ws-canvas-top) 0%,
+    var(--yd-ws-canvas-mid) 44%,
+    var(--yd-ws-canvas-end) 100%
+  ) !important;
+}

@@ -191,9 +191,9 @@
 @media (hover: hover) {
   .yd-workspace .yd-workspace-toolbar__icon-btn:hover {
     transform: translateY(-1px);
-    border-color: rgba(47, 128, 237, 0.28);
-    color: #2f80ed;
-    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.1);
+    border-color: rgba(26, 79, 156, 0.28);
+    color: #1a4f9c;
+    box-shadow: 0 4px 12px rgba(26, 79, 156, 0.1);
   }
 }
 

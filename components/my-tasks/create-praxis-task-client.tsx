@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition, useCallback } from "react";
 
 import {
   createMyTask,
@@ -17,6 +17,11 @@ import {
   MedicalFormSegmented,
   MedicalFormTextarea,
 } from "@/components/forms/medical-form-ui";
+import {
+  consumeCommandTaskDraft,
+  subscribeCommandTaskDraft,
+  type PendingCommandTaskDraft,
+} from "@/lib/command-ai/task-draft-bridge";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { TaskRecurrenceType } from "@/lib/tasks/recurrence";
 import { cn } from "@/lib/utils";
@@ -67,23 +72,20 @@ const MSG_RECIPIENT_OPTIONS = [
 
 const SHELL_COPY: Record<
   CreateMode,
-  { title: string; subtitle: string; primary: string; pending: string }
+  { title: string; primary: string; pending: string }
 > = {
   task: {
     title: "Praxisaufgabe erstellen",
-    subtitle: "Strukturierte Aufgabe für Team, Patientenfall oder Praxisorganisation.",
     primary: "Aufgabe erstellen",
     pending: "Wird erstellt…",
   },
   assign: {
     title: "Aufgabe zuweisen",
-    subtitle: "Aufgabe direkt an Teammitglieder oder das gesamte Team vergeben.",
     primary: "Zuweisen",
     pending: "Wird zugewiesen…",
   },
   message: {
     title: "Interne Nachricht",
-    subtitle: "Übergabe oder Hinweis an Kolleginnen und Kollegen — kein Patientenkanal.",
     primary: "Nachricht senden",
     pending: "Wird gesendet…",
   },
@@ -96,6 +98,8 @@ type CreatePraxisTaskClientProps = {
   initialTitle?: string;
   initialDescription?: string;
   initialDueDate?: string;
+  onClose?: () => void;
+  overlay?: "auth" | "workspace";
 };
 
 export function CreatePraxisTaskClient({
@@ -105,6 +109,8 @@ export function CreatePraxisTaskClient({
   initialTitle = "",
   initialDescription = "",
   initialDueDate = "",
+  onClose,
+  overlay = "workspace",
 }: CreatePraxisTaskClientProps) {
   const router = useRouter();
   const formId = useId();
@@ -142,6 +148,25 @@ export function CreatePraxisTaskClient({
   const shell = SHELL_COPY[createMode];
   const isTaskFlow = createMode === "task" || createMode === "assign";
 
+  const applyCommandDraft = useCallback((draft: PendingCommandTaskDraft) => {
+    setTitle(draft.title);
+    setDescription(draft.notes ?? "");
+    if (draft.dueDate) setDueDate(draft.dueDate);
+    setError(null);
+  }, []);
+
+  useEffect(() => {
+    setTitle(initialTitle);
+    setDescription(initialDescription);
+    setDueDate(initialDueDate);
+  }, [initialTitle, initialDescription, initialDueDate]);
+
+  useEffect(() => {
+    const pending = consumeCommandTaskDraft();
+    if (pending) applyCommandDraft(pending);
+    return subscribeCommandTaskDraft(applyCommandDraft);
+  }, [applyCommandDraft]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -174,6 +199,10 @@ export function CreatePraxisTaskClient({
 
   const close = () => {
     if (busy) return;
+    if (onClose) {
+      onClose();
+      return;
+    }
     router.push(cancelHref);
   };
 
@@ -236,6 +265,7 @@ export function CreatePraxisTaskClient({
         setError(result.error);
         return;
       }
+      onClose?.();
       if (submissionId) {
         router.push(`/inbox/${submissionId}`);
       } else if (cancelHref.startsWith("/relay")) {
@@ -274,6 +304,7 @@ export function CreatePraxisTaskClient({
         setError(res.error);
         return;
       }
+      onClose?.();
       if (res.conversationId) {
         router.push(`/relay?section=handoffs&conversation=${res.conversationId}`);
       } else if (cancelHref.startsWith("/relay")) {
@@ -300,10 +331,10 @@ export function CreatePraxisTaskClient({
   return (
     <MedicalFormShell
       title={shell.title}
-      subtitle={shell.subtitle}
       onClose={close}
       closeDisabled={busy}
       ariaLabel={shell.title}
+      overlayVariant={overlay}
       footer={
         <MedicalFormFooterActions
           onCancel={close}
@@ -317,7 +348,7 @@ export function CreatePraxisTaskClient({
       }
     >
       <div className="yd-medical-form">
-        <MedicalFormSection title="Was möchten Sie tun?">
+        <MedicalFormSection title="Aktion">
           <MedicalFormSegmented
             name="create_mode"
             aria-label="Aktion wählen"
@@ -359,7 +390,6 @@ export function CreatePraxisTaskClient({
                       maxLength={200}
                       autoComplete="off"
                       className="yd-auth-input"
-                      placeholder="z. B. Röntgenbilder nachfordern"
                     />
                   </div>
                   <div>
@@ -371,7 +401,6 @@ export function CreatePraxisTaskClient({
                       value={description}
                       onChange={setDescription}
                       rows={4}
-                      placeholder="Kontext oder nächster Schritt für das Team …"
                     />
                   </div>
                 </MedicalFormFieldStack>
@@ -386,11 +415,6 @@ export function CreatePraxisTaskClient({
                   onChange={(v) => v && setTaskContext(v)}
                   disabled={contextLocked || busy}
                 />
-                {contextLocked ? (
-                  <p className="yd-medical-form-context-note">
-                    Diese Aufgabe wird dem geöffneten Patientenfall zugeordnet.
-                  </p>
-                ) : null}
               </MedicalFormSection>
 
               <MedicalFormSection title="Verantwortlichkeit">
@@ -455,11 +479,7 @@ export function CreatePraxisTaskClient({
                 </MedicalFormFieldStack>
               </MedicalFormSection>
 
-              <MedicalFormSection
-                title="Rhythmus & Erinnerung"
-                hint="Optional — für wiederkehrende Routinen oder Erinnerungen."
-                className="yd-medical-form-routine"
-              >
+              <MedicalFormSection title="Rhythmus & Erinnerung" className="yd-medical-form-routine">
                 <MedicalFormFieldStack>
                   <div>
                     <MedicalFormLabel optional>Wiederholung</MedicalFormLabel>
@@ -483,12 +503,8 @@ export function CreatePraxisTaskClient({
                       disabled={busy}
                     />
                     {reminderMode !== "none" && !dueDate.trim() ? (
-                      <p className="yd-medical-form-context-note">
+                      <p className="yd-medical-form-context-note" role="alert">
                         Bitte ein Fälligkeitsdatum setzen, damit die Erinnerung ausgelöst werden kann.
-                      </p>
-                    ) : reminderMode !== "none" && dueDate.trim() ? (
-                      <p className="yd-medical-form-context-note">
-                        Erinnerung einen Tag vor dem Fälligkeitstermin.
                       </p>
                     ) : null}
                   </div>
@@ -558,11 +574,10 @@ export function CreatePraxisTaskClient({
                   value={messageBody}
                   onChange={setMessageBody}
                   rows={5}
-                  placeholder="Interne Übergabe formulieren …"
                 />
               </MedicalFormSection>
 
-              <MedicalFormSection title="Bezug" hint="Optional — Fall oder Tracker-Verknüpfung.">
+              <MedicalFormSection title="Bezug">
                 <MedicalFormFieldStack>
                   <div>
                     <MedicalFormLabel htmlFor={`${formId}-msg-sub`} optional>
@@ -574,7 +589,6 @@ export function CreatePraxisTaskClient({
                       value={msgSubmissionId}
                       onChange={(e) => setMsgSubmissionId(e.target.value)}
                       className="yd-auth-input"
-                      placeholder="UUID des Falls"
                       disabled={Boolean(submissionId)}
                     />
                   </div>

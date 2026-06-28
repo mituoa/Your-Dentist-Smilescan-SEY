@@ -276,6 +276,7 @@ export default async function ProtectedLayout({
                       <WorkspaceIntegratedHeaderBridge
                         email={user.email || ""}
                         workspaceName={workspaceName}
+                        workspaceId={workspace.workspace_id}
                         role={role}
                         initialTheme={theme}
                         displayName={doctorLabel}

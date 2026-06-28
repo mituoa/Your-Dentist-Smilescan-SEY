@@ -15,10 +15,10 @@ export const CLINICAL_BRIEFING = {
     surface: "#FFFFFF",
     surfaceRaised: "#F4F8FC",
     surfaceSunken: "#EDF5FD",
-    /** Akzent — kontrolliertes Medical Blue */
-    accent: "#2F63B7",
+    /** Akzent — Navy Blue (einheitlich) */
+    accent: "#1A4F9C",
     accentSoft: "#DCE8F5",
-    accentSubtle: "rgba(47, 99, 183, 0.1)",
+    accentSubtle: "rgba(26, 79, 156, 0.1)",
     /** Text — kein Schwarz */
     textPrimary: "#243446",
     textSecondary: "#516170",
@@ -39,7 +39,7 @@ export const CLINICAL_BRIEFING = {
     /** Legacy-Alias */
     ink: "#243446",
     graphite: "#243446",
-    clinicalBlue: "#2F63B7",
+    clinicalBlue: "#1A4F9C",
     mineralGray: "#7C8A98",
     offWhite: "#F8FBFD",
   },
@@ -69,10 +69,10 @@ export const CLINICAL_BRIEFING = {
   },
   status: {
     submitted: { bg: "#EDF2F7", text: "#516170", dot: "#7C8A98" },
-    review: { bg: "#EDF5FD", text: "#2F63B7", dot: "#2F63B7" },
+    review: { bg: "#EDF5FD", text: "#1A4F9C", dot: "#1A4F9C" },
     question: { bg: "#F6F2EA", text: "#7A6340", dot: "#9A8458" },
-    progress: { bg: "#EDF5FD", text: "#2F63B7", dot: "#4A7BB5" },
-    approval: { bg: "#E8F0FA", text: "#243446", dot: "#2F63B7" },
+    progress: { bg: "#EDF5FD", text: "#1A4F9C", dot: "#4A7BB5" },
+    approval: { bg: "#E8F0FA", text: "#243446", dot: "#1A4F9C" },
     done: { bg: "#EDF4EF", text: "#3D6B52", dot: "#4D8A66" },
     report: { bg: "#EDF2F7", text: "#516170", dot: "#7C8A98" },
   },

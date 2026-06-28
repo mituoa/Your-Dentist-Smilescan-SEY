@@ -6,17 +6,19 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
+import { TrackerInboxListStatusMenu } from "@/components/inbox/tracker-inbox-list-status-menu";
+import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
+import { displayPracticeStatusForCase } from "@/lib/inbox/tracker-enterprise-status";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
-  TRACKER_FILTER_HINTS,
   countByTrackerFilter,
   formatPatientAgeYears,
   formatTrackerCaseRef,
   matchesTrackerFilter,
   matchesTrackerSearch,
   sortTrackerInboxItems,
-  trackerStatusForRow,
+  trackerInboxReadState,
   type EnrichedSubmissionListItem,
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
@@ -123,13 +125,6 @@ export function TrackerPatientDirectory({
             <h2 className="yd-tracker-directory__title">
               {isFull ? "Patienten" : "Übersicht"}
             </h2>
-            {isFull ? (
-              <p className="yd-tracker-directory__subtitle">
-                {filtered.length === 1
-                  ? "1 Patient in der Praxis-Inbox"
-                  : `${filtered.length} Patienten in der Praxis-Inbox`}
-              </p>
-            ) : null}
           </div>
           {showCreateCase && isFull ? (
             <Link href="/create-case?from=inbox" className="yd-tracker-directory__new-case">
@@ -150,15 +145,12 @@ export function TrackerPatientDirectory({
             {TRACKER_FILTER_CHIPS.map((chip) => {
               const count = countByTrackerFilter(searchScoped, chip.id);
               const active = filter === chip.id;
-              const hint = TRACKER_FILTER_HINTS[chip.id];
               return (
                 <button
                   key={chip.id}
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  title={hint}
-                  aria-description={hint}
                   className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
                   onClick={() => setFilter(chip.id)}
                 >
@@ -200,11 +192,16 @@ export function TrackerPatientDirectory({
                   <tbody>
                     {pageItems.map((item) => {
                       const isActive = pathname === `/inbox/${item.id}`;
-                      const status = trackerStatusForRow(item);
                       const age = formatPatientAgeYears(item.patient_birth_date);
                       const patientId = formatTrackerCaseRef(item.id, item.patient_external_id);
                       const name = item.patient_name?.trim() || "Unbekannter Patient";
-                      const email = item.patient_email?.trim() || null;
+                      const preview = deriveSubmissionIssueShortLine(
+                        item.patient_notes,
+                        item.patient_name,
+                        { maxLen: 72, emptyLabel: "" }
+                      );
+                      const practiceStatus = displayPracticeStatusForCase(item.practice_status);
+                      const readState = trackerInboxReadState(item);
 
                       return (
                         <tr
@@ -212,7 +209,12 @@ export function TrackerPatientDirectory({
                           className={cn(
                             "yd-tracker-directory__row",
                             isActive && "yd-tracker-directory__row--active",
-                            !item.seen_at && !isActive && "yd-tracker-directory__row--unseen"
+                            readState === "new_submission" &&
+                              !isActive &&
+                              "yd-tracker-directory__row--new",
+                            readState === "marked_unread" &&
+                              !isActive &&
+                              "yd-tracker-directory__row--marked-unread"
                           )}
                           onClick={() => goToCase(item.id)}
                           onKeyDown={(e) => {
@@ -232,13 +234,19 @@ export function TrackerPatientDirectory({
                               </span>
                               <span className="yd-tracker-directory__patient-text">
                                 <span className="yd-tracker-directory__name">{name}</span>
-                                {email ? (
-                                  <span className="yd-tracker-directory__email">{email}</span>
-                                ) : (
-                                  <span className="yd-tracker-directory__email yd-tracker-directory__email--muted">
-                                    Keine E-Mail hinterlegt
+                                {readState === "new_submission" ? (
+                                  <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--new yd-tracker-directory__ingress-badge">
+                                    Neu
                                   </span>
-                                )}
+                                ) : null}
+                                {readState === "marked_unread" ? (
+                                  <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--unread yd-tracker-directory__ingress-badge">
+                                    Ungelesen
+                                  </span>
+                                ) : null}
+                                {preview ? (
+                                  <span className="yd-tracker-directory__preview">{preview}</span>
+                                ) : null}
                               </span>
                             </div>
                           </td>
@@ -251,17 +259,12 @@ export function TrackerPatientDirectory({
                           <td data-label="Patienten-ID">
                             <span className="yd-tracker-directory__patient-id">{patientId}</span>
                           </td>
-                          <td data-label="Status">
-                            <span
-                              className={cn(
-                                "yd-tracker-directory__status",
-                                "yd-tracker-table__status",
-                                status.className
-                              )}
-                            >
-                              <span className="yd-tracker-table__status-dot" aria-hidden />
-                              {status.label}
-                            </span>
+                          <td data-label="Status" onClick={(e) => e.stopPropagation()}>
+                            <TrackerInboxListStatusMenu
+                              submissionId={item.id}
+                              status={practiceStatus}
+                              seenAt={item.seen_at}
+                            />
                           </td>
                         </tr>
                       );
@@ -322,10 +325,17 @@ export function TrackerPatientDirectory({
           <ul className="yd-tracker-directory__sidebar-list" aria-label="Patienten">
             {filtered.map((item) => {
               const isActive = pathname === `/inbox/${item.id}`;
-              const status = trackerStatusForRow(item);
               const age = formatPatientAgeYears(item.patient_birth_date);
               const patientId = formatTrackerCaseRef(item.id, item.patient_external_id);
               const name = item.patient_name?.trim() || "Unbekannter Patient";
+              const preview = deriveSubmissionIssueShortLine(
+                item.patient_notes,
+                item.patient_name,
+                { maxLen: 72, emptyLabel: "" }
+              );
+              const practiceStatus = displayPracticeStatusForCase(item.practice_status);
+
+              const readState = trackerInboxReadState(item);
 
               return (
                 <li key={item.id}>
@@ -334,7 +344,12 @@ export function TrackerPatientDirectory({
                     className={cn(
                       "yd-tracker-directory__sidebar-card",
                       isActive && "yd-tracker-directory__sidebar-card--active",
-                      !item.seen_at && !isActive && "yd-tracker-directory__sidebar-card--unseen"
+                      readState === "new_submission" &&
+                        !isActive &&
+                        "yd-tracker-directory__sidebar-card--new",
+                      readState === "marked_unread" &&
+                        !isActive &&
+                        "yd-tracker-directory__sidebar-card--marked-unread"
                     )}
                     onClick={() => goToCase(item.id)}
                     aria-current={isActive ? "page" : undefined}
@@ -345,9 +360,19 @@ export function TrackerPatientDirectory({
                       </span>
                       <span className="min-w-0 flex-1 text-left">
                         <span className="yd-tracker-directory__name block truncate">{name}</span>
-                        {item.patient_email?.trim() ? (
-                          <span className="yd-tracker-directory__email block truncate">
-                            {item.patient_email.trim()}
+                        {readState === "new_submission" ? (
+                          <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--new yd-tracker-directory__ingress-badge">
+                            Neu
+                          </span>
+                        ) : null}
+                        {readState === "marked_unread" ? (
+                          <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--unread yd-tracker-directory__ingress-badge">
+                            Ungelesen
+                          </span>
+                        ) : null}
+                        {preview ? (
+                          <span className="yd-tracker-directory__preview block truncate">
+                            {preview}
                           </span>
                         ) : null}
                       </span>
@@ -366,16 +391,17 @@ export function TrackerPatientDirectory({
                         <dd>{patientId}</dd>
                       </div>
                     </dl>
-                    <span
-                      className={cn(
-                        "yd-tracker-directory__status",
-                        "yd-tracker-table__status mt-2",
-                        status.className
-                      )}
+                    <div
+                      className="mt-2 flex justify-end"
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
                     >
-                      <span className="yd-tracker-table__status-dot" aria-hidden />
-                      {status.label}
-                    </span>
+                      <TrackerInboxListStatusMenu
+                        submissionId={item.id}
+                        status={practiceStatus}
+                        seenAt={item.seen_at}
+                      />
+                    </div>
                   </button>
                 </li>
               );

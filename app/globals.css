@@ -47,6 +47,7 @@
 @import "./yd-clinical-brand.css";
 @import "./yd-clinical-settings.css";
 @import "./yd-journal-v6.css";
+@import "./yd-care-center.css";
 @import "./yd-loading.css";
 
 @layer base {

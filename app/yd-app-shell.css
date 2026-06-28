@@ -170,6 +170,52 @@
   }
 }
 
+/* Workspace-Modals (Aufgabe, Fall, Nachricht): Command AI bleibt erreichbar */
+html[data-yd-workspace-modal="true"] .yd-command-assist-fab-host {
+  z-index: 280;
+  pointer-events: auto;
+}
+
+html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
+  z-index: 285;
+  pointer-events: auto;
+}
+
+html[data-yd-workspace-modal="true"] .yd-command-assist-backdrop {
+  z-index: 279;
+  pointer-events: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Tracker: Command AI über Fallansicht */
+.yd-inbox-workspace .yd-command-assist-fab-host {
+  z-index: 52;
+}
+
+.yd-inbox-workspace .yd-command-assist-sheet {
+  z-index: 53;
+}
+
+.yd-inbox-workspace .yd-command-assist-backdrop {
+  z-index: 51;
+}
+
+@media (min-width: 768px) {
+  .yd-inbox-workspace .yd-command-assist-fab-host {
+    z-index: 56;
+  }
+
+  .yd-inbox-workspace .yd-command-assist-sheet {
+    z-index: 57;
+  }
+
+  .yd-inbox-workspace .yd-command-assist-backdrop {
+    z-index: 55;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .yd-command-assist-sheet {
     transition: none;

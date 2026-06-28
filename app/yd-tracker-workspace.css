@@ -312,7 +312,7 @@
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #2f80ed;
+  color: #1a4f9c;
 }
 
 .yd-tracker-case-card__time {
@@ -519,7 +519,7 @@
 }
 
 .yd-tracker-journey__day-badge--today {
-  background: linear-gradient(135deg, #2f80ed 0%, #1a4f9c 100%);
+  background: linear-gradient(135deg, #1a4f9c 0%, #1a4f9c 100%);
   color: #fff;
 }
 
@@ -555,7 +555,7 @@
 }
 
 .yd-tracker-journey__thumb--active {
-  border-color: #2f80ed;
+  border-color: #1a4f9c;
   box-shadow: 0 4px 14px rgba(47, 128, 237, 0.28);
 }
 
@@ -614,7 +614,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 14px;
-  background: linear-gradient(145deg, #6ba8f5 0%, #2f80ed 48%, #1a4f9c 100%);
+  background: linear-gradient(145deg, #6ba8f5 0%, #1a4f9c 48%, #1a4f9c 100%);
   color: #fff;
   box-shadow: 0 6px 18px rgba(47, 128, 237, 0.35);
 }
@@ -631,7 +631,7 @@
   margin: 0.2rem 0 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #2f80ed;
+  color: #1a4f9c;
 }
 
 .yd-tracker-ki__grid {
@@ -817,7 +817,7 @@
 }
 
 .yd-tracker-team__btn--primary {
-  background: #2f80ed;
+  background: #1a4f9c;
   color: #fff;
   box-shadow: 0 4px 14px rgba(47, 128, 237, 0.28);
 }
@@ -956,7 +956,7 @@
   margin: 0.35rem 0 0;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #2f80ed;
+  color: #1a4f9c;
   letter-spacing: 0.01em;
 }
 
@@ -1377,7 +1377,7 @@
   height: 2.5rem;
   border-radius: 12px;
   color: #fff;
-  background: linear-gradient(145deg, #6ba8f5 0%, #2f80ed 48%, #1a4f9c 100%);
+  background: linear-gradient(145deg, #6ba8f5 0%, #1a4f9c 48%, #1a4f9c 100%);
   box-shadow: 0 4px 14px rgba(47, 128, 237, 0.28);
 }
 
@@ -1424,7 +1424,7 @@
 }
 
 .yd-tracker-v5-ki__check--done svg {
-  color: #2f80ed;
+  color: #1a4f9c;
 }
 
 .yd-tracker-v5-ki__summary {
@@ -1472,7 +1472,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #2f80ed;
+  background: #1a4f9c;
 }
 
 /* Aufgaben */
@@ -1619,7 +1619,7 @@
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #2f80ed;
+  color: #1a4f9c;
 }
 
 .yd-tracker-v6-today__list {
@@ -2149,7 +2149,7 @@
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #2f80ed;
+  color: #1a4f9c;
 }
 
 .yd-tracker-v7-queue__list {

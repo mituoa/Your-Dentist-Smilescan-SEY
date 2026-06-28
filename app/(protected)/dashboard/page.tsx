@@ -179,7 +179,7 @@ export default async function DashboardPage() {
 
   return (
     <div
-      className="yd-dashboard yd-dashboard--bento relative mx-auto w-full min-w-0 pb-8"
+      className="yd-dashboard yd-dashboard--bento relative mx-auto w-full min-w-0 pb-12 md:pb-16"
       style={{ maxWidth: YD.space.contentMax }}
     >
       <DashboardMobileHealth

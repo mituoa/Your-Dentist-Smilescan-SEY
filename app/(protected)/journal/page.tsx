@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
-import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { getCurrentUser, getCurrentWorkspace } from "@/lib/auth-helpers";
+import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import { listJournalForWorkspace } from "@/lib/queries/journal";
-import { JournalPatientKnowledge } from "@/components/journal/journal-patient-knowledge";
+import { createClient } from "@/lib/supabase/server";
+import { CareCenter } from "@/components/care-center/care-center";
 
 export default async function JournalPage() {
   const workspace = await getCurrentWorkspace();
@@ -10,11 +12,29 @@ export default async function JournalPage() {
     redirect("/my-tasks");
   }
 
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   const entries = await listJournalForWorkspace(workspace.workspace_id);
+
+  // @ts-expect-error - workspaces is joined
+  const publicSlug = (workspace.workspaces?.slug as string | undefined) ?? null;
+  const authorLabel = cockpitDoctorLabel(profile?.display_name);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <JournalPatientKnowledge initialEntries={entries} />
+      <CareCenter
+        initialEntries={entries}
+        authorLabel={authorLabel}
+        publicSlug={publicSlug}
+      />
     </div>
   );
 }

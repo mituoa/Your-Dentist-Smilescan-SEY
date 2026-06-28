@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { Plus } from "lucide-react";
 
-import { createTaskFromQuery } from "@/lib/create-task-return";
+import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import { cn } from "@/lib/utils";
 
 type NewTaskModalTriggerProps = {
@@ -14,7 +12,7 @@ type NewTaskModalTriggerProps = {
   showIcon?: boolean;
   preset?: "task" | "reminder";
   icon?: LucideIcon;
-  /** @deprecated Nur noch für API-Kompatibilität — Formular ist Vollbild unter `/my-tasks/new`. */
+  /** @deprecated Nur noch für API-Kompatibilität */
   compactMode?: boolean;
   submissionId?: string;
 };
@@ -28,40 +26,67 @@ export function NewTaskModalTrigger({
   showIcon = true,
   preset = "task",
   icon: Icon = Plus,
-  submissionId,
 }: NewTaskModalTriggerProps) {
-  const pathname = usePathname();
-  const from = createTaskFromQuery(pathname || "/my-tasks");
-  const params = new URLSearchParams({ from });
-  if (submissionId) params.set("submission_id", submissionId);
-  if (preset === "reminder") params.set("title", "Erinnerung");
-
-  const href = `/my-tasks/new?${params.toString()}`;
+  const assist = useAssistDispatchOptional();
   const isReminder = preset === "reminder";
 
   return (
-    <Link href={href} title={label} className={className ?? DEFAULT_TRIGGER_CLASS}>
+    <button
+      type="button"
+      title={label}
+      className={className ?? DEFAULT_TRIGGER_CLASS}
+      onClick={() =>
+        assist?.openTaskModal(
+          isReminder
+            ? {
+                title: "Erinnerung",
+                notes: "",
+                dueDate: null,
+                assigneeHint: null,
+                savedAt: new Date().toISOString(),
+              }
+            : null
+        )
+      }
+    >
       {showIcon ? (
         <Icon
-          className={cn("h-4 w-4 shrink-0 text-[#2F80ED]")}
+          className={cn("h-4 w-4 shrink-0 text-[#1A4F9C]")}
           strokeWidth={isReminder ? 1.75 : 2}
           aria-hidden
         />
       ) : null}
       <span>{label}</span>
-    </Link>
+    </button>
   );
 }
 
-/** @deprecated Modal entfernt — nutzt `/my-tasks/new` (Kompatibilität für alte Importe). */
-export function NewTaskModal(_props: {
-  open?: boolean;
-  onClose?: () => void;
+/** @deprecated Nutze `openTaskModal` aus AssistShell. */
+export function NewTaskModal(props: {
+  open: boolean;
+  onClose: () => void;
   initialRecurrenceType?: string;
   compactMode?: boolean;
   dialogTitle?: string;
   dialogHint?: string;
   initialDraft?: { title: string; notes?: string; dueDate?: string | null } | null;
 }) {
+  const assist = useAssistDispatchOptional();
+
+  if (props.open && assist) {
+    assist.openTaskModal(
+      props.initialDraft
+        ? {
+            title: props.initialDraft.title,
+            notes: props.initialDraft.notes ?? "",
+            dueDate: props.initialDraft.dueDate ?? null,
+            assigneeHint: null,
+            savedAt: new Date().toISOString(),
+          }
+        : null
+    );
+    props.onClose();
+  }
+
   return null;
 }

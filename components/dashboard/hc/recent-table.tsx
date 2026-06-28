@@ -165,7 +165,7 @@ export function HcRecentTable({
             <Link
               href="/inbox"
               prefetch
-              className="inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-[rgba(180,198,218,0.32)] bg-[rgba(248,251,254,0.9)] text-[12px] font-semibold text-[#2F80ED] no-underline"
+              className="inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-[rgba(180,198,218,0.32)] bg-[rgba(248,251,254,0.9)] text-[12px] font-semibold text-[#1A4F9C] no-underline"
             >
               {mobileOverflow} weitere {mobileOverflow === 1 ? "Vorgang" : "Vorgänge"} im Tracker
             </Link>

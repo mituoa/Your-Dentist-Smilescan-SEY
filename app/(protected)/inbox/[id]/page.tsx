@@ -13,6 +13,7 @@ import {
   trackerStatusForRow,
   type EnrichedSubmissionListItem,
 } from "@/lib/inbox/tracker-inbox-logic";
+import { suggestClinicalUrgencyFromListItem } from "@/lib/inbox/tracker-v9-clinical";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import { getInboxSubmissions } from "@/lib/queries/inbox";
 import { loadMessageDraftDetailForSubmission } from "@/lib/queries/message-drafts";
@@ -128,7 +129,7 @@ export default async function InboxDetailPage({ params }: InboxDetailPageProps) 
       <InboxAssistHydration
         submissionId={submission.id}
         patientName={submission.patient_name}
-        urgency={submission.urgency}
+        urgency={submission.urgency ?? suggestClinicalUrgencyFromListItem(statusRow)}
         practicePhone={practicePhone}
         appointmentUrl={appointmentUrl}
         concernLine={concernPreview}

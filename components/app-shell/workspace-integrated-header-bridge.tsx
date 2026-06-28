@@ -17,6 +17,7 @@ import { WorkspaceIntegratedHeader } from "./workspace-integrated-header";
 type WorkspaceIntegratedHeaderBridgeProps = {
   email: string;
   workspaceName: string;
+  workspaceId: string;
   role: "doctor" | "team";
   initialTheme: ThemePreference;
   displayName: string;
@@ -31,6 +32,7 @@ type WorkspaceIntegratedHeaderBridgeProps = {
 export function WorkspaceIntegratedHeaderBridge({
   email,
   workspaceName,
+  workspaceId,
   role,
   initialTheme,
   displayName,
@@ -46,22 +48,20 @@ export function WorkspaceIntegratedHeaderBridge({
   const onDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const onRelay = pathname === "/relay" || pathname.startsWith("/relay/");
   const dashboardEditorial =
-    onDashboard && dashboardHeaderSummary ? dashboardHeaderSummary.editorial : null;
+    onDashboard && dashboardHeaderSummary
+      ? dashboardHeaderSummary.editorial
+      : onTracker
+        ? { statusTitle: "", statusPrimary: "", metricsLine: "" }
+        : null;
 
   const subtitle =
     onRelay && relayHeaderSummary
       ? relayHeaderSummary.lead
-      : onTracker && trackerHeaderSummary
-        ? trackerHeaderSummary.lead
-        : onDashboard
-          ? ""
-          : ctx.subtitle;
+      : onDashboard || onTracker
+        ? ""
+        : ctx.subtitle;
   const subtitleMeta =
-    onRelay && relayHeaderSummary
-      ? relayHeaderSummary.breakdown
-      : onTracker && trackerHeaderSummary
-        ? trackerHeaderSummary.breakdown
-        : ctx.subtitleMeta;
+    onRelay || onDashboard || onTracker ? "" : ctx.subtitleMeta;
 
   const greeting = useMemo(() => {
     return resolveWorkspaceGreeting(new Date().getHours());
@@ -83,6 +83,7 @@ export function WorkspaceIntegratedHeaderBridge({
         dashboardEditorial={dashboardEditorial}
         email={email}
         workspaceName={workspaceName}
+        workspaceId={workspaceId}
         role={role}
         initialTheme={initialTheme}
         avatarUrl={avatarUrl}

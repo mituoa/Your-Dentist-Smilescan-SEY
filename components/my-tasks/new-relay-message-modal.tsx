@@ -172,10 +172,10 @@ function RelayMessageCreateForm({
   return (
     <MedicalFormShell
       title="Interne Nachricht"
-      subtitle="Übergabe oder Hinweis an Kolleginnen und Kollegen — kein Patientenkanal."
       onClose={close}
       closeDisabled={busy}
       ariaLabel="Interne Nachricht"
+      overlayVariant="workspace"
       footer={
         <MedicalFormFooterActions
           onCancel={close}
@@ -263,11 +263,10 @@ function RelayMessageCreateForm({
               value={messageBody}
               onChange={setMessageBody}
               rows={5}
-              placeholder="Interne Übergabe formulieren …"
             />
           </MedicalFormSection>
 
-          <MedicalFormSection title="Bezug" hint="Optional — Fall oder Tracker-Verknüpfung.">
+          <MedicalFormSection title="Bezug">
             <MedicalFormFieldStack>
               <div>
                 <MedicalFormLabel htmlFor={`${formId}-msg-sub`} optional>
@@ -279,7 +278,6 @@ function RelayMessageCreateForm({
                   value={msgSubmissionId}
                   onChange={(e) => setMsgSubmissionId(e.target.value)}
                   className="yd-auth-input"
-                  placeholder="UUID des Falls"
                   disabled={Boolean(submissionId)}
                 />
               </div>

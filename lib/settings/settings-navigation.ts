@@ -195,7 +195,7 @@ export const SETTINGS_MOBILE_NAV_GROUPS: SettingsNavGroup[] = [
       "journal-vorlagen",
     ]).map((item) =>
       item.id === "journal-kategorien"
-        ? { ...item, label: "Journal", hint: "Themenbereiche" }
+        ? { ...item, label: "Care Center", hint: "Patientenwissen" }
         : item.id === "journal-vorlagen"
           ? { ...item, label: "Vorlagen", hint: "Nachsorge und FAQ" }
           : item

@@ -147,7 +147,7 @@ export function WorkspaceMobileShortcuts({
     {
       id: "journal",
       href: "/journal",
-      label: "Journal",
+      label: "Care Center",
       description: "Patientenwissen",
       icon: BookOpen,
       active: isJournalActive,

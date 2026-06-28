@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, MessageCircle } from "lucide-react";
 
 import type { RelayKanbanCard } from "@/lib/relay/relay-work-center-model";
 import { cn } from "@/lib/utils";
@@ -19,34 +18,14 @@ export function RelayKanbanCardView({ card, done }: RelayKanbanCardViewProps) {
     >
       <p className="relay-kanban-card__type">{card.typeLabel}</p>
       <h3 className="relay-kanban-card__title">{card.title}</h3>
-      <p className="relay-kanban-card__status">{card.statusLine}</p>
+      {card.metaLine ? <p className="relay-kanban-card__meta">{card.metaLine}</p> : null}
       <div className="relay-kanban-card__foot">
-        <span
-          className="relay-kanban-card__badge"
-          style={{ background: "rgba(47,128,237,0.08)", color: "#2f80ed" }}
-          aria-hidden
-        >
-          {card.typeCode}
-        </span>
         {card.dateLabel ? (
-          <span className="relay-kanban-card__meta">
-            <Calendar strokeWidth={1.75} aria-hidden />
-            {card.dateLabel}
-          </span>
-        ) : null}
-        {card.commentCount > 0 ? (
-          <span className="relay-kanban-card__meta">
-            <MessageCircle strokeWidth={1.75} aria-hidden />
-            {card.commentCount}
-          </span>
-        ) : null}
-        <span
-          className="relay-kanban-card__avatar"
-          style={{ background: card.assigneeColor }}
-          title="Verantwortlich"
-        >
-          {done ? "✓" : card.assigneeInitials}
-        </span>
+          <span className="relay-kanban-card__date">{card.dateLabel}</span>
+        ) : (
+          <span className="relay-kanban-card__date relay-kanban-card__date--muted">—</span>
+        )}
+        <span className="relay-kanban-card__action">{card.actionLabel}</span>
       </div>
       {card.priority === "important" ? (
         <span className="relay-kanban-card__priority" aria-label="Wichtig" />

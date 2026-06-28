@@ -8,10 +8,15 @@ export type PendingCommandTaskDraft = {
   savedAt: string;
 };
 
+export const COMMAND_TASK_DRAFT_EVENT = "yd:command-task-draft";
+
 export function stashCommandTaskDraft(draft: PendingCommandTaskDraft): void {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    window.dispatchEvent(
+      new CustomEvent<PendingCommandTaskDraft>(COMMAND_TASK_DRAFT_EVENT, { detail: draft })
+    );
   } catch {
     /* ignore */
   }
@@ -27,6 +32,18 @@ export function consumeCommandTaskDraft(): PendingCommandTaskDraft | null {
   } catch {
     return null;
   }
+}
+
+export function subscribeCommandTaskDraft(
+  listener: (draft: PendingCommandTaskDraft) => void
+): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = (event: Event) => {
+    const detail = (event as CustomEvent<PendingCommandTaskDraft>).detail;
+    if (detail?.title) listener(detail);
+  };
+  window.addEventListener(COMMAND_TASK_DRAFT_EVENT, handler);
+  return () => window.removeEventListener(COMMAND_TASK_DRAFT_EVENT, handler);
 }
 
 export function dueDateForHint(hint: "today" | "tomorrow" | "this_week" | null): string | null {

@@ -410,7 +410,7 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: #2f80ed;
+  color: #1a4f9c;
 }
 
 .yd-dashboard .yd-dash-interactive-card {
@@ -427,7 +427,7 @@
   }
 
   .yd-dashboard .yd-dash-table-action:hover {
-    color: #2f80ed !important;
+    color: #1a4f9c !important;
   }
 }
 
@@ -716,7 +716,7 @@
 }
 
 .yd-dashboard .yd-dash-chart-legend__dot--primary {
-  background: #2f80ed;
+  background: #1a4f9c;
 }
 
 .yd-dashboard .yd-dash-chart-legend__dot--soft {
@@ -772,8 +772,8 @@
 }
 
 .yd-dashboard .yd-dash-primary-action {
-  background: linear-gradient(145deg, #4a9af0 0%, #2f80ed 48%, #1e5bb8 100%);
-  box-shadow: 0 6px 20px rgba(47, 128, 237, 0.28);
+  background: linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 48%, #163d7a 100%);
+  box-shadow: 0 6px 20px rgba(22, 61, 122, 0.28);
 }
 
 .yd-dashboard .yd-dash-kpi-metrics {
@@ -849,7 +849,13 @@ main:has(.yd-dashboard--reference) {
     0 14px 44px rgba(15, 35, 58, 0.1),
     0 4px 14px rgba(47, 128, 237, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
-  padding: 1.25rem 1.375rem 1.75rem !important;
+  padding: 1.5rem 1.5rem 2.5rem !important;
+}
+
+@media (min-width: 1024px) {
+  .yd-workspace .yd-awaken-canvas:has(.yd-dashboard--bento) {
+    padding: 1.75rem 1.75rem 3rem !important;
+  }
 }
 
 /* Medical-Blue-Glow — wie Standard-Workspace-Canvas */
@@ -866,22 +872,22 @@ main:has(.yd-dashboard--reference) {
   display: block !important;
   background: radial-gradient(
     ellipse 120% 80% at 50% 100%,
-    rgba(47, 99, 183, 0.07) 0%,
+    rgba(47, 128, 237, 0.07) 0%,
     transparent 55%
   ) !important;
 }
 
 main:has(.yd-dashboard--bento) {
-  padding-top: 0.5rem !important;
+  padding-top: 0.75rem !important;
 }
 
 main:has(.yd-dashboard--bento) .yd-dash-header-premium {
-  padding-bottom: 2.25rem !important;
+  padding-bottom: 3rem !important;
 }
 
 @media (min-width: 1024px) {
   main:has(.yd-dashboard--bento) .yd-dash-header-premium {
-    padding-bottom: 3rem !important;
+    padding-bottom: 4rem !important;
   }
 }
 
@@ -890,43 +896,62 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 }
 
 .yd-dashboard--bento {
-  --bento-base: #f4f8fc;
+  --bento-base: rgba(255, 255, 255, 0.78);
+  --bento-fade: #f1f7fc;
+  --dash-gap: 1.25rem;
   --bento-raised:
-    7px 7px 18px rgba(36, 52, 70, 0.055),
-    -6px -6px 16px rgba(255, 255, 255, 0.96);
+    0 1px 0 rgba(255, 255, 255, 0.98) inset,
+    0 20px 48px -28px rgba(22, 61, 122, 0.12),
+    0 8px 20px -12px rgba(15, 35, 58, 0.06);
+  --bento-surface:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 14px 36px -22px rgba(22, 61, 122, 0.1),
+    0 4px 12px -6px rgba(15, 35, 58, 0.05);
   --bento-inset:
-    inset 5px 5px 12px rgba(36, 52, 70, 0.045),
-    inset -4px -4px 10px rgba(255, 255, 255, 0.88);
-  --bento-radius: 24px;
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(36, 52, 70, 0.03);
+  --bento-radius: 20px;
   color: var(--me-text, #243446);
+}
+
+@media (min-width: 1024px) {
+  .yd-dashboard--bento {
+    --dash-gap: 1.375rem;
+  }
 }
 
 .yd-dash-bento-canvas {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: calc(var(--dash-gap) + 0.75rem);
+  padding-top: 0;
+  padding-bottom: 0.5rem;
 }
 
 @media (min-width: 1024px) {
   .yd-dash-bento-canvas {
-    gap: 2.5rem;
+    gap: calc(var(--dash-gap) + 1rem);
+    padding-bottom: 0.75rem;
   }
 }
 
 .yd-dashboard--bento .yd-dash-zone--kpis {
-  margin: 0;
+  margin: 0 0 0.25rem;
 }
 
-/* —— Status row — gleich hoch, Medical-Blue-Linie rechts —— */
+/* —— Status row: vier Spalten, ohne Kästchen —— */
 .yd-dash-bento-status-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.25rem;
+  gap: var(--dash-gap);
+  position: relative;
+  z-index: 20;
 }
 
 @media (max-width: 1100px) {
   .yd-dash-bento-status-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 1.5rem;
   }
 }
 
@@ -934,20 +959,30 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  min-height: 7.5rem;
-  padding: 1.125rem 1.25rem 1rem;
-  border-radius: var(--bento-radius);
-  background: var(--bento-base);
-  box-shadow: var(--bento-raised);
+  gap: 0.375rem;
+  min-height: 0;
+  padding: 0.125rem 0 0.5rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   text-decoration: none;
-  transition: box-shadow 180ms ease;
-  overflow: hidden;
+  transition: opacity 140ms ease;
+  overflow: visible;
+}
+
+@media (hover: hover) {
+  .yd-dash-bento-status:hover {
+    opacity: 0.82;
+    transform: none;
+  }
 }
 
 .yd-dash-bento-status__top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   min-width: 0;
 }
@@ -956,32 +991,40 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.625rem;
+  height: 1.625rem;
+  margin-bottom: 0;
   border-radius: 999px;
-  background: rgba(47, 99, 183, 0.08);
-  color: #2f63b7;
+  background: rgba(26, 79, 156, 0.07);
+  color: #1a4f9c;
   flex-shrink: 0;
 }
 
 .yd-dash-bento-status__icon svg {
-  width: 0.9375rem;
-  height: 0.9375rem;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .yd-dash-bento-status__title {
   margin: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   color: #7c8a98;
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .yd-dash-bento-status__value {
   margin: 0;
+  padding-left: 2.125rem;
   color: #243446;
-  font-size: 2rem;
+  font-size: 1.625rem;
   font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -989,61 +1032,166 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 }
 
 .yd-dash-bento-status__detail {
-  margin: 0.125rem 0 0;
-  color: #516170;
-  font-size: 0.75rem;
-  font-weight: 400;
+  display: none;
+}
+
+.yd-dash-bento-status__popover-link {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #1a4f9c;
+}
+
+.yd-dash-bento-status__popover-text {
+  margin: 0;
+  color: #243446;
+  font-size: 0.8125rem;
+  font-weight: 500;
   line-height: 1.45;
 }
 
-@media (hover: hover) {
-  .yd-dash-bento-status:hover {
-    box-shadow:
-      8px 8px 20px rgba(36, 52, 70, 0.065),
-      -7px -7px 18px rgba(255, 255, 255, 0.98);
-  }
+.yd-dash-bento-status__popover-hint {
+  display: block;
+  margin-top: 0.375rem;
+  color: #7c8a98;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
-/* —— Referenz-Zeile 2: zwei Geschwister-Karten 70/30 —— */
+.yd-dash-bento-status {
+  position: relative;
+}
+
+.yd-dash-bento-status__popover,
+.yd-dash-practice-state__popover {
+  position: absolute;
+  z-index: 50;
+  left: 0;
+  right: auto;
+  top: auto;
+  bottom: calc(100% + 0.5rem);
+  min-width: 12rem;
+  max-width: 17rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 198, 218, 0.42);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 6px rgba(15, 35, 58, 0.04),
+    0 16px 40px rgba(15, 35, 58, 0.12);
+  color: #516170;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
+  pointer-events: none;
+}
+
+.yd-dash-bento-status__popover[hidden],
+.yd-dash-practice-state__popover[hidden] {
+  display: none;
+}
+
+.yd-dash-bento-status--open .yd-dash-bento-status__popover {
+  pointer-events: none;
+}
+
+.yd-dash-bento-status:nth-child(3) .yd-dash-bento-status__popover,
+.yd-dash-bento-status:nth-child(4) .yd-dash-bento-status__popover {
+  left: auto;
+  right: 0;
+}
+
+.yd-dash-practice-state {
+  position: relative;
+}
+
+.yd-dash-practice-state__popover {
+  left: 1.25rem;
+  right: 1.25rem;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* —— Referenz-Zeile 2: Diagramm und Kalender getrennt —— */
 .yd-dash-ref-main-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1.5rem;
+  gap: var(--dash-gap);
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 1024px) {
   .yd-dash-ref-main-row {
-    grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.88fr) minmax(0, 1fr);
     align-items: stretch;
-    min-height: 22rem;
-    gap: 2rem;
+    min-height: 0;
   }
 }
 
-/* Eine Karte = eine Referenz-Fläche */
+/* Weiche Glasflächen — klein, ohne harte Kanten */
 .yd-dash-ref-card {
-  border-radius: var(--bento-radius);
-  background: var(--bento-base);
-  box-shadow: var(--bento-raised);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.48);
+  backdrop-filter: blur(32px) saturate(1.15);
+  -webkit-backdrop-filter: blur(32px) saturate(1.15);
+  border: none;
+  box-shadow:
+    0 20px 56px -32px rgba(22, 61, 122, 0.14),
+    0 8px 24px -16px rgba(15, 35, 58, 0.06);
   padding: 1.25rem 1.375rem 1.125rem;
   min-width: 0;
+  overflow: visible;
+}
+
+.yd-dash-ref-card::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 42%,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(241, 247, 252, 0.2) 45%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.yd-dash-ref-card::after {
+  content: none;
+}
+
+.yd-dash-ref-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) {
+  .yd-dash-ref-card:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.54);
+  }
 }
 
 .yd-dash-ref-card__head {
-  margin-bottom: 1rem;
-}
-
-.yd-dash-ref-card__head--row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  margin-bottom: 0.875rem;
 }
 
 .yd-dash-ref-card__title {
   margin: 0;
   color: #243446;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
@@ -1066,7 +1214,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 .yd-dash-ref-card__link {
   display: inline-flex;
   margin-top: 0.75rem;
-  color: #2f63b7;
+  color: #1a4f9c;
   font-size: 0.75rem;
   font-weight: 500;
   text-decoration: none;
@@ -1077,39 +1225,26 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   flex-shrink: 0;
 }
 
-/* Praxiszustand — Balkendiagramm im Inset */
-.yd-dash-ref-card--hero {
+.yd-dash-ref-card--hero,
+.yd-dash-ref-card--schedule {
   display: flex;
   flex-direction: column;
-  min-height: 24rem;
+  min-height: 0;
 }
 
 .yd-dash-state-visual {
   flex: 1;
-  margin-top: 0.25rem;
-  padding: 1rem 1.125rem 1.125rem;
-  border-radius: 18px;
-  background: var(--bento-base);
-  box-shadow: var(--bento-inset);
-  min-height: 16rem;
-}
-
-.yd-dash-state-chart {
-  position: relative;
-  height: 100%;
-  min-height: 14rem;
+  margin-top: 0;
+  padding: 0.125rem 0 0;
+  min-height: 10.5rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .yd-dash-state-chart__grid {
-  position: absolute;
-  inset: 0 0 2.75rem;
-  background-image: linear-gradient(
-    to bottom,
-    rgba(36, 52, 70, 0.05) 1px,
-    transparent 1px
-  );
-  background-size: 100% 2.5rem;
-  pointer-events: none;
+  display: none;
 }
 
 .yd-dash-state-chart__plot {
@@ -1117,21 +1252,42 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.625rem;
+  gap: 0.375rem;
   align-items: end;
   height: 100%;
-  min-height: 14rem;
-  padding-top: 0.5rem;
+  min-height: 9.5rem;
+  padding-top: 0.125rem;
+}
+
+.yd-dash-state-chart {
+  position: relative;
+  height: 100%;
+  min-height: 9.5rem;
 }
 
 .yd-dash-state-chart__col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.25rem;
   min-width: 0;
   height: 100%;
   text-decoration: none;
+  border-radius: 12px;
+  padding: 0.25rem 0.125rem 0.125rem;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.yd-dash-state-chart__col--quiet .yd-dash-state-chart__bar {
+  background: linear-gradient(180deg, rgba(26, 79, 156, 0.22) 0%, rgba(26, 79, 156, 0.08) 100%);
+}
+
+@media (hover: hover) {
+  .yd-dash-state-chart__col:hover .yd-dash-state-chart__bar {
+    filter: brightness(1.05);
+  }
 }
 
 .yd-dash-state-chart__bar-wrap {
@@ -1140,38 +1296,56 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   justify-content: center;
   flex: 1;
   width: 100%;
-  min-height: 9rem;
+  min-height: 5.75rem;
 }
 
 .yd-dash-state-chart__bar {
   display: block;
-  width: min(2.25rem, 72%);
-  border-radius: 10px 10px 6px 6px;
-  background: linear-gradient(180deg, #2f63b7 0%, rgba(47, 99, 183, 0.35) 100%);
-  min-height: 0.75rem;
-  transition: height 200ms ease;
+  width: min(2rem, 70%);
+  border-radius: 999px 999px 10px 10px;
+  background: linear-gradient(180deg, #1a4f9c 0%, rgba(26, 79, 156, 0.38) 100%);
+  min-height: 0.5rem;
+  transition: height 200ms ease, filter 160ms ease;
+  filter: blur(0);
 }
 
 .yd-dash-state-chart__count {
   color: #243446;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  letter-spacing: -0.03em;
 }
 
 .yd-dash-state-chart__label {
-  color: #7c8a98;
+  color: #243446;
   font-size: 0.6875rem;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
   line-height: 1.25;
+  letter-spacing: -0.01em;
+  max-width: 5.75rem;
 }
 
 /* Schedule-Panel */
-.yd-dash-ref-card--schedule {
+.yd-dash-ref-card--schedule .yd-dash-week-strip {
+  margin-bottom: 0.625rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.yd-dash-ref-card--schedule .yd-dash-schedule-list {
+  flex: 1;
+  padding: 0;
+}
+
+.yd-dash-ref-card__head--row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .yd-dash-week-strip {
@@ -1201,16 +1375,16 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 999px;
   color: #516170;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 500;
 }
 
 .yd-dash-week-strip__day--active .yd-dash-week-strip__num {
-  background: #2f63b7;
+  background: #1a4f9c;
   color: #fff;
 }
 
@@ -1224,11 +1398,21 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 .yd-dash-schedule-item {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 0.625rem 0.75rem;
+  gap: 0.5rem 0.625rem;
   align-items: start;
-  padding: 0.65rem 0;
+  padding: 0.5rem 0;
   text-decoration: none;
-  border-bottom: 1px solid rgba(36, 52, 70, 0.05);
+  border-bottom: none;
+  border-radius: 0;
+  margin: 0;
+  transition: opacity 140ms ease;
+}
+
+@media (hover: hover) {
+  .yd-dash-schedule-item:hover {
+    opacity: 0.78;
+    background: transparent;
+  }
 }
 
 .yd-dash-schedule-item:last-child {
@@ -1240,7 +1424,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   height: 0.4375rem;
   margin-top: 0.35rem;
   border-radius: 50%;
-  background: #2f63b7;
+  background: #1a4f9c;
 }
 
 .yd-dash-schedule-item__dot--routine {
@@ -1252,18 +1436,21 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
 .yd-dash-schedule-item__when {
-  color: #7c8a98;
+  color: #9aa6b2;
   font-size: 0.6875rem;
-  font-weight: 400;
+  font-weight: 500;
   white-space: nowrap;
+  padding-top: 0.125rem;
 }
 
 /* Aktive Vorgänge — Gantt-Timeline */
 .yd-dash-ref-card--timeline {
-  padding-bottom: 1.25rem;
+  padding-bottom: 1.5rem;
+  margin-top: 0.25rem;
 }
 
 .yd-dash-gantt {
@@ -1355,7 +1542,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #2f63b7 0%, rgba(47, 99, 183, 0.5) 100%);
+  background: linear-gradient(90deg, #1a4f9c 0%, rgba(26, 79, 156, 0.5) 100%);
   min-width: 1.5rem;
   transition: width 200ms ease;
 }

@@ -8,7 +8,7 @@ type Props = {
 
 export function DashboardStatusStrip({ cards }: Props) {
   return (
-    <section className="yd-dash-bento-status-row" aria-label="Praxisstatus">
+    <section className="yd-dash-bento-status-row" aria-label="Praxislage">
       {cards.map((card) => (
         <StatusCard key={card.id} card={card} />
       ))}

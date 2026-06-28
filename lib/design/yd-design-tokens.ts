@@ -26,20 +26,20 @@ export const YD = {
   },
 
   accent: {
-    core: CLINICAL_BRIEFING.color.accent,
-    deep: "#254E94",
-    mid: "#3A6FA8",
-    light: "#6A94C4",
+    core: "#1A4F9C",
+    deep: "#163D7A",
+    mid: "#1A4F9C",
+    light: "#4A7BB5",
     ice: CLINICAL_BRIEFING.color.iceDeep,
-    glow: "rgba(47, 99, 183, 0.12)",
-    glowSoft: "rgba(47, 99, 183, 0.06)",
-    iconGradient: "linear-gradient(145deg, #4A7BB5 0%, #2F63B7 100%)",
+    glow: "rgba(26, 79, 156, 0.12)",
+    glowSoft: "rgba(26, 79, 156, 0.06)",
+    iconGradient: "linear-gradient(145deg, #4A7BB5 0%, #1A4F9C 55%, #163D7A 100%)",
     navActive: CLINICAL_BRIEFING.color.accent,
-    chartBar: "linear-gradient(180deg, #254E94 0%, #2F63B7 100%)",
+    chartBar: "linear-gradient(180deg, #1A4F9C 0%, #163D7A 100%)",
     chartBarSoft: "linear-gradient(180deg, #A8BFD4 0%, #DCE8F5 100%)",
     chartStripe:
       "repeating-linear-gradient(-45deg, #4A7BB5, #4A7BB5 3px, #B8CDE0 3px, #B8CDE0 6px)",
-    arc: ["#254E94", "#2F63B7", "#6A94C4"] as const,
+    arc: ["#163D7A", "#1A4F9C", "#4A7BB5"] as const,
     arcSoft: ["#B8CDE0", "#DCE8F5"] as const,
   },
 
@@ -54,7 +54,7 @@ export const YD = {
   border: {
     whisper: "rgba(255, 255, 255, 0.9)",
     soft: CLINICAL_BRIEFING.color.borderSoft,
-    focus: "rgba(47, 99, 183, 0.35)",
+    focus: "rgba(47, 128, 237, 0.35)",
   },
 
   /* —— Depth —— */

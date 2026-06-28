@@ -86,7 +86,7 @@ export function buildNavAmbientPreviews(input: {
     const published = journalEntries.filter((e) => e.status === "published");
 
     map.journal = {
-      title: "Journals",
+      title: "Care Center",
       lines: [
         { label: "Veröffentlicht", value: String(published.length) },
         { label: "Entwürfe", value: String(drafts.length), tone: drafts.length > 0 ? "default" : "muted" },

@@ -1,21 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import {
-  ChevronDown,
-  ClipboardList,
-  MessageSquarePlus,
-  Plus,
-  UserPlus,
-  UsersRound,
-} from "lucide-react";
+import { ChevronDown, ClipboardList, MessageSquarePlus, Plus } from "lucide-react";
 
 import { fetchAssignableMembersForTaskCreate } from "@/app/(protected)/my-tasks/actions";
-import { RelayGroupCreateModal } from "@/components/my-tasks/relay-group-create-modal";
+import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import { NewRelayMessageModal } from "@/components/my-tasks/new-relay-message-modal";
-import { createTaskFromQuery } from "@/lib/create-task-return";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import { cn } from "@/lib/utils";
 
@@ -26,9 +17,11 @@ type RelayCreateMenuProps = {
   /** @deprecated Nutze placement="header" */
   variant?: "primary" | "secondary";
   placement?: "header" | "toolbar" | "inline";
+  /** @deprecated Nicht mehr im Menü verwendet */
   isDoctor?: boolean;
   label?: string;
   onMessageCreated?: () => void;
+  /** @deprecated Gruppenchat nicht mehr im Neu-Menü */
   onGroupCreated?: (conversationId: string) => void;
 };
 
@@ -63,27 +56,23 @@ export function RelayCreateMenu({
   className,
   variant = "primary",
   placement = "toolbar",
-  isDoctor = false,
   label,
   onMessageCreated,
-  onGroupCreated,
 }: RelayCreateMenuProps) {
   const router = useRouter();
-  const pathname = usePathname() || "/relay";
+  const assist = useAssistDispatchOptional();
   const menuId = useId();
   const [open, setOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
-  const [groupOpen, setGroupOpen] = useState(false);
   const [members, setMembers] = useState<AssignableMember[]>(membersProp ?? []);
   const [currentUserId, setCurrentUserId] = useState(userIdProp ?? "");
   const [membersLoading, setMembersLoading] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const taskHref = `/my-tasks/new?from=${createTaskFromQuery(pathname)}`;
   const triggerLabel =
     label ??
     (placement === "header"
-      ? "Praxisaufgabe erstellen"
+      ? "Neu"
       : placement === "inline"
         ? "Erstellen"
         : variant === "primary"
@@ -122,27 +111,20 @@ export function RelayCreateMenu({
     }
   }, [members.length, currentUserId, membersLoading]);
 
+  const openTask = () => {
+    setOpen(false);
+    assist?.openTaskModal();
+  };
+
   const openMessage = async () => {
     setOpen(false);
     await ensureMembers();
     setMessageOpen(true);
   };
 
-  const openGroup = async () => {
-    setOpen(false);
-    await ensureMembers();
-    setGroupOpen(true);
-  };
-
   const handleMessageClose = () => {
     setMessageOpen(false);
     onMessageCreated?.();
-  };
-
-  const handleGroupCreated = (conversationId: string) => {
-    onGroupCreated?.(conversationId);
-    router.replace(`/relay?bereich=teamwork&item=msg-${conversationId}`);
-    router.refresh();
   };
 
   const showChevron = placement !== "inline" || variant === "primary";
@@ -167,63 +149,27 @@ export function RelayCreateMenu({
       {open ? (
         <ul id={menuId} className="yd-relay-create-menu__dropdown" role="menu">
           <li role="none">
-            <Link
-              href={taskHref}
-              className="yd-relay-create-menu__item"
+            <button
+              type="button"
+              className="yd-relay-create-menu__item yd-relay-create-menu__item--compact"
               role="menuitem"
-              onClick={() => setOpen(false)}
+              onClick={openTask}
             >
               <ClipboardList className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              <span>
-                <strong>Praxisaufgabe</strong>
-                <small>Aufgabe, Routine oder Teamzuweisung</small>
-              </span>
-            </Link>
+              <span>Aufgabe</span>
+            </button>
           </li>
           <li role="none">
             <button
               type="button"
-              className="yd-relay-create-menu__item"
+              className="yd-relay-create-menu__item yd-relay-create-menu__item--compact"
               role="menuitem"
               onClick={() => void openMessage()}
             >
               <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              <span>
-                <strong>Neue Nachricht</strong>
-                <small>Empfänger wählen und intern senden</small>
-              </span>
+              <span>Teamnachricht</span>
             </button>
           </li>
-          <li role="none">
-            <button
-              type="button"
-              className="yd-relay-create-menu__item"
-              role="menuitem"
-              onClick={() => void openGroup()}
-            >
-              <UsersRound className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              <span>
-                <strong>Gruppe erstellen</strong>
-                <small>Team-Chat für Übergaben und Abstimmung</small>
-              </span>
-            </button>
-          </li>
-          {isDoctor ? (
-            <li role="none">
-              <Link
-                href="/settings?section=einladungen"
-                className="yd-relay-create-menu__item"
-                role="menuitem"
-                onClick={() => setOpen(false)}
-              >
-                <UserPlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                <span>
-                  <strong>Mitarbeiter einladen</strong>
-                  <small>Team in Einstellungen erweitern</small>
-                </span>
-              </Link>
-            </li>
-          ) : null}
         </ul>
       ) : null}
 
@@ -233,16 +179,6 @@ export function RelayCreateMenu({
         assignableMembers={members}
         currentUserId={currentUserId}
       />
-
-      {currentUserId ? (
-        <RelayGroupCreateModal
-          open={groupOpen}
-          onClose={() => setGroupOpen(false)}
-          members={members}
-          currentUserId={currentUserId}
-          onCreated={handleGroupCreated}
-        />
-      ) : null}
     </div>
   );
 }

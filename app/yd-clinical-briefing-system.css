@@ -16,8 +16,8 @@
   --me-page: #f8fbfd;
   --me-page-alt: #f5f8fb;
   --me-surface: #ffffff;
-  --me-accent: #2f63b7;
-  --me-accent-subtle: rgba(47, 99, 183, 0.1);
+  --me-accent: #1a4f9c;
+  --me-accent-subtle: rgba(26, 79, 156, 0.1);
   --me-text: #243446;
   --me-text-secondary: #516170;
   --me-text-muted: #7c8a98;
@@ -65,7 +65,7 @@
   --yd-brand-muted: var(--me-text-muted);
   --yd-brand-faint: #9aa6b2;
   --yd-brand-accent: var(--me-accent);
-  --yd-brand-accent-deep: #254e94;
+  --yd-brand-accent-deep: #163d7a;
   --yd-brand-border: var(--me-border);
   --yd-brand-border-soft: var(--me-border-soft);
   --yd-brand-stone: var(--me-ice-mid);
@@ -84,8 +84,8 @@
   --text-primary: 36 52 70;
   --text-secondary: 81 97 112;
   --text-tertiary: 124 138 152;
-  --brand-primary: 47 99 183;
-  --brand-glow: 37 78 148;
+  --brand-primary: 47 128 237;
+  --brand-glow: 26 79 156;
 }
 
 /* —— Schritt 1: Workspace-Atmosphäre —— */
@@ -114,9 +114,9 @@
 
 .yd-workspace .yd-awaken-canvas {
   background: linear-gradient(
-    180deg,
+    168deg,
     var(--yd-ws-canvas-top) 0%,
-    var(--yd-ws-canvas-mid) 50%,
+    var(--yd-ws-canvas-mid) 44%,
     var(--yd-ws-canvas-end) 100%
   ) !important;
   border-color: rgba(255, 255, 255, 0.92) !important;
@@ -189,7 +189,7 @@
 /* —— Buttons — sachlich —— */
 .yd-workspace .yd-tracker-v8-decision-btn,
 .yd-workspace .yd-relay-v7-action--primary,
-.yd-workspace button[class*="bg-[#2F80ED]"],
+.yd-workspace button[class*="bg-[#1A4F9C]"],
 .yd-workspace button[class*="bg-[#2563EB]"],
 .yd-workspace a.yd-relay-v7-action--primary {
   background: var(--me-accent) !important;

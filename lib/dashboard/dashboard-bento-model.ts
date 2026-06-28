@@ -44,6 +44,36 @@ function nonGhost(rows: RelayWorkRow[]) {
   return rows.filter((r) => !r.isGhost);
 }
 
+/** Lesbare Dashboard-Zeile — kein „Ohne Titel“ in der Tagesliste. */
+export function dashboardDisplayLabel(row: RelayWorkRow): string {
+  const primary = row.primaryLabel?.trim();
+  if (primary && primary.toLowerCase() !== "ohne titel") return primary;
+
+  if (row.kind === "journal") {
+    const type = row.typeLabel?.trim();
+    return type ? `${type} zur Freigabe` : "Praxiswissen zur Freigabe";
+  }
+
+  const concern = row.concernLine?.trim();
+  if (concern) return concern;
+
+  const context = row.context?.trim();
+  if (context && context.length > 2) {
+    return context.length > 56 ? `${context.slice(0, 53)}…` : context;
+  }
+
+  if (row.kind === "message") return "Teamübergabe";
+
+  return row.typeLabel?.trim() || row.statusLabel?.trim() || "Offener Vorgang";
+}
+
+function dashboardWhenLabel(row: RelayWorkRow): string {
+  const when = row.dueLabel ?? row.waitingLabel ?? row.timeLabel;
+  if (when?.trim()) return when.trim();
+  if (row.kind === "journal") return "Freigabe ausstehend";
+  return "In Bearbeitung";
+}
+
 export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): DashboardStatusCard[] {
   const attention = nonGhost(snapshot.attention);
   const freigaben = attention.filter(
@@ -66,7 +96,7 @@ export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): Dash
   return [
     {
       id: "attention",
-      title: "Wartet auf mich",
+      title: "Freigaben & Entscheidungen",
       value: attention.length,
       detail: waitingDetail,
       href: "/relay?bereich=praxis",
@@ -74,40 +104,52 @@ export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): Dash
     },
     {
       id: "teamwork",
-      title: "Team wartet",
+      title: "Neue Teamaufgaben",
       value: teamCount,
-      detail: teamCount === 1 ? "1 Aufgabe offen" : `${teamCount} Aufgaben offen`,
+      detail:
+        teamCount === 0
+          ? "Keine offenen Aufgaben"
+          : teamCount === 1
+            ? "1 Aufgabe offen"
+            : `${teamCount} Aufgaben offen`,
       href: "/relay?bereich=team",
       icon: "team",
     },
     {
       id: "patient",
-      title: "Patient wartet",
+      title: "Neue Patientenanfragen",
       value: patientCount,
       detail:
         patientCount === 0
-          ? "Keine Rückmeldungen offen"
+          ? "Keine offenen Rückfragen"
           : patientCount === 1
-            ? "1 Rückmeldung offen"
-            : `${patientCount} Rückmeldungen offen`,
+            ? "1 Rückfrage offen"
+            : `${patientCount} Rückfragen offen`,
       href: "/relay?bereich=patienten",
       icon: "patient",
     },
     {
       id: "routines",
-      title: "Routinen heute",
+      title: "Routinen fällig",
       value: routineCount,
       detail:
         routineCount === 0
-          ? "Keine fälligen Routinen"
+          ? "Heute nichts fällig"
           : routineCount === 1
-            ? "1 fällige Routine"
-            : `${routineCount} fällige Routinen`,
+            ? "1 Routine heute"
+            : `${routineCount} Routinen heute`,
       href: "/relay?bereich=praxis",
       icon: "routines",
     },
   ];
 }
+
+export const DASHBOARD_STATUS_SHORT_LABELS: Record<string, string> = {
+  attention: "Freigaben",
+  teamwork: "Team",
+  patient: "Patienten",
+  routines: "Routinen",
+};
 
 export function buildPracticeStateDomains(snapshot: RelayPracticeSnapshot): PracticeStateDomain[] {
   const journalRows = nonGhost(snapshot.attention).filter((r) => r.kind === "journal");
@@ -116,19 +158,19 @@ export function buildPracticeStateDomains(snapshot: RelayPracticeSnapshot): Prac
   return [
     {
       id: "patienten",
-      label: "Patienten",
+      label: "Patientenanfragen",
       count: nonGhost(snapshot.patientWaiting).length,
       href: "/relay?bereich=patienten",
     },
     {
       id: "journal",
-      label: "Journal",
+      label: "Praxiswissen",
       count: journalRows.length,
       href: "/relay?bereich=journal",
     },
     {
       id: "team",
-      label: "Team",
+      label: "Teamaufgaben",
       count: nonGhost(snapshot.teamwork).length,
       href: "/relay?bereich=team",
     },
@@ -140,7 +182,7 @@ export function buildPracticeStateDomains(snapshot: RelayPracticeSnapshot): Prac
     },
     {
       id: "routinen",
-      label: "Routinen",
+      label: "Tagesroutinen",
       count: nonGhost(snapshot.routines).length,
       href: "/relay?bereich=praxis",
     },
@@ -150,16 +192,16 @@ export function buildPracticeStateDomains(snapshot: RelayPracticeSnapshot): Prac
 export function buildDashboardTodayRelevant(snapshot: RelayPracticeSnapshot): DashboardTodayItem[] {
   const decisions = nonGhost(snapshot.attention).map((row) => ({
     id: row.id,
-    label: row.primaryLabel,
-    when: row.dueLabel ?? row.waitingLabel ?? row.timeLabel,
+    label: dashboardDisplayLabel(row),
+    when: dashboardWhenLabel(row),
     kind: "entscheidung" as const,
     href: row.href,
   }));
 
   const routines = nonGhost(snapshot.routines).map((row) => ({
     id: row.id,
-    label: row.primaryLabel,
-    when: row.dueLabel ?? row.waitingLabel ?? row.timeLabel,
+    label: dashboardDisplayLabel(row),
+    when: dashboardWhenLabel(row),
     kind: "routine" as const,
     href: row.href,
   }));
@@ -197,7 +239,7 @@ export function buildDashboardGanttRows(
   return unique.slice(0, 6).map((row, index) => ({
     id: row.id,
     typeLabel: row.workTypeLabel ?? row.typeLabel,
-    title: row.concernLine || row.primaryLabel,
+    title: dashboardDisplayLabel(row),
     route: `${row.fromLabel} → ${row.toLabel}`,
     when: row.waitingLabel ?? row.timeLabel,
     href: row.href,

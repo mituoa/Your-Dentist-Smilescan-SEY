@@ -54,7 +54,7 @@ function suggestRoutes(text: string, pathname: string): { label: string; href: s
     out.push({ label: "Relay", href: "/relay" });
   }
   if (/journal|artikel/.test(t)) {
-    out.push({ label: "Journals", href: "/journal" });
+    out.push({ label: "Care Center", href: "/journal" });
   }
   if (/dashboard|atlas/.test(t)) {
     out.push({ label: "Atlas", href: "/dashboard" });
@@ -102,12 +102,12 @@ const HEADER_DIVIDER =
   "border-b border-black/[0.05] dark:border-white/[0.06]";
 
 const FAB =
-  "pointer-events-auto flex h-12 w-12 touch-manipulation items-center justify-center rounded-2xl border border-[rgba(255,255,255,0.22)] bg-[#2F80ED] text-white shadow-[0_2px_8px_-2px_rgba(47,128,237,0.25),0_10px_28px_-12px_rgba(47,128,237,0.35),0_0_0_1px_rgba(255,255,255,0.12)_inset] " +
+  "pointer-events-auto flex h-12 w-12 touch-manipulation items-center justify-center rounded-2xl border border-[rgba(255,255,255,0.22)] bg-[#1A4F9C] text-white shadow-[0_2px_8px_-2px_rgba(47,128,237,0.25),0_10px_28px_-12px_rgba(47,128,237,0.35),0_0_0_1px_rgba(255,255,255,0.12)_inset] " +
   "transition-[transform,box-shadow,background-color,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none " +
   "hover:border-[rgba(255,255,255,0.28)] hover:bg-[#2563EB] hover:shadow-[0_4px_14px_-4px_rgba(47,128,237,0.3),0_14px_36px_-16px_rgba(47,128,237,0.4)] " +
   "active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.4)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent " +
   "md:h-[52px] md:w-[52px] md:rounded-[14px] " +
-  "dark:border-white/[0.12] dark:bg-[#2F80ED] dark:text-white dark:shadow-[0_12px_36px_-20px_rgba(47,128,237,0.45)]";
+  "dark:border-white/[0.12] dark:bg-[#1A4F9C] dark:text-white dark:shadow-[0_12px_36px_-20px_rgba(47,128,237,0.45)]";
 
 const ICON_WRAP =
   "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.1)] " +
@@ -176,7 +176,7 @@ function placeholderForZone(
     case "inbox":
       return "Kurz eingeben — z. B. Triage, Terminvorbereitung (nur Hilfe, kein Versand) …";
     default:
-      return "Befehl — Posteingang, Relay, Journals …";
+      return "Befehl — Tracker, Relay, Care Center …";
   }
 }
 
@@ -334,18 +334,7 @@ export function CommandAssist() {
               submissionId: inboxCase.submissionId,
               rawText: trimmed,
             })
-          : zone === "relay"
-            ? await createTaskFromCommandRelay({ rawText: trimmed })
-            : null;
-
-        if (!created) {
-          setPreparedWork(null);
-          setPrepareHintTone("error");
-          setPrepareHint(
-            "Bitte öffnen Sie einen Patientenfall oder wechseln Sie zu Relay für interne Aufgaben."
-          );
-          return;
-        }
+          : await createTaskFromCommandRelay({ rawText: trimmed });
 
         if (created.ok) {
           setPreparedWork(null);
@@ -380,7 +369,7 @@ export function CommandAssist() {
           ? "Ich konnte daraus noch keine Aufgabe erstellen."
           : "Konnte nicht vorbereitet werden. Bitte Patientennamen nennen oder einen Tracker-Fall öffnen."
     );
-  }, [text, mergedHints, inboxCase, router, setPreparedWork]);
+  }, [text, mergedHints, inboxCase, router, setPreparedWork, zone]);
 
   const handleApprovePrepared = useCallback(async () => {
     if (!preparedWork) return;
@@ -443,6 +432,10 @@ export function CommandAssist() {
         assigneeHint: preparedWork.relayTaskDraft.assigneeHint,
         savedAt: new Date().toISOString(),
       });
+      setPreparedWork(null);
+      setOpen(false);
+      router.refresh();
+      return;
     }
     const messageHref = preparedWork.actions.find(
       (a) => a.enabled && a.kind === "send_message" && a.href

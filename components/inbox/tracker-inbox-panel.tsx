@@ -4,23 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { TrackerMobileInbox } from "@/components/inbox/tracker-mobile-inbox";
-import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
+import { TrackerInboxListCardContent } from "@/components/inbox/tracker-inbox-list-card-content";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
-  TRACKER_FILTER_HINTS,
-  TRACKER_OPTIONAL_FILTER_CHIPS,
   countByTrackerFilter,
-  inboxUrgencyVisualTier,
   matchesTrackerFilter,
   matchesTrackerSearch,
   sortTrackerInboxItems,
-  trackerInboxAttentionTier,
-  trackerInboxWorkType,
+  trackerInboxReadState,
   type EnrichedSubmissionListItem,
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
-import { formatTrackerRelativeIngress } from "@/lib/inbox/tracker-v9-clinical";
+import { inboxListUrgencyTier } from "@/lib/inbox/tracker-v9-clinical";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +24,7 @@ type TrackerInboxPanelProps = {
   items: SubmissionListItem[];
 };
 
-/** Desktop-Arbeitsliste — Handlungsbedarf vor Patient (klinische Triage). */
+/** Desktop-Arbeitsliste — stabile Reihenfolge, Status in der Liste. */
 export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
@@ -53,19 +49,6 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
     [searchScoped, filter]
   );
 
-  const headerSummary = useMemo(
-    () => buildTrackerHeaderSummary(searchScoped),
-    [searchScoped]
-  );
-
-  const optionalChips = useMemo(
-    () =>
-      TRACKER_OPTIONAL_FILTER_CHIPS.filter(
-        (chip) => countByTrackerFilter(searchScoped, chip.id) > 0
-      ),
-    [searchScoped]
-  );
-
   useEffect(() => {
     setFilter("all");
   }, [qLower]);
@@ -85,30 +68,21 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
       </div>
       <div className="yd-tracker-v4-inbox yd-tracker-v8-inbox yd-tracker-v9-inbox yd-tracker-v10-inbox yd-tracker-v12-inbox yd-tracker-v14-inbox yd-tracker-v15-inbox yd-tracker-v16-triage yd-clinical-control hidden h-full min-h-0 flex-col md:flex">
         <div className="yd-tracker-v4-inbox__toolbar yd-tracker-v8-inbox__toolbar">
-          <div className="yd-tracker-v8-inbox__head yd-tracker-v16-inbox__head">
-            <h2 className="yd-dash-section yd-tracker-v4-inbox__title yd-tracker-v16-inbox__title">
-              {headerSummary.lead}
-            </h2>
-            <p className="yd-tracker-v16-inbox__breakdown">{headerSummary.breakdown}</p>
-          </div>
           <div className="yd-tracker-filter-scroll">
             <div
               className="yd-tracker-filter-chips"
               role="tablist"
               aria-label="Arbeit in der Liste filtern"
             >
-              {[...TRACKER_FILTER_CHIPS, ...optionalChips].map((chip) => {
+              {TRACKER_FILTER_CHIPS.map((chip) => {
                 const count = countByTrackerFilter(searchScoped, chip.id);
                 const active = filter === chip.id;
-                const hint = TRACKER_FILTER_HINTS[chip.id];
                 return (
                   <button
                     key={chip.id}
                     type="button"
                     role="tab"
                     aria-selected={active}
-                    title={hint}
-                    aria-description={hint}
                     className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
                     onClick={() => setFilter(chip.id)}
                   >
@@ -139,13 +113,8 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
           ) : (
             filtered.map((item) => {
               const isActive = pathname === `/inbox/${item.id}`;
-              const patientName = item.patient_name?.trim() || "Unbekannter Patient";
-              const work = trackerInboxWorkType(item);
-              const attention = trackerInboxAttentionTier(item);
-              const timeLabel = formatTrackerRelativeIngress(item.created_at);
-              const urgencyTier = inboxUrgencyVisualTier(item.urgency);
-
-              const isFresh = !item.seen_at && !item.is_draft;
+              const urgencyTier = inboxListUrgencyTier(item);
+              const readState = trackerInboxReadState(item);
 
               return (
                 <li key={item.id}>
@@ -159,8 +128,8 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                       "yd-tracker-v15-inbox-card",
                       "yd-tracker-v16-inbox-card",
                       `yd-tracker-v15-inbox-card--urgency-${urgencyTier}`,
-                      `yd-tracker-v16-inbox-card--attention-${attention}`,
-                      isFresh && "yd-tracker-v15-inbox-card--fresh",
+                      readState === "new_submission" && "yd-tracker-v15-inbox-card--fresh",
+                      readState === "marked_unread" && "yd-tracker-v15-inbox-card--marked-unread",
                       isActive && "yd-tracker-v4-inbox-card--active",
                       isActive && "yd-tracker-v8-inbox-card--active",
                       isActive && "yd-tracker-v10-inbox-card--active",
@@ -179,32 +148,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                       tabIndex={0}
                       aria-current={isActive ? "page" : undefined}
                     >
-                      <span
-                        className="yd-tracker-v15-inbox-card__urgency-rail"
-                        aria-hidden
-                      />
-                      <span className="yd-tracker-v16-inbox-card__scan">
-                        <span className="yd-tracker-v16-inbox-card__headline-row">
-                          <span className="yd-tracker-v16-inbox-card__headline">
-                            {work.headline}
-                          </span>
-                          {isFresh ? (
-                            <span
-                              className="yd-tracker-v14-inbox-card__fresh-badge"
-                              aria-label="Neu"
-                            >
-                              Neu
-                            </span>
-                          ) : null}
-                          <span className="yd-tracker-v16-inbox-card__time">{timeLabel}</span>
-                        </span>
-                        <span className="yd-tracker-v16-inbox-card__patient">{patientName}</span>
-                        {work.context ? (
-                          <span className="yd-tracker-v16-inbox-card__context" title={work.context}>
-                            {work.context}
-                          </span>
-                        ) : null}
-                      </span>
+                      <TrackerInboxListCardContent item={item} />
                     </div>
                   </div>
                 </li>

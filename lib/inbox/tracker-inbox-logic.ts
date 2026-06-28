@@ -36,10 +36,11 @@ export function outboundSentForItem(
 
 export type TrackerInboxFilter =
   | "all"
+  | "unread"
+  | "completed"
   | "waiting_on_me"
   | "patient_waiting"
   | "in_progress"
-  | "completed"
   | "today"
   | "overdue"
   /** @deprecated Legacy — intern für Metriken */
@@ -64,26 +65,22 @@ export type TrackerFilterChip = {
   label: string;
 };
 
-/** Triage-Filter — Praxisalltag statt Workflow. */
+/** Triage-Filter — reduziert auf das Wesentliche. */
 export const TRACKER_FILTER_CHIPS: TrackerFilterChip[] = [
-  { id: "all", label: "Alle" },
-  { id: "waiting_on_me", label: "Wartet auf mich" },
-  { id: "patient_waiting", label: "Patient wartet" },
-  { id: "in_progress", label: "In Bearbeitung" },
+  { id: "all", label: "Offen" },
+  { id: "unread", label: "Neu" },
   { id: "completed", label: "Erledigt" },
 ];
 
-export const TRACKER_OPTIONAL_FILTER_CHIPS: TrackerFilterChip[] = [
-  { id: "today", label: "Heute" },
-  { id: "overdue", label: "Überfällig" },
-];
+export const TRACKER_OPTIONAL_FILTER_CHIPS: TrackerFilterChip[] = [];
 
 export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
-  all: "Keine offene Arbeit in der Arbeitsliste.",
+  all: "Keine offenen Fälle.",
+  unread: "Keine neuen Eingänge.",
+  completed: "Keine erledigten Fälle.",
   waiting_on_me: "Keine Fälle warten auf Ihre Entscheidung oder Freigabe.",
   patient_waiting: "Kein Patient wartet derzeit auf die Praxis.",
   in_progress: "Keine Fälle in Bearbeitung.",
-  completed: "Keine erledigten Fälle in dieser Ansicht.",
   today: "Heute keine neuen Eingänge.",
   overdue: "Keine überfälligen Fälle.",
   new_submissions: "Keine neuen Patientenanfragen.",
@@ -97,17 +94,8 @@ export const TRACKER_FILTER_EMPTY: Record<TrackerInboxFilter, string> = {
   practice_cases: "Keine Praxisfälle ohne Patienteneingang.",
 };
 
-/** Kurz erklärt, was ein Filter meint (Tooltip / aria-description). */
-export const TRACKER_FILTER_HINTS: Partial<Record<TrackerInboxFilter, string>> = {
-  all: "Alle offenen Fälle — erledigte sind ausgeblendet.",
-  waiting_on_me:
-    "Ihre Entscheidung oder Freigabe: neue Eingänge, Antworten zur Freigabe, noch nicht gesichtet.",
-  patient_waiting: "Antwort freigegeben oder vorbereitet — Patient wartet auf Versand oder Rückmeldung.",
-  in_progress: "Praxis arbeitet am Fall oder wartet auf Patientendaten.",
-  completed: "Abgeschlossen oder beantwortet — nur zur Nachsicht.",
-  today: "Heute eingegangen und noch offen.",
-  overdue: "Offen seit mehr als 48 Stunden — zeitnah bearbeiten.",
-};
+/** @deprecated Nur noch für Metriken / Legacy-Pfade */
+export const TRACKER_FILTER_HINTS: Partial<Record<TrackerInboxFilter, string>> = {};
 
 export function isApprovalPending(item: EnrichedSubmissionListItem): boolean {
   return (
@@ -187,6 +175,18 @@ export function trackerInboxAttentionTier(
   return "in_progress";
 }
 
+/** Lesestatus für Listen-Markierung — neue Einsendung vs. erneut ungelesen. */
+export type TrackerInboxReadState = "new_submission" | "marked_unread" | "read";
+
+export function trackerInboxReadState(
+  item: EnrichedSubmissionListItem
+): TrackerInboxReadState {
+  if (item.is_draft || item.seen_at) return "read";
+  const practiceStatus = normalizePracticeStatus(item.practice_status);
+  if (practiceStatus === "new") return "new_submission";
+  return "marked_unread";
+}
+
 export function matchesTrackerFilter(
   item: EnrichedSubmissionListItem,
   filter: TrackerInboxFilter
@@ -196,6 +196,8 @@ export function matchesTrackerFilter(
   switch (filter) {
     case "all":
       return tier !== "completed";
+    case "unread":
+      return trackerInboxReadState(item) === "new_submission" && tier !== "completed";
     case "waiting_on_me":
       return tier === "decision";
     case "patient_waiting":
@@ -268,7 +270,6 @@ export function countByTrackerFilter(
   items: EnrichedSubmissionListItem[],
   filter: TrackerInboxFilter
 ): number {
-  if (filter === "all") return items.length;
   return items.filter((item) => matchesTrackerFilter(item, filter)).length;
 }
 
@@ -354,26 +355,16 @@ export function clinicalRiskSubTier(item: EnrichedSubmissionListItem): number {
   return 6;
 }
 
-/** Tagesliste: Handlungsbedarf oben, erledigt unten. */
-function priorityTier(item: EnrichedSubmissionListItem): number {
-  const tier = trackerInboxAttentionTier(item);
-  if (tier === "decision") return 1;
-  if (tier === "patient_waiting") return 2;
-  if (tier === "in_progress") return 3;
-  return 4;
-}
-
-/** Handlungsbedarf zuerst, innerhalb der Stufe neueste zuerst. */
+/** Erledigte unten; sonst nach klinischem Risiko (KI/Anliegen), dann Eingangsdatum — ohne `seen_at`. */
 export function sortTrackerInboxItems(
   items: EnrichedSubmissionListItem[]
 ): EnrichedSubmissionListItem[] {
   return [...items].sort((a, b) => {
-    const tierDiff = priorityTier(a) - priorityTier(b);
-    if (tierDiff !== 0) return tierDiff;
+    const completedA = trackerInboxAttentionTier(a) === "completed" ? 1 : 0;
+    const completedB = trackerInboxAttentionTier(b) === "completed" ? 1 : 0;
+    if (completedA !== completedB) return completedA - completedB;
     const riskDiff = clinicalRiskSubTier(a) - clinicalRiskSubTier(b);
     if (riskDiff !== 0) return riskDiff;
-    const archivedDiff = Number(isArchivedCompleted(a)) - Number(isArchivedCompleted(b));
-    if (archivedDiff !== 0) return archivedDiff;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 }

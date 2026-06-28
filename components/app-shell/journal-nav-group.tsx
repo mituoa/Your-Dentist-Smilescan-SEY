@@ -14,7 +14,8 @@ export function JournalNavGroup({
     <NavItem
       href="/journal"
       iconName="journal"
-      label="Journals"
+      label="Care Center"
+      description="Patientenwissen"
       ambientPreview={ambientPreview}
       tier={tier}
     />

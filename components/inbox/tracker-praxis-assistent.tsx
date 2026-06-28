@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -26,6 +26,7 @@ import {
   buildTrackerV9ClinicalModel,
   CLINICAL_URGENCY_OPTIONS,
   normalizeClinicalUrgency,
+  suggestClinicalUrgency,
   type ClinicalUrgencyId,
 } from "@/lib/inbox/tracker-v9-clinical";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
@@ -93,9 +94,46 @@ export function TrackerPraxisAssistent({
   const router = useRouter();
   const { responsePath, setResponsePath, applyDraftToPanel } = useTrackerWorkflow();
   const [sheetIntent, setSheetIntent] = useState<TrackerActionIntent | null>(null);
-  const [clinicalUrgency, setClinicalUrgency] = useState<ClinicalUrgencyId>(
-    normalizeClinicalUrgency(urgency) ?? "this_week"
+
+  const suggestedUrgency = useMemo(
+    () =>
+      suggestClinicalUrgency({
+        patientNotes,
+        patientName,
+        photoCount,
+        hasMultiDayPhotos,
+        hasPhotoTrail,
+        messageDraftStatus,
+        draftsAvailable,
+        urgency,
+        intakeChannel,
+        isApprovalPending,
+        isDoctor,
+        openTaskCount: 0,
+      }),
+    [
+      patientNotes,
+      patientName,
+      photoCount,
+      hasMultiDayPhotos,
+      hasPhotoTrail,
+      messageDraftStatus,
+      draftsAvailable,
+      urgency,
+      intakeChannel,
+      isApprovalPending,
+      isDoctor,
+    ]
   );
+
+  const [clinicalUrgency, setClinicalUrgency] = useState<ClinicalUrgencyId>(
+    () => normalizeClinicalUrgency(urgency) ?? suggestedUrgency
+  );
+
+  useEffect(() => {
+    setClinicalUrgency(normalizeClinicalUrgency(urgency) ?? suggestedUrgency);
+  }, [urgency, suggestedUrgency]);
+
   const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null);
   const [pending, startTransition] = useTransition();
 

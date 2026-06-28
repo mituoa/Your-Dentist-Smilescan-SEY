@@ -1,1 +1,2 @@
-export { JournalPatientKnowledge as JournalKnowledgeCenter } from "@/components/journal/journal-patient-knowledge";
+export { CareCenter as JournalKnowledgeCenter } from "@/components/care-center/care-center";
+export { CareCenter } from "@/components/care-center/care-center";

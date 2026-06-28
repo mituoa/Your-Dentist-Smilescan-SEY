@@ -5,7 +5,7 @@ export type RelayHeaderSummary = {
   breakdown: string;
 };
 
-/** Arbeitsübersicht für den integrierten Relay-Header (wie Tracker). */
+/** Eine ruhige Zeile für den Relay-Header — entscheidungsorientiert. */
 export function buildRelayHeaderSummary(
   snapshot: Pick<
     RelayPracticeSnapshot,
@@ -18,69 +18,59 @@ export function buildRelayHeaderSummary(
   >
 ): RelayHeaderSummary {
   const attentionCount = snapshot.attention.length;
-  const teamworkCount = snapshot.teamwork.length;
   const patientCount = snapshot.patientWaiting.length;
-  const routineCount = snapshot.routines.length;
+  const teamworkCount = snapshot.teamwork.length;
   const todoCount = snapshot.practiceTasks.length;
 
   if (!snapshot.hasAnyWork) {
     return {
-      lead: "Alles erledigt — keine offene Praxisarbeit.",
-      breakdown: "Entscheidungen, Patienten und Teamaufgaben erscheinen hier automatisch.",
+      lead: "Heute ist alles erledigt.",
+      breakdown: "",
     };
   }
 
-  const leadParts: string[] = [];
-
   if (attentionCount > 0) {
-    leadParts.push(
-      attentionCount === 1
-        ? "1 Vorgang wartet auf Ihre Entscheidung"
-        : `${attentionCount} Vorgänge warten auf Ihre Entscheidung`
-    );
-  } else if (patientCount > 0) {
-    leadParts.push(
-      patientCount === 1 ? "1 Patient wartet" : `${patientCount} Patienten warten`
-    );
-  } else if (teamworkCount > 0) {
-    leadParts.push(
-      teamworkCount === 1 ? "1 Blockade im Team" : `${teamworkCount} Blockaden im Team`
-    );
-  } else if (todoCount > 0) {
-    leadParts.push(
-      todoCount === 1 ? "1 Aufgabe zu erledigen" : `${todoCount} Aufgaben zu erledigen`
-    );
-  } else if (routineCount > 0) {
-    leadParts.push(
-      routineCount === 1 ? "1 Routine offen" : `${routineCount} Routinen offen`
-    );
+    return {
+      lead:
+        attentionCount === 1
+          ? "Heute wartet 1 Freigabe auf Ihre Entscheidung."
+          : `Heute warten ${attentionCount} Freigaben auf Ihre Entscheidung.`,
+      breakdown: "",
+    };
   }
 
-  const lead = leadParts[0] ? `${leadParts[0]}.` : "Offene Praxisarbeit.";
-
-  const breakdownParts: string[] = [];
-
-  if (attentionCount > 0 && patientCount > 0) {
-    breakdownParts.push(
-      patientCount === 1 ? "1 Patient wartet" : `${patientCount} Patienten warten`
-    );
+  if (patientCount > 0) {
+    return {
+      lead:
+        patientCount === 1
+          ? "Heute wartet 1 Patientenanfrage."
+          : `Heute warten ${patientCount} Patientenanfragen.`,
+      breakdown: "",
+    };
   }
-  if (teamworkCount > 0 && attentionCount > 0) {
-    breakdownParts.push(
-      teamworkCount === 1 ? "1 Blockade im Team" : `${teamworkCount} Blockaden im Team`
-    );
+
+  if (teamworkCount > 0) {
+    return {
+      lead:
+        teamworkCount === 1
+          ? "Heute gibt es 1 offenen Team-Punkt."
+          : `Heute gibt es ${teamworkCount} offene Team-Punkte.`,
+      breakdown: "",
+    };
   }
-  if (todoCount > 0 && attentionCount > 0) {
-    breakdownParts.push(
-      todoCount === 1 ? "1 Aufgabe zu erledigen" : `${todoCount} Aufgaben zu erledigen`
-    );
+
+  if (todoCount > 0) {
+    return {
+      lead:
+        todoCount === 1
+          ? "Heute steht 1 Praxisaufgabe an."
+          : `Heute stehen ${todoCount} Praxisaufgaben an.`,
+      breakdown: "",
+    };
   }
 
   return {
-    lead,
-    breakdown:
-      breakdownParts.length > 0
-        ? breakdownParts.map((p) => (p.endsWith(".") ? p : `${p}.`)).join(" ")
-        : "",
+    lead: "Heute ist alles erledigt.",
+    breakdown: "",
   };
 }

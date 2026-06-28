@@ -11,7 +11,6 @@ import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-is
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
-  TRACKER_FILTER_HINTS,
   buildTrackerAssistHints,
   countByTrackerFilter,
   formatTrackerListDate,
@@ -191,9 +190,6 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
         <div className="yd-tracker-table-toolbar__head">
           <div className="min-w-0">
             <h2 className="yd-tracker-table-toolbar__title">Praxis-Inbox</h2>
-            <p className="yd-tracker-table-toolbar__meta">
-              Was heute bearbeitet werden soll
-            </p>
           </div>
           {showCreateCase ? (
             <Link href="/create-case?from=inbox" className="yd-tracker-new-case-btn">
@@ -208,15 +204,12 @@ export function TrackerTable({ items, showCreateCase = false }: TrackerTableProp
             {TRACKER_FILTER_CHIPS.map((chip) => {
               const count = countByTrackerFilter(searchScoped, chip.id);
               const active = filter === chip.id;
-              const hint = TRACKER_FILTER_HINTS[chip.id];
               return (
                 <button
                   key={chip.id}
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  title={hint}
-                  aria-description={hint}
                   className={cn("yd-tracker-filter-chip", active && "yd-tracker-filter-chip--active")}
                   onClick={() => {
                     setFilter(chip.id);

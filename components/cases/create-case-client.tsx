@@ -71,10 +71,17 @@ function userFacingUploadHttpError(status: number, serverMessage: string | undef
 
 interface CreateCaseClientProps {
   workspaceId: string;
-  cancelHref: string;
+  cancelHref?: string;
+  onClose?: () => void;
+  overlay?: "auth" | "workspace";
 }
 
-export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientProps) {
+export function CreateCaseClient({
+  workspaceId,
+  cancelHref = "/inbox",
+  onClose,
+  overlay = "auth",
+}: CreateCaseClientProps) {
   const router = useRouter();
   const birthRef = useRef<SmartDateInputHandle>(null);
   const actionErrorBannerRef = useRef<HTMLDivElement>(null);
@@ -103,17 +110,12 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
   const canSaveFinal =
     patientName.length > 0 && emailTrim.length > 0 && phoneTrim.length > 0;
 
-  const urgencyLabel =
-    urgency === "today"
-      ? "Heute"
-      : urgency === "this_week"
-        ? "Diese Woche"
-        : urgency === "not_urgent"
-          ? "Nicht dringend"
-          : "Nicht gewählt";
-
   const close = () => {
     if (busy) return;
+    if (onClose) {
+      onClose();
+      return;
+    }
     router.push(cancelHref);
   };
 
@@ -286,6 +288,7 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
         if (result.submissionId) {
           const q = new URLSearchParams({ angelegt: "1" });
           if (result.partialAttachments) q.set("anlagen_teilweise", "1");
+          onClose?.();
           router.push(`/inbox/${result.submissionId}?${q.toString()}`);
           router.refresh();
         }
@@ -298,11 +301,11 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
 
   return (
     <MedicalFormShell
-      title="Neuen Patientenfall anlegen"
-      subtitle="Patientenstammdaten, Anliegen und Bilder in einem Schritt — danach Bearbeitung im Tracker."
+      title="Neuer Fall"
       onClose={close}
       closeDisabled={busy}
-      ariaLabel="Neuen Patientenfall anlegen"
+      ariaLabel="Neuer Fall"
+      overlayVariant={overlay}
       footer={
         <MedicalFormFooterActions
           onCancel={close}
@@ -340,7 +343,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                   onChange={(e) => setFirstName(e.target.value)}
                   autoComplete="given-name"
                   className="yd-auth-input"
-                  placeholder="Vorname"
                 />
               </div>
               <div>
@@ -352,7 +354,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                   onChange={(e) => setLastName(e.target.value)}
                   autoComplete="family-name"
                   className="yd-auth-input"
-                  placeholder="Nachname"
                 />
               </div>
               <div>
@@ -378,7 +379,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                   value={externalId}
                   onChange={(e) => setExternalId(e.target.value)}
                   className="yd-auth-input"
-                  placeholder="Interne Kennung"
                 />
               </div>
             </MedicalFormFieldStack>
@@ -393,7 +393,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                   autoComplete="email"
                   required
                   className="yd-auth-input"
-                  placeholder="E-Mail-Adresse"
                 />
               </div>
               <div>
@@ -406,22 +405,18 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                   autoComplete="tel"
                   required
                   className="yd-auth-input"
-                  placeholder="+49 …"
                 />
               </div>
             </MedicalFormFieldStack>
           </MedicalFormSection>
 
           <MedicalFormSection title="Anliegen">
-            <MedicalFormLabel htmlFor="cc-notes">
-              Worum geht es bei diesem Fall?
-            </MedicalFormLabel>
+            <MedicalFormLabel htmlFor="cc-notes">Anliegen</MedicalFormLabel>
             <MedicalFormTextarea
               id="cc-notes"
               value={notes}
               onChange={setNotes}
               rows={6}
-              placeholder="Beschwerden, Verlauf und klinischer Kontext in eigenen Worten …"
             />
           </MedicalFormSection>
 
@@ -429,11 +424,8 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
           <MedicalFormSection title="Klinische Bilder">
             <MedicalFormUploadEmpty
               title={
-                attachments.length > 0
-                  ? "Weitere klinische Fotos hinzufügen"
-                  : "Klinische Fotos hinzufügen"
+                attachments.length > 0 ? "Weitere Fotos" : "Fotos hinzufügen"
               }
-              hint="JPG, PNG, HEIC oder WEBP — Übernahme nach dem Anlegen des Falls"
               dragActive={dragActive}
               disabled={busy}
               icon={
@@ -485,9 +477,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
                       <p className="truncate text-[14px] font-medium text-[#0c1929]">
                         {row.file.name || "Foto"}
                       </p>
-                      <p className="text-[12px] text-slate-500">
-                        Wird mit dem Fall gespeichert
-                      </p>
                     </div>
                     <button
                       type="button"
@@ -514,27 +503,6 @@ export function CreateCaseClient({ workspaceId, cancelHref }: CreateCaseClientPr
               allowDeselect
               disabled={busy}
             />
-          </MedicalFormSection>
-
-          <MedicalFormSection title="Übersicht" hint="Kurz prüfen, dann anlegen.">
-            <dl className="yd-medical-review-dl">
-              <div>
-                <dt>Patient</dt>
-                <dd>{patientName || "—"}</dd>
-              </div>
-              <div>
-                <dt>Anliegen</dt>
-                <dd>{notesTrim || "—"}</dd>
-              </div>
-              <div>
-                <dt>Bilder</dt>
-                <dd>{attachments.length === 0 ? "Keine" : `${attachments.length} Foto(s)`}</dd>
-              </div>
-              <div>
-                <dt>Priorität</dt>
-                <dd>{urgencyLabel}</dd>
-              </div>
-            </dl>
           </MedicalFormSection>
         </fieldset>
       </div>

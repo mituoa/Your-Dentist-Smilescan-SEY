@@ -7,7 +7,7 @@
   --yd-header-action-bg: #ffffff;
   --yd-header-focus: rgba(22, 61, 122, 0.14);
   --yd-header-accent: #1a4f9c;
-  /* Luxuriöses Medical Blue — etwas dunkler, weniger „Digital-SaaS“ */
+  /* Luxuriöses Medical Blue — Navy, einheitlich mit Tracker */
   --yd-medical-blue-deep: #163d7a;
   --yd-medical-blue-mid: #1a4f9c;
   --yd-medical-blue-bright: #2a5f9e;
@@ -456,7 +456,7 @@
   width: 100%;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #6ba8f5 0%, #2f80ed 42%, #1a4f9c 100%);
+  background: linear-gradient(145deg, #4a7bb5 0%, #1a4f9c 55%, #163d7a 100%);
   color: #ffffff;
   font-size: 0.6875rem;
   font-weight: 600;

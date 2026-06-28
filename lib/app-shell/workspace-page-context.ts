@@ -25,7 +25,7 @@ export function resolveWorkspacePageContext(pathname: string): WorkspacePageCont
     return { title: "Verwaltung", hint: "Administration" };
   }
   if (pathname.startsWith("/journal")) {
-    return { title: "Journal", hint: "Inhalte" };
+    return { title: "Care Center", hint: "Wissenszentrum" };
   }
   if (pathname.startsWith("/profile")) {
     return { title: "Profil", hint: "Praxis" };

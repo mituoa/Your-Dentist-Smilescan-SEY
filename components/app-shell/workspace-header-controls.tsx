@@ -11,6 +11,7 @@ import type { ThemePreference } from "@/lib/theme";
 type WorkspaceHeaderControlsProps = {
   email: string;
   workspaceName: string;
+  workspaceId: string;
   role: "doctor" | "team";
   initialTheme: ThemePreference;
   avatarUrl?: string | null;
@@ -23,6 +24,7 @@ type WorkspaceHeaderControlsProps = {
 export function WorkspaceHeaderControls({
   email,
   workspaceName,
+  workspaceId,
   role,
   initialTheme,
   avatarUrl,
@@ -33,11 +35,18 @@ export function WorkspaceHeaderControls({
   const pathname = usePathname() || "";
   const searchParams = useSearchParams();
   const searchQ = searchParams.get("q") ?? "";
-  const searchAction = pathname.startsWith("/inbox") ? pathname.split("?")[0] || "/inbox" : "/inbox";
+  const searchAction = pathname.startsWith("/inbox")
+    ? pathname.split("?")[0] || "/inbox"
+    : pathname.startsWith("/relay")
+      ? "/relay"
+      : "/inbox";
+  const searchPlaceholder = pathname.startsWith("/relay")
+    ? "Aufgabe oder Nachricht suchen …"
+    : "Patient oder Anfrage suchen …";
 
   return (
     <div className="yd-dash-header-premium__toolbar">
-      <TopbarContextActions role={role} variant="dashboard" />
+      <TopbarContextActions role={role} variant="dashboard" workspaceId={workspaceId} />
 
       {showSearch ? (
         <form action={searchAction} method="get" className="yd-dash-header-premium__search relative min-w-0">
@@ -51,7 +60,7 @@ export function WorkspaceHeaderControls({
             name="q"
             key={searchQ}
             defaultValue={searchQ}
-            placeholder="Patient oder Anfrage suchen …"
+            placeholder={searchPlaceholder}
             className="yd-dash-header-premium__search-input"
             aria-label="Patient oder Anfrage suchen"
           />

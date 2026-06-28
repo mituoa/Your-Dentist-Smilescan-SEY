@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export type MedicalFormShellProps = {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   onClose: () => void;
   closeDisabled?: boolean;
   children: React.ReactNode;
@@ -18,6 +18,8 @@ export type MedicalFormShellProps = {
   ariaLabel?: string;
   /** Wider panel for split layouts (e.g. landing inquiry + preview) */
   panelClassName?: string;
+  /** Lighter overlay when opened above an existing workspace view */
+  overlayVariant?: "auth" | "workspace";
 };
 
 /**
@@ -32,6 +34,7 @@ export function MedicalFormShell({
   footer,
   ariaLabel,
   panelClassName,
+  overlayVariant = "auth",
 }: MedicalFormShellProps) {
   const [mounted, setMounted] = React.useState(false);
   const titleId = React.useId();
@@ -44,10 +47,16 @@ export function MedicalFormShell({
     const html = document.documentElement;
     const prev = html.style.overflow;
     html.style.overflow = "hidden";
+    if (overlayVariant === "workspace") {
+      html.setAttribute("data-yd-workspace-modal", "true");
+    }
     return () => {
       html.style.overflow = prev;
+      if (overlayVariant === "workspace") {
+        html.removeAttribute("data-yd-workspace-modal");
+      }
     };
-  }, []);
+  }, [overlayVariant]);
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -60,7 +69,12 @@ export function MedicalFormShell({
   if (!mounted) return null;
 
   const overlay = (
-    <div className="yd-auth-register-overlay yd-medical-form-overlay">
+    <div
+      className={cn(
+        "yd-auth-register-overlay yd-medical-form-overlay",
+        overlayVariant === "workspace" && "yd-medical-form-overlay--workspace"
+      )}
+    >
       <div className="yd-auth-register-backdrop" aria-hidden />
 
       <div className="yd-auth-register-stage">
@@ -97,7 +111,7 @@ export function MedicalFormShell({
             <h1 id={titleId} className="yd-auth-register-title">
               {title}
             </h1>
-            <p className="yd-auth-register-subtitle mt-2">{subtitle}</p>
+            {subtitle ? <p className="yd-auth-register-subtitle mt-2">{subtitle}</p> : null}
           </div>
 
           <div className="yd-auth-register-body yd-medical-form-body">

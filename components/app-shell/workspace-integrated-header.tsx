@@ -13,6 +13,7 @@ export type WorkspaceIntegratedHeaderProps = {
   dashboardEditorial?: DashboardEditorialHeader | null;
   email: string;
   workspaceName: string;
+  workspaceId: string;
   role: "doctor" | "team";
   initialTheme: ThemePreference;
   avatarUrl?: string | null;
@@ -30,6 +31,7 @@ export function WorkspaceIntegratedHeader({
   subtitleMeta,
   email,
   workspaceName,
+  workspaceId,
   role,
   initialTheme,
   avatarUrl,
@@ -72,6 +74,7 @@ export function WorkspaceIntegratedHeader({
         <WorkspaceHeaderControls
           email={email}
           workspaceName={workspaceName}
+          workspaceId={workspaceId}
           role={role}
           initialTheme={initialTheme}
           avatarUrl={avatarUrl}

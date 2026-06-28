@@ -172,7 +172,7 @@ export async function updateSubmissionUrgency(
   return { success: true };
 }
 
-/** Setzt einen Fall zurück auf „Neu“ (Arbeitsliste). */
+/** Setzt einen Fall auf ungelesen — Praxisstatus bleibt (unterscheidbar von neuer Einsendung). */
 export async function markSubmissionUnseen(submissionId: string) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) {
@@ -190,7 +190,6 @@ export async function markSubmissionUnseen(submissionId: string) {
     .update({
       seen_at: null,
       seen_by: null,
-      practice_status: "new",
       updated_at: new Date().toISOString(),
     })
     .eq("id", submissionId)

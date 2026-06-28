@@ -2,8 +2,9 @@
 
 import { Plus } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { createCaseFromQuery } from "@/lib/create-case-return";
+import { NewCaseModal } from "@/components/cases/new-case-modal";
 import { RelayCreateMenu } from "@/components/my-tasks/relay-create-menu";
 
 type ActionVariant = "both" | "newCase" | "newTask" | "none";
@@ -40,33 +41,43 @@ function actionClasses(variant: "toolbar" | "dashboard", kind: "primary" | "seco
     : "yd-workspace-toolbar__cta yd-workspace-toolbar__cta--secondary inline-flex items-center gap-2";
 }
 
-function NeuerFallLink({
-  pathname,
+function NeuerFallButton({
   variant = "toolbar",
+  workspaceId,
 }: {
-  pathname: string;
   variant?: "toolbar" | "dashboard";
+  workspaceId: string;
 }) {
-  const from = createCaseFromQuery(pathname);
+  const [open, setOpen] = useState(false);
+
   return (
-    <a
-      title="Neuer Fall"
-      className={actionClasses(variant, "primary")}
-      href={`/create-case?from=${from}`}
-    >
-      <Plus className="h-4 w-4 shrink-0" strokeWidth={2} />
-      <span>Neuer Fall</span>
-    </a>
+    <>
+      <button
+        type="button"
+        title="Neuer Fall"
+        className={actionClasses(variant, "primary")}
+        onClick={() => setOpen(true)}
+      >
+        <Plus className="h-4 w-4 shrink-0" strokeWidth={2} />
+        <span>Neuer Fall</span>
+      </button>
+      <NewCaseModal open={open} onClose={() => setOpen(false)} workspaceId={workspaceId} />
+    </>
   );
 }
 
 type TopbarContextActionsProps = {
   role: "doctor" | "team";
   variant?: "toolbar" | "dashboard";
+  workspaceId: string;
 };
 
 /** Globale Schnellaktionen — Workspace-Toolbar oder integrierte Dashboard-Headline. */
-export function TopbarContextActions({ role, variant = "toolbar" }: TopbarContextActionsProps) {
+export function TopbarContextActions({
+  role,
+  variant = "toolbar",
+  workspaceId,
+}: TopbarContextActionsProps) {
   const pathname = usePathname() || "";
   const router = useRouter();
   const actionVariant = resolveVariant(pathname, role);
@@ -85,11 +96,11 @@ export function TopbarContextActions({ role, variant = "toolbar" }: TopbarContex
         <RelayCreateMenu
           placement={variant === "dashboard" ? "header" : "toolbar"}
           isDoctor={role === "doctor"}
-          onMessageCreated={() => router.push("/relay?bereich=teamwork")}
+          onMessageCreated={() => router.push("/relay?bereich=team")}
         />
       )}
       {(actionVariant === "both" || actionVariant === "newCase") && (
-        <NeuerFallLink pathname={pathname} variant={variant} />
+        <NeuerFallButton variant={variant} workspaceId={workspaceId} />
       )}
     </div>
   );

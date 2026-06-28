@@ -1,4 +1,3 @@
-import { TrackerCaseMetaControls } from "@/components/inbox/tracker-case-meta-controls";
 import { TrackerWorkflowProvider } from "@/components/inbox/tracker-workflow-context";
 import { TrackerCaseTimeline } from "@/components/inbox/tracker-case-timeline";
 import { TrackerDraftWorkspace } from "@/components/inbox/tracker-draft-workspace";
@@ -154,12 +153,6 @@ export function TrackerWorkspace({
         concern={concern || null}
         createdAt={submission.created_at}
         isDraft={submission.is_draft}
-      />
-      <TrackerCaseMetaControls
-        submissionId={submission.id}
-        practiceStatus={submission.practice_status ?? null}
-        seenAt={submission.seen_at ?? null}
-        className="mb-3 px-1"
       />
 
       <div className="yd-tracker-v8-clinical-row">

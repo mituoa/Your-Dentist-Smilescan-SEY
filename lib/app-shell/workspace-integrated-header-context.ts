@@ -25,7 +25,7 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname.startsWith("/inbox")) {
     return {
       eyebrow: "Tracker",
-      subtitle: "Praxis-Inbox und Fallakte",
+      subtitle: "",
       showSearch: true,
     };
   }
@@ -45,9 +45,9 @@ export function resolveWorkspaceIntegratedHeader(
   }
   if (pathname.startsWith("/journal")) {
     return {
-      eyebrow: "Journal",
-      subtitle: "Das Wissen Ihrer Praxis — Erklärungen, Nachsorge und Antworten für Patienten",
-      showSearch: true,
+      eyebrow: "Care Center",
+      subtitle: "",
+      showSearch: false,
       hideGreeting: true,
     };
   }

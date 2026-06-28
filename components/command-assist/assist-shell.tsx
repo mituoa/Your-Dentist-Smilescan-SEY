@@ -4,12 +4,20 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
+import { NewPraxisTaskModal } from "@/components/my-tasks/new-praxis-task-modal";
 import type { CommandWorkspaceHints, PreparedWorkItem } from "@/lib/command-ai/types";
+import {
+  subscribeCommandTaskDraft,
+  type PendingCommandTaskDraft,
+} from "@/lib/command-ai/task-draft-bridge";
+import { createTaskFromQuery, resolveCreateTaskCancelHref } from "@/lib/create-task-return";
 
 import { CommandAssist } from "./command-assist";
 
@@ -25,12 +33,20 @@ export type InboxAssistCasePayload = {
 
 type AssistCasePayload = InboxAssistCasePayload | null;
 
+type TaskModalDraft = {
+  title: string;
+  description: string;
+  dueDate: string;
+};
+
 type AssistDispatchValue = {
   setCasePayload: (p: AssistCasePayload) => void;
   setWorkspaceHints: (hints: CommandWorkspaceHints | null) => void;
   setPreparedWork: (work: PreparedWorkItem | null) => void;
   setCommandOpen: (open: boolean) => void;
   openCommand: () => void;
+  openTaskModal: (draft?: PendingCommandTaskDraft | null) => void;
+  closeTaskModal: () => void;
 };
 
 type AssistStateValue = {
@@ -38,6 +54,7 @@ type AssistStateValue = {
   workspaceHints: CommandWorkspaceHints | null;
   preparedWork: PreparedWorkItem | null;
   commandOpen: boolean;
+  taskModalOpen: boolean;
 };
 
 export type AssistContextValue = AssistStateValue & AssistDispatchValue;
@@ -79,6 +96,14 @@ function casePayloadEqual(a: AssistCasePayload, b: AssistCasePayload): boolean {
   );
 }
 
+function draftToModalFields(draft: PendingCommandTaskDraft): TaskModalDraft {
+  return {
+    title: draft.title,
+    description: draft.notes ?? "",
+    dueDate: draft.dueDate ?? "",
+  };
+}
+
 export function useAssistDispatchOptional(): AssistDispatchValue | null {
   return useContext(AssistDispatchContext);
 }
@@ -100,10 +125,20 @@ export function useAssistCaseOptional(): AssistContextValue | null {
 }
 
 export function AssistShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname() || "/dashboard";
+  const router = useRouter();
   const [casePayload, setCasePayloadState] = useState<AssistCasePayload>(null);
   const [workspaceHints, setWorkspaceHintsState] = useState<CommandWorkspaceHints | null>(null);
   const [preparedWork, setPreparedWorkState] = useState<PreparedWorkItem | null>(null);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [taskModalDraft, setTaskModalDraft] = useState<TaskModalDraft>({
+    title: "",
+    description: "",
+    dueDate: "",
+  });
+
+  const cancelHref = resolveCreateTaskCancelHref(createTaskFromQuery(pathname));
 
   const setCasePayload = useCallback((p: AssistCasePayload) => {
     setCasePayloadState((prev) => (casePayloadEqual(prev, p) ? prev : p));
@@ -123,6 +158,21 @@ export function AssistShell({ children }: { children: ReactNode }) {
     setCommandOpen(true);
   }, []);
 
+  const openTaskModal = useCallback((draft?: PendingCommandTaskDraft | null) => {
+    if (draft) {
+      setTaskModalDraft(draftToModalFields(draft));
+    }
+    setTaskModalOpen(true);
+  }, []);
+
+  const closeTaskModal = useCallback(() => {
+    setTaskModalOpen(false);
+  }, []);
+
+  useEffect(() => {
+    return subscribeCommandTaskDraft((draft) => openTaskModal(draft));
+  }, [openTaskModal]);
+
   const dispatchValue = useMemo<AssistDispatchValue>(
     () => ({
       setCasePayload,
@@ -130,8 +180,17 @@ export function AssistShell({ children }: { children: ReactNode }) {
       setPreparedWork,
       setCommandOpen,
       openCommand,
+      openTaskModal,
+      closeTaskModal,
     }),
-    [setCasePayload, setWorkspaceHints, setPreparedWork, openCommand]
+    [
+      setCasePayload,
+      setWorkspaceHints,
+      setPreparedWork,
+      openCommand,
+      openTaskModal,
+      closeTaskModal,
+    ]
   );
 
   const stateValue = useMemo<AssistStateValue>(
@@ -140,8 +199,9 @@ export function AssistShell({ children }: { children: ReactNode }) {
       workspaceHints,
       preparedWork,
       commandOpen,
+      taskModalOpen,
     }),
-    [casePayload, workspaceHints, preparedWork, commandOpen]
+    [casePayload, workspaceHints, preparedWork, commandOpen, taskModalOpen]
   );
 
   return (
@@ -149,6 +209,18 @@ export function AssistShell({ children }: { children: ReactNode }) {
       <AssistStateContext.Provider value={stateValue}>
         {children}
         <CommandAssist />
+        <NewPraxisTaskModal
+          key={`${taskModalOpen}-${taskModalDraft.title}-${taskModalDraft.dueDate}`}
+          open={taskModalOpen}
+          onClose={() => {
+            closeTaskModal();
+            router.refresh();
+          }}
+          cancelHref={cancelHref}
+          initialTitle={taskModalDraft.title}
+          initialDescription={taskModalDraft.description}
+          initialDueDate={taskModalDraft.dueDate}
+        />
       </AssistStateContext.Provider>
     </AssistDispatchContext.Provider>
   );

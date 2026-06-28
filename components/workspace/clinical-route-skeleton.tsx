@@ -257,20 +257,29 @@ export function ClinicalSettingsSkeleton() {
 export function ClinicalJournalSkeleton() {
   return (
     <YdSkeletonPage
-      label="Journal wird geladen"
-      className="yd-journal-v6 yd-journal-pk yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto"
+      label="Care Center wird geladen"
+      className="care-center yd-praxiswissen yd-journal-v6 yd-clinical-brand relative flex min-h-0 flex-1 flex-col overflow-auto"
     >
-      <div className={`yd-journal-pk__frame ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
-        <div className="mb-6 space-y-2">
-          <YdSkeleton className="h-9 w-32" />
-          <YdSkeleton className="h-5 w-48" />
-          <YdSkeleton className="h-4 w-full max-w-sm" variant="calm" />
+      <div className="yd-pw__shell cc-shell">
+        <div className="cc-head">
+          <div className="space-y-2">
+            <YdSkeleton className="h-9 w-44" />
+            <YdSkeleton className="h-4 w-64 max-w-full" variant="calm" />
+          </div>
+          <div className="flex gap-2">
+            <YdSkeleton className="h-10 w-32 rounded-full" variant="calm" />
+            <YdSkeleton className="h-10 w-36 rounded-full" variant="calm" />
+          </div>
         </div>
-        <YdSkeleton className="mb-8 h-12 w-full rounded-[14px]" variant="calm" />
-        <YdSkeleton className="mb-3 h-3 w-28" variant="calm" />
-        <div className="space-y-0 border-t border-[rgba(180,198,218,0.28)]">
-          {[0, 1, 2, 3].map((i) => (
-            <YdSkeleton key={i} className="my-2 h-11 w-full" variant="calm" />
+        <div className="cc-stats__grid">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <YdSkeleton key={i} className="h-[7.5rem] rounded-[14px]" variant="calm" />
+          ))}
+        </div>
+        <YdSkeleton className="mt-4 h-11 w-full rounded-xl" variant="calm" />
+        <div className="cc-grid mt-4">
+          {[0, 1, 2].map((i) => (
+            <YdSkeleton key={i} className="h-44 rounded-[14px]" variant="calm" />
           ))}
         </div>
       </div>

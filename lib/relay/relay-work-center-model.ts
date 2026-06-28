@@ -18,7 +18,7 @@ import {
 } from "@/lib/relay/relay-work-object";
 import { formatRelayMessageTimestamp } from "@/lib/relay/read-receipt-display";
 
-export type RelayKanbanColumnId = "waiting" | "in_progress" | "freigaben" | "done";
+export type RelayKanbanColumnId = "decision" | "in_progress" | "done";
 export type RelayTaskScopeTab = "all" | "mine" | "delegated";
 export type RelayMessageInboxTab = "unread" | "all" | "mentions";
 
@@ -28,8 +28,9 @@ export type RelayKanbanCard = {
   typeLabel: string;
   typeCode: string;
   title: string;
-  statusLine: string;
+  metaLine: string;
   dateLabel: string | null;
+  actionLabel: string;
   assigneeInitials: string;
   assigneeColor: string;
   commentCount: number;
@@ -52,12 +53,31 @@ export type RelayTeamInboxRow = {
 export const RELAY_KANBAN_COLUMNS: {
   id: RelayKanbanColumnId;
   label: string;
-  tone: "waiting" | "progress" | "approval" | "done";
+  tone: "waiting" | "progress" | "done";
+  emptyTitle: string;
+  emptyHint?: string;
 }[] = [
-  { id: "waiting", label: "Wartet auf mich", tone: "waiting" },
-  { id: "in_progress", label: "In Bearbeitung", tone: "progress" },
-  { id: "freigaben", label: "Zur Freigabe", tone: "approval" },
-  { id: "done", label: "Erledigt", tone: "done" },
+  {
+    id: "decision",
+    label: "Benötigt Entscheidung",
+    tone: "waiting",
+    emptyTitle: "Keine offenen Entscheidungen.",
+    emptyHint: "Freigaben und Rückfragen erscheinen hier.",
+  },
+  {
+    id: "in_progress",
+    label: "In Bearbeitung",
+    tone: "progress",
+    emptyTitle: "Nichts in Bearbeitung.",
+    emptyHint: "Laufende Vorgänge des Teams erscheinen hier.",
+  },
+  {
+    id: "done",
+    label: "Erledigt",
+    tone: "done",
+    emptyTitle: "Keine offenen Aufgaben.",
+    emptyHint: "Sie sind für heute fertig.",
+  },
 ];
 
 export const RELAY_TASK_SCOPE_TABS: { id: RelayTaskScopeTab; label: string }[] = [
@@ -93,10 +113,9 @@ function colorForKey(key: string): string {
 }
 
 function statusToColumn(status: RelayWorkStatusId): RelayKanbanColumnId {
-  if (status === "waiting") return "waiting";
+  if (status === "done") return "done";
   if (status === "in_progress") return "in_progress";
-  if (status === "freigaben") return "freigaben";
-  return "done";
+  return "decision";
 }
 
 function findTask(
@@ -201,14 +220,20 @@ function rowToKanbanCard(
   const objectType = resolveRelayWorkObjectType(row, { task, journal, messageDraftStatus });
   const assignee = assigneeForRow(row, task, membersById);
 
+  const from = row.fromLabel?.trim();
+  const metaLine = from
+    ? `Bearbeitet von ${from}`
+    : enriched.waitingLabel ?? enriched.concernLine ?? row.statusLabel;
+
   return {
     id: row.id,
     href: row.href,
     typeLabel: enriched.workTypeLabel ?? row.typeLabel,
     typeCode: TYPE_CODES[objectType],
     title: enriched.primaryLabel,
-    statusLine: enriched.waitingLabel ?? enriched.concernLine ?? row.statusLabel,
+    metaLine,
     dateLabel: row.dueLabel ?? row.timeLabel,
+    actionLabel: row.actionLabel?.trim() || "Öffnen",
     assigneeInitials: assignee.initials,
     assigneeColor: assignee.color,
     commentCount: 0,
@@ -255,8 +280,9 @@ function mapDoneTaskToCard(
     typeLabel: task.submission_id ? "Patientenanfrage" : "Teamaufgabe",
     typeCode: task.submission_id ? "P" : "T",
     title: task.title,
-    statusLine: "Erledigt",
+    metaLine: "Erledigt",
     dateLabel: doneAt,
+    actionLabel: "Öffnen",
     assigneeInitials: assignee.initials,
     assigneeColor: assignee.color,
     commentCount: 0,
@@ -288,9 +314,8 @@ export function buildRelayKanbanBoard(input: {
   });
 
   const board: Record<RelayKanbanColumnId, RelayKanbanCard[]> = {
-    waiting: [],
+    decision: [],
     in_progress: [],
-    freigaben: [],
     done: [],
   };
 
@@ -308,7 +333,7 @@ export function buildRelayKanbanBoard(input: {
     const card = rowToKanbanCard(row, task, membersById, journal, draftStatus);
     if (
       q &&
-      !`${card.title} ${card.typeLabel} ${card.statusLine}`.toLowerCase().includes(q)
+      !`${card.title} ${card.typeLabel} ${card.metaLine}`.toLowerCase().includes(q)
     ) {
       continue;
     }
@@ -346,7 +371,7 @@ export function buildRelayKanbanBoard(input: {
     const card = mapDoneTaskToCard(task, membersById);
     if (
       q &&
-      !`${card.title} ${card.typeLabel} ${card.statusLine}`.toLowerCase().includes(q)
+      !`${card.title} ${card.typeLabel} ${card.metaLine}`.toLowerCase().includes(q)
     ) {
       continue;
     }

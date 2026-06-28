@@ -1,13 +1,8 @@
 "use client";
 
 import {
-  ArrowUpDown,
   ClipboardList,
-  Filter,
-  LayoutGrid,
   MessageSquare,
-  MoreHorizontal,
-  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -137,7 +132,7 @@ export function RelayWorkCenter({
   };
 
   return (
-    <div className="relay-center" data-relay-ui="work-center">
+    <div className="relay-center relay-center--premium" data-relay-ui="work-center">
       <RelayCommandTaskPrefill />
 
       <div className="relay-center__layout">
@@ -224,24 +219,6 @@ export function RelayWorkCenter({
                   Aufgaben
                 </h2>
               </div>
-              <div className="relay-center__panel-tools">
-                <button type="button" className="relay-center__tool" aria-label="Filter">
-                  <Filter strokeWidth={1.75} aria-hidden />
-                  <span>Filter</span>
-                </button>
-                <button type="button" className="relay-center__tool" aria-label="Sortierung">
-                  <ArrowUpDown strokeWidth={1.75} aria-hidden />
-                  <span>Sortierung</span>
-                </button>
-                <button
-                  type="button"
-                  className="relay-center__tool relay-center__tool--active"
-                  aria-label="Kanban-Ansicht"
-                  aria-pressed
-                >
-                  <LayoutGrid strokeWidth={1.75} aria-hidden />
-                </button>
-              </div>
             </header>
 
             <div className="relay-center__tabs" role="tablist" aria-label="Aufgaben-Ansicht">
@@ -285,18 +262,18 @@ export function RelayWorkCenter({
                         <h3>{column.label}</h3>
                         <span className="relay-kanban__count">{cards.length}</span>
                       </div>
-                      <div className="relay-kanban__col-actions">
-                        <button type="button" className="relay-kanban__icon-btn" aria-label="Spaltenoptionen">
-                          <MoreHorizontal strokeWidth={1.75} />
-                        </button>
-                        <button type="button" className="relay-kanban__icon-btn" aria-label="Hinzufügen">
-                          <Plus strokeWidth={1.75} />
-                        </button>
-                      </div>
                     </header>
                     <div className="relay-kanban__cards">
                       {cards.length === 0 ? (
-                        <p className="relay-kanban__empty">Keine Vorgänge</p>
+                        <div className="relay-kanban__empty-state">
+                          <span className="relay-kanban__empty-icon" aria-hidden>
+                            ✓
+                          </span>
+                          <p className="relay-kanban__empty-title">{column.emptyTitle}</p>
+                          {column.emptyHint ? (
+                            <p className="relay-kanban__empty-hint">{column.emptyHint}</p>
+                          ) : null}
+                        </div>
                       ) : (
                         cards.map((card) => (
                           <RelayKanbanCardView
@@ -324,16 +301,6 @@ export function RelayWorkCenter({
                 <h2 id="relay-nachrichten-title" className="relay-center__panel-title">
                   Nachrichten vom Team
                 </h2>
-              </div>
-              <div className="relay-center__panel-tools">
-                <button type="button" className="relay-center__tool" aria-label="Filter">
-                  <Filter strokeWidth={1.75} aria-hidden />
-                  <span>Filter</span>
-                </button>
-                <button type="button" className="relay-center__tool" aria-label="Sortierung">
-                  <ArrowUpDown strokeWidth={1.75} aria-hidden />
-                  <span>Sortierung</span>
-                </button>
               </div>
             </header>
 

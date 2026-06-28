@@ -104,7 +104,6 @@ export function DashboardMobileHealth({
   overviewIncomplete,
 }: Props) {
   const practiceMax = Math.max(...practiceDomains.map((d) => d.count), 1);
-  const practiceTotal = practiceDomains.reduce((sum, d) => sum + d.count, 0);
   const casesWeekTotal = (weeklyCounts ?? []).reduce((a, b) => a + b, 0);
   const freigabenCount = domainCount(practiceDomains, "freigaben");
   const journalCount = domainCount(practiceDomains, "journal");
@@ -152,9 +151,6 @@ export function DashboardMobileHealth({
         <header className="yd-dash-m__card-head">
           <div>
             <h2 className="yd-dash-m__card-title">Praxiszustand</h2>
-            <p className="yd-dash-m__card-meta">
-              {practiceTotal === 0 ? "Alle Bereiche ruhig" : `${practiceTotal} offene Vorgänge`}
-            </p>
           </div>
         </header>
         <div className="yd-dash-m__state-inset">

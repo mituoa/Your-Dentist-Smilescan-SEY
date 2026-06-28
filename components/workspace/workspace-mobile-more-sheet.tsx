@@ -37,7 +37,7 @@ function buildMoreLinks(role: "doctor" | "team"): MoreLink[] {
       {
         id: "journal",
         href: "/journal",
-        label: "Journal",
+        label: "Care Center",
         hint: "Patientenwissen",
         icon: BookOpen,
       },
