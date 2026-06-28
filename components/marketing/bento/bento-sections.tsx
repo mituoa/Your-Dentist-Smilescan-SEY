@@ -87,7 +87,7 @@ export function BentoHeroSection() {
             />
             <p className="yd-bento-hero-signin">
               {BENTO_HERO.signInPrefix}{" "}
-              <Link href="/login" className="yd-bento-link">
+              <Link href="/login" prefetch className="yd-bento-link">
                 {BENTO_HERO.signInLabel}
               </Link>
             </p>
@@ -336,6 +336,8 @@ export function BentoServicesSection() {
                   height={250}
                   className="yd-bento-service-card__image"
                   sizes="(max-width: 768px) 80vw, 33vw"
+                  loading="lazy"
+                  quality={75}
                 />
               </div>
               <div className="yd-bento-service-card__body">

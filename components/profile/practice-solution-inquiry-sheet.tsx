@@ -70,8 +70,18 @@ export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryConte
   }, []);
 
   React.useEffect(() => {
-    if (!open) document.documentElement.style.overflow = "";
+    if (!open) {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    }
   }, [open]);
+
+  React.useEffect(() => {
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   const openInquiry = React.useCallback(
     (inquiryId: PracticeSolutionId, displayTitle: string, categoryId?: string) => {

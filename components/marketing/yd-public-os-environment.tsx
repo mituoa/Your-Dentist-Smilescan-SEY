@@ -10,6 +10,8 @@ export type YdPublicOsEnvironmentProps = {
   mode?: "editorial" | "focus" | "register";
   /** Allow vertical scroll (pricing, register) */
   scroll?: boolean;
+  /** Landing: kein 2s Blur-Fade — sofort lesbar nach Navigation */
+  instantEnter?: boolean;
   className?: string;
 };
 
@@ -20,24 +22,28 @@ export function YdPublicOsEnvironment({
   children,
   mode = "editorial",
   scroll = false,
+  instantEnter = false,
   className,
 }: YdPublicOsEnvironmentProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (instantEnter) return;
     const root = rootRef.current;
     if (!root) return;
     const id = requestAnimationFrame(() => {
       root.classList.add("yd-public-os-awakening-active");
     });
     return () => cancelAnimationFrame(id);
-  }, []);
+  }, [instantEnter]);
 
   return (
     <div
       ref={rootRef}
       className={cn(
-        "yd-public-os yd-public-os-awakening yd-clinical-world",
+        "yd-public-os yd-clinical-world",
+        !instantEnter && "yd-public-os-awakening",
+        instantEnter && "yd-public-os-awakening-active yd-public-os--instant-enter",
         mode === "focus" && "yd-public-os--focus",
         mode === "register" && "yd-public-os--register",
         scroll && "yd-public-os--scroll",

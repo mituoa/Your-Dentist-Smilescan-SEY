@@ -397,10 +397,19 @@
     padding-inline: 0 !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   .yd-workspace main:has(.yd-profile-solutions-workspace) .yd-awaken-canvas {
     padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+  }
+
+  .yd-workspace main:has(.yd-profile-solutions-workspace) .yd-awaken-canvas > .relative {
     overflow: visible !important;
     height: auto !important;
     min-height: 0 !important;

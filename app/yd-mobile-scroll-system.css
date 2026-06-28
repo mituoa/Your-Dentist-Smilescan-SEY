@@ -82,4 +82,34 @@
   .yd-tracker-mobile-case-view .yd-tracker-v6-communication {
     overflow: visible;
   }
+
+  /* Settings (module scroll): flex chain main → canvas → settings */
+  html[data-yd-scroll-owner="module"] main:has(.yd-settings-v2) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="module"] main:has(.yd-settings-v2) .yd-awaken-canvas > .relative {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden !important;
+  }
+
+  /* Profile / solutions (main scroll): canvas grows with content */
+  html[data-yd-scroll-owner="main"] main:has(.yd-profile-solutions-workspace) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="main"] main:has(.yd-profile-editor-workspace) .yd-awaken-canvas {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+  }
+
+  html[data-yd-scroll-owner="main"] main:has(.yd-profile-solutions-workspace) .yd-awaken-canvas > .relative,
+  html[data-yd-scroll-owner="main"] main:has(.yd-profile-editor-workspace) .yd-awaken-canvas > .relative {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    display: block;
+  }
 }

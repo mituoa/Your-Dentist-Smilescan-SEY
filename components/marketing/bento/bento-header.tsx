@@ -85,7 +85,7 @@ export function BentoHeader({ dashboardHref = null }: Props) {
             >
               {BENTO_HERO.primaryCta}
             </button>
-            <Link href="/login" className="yd-bento-header__login hidden md:inline-flex">
+            <Link href="/login" prefetch className="yd-bento-header__login hidden md:inline-flex">
               {BENTO_HERO.signInLabel}
             </Link>
             <button
@@ -129,7 +129,7 @@ export function BentoHeader({ dashboardHref = null }: Props) {
           >
             {BENTO_HERO.primaryCta}
           </button>
-          <Link href="/login" className="yd-bento-mobile-nav__link" onClick={() => setMenuOpen(false)}>
+          <Link href="/login" prefetch className="yd-bento-mobile-nav__link" onClick={() => setMenuOpen(false)}>
             {BENTO_HERO.signInLabel}
           </Link>
         </nav>

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 
 import { BentoHeader } from "@/components/marketing/bento/bento-header";
@@ -17,9 +18,16 @@ import {
   BentoWarumSection,
 } from "@/components/marketing/bento/bento-sections";
 import { BentoPage } from "@/components/marketing/bento/bento-primitives";
-import { YdHomePricingSheet } from "@/components/marketing/yd-home-pricing-sheet";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { scrollToPublicSectionFromHash } from "@/lib/marketing/public-site-scroll";
+
+const YdHomePricingSheet = dynamic(
+  () =>
+    import("@/components/marketing/yd-home-pricing-sheet").then((m) => ({
+      default: m.YdHomePricingSheet,
+    })),
+  { ssr: false }
+);
 
 const PRICING_HASHES = new Set(["preise", "pricing", "pakete"]);
 
@@ -85,7 +93,7 @@ export function YdBentoHomePage({
   }, [syncPricingFromHash]);
 
   return (
-    <YdPublicOsEnvironment scroll mode="editorial">
+    <YdPublicOsEnvironment scroll mode="editorial" instantEnter>
       <BentoPage>
         <BentoHeader dashboardHref={dashboardHref} />
         <BentoHeroSection />
@@ -100,13 +108,15 @@ export function YdBentoHomePage({
         <BentoCtaSection />
         <BentoFooter onPricingClick={openPricingSheet} />
       </BentoPage>
-      <YdHomePricingSheet
-        open={pricingOpen}
-        onClose={closePricingSheet}
-        initialPlan={initialPlan}
-        inviteToken={inviteToken}
-        prefilledEmail={prefilledEmail}
-      />
+      {pricingOpen ? (
+        <YdHomePricingSheet
+          open={pricingOpen}
+          onClose={closePricingSheet}
+          initialPlan={initialPlan}
+          inviteToken={inviteToken}
+          prefilledEmail={prefilledEmail}
+        />
+      ) : null}
     </YdPublicOsEnvironment>
   );
 }

@@ -148,6 +148,14 @@
 }
 
 /* —— Awakening —— */
+.yd-public-os--instant-enter .yd-public-os-awaken-content,
+.yd-public-os--instant-enter .yd-public-os-awaken-field {
+  animation: none;
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
 .yd-public-os-awakening.yd-public-os-awakening-active .yd-public-os-awaken-content {
   animation: yd-public-content-emerge 2000ms var(--yd-public-ease) both;
 }
