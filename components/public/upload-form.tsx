@@ -166,7 +166,7 @@ export function UploadForm({
             Kontaktaufnahme an {practiceName} übermittelt und verarbeitet
             werden.{" "}
             <Link
-              href="/datenschutz"
+              href="/trust/privacy"
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-text-primary underline decoration-border underline-offset-2 hover:decoration-text-primary"

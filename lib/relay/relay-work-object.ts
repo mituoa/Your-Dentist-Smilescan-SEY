@@ -77,6 +77,12 @@ export function resolveRelayWorkObjectType(
   return "teamaufgabe";
 }
 
+function truncateForTitle(text: string | null | undefined, maxLength = 64): string | null {
+  if (!text) return null;
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}…`;
+}
+
 export function enrichRelayWorkRowDisplay(
   row: RelayWorkRow,
   options?: {
@@ -92,13 +98,17 @@ export function enrichRelayWorkRowDisplay(
   if (journal) {
     const contentType = inferContentType(journal);
     const typeLabel = getContentTypeLabel(contentType);
-    const title = journal.title?.trim() || "Ohne Titel";
+    const ownTitle = journal.title?.trim();
+    const excerpt = journal.excerpt?.trim();
+    const title = ownTitle || truncateForTitle(excerpt) || typeLabel;
     const markdown = journal.content_markdown?.trim();
     const sectionCount = markdown ? markdown.split(/\n#{1,3}\s+/).length : 0;
     const sectionHint =
       sectionCount > 1
         ? `${Math.max(1, sectionCount - 1)} Abschnitte ergänzt`
-        : journal.excerpt?.trim() || typeLabel;
+        : ownTitle
+          ? excerpt || typeLabel
+          : "Entwurf — noch ohne Titel";
 
     return {
       ...row,

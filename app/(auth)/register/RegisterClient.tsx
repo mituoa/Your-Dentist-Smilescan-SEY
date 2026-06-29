@@ -1416,14 +1416,14 @@ export function RegisterClient(props: {
                             <RegisterStep4Checkbox checked={acceptedLegal} onChange={setAcceptedLegal}>
                               <>
                                 <Link
-                                  href="/agb"
+                                  href="/trust/terms"
                                   className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
                                 >
                                   AGB
                                 </Link>{" "}
                                 und{" "}
                                 <Link
-                                  href="/datenschutz"
+                                  href="/trust/privacy"
                                   className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
                                 >
                                   Datenschutz
@@ -1442,7 +1442,7 @@ export function RegisterClient(props: {
                                   {" "}
                                   (
                                   <Link
-                                    href="/widerruf"
+                                    href="/trust/terms#21-widerruf"
                                     className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
                                   >
                                     Widerruf

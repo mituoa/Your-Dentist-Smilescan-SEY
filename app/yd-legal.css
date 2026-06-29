@@ -1,0 +1,366 @@
+/* Your Dentist — Rechtliche Informationen (ruhig, medizinisch, klar) */
+
+.yd-legal {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fb;
+  color: #16233a;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+.yd-legal-main {
+  flex: 1;
+  padding: 0 0 max(2.5rem, env(safe-area-inset-bottom));
+}
+
+.yd-legal-container {
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0 max(1.125rem, env(safe-area-inset-left)) 0 max(1.125rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 768px) {
+  .yd-legal-container {
+    max-width: 42rem;
+    padding-inline: 1.5rem;
+  }
+}
+
+.yd-legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.75rem 0 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #54637a;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.yd-legal-back:hover {
+  color: #16233a;
+}
+
+.yd-legal-hub__head {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.yd-legal-hub__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.375rem, 4vw, 1.625rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #16233a;
+}
+
+.yd-legal-hub__lead {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #54637a;
+  max-width: 32rem;
+}
+
+.yd-legal-draft {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(180, 83, 9, 0.18);
+  background: rgba(255, 251, 235, 0.85);
+}
+
+.yd-legal-draft p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #92400e;
+}
+
+.yd-legal-index {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid rgba(22, 35, 58, 0.08);
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(22, 35, 58, 0.04);
+}
+
+.yd-legal-index-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.125rem;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid rgba(22, 35, 58, 0.06);
+  transition: background 0.18s ease;
+  min-height: 3.25rem;
+}
+
+.yd-legal-index li:last-child .yd-legal-index-row {
+  border-bottom: none;
+}
+
+@media (hover: hover) {
+  .yd-legal-index-row:hover {
+    background: rgba(248, 251, 253, 0.95);
+  }
+}
+
+.yd-legal-index-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  text-align: left;
+}
+
+.yd-legal-index-row__label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #16233a;
+}
+
+.yd-legal-index-row__desc {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #8a93a3;
+}
+
+.yd-legal-index-row__icon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: #8a93a3;
+}
+
+.yd-legal-doc__head {
+  margin-bottom: 1.5rem;
+}
+
+.yd-legal-doc__title {
+  margin: 0 0 0.375rem;
+  font-size: clamp(1.375rem, 4vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #16233a;
+}
+
+.yd-legal-doc__meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #8a93a3;
+}
+
+.yd-legal-doc__toc {
+  margin-bottom: 1.75rem;
+  padding: 1rem 1.125rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(22, 35, 58, 0.06);
+}
+
+.yd-legal-doc__toc-title {
+  margin: 0 0 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a93a3;
+}
+
+.yd-legal-doc__toc-list {
+  margin: 0;
+  padding-left: 1.125rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: #54637a;
+}
+
+.yd-legal-doc__toc-link {
+  color: #2f6fd6;
+  text-decoration: none;
+}
+
+.yd-legal-doc__toc-link:hover {
+  text-decoration: underline;
+}
+
+.yd-legal-doc__section {
+  margin-bottom: 1.5rem;
+  scroll-margin-top: 5rem;
+}
+
+.yd-legal-doc__section-title {
+  margin: 0 0 0.625rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #16233a;
+}
+
+.yd-legal-doc__p {
+  margin: 0 0 0.625rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #3d4f63;
+}
+
+.yd-legal-doc__p:last-child {
+  margin-bottom: 0;
+}
+
+.yd-legal-doc__footer {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(22, 35, 58, 0.08);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: #8a93a3;
+}
+
+.yd-legal-doc__footer p {
+  margin: 0 0 0.5rem;
+}
+
+.yd-legal-doc__footer-link {
+  color: #2f6fd6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.yd-legal-doc__footer-link:hover {
+  text-decoration: underline;
+}
+
+/* Footer — Rechtliches-Spalte */
+.yd-public-site-footer--legal-columns .yd-public-site-footer-inner {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .yd-public-site-footer--legal-columns .yd-public-site-footer-inner {
+    grid-template-columns: 1fr auto auto;
+    align-items: start;
+    gap: 2rem 3rem;
+  }
+}
+
+.yd-public-site-footer-col__title {
+  margin: 0 0 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(22, 35, 58, 0.42);
+}
+
+.yd-public-site-footer-col__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-public-site-footer-col__link {
+  font-size: 0.8125rem;
+  color: rgba(22, 35, 58, 0.62);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.yd-public-site-footer-col__link:hover {
+  color: #16233a;
+}
+
+/* Settings — Rechtliches */
+.yd-settings-legal__acceptance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.yd-settings-legal__card {
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(22, 35, 58, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.yd-settings-legal__card-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a93a3;
+}
+
+.yd-settings-legal__card-value {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #16233a;
+}
+
+.yd-settings-legal__card-sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #8a93a3;
+}
+
+.yd-settings-legal__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid rgba(22, 35, 58, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.yd-settings-legal__link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #16233a;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(22, 35, 58, 0.06);
+  transition: background 0.18s ease;
+}
+
+.yd-settings-legal__link-row:last-child {
+  border-bottom: none;
+}
+
+.yd-settings-legal__link-row:hover {
+  background: rgba(248, 251, 253, 0.95);
+}
+
+.yd-settings-legal__link-row svg {
+  flex-shrink: 0;
+  color: #8a93a3;
+}
+
+.yd-settings-legal__links-label {
+  margin-bottom: 0.5rem;
+}

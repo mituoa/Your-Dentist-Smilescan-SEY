@@ -7,6 +7,7 @@ import {
   Mail,
   MapPin,
   MessageSquare,
+  Scale,
   Shield,
   Sparkles,
   Store,
@@ -25,7 +26,8 @@ export type SettingsSectionId =
   | "nachrichten"
   | "automatisierungen"
   | "journal-kategorien"
-  | "journal-vorlagen";
+  | "journal-vorlagen"
+  | "rechtliches";
 
 export type SettingsNavItem = {
   id: SettingsSectionId;
@@ -126,6 +128,17 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
       },
     ],
   },
+  {
+    label: "RECHTLICHES",
+    items: [
+      {
+        id: "rechtliches",
+        label: "Rechtliches",
+        hint: "Verträge und Dokumente",
+        icon: Scale,
+      },
+    ],
+  },
 ];
 
 export const SETTINGS_SECTION_IDS = SETTINGS_NAV_GROUPS.flatMap((g) =>
@@ -203,10 +216,14 @@ export const SETTINGS_MOBILE_NAV_GROUPS: SettingsNavGroup[] = [
   },
   {
     label: "SYSTEM",
-    items: pickNavItems(["sicherheit"]).map((item) => ({
-      ...item,
-      label: "Sicherheit & Login",
-      hint: "Passwort und Sitzungen",
-    })),
+    items: pickNavItems(["sicherheit", "rechtliches"]).map((item) =>
+      item.id === "sicherheit"
+        ? {
+            ...item,
+            label: "Sicherheit & Login",
+            hint: "Passwort und Sitzungen",
+          }
+        : item
+    ),
   },
 ];

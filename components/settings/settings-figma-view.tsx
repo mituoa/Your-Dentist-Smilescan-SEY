@@ -23,6 +23,7 @@ import { SettingsMobileBack } from "@/components/settings/settings-mobile-back";
 import { SettingsMobileNav } from "@/components/settings/settings-mobile-nav";
 import { SettingsOpeningHoursPanel } from "@/components/settings/settings-opening-hours-panel";
 import { SettingsPracticeProfilePanel } from "@/components/settings/settings-practice-profile-panel";
+import { SettingsLegalPanel } from "@/components/settings/settings-legal-panel";
 import {
   SettingsPlaceholderPanel,
   SettingsSecurityPanel,
@@ -37,6 +38,7 @@ import {
 } from "@/lib/settings/settings-navigation";
 import { cn } from "@/lib/utils";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
+import type { WorkspaceContractAcceptance } from "@/lib/types/settings-legal";
 import type { ThemePreference } from "@/lib/theme";
 import type { OpeningHoursConfig } from "@/lib/settings/opening-hours";
 
@@ -71,6 +73,7 @@ interface SettingsFigmaViewProps {
   members: TeamMember[];
   invitations: TeamInvitation[];
   currentUserId: string;
+  contract: WorkspaceContractAcceptance | null;
 }
 
 export function SettingsFigmaView({
@@ -86,6 +89,7 @@ export function SettingsFigmaView({
   members,
   invitations,
   currentUserId,
+  contract,
 }: SettingsFigmaViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -514,6 +518,8 @@ export function SettingsFigmaView({
             hrefLabel="Vorlagen im Journal"
           />
         );
+      case "rechtliches":
+        return <SettingsLegalPanel contract={contract} />;
       default:
         return null;
     }

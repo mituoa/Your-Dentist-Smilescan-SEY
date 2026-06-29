@@ -329,10 +329,10 @@ export function LoginPageClient({
 
         <footer className="yd-auth-legal-minimal">
           <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
-            <Link href="/datenschutz" className="yd-auth-legal-minimal-link">
+            <Link href="/trust/privacy" className="yd-auth-legal-minimal-link">
               Datenschutz
             </Link>
-            <Link href="/impressum" className="yd-auth-legal-minimal-link">
+            <Link href="/trust/imprint" className="yd-auth-legal-minimal-link">
               Impressum
             </Link>
           </nav>

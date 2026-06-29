@@ -167,8 +167,7 @@ export const PUBLIC_SITE_FOOTER = {
   tagline: PUBLIC_BRAND_TAGLINE,
   links: [
     { label: "Produkt", href: "/produkt" },
-    { label: "Datenschutz", href: "/datenschutz" },
-    { label: "Impressum", href: "/impressum" },
+    { label: "Trust Center", href: "/trust" },
     { label: "Gespräch vereinbaren", href: `/#${PUBLIC_SITE_SECTIONS.demo}` },
     { label: "Anmelden", href: "/login" },
   ],

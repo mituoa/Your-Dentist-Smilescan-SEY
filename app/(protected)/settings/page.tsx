@@ -46,6 +46,7 @@ export default async function SettingsPage() {
         members={data.members}
         invitations={data.invitations}
         currentUserId={user.id}
+        contract={data.contract}
       />
     </Suspense>
   );

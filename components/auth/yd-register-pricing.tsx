@@ -166,7 +166,7 @@ export function YdRegisterPricing({
 
       <p className="yd-register-pricing-enterprise">
         Größere Einrichtungen oder mehrere Standorte?{" "}
-        <Link href="/impressum" className="yd-auth-link">
+        <Link href="/trust/imprint" className="yd-auth-link">
           Kontakt aufnehmen
         </Link>
       </p>

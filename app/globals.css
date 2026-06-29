@@ -32,10 +32,6 @@
 @import "./yd-relay-messages.css";
 @import "./yd-relay-enterprise.css";
 @import "./yd-relay-decisions.css";
-@import "./yd-relay-decision-workspace.css";
-@import "./yd-relay-clinical-workspace.css";
-@import "./yd-relay-workspace.css";
-@import "./yd-relay-decision-center.css";
 @import "./yd-relay-work-center.css";
 @import "./yd-relay-practice-central.css";
 @import "./yd-clinical-controls.css";
@@ -51,6 +47,8 @@
 @import "./yd-loading.css";
 @import "./yd-product-overview.css";
 @import "./yd-home-os.css";
+@import "./yd-legal.css";
+@import "./yd-trust.css";
 
 @layer base {
   :root {

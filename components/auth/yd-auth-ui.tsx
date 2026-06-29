@@ -135,11 +135,11 @@ export function YdAuthLegalFooter(props: {
           Startseite
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/datenschutz" className="yd-auth-link">
+        <Link href="/trust/privacy" className="yd-auth-link">
           Datenschutz
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/impressum" className="yd-auth-link">
+        <Link href="/trust/imprint" className="yd-auth-link">
           Impressum
         </Link>
       </div>

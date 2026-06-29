@@ -6,6 +6,7 @@ import {
   parseOpeningHoursConfig,
 } from "@/lib/settings/opening-hours";
 import type { TeamInvitation, TeamMember } from "@/lib/types/settings-team";
+import type { WorkspaceContractAcceptance } from "@/lib/types/settings-legal";
 
 export type { TeamInvitation, TeamMember };
 
@@ -52,6 +53,21 @@ export async function getSettingsData(workspaceId: string) {
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });
 
+  const { data: contractRow } = await supabase
+    .from("workspace_contracts")
+    .select("contract_version, accepted_at, accepted_tos, accepted_privacy")
+    .eq("workspace_id", workspaceId)
+    .maybeSingle();
+
+  const contract: WorkspaceContractAcceptance | null = contractRow
+    ? {
+        contract_version: contractRow.contract_version,
+        accepted_at: contractRow.accepted_at,
+        accepted_tos: contractRow.accepted_tos,
+        accepted_privacy: contractRow.accepted_privacy,
+      }
+    : null;
+
   return {
     workspace: ws.data || null,
     profile: profile.data
@@ -64,6 +80,7 @@ export async function getSettingsData(workspaceId: string) {
       : null,
     members,
     invitations: (invitations as TeamInvitation[]) || [],
+    contract,
   };
 }
 

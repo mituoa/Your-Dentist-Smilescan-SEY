@@ -278,8 +278,7 @@ export const BENTO_CTA = {
 
 export const BENTO_FOOTER = {
   links: [
-    { label: "Datenschutz", href: "/datenschutz" },
-    { label: "Impressum", href: "/impressum" },
+    { label: "Trust Center", href: "/trust" },
     { label: "Preise", href: "/#preise" },
     { label: "Anmelden", href: "/login" },
   ],
