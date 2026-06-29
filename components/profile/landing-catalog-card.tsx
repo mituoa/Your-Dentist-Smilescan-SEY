@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
@@ -51,6 +52,16 @@ export function LandingCatalogCard({ category, onBook }: Props) {
         <ChevronRight className="yd-cl-catalog__chevron" aria-hidden />
       </div>
     </button>
+    {category.previewHref ? (
+      <Link
+        href={category.previewHref}
+        target="_blank"
+        className="yd-cl-catalog__preview-link"
+        onClick={(e) => e.stopPropagation()}
+      >
+        Vorschau ansehen
+      </Link>
+    ) : null}
     </li>
   );
 }

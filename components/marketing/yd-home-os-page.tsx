@@ -33,7 +33,6 @@ import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
 import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 
 type Props = {
-  dashboardHref?: string | null;
   initialPlan?: string | null;
   inviteToken?: string;
   prefilledEmail?: string;
@@ -302,7 +301,6 @@ const TRUST_ITEMS = [
 ];
 
 export function YdHomeOsPage({
-  dashboardHref = null,
   initialPlan = null,
   inviteToken = "",
   prefilledEmail = "",
@@ -353,15 +351,9 @@ export function YdHomeOsPage({
             ))}
           </nav>
           <div className="yd-os-header-actions">
-            {dashboardHref ? (
-              <Link href={dashboardHref} className="yd-os-login">
-                Dashboard
-              </Link>
-            ) : (
-              <Link href="/login" className="yd-os-login">
-                Anmelden
-              </Link>
-            )}
+            <Link href="/login" className="yd-os-login">
+              Anmelden
+            </Link>
             <button type="button" className="yd-os-btn yd-os-btn--primary yd-os-btn--sm" onClick={() => go("demo")}>
               Demo buchen
             </button>
@@ -386,8 +378,8 @@ export function YdHomeOsPage({
               {item.label}
             </button>
           ))}
-          <Link href={dashboardHref ?? "/login"} onClick={() => setMenuOpen(false)}>
-            {dashboardHref ? "Dashboard" : "Anmelden"}
+          <Link href="/login" onClick={() => setMenuOpen(false)}>
+            Anmelden
           </Link>
         </nav>
       </div>

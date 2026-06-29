@@ -46,7 +46,7 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname.startsWith("/journal")) {
     return {
       eyebrow: "Care Center",
-      subtitle: "",
+      subtitle: "Antworten für Patienten — weniger Standardanrufe.",
       showSearch: false,
       hideGreeting: true,
     };

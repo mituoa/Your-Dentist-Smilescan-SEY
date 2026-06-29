@@ -124,7 +124,22 @@
 
 .yd-cl-catalog__item {
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   min-width: 0;
+}
+
+.yd-cl-catalog__preview-link {
+  align-self: flex-start;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--bento-primary, #1a4f9c);
+  text-decoration: none;
+  padding: 0.2rem 0.1rem;
+}
+
+.yd-cl-catalog__preview-link:hover {
+  text-decoration: underline;
 }
 
 @media (min-width: 768px) {

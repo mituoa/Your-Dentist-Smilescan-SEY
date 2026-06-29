@@ -11,6 +11,8 @@ export type LandingCategory = {
   image: string;
   imagePosition?: string;
   inquiryId: PracticeSolutionId;
+  /** Fertige Beispiel-Landingpage zu dieser Leistung (Vorlage), falls vorhanden. */
+  previewHref?: string;
 };
 
 export const LANDING_HERO = {
@@ -35,6 +37,7 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
     image: landingCatalogPreview("aligner", LANDING_IMG.aligner),
     imagePosition: "50% 22%",
     inquiryId: "aligner",
+    previewHref: "/landingpages/aligner",
   },
   {
     id: "implantologie",
