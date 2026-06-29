@@ -5,7 +5,7 @@ import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
 export default function RegisterLoading() {
   return (
-    <YdPublicOsEnvironment mode="register" scroll>
+    <YdPublicOsEnvironment mode="register" scroll landingAtmosphere instantEnter>
       <YdProductChrome variant="entry" />
       <main className="yd-product-entry yd-clinical-entry">
         <section className="yd-product-entry-card yd-clinical-entry-panel yd-auth-register-page-card">

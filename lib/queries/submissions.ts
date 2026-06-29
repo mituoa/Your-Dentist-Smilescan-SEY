@@ -60,22 +60,43 @@ async function signSubmissionPhotos(
     created_at: string;
   }>
 ) {
-  // Admin nur für Sign — storage_path stammt aus workspace-gefilterter Submission-Abfrage.
+  if (sortedPhotos.length === 0) return [];
+
   const admin = createAdminClient();
-  return Promise.all(
-    sortedPhotos.map(async (photo) => {
-      const { data: signed } = await admin.storage
-        .from("submission-photos")
-        .createSignedUrl(photo.storage_path, SIGNED_PHOTO_URL_TTL_SEC);
-      return {
-        id: photo.id,
-        storage_path: photo.storage_path,
-        sort_order: photo.sort_order,
-        created_at: photo.created_at,
-        signed_url: signed?.signedUrl ?? null,
-      };
-    })
-  );
+  const paths = sortedPhotos.map((photo) => photo.storage_path);
+  const { data, error } = await admin.storage
+    .from("submission-photos")
+    .createSignedUrls(paths, SIGNED_PHOTO_URL_TTL_SEC);
+
+  if (error || !data) {
+    return sortedPhotos.map((photo) => ({
+      id: photo.id,
+      storage_path: photo.storage_path,
+      sort_order: photo.sort_order,
+      created_at: photo.created_at,
+      signed_url: null,
+    }));
+  }
+
+  const signedByPath = new Map<string, string | null>();
+  for (const entry of data) {
+    const url = entry.signedUrl ?? null;
+    if (entry.path) signedByPath.set(entry.path, url);
+    if (entry.path && !entry.path.startsWith("/")) {
+      signedByPath.set(`/${entry.path}`, url);
+    }
+  }
+
+  return sortedPhotos.map((photo) => ({
+    id: photo.id,
+    storage_path: photo.storage_path,
+    sort_order: photo.sort_order,
+    created_at: photo.created_at,
+    signed_url:
+      signedByPath.get(photo.storage_path) ??
+      signedByPath.get(photo.storage_path.replace(/^\//, "")) ??
+      null,
+  }));
 }
 
 async function getSubmissionByIdInner(

@@ -1,7 +1,8 @@
 "use client";
 
 import { Check, MoreHorizontal } from "lucide-react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import {
@@ -9,8 +10,9 @@ import {
   updateSubmissionPracticeStatus,
   type InboxPracticeStatusValue,
 } from "@/app/(protected)/inbox/[id]/actions";
+import { useTrackerInboxRead } from "@/components/inbox/tracker-inbox-read-context";
 import {
-  TRACKER_ENTERPRISE_STATUS_OPTIONS,
+  TRACKER_LIST_STATUS_OPTIONS,
   displayPracticeStatusForCase,
   enterpriseStatusLabel,
 } from "@/lib/inbox/tracker-enterprise-status";
@@ -24,7 +26,47 @@ type TrackerInboxListStatusMenuProps = {
   className?: string;
 };
 
-/** Dezentes Status-Menü für die Patientenliste — Indikator + Popover. */
+function usePopoverPosition(
+  open: boolean,
+  anchorRef: React.RefObject<HTMLElement | null>
+) {
+  const [style, setStyle] = useState<React.CSSProperties>({});
+
+  useLayoutEffect(() => {
+    if (!open || !anchorRef.current) return;
+
+    const update = () => {
+      const el = anchorRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const menuHeight = 240;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const openUp = spaceBelow < menuHeight;
+      const width = 216;
+
+      setStyle({
+        position: "fixed",
+        left: Math.min(Math.max(8, rect.right - width), window.innerWidth - width - 8),
+        top: openUp ? rect.top - 8 : rect.bottom + 6,
+        transform: openUp ? "translateY(-100%)" : undefined,
+        zIndex: 10050,
+        minWidth: "13.5rem",
+      });
+    };
+
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open, anchorRef]);
+
+  return style;
+}
+
+/** Dezentes Status-Menü für die Patientenliste — Popover per Portal (Mobile-safe). */
 export function TrackerInboxListStatusMenu({
   submissionId,
   status,
@@ -32,10 +74,13 @@ export function TrackerInboxListStatusMenu({
   className,
 }: TrackerInboxListStatusMenuProps) {
   const router = useRouter();
+  const { markCaseUnread } = useTrackerInboxRead();
   const rootRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const popoverStyle = usePopoverPosition(open, rootRef);
 
   const displayStatus = displayPracticeStatusForCase(status);
   const statusLabel = enterpriseStatusLabel(displayStatus);
@@ -43,19 +88,28 @@ export function TrackerInboxListStatusMenu({
 
   useEffect(() => {
     if (!open) return;
+
     const onPointerDown = (e: PointerEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) {
-        setOpen(false);
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target) || popoverRef.current?.contains(target)) {
+        return;
       }
+      setOpen(false);
     };
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    window.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("keydown", onKeyDown);
+
+    const timer = window.setTimeout(() => {
+      document.addEventListener("pointerdown", onPointerDown, true);
+    }, 0);
+
+    document.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown);
-      window.removeEventListener("keydown", onKeyDown);
+      window.clearTimeout(timer);
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
@@ -83,8 +137,99 @@ export function TrackerInboxListStatusMenu({
 
   const markUnread = () => {
     if (!canMarkUnread) return;
-    run(() => markSubmissionUnseen(submissionId));
+    run(async () => {
+      const res = await markSubmissionUnseen(submissionId);
+      if (!res.error) {
+        markCaseUnread(submissionId);
+      }
+      return res;
+    });
   };
+
+  const toggleOpen = (e: React.MouseEvent | React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pending) return;
+    setOpen((v) => !v);
+  };
+
+  const popover =
+    open && typeof document !== "undefined" ? (
+      <div
+        ref={popoverRef}
+        className="yd-tracker-list-status-menu__popover yd-tracker-list-status-menu__popover--portal"
+        style={popoverStyle}
+        role="menu"
+        aria-label="Fallstatus"
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <p className="yd-tracker-list-status-menu__popover-label">Status</p>
+        <ul className="yd-tracker-list-status-menu__options">
+          {TRACKER_LIST_STATUS_OPTIONS.map((opt) => {
+            const isActive = opt.id === displayStatus;
+            return (
+              <li key={opt.id}>
+                <button
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={isActive}
+                  className={cn(
+                    "yd-tracker-list-status-menu__option",
+                    isActive && "yd-tracker-list-status-menu__option--active"
+                  )}
+                  disabled={pending}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    applyStatus(opt.id);
+                  }}
+                >
+                  <span
+                    className={cn(
+                      "yd-tracker-list-status-menu__option-dot",
+                      `yd-tracker-list-status-menu__option-dot--${opt.id}`
+                    )}
+                    aria-hidden
+                  />
+                  <span className="yd-tracker-list-status-menu__option-label">{opt.label}</span>
+                  {isActive ? (
+                    <Check className="yd-tracker-list-status-menu__check" strokeWidth={2.25} aria-hidden />
+                  ) : (
+                    <span className="yd-tracker-list-status-menu__check-placeholder" aria-hidden />
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        {canMarkUnread ? (
+          <>
+            <div className="yd-tracker-list-status-menu__divider" role="separator" />
+            <button
+              type="button"
+              role="menuitem"
+              className="yd-tracker-list-status-menu__secondary"
+              disabled={pending}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                markUnread();
+              }}
+            >
+              Als ungelesen markieren
+            </button>
+          </>
+        ) : null}
+        {error ? (
+          <p className="yd-tracker-list-status-menu__error" role="status" aria-live="polite">
+            {error}
+          </p>
+        ) : null}
+      </div>
+    ) : null;
 
   return (
     <div
@@ -92,7 +237,7 @@ export function TrackerInboxListStatusMenu({
       className={cn("yd-tracker-list-status-menu", className)}
       aria-busy={pending}
       onClick={(e) => e.stopPropagation()}
-      onKeyDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <span
         className={cn(
@@ -113,69 +258,11 @@ export function TrackerInboxListStatusMenu({
         aria-expanded={open}
         aria-label="Status ändern"
         disabled={pending}
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggleOpen}
       >
         <MoreHorizontal className="yd-tracker-list-status-menu__icon" strokeWidth={2} aria-hidden />
       </button>
-
-      {open ? (
-        <div className="yd-tracker-list-status-menu__popover" role="menu" aria-label="Fallstatus">
-          <p className="yd-tracker-list-status-menu__popover-label">Status</p>
-          <ul className="yd-tracker-list-status-menu__options">
-            {TRACKER_ENTERPRISE_STATUS_OPTIONS.map((opt) => {
-              const isActive = opt.id === displayStatus;
-              return (
-                <li key={opt.id}>
-                  <button
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={isActive}
-                    className={cn(
-                      "yd-tracker-list-status-menu__option",
-                      isActive && "yd-tracker-list-status-menu__option--active"
-                    )}
-                    disabled={pending}
-                    onClick={() => applyStatus(opt.id)}
-                  >
-                    <span
-                      className={cn(
-                        "yd-tracker-list-status-menu__option-dot",
-                        `yd-tracker-list-status-menu__option-dot--${opt.id}`
-                      )}
-                      aria-hidden
-                    />
-                    <span className="yd-tracker-list-status-menu__option-label">{opt.label}</span>
-                    {isActive ? (
-                      <Check className="yd-tracker-list-status-menu__check" strokeWidth={2.25} aria-hidden />
-                    ) : (
-                      <span className="yd-tracker-list-status-menu__check-placeholder" aria-hidden />
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          {canMarkUnread ? (
-            <>
-              <div className="yd-tracker-list-status-menu__divider" role="separator" />
-              <button
-                type="button"
-                role="menuitem"
-                className="yd-tracker-list-status-menu__secondary"
-                disabled={pending}
-                onClick={markUnread}
-              >
-                Als ungelesen markieren
-              </button>
-            </>
-          ) : null}
-          {error ? (
-            <p className="yd-tracker-list-status-menu__error" role="status" aria-live="polite">
-              {error}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      {popover ? createPortal(popover, document.body) : null}
     </div>
   );
 }

@@ -1,6 +1,7 @@
-import { YdAuthEnvironment } from "@/components/auth/yd-auth-environment";
-import { YdAuthIntro, YdAuthLegalFooter } from "@/components/auth/yd-auth-ui";
 import { ResetPasswordForm } from "./ResetPasswordForm";
+import { YdAuthIntro, YdAuthLegalFooter } from "@/components/auth/yd-auth-ui";
+import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
+import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { sanitizeTeamInvitationTokenForAuth } from "@/lib/team-invitations/sanitize-invite-token-for-auth";
 
 interface ResetPasswordPageProps {
@@ -14,18 +15,23 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
   const invite = sanitizeTeamInvitationTokenForAuth(params.invite);
 
   return (
-    <YdAuthEnvironment>
-      <YdAuthIntro
-        title="Neues Passwort festlegen"
-        subtitle="Wählen Sie ein sicheres Passwort für Ihren geschützten Praxiszugang."
-        fieldIndex={0}
-      />
-      <ResetPasswordForm
-        tokenHashFromQuery={tokenHash}
-        typeFromQuery={type}
-        inviteTokenFromQuery={invite || null}
-      />
-      <YdAuthLegalFooter className="mt-8" />
-    </YdAuthEnvironment>
+    <YdPublicOsEnvironment mode="focus" scroll landingAtmosphere instantEnter>
+      <main className="yd-product-entry yd-login-page-entry">
+        <YdProductChrome variant="entry" />
+        <section className="yd-product-entry-card yd-clinical-entry--login yd-clinical-entry-panel--login-entrance">
+          <YdAuthIntro
+            title="Neues Passwort festlegen"
+            subtitle="Wählen Sie ein sicheres Passwort für Ihren geschützten Praxiszugang."
+            fieldIndex={0}
+          />
+          <ResetPasswordForm
+            tokenHashFromQuery={tokenHash}
+            typeFromQuery={type}
+            inviteTokenFromQuery={invite || null}
+          />
+          <YdAuthLegalFooter className="mt-8" />
+        </section>
+      </main>
+    </YdPublicOsEnvironment>
   );
 }

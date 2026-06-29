@@ -1,10 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { TrackerMobileInbox } from "@/components/inbox/tracker-mobile-inbox";
 import { TrackerInboxListCardContent } from "@/components/inbox/tracker-inbox-list-card-content";
+import { TrackerInboxListStatusMenu } from "@/components/inbox/tracker-inbox-list-status-menu";
+import { useTrackerInboxRead } from "@/components/inbox/tracker-inbox-read-context";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
@@ -17,6 +20,7 @@ import {
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
 import { inboxListUrgencyTier } from "@/lib/inbox/tracker-v9-clinical";
+import { displayPracticeStatusForCase } from "@/lib/inbox/tracker-enterprise-status";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
 import { cn } from "@/lib/utils";
 
@@ -24,16 +28,23 @@ type TrackerInboxPanelProps = {
   items: SubmissionListItem[];
 };
 
+function caseHref(id: string, q?: string | null): string {
+  return q ? `/inbox/${id}?q=${encodeURIComponent(q)}` : `/inbox/${id}`;
+}
+
 /** Desktop-Arbeitsliste — stabile Reihenfolge, Status in der Liste. */
 export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
-  const router = useRouter();
   const pathname = usePathname() || "";
   const searchParams = useSearchParams();
   const q = searchParams.get("q")?.trim();
+  const { mergeSeenState, markCaseOpened } = useTrackerInboxRead();
 
   const enriched = useMemo(
-    () => sortTrackerInboxItems(items as EnrichedSubmissionListItem[]),
-    [items]
+    () =>
+      sortTrackerInboxItems(
+        items.map((item) => mergeSeenState(item as EnrichedSubmissionListItem))
+      ),
+    [items, mergeSeenState]
   );
 
   const [filter, setFilter] = useState<TrackerInboxFilter>("all");
@@ -52,11 +63,6 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
   useEffect(() => {
     setFilter("all");
   }, [qLower]);
-
-  const goToCase = (id: string) => {
-    const href = q ? `/inbox/${id}?q=${encodeURIComponent(q)}` : `/inbox/${id}`;
-    router.push(href);
-  };
 
   const emptyCopy =
     filter === "all" && q ? "Keine Treffer für diese Suche." : TRACKER_FILTER_EMPTY[filter];
@@ -136,19 +142,24 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                       isActive && "yd-tracker-v12-inbox-card--active"
                     )}
                   >
-                    <div
-                      role="button"
-                      className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body yd-tracker-v16-inbox-card__body"
-                      onClick={() => goToCase(item.id)}
-                      onKeyDown={(e) => {
-                        if (e.key !== "Enter" && e.key !== " ") return;
-                        e.preventDefault();
-                        goToCase(item.id);
-                      }}
-                      tabIndex={0}
-                      aria-current={isActive ? "page" : undefined}
-                    >
-                      <TrackerInboxListCardContent item={item} />
+                    <div className="yd-tracker-inbox-card__inner">
+                      <Link
+                        href={caseHref(item.id, q)}
+                        prefetch
+                        scroll={false}
+                        className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body yd-tracker-v16-inbox-card__body yd-tracker-inbox-card__tap"
+                        aria-current={isActive ? "page" : undefined}
+                        onClick={() => markCaseOpened(item.id)}
+                      >
+                        <TrackerInboxListCardContent item={item} showStatusMenu={false} />
+                      </Link>
+                      <div className="yd-tracker-inbox-card__status">
+                        <TrackerInboxListStatusMenu
+                          submissionId={item.id}
+                          status={displayPracticeStatusForCase(item.practice_status)}
+                          seenAt={item.seen_at}
+                        />
+                      </div>
                     </div>
                   </div>
                 </li>

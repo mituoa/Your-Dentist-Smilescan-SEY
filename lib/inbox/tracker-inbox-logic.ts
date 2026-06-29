@@ -197,7 +197,7 @@ export function matchesTrackerFilter(
     case "all":
       return tier !== "completed";
     case "unread":
-      return trackerInboxReadState(item) === "new_submission" && tier !== "completed";
+      return trackerInboxReadState(item) !== "read" && tier !== "completed";
     case "waiting_on_me":
       return tier === "decision";
     case "patient_waiting":

@@ -1,18 +1,19 @@
 /**
- * Relay Work Center — Kanban + Team-Inbox (Premium Finishing)
+ * Relay Work Center — Kanban + Team-Inbox (Premium V3)
  */
 
 .relay-center {
   --rc-page: transparent;
   --rc-surface: #ffffff;
-  --rc-surface-warm: #fdfcfa;
-  --rc-border: rgba(15, 23, 42, 0.06);
+  --rc-surface-warm: #f8fafc;
+  --rc-border: rgba(186, 203, 222, 0.42);
   --rc-ink: #0c1929;
   --rc-muted: #5e7389;
-  --rc-faint: #94a3b8;
+  --rc-faint: rgba(12, 25, 41, 0.38);
   --rc-blue: #1a4f9c;
+  --rc-blue-soft: rgba(26, 79, 156, 0.08);
   --rc-green: #16a34a;
-  --rc-radius: 16px;
+  --rc-radius: 18px;
   --rc-space: 8px;
   --rc-space-2: 16px;
 
@@ -24,6 +25,10 @@
   background: var(--rc-page);
 }
 
+.relay-center--v3 .relay-center__layout {
+  gap: 1.25rem;
+}
+
 .relay-center__layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -33,8 +38,8 @@
 
 @media (min-width: 1024px) {
   .relay-center__layout {
-    grid-template-columns: 12.5rem minmax(0, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: 13.75rem minmax(0, 1fr);
+    gap: 1.75rem;
     align-items: start;
   }
 }
@@ -73,21 +78,23 @@
 .relay-center__areas-list {
   list-style: none;
   margin: 0;
-  padding: 0.625rem;
-  border-radius: 14px;
+  padding: 0.5rem;
+  border-radius: 16px;
   border: 1px solid var(--rc-border);
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+  background: linear-gradient(168deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 252, 255, 0.94) 100%);
+  box-shadow:
+    0 1px 2px rgba(12, 25, 41, 0.04),
+    0 8px 24px rgba(12, 25, 41, 0.03);
 }
 
 .relay-center__area {
   display: flex;
   width: 100%;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.75rem 0.875rem;
-  border: none;
-  border-radius: 10px;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.8125rem 0.875rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
   background: transparent;
   color: var(--rc-muted);
   font-size: 0.8125rem;
@@ -95,41 +102,103 @@
   letter-spacing: -0.01em;
   text-align: left;
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
 }
 
-.relay-center__area svg {
-  width: 1.125rem;
-  height: 1.125rem;
+.relay-center__area-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
   flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  color: var(--rc-muted);
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.relay-center__area-icon svg {
+  width: 1.0625rem;
+  height: 1.0625rem;
   stroke-width: 1.75;
+}
+
+.relay-center__area-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.relay-center__area-title {
+  color: var(--rc-ink);
+  font-size: 0.875rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.relay-center__area-hint {
+  font-size: 0.6875rem;
+  font-weight: 500;
   color: var(--rc-faint);
+  line-height: 1.35;
 }
 
 .relay-center__area:hover {
-  background: rgba(47, 128, 237, 0.05);
-  color: var(--rc-ink);
+  background: rgba(248, 252, 255, 0.92);
+  border-color: rgba(186, 203, 222, 0.35);
+}
+
+.relay-center__area:hover .relay-center__area-icon {
+  color: var(--rc-blue);
+  border-color: rgba(26, 79, 156, 0.16);
+  background: rgba(255, 255, 255, 0.98);
 }
 
 .relay-center__area--active {
-  background: rgba(47, 128, 237, 0.08);
+  background: #fff;
+  border-color: rgba(26, 79, 156, 0.14);
+  box-shadow:
+    0 1px 2px rgba(12, 25, 41, 0.04),
+    inset 3px 0 0 var(--rc-blue);
   color: var(--rc-blue);
 }
 
-.relay-center__area--active svg {
-  color: var(--rc-blue);
+.relay-center__area--active .relay-center__area-title {
+  color: var(--rc-ink);
+}
+
+.relay-center__area--active .relay-center__area-hint {
+  color: rgba(26, 79, 156, 0.62);
+}
+
+.relay-center__area--active .relay-center__area-icon {
+  background: linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 48%, #163d7a 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 2px 8px rgba(22, 61, 122, 0.18);
 }
 
 .relay-center__area-count {
   margin-left: auto;
-  min-width: 1.25rem;
-  padding: 0.1rem 0.4rem;
+  align-self: center;
+  min-width: 1.375rem;
+  padding: 0.15rem 0.45rem;
   border-radius: 999px;
-  background: rgba(47, 128, 237, 0.12);
-  color: var(--rc-blue);
+  background: linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 100%);
+  color: rgba(255, 255, 255, 0.98);
   font-size: 0.6875rem;
   font-weight: 700;
   text-align: center;
+  box-shadow: 0 1px 4px rgba(22, 61, 122, 0.2);
 }
 
 .relay-center__main {
@@ -142,11 +211,85 @@
 
 .relay-center__panel {
   border-radius: var(--rc-radius);
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  border: 1px solid var(--rc-border);
   background: var(--rc-surface);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow:
+    0 1px 2px rgba(12, 25, 41, 0.04),
+    0 10px 32px rgba(12, 25, 41, 0.04);
   overflow: hidden;
   min-width: 0;
+}
+
+.relay-center--v3 .relay-center__panel-head {
+  display: none;
+}
+
+.relay-center__chip-scroll {
+  padding: 0.875rem 1.125rem 0.75rem;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.relay-center__chips {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  gap: 0.5rem;
+}
+
+.relay-center__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.375rem;
+  padding: 0 0.875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+  color: var(--rc-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.03);
+}
+
+.relay-center__chip:hover {
+  border-color: rgba(186, 203, 222, 0.85);
+  color: var(--rc-ink);
+}
+
+.relay-center__chip--active {
+  border-color: rgba(12, 25, 41, 0.14);
+  background: #fff;
+  color: var(--rc-ink);
+  font-weight: 650;
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.06);
+}
+
+.relay-center__chip-count {
+  display: inline-flex;
+  min-width: 1.125rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: rgba(241, 245, 249, 0.95);
+  color: var(--rc-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.relay-center__chip--active .relay-center__chip-count {
+  background: rgba(26, 79, 156, 0.1);
+  color: var(--rc-blue);
 }
 
 .relay-center__panel-head {
@@ -313,8 +456,21 @@
   border-radius: 14px;
   background: var(--rc-surface-warm);
   border: 1px solid var(--rc-border);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
   scroll-snap-align: start;
+  overflow: hidden;
+}
+
+.relay-kanban__col:has(.relay-kanban__dot--waiting) {
+  border-top: 2px solid rgba(26, 79, 156, 0.55);
+}
+
+.relay-kanban__col:has(.relay-kanban__dot--progress) {
+  border-top: 2px solid rgba(94, 115, 137, 0.35);
+}
+
+.relay-kanban__col:has(.relay-kanban__dot--done) {
+  border-top: 2px solid rgba(203, 213, 225, 0.95);
 }
 
 .relay-kanban__col-head {
@@ -384,47 +540,31 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.375rem;
-  padding: 1rem 0.25rem;
+  gap: 0.25rem;
+  padding: 1.25rem 0.35rem;
   text-align: left;
 }
 
 .relay-kanban__empty-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--rc-faint);
+  display: none;
 }
 
 .relay-kanban__empty-title {
   margin: 0;
   font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--rc-muted);
-}
-
-.relay-kanban__empty-hint {
-  margin: 0;
-  max-width: 14rem;
-  font-size: 0.75rem;
   font-weight: 500;
   color: var(--rc-faint);
-  line-height: 1.45;
 }
 
 .relay-kanban-card {
   position: relative;
   display: block;
-  padding: 1.125rem 1.125rem 1rem;
-  border-radius: 12px;
-  border: 1px solid var(--rc-border);
-  background: var(--rc-surface);
+  padding: 1rem 1rem 0.875rem;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  background: #fff;
   text-decoration: none;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 1px 2px rgba(12, 25, 41, 0.04);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -432,8 +572,11 @@
 }
 
 .relay-kanban-card:hover {
-  border-color: rgba(47, 128, 237, 0.2);
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  border-color: rgba(26, 79, 156, 0.22);
+  box-shadow:
+    0 4px 16px rgba(12, 25, 41, 0.06),
+    0 0 0 1px rgba(26, 79, 156, 0.06);
+  transform: translateY(-1px);
 }
 
 .relay-kanban-card--done {
@@ -441,21 +584,35 @@
   background: rgba(253, 252, 250, 0.95);
 }
 
+.relay-kanban-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
 .relay-kanban-card__type {
-  margin: 0 0 0.5rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: var(--rc-faint);
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 79, 156, 0.12);
+  background: rgba(26, 79, 156, 0.06);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--rc-blue);
 }
 
 .relay-kanban-card__title {
   margin: 0;
   font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: -0.02em;
+  font-weight: 650;
+  line-height: 1.38;
+  letter-spacing: -0.022em;
   color: var(--rc-ink);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -469,7 +626,7 @@
 }
 
 .relay-kanban-card__meta {
-  margin: 0.5rem 0 0;
+  margin: 0.45rem 0 0;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--rc-muted);
@@ -481,9 +638,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 1rem;
+  margin-top: 0.875rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(241, 245, 249, 0.95);
+  border-top: 1px solid rgba(241, 245, 249, 0.98);
 }
 
 .relay-kanban-card__date {
@@ -498,48 +655,25 @@
 
 .relay-kanban-card__action {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--rc-blue);
-}
-
-.relay-kanban-card__badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.125rem;
-  height: 1.125rem;
-  border-radius: 4px;
-  font-size: 0.5625rem;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.relay-kanban-card__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  font-size: 0.625rem;
-  font-weight: 600;
-  color: var(--rc-faint);
-}
-
-.relay-kanban-card__meta svg {
-  width: 0.75rem;
-  height: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(26, 79, 156, 0.06);
 }
 
 .relay-kanban-card__avatar {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.375rem;
-  height: 1.375rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 999px;
   color: #fff;
   font-size: 0.5625rem;
   font-weight: 700;
   flex-shrink: 0;
+  box-shadow: 0 0 0 2px #fff;
 }
 
 .relay-kanban-card__priority {
@@ -564,15 +698,19 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1.125rem;
-  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  gap: 0.875rem;
+  padding: 0.9375rem 1.125rem;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.98);
   text-decoration: none;
-  transition: background-color 140ms ease;
+  transition: background-color 160ms ease;
 }
 
 .relay-team-inbox__row:hover {
-  background: rgba(248, 250, 252, 0.85);
+  background: rgba(248, 252, 255, 0.92);
+}
+
+.relay-team-inbox__row:has(.relay-team-inbox__dot) {
+  background: linear-gradient(90deg, rgba(26, 79, 156, 0.04) 0%, transparent 28%);
 }
 
 .relay-team-inbox__row:last-child {
@@ -583,13 +721,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.375rem;
+  height: 2.375rem;
   border-radius: 999px;
   color: #fff;
   font-size: 0.6875rem;
   font-weight: 700;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(12, 25, 41, 0.08);
 }
 
 .relay-team-inbox__body {
@@ -750,26 +889,46 @@
   .relay-center__areas-list--mobile .relay-center__area {
     min-height: 2.75rem;
     padding: 0.625rem 0.75rem;
-    border-radius: 9px;
+    border-radius: 10px;
     font-size: 0.8125rem;
     font-weight: 600;
     justify-content: center;
-  }
-
-  .relay-center__areas-list--mobile .relay-center__area--active {
-    background: rgba(47, 128, 237, 0.1);
-    color: var(--rc-blue);
-    border: 1px solid rgba(47, 128, 237, 0.2);
+    align-items: center;
     box-shadow: none;
   }
 
-  .relay-center__areas-list--mobile .relay-center__area--active svg {
-    color: var(--rc-blue);
+  .relay-center__areas-list--mobile .relay-center__area-hint,
+  .relay-center__areas-list--mobile .relay-center__area-copy {
+    display: none;
+  }
+
+  .relay-center__areas-list--mobile .relay-center__area-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .relay-center__areas-list--mobile .relay-center__area--active {
+    background: linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 48%, #163d7a 100%);
+    color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 2px 8px rgba(22, 61, 122, 0.18);
+    inset: unset;
+  }
+
+  .relay-center__areas-list--mobile .relay-center__area--active .relay-center__area-icon {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.98);
+    box-shadow: none;
   }
 
   .relay-center__areas-list--mobile .relay-center__area-count {
-    background: rgba(47, 128, 237, 0.12);
-    color: var(--rc-blue-deep);
+    background: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.98);
+    box-shadow: none;
   }
 
   .relay-center__area-label--short {
@@ -810,18 +969,14 @@
     display: none;
   }
 
-  .relay-center__tabs {
-    flex-wrap: wrap;
-    gap: 0.25rem 0.75rem;
-    padding: 0 0.875rem;
-    overflow-x: visible;
+  .relay-center__chip-scroll {
+    padding: 0.625rem 0.875rem 0.5rem;
   }
 
-  .relay-center__tab {
-    flex-shrink: 0;
-    padding: 0.625rem 0 0.5rem;
+  .relay-center__chip {
+    min-height: 2.125rem;
+    padding: 0 0.75rem;
     font-size: 0.75rem;
-    white-space: nowrap;
   }
 
   /* Kanban: Spalten untereinander — kein Seiten-Swipe */
@@ -913,6 +1068,11 @@
 
   .relay-center__tab {
     padding-inline: 0.5rem;
+    font-size: 0.71875rem;
+  }
+
+  .relay-center__chip {
+    padding-inline: 0.625rem;
     font-size: 0.71875rem;
   }
 }

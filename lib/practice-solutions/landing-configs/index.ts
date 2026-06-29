@@ -10,6 +10,7 @@ import {
   aesthetikLandingConfig,
   endodontieLandingConfig,
   individuellLandingConfig,
+  karriereLandingConfig,
   parodontologieLandingConfig,
   praxiswebsiteLandingConfig,
   prophylaxeLandingConfig,
@@ -63,6 +64,7 @@ export const LANDING_CONFIGS: Record<LandingConfigId, LandingPageConfig> = {
   aesthetik: aesthetikLandingConfig,
   individuell: individuellLandingConfig,
   praxiswebsite: praxiswebsiteLandingConfig,
+  karriere: karriereLandingConfig,
 };
 
 const TITLE_HINTS: { needle: string; id: LandingConfigId }[] = [
@@ -80,6 +82,10 @@ const TITLE_HINTS: { needle: string; id: LandingConfigId }[] = [
   { needle: "wurzel", id: "endodontie" },
   { needle: "praxiswebsite", id: "praxiswebsite" },
   { needle: "website", id: "praxiswebsite" },
+  { needle: "karriere", id: "karriere" },
+  { needle: "recruit", id: "karriere" },
+  { needle: "personal", id: "karriere" },
+  { needle: "teamgewinnung", id: "karriere" },
   { needle: "ästhetik", id: "aesthetik" },
   { needle: "aesthetik", id: "aesthetik" },
   { needle: "veneer", id: "aesthetik" },
@@ -209,6 +215,9 @@ export function buildLandingPreviewDraft(
   for (const field of config.fields) {
     if (field.type === "checkbox") {
       serviceLabels.push(...labelsForCheckboxField(field, values.checkbox[field.id] ?? []));
+      const custom =
+        field.supplementText && values.text[field.supplementText.id]?.trim();
+      if (custom) serviceLabels.push(custom);
     }
     if (field.type === "radio" && field.id !== "goal") {
       const label = labelForRadioField(field, values.radio[field.id] ?? "");
@@ -216,7 +225,7 @@ export function buildLandingPreviewDraft(
     }
   }
 
-  const highlights =
+  let highlights =
     serviceLabels.length > 0 ? serviceLabels.slice(0, 3) : trustBadges.slice(0, 3);
 
   const services =
@@ -229,6 +238,34 @@ export function buildLandingPreviewDraft(
   const notesField = config.fields.find((f) => f.type === "text" && f.id === "notes");
   const notes = notesField ? values.text[notesField.id]?.trim() : "";
   if (notes) subheadline = notes.slice(0, 180);
+
+  if (config.id === "karriere") {
+    const rolesField = config.fields.find((f) => f.id === "roles" && f.type === "checkbox");
+    if (rolesField?.type === "checkbox") {
+      const roleLabels = labelsForCheckboxField(rolesField, values.checkbox.roles ?? []);
+      const rolesCustom = values.text.roles_custom?.trim();
+      if (rolesCustom) roleLabels.push(rolesCustom);
+      if (roleLabels.length > 0) {
+        headline =
+          roleLabels.length === 1
+            ? `${roleLabels[0]} gesucht`
+            : `Wir suchen ${roleLabels.slice(0, 3).join(", ")}`;
+      }
+    }
+    const benefitsField = config.fields.find((f) => f.id === "benefits" && f.type === "checkbox");
+    if (benefitsField?.type === "checkbox") {
+      const benefitLabels = labelsForCheckboxField(
+        benefitsField,
+        values.checkbox.benefits ?? []
+      );
+      const benefitsCustom = values.text.benefits_custom?.trim();
+      if (benefitsCustom) benefitLabels.push(benefitsCustom);
+      if (benefitLabels.length > 0) {
+        trustBadges = benefitLabels.slice(0, 4);
+        highlights = benefitLabels.slice(0, 3);
+      }
+    }
+  }
 
   const schwerpunkt = values.text.schwerpunkt?.trim();
   if (schwerpunkt) headline = schwerpunkt;
@@ -286,6 +323,9 @@ export function buildLandingConfigMessage(params: {
     }
     if (field.type === "checkbox") {
       const labels = labelsForCheckboxField(field, params.values.checkbox[field.id] ?? []);
+      const supplement =
+        field.supplementText && params.values.text[field.supplementText.id]?.trim();
+      if (supplement) labels.push(supplement);
       if (labels.length > 0) {
         lines.push("");
         lines.push(`--- ${field.label} ---`);

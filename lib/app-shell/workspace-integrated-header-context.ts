@@ -81,6 +81,13 @@ export function resolveWorkspaceIntegratedHeader(
       hideOnDesktop: true,
     };
   }
+  if (pathname.startsWith("/profile/solutions")) {
+    return {
+      eyebrow: "Profil",
+      subtitle: "Kampagnen & Landingpages",
+      showSearch: false,
+    };
+  }
   if (pathname.startsWith("/profile")) {
     return {
       eyebrow: "Profil",

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { YdBentoHomePage } from "@/components/marketing/yd-bento-home-page";
+import { YdHomeOsPage } from "@/components/marketing/yd-home-os-page";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { resolveHomeDashboardHref } from "@/lib/public-entry/resolve-home-dashboard-href";
 
@@ -16,13 +16,13 @@ type HomeContentProps = {
 };
 
 function HomePageShell(props: HomeContentProps) {
-  return <YdBentoHomePage {...props} />;
+  return <YdHomeOsPage {...props} />;
 }
 
 async function HomePageWithSession(props: Omit<HomeContentProps, "dashboardHref">) {
   const user = await getCurrentUser();
   const dashboardHref = user ? await resolveHomeDashboardHref(user) : null;
-  return <YdBentoHomePage {...props} dashboardHref={dashboardHref} />;
+  return <YdHomeOsPage {...props} dashboardHref={dashboardHref} />;
 }
 
 /** Öffentliche Landing — Session nur für „Dashboard“-Link; Shell streamt sofort. */

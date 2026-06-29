@@ -22,7 +22,7 @@ export function ForgotPasswordPageClient({
   prefilledEmail,
 }: ForgotPasswordPageClientProps) {
   return (
-    <YdPublicOsEnvironment mode="focus">
+    <YdPublicOsEnvironment mode="focus" landingAtmosphere instantEnter>
       <div className="yd-clinical-entry yd-clinical-entry--login">
         <div className="yd-clinical-entry-panel yd-clinical-entry-panel--login-entrance">
           <div

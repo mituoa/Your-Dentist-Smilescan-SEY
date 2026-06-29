@@ -302,11 +302,18 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
           </div>
           <YourDentistBrandLockup size="md" centered priority />
           <h2 className="yd-lp-briefing-success__title">Ihre Anfrage wurde übermittelt</h2>
-          <p className="yd-lp-briefing-success__lead">
-            In den nächsten Tagen erhalten Sie Ihre individuelle Landingpage zur Freigabe. Sobald Sie
-            freigeben, schalten wir sie für Ihre Praxis — mit messbarer Nachverfolgung Ihrer
-            Anfragen.
-          </p>
+          <div className="yd-lp-briefing-success__next">
+            <p className="yd-lp-briefing-success__next-label">So geht es weiter</p>
+            <ol className="yd-lp-briefing-success__steps">
+              <li className="yd-lp-briefing-success__step">
+                In den nächsten Tagen erhalten Sie Ihre individuelle Landingpage zur Freigabe.
+              </li>
+              <li className="yd-lp-briefing-success__step">
+                Sobald Sie freigeben, schalten wir sie für Ihre Praxis — mit messbarer
+                Nachverfolgung Ihrer Anfragen.
+              </li>
+            </ol>
+          </div>
         </div>
       </MedicalFormShell>
     );
@@ -547,6 +554,9 @@ function ActiveBriefingStep({
   return (
     <div className="yd-lp-briefing-question yd-lp-briefing-question--active">
       <h3 className="yd-lp-briefing-question__title">{field.label}</h3>
+      {field.description ? (
+        <p className="yd-lp-briefing-question__desc">{field.description}</p>
+      ) : null}
       <div
         className="yd-lp-selection-cards"
         role={isRadio ? "radiogroup" : "group"}
@@ -581,6 +591,25 @@ function ActiveBriefingStep({
           );
         })}
       </div>
+      {!isRadio && field.supplementText ? (
+        <div className="yd-lp-briefing-question__supplement">
+          <label
+            htmlFor={`briefing-${field.supplementText.id}`}
+            className="yd-lp-briefing-question__supplement-label"
+          >
+            {field.supplementText.label}
+          </label>
+          <MedicalFormTextarea
+            id={`briefing-${field.supplementText.id}`}
+            value={fieldValues.text[field.supplementText.id] ?? ""}
+            onChange={(value) => onText(field.supplementText!.id, value)}
+            rows={1}
+            placeholder={field.supplementText.placeholder}
+            disabled={disabled}
+            aria-label={field.supplementText.label}
+          />
+        </div>
+      ) : null}
       {!isRadio ? (
         <div className="yd-lp-briefing-question__actions">
           <button

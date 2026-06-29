@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ImageIcon,
   Download,
   Check,
   Maximize2,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
@@ -40,6 +42,11 @@ interface PhotoViewerProps {
   noPhotosAriaLabel?: string;
   /** Hinweis, wenn das Hauptbild nicht geladen werden kann (z. B. Vorschau). */
   imageUnavailableText?: string;
+  /** Gesteuerte Auswahl (z. B. gemeinsam mit Fotoverlauf-Timeline). */
+  selectedIndex?: number;
+  onSelectedIndexChange?: (index: number) => void;
+  /** Miniatur-Leiste unter dem Hauptbild — bei externer Timeline ausblendbar. */
+  showThumbnails?: boolean;
 }
 
 type ZipDownloadStatus = "idle" | "loading" | "success" | "error";
@@ -128,12 +135,34 @@ export function PhotoViewer({
   noPhotosPrimaryText,
   noPhotosAriaLabel,
   imageUnavailableText,
+  selectedIndex: selectedIndexProp,
+  onSelectedIndexChange,
+  showThumbnails = true,
 }: PhotoViewerProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [internalIndex, setInternalIndex] = useState(0);
   const [downloadStatus, setDownloadStatus] = useState<ZipDownloadStatus>("idle");
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [hoverImage, setHoverImage] = useState(false);
   const prevSubmissionIdRef = useRef(submissionId);
+  const swipeAreaRef = useRef<HTMLDivElement>(null);
+  const touchRef = useRef<{ x: number; y: number; axis: "x" | "y" | null }>({
+    x: 0,
+    y: 0,
+    axis: null,
+  });
+  const idxRef = useRef(0);
+
+  const isControlled =
+    selectedIndexProp !== undefined && onSelectedIndexChange !== undefined;
+  const selectedIndex = isControlled ? selectedIndexProp : internalIndex;
+
+  const setSelectedIndex = (next: number) => {
+    if (isControlled) {
+      onSelectedIndexChange(next);
+    } else {
+      setInternalIndex(next);
+    }
+  };
 
   /* ZIP-/Download-UI und Thumbnail-Auswahl bei Submission-Wechsel zurücksetzen. */
   /* eslint-disable react-hooks/set-state-in-effect -- bewusst bei submissionId neu initialisieren */
@@ -151,6 +180,76 @@ export function PhotoViewer({
   const idx = hasPhotos
     ? Math.min(Math.max(0, selectedIndex), photos.length - 1)
     : 0;
+  idxRef.current = idx;
+
+  const goToPhoto = useCallback(
+    (nextIndex: number) => {
+      if (photos.length === 0) return;
+      const clamped = Math.min(Math.max(0, nextIndex), photos.length - 1);
+      setSelectedIndex(clamped);
+    },
+    [photos.length, setSelectedIndex]
+  );
+
+  useEffect(() => {
+    const el = swipeAreaRef.current;
+    if (!el || photos.length <= 1) return;
+
+    const resetTouch = () => {
+      touchRef.current.axis = null;
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      touchRef.current = { x: touch.clientX, y: touch.clientY, axis: null };
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      const dx = touch.clientX - touchRef.current.x;
+      const dy = touch.clientY - touchRef.current.y;
+
+      if (touchRef.current.axis === null) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        touchRef.current.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+
+      if (touchRef.current.axis === "x") {
+        e.preventDefault();
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      const touch = e.changedTouches[0];
+      if (!touch || touchRef.current.axis !== "x") {
+        resetTouch();
+        return;
+      }
+
+      const delta = touch.clientX - touchRef.current.x;
+      resetTouch();
+      if (Math.abs(delta) < 36) return;
+
+      const current = idxRef.current;
+      if (delta < 0) goToPhoto(current + 1);
+      else goToPhoto(current - 1);
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, [goToPhoto, photos.length]);
   const selectedUrlForReset = hasPhotos ? photos[idx]?.signed_url ?? null : null;
   const mainImageMountKey = `${submissionId}:${selectedUrlForReset ?? ""}`;
 
@@ -179,6 +278,8 @@ export function PhotoViewer({
   const selected = photos[idx];
   const selectedUrl = selected?.signed_url;
   const isLoading = downloadStatus === "loading";
+  const canGoPrev = idx > 0;
+  const canGoNext = idx < photos.length - 1;
 
   async function handleDownloadAllPhotos() {
     if (!enableZipDownload || isLoading || photos.length === 0 || !submissionId.trim()) return;
@@ -227,7 +328,11 @@ export function PhotoViewer({
       aria-label={`Fotos: ${patientName}`}
     >
       <div
-        className={enableZipDownload ? "relative cursor-pointer" : "relative cursor-default"}
+        ref={swipeAreaRef}
+        className={cn(
+          "yd-tracker-v14-photo__swipe relative touch-manipulation",
+          enableZipDownload ? "cursor-pointer" : "cursor-default"
+        )}
         onMouseEnter={() => setHoverImage(true)}
         onMouseLeave={() => setHoverImage(false)}
       >
@@ -257,6 +362,35 @@ export function PhotoViewer({
             </div>
           )}
         </div>
+
+        {photos.length > 1 ? (
+          <>
+            <button
+              type="button"
+              className="yd-tracker-v14-photo__nav yd-tracker-v14-photo__nav--prev"
+              aria-label="Vorheriges Bild"
+              disabled={!canGoPrev}
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPhoto(idx - 1);
+              }}
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </button>
+            <button
+              type="button"
+              className="yd-tracker-v14-photo__nav yd-tracker-v14-photo__nav--next"
+              aria-label="Nächstes Bild"
+              disabled={!canGoNext}
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPhoto(idx + 1);
+              }}
+            >
+              <ChevronRight className="h-5 w-5" strokeWidth={2} aria-hidden />
+            </button>
+          </>
+        ) : null}
 
         <button
           type="button"
@@ -338,14 +472,16 @@ export function PhotoViewer({
         </div>
       )}
 
-      {photos.length > 1 ? (
-        <div className="flex flex-wrap gap-2">
+      {showThumbnails && photos.length > 1 ? (
+        <div className="yd-tracker-v14-photo__thumbs flex flex-wrap gap-2">
           {photos.map((photo, i) => (
             <button
               key={photo.id}
               type="button"
-              onClick={() => setSelectedIndex(i)}
-              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.15)] ${
+              onClick={() => goToPhoto(i)}
+              aria-label={`Bild ${i + 1} von ${photos.length} anzeigen`}
+              aria-current={i === idx ? "true" : undefined}
+              className={`relative h-14 w-14 shrink-0 touch-manipulation overflow-hidden rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(12,25,41,0.15)] ${
                 i === idx
                   ? "border-[#1A4F9C] ring-1 ring-[#1A4F9C]/25"
                   : "border-transparent hover:border-[#E2E8F0]"

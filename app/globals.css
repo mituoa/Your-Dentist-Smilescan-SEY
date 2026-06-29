@@ -49,6 +49,8 @@
 @import "./yd-journal-v6.css";
 @import "./yd-care-center.css";
 @import "./yd-loading.css";
+@import "./yd-product-overview.css";
+@import "./yd-home-os.css";
 
 @layer base {
   :root {

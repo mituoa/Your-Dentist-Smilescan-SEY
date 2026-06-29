@@ -233,17 +233,26 @@ export function TrackerPatientDirectory({
                                 {initials(item.patient_name)}
                               </span>
                               <span className="yd-tracker-directory__patient-text">
-                                <span className="yd-tracker-directory__name">{name}</span>
-                                {readState === "new_submission" ? (
-                                  <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--new yd-tracker-directory__ingress-badge">
-                                    Neu
+                                <span className="yd-tracker-directory__name-row">
+                                  {readState !== "read" ? (
+                                    <span
+                                      className={cn(
+                                        "yd-tracker-v16-unread-pip",
+                                        readState === "new_submission" &&
+                                          "yd-tracker-v16-unread-pip--new"
+                                      )}
+                                      aria-hidden
+                                    />
+                                  ) : null}
+                                  <span
+                                    className={cn(
+                                      "yd-tracker-directory__name",
+                                      readState !== "read" && "yd-tracker-directory__name--unread"
+                                    )}
+                                  >
+                                    {name}
                                   </span>
-                                ) : null}
-                                {readState === "marked_unread" ? (
-                                  <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--unread yd-tracker-directory__ingress-badge">
-                                    Ungelesen
-                                  </span>
-                                ) : null}
+                                </span>
                                 {preview ? (
                                   <span className="yd-tracker-directory__preview">{preview}</span>
                                 ) : null}
@@ -359,17 +368,25 @@ export function TrackerPatientDirectory({
                         {initials(item.patient_name)}
                       </span>
                       <span className="min-w-0 flex-1 text-left">
-                        <span className="yd-tracker-directory__name block truncate">{name}</span>
-                        {readState === "new_submission" ? (
-                          <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--new yd-tracker-directory__ingress-badge">
-                            Neu
+                        <span className="yd-tracker-directory__name-row flex items-center gap-2">
+                          {readState !== "read" ? (
+                            <span
+                              className={cn(
+                                "yd-tracker-v16-unread-pip",
+                                readState === "new_submission" && "yd-tracker-v16-unread-pip--new"
+                              )}
+                              aria-hidden
+                            />
+                          ) : null}
+                          <span
+                            className={cn(
+                              "yd-tracker-directory__name block truncate",
+                              readState !== "read" && "yd-tracker-directory__name--unread"
+                            )}
+                          >
+                            {name}
                           </span>
-                        ) : null}
-                        {readState === "marked_unread" ? (
-                          <span className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--unread yd-tracker-directory__ingress-badge">
-                            Ungelesen
-                          </span>
-                        ) : null}
+                        </span>
                         {preview ? (
                           <span className="yd-tracker-directory__preview block truncate">
                             {preview}

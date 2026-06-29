@@ -137,7 +137,7 @@ const CATEGORY_BLUEPRINT: Record<InquiryCategoryKey, CategoryBlueprint> = {
     subheadline: "Teamgewinnung mit klarer Praxisidentität und ruhigem Bewerbungsweg.",
     cta: "Jetzt bewerben",
     heroImage: IMG.karriere,
-    secondaryImage: IMG.praxiswebsite,
+    secondaryImage: IMG.karriere,
     valueProps: ["Praxiskultur", "Klare Erwartungen", "Professioneller Auftritt"],
   },
   praxiswebsite: {

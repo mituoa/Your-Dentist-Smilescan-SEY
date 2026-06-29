@@ -297,3 +297,23 @@ export const countUnseenInboxSubmissions = cache(
     return { ok: true, count: count ?? 0 };
   }
 );
+
+/** Offene Relay-Aufgaben zu einem Fall — leichtgewichtig statt voller Inbox-Liste. */
+export const getOpenTaskCountForSubmission = cache(
+  async (submissionId: string, workspaceId: string): Promise<number> => {
+    const supabase = await createClient();
+    const { count, error } = await supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspaceId)
+      .eq("submission_id", submissionId)
+      .eq("status", "open");
+
+    if (error) {
+      logInboxQueryFailure("getOpenTaskCountForSubmission failed", error);
+      return 0;
+    }
+
+    return count ?? 0;
+  }
+);

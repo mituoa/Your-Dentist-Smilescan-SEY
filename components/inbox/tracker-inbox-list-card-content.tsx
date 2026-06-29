@@ -13,12 +13,15 @@ import { cn } from "@/lib/utils";
 type TrackerInboxListCardContentProps = {
   item: EnrichedSubmissionListItem;
   className?: string;
+  /** Status-Menü separat neben der Karte rendern (Mobile). */
+  showStatusMenu?: boolean;
 };
 
 /** Inhalt einer Tracker-Listenkarte — Name, Anliegen-Vorschau (grau), dezentes Status-Menü. */
 export function TrackerInboxListCardContent({
   item,
   className,
+  showStatusMenu = true,
 }: TrackerInboxListCardContentProps) {
   const patientName = item.patient_name?.trim() || "Unbekannter Patient";
   const readState = trackerInboxReadState(item);
@@ -31,40 +34,38 @@ export function TrackerInboxListCardContent({
 
   return (
     <>
-      <span className="yd-tracker-v15-inbox-card__urgency-rail" aria-hidden />
       <span className={cn("yd-tracker-v16-inbox-card__scan", className)}>
         <span className="yd-tracker-v16-inbox-card__headline-row">
-          <span
-            className={cn(
-              "yd-tracker-v16-inbox-card__patient",
-              readState === "new_submission" && "yd-tracker-v16-inbox-card__patient--new"
-            )}
-          >
-            {patientName}
+          <span className="yd-tracker-v16-inbox-card__patient-wrap">
+            {readState !== "read" ? (
+              <span
+                className={cn(
+                  "yd-tracker-v16-unread-pip",
+                  readState === "new_submission" && "yd-tracker-v16-unread-pip--new"
+                )}
+                aria-label={
+                  readState === "new_submission" ? "Neue Einsendung" : "Ungelesen"
+                }
+              />
+            ) : null}
+            <span
+              className={cn(
+                "yd-tracker-v16-inbox-card__patient",
+                readState !== "read" && "yd-tracker-v16-inbox-card__patient--unread"
+              )}
+            >
+              {patientName}
+            </span>
           </span>
-          {readState === "new_submission" ? (
-            <span
-              className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--new"
-              aria-label="Neue Einsendung"
-            >
-              Neu
-            </span>
-          ) : null}
-          {readState === "marked_unread" ? (
-            <span
-              className="yd-tracker-v16-ingress-badge yd-tracker-v16-ingress-badge--unread"
-              aria-label="Ungelesen"
-            >
-              Ungelesen
-            </span>
-          ) : null}
           <span className="yd-tracker-v16-inbox-card__headline-actions">
             <span className="yd-tracker-v16-inbox-card__time">{timeLabel}</span>
-            <TrackerInboxListStatusMenu
-              submissionId={item.id}
-              status={practiceStatus}
-              seenAt={item.seen_at}
-            />
+            {showStatusMenu ? (
+              <TrackerInboxListStatusMenu
+                submissionId={item.id}
+                status={practiceStatus}
+                seenAt={item.seen_at}
+              />
+            ) : null}
           </span>
         </span>
         {preview ? (

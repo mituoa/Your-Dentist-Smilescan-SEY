@@ -2242,6 +2242,9 @@
 
 .yd-smart-date-popover__subtitle {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0;
   text-align: center;
   font-size: 0.875rem;
@@ -2433,6 +2436,104 @@
   color: #fff;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(26, 79, 156, 0.22);
+}
+
+.yd-smart-date-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2490;
+  border: 0;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.yd-smart-date-title {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgba(12, 25, 41, 0.82);
+  text-align: center;
+}
+
+.yd-smart-date-title--inline {
+  flex: unset;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+}
+
+.yd-smart-date-title--inline:hover {
+  background: rgba(26, 79, 156, 0.06);
+}
+
+@media (max-width: 767px) {
+  .yd-smart-date-popover--mobile {
+    max-height: min(78dvh, 560px);
+    border-radius: 1.25rem 1.25rem 0 0;
+    border-bottom: none;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 48px rgba(15, 35, 58, 0.18);
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-popover__header {
+    padding-top: 0.625rem;
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-popover__header::before {
+    content: "";
+    position: absolute;
+    top: 0.45rem;
+    left: 50%;
+    width: 2.25rem;
+    height: 0.25rem;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.55);
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-popover__header {
+    position: relative;
+    padding-top: 1rem;
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-popover__body {
+    padding-inline: 0.875rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-weekday {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: rgba(100, 116, 139, 0.9);
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-cell {
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-month-grid {
+    gap: 0.5rem;
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-month {
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-year-list {
+    max-height: min(48dvh, 360px);
+  }
+
+  .yd-smart-date-popover--mobile .yd-smart-date-year {
+    min-height: 2.5rem;
+    font-size: 0.9375rem;
+  }
 }
 
 .yd-medical-form-reminder {

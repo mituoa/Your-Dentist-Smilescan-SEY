@@ -1,24 +1,36 @@
-/** Dezente Wochenzeile — Referenz: Schedule-Panel oben */
+/** Wochenzeile — kompakt auf Mobile, Mo–So der aktuellen Kalenderwoche. */
 export function DashboardWeekStrip() {
   const today = new Date();
-  const days: { label: string; num: number; active: boolean }[] = [];
+  today.setHours(0, 0, 0, 0);
 
-  for (let i = -2; i <= 4; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() + i);
+  const weekStart = new Date(today);
+  const dayOfWeek = today.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  weekStart.setDate(today.getDate() + mondayOffset);
+
+  const days: { label: string; num: number; active: boolean; key: string }[] = [];
+  for (let i = 0; i < 7; i += 1) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
     days.push({
+      key: d.toISOString().slice(0, 10),
       label: d.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", ""),
       num: d.getDate(),
-      active: i === 0,
+      active: d.getTime() === today.getTime(),
     });
   }
 
   return (
-    <div className="yd-dash-week-strip" aria-hidden>
+    <div className="yd-dash-week-strip" role="group" aria-label="Aktuelle Woche">
       {days.map((day) => (
         <div
-          key={`${day.label}-${day.num}`}
-          className={day.active ? "yd-dash-week-strip__day yd-dash-week-strip__day--active" : "yd-dash-week-strip__day"}
+          key={day.key}
+          className={
+            day.active
+              ? "yd-dash-week-strip__day yd-dash-week-strip__day--active"
+              : "yd-dash-week-strip__day"
+          }
+          aria-current={day.active ? "date" : undefined}
         >
           <span className="yd-dash-week-strip__label">{day.label}</span>
           <span className="yd-dash-week-strip__num">{day.num}</span>

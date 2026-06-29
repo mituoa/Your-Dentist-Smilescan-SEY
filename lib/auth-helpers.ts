@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -50,13 +51,13 @@ export function isAdminAllowlistUser(user: User | null | undefined): boolean {
   return candidates.some((c) => ghAllow.includes(c));
 }
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
+});
 
 export async function requireUser() {
   const user = await getCurrentUser();
@@ -87,7 +88,8 @@ export async function requireUser() {
  * **Supabase RLS:** `current_workspace_id()` in Postgres folgt derselben Reihenfolge (Migration
  * `030_align_current_workspace_id_with_app.sql`).
  */
-export async function getWorkspaceMembershipForUserId(userId: string, client?: SupabaseClient) {
+export const getWorkspaceMembershipForUserId = cache(
+  async (userId: string, client?: SupabaseClient) => {
   const supabase = client ?? (await createClient());
   const { data, error } = await supabase
     .from("workspace_members")
@@ -108,7 +110,8 @@ export async function getWorkspaceMembershipForUserId(userId: string, client?: S
   }
 
   return data;
-}
+  }
+);
 
 /**
  * Aktueller Workspace-Kontext für geschützte App-Routen (inkl. `/dashboard`).

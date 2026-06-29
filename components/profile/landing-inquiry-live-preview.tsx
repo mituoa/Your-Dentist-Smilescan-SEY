@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Check } from "lucide-react";
 
 import type { PracticeSolutionInquiryContext } from "@/lib/practice-solutions/inquiry-context";
 import {
@@ -8,6 +9,7 @@ import {
   type LandingFieldValues,
   type LandingPageConfig,
 } from "@/lib/practice-solutions/landing-configs";
+import { LANDING_IMG } from "@/lib/practice-solutions/landing-configs/shared-images";
 import { cn } from "@/lib/utils";
 
 export type LandingInquiryPreviewProps = {
@@ -37,8 +39,13 @@ export function LandingInquiryLivePreview({
     [config, fieldValues, profile]
   );
 
-  const accent = profile.accentColor?.trim() || "#2F80ED";
+  const accent = profile.accentColor?.trim() || "#1a4f9c";
   const isStudio = variant === "studio";
+  const [heroImage, setHeroImage] = React.useState(draft.heroImage);
+
+  React.useEffect(() => {
+    setHeroImage(draft.heroImage);
+  }, [draft.heroImage]);
 
   return (
     <div
@@ -48,122 +55,132 @@ export function LandingInquiryLivePreview({
         className
       )}
     >
+      {isStudio ? (
+        <div className="yd-lp-config-preview__frame-header">
+          <span className="yd-lp-config-preview__live-dot" aria-hidden />
+          <span className="yd-lp-config-preview__frame-title">Live-Vorschau</span>
+        </div>
+      ) : null}
+
       <div
         className="yd-lp-config-preview__browser"
         style={{ "--yd-lp-accent": accent } as React.CSSProperties}
       >
         <div className="yd-lp-config-preview__chrome" aria-hidden>
-          <div className="yd-lp-config-preview__dots">
-            <span />
-            <span />
-            <span />
+          <div className="yd-lp-config-preview__address-bar">
+            {draft.slug}.yourdentist.de
           </div>
-          <div className="yd-lp-config-preview__address-bar">{draft.slug}.yourdentist.de</div>
         </div>
 
-        <div className="yd-lp-config-preview__page">
-          <header className="yd-lp-config-preview__nav">
-            <div className="yd-lp-config-preview__brand">
-              {profile.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.logoUrl} alt="" className="yd-lp-config-preview__logo" />
-              ) : (
-                <span className="yd-lp-config-preview__monogram">
-                  {initialsFromName(draft.practiceName)}
-                </span>
-              )}
-              <span className="yd-lp-config-preview__practice">{draft.practiceName}</span>
-            </div>
-            <nav className="yd-lp-config-preview__nav-links" aria-hidden>
-              <span>Leistungen</span>
-              <span>Team</span>
-              <span>Kontakt</span>
-            </nav>
-            <span className="yd-lp-config-preview__nav-cta">{draft.ctaLabel}</span>
-          </header>
-
-          <section className="yd-lp-config-preview__hero yd-lp-config-preview__hero--premium">
-            <div className="yd-lp-config-preview__hero-copy">
-              <p className="yd-lp-config-preview__eyebrow" key={`eyebrow-${draft.eyebrow}`}>
-                {draft.eyebrow}
-              </p>
-              <h1 className="yd-lp-config-preview__headline" key={`headline-${draft.headline}`}>
-                {draft.headline}
-              </h1>
-              <p className="yd-lp-config-preview__subhead" key={`sub-${draft.subheadline}`}>
-                {draft.subheadline}
-              </p>
-              <ul className="yd-lp-config-preview__trust" role="list">
-                {draft.trustBadges.map((badge) => (
-                  <li key={badge}>{badge}</li>
-                ))}
-              </ul>
-              <span className="yd-lp-config-preview__hero-cta">{draft.ctaLabel}</span>
-            </div>
-            <div className="yd-lp-config-preview__hero-visual">
-              <div className="yd-lp-config-preview__hero-image-wrap">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  key={draft.heroImage}
-                  src={draft.heroImage}
-                  alt=""
-                  className="yd-lp-config-preview__hero-image"
-                />
+        <div className="yd-lp-config-preview__viewport">
+          <div className="yd-lp-config-preview__page">
+            <header className="yd-lp-config-preview__nav">
+              <div className="yd-lp-config-preview__brand">
+                {profile.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.logoUrl} alt="" className="yd-lp-config-preview__logo" />
+                ) : (
+                  <span className="yd-lp-config-preview__monogram">
+                    {initialsFromName(draft.practiceName)}
+                  </span>
+                )}
+                <span className="yd-lp-config-preview__practice">{draft.practiceName}</span>
               </div>
-            </div>
-          </section>
-
-          <section className="yd-lp-config-preview__services" aria-label="Leistungen">
-            <h2 className="yd-lp-config-preview__section-title">Ihre Schwerpunkte</h2>
-            <div className="yd-lp-config-preview__service-grid">
-              {draft.services.map((service) => (
-                <article key={service} className="yd-lp-config-preview__service-card">
-                  <span className="yd-lp-config-preview__service-dot" aria-hidden />
-                  <span>{service}</span>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          {draft.testimonialQuote ? (
-            <section className="yd-lp-config-preview__testimonial">
-              <blockquote className="yd-lp-config-preview__testimonial-quote">
-                {draft.testimonialQuote}
-              </blockquote>
-              {draft.testimonialAuthor ? (
-                <cite className="yd-lp-config-preview__testimonial-author">
-                  {draft.testimonialAuthor}
-                </cite>
+              {!isStudio ? (
+                <nav className="yd-lp-config-preview__nav-links" aria-hidden>
+                  <span>Leistungen</span>
+                  <span>Team</span>
+                  <span>Kontakt</span>
+                </nav>
               ) : null}
-            </section>
-          ) : null}
+              <span className="yd-lp-config-preview__nav-cta">{draft.ctaLabel}</span>
+            </header>
 
-          <section className="yd-lp-config-preview__team">
-            <div className="yd-lp-config-preview__team-visual">
+            <section className="yd-lp-config-preview__hero">
+              <div className="yd-lp-config-preview__hero-copy">
+                <p className="yd-lp-config-preview__eyebrow">{draft.eyebrow}</p>
+                <h1 className="yd-lp-config-preview__headline">{draft.headline}</h1>
+                <p className="yd-lp-config-preview__subhead">{draft.subheadline}</p>
+                {draft.trustBadges.length > 0 ? (
+                  <ul className="yd-lp-config-preview__trust" role="list">
+                    {draft.trustBadges.map((badge) => (
+                      <li key={badge}>
+                        <Check className="yd-lp-config-preview__trust-icon" aria-hidden />
+                        <span>{badge}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                <span className="yd-lp-config-preview__hero-cta">{draft.ctaLabel}</span>
+              </div>
+              <div className="yd-lp-config-preview__hero-visual">
+                <div className="yd-lp-config-preview__hero-image-wrap">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={heroImage}
+                    alt=""
+                    className="yd-lp-config-preview__hero-image"
+                    onError={() => {
+                      if (heroImage !== LANDING_IMG.default) {
+                        setHeroImage(LANDING_IMG.default);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {draft.services.length > 0 ? (
+              <section className="yd-lp-config-preview__services" aria-label="Schwerpunkte">
+                <h2 className="yd-lp-config-preview__section-title">Schwerpunkte</h2>
+                <ul className="yd-lp-config-preview__service-list" role="list">
+                  {draft.services.map((service) => (
+                    <li key={service} className="yd-lp-config-preview__service-item">
+                      {service}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {draft.testimonialQuote ? (
+              <section className="yd-lp-config-preview__testimonial">
+                <blockquote className="yd-lp-config-preview__testimonial-quote">
+                  „{draft.testimonialQuote}"
+                </blockquote>
+                {draft.testimonialAuthor ? (
+                  <cite className="yd-lp-config-preview__testimonial-author">
+                    {draft.testimonialAuthor}
+                  </cite>
+                ) : null}
+              </section>
+            ) : null}
+
+            <section className="yd-lp-config-preview__team">
               {profile.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={profile.photoUrl} alt="" className="yd-lp-config-preview__team-photo" />
               ) : (
                 <div className="yd-lp-config-preview__team-placeholder" aria-hidden />
               )}
-            </div>
-            <div className="yd-lp-config-preview__team-copy">
-              <p className="yd-lp-config-preview__eyebrow">Ihr Behandlungsteam</p>
-              <h2 className="yd-lp-config-preview__team-name">{draft.doctorName}</h2>
-              <p className="yd-lp-config-preview__team-role">{draft.doctorRole}</p>
-            </div>
-          </section>
+              <div className="yd-lp-config-preview__team-copy">
+                <p className="yd-lp-config-preview__team-eyebrow">Behandlungsteam</p>
+                <h2 className="yd-lp-config-preview__team-name">{draft.doctorName}</h2>
+                <p className="yd-lp-config-preview__team-role">{draft.doctorRole}</p>
+              </div>
+            </section>
 
-          <footer className="yd-lp-config-preview__footer">
-            <div>
-              <span className="yd-lp-config-preview__footer-label">Standort</span>
-              <span>{draft.locationLine ?? "—"}</span>
-            </div>
-            <div>
-              <span className="yd-lp-config-preview__footer-label">Kontakt</span>
-              <span>{draft.phoneLine ?? profile.contactEmail}</span>
-            </div>
-          </footer>
+            <footer className="yd-lp-config-preview__footer">
+              <div className="yd-lp-config-preview__footer-item">
+                <span className="yd-lp-config-preview__footer-label">Standort</span>
+                <span>{draft.locationLine ?? "—"}</span>
+              </div>
+              <div className="yd-lp-config-preview__footer-item">
+                <span className="yd-lp-config-preview__footer-label">Kontakt</span>
+                <span>{draft.phoneLine ?? profile.contactEmail}</span>
+              </div>
+            </footer>
+          </div>
         </div>
       </div>
     </div>

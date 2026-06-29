@@ -13,7 +13,8 @@ export type LandingConfigId =
   | "endodontie"
   | "aesthetik"
   | "individuell"
-  | "praxiswebsite";
+  | "praxiswebsite"
+  | "karriere";
 
 export type LandingFieldOption = {
   id: string;
@@ -40,6 +41,12 @@ export type LandingFieldDef =
       description?: string;
       options: readonly LandingFieldOption[];
       defaultSelected?: readonly string[];
+      optional?: boolean;
+      supplementText?: {
+        id: string;
+        label: string;
+        placeholder?: string;
+      };
     }
   | {
       id: string;

@@ -44,31 +44,37 @@ const TODAY_SUMMARY = [
   {
     id: "freigaben" as const,
     label: "Freigaben",
-    suffix: "offen",
+    mobileLabel: "Freigaben",
     icon: ClipboardCheck,
   },
   {
     id: "patienten" as const,
     label: "Patienten-Rückfragen",
-    suffix: "offen",
+    mobileLabel: "Patienten",
     icon: UserRound,
   },
   {
     id: "team" as const,
     label: "Teamaufgaben",
-    suffix: "offen",
+    mobileLabel: "Team",
     icon: Users,
   },
   {
     id: "routinen" as const,
     label: "Routinen",
-    suffix: "fällig",
+    mobileLabel: "Routinen",
     icon: Calendar,
   },
 ] as const;
 
 function kindLabel(kind: DashboardTodayItem["kind"]) {
   return kind === "routine" ? "Routine" : "Entscheidung";
+}
+
+function compactWhen(when: string): string {
+  const trimmed = when.trim();
+  if (trimmed.length <= 18) return trimmed;
+  return `${trimmed.slice(0, 16).trimEnd()}…`;
 }
 
 function MiniSparkline({ counts, className }: { counts: number[]; className?: string }) {
@@ -136,9 +142,7 @@ export function DashboardMobileHealth({
                   </span>
                   <span className="yd-dash-m__summary-copy">
                     <span className="yd-dash-m__summary-count">{count}</span>
-                    <span className="yd-dash-m__summary-label">
-                      {row.label} {row.suffix}
-                    </span>
+                    <span className="yd-dash-m__summary-label">{row.mobileLabel}</span>
                   </span>
                 </Link>
               </li>
@@ -176,40 +180,39 @@ export function DashboardMobileHealth({
       </section>
 
       <section className="yd-dash-m__card yd-dash-m__card--schedule" aria-label="Heute relevant">
-        <header className="yd-dash-m__card-head">
+        <header className="yd-dash-m__card-head yd-dash-m__card-head--schedule">
           <h2 className="yd-dash-m__card-title">Heute relevant</h2>
+          <Link href="/relay" className="yd-dash-m__card-link yd-dash-m__card-link--inline">
+            Relay
+          </Link>
         </header>
 
         <DashboardWeekStrip />
 
         {todayItems.length === 0 ? (
-          <p className="yd-dash-m__empty">Keine anstehenden Termine oder Entscheidungen.</p>
+          <p className="yd-dash-m__empty">Keine Termine oder Entscheidungen.</p>
         ) : (
           <ul className="yd-dash-m__relevant">
             {todayItems.map((item) => (
               <li key={item.id}>
                 <Link href={item.href} className="yd-dash-m__relevant-item">
-                  <div className="yd-dash-m__relevant-main">
-                    <p className="yd-dash-m__relevant-title">{item.label}</p>
-                    <span
-                      className={cn(
-                        "yd-dash-m__relevant-status",
-                        item.kind === "routine" && "yd-dash-m__relevant-status--routine"
-                      )}
-                    >
-                      {kindLabel(item.kind)}
-                    </span>
-                  </div>
-                  <time className="yd-dash-m__relevant-when">{item.when}</time>
+                  <span
+                    className={cn(
+                      "yd-dash-m__relevant-dot",
+                      item.kind === "routine" && "yd-dash-m__relevant-dot--routine"
+                    )}
+                    aria-hidden
+                  />
+                  <span className="yd-dash-m__relevant-copy">
+                    <span className="yd-dash-m__relevant-title">{item.label}</span>
+                    <time className="yd-dash-m__relevant-when">{compactWhen(item.when)}</time>
+                  </span>
+                  <span className="sr-only">{kindLabel(item.kind)}</span>
                 </Link>
               </li>
             ))}
           </ul>
         )}
-
-        <Link href="/relay" className="yd-dash-m__card-link">
-          Relay öffnen
-        </Link>
       </section>
 
       <section className="yd-dash-m__card" aria-label="Aktivität">

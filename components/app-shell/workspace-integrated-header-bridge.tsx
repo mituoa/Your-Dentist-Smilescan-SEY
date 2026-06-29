@@ -40,7 +40,7 @@ export function WorkspaceIntegratedHeaderBridge({
   inboxCount,
   trackerHeaderSummary,
   dashboardHeaderSummary,
-  relayHeaderSummary,
+  relayHeaderSummary: _relayHeaderSummary,
 }: WorkspaceIntegratedHeaderBridgeProps) {
   const pathname = usePathname() || "";
   const ctx = resolveWorkspaceIntegratedHeader(pathname);
@@ -50,18 +50,12 @@ export function WorkspaceIntegratedHeaderBridge({
   const dashboardEditorial =
     onDashboard && dashboardHeaderSummary
       ? dashboardHeaderSummary.editorial
-      : onTracker
+      : onTracker || onRelay
         ? { statusTitle: "", statusPrimary: "", metricsLine: "" }
         : null;
 
-  const subtitle =
-    onRelay && relayHeaderSummary
-      ? relayHeaderSummary.lead
-      : onDashboard || onTracker
-        ? ""
-        : ctx.subtitle;
-  const subtitleMeta =
-    onRelay || onDashboard || onTracker ? "" : ctx.subtitleMeta;
+  const subtitle = onRelay || onDashboard || onTracker ? "" : ctx.subtitle;
+  const subtitleMeta = onRelay || onDashboard || onTracker ? "" : ctx.subtitleMeta;
 
   const greeting = useMemo(() => {
     return resolveWorkspaceGreeting(new Date().getHours());

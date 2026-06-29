@@ -16,7 +16,18 @@ export function RelayKanbanCardView({ card, done }: RelayKanbanCardViewProps) {
       href={card.href}
       className={cn("relay-kanban-card", done && "relay-kanban-card--done")}
     >
-      <p className="relay-kanban-card__type">{card.typeLabel}</p>
+      <div className="relay-kanban-card__head">
+        <span className="relay-kanban-card__type">{card.typeLabel}</span>
+        {card.assigneeInitials ? (
+          <span
+            className="relay-kanban-card__avatar"
+            style={{ background: card.assigneeColor }}
+            aria-hidden
+          >
+            {card.assigneeInitials}
+          </span>
+        ) : null}
+      </div>
       <h3 className="relay-kanban-card__title">{card.title}</h3>
       {card.metaLine ? <p className="relay-kanban-card__meta">{card.metaLine}</p> : null}
       <div className="relay-kanban-card__foot">

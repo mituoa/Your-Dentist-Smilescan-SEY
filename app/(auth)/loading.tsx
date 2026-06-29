@@ -5,7 +5,7 @@ import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
 export default function AuthLoading() {
   return (
-    <YdPublicOsEnvironment mode="focus">
+    <YdPublicOsEnvironment mode="focus" landingAtmosphere instantEnter>
       <YdProductChrome variant="entry" />
       <main className="yd-product-entry">
         <section className="yd-product-entry-card">

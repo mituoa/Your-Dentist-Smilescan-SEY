@@ -12,6 +12,8 @@ export type YdPublicOsEnvironmentProps = {
   scroll?: boolean;
   /** Landing: kein 2s Blur-Fade — sofort lesbar nach Navigation */
   instantEnter?: boolean;
+  /** Auth: gleiche Luminanz/Mesh wie Startseite — nicht Dashboard-Focus */
+  landingAtmosphere?: boolean;
   className?: string;
 };
 
@@ -23,6 +25,7 @@ export function YdPublicOsEnvironment({
   mode = "editorial",
   scroll = false,
   instantEnter = false,
+  landingAtmosphere = false,
   className,
 }: YdPublicOsEnvironmentProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -46,6 +49,7 @@ export function YdPublicOsEnvironment({
         instantEnter && "yd-public-os-awakening-active yd-public-os--instant-enter",
         mode === "focus" && "yd-public-os--focus",
         mode === "register" && "yd-public-os--register",
+        landingAtmosphere && "yd-public-os--landing-atmosphere",
         scroll && "yd-public-os--scroll",
         className
       )}

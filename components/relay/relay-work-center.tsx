@@ -132,7 +132,7 @@ export function RelayWorkCenter({
   };
 
   return (
-    <div className="relay-center relay-center--premium" data-relay-ui="work-center">
+    <div className="relay-center relay-center--premium relay-center--v3" data-relay-ui="work-center">
       <RelayCommandTaskPrefill />
 
       <div className="relay-center__layout">
@@ -148,8 +148,13 @@ export function RelayWorkCenter({
                 onClick={() => openArea("aufgaben")}
                 aria-current={activeArea === "aufgaben" ? "true" : undefined}
               >
-                <ClipboardList strokeWidth={1.75} aria-hidden />
-                <span>Aufgaben</span>
+                <span className="relay-center__area-icon" aria-hidden>
+                  <ClipboardList strokeWidth={1.75} />
+                </span>
+                <span className="relay-center__area-copy">
+                  <span className="relay-center__area-title">Aufgaben</span>
+                  <span className="relay-center__area-hint">Kanban & Freigaben</span>
+                </span>
               </button>
             </li>
             <li>
@@ -162,9 +167,16 @@ export function RelayWorkCenter({
                 onClick={() => openArea("nachrichten")}
                 aria-current={activeArea === "nachrichten" ? "true" : undefined}
               >
-                <MessageSquare strokeWidth={1.75} aria-hidden />
-                <span className="relay-center__area-label relay-center__area-label--long">Teamnachrichten</span>
-                <span className="relay-center__area-label relay-center__area-label--short">Team</span>
+                <span className="relay-center__area-icon" aria-hidden>
+                  <MessageSquare strokeWidth={1.75} />
+                </span>
+                <span className="relay-center__area-copy">
+                  <span className="relay-center__area-title">
+                    <span className="relay-center__area-label relay-center__area-label--long">Teamnachrichten</span>
+                    <span className="relay-center__area-label relay-center__area-label--short">Team</span>
+                  </span>
+                  <span className="relay-center__area-hint">Interne Übergaben</span>
+                </span>
                 {messageCounts.unread > 0 ? (
                   <span className="relay-center__area-count">{messageCounts.unread}</span>
                 ) : null}
@@ -221,28 +233,30 @@ export function RelayWorkCenter({
               </div>
             </header>
 
-            <div className="relay-center__tabs" role="tablist" aria-label="Aufgaben-Ansicht">
-              {RELAY_TASK_SCOPE_TABS.map((tab) => {
-                const active = scope === tab.id;
-                const count = scopeCounts[tab.id];
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    className={cn("relay-center__tab", active && "relay-center__tab--active")}
-                    onClick={() =>
-                      replaceParams((p) => {
-                        p.set("scope", tab.id);
-                      })
-                    }
-                  >
-                    {tab.label}
-                    <span className="relay-center__tab-count">{count}</span>
-                  </button>
-                );
-              })}
+            <div className="relay-center__chip-scroll">
+              <div className="relay-center__chips" role="tablist" aria-label="Aufgaben-Ansicht">
+                {RELAY_TASK_SCOPE_TABS.map((tab) => {
+                  const active = scope === tab.id;
+                  const count = scopeCounts[tab.id];
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      className={cn("relay-center__chip", active && "relay-center__chip--active")}
+                      onClick={() =>
+                        replaceParams((p) => {
+                          p.set("scope", tab.id);
+                        })
+                      }
+                    >
+                      {tab.label}
+                      <span className="relay-center__chip-count">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="relay-kanban">
@@ -270,9 +284,6 @@ export function RelayWorkCenter({
                             ✓
                           </span>
                           <p className="relay-kanban__empty-title">{column.emptyTitle}</p>
-                          {column.emptyHint ? (
-                            <p className="relay-kanban__empty-hint">{column.emptyHint}</p>
-                          ) : null}
                         </div>
                       ) : (
                         cards.map((card) => (
@@ -304,29 +315,31 @@ export function RelayWorkCenter({
               </div>
             </header>
 
-            <div className="relay-center__tabs" role="tablist" aria-label="Nachrichten-Ansicht">
-              {RELAY_MESSAGE_INBOX_TABS.map((tab) => {
-                const active = messageTab === tab.id;
-                const count = messageCounts[tab.id];
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    className={cn("relay-center__tab", active && "relay-center__tab--active")}
-                    onClick={() =>
-                      replaceParams((p) => {
-                        p.set("msg", tab.id);
-                        p.set("area", "nachrichten");
-                      })
-                    }
-                  >
-                    {tab.label}
-                    {count > 0 ? <span className="relay-center__tab-count">{count}</span> : null}
-                  </button>
-                );
-              })}
+            <div className="relay-center__chip-scroll">
+              <div className="relay-center__chips" role="tablist" aria-label="Nachrichten-Ansicht">
+                {RELAY_MESSAGE_INBOX_TABS.map((tab) => {
+                  const active = messageTab === tab.id;
+                  const count = messageCounts[tab.id];
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      className={cn("relay-center__chip", active && "relay-center__chip--active")}
+                      onClick={() =>
+                        replaceParams((p) => {
+                          p.set("msg", tab.id);
+                          p.set("area", "nachrichten");
+                        })
+                      }
+                    >
+                      {tab.label}
+                      {count > 0 ? <span className="relay-center__chip-count">{count}</span> : null}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <RelayTeamInboxList rows={inboxRows} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ImageIcon } from "lucide-react";
 
 import { PhotoViewer } from "@/components/inbox/photo-viewer";
@@ -39,6 +39,8 @@ export function TrackerPhotoStage({
   patientName,
   dominant = false,
 }: TrackerPhotoStageProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
   const sorted = useMemo(
     () =>
       [...photos].sort(
@@ -46,6 +48,12 @@ export function TrackerPhotoStage({
       ),
     [photos]
   );
+
+  const photoIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    sorted.forEach((photo, index) => map.set(photo.id, index));
+    return map;
+  }, [sorted]);
 
   const dayGroups = useMemo(() => {
     const groups: { key: string; photos: TrackerPhoto[] }[] = [];
@@ -60,6 +68,16 @@ export function TrackerPhotoStage({
     }
     return groups;
   }, [sorted]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [submissionId]);
+
+  useEffect(() => {
+    if (selectedIndex > sorted.length - 1) {
+      setSelectedIndex(Math.max(0, sorted.length - 1));
+    }
+  }, [selectedIndex, sorted.length]);
 
   const stageClass = cn(
     "yd-tracker-v4-photo-stage",
@@ -116,10 +134,13 @@ export function TrackerPhotoStage({
             signed_url,
           }))}
           patientName={patientName}
+          selectedIndex={selectedIndex}
+          onSelectedIndexChange={setSelectedIndex}
+          showThumbnails={false}
         />
       </div>
 
-      {dayGroups.length > 0 ? (
+      {sorted.length > 1 ? (
         <div
           className="yd-tracker-v4-photo-stage__timeline yd-tracker-v11-photo-timeline"
           role="list"
@@ -129,16 +150,30 @@ export function TrackerPhotoStage({
             <div key={group.key} className="yd-tracker-v4-photo-day" role="listitem">
               <p className="yd-tracker-v4-photo-day__label">{dayIndexLabel(groupIndex)}</p>
               <div className="yd-tracker-v4-photo-day__thumbs">
-                {group.photos.map((photo) => (
-                  <div key={photo.id} className="yd-tracker-v4-photo-thumb">
-                    {photo.signed_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={photo.signed_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <ImageIcon className="m-auto h-5 w-5 text-[#94A3B8]/50" aria-hidden />
-                    )}
-                  </div>
-                ))}
+                {group.photos.map((photo) => {
+                  const globalIndex = photoIndexById.get(photo.id) ?? 0;
+                  const isActive = globalIndex === selectedIndex;
+                  return (
+                    <button
+                      key={photo.id}
+                      type="button"
+                      className={cn(
+                        "yd-tracker-v4-photo-thumb yd-tracker-v4-photo-thumb-btn touch-manipulation",
+                        isActive && "yd-tracker-v4-photo-thumb-btn--active"
+                      )}
+                      aria-label={`Bild ${globalIndex + 1} von ${sorted.length} anzeigen`}
+                      aria-current={isActive ? "true" : undefined}
+                      onClick={() => setSelectedIndex(globalIndex)}
+                    >
+                      {photo.signed_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={photo.signed_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <ImageIcon className="m-auto h-5 w-5 text-[#94A3B8]/50" aria-hidden />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}

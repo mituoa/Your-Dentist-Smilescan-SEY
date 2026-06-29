@@ -1,0 +1,46 @@
+/* Your Dentist — /produkt (Bento-Familie, siehe yd-public-bento.css für Basis). */
+
+.yd-product-hero-mock-card {
+  min-height: 13rem;
+}
+
+/* Motion (Phase 5) — max. 2 eigene Typen: Section-Reveal + dezenter Card-Hover.
+   Hero-Entrance kommt bereits aus YdPublicOsEnvironment (wiederverwendet). */
+
+.yd-product-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.yd-product-reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#modul .yd-bento-module-card,
+#funktionen .yd-bento-feature-tile,
+#vertrauen .yd-bento-warum-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#modul .yd-bento-module-card:hover,
+#funktionen .yd-bento-feature-tile:hover,
+#vertrauen .yd-bento-warum-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(26, 79, 156, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-product-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  #modul .yd-bento-module-card:hover,
+  #funktionen .yd-bento-feature-tile:hover,
+  #vertrauen .yd-bento-warum-card:hover {
+    transform: none;
+  }
+}

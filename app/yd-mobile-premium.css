@@ -906,6 +906,38 @@
     min-height: 2.75rem;
   }
 
+  .yd-settings-v2__hours-days--mobile {
+    gap: 0.875rem;
+  }
+
+  .yd-settings-v2__hours-days--mobile .yd-settings-v2__hours-day-head {
+    margin-bottom: 0.5rem;
+  }
+
+  .yd-settings-v2__hours-days--mobile .yd-settings-v2__hours-day-label {
+    min-width: 1.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .yd-settings-v2__hours-days--mobile .yd-settings-v2__hours-slot-row {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+  }
+
+  .yd-settings-v2__hours-days--mobile .yd-settings-v2__hours-slot-sep {
+    font-size: 0.75rem;
+  }
+
+  .yd-settings-v2__hours-days--mobile .yd-settings-v2__hours-add-slot {
+    align-self: flex-start;
+    min-height: 2.25rem;
+    font-size: 0.8125rem;
+  }
+
+  .yd-settings-v2__field-hint--compact {
+    font-size: 0.75rem;
+  }
+
   /* —— Journal mobile hub —— */
   .yd-journal-mobile {
     flex: 1;
@@ -1209,6 +1241,20 @@
 
   .yd-tracker-mobile-inbox__item {
     min-width: 0;
+  }
+
+  .yd-tracker-mobile-inbox-card__inner {
+    align-items: stretch;
+  }
+
+  .yd-tracker-mobile-inbox-card__status {
+    padding-top: 0.55rem;
+    padding-right: 0.25rem;
+  }
+
+  .yd-tracker-list-status-menu__trigger {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
   }
 
   .yd-tracker-mobile-inbox-card {

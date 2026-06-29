@@ -14,6 +14,11 @@ export const TRACKER_ENTERPRISE_STATUS_OPTIONS: {
   { id: "resolved", label: "Abgeschlossen" },
 ];
 
+/** Status-Auswahl in der Liste — „Neu“ ist kein manueller Zielstatus. */
+export const TRACKER_LIST_STATUS_OPTIONS = TRACKER_ENTERPRISE_STATUS_OPTIONS.filter(
+  (o) => o.id !== "new"
+);
+
 export function displayPracticeStatusForCase(
   stored: string | null | undefined
 ): PracticeStatusId {

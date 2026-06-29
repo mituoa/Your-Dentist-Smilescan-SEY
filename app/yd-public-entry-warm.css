@@ -1174,3 +1174,102 @@
 .yd-practice-demo-flow--compact .yd-practice-demo-step-detail {
   font-size: 0.8125rem;
 }
+
+/* —— Auth (Login/Register): Startseiten-Atmosphäre, nicht Dashboard-Focus —— */
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-bg {
+  background: radial-gradient(
+      ellipse 85% 65% at 88% 0%,
+      rgba(200, 228, 248, 0.42) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 55% 50% at 4% 92%,
+      rgba(255, 246, 234, 0.62) 0%,
+      transparent 48%
+    ),
+    linear-gradient(175deg, #ebe4d8 0%, #e8eef4 38%, #dce8f2 100%);
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-mesh {
+  background: radial-gradient(
+      ellipse 70% 55% at 90% 6%,
+      rgba(125, 211, 252, 0.14) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 8% 78%,
+      rgba(255, 250, 242, 0.5) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 45% 40% at 48% 40%,
+      rgba(255, 255, 255, 0.35) 0%,
+      transparent 68%
+    );
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-ambient {
+  opacity: 0.85;
+  filter: blur(96px);
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-ambient--upper {
+  opacity: 0.75;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-ambient--center {
+  opacity: 0.9;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-ambient--lower {
+  opacity: 0.7;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-vignette {
+  opacity: 0.35;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 252, 247, 0.15) 70%,
+    rgba(200, 215, 228, 0.2) 100%
+  );
+}
+
+/* Bento-Startseite (#f8fbfd) — leichter Tageslicht-Wash über dem Mesh */
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-content {
+  background: linear-gradient(
+    180deg,
+    rgba(248, 251, 253, 0.38) 0%,
+    rgba(248, 251, 253, 0.52) 100%
+  );
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere.yd-public-os--focus:has(.yd-clinical-entry--login)
+  .yd-public-os-ambient--center {
+  opacity: 0.9;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere.yd-public-os--focus:has(.yd-clinical-entry--login)
+  .yd-public-os-ambient--upper {
+  opacity: 0.75;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere.yd-public-os--focus:has(.yd-clinical-entry--login)
+  .yd-public-os-vignette {
+  opacity: 0.35;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-clinical-entry-panel,
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-product-entry-card {
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(248, 252, 255, 0.94) 48%,
+    rgba(241, 248, 254, 0.92) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 16px 48px rgba(72, 98, 128, 0.08),
+    0 4px 18px rgba(47, 128, 237, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}

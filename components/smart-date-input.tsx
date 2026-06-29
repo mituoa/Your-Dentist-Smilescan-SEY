@@ -22,6 +22,7 @@ import {
   toIso,
 } from "@/lib/dates/smart-date-parse";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 
 const MONTHS_DE = [
   "Januar",
@@ -54,6 +55,7 @@ const MONTHS_SHORT = [
 ] as const;
 
 const WEEK_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"] as const;
+const WEEK_DE_MOBILE = ["M", "D", "M", "D", "F", "S", "S"] as const;
 
 type PickerView = "days" | "months" | "years";
 
@@ -106,6 +108,7 @@ export const SmartDateInput = forwardRef<SmartDateInputHandle, SmartDateInputPro
   function SmartDateInput({ value, onChange, disabled, "aria-label": ariaLabel }, ref) {
     const inputId = useId();
     const hintId = `${inputId}-hint`;
+    const isMobile = useIsMobile();
     const minP = useMemo(() => utcPartsFromMs(minBirthUtc()), []);
     const maxP = useMemo(() => utcPartsFromMs(maxBirthUtc()), []);
     const minIdx = monthYearToIndex(minP.y, minP.m0);
@@ -183,6 +186,15 @@ export const SmartDateInput = forwardRef<SmartDateInputHandle, SmartDateInputPro
 
     useLayoutEffect(() => {
       if (!open || !wrapRef.current) return;
+      if (isMobile) {
+        setPos({
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          placement: "below",
+        });
+        return;
+      }
       const r = wrapRef.current.getBoundingClientRect();
       const w = Math.max(300, Math.min(340, r.width));
       let left = r.left;
@@ -197,7 +209,7 @@ export const SmartDateInput = forwardRef<SmartDateInputHandle, SmartDateInputPro
           ? r.bottom + 8
           : Math.max(12, r.top - panelH - 8);
       setPos({ top, left, width: w, placement });
-    }, [open, viewY, viewM0, pickerView]);
+    }, [open, viewY, viewM0, pickerView, isMobile]);
 
     useEffect(() => {
       if (!open || pickerView !== "years") return;
@@ -294,84 +306,127 @@ export const SmartDateInput = forwardRef<SmartDateInputHandle, SmartDateInputPro
     const panel =
       open && typeof document !== "undefined"
         ? createPortal(
-            <div
-              ref={panelRef}
-              role="dialog"
-              aria-label="Datum auswählen"
-              className={cn(
-                "yd-smart-date-popover fixed z-[2500]",
-                pos.placement === "above" && "yd-smart-date-popover--above"
-              )}
-              style={{ top: pos.top, left: pos.left, width: pos.width }}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              <div className="yd-smart-date-popover__header">
-                {pickerView === "days" ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={goPrev}
-                      disabled={!canPrev}
-                      className="yd-smart-date-nav"
-                      aria-label="Vorheriger Monat"
-                    >
-                      <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-                    </button>
-                    <div className="yd-smart-date-popover__title-group">
-                      <button
-                        type="button"
-                        className="yd-smart-date-chip"
-                        onClick={() => setPickerView("months")}
-                        aria-label="Monat wählen"
-                      >
-                        {MONTHS_DE[viewM0]}
-                      </button>
-                      <button
-                        type="button"
-                        className="yd-smart-date-chip"
-                        onClick={() => setPickerView("years")}
-                        aria-label="Jahr wählen"
-                      >
-                        {viewY}
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={goNext}
-                      disabled={!canNext}
-                      className="yd-smart-date-nav"
-                      aria-label="Nächster Monat"
-                    >
-                      <ChevronRight className="h-4 w-4" strokeWidth={2} />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className="yd-smart-date-nav"
-                      onClick={() => setPickerView("days")}
-                      aria-label="Zurück zum Kalender"
-                    >
-                      <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-                    </button>
-                    <p className="yd-smart-date-popover__subtitle">
-                      {pickerView === "months" ? "Monat wählen" : "Jahr wählen"}
-                    </p>
-                    <span className="yd-smart-date-nav yd-smart-date-nav--ghost" aria-hidden />
-                  </>
+            <>
+              {isMobile ? (
+                <button
+                  type="button"
+                  className="yd-smart-date-backdrop"
+                  aria-label="Datumswahl schließen"
+                  onClick={() => setOpen(false)}
+                />
+              ) : null}
+              <div
+                ref={panelRef}
+                role="dialog"
+                aria-label="Datum auswählen"
+                className={cn(
+                  "yd-smart-date-popover z-[2500]",
+                  isMobile
+                    ? "yd-smart-date-popover--mobile fixed inset-x-0 bottom-0"
+                    : "yd-smart-date-popover--anchored fixed",
+                  !isMobile && pos.placement === "above" && "yd-smart-date-popover--above"
                 )}
-              </div>
-
-              {pickerView === "days" ? (
-                <div className="yd-smart-date-popover__body">
-                  <div className="yd-smart-date-weekdays">
-                    {WEEK_DE.map((w) => (
-                      <div key={w} className="yd-smart-date-weekday">
-                        {w}
+                style={
+                  isMobile
+                    ? undefined
+                    : { top: pos.top, left: pos.left, width: pos.width }
+                }
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                <div className="yd-smart-date-popover__header">
+                  {pickerView === "days" ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={goPrev}
+                        disabled={!canPrev}
+                        className="yd-smart-date-nav"
+                        aria-label="Vorheriger Monat"
+                      >
+                        <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                      {isMobile ? (
+                        <button
+                          type="button"
+                          className="yd-smart-date-title"
+                          onClick={() => setPickerView("months")}
+                          aria-label="Monat und Jahr wählen"
+                        >
+                          {MONTHS_SHORT[viewM0]} {viewY}
+                        </button>
+                      ) : (
+                        <div className="yd-smart-date-popover__title-group">
+                          <button
+                            type="button"
+                            className="yd-smart-date-chip"
+                            onClick={() => setPickerView("months")}
+                            aria-label="Monat wählen"
+                          >
+                            {MONTHS_DE[viewM0]}
+                          </button>
+                          <button
+                            type="button"
+                            className="yd-smart-date-chip"
+                            onClick={() => setPickerView("years")}
+                            aria-label="Jahr wählen"
+                          >
+                            {viewY}
+                          </button>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={goNext}
+                        disabled={!canNext}
+                        className="yd-smart-date-nav"
+                        aria-label="Nächster Monat"
+                      >
+                        <ChevronRight className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="yd-smart-date-nav"
+                        onClick={() => setPickerView("days")}
+                        aria-label="Zurück zum Kalender"
+                      >
+                        <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                      <div className="yd-smart-date-popover__subtitle">
+                        {pickerView === "months" ? (
+                          isMobile ? (
+                            <button
+                              type="button"
+                              className="yd-smart-date-title yd-smart-date-title--inline"
+                              onClick={() => setPickerView("years")}
+                            >
+                              {viewY}
+                            </button>
+                          ) : (
+                            "Monat wählen"
+                          )
+                        ) : isMobile ? (
+                          String(viewY)
+                        ) : (
+                          "Jahr wählen"
+                        )}
                       </div>
-                    ))}
-                  </div>
+                      <span className="yd-smart-date-nav yd-smart-date-nav--ghost" aria-hidden />
+                    </>
+                  )}
+                </div>
+
+                {pickerView === "days" ? (
+                  <div className="yd-smart-date-popover__body">
+                    <div className="yd-smart-date-weekdays">
+                      {(isMobile ? WEEK_DE_MOBILE : WEEK_DE).map((w, index) => (
+                        <div key={`${w}-${index}`} className="yd-smart-date-weekday">
+                          {w}
+                        </div>
+                      ))}
+                    </div>
                   <div className="yd-smart-date-grid">
                     {cells.map((day, idx) => {
                       if (day == null) {
@@ -451,7 +506,8 @@ export const SmartDateInput = forwardRef<SmartDateInputHandle, SmartDateInputPro
                   </div>
                 </div>
               ) : null}
-            </div>,
+              </div>
+            </>,
             document.body
           )
         : null;

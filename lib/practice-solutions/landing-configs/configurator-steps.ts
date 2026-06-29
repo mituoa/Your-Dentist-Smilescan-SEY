@@ -62,9 +62,14 @@ export function getFieldAnswerSummary(
   }
   if (field.type === "checkbox") {
     const labels = labelsForCheckboxField(field, values.checkbox[field.id] ?? []);
-    if (labels.length === 0) return null;
-    if (labels.length <= 2) return labels.join(" · ");
-    return `${labels.slice(0, 2).join(" · ")} +${labels.length - 2}`;
+    const supplement =
+      field.supplementText && values.text[field.supplementText.id]?.trim()
+        ? values.text[field.supplementText.id]!.trim()
+        : null;
+    const all = supplement ? [...labels, supplement] : labels;
+    if (all.length === 0) return null;
+    if (all.length <= 2) return all.join(" · ");
+    return `${all.slice(0, 2).join(" · ")} +${all.length - 2}`;
   }
   if (field.type === "text") {
     const raw = values.text[field.id]?.trim();
@@ -149,6 +154,8 @@ function summaryLabelForField(field: LandingFieldDef): string {
   if (field.id === "goal") return "Kampagnenziel";
   if (field.id === "audience" || field.id === "institutions") return "Zielgruppe";
   if (field.id === "services") return "Schwerpunkte";
+  if (field.id === "roles") return "Gesuchte Profile";
+  if (field.id === "benefits") return "Arbeitgeber-Vorteile";
   if (field.id === "system") return "System";
   if (field.id === "notes") return "Besonderheiten";
   return field.label;
@@ -160,8 +167,8 @@ export function resolveConfiguratorStep(
   if (field.type === "text" && field.id === "schwerpunkt") return "product";
   if (field.type === "text") return "notes";
   if (field.id === "goal") return "goal";
-  if (field.id === "audience" || field.id === "institutions") return "audience";
-  if (field.id === "services") return "services";
+  if (field.id === "audience" || field.id === "institutions" || field.id === "benefits") return "audience";
+  if (field.id === "services" || field.id === "roles") return "services";
   if (field.type === "checkbox") return "services";
   if (field.type === "radio") return "product";
   return "product";
@@ -213,7 +220,11 @@ export function isConfiguratorFieldComplete(
   values: LandingFieldValues
 ): boolean {
   if (field.type === "checkbox") {
-    return (values.checkbox[field.id]?.length ?? 0) > 0;
+    if (field.optional) return true;
+    const selected = values.checkbox[field.id]?.length ?? 0;
+    const supplement =
+      field.supplementText && values.text[field.supplementText.id]?.trim();
+    return selected > 0 || Boolean(supplement);
   }
   if (field.type === "radio") {
     return Boolean(values.radio[field.id]?.trim());

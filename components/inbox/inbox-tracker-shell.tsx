@@ -10,15 +10,14 @@ type InboxTrackerShellProps = {
   detail: React.ReactNode;
 };
 
-/** 34% Inbox · 66% Arbeitsbereich — Referenz-Split. */
+/** 34% Inbox · 66% Arbeitsbereich — Mobile: Liste oder Fall, nie beides. */
 export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
   const pathname = usePathname() || "";
   const isInboxIndex = pathname === "/inbox";
   const isCaseDetail = pathname.startsWith("/inbox/") && pathname !== "/inbox";
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!isCaseDetail) return;
+    if (typeof window === "undefined" || !isCaseDetail) return;
     window.requestAnimationFrame(() => {
       document
         .querySelector(".yd-tracker-v4-detail__scroll")
@@ -51,7 +50,7 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
             "max-md:flex max-md:min-h-0 max-md:w-full max-md:flex-1 max-md:flex-col"
         )}
       >
-        {detail}
+        <div className="flex h-full min-h-0 flex-1 flex-col">{detail}</div>
       </div>
     </div>
   );

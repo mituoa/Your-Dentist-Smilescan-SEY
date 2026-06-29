@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { CalendarOff, Clock, Plus, Trash2 } from "lucide-react";
 
 import { saveOpeningHoursConfig } from "@/app/(protected)/settings/actions";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import {
   defaultOpeningHoursConfig,
   newSpecialPeriodId,
@@ -17,6 +18,16 @@ import {
   WEEKDAY_ORDER,
 } from "@/lib/settings/opening-hours";
 import { cn } from "@/lib/utils";
+
+const WEEKDAY_SHORT: Record<WeekdayId, string> = {
+  mon: "Mo",
+  tue: "Di",
+  wed: "Mi",
+  thu: "Do",
+  fri: "Fr",
+  sat: "Sa",
+  sun: "So",
+};
 
 type SettingsOpeningHoursPanelProps = {
   initialConfig: OpeningHoursConfig | null;
@@ -35,6 +46,7 @@ export function SettingsOpeningHoursPanel({
   onSaved,
   onError,
 }: SettingsOpeningHoursPanelProps) {
+  const isMobile = useIsMobile();
   const [config, setConfig] = useState<OpeningHoursConfig>(
     initialConfig ?? defaultOpeningHoursConfig()
   );
@@ -186,9 +198,11 @@ export function SettingsOpeningHoursPanel({
         <section className="yd-settings-v2__hours-block">
           <div className="yd-settings-v2__hours-block-head">
             <h3 className="yd-settings-v2__hours-block-title">Online-Terminbuchung</h3>
-            <p className="yd-settings-v2__hours-block-copy">
-              Steuert, ob Patienten online Termine buchen können.
-            </p>
+            {!isMobile ? (
+              <p className="yd-settings-v2__hours-block-copy">
+                Steuert, ob Patienten online Termine buchen können.
+              </p>
+            ) : null}
           </div>
           <label className="yd-settings-v2__toggle">
             <input
@@ -204,12 +218,12 @@ export function SettingsOpeningHoursPanel({
             </span>
           </label>
           {appointmentLink ? (
-            <p className="yd-settings-v2__field-hint">
-              Terminlink ist hinterlegt — Patienten werden dorthin weitergeleitet.
+            <p className="yd-settings-v2__field-hint yd-settings-v2__field-hint--compact">
+              Terminlink hinterlegt
             </p>
           ) : (
-            <p className="yd-settings-v2__field-hint">
-              Terminlink fehlt noch — hinterlegen Sie ihn unter Praxisprofil.
+            <p className="yd-settings-v2__field-hint yd-settings-v2__field-hint--compact">
+              Terminlink unter Praxisprofil hinterlegen
             </p>
           )}
         </section>
@@ -217,18 +231,21 @@ export function SettingsOpeningHoursPanel({
         <section className="yd-settings-v2__hours-block">
           <div className="yd-settings-v2__hours-block-head">
             <h3 className="yd-settings-v2__hours-block-title">Reguläre Woche</h3>
-            <p className="yd-settings-v2__hours-block-copy">
-              Mehrere Zeitfenster pro Tag ermöglichen Mittagspausen.
-            </p>
+            {!isMobile ? (
+              <p className="yd-settings-v2__hours-block-copy">
+                Mehrere Zeitfenster pro Tag ermöglichen Mittagspausen.
+              </p>
+            ) : null}
           </div>
 
-          <ul className="yd-settings-v2__hours-days">
+          <ul className={cn("yd-settings-v2__hours-days", isMobile && "yd-settings-v2__hours-days--mobile")}>
             {WEEKDAY_ORDER.map((day) => {
               const schedule = config.weekly[day];
+              const dayLabel = isMobile ? WEEKDAY_SHORT[day] : WEEKDAY_LABELS[day];
               return (
                 <li key={day} className="yd-settings-v2__hours-day">
                   <div className="yd-settings-v2__hours-day-head">
-                    <span className="yd-settings-v2__hours-day-label">{WEEKDAY_LABELS[day]}</span>
+                    <span className="yd-settings-v2__hours-day-label">{dayLabel}</span>
                     <label className="yd-settings-v2__hours-closed">
                       <input
                         type="checkbox"
@@ -240,7 +257,7 @@ export function SettingsOpeningHoursPanel({
                           })
                         }
                       />
-                      <span>Geschlossen</span>
+                      <span>{isMobile ? "Zu" : "Geschlossen"}</span>
                     </label>
                   </div>
 
@@ -282,12 +299,18 @@ export function SettingsOpeningHoursPanel({
                         onClick={() => addDaySlot(day)}
                       >
                         <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                        Zeitfenster hinzufügen
+                        {isMobile ? "Zeitfenster" : "Zeitfenster hinzufügen"}
                       </button>
                     </div>
                   ) : (
                     <p className="yd-settings-v2__hours-closed-note">
-                      <CalendarOff className="inline h-3.5 w-3.5 opacity-70" aria-hidden /> Geschlossen
+                      {!isMobile ? (
+                        <>
+                          <CalendarOff className="inline h-3.5 w-3.5 opacity-70" aria-hidden /> Geschlossen
+                        </>
+                      ) : (
+                        "Geschlossen"
+                      )}
                     </p>
                   )}
                 </li>
