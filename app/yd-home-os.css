@@ -1361,14 +1361,14 @@
 .yd-os-cta-grid {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
 }
 
-@media (min-width: 960px) {
+@media (min-width: 40rem) {
   .yd-os-cta-grid {
-    grid-template-columns: 0.9fr 1.1fr;
-    align-items: start;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   }
 }
 

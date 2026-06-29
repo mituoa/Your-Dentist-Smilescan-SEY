@@ -170,15 +170,17 @@
   }
 }
 
-/* Workspace-Modals (Aufgabe, Fall, Nachricht): Command AI bleibt erreichbar */
+/* Workspace-Modals (Aufgabe, Fall, Nachricht): Command AI bleibt erreichbar; Bottom-Rail bleibt sichtbar */
 html[data-yd-workspace-modal="true"] .yd-command-assist-fab-host {
   z-index: 280;
   pointer-events: auto;
+  bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.5rem);
 }
 
 html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
   z-index: 285;
   pointer-events: auto;
+  bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.25rem);
 }
 
 html[data-yd-workspace-modal="true"] .yd-command-assist-backdrop {

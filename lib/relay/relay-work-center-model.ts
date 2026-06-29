@@ -17,6 +17,8 @@ import {
   type RelayWorkObjectType,
 } from "@/lib/relay/relay-work-object";
 import { formatRelayMessageTimestamp } from "@/lib/relay/read-receipt-display";
+import { examplesForKanbanColumn } from "@/lib/relay/relay-kanban-examples";
+import type { BoardColumnId } from "@/lib/tasks/workflow-rules";
 
 export type RelayKanbanColumnId = "decision" | "in_progress" | "done";
 export type RelayTaskScopeTab = "all" | "mine" | "delegated";
@@ -35,6 +37,11 @@ export type RelayKanbanCard = {
   assigneeColor: string;
   commentCount: number;
   priority: "normal" | "important";
+  /** Echte Aufgabe — für Drag & Drop Statuswechsel. */
+  taskId?: string | null;
+  /** Beispielkarte — nicht persistiert. */
+  isGhost?: boolean;
+  columnId?: RelayKanbanColumnId;
 };
 
 export type RelayTeamInboxRow = {
@@ -116,6 +123,37 @@ function statusToColumn(status: RelayWorkStatusId): RelayKanbanColumnId {
   if (status === "done") return "done";
   if (status === "in_progress") return "in_progress";
   return "decision";
+}
+
+function taskDbColumn(
+  taskId: string,
+  columns: { open: MyTask[]; pending: MyTask[]; done: MyTask[] }
+): BoardColumnId | null {
+  if (columns.done.some((t) => t.id === taskId)) return "done";
+  if (columns.pending.some((t) => t.id === taskId)) return "pending";
+  if (columns.open.some((t) => t.id === taskId)) return "open";
+  return null;
+}
+
+function dbColumnToKanban(db: BoardColumnId): RelayKanbanColumnId {
+  if (db === "done") return "done";
+  if (db === "pending") return "in_progress";
+  return "decision";
+}
+
+function columnForRow(
+  row: RelayWorkRow,
+  task: MyTask | undefined,
+  columns: { open: MyTask[]; pending: MyTask[]; done: MyTask[] }
+): RelayKanbanColumnId {
+  if (row.kind === "journal") return "decision";
+  if (task) {
+    const dbCol = taskDbColumn(task.id, columns);
+    if (dbCol) return dbColumnToKanban(dbCol);
+    if (task.status === "done") return "done";
+    if (task.status === "pending_review") return "in_progress";
+  }
+  return statusToColumn(classifyRelayWorkStatus(row));
 }
 
 function findTask(
@@ -238,6 +276,8 @@ function rowToKanbanCard(
     assigneeColor: assignee.color,
     commentCount: 0,
     priority: task?.priority === "important" ? "important" : "normal",
+    taskId: task?.id ?? null,
+    isGhost: row.isGhost,
   };
 }
 
@@ -287,6 +327,7 @@ function mapDoneTaskToCard(
     assigneeColor: assignee.color,
     commentCount: 0,
     priority: task.priority === "important" ? "important" : "normal",
+    taskId: task.id,
   };
 }
 
@@ -338,7 +379,7 @@ export function buildRelayKanbanBoard(input: {
       continue;
     }
 
-    const column = statusToColumn(classifyRelayWorkStatus(row));
+    const column = columnForRow(row, task, input.columns);
     board[column].push(card);
   }
 
@@ -378,7 +419,71 @@ export function buildRelayKanbanBoard(input: {
     board.done.push(card);
   }
 
-  return board;
+  for (const colId of ["decision", "in_progress", "done"] as RelayKanbanColumnId[]) {
+    board[colId] = bundleJournalDecisionCards(board[colId]);
+  }
+
+  return enrichKanbanWithExamples(board);
+}
+
+const MAX_JOURNAL_DECISION_CARDS = 1;
+
+function bundleJournalDecisionCards(cards: RelayKanbanCard[]): RelayKanbanCard[] {
+  const journals = cards.filter((c) => c.typeCode === "J" && !c.isGhost);
+  if (journals.length <= MAX_JOURNAL_DECISION_CARDS) return cards;
+  const rest = cards.filter((c) => c.typeCode !== "J" || c.isGhost);
+  const bundle: RelayKanbanCard = {
+    id: "journal-drafts-bundle",
+    href: journals[0]!.href,
+    typeLabel: "Care Center",
+    typeCode: "J",
+    title: `${journals.length} Entwürfe zur Freigabe`,
+    metaLine: "Journal · gebündelt — Care Center öffnen",
+    dateLabel: journals[0]!.dateLabel,
+    actionLabel: "Öffnen",
+    assigneeInitials: journals[0]!.assigneeInitials,
+    assigneeColor: journals[0]!.assigneeColor,
+    commentCount: 0,
+    priority: "normal",
+  };
+  return [...rest, bundle];
+}
+
+function enrichKanbanWithExamples(
+  board: Record<RelayKanbanColumnId, RelayKanbanCard[]>
+): Record<RelayKanbanColumnId, RelayKanbanCard[]> {
+  const next: Record<RelayKanbanColumnId, RelayKanbanCard[]> = {
+    decision: [...board.decision],
+    in_progress: [...board.in_progress],
+    done: [...board.done],
+  };
+
+  const liveTotal =
+    next.decision.filter((c) => !c.isGhost).length +
+    next.in_progress.filter((c) => !c.isGhost).length +
+    next.done.filter((c) => !c.isGhost).length;
+
+  const journalHeavy =
+    next.decision.filter((c) => c.typeCode === "J" && !c.isGhost).length > 0 &&
+    next.in_progress.filter((c) => !c.isGhost).length === 0;
+
+  for (const column of RELAY_KANBAN_COLUMNS) {
+    const live = next[column.id].filter((c) => !c.isGhost);
+    const shouldAdd =
+      live.length === 0 ||
+      (journalHeavy && column.id !== "decision") ||
+      (liveTotal < 3 && column.id !== "decision");
+
+    if (!shouldAdd) continue;
+
+    const examples = examplesForKanbanColumn(column.id).filter(
+      (ex) => !next[column.id].some((c) => c.id === ex.id)
+    );
+    const limit = live.length === 0 ? examples.length : Math.min(2, examples.length);
+    next[column.id] = [...next[column.id], ...examples.slice(0, limit)];
+  }
+
+  return next;
 }
 
 export function countRelayTaskScope(

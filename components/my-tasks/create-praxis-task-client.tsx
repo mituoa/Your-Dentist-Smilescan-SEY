@@ -335,6 +335,9 @@ export function CreatePraxisTaskClient({
       closeDisabled={busy}
       ariaLabel={shell.title}
       overlayVariant={overlay}
+      panelClassName={
+        overlay === "workspace" ? "yd-medical-form-panel--workspace-compact" : undefined
+      }
       footer={
         <MedicalFormFooterActions
           onCancel={close}

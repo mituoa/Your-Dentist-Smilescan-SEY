@@ -2,6 +2,7 @@
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { SignOutIconForm } from "@/components/app-shell/sign-out-form";
+import { TopbarContextActions } from "@/components/app-shell/topbar-context-actions";
 import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
 import type { ThemePreference } from "@/lib/theme";
@@ -10,6 +11,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 type ProtectedTopbarProps = {
   email: string;
   workspaceName: string;
+  workspaceId: string;
   role: "doctor" | "team";
   initialTheme: ThemePreference;
   avatarUrl?: string | null;
@@ -24,6 +26,7 @@ type ProtectedTopbarProps = {
 export function ProtectedTopbar({
   email,
   workspaceName,
+  workspaceId,
   role,
   initialTheme,
   avatarUrl,
@@ -37,6 +40,14 @@ export function ProtectedTopbar({
       )}
     >
       <div className="yd-mobile-topbar-inner">
+        <div className="yd-mobile-topbar-cta-group">
+          <TopbarContextActions
+            role={role}
+            variant="dashboard"
+            workspaceId={workspaceId}
+            placement="mobile"
+          />
+        </div>
         <div className="yd-mobile-topbar-brand" aria-label="Your Dentist">
           <YourDentistBrandLockup size="sm" tagline={null} className="min-w-0" priority />
         </div>

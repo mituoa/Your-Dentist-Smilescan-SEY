@@ -16,7 +16,7 @@ type RelayCreateMenuProps = {
   className?: string;
   /** @deprecated Nutze placement="header" */
   variant?: "primary" | "secondary";
-  placement?: "header" | "toolbar" | "inline";
+  placement?: "header" | "toolbar" | "inline" | "mobile";
   /** @deprecated Nicht mehr im Menü verwendet */
   isDoctor?: boolean;
   label?: string;
@@ -30,9 +30,10 @@ function triggerClass(
   variant: RelayCreateMenuProps["variant"],
   open: boolean
 ) {
-  if (placement === "header") {
+  if (placement === "header" || placement === "mobile") {
     return cn(
       "yd-dash-header-premium__cta yd-dash-header-premium__cta--secondary yd-relay-create-menu__trigger",
+      placement === "mobile" && "yd-relay-create-menu__trigger--mobile",
       open && "yd-relay-create-menu__trigger--open"
     );
   }
@@ -71,7 +72,7 @@ export function RelayCreateMenu({
 
   const triggerLabel =
     label ??
-    (placement === "header"
+    (placement === "header" || placement === "mobile"
       ? "Neu"
       : placement === "inline"
         ? "Erstellen"

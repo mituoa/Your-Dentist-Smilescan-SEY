@@ -40,19 +40,6 @@ export type { InquiryTarget, PracticeSolutionInquiryContext } from "@/lib/practi
 type SubmitState = "idle" | "pending" | "success" | "error";
 
 const ADVANCE_DELAY_MS = 320;
-const BRIEFING_NARROW_MQ = "(max-width: 959px)";
-
-function useBriefingNarrow(): boolean {
-  return React.useSyncExternalStore(
-    (onStoreChange) => {
-      const mq = window.matchMedia(BRIEFING_NARROW_MQ);
-      mq.addEventListener("change", onStoreChange);
-      return () => mq.removeEventListener("change", onStoreChange);
-    },
-    () => window.matchMedia(BRIEFING_NARROW_MQ).matches,
-    () => false
-  );
-}
 
 export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryContext) {
   const [target, setTarget] = React.useState<InquiryTarget | null>(null);
@@ -119,7 +106,6 @@ type StudioProps = {
 };
 
 function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
-  const isNarrow = useBriefingNarrow();
   const config = React.useMemo(() => getLandingConfig(target.configId), [target.configId]);
   const briefingFields = React.useMemo(() => getBriefingFields(config), [config]);
 
@@ -359,12 +345,10 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
             city={city}
           />
 
-          {isNarrow ? (
-            <details className="yd-lp-briefing-mobile-preview">
-              <summary>Live-Vorschau anzeigen</summary>
-              <div className="yd-lp-briefing-mobile-preview__frame">{livePreview}</div>
-            </details>
-          ) : null}
+          <details className="yd-lp-briefing-mobile-preview">
+            <summary>Live-Vorschau anzeigen</summary>
+            <div className="yd-lp-briefing-mobile-preview__frame">{livePreview}</div>
+          </details>
 
           {submitError ? (
             <p className="yd-medical-form-alert" role="alert">
@@ -450,11 +434,9 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
           </label>
         </div>
 
-        {!isNarrow ? (
-          <aside className="yd-lp-briefing-studio__preview" aria-label="Live-Vorschau">
-            {livePreview}
-          </aside>
-        ) : null}
+        <aside className="yd-lp-briefing-studio__preview" aria-label="Live-Vorschau">
+          {livePreview}
+        </aside>
       </div>
     </MedicalFormShell>
   );

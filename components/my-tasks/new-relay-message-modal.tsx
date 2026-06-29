@@ -176,6 +176,7 @@ function RelayMessageCreateForm({
       closeDisabled={busy}
       ariaLabel="Interne Nachricht"
       overlayVariant="workspace"
+      panelClassName="yd-medical-form-panel--workspace-compact"
       footer={
         <MedicalFormFooterActions
           onCancel={close}

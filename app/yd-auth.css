@@ -1919,6 +1919,60 @@
   border-top-color: rgba(186, 203, 222, 0.32);
 }
 
+/* Workspace-Modals auf Mobile: kompaktes Sheet, nicht Vollbild */
+@media (max-width: 767px) {
+  .yd-medical-form-overlay--workspace.yd-auth-register-overlay {
+    height: 100dvh;
+    max-height: 100dvh;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage {
+    min-height: 0;
+    flex: 0 1 auto;
+    width: 100%;
+    max-height: calc(
+      100dvh - var(--yd-mobile-bottom-nav-h, 4.75rem) - 1.25rem
+    );
+    justify-content: center;
+    padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem
+      calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + 0.5rem);
+  }
+
+  .yd-medical-form-panel--workspace-compact {
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: min(100%, 22.5rem);
+    max-height: min(
+      calc(82dvh - var(--yd-mobile-bottom-nav-h, 4.75rem)),
+      34rem
+    );
+    margin-inline: auto;
+    border-radius: 1.25rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-auth-register-header {
+    padding: 0.875rem 1rem 0.5rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-auth-register-header .mb-5 {
+    display: none;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-auth-register-title {
+    font-size: 1.125rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-auth-register-body {
+    padding-inline: 1rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-footer {
+    padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
 .yd-medical-form-body {
   display: flex;
   min-height: 0;

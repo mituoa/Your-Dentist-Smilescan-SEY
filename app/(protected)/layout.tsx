@@ -264,6 +264,7 @@ export default async function ProtectedLayout({
                   <ProtectedTopbar
                     email={user.email || ""}
                     workspaceName={workspaceName}
+                    workspaceId={workspace.workspace_id}
                     role={role}
                     initialTheme={theme}
                     avatarUrl={profileData?.photo_url ?? null}
@@ -271,7 +272,7 @@ export default async function ProtectedLayout({
                     inboxCount={inboxCount}
                   />
 
-                  <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 pb-[max(3rem,env(safe-area-inset-bottom)+2rem)] md:p-5 md:pb-6">
+                  <main className="yd-workspace-main relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 md:p-5 md:pb-6">
                     <HcAppCanvas>
                       <WorkspaceIntegratedHeaderBridge
                         email={user.email || ""}

@@ -6,10 +6,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
-import { RelayKanbanCardView } from "@/components/relay/relay-kanban-card";
+import { parseKanbanMobileColumn } from "@/lib/relay/relay-kanban-columns";
+import { RelayKanbanBoard } from "@/components/relay/relay-kanban-board";
 import { RelayTeamInboxList } from "@/components/relay/relay-team-inbox-list";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
 import type { MyTask } from "@/lib/queries/my-tasks";
@@ -49,6 +50,20 @@ function parseMessageTab(value: string | null): RelayMessageInboxTab {
   return "unread";
 }
 
+const RELAY_KANBAN_MOBILE_MQ = "(max-width: 1023px)";
+
+function useRelayKanbanMobile(): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(RELAY_KANBAN_MOBILE_MQ);
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia(RELAY_KANBAN_MOBILE_MQ).matches,
+    () => false
+  );
+}
+
 export function RelayWorkCenter({
   userId,
   isDoctor,
@@ -60,9 +75,11 @@ export function RelayWorkCenter({
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isKanbanMobile = useRelayKanbanMobile();
   const scope = parseScope(searchParams.get("scope"));
   const messageTab = parseMessageTab(searchParams.get("msg"));
   const searchQuery = searchParams.get("q") ?? "";
+  const mobileKanbanCol = parseKanbanMobileColumn(searchParams.get("kanban"));
 
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -259,46 +276,43 @@ export function RelayWorkCenter({
               </div>
             </div>
 
-            <div className="relay-kanban">
-              {RELAY_KANBAN_COLUMNS.map((column) => {
-                const cards = board[column.id];
-                return (
-                  <div key={column.id} className="relay-kanban__col">
-                    <header className="relay-kanban__col-head">
-                      <div className="relay-kanban__col-label">
-                        <span
-                          className={cn(
-                            "relay-kanban__dot",
-                            `relay-kanban__dot--${column.tone}`
-                          )}
-                          aria-hidden
-                        />
-                        <h3>{column.label}</h3>
-                        <span className="relay-kanban__count">{cards.length}</span>
-                      </div>
-                    </header>
-                    <div className="relay-kanban__cards">
-                      {cards.length === 0 ? (
-                        <div className="relay-kanban__empty-state">
-                          <span className="relay-kanban__empty-icon" aria-hidden>
-                            ✓
-                          </span>
-                          <p className="relay-kanban__empty-title">{column.emptyTitle}</p>
-                        </div>
-                      ) : (
-                        cards.map((card) => (
-                          <RelayKanbanCardView
-                            key={card.id}
-                            card={card}
-                            done={column.id === "done"}
-                          />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="relay-center__kanban-col-scroll lg:hidden">
+              <div className="relay-center__chips" role="tablist" aria-label="Kanban-Spalte">
+                {RELAY_KANBAN_COLUMNS.map((col) => {
+                  const active = mobileKanbanCol === col.id;
+                  const count = board[col.id].length;
+                  return (
+                    <button
+                      key={col.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      className={cn("relay-center__chip", active && "relay-center__chip--active")}
+                      onClick={() =>
+                        replaceParams((p) => {
+                          p.set("kanban", col.id);
+                        })
+                      }
+                    >
+                      {col.id === "decision"
+                        ? "Entscheidung"
+                        : col.id === "in_progress"
+                          ? "Bearbeitung"
+                          : "Erledigt"}
+                      <span className="relay-center__chip-count">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+
+            <RelayKanbanBoard
+              board={board}
+              columns={columns}
+              currentUserId={userId}
+              isDoctor={isDoctor}
+              mobileColumn={isKanbanMobile ? mobileKanbanCol : null}
+            />
           </section>
           ) : (
           <section

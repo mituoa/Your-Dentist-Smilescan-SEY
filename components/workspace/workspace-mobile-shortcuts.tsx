@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   BookOpen,
   CalendarDays,
@@ -186,7 +188,10 @@ export function WorkspaceMobileShortcuts({
 
   const tabs = role === "doctor" ? doctorTabs : teamTabs;
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const rail = (
     <nav
       className={cn("yd-mobile-bottom-rail md:hidden", className)}
       aria-label="Hauptnavigation"
@@ -213,4 +218,8 @@ export function WorkspaceMobileShortcuts({
       </div>
     </nav>
   );
+
+  if (!mounted) return null;
+
+  return createPortal(rail, document.body);
 }

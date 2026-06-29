@@ -145,8 +145,8 @@
   .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas,
   .yd-workspace main:has(.relay-ws) .yd-awaken-canvas,
   .yd-workspace main:has(.relay-center) .yd-awaken-canvas {
-    padding: 0.375rem max(0.75rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom))
-      max(0.75rem, env(safe-area-inset-left)) !important;
+    padding: 0.375rem max(0.75rem, env(safe-area-inset-right))
+      calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + 0.5rem) max(0.75rem, env(safe-area-inset-left)) !important;
     border-radius: 22px !important;
   }
 
