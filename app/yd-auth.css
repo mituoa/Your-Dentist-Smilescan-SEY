@@ -1971,6 +1971,62 @@
   .yd-medical-form-panel--workspace-compact .yd-medical-form-footer {
     padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom));
   }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-section + .yd-medical-form-section {
+    margin-top: 1.125rem;
+    padding-top: 1.125rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-section__head {
+    margin-bottom: 0.625rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-section__title {
+    font-size: 0.875rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-label {
+    font-size: 0.8125rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-auth-input,
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-textarea {
+    font-size: 1rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-segmented {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-segmented__btn {
+    flex: 1 1 calc(50% - 0.375rem);
+    min-height: 2.375rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-stack {
+    gap: 0.75rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-stack--pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.625rem;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-routine--collapsible {
+    margin-top: 0.875rem;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-form-routine--collapsible > .yd-medical-form-section__head {
+    display: none;
+  }
 }
 
 .yd-medical-form-body {

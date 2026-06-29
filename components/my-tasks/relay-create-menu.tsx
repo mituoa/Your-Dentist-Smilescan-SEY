@@ -30,10 +30,15 @@ function triggerClass(
   variant: RelayCreateMenuProps["variant"],
   open: boolean
 ) {
-  if (placement === "header" || placement === "mobile") {
+  if (placement === "mobile") {
+    return cn(
+      "yd-mobile-topbar-create yd-mobile-topbar-create--task yd-relay-create-menu__trigger",
+      open && "yd-mobile-topbar-create--open"
+    );
+  }
+  if (placement === "header") {
     return cn(
       "yd-dash-header-premium__cta yd-dash-header-premium__cta--secondary yd-relay-create-menu__trigger",
-      placement === "mobile" && "yd-relay-create-menu__trigger--mobile",
       open && "yd-relay-create-menu__trigger--open"
     );
   }
@@ -72,13 +77,15 @@ export function RelayCreateMenu({
 
   const triggerLabel =
     label ??
-    (placement === "header" || placement === "mobile"
-      ? "Neu"
-      : placement === "inline"
-        ? "Erstellen"
-        : variant === "primary"
+    (placement === "mobile"
+      ? ""
+      : placement === "header"
+        ? "Neu"
+        : placement === "inline"
           ? "Erstellen"
-          : "Neue Nachricht");
+          : variant === "primary"
+            ? "Erstellen"
+            : "Neue Nachricht");
 
   useEffect(() => {
     if (membersProp?.length) setMembers(membersProp);
@@ -128,27 +135,44 @@ export function RelayCreateMenu({
     onMessageCreated?.();
   };
 
-  const showChevron = placement !== "inline" || variant === "primary";
+  const showChevron =
+    placement !== "mobile" && (placement !== "inline" || variant === "primary");
+  const isMobileIcon = placement === "mobile";
 
   return (
-    <div ref={rootRef} className={cn("yd-relay-create-menu", className)}>
+    <div
+      ref={rootRef}
+      className={cn(
+        "yd-relay-create-menu",
+        isMobileIcon && "yd-mobile-topbar-create-menu",
+        className
+      )}
+    >
       <button
         type="button"
         className={triggerClass(placement, variant, open)}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={menuId}
+        title={isMobileIcon ? "Neu erstellen" : undefined}
         onClick={() => setOpen((v) => !v)}
       >
-        <Plus className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-        <span>{triggerLabel}</span>
+        <Plus className="h-4 w-4 shrink-0" strokeWidth={isMobileIcon ? 2.25 : 2} aria-hidden />
+        {triggerLabel ? <span>{triggerLabel}</span> : <span className="sr-only">Neu erstellen</span>}
         {showChevron ? (
           <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
         ) : null}
       </button>
 
       {open ? (
-        <ul id={menuId} className="yd-relay-create-menu__dropdown" role="menu">
+        <ul
+          id={menuId}
+          className={cn(
+            "yd-relay-create-menu__dropdown",
+            isMobileIcon && "yd-mobile-topbar-create-menu__dropdown"
+          )}
+          role="menu"
+        >
           <li role="none">
             <button
               type="button"

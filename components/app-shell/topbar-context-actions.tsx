@@ -4,9 +4,9 @@ import { Plus } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { MobileTopbarCreateMenu } from "@/components/app-shell/mobile-topbar-create-menu";
 import { NewCaseModal } from "@/components/cases/new-case-modal";
 import { RelayCreateMenu } from "@/components/my-tasks/relay-create-menu";
-import { cn } from "@/lib/utils";
 
 type ActionVariant = "both" | "newCase" | "newTask" | "none";
 
@@ -45,11 +45,9 @@ function actionClasses(variant: "toolbar" | "dashboard", kind: "primary" | "seco
 function NeuerFallButton({
   variant = "toolbar",
   workspaceId,
-  compact = false,
 }: {
   variant?: "toolbar" | "dashboard";
   workspaceId: string;
-  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -58,11 +56,11 @@ function NeuerFallButton({
       <button
         type="button"
         title="Neuer Fall"
-        className={cn(actionClasses(variant, "primary"), compact && "yd-mobile-topbar-cta--case")}
+        className={actionClasses(variant, "primary")}
         onClick={() => setOpen(true)}
       >
         <Plus className="h-4 w-4 shrink-0" strokeWidth={2} />
-        <span className={compact ? "yd-mobile-topbar-cta__label" : undefined}>Neuer Fall</span>
+        <span>Neuer Fall</span>
       </button>
       <NewCaseModal open={open} onClose={() => setOpen(false)} workspaceId={workspaceId} />
     </>
@@ -88,34 +86,40 @@ export function TopbarContextActions({
   const pathname = usePathname() || "";
   const router = useRouter();
   const actionVariant = resolveVariant(pathname, role);
-  const uiVariant = placement === "mobile" ? "dashboard" : variant;
 
   if (actionVariant === "none") return null;
+
+  if (placement === "mobile") {
+    return (
+      <MobileTopbarCreateMenu
+        actionVariant={actionVariant}
+        workspaceId={workspaceId}
+        className={
+          className ??
+          "yd-mobile-topbar-cta-group__inner flex min-w-0 shrink-0 items-center"
+        }
+      />
+    );
+  }
 
   return (
     <div
       className={
         className ??
-        (placement === "mobile"
-          ? "yd-mobile-topbar-cta-group__inner flex min-w-0 shrink-0 items-center gap-1.5"
-          : uiVariant === "dashboard"
-            ? "yd-dash-header-premium__cta-group flex shrink-0 items-center gap-2"
-            : "flex shrink-0 items-center gap-2")
+        (variant === "dashboard"
+          ? "yd-dash-header-premium__cta-group flex shrink-0 items-center gap-2"
+          : "flex shrink-0 items-center gap-2")
       }
     >
       {(actionVariant === "both" || actionVariant === "newTask") && (
         <RelayCreateMenu
-          placement={placement === "mobile" ? "mobile" : uiVariant === "dashboard" ? "header" : "toolbar"}
+          placement={variant === "dashboard" ? "header" : "toolbar"}
           isDoctor={role === "doctor"}
           onMessageCreated={() => router.push("/relay?area=nachrichten")}
         />
       )}
       {(actionVariant === "both" || actionVariant === "newCase") && (
-        <NeuerFallButton
-          variant={uiVariant}
-          workspaceId={workspaceId}
-          compact={placement === "mobile"}
-        />
+        <NeuerFallButton variant={variant} workspaceId={workspaceId} />
       )}
     </div>
   );

@@ -482,37 +482,72 @@ export function CreatePraxisTaskClient({
                 </MedicalFormFieldStack>
               </MedicalFormSection>
 
-              <MedicalFormSection title="Rhythmus & Erinnerung" className="yd-medical-form-routine">
-                <MedicalFormFieldStack>
-                  <div>
-                    <MedicalFormLabel optional>Wiederholung</MedicalFormLabel>
-                    <MedicalFormSegmented
-                      name="recurrence_type"
-                      aria-label="Wiederholung"
-                      options={RECURRENCE_OPTIONS}
-                      value={recurrence}
-                      onChange={(v) => v && setRecurrence(v)}
-                      disabled={busy}
-                    />
-                  </div>
-                  <div>
-                    <MedicalFormLabel optional>Erinnerung</MedicalFormLabel>
-                    <MedicalFormSegmented
-                      name="reminder_mode"
-                      aria-label="Erinnerung"
-                      options={REMINDER_OPTIONS}
-                      value={reminderMode}
-                      onChange={(v) => v && setReminderMode(v)}
-                      disabled={busy}
-                    />
-                    {reminderMode !== "none" && !dueDate.trim() ? (
-                      <p className="yd-medical-form-context-note" role="alert">
-                        Bitte ein Fälligkeitsdatum setzen, damit die Erinnerung ausgelöst werden kann.
-                      </p>
-                    ) : null}
-                  </div>
-                </MedicalFormFieldStack>
-              </MedicalFormSection>
+              {overlay === "workspace" ? (
+                <details className="yd-medical-form-reminder yd-medical-form-routine--collapsible">
+                  <summary>Rhythmus & Erinnerung (optional)</summary>
+                  <MedicalFormFieldStack>
+                    <div>
+                      <MedicalFormLabel optional>Wiederholung</MedicalFormLabel>
+                      <MedicalFormSegmented
+                        name="recurrence_type"
+                        aria-label="Wiederholung"
+                        options={RECURRENCE_OPTIONS}
+                        value={recurrence}
+                        onChange={(v) => v && setRecurrence(v)}
+                        disabled={busy}
+                      />
+                    </div>
+                    <div>
+                      <MedicalFormLabel optional>Erinnerung</MedicalFormLabel>
+                      <MedicalFormSegmented
+                        name="reminder_mode"
+                        aria-label="Erinnerung"
+                        options={REMINDER_OPTIONS}
+                        value={reminderMode}
+                        onChange={(v) => v && setReminderMode(v)}
+                        disabled={busy}
+                      />
+                      {reminderMode !== "none" && !dueDate.trim() ? (
+                        <p className="yd-medical-form-context-note" role="alert">
+                          Bitte ein Fälligkeitsdatum setzen, damit die Erinnerung ausgelöst werden kann.
+                        </p>
+                      ) : null}
+                    </div>
+                  </MedicalFormFieldStack>
+                </details>
+              ) : (
+                <MedicalFormSection title="Rhythmus & Erinnerung" className="yd-medical-form-routine">
+                  <MedicalFormFieldStack>
+                    <div>
+                      <MedicalFormLabel optional>Wiederholung</MedicalFormLabel>
+                      <MedicalFormSegmented
+                        name="recurrence_type"
+                        aria-label="Wiederholung"
+                        options={RECURRENCE_OPTIONS}
+                        value={recurrence}
+                        onChange={(v) => v && setRecurrence(v)}
+                        disabled={busy}
+                      />
+                    </div>
+                    <div>
+                      <MedicalFormLabel optional>Erinnerung</MedicalFormLabel>
+                      <MedicalFormSegmented
+                        name="reminder_mode"
+                        aria-label="Erinnerung"
+                        options={REMINDER_OPTIONS}
+                        value={reminderMode}
+                        onChange={(v) => v && setReminderMode(v)}
+                        disabled={busy}
+                      />
+                      {reminderMode !== "none" && !dueDate.trim() ? (
+                        <p className="yd-medical-form-context-note" role="alert">
+                          Bitte ein Fälligkeitsdatum setzen, damit die Erinnerung ausgelöst werden kann.
+                        </p>
+                      ) : null}
+                    </div>
+                  </MedicalFormFieldStack>
+                </MedicalFormSection>
+              )}
             </>
           ) : (
             <>

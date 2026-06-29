@@ -31,13 +31,13 @@ export function WorkspaceMobileQuickActions({
   }
 
   return (
-    <div className={cn("yd-dash-mobile-actions-trigger px-4 pb-2 md:hidden", className)}>
+    <div className={cn("yd-dash-mobile-actions-trigger flex justify-center px-4 pb-2 md:hidden", className)}>
       <TopbarContextActions
         role={role}
         variant="dashboard"
         workspaceId={workspaceId}
         placement="mobile"
-        className="yd-mobile-topbar-cta-group__inner yd-mobile-topbar-cta-group__inner--bar flex w-full flex-wrap items-center justify-center gap-2"
+        className="yd-mobile-topbar-cta-group__inner yd-mobile-topbar-cta-group__inner--bar"
       />
     </div>
   );

@@ -336,7 +336,7 @@ export function CreateCaseClient({
           className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
         >
           <MedicalFormSection title="Patient">
-            <MedicalFormFieldStack>
+            <MedicalFormFieldStack className={overlay === "workspace" ? "yd-medical-form-stack--pair" : undefined}>
               <div>
                 <MedicalFormLabel htmlFor="cc-first">Vorname</MedicalFormLabel>
                 <input
@@ -359,6 +359,8 @@ export function CreateCaseClient({
                   className="yd-auth-input"
                 />
               </div>
+            </MedicalFormFieldStack>
+            <MedicalFormFieldStack className="mt-3">
               <div>
                 <MedicalFormLabel htmlFor="cc-birth" optional>
                   Geburtsdatum
@@ -385,7 +387,7 @@ export function CreateCaseClient({
                 />
               </div>
             </MedicalFormFieldStack>
-            <MedicalFormFieldStack className="mt-4">
+            <MedicalFormFieldStack className={overlay === "workspace" ? "yd-medical-form-stack--pair mt-3" : "mt-4"}>
               <div>
                 <MedicalFormLabel htmlFor="cc-email">E-Mail</MedicalFormLabel>
                 <input
@@ -419,7 +421,7 @@ export function CreateCaseClient({
               id="cc-notes"
               value={notes}
               onChange={setNotes}
-              rows={6}
+              rows={overlay === "workspace" ? 4 : 6}
             />
           </MedicalFormSection>
 

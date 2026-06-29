@@ -2,18 +2,31 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import {
+  CalendarCheck,
+  ChevronDown,
+  MessageCircle,
+  ScanLine,
+  Sparkles,
+  Stethoscope,
+  Users,
+} from "lucide-react";
 
 /**
  * Vorlage "Aligner" — erstes reales Beispiel: Carree Dental, Köln Brück.
- * Eigenständige Ads-Landingpage (kein /relay-Workflow), echte Inhalte/Fotos
- * von carree-dental.de übernommen (mit Freigabe der Praxis).
+ * Eigenständige Ads-Landingpage, echte Inhalte/Fotos von carree-dental.de
+ * (mit Freigabe der Praxis). Dient als Premium-Referenzvorlage für weitere
+ * Your-Dentist-Landingpages.
  */
 
 const PHONE_DISPLAY = "0221 9842700";
 const PHONE_HREF = "tel:+492219842700";
 const CONTACT_URL = "https://carree-dental.de/kontakt/";
 const ADDRESS = "Brücker Mauspfad 611, 51109 Köln (Brück)";
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -43,14 +56,8 @@ function Reveal({ children, className }: { children: React.ReactNode; className?
   );
 }
 
-/** Staggert die Kinder eines Grids beim Sichtbarwerden — 50ms pro Karte. */
-function StaggerGrid({
-  children,
-  className,
-}: {
-  children: React.ReactNode[];
-  className?: string;
-}) {
+/** Staggert die Kinder eines Grids beim Sichtbarwerden — 60ms pro Karte. */
+function StaggerGrid({ children, className }: { children: React.ReactNode[]; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -85,47 +92,6 @@ function StaggerGrid({
   );
 }
 
-/** Zählt einmalig hoch, sobald sichtbar. */
-function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [display, setDisplay] = useState(0);
-  const started = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !started.current) {
-            started.current = true;
-            const duration = 1000;
-            const start = performance.now();
-            const tick = (now: number) => {
-              const t = Math.min(1, (now - start) / duration);
-              const eased = 1 - Math.pow(1 - t, 3);
-              setDisplay(Math.round(eased * to));
-              if (t < 1) requestAnimationFrame(tick);
-            };
-            requestAnimationFrame(tick);
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [to]);
-
-  return (
-    <span ref={ref}>
-      {display}
-      {suffix}
-    </span>
-  );
-}
-
 /** Karte mit dezentem Cursor-Licht — folgt der Maus, navy/blau getönt. */
 function GlowCard({ className, children }: { className?: string; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -143,24 +109,18 @@ function GlowCard({ className, children }: { className?: string; children: React
   );
 }
 
-const PRESS = [
-  { src: "press-focus.png", alt: "Focus" },
-  { src: "press-faz.png", alt: "FAZ" },
-  { src: "press-rtl.png", alt: "RTL" },
-  { src: "press-bunte.png", alt: "Bunte" },
-  { src: "press-gq.png", alt: "GQ" },
-  { src: "press-gala.png", alt: "Gala" },
-  { src: "press-sz.png", alt: "Süddeutsche Zeitung" },
-  { src: "press-brigitte.png", alt: "Brigitte" },
+const TRUST_PILLS = [
+  { icon: Stethoscope, label: "Kieferorthopädisch begleitet" },
+  { icon: ScanLine, label: "Digitale Planung" },
+  { icon: MessageCircle, label: "Transparente Beratung" },
+  { icon: Users, label: "Für Erwachsene & Jugendliche" },
 ];
 
 const BENEFITS = [
-  { title: "Fast unsichtbar", text: "Hauchdünne, transparente Aligner — diskret im Beruf, Studium und Alltag." },
-  { title: "Herausnehmbar", text: "Zum Essen, Trinken und für wichtige Anlässe einfach herausnehmen." },
-  { title: "Schmerzarm", text: "Sanfte Bewegungen von max. 0,3mm pro Schiene — ohne Drücken oder Reiben." },
-  { title: "Gute Mundhygiene", text: "Zähneputzen und Zahnseide wie gewohnt, ohne Einschränkungen durch Brackets." },
-  { title: "Komplikationsfrei", text: "Keine gelösten Brackets, kein Hängenbleiben an Drähten." },
-  { title: "Allergikerfreundlich", text: "Vollständig aus Kunststoff — kein Risiko für Metallallergien." },
+  { icon: Sparkles, title: "Fast unsichtbar", text: "Hauchdünne, transparente Aligner — diskret im Beruf und Alltag." },
+  { icon: CalendarCheck, title: "Planbarer Ablauf", text: "Digitale Planung zeigt vorab, wie viele Schienen nötig sind." },
+  { icon: Stethoscope, title: "Schmerzarm", text: "Sanfte Bewegungen pro Schiene, ohne Drücken oder Reiben." },
+  { icon: ScanLine, title: "Komplikationsfrei", text: "Keine Brackets, keine losen Drähte, herausnehmbar zum Essen." },
 ];
 
 const SEGMENTS = [
@@ -170,22 +130,25 @@ const SEGMENTS = [
 ];
 
 const PROCESS = [
-  { title: "Beratung & Diagnostik", text: "Digitaler Abdruck, DVT-Röntgen und Funktionsanalyse — kostenlose Erstberatung." },
-  { title: "Digitale Planung", text: "3D-Simulation Ihres zukünftigen Lächelns, individuell modellierte Aligner." },
-  { title: "Aligner-Wechsel", text: "Alle 1–2 Wochen ein neuer Aligner — mindestens 22 Stunden täglich tragen." },
-  { title: "Ergebnis & Retention", text: "Nach wenigen Monaten die Zielposition erreicht — Stabilisierung durch Retainer." },
+  { title: "Eignungsprüfung", text: "Erste Untersuchung und Beratung — wir prüfen, ob Aligner für Ihre Zahnsituation geeignet sind." },
+  { title: "Digitale Planung", text: "3D-Scan und Simulation Ihres Behandlungsverlaufs, individuell modellierte Aligner." },
+  { title: "Aligner-Wechsel", text: "Alle 1–2 Wochen ein neues Set — empfohlene Tragedauer mind. 22 Stunden täglich." },
+  { title: "Nachsorge & Retainer", text: "Regelmäßige Kontrolle, danach Stabilisierung des Ergebnisses mit Retainer." },
+];
+
+const SYSTEMS = [
+  { name: "Invisalign", text: "Marktführer für transparente Aligner — bei uns im Einsatz.", current: true },
+  { name: "Spark", text: "Hochästhetische Aligner-Therapie mit besonders klarem Material." },
+  { name: "SureSmile", text: "Digitale Zahnkorrektur mit präziser Verlaufsplanung." },
+  { name: "ClearCorrect", text: "Transparente Schienen-Therapie für sanfte Korrekturen." },
+  { name: "Angel Aligner", text: "Moderne Aligner-Technologie für individuelle Fälle." },
+  { name: "Eigenes System", text: "Nach Eignungsprüfung besprechen wir die passende Option." },
 ];
 
 const TESTIMONIALS = [
-  {
-    quote: "Nach fast 2 Jahren Invisalign Behandlung bei Frau Dr. Andersson bin ich mit dem Ergebnis wirklich super zufrieden! Kompetent ist ne nette Kieferorthopädin! Sehr zu empfehlen!",
-  },
-  {
-    quote: "War wegen massiver Kieferprobleme bei Frau Andersson in Behandlung. Sie hat mich sehr gut aufgeklärt, nahm sich viel Zeit für meine Fragen und konnte mir sehr kompetent Auskunft über die Behandlungsoptionen geben.",
-  },
-  {
-    quote: "Ich fühlte mich vom ersten Termin an gut aufgehoben, sowohl von der Kieferorthopädin als auch Mitarbeitern. Frau Dr. Andersson hat eine sehr angenehme Art mit ihren Patienten zu sprechen.",
-  },
+  { quote: "Nach fast 2 Jahren Invisalign Behandlung bei Frau Dr. Andersson bin ich mit dem Ergebnis wirklich super zufrieden! Kompetent ist ne nette Kieferorthopädin! Sehr zu empfehlen!" },
+  { quote: "War wegen massiver Kieferprobleme bei Frau Andersson in Behandlung. Sie hat mich sehr gut aufgeklärt, nahm sich viel Zeit für meine Fragen und konnte mir sehr kompetent Auskunft über die Behandlungsoptionen geben." },
+  { quote: "Ich fühlte mich vom ersten Termin an gut aufgehoben, sowohl von der Kieferorthopädin als auch Mitarbeitern. Frau Dr. Andersson hat eine sehr angenehme Art mit ihren Patienten zu sprechen." },
 ];
 
 const FAQ = [
@@ -194,6 +157,7 @@ const FAQ = [
   { q: "Tut die Behandlung weh?", a: "Es kann zu leichten Druckgefühlen kommen, die nach wenigen Tagen verschwinden. Aligner sind durch das Smart-Track-Material deutlich komfortabler als klassische Zahnspangen." },
   { q: "Was kostet die unsichtbare Zahnspange?", a: "Eine einfache Korrektur beginnt ab 150€ monatlich zzgl. Laborkosten. Im kostenlosen Beratungsgespräch erhalten Sie eine genaue Kostenübersicht und mögliche Finanzierungsoptionen." },
   { q: "Übernimmt die Krankenkasse die Kosten?", a: "Gesetzliche Krankenkassen bezuschussen Invisalign grundsätzlich nicht — die Behandlung ist privat zu finanzieren. Privat Versicherte erhalten je nach Vertrag eine vollständige oder teilweise Erstattung." },
+  { q: "Was passiert nach der Eignungsprüfung?", a: "Sie erhalten eine individuelle Einschätzung, ob und welches Aligner-System für Ihre Zahnsituation geeignet ist — unverbindlich und ohne Diagnose vor der Untersuchung." },
 ];
 
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -202,14 +166,27 @@ function FaqItem({ q, a }: { q: string; a: string }) {
     <div className="yd-al-faq-item">
       <button type="button" className="yd-al-faq-q" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         {q}
-        <ChevronDown size={16} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s ease" }} />
+        <ChevronDown size={16} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.3s ease" }} />
       </button>
-      {open ? <p className="yd-al-faq-a">{a}</p> : null}
+      <p className={`yd-al-faq-a ${open ? "yd-al-faq-a--open" : ""}`}>{a}</p>
     </div>
   );
 }
 
 export function YdAlignerLandingCarree() {
+  const [stickyVisible, setStickyVisible] = useState(false);
+
+  useEffect(() => {
+    const hero = document.querySelector(".yd-al-hero");
+    if (!hero) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setStickyVisible(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <main className="yd-al">
       <header className="yd-al-topbar">
@@ -226,7 +203,7 @@ export function YdAlignerLandingCarree() {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* 1 — Hero */}
       <section className="yd-al-hero">
         <div className="yd-al-container yd-al-hero-grid">
           <div>
@@ -234,109 +211,113 @@ export function YdAlignerLandingCarree() {
               Invisalign® · Köln Brück
             </span>
             <h1 className="yd-al-hero-title yd-al-hero-stagger" style={{ transitionDelay: "70ms" }}>
-              Unsichtbare Zahnkorrektur — <em>sichtbarer Erfolg.</em>
+              Unsichtbare Zahnkorrektur. <em>Sichtbar mehr Sicherheit.</em>
             </h1>
             <p className="yd-al-hero-lead yd-al-hero-stagger" style={{ transitionDelay: "140ms" }}>
-              Transparente, herausnehmbare Aligner statt klassischer Zahnspange. Bei Carree Dental in
-              Köln Brück begleitet Sie Kieferorthopädin Frau Dr. Andersson mit über 30 Jahren Erfahrung
-              und mehr als 2.000 erfolgreichen Aligner-Behandlungen.
+              Transparente Aligner können Zahnfehlstellungen diskret korrigieren. In unserer Praxis
+              prüfen wir individuell, welches System zu Ihren Zähnen, Ihrem Alltag und Ihrem
+              Behandlungsziel passt.
             </p>
             <div className="yd-al-hero-ctas yd-al-hero-stagger" style={{ transitionDelay: "210ms" }}>
               <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--glow">
-                <span>Kostenlose Erstberatung</span>
+                <span>Kostenlose Erstberatung anfragen</span>
               </a>
-              <a href={PHONE_HREF} className="yd-al-btn yd-al-btn--ghost">
-                {PHONE_DISPLAY} anrufen
-              </a>
+              <button type="button" className="yd-al-btn yd-al-btn--ghost" onClick={() => scrollToId("ablauf")}>
+                Behandlung ansehen
+              </button>
             </div>
-            <div className="yd-al-trust-row yd-al-hero-stagger" style={{ transitionDelay: "280ms" }}>
-              <Image src="/landingpages/aligner/google-49.png" alt="4.9 Sterne auf Google" width={120} height={40} />
-              <Image src="/landingpages/aligner/jameda.png" alt="Bewertung auf Jameda" width={90} height={20} />
-              <Image src="/landingpages/aligner/invisalign-logo.png" alt="Invisalign Platinum Elite II Provider" width={110} height={28} />
+            <div className="yd-al-pill-row yd-al-hero-stagger" style={{ transitionDelay: "280ms" }}>
+              {TRUST_PILLS.map((p) => {
+                const Icon = p.icon;
+                return (
+                  <span key={p.label} className="yd-al-pill">
+                    <Icon size={13} strokeWidth={2} />
+                    {p.label}
+                  </span>
+                );
+              })}
+            </div>
+            <div className="yd-al-hero-stats yd-al-hero-stagger" style={{ transitionDelay: "340ms" }}>
+              <div className="yd-al-hero-stat">
+                <strong>30+</strong>
+                <span>Jahre kieferorth. Erfahrung</span>
+              </div>
+              <div className="yd-al-hero-stat">
+                <strong>2.000+</strong>
+                <span>begleitete Aligner-Fälle</span>
+              </div>
+              <div className="yd-al-hero-stat">
+                <strong>4,9★</strong>
+                <span>Google-Bewertung</span>
+              </div>
             </div>
           </div>
 
           <div className="yd-al-hero-visual">
-            <Image
-              src="/landingpages/aligner/hero-lifestyle.png"
-              alt="Patientin setzt einen unsichtbaren Invisalign-Aligner ein"
-              width={800}
-              height={555}
-              priority
-            />
-            <div className="yd-al-hero-float yd-al-hero-float--top">
-              <strong>
-                <CountUp to={30} suffix="+" />
-              </strong>
-              <span>
-                Jahre kieferorth.
-                <br />
-                Erfahrung
-              </span>
+            <div className="yd-al-hero-frame">
+              <Image
+                src="/landingpages/aligner/hero-lifestyle.png"
+                alt="Patientin setzt einen unsichtbaren Invisalign-Aligner ein"
+                width={760}
+                height={874}
+                priority
+              />
             </div>
-            <div className="yd-al-hero-float yd-al-hero-float--mid">
-              <strong>
-                <CountUp to={2000} suffix="+" />
-              </strong>
-              <span>
-                erfolgreiche
-                <br />
-                Behandlungen
+            <div className="yd-al-hero-caption">
+              <span className="yd-al-hero-caption-icon">
+                <Sparkles size={15} />
               </span>
+              <div>
+                <p>Invisalign Platinum Elite II Provider</p>
+                <span>Frau Dr. Andersson · Fachzahnärztin für Kieferorthopädie</span>
+              </div>
             </div>
-            <span className="yd-al-hero-badge">Invisalign Platinum Elite II Provider</span>
           </div>
         </div>
       </section>
 
-      {/* Press */}
-      <section className="yd-al-press">
-        <div className="yd-al-container">
-          <p className="yd-al-press-label">Bekannt aus</p>
-          <StaggerGrid className="yd-al-press-row">
-            {PRESS.map((p) => (
-              <Image key={p.src} src={`/landingpages/aligner/${p.src}`} alt={p.alt} width={100} height={24} />
-            ))}
-          </StaggerGrid>
-        </div>
-      </section>
-
-      {/* Benefits */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }}>
+      {/* 2 — Warum Aligner */}
+      <section className="yd-al-section" id="warum">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Vorteile</span>
-              <h2 className="yd-al-title">Komfortabel. Alltagstauglich. Fast unsichtbar.</h2>
+              <span className="yd-al-kicker">Warum Aligner</span>
+              <h2 className="yd-al-title">Komfortabel im Alltag, präzise in der Planung.</h2>
               <p className="yd-al-lead">
-                Invisalign® bewegt Ihre Zähne in kleinen, behutsamen Schritten — ohne Ihren Alltag zu
-                beeinträchtigen.
+                Transparente Aligner bewegen Ihre Zähne in kleinen, digital geplanten Schritten —
+                ohne feste Brackets oder Drähte.
               </p>
             </div>
             <StaggerGrid className="yd-al-benefit-grid">
-              {BENEFITS.map((b) => (
-                <GlowCard key={b.title} className="yd-al-benefit-card">
-                  <h3>{b.title}</h3>
-                  <p>{b.text}</p>
-                </GlowCard>
-              ))}
+              {BENEFITS.map((b) => {
+                const Icon = b.icon;
+                return (
+                  <GlowCard key={b.title} className="yd-al-benefit-card">
+                    <span className="yd-al-benefit-icon">
+                      <Icon size={18} strokeWidth={1.8} />
+                    </span>
+                    <h3>{b.title}</h3>
+                    <p>{b.text}</p>
+                  </GlowCard>
+                );
+              })}
             </StaggerGrid>
           </Reveal>
         </div>
       </section>
 
-      {/* Segments — echte Fotokarten */}
-      <section className="yd-al-section">
+      {/* 3 — Für wen geeignet */}
+      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="fuer-wen">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Für jedes Alter</span>
+              <span className="yd-al-kicker">Für wen geeignet</span>
               <h2 className="yd-al-title">Zahnkorrekturen sind in jedem Alter möglich.</h2>
             </div>
             <StaggerGrid className="yd-al-segment-grid">
               {SEGMENTS.map((s) => (
                 <div key={s.title} className="yd-al-segment-photo-card">
-                  <Image src={`/landingpages/aligner/${s.img}`} alt={s.title} width={400} height={220} />
+                  <Image src={`/landingpages/aligner/${s.img}`} alt={s.title} width={400} height={200} />
                   <div className="yd-al-segment-photo-body">
                     <h3>{s.title}</h3>
                     <p>{s.text}</p>
@@ -348,13 +329,13 @@ export function YdAlignerLandingCarree() {
         </div>
       </section>
 
-      {/* Process */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }}>
+      {/* 4 — Ablauf der Behandlung */}
+      <section className="yd-al-section" id="ablauf">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Ablauf</span>
-              <h2 className="yd-al-title">Der Weg zu Ihrem neuen Lächeln.</h2>
+              <span className="yd-al-kicker">Ablauf der Behandlung</span>
+              <h2 className="yd-al-title">Vier Schritte, klar begleitet.</h2>
             </div>
             <StaggerGrid className="yd-al-process">
               {PROCESS.map((p, i) => (
@@ -369,8 +350,33 @@ export function YdAlignerLandingCarree() {
         </div>
       </section>
 
-      {/* SmileView Simulation */}
-      <section className="yd-al-section">
+      {/* 5 — Systeme / Möglichkeiten */}
+      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="systeme">
+        <div className="yd-al-container">
+          <Reveal>
+            <div className="yd-al-head">
+              <span className="yd-al-kicker">Systeme &amp; Möglichkeiten</span>
+              <h2 className="yd-al-title">Welches Aligner-System passt zu Ihnen?</h2>
+              <p className="yd-al-lead">
+                Wir arbeiten überwiegend mit Invisalign®, prüfen aber je nach Befund auch
+                Alternativen — die endgültige Empfehlung erfolgt erst nach Ihrer Eignungsprüfung.
+              </p>
+            </div>
+            <StaggerGrid className="yd-al-system-grid">
+              {SYSTEMS.map((s) => (
+                <div key={s.name} className={`yd-al-system-card ${s.current ? "yd-al-system-card--current" : ""}`}>
+                  {s.current ? <span className="yd-al-system-tag">Bei uns im Einsatz</span> : null}
+                  <h3>{s.name}</h3>
+                  <p>{s.text}</p>
+                </div>
+              ))}
+            </StaggerGrid>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 6 — Behandlungsbeispiele (SmileView statt Vorher/Nachher) */}
+      <section className="yd-al-section" id="smileview">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-smileview">
@@ -379,11 +385,12 @@ export function YdAlignerLandingCarree() {
                 <h2 className="yd-al-title">Sehen Sie Ihr mögliches Lächeln — in 60 Sekunden.</h2>
                 <p className="yd-al-lead">
                   Mit einem einfachen Selfie zeigt Ihnen die offizielle Invisalign SmileView-Simulation,
-                  wie Ihr Lächeln nach einer Behandlung aussehen könnte. Unverbindlich und kostenlos.
+                  wie Ihr Lächeln nach einer Behandlung aussehen könnte. Unverbindlich und kostenlos —
+                  ersetzt keine zahnärztliche Eignungsprüfung.
                 </p>
               </div>
               <div className="yd-al-smileview-qr">
-                <Image src="/landingpages/aligner/qr-smileview.png" alt="QR-Code zur Invisalign SmileView Simulation" width={160} height={160} />
+                <Image src="/landingpages/aligner/qr-smileview.png" alt="QR-Code zur Invisalign SmileView Simulation" width={150} height={150} />
                 <span>QR-Code scannen &amp; starten</span>
               </div>
             </div>
@@ -391,106 +398,75 @@ export function YdAlignerLandingCarree() {
         </div>
       </section>
 
-      {/* Praxis-Atmosphäre — full-bleed */}
-      <section className="yd-al-section" style={{ paddingTop: 0 }}>
+      {/* 7 — FAQ */}
+      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="faq">
         <div className="yd-al-container">
           <Reveal>
-            <div className="yd-al-atmosphere">
-              <Image src="/landingpages/aligner/practice-room.jpg" alt="Behandlungsraum bei Carree Dental mit Gartenblick" fill style={{ objectFit: "cover" }} />
-              <div className="yd-al-atmosphere-overlay">
-                <p>Helle, moderne Behandlungsräume mit Gartenblick — mitten in Köln Brück.</p>
-              </div>
+            <div className="yd-al-head">
+              <span className="yd-al-kicker">Häufige Fragen</span>
+              <h2 className="yd-al-title">Was Patient:innen am häufigsten fragen.</h2>
+            </div>
+            <div className="yd-al-faq">
+              {FAQ.map((f) => (
+                <FaqItem key={f.q} q={f.q} a={f.a} />
+              ))}
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* Doctor */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }}>
+      {/* 8 — Praxis & Behandlerin */}
+      <section className="yd-al-section" id="praxis">
         <div className="yd-al-container">
           <Reveal>
-            <div className="yd-al-doctor">
-              <div className="yd-al-doctor-photo">
-                <Image src="/landingpages/aligner/dr-andersson.jpg" alt="Frau Dr. Andersson" width={500} height={600} />
+            <div className="yd-al-head">
+              <span className="yd-al-kicker">Praxis &amp; Behandlerin</span>
+              <h2 className="yd-al-title">Persönlich begleitet, fachlich erfahren.</h2>
+            </div>
+            <div className="yd-al-practice">
+              <div className="yd-al-practice-photo">
+                <Image src="/landingpages/aligner/dr-andersson.jpg" alt="Frau Dr. Andersson" width={480} height={600} />
               </div>
               <div>
-                <p className="yd-al-doctor-name">Frau Dr. Andersson</p>
-                <p className="yd-al-doctor-role">Fachzahnärztin für Kieferorthopädie</p>
-                <p className="yd-al-doctor-bio">
-                  Seit 1999 habe ich über 2.000 Patient:innen mit Hilfe glasklarer Aligner zu einem
-                  strahlenden Lächeln verholfen — verliehen mit dem Invisalign Platinum Elite II Status.
-                  Ich nehme mir Zeit für jede individuelle Situation, von einfachen Korrekturen bis zu
-                  komplexen CMD-Fällen.
+                <p className="yd-al-practice-name">Frau Dr. Andersson</p>
+                <p className="yd-al-practice-role">Fachzahnärztin für Kieferorthopädie</p>
+                <p className="yd-al-practice-bio">
+                  Seit 1999 begleite ich Patient:innen mit Aligner-Therapien — vom einfachen
+                  Korrekturfall bis zu komplexen kieferorthopädischen Situationen. Jede Behandlung
+                  beginnt mit einer individuellen Eignungsprüfung, nicht mit einem Versprechen.
                 </p>
-                <div className="yd-al-doctor-stats">
-                  <div className="yd-al-doctor-stat">
+                <div className="yd-al-practice-stats">
+                  <div className="yd-al-practice-stat">
                     <strong>30+</strong>
                     <span>Jahre Erfahrung</span>
                   </div>
-                  <div className="yd-al-doctor-stat">
+                  <div className="yd-al-practice-stat">
                     <strong>2.000+</strong>
                     <span>Aligner-Behandlungen</span>
                   </div>
-                  <div className="yd-al-doctor-stat">
+                  <div className="yd-al-practice-stat">
                     <strong>Platinum</strong>
                     <span>Elite II Provider</span>
                   </div>
                 </div>
-                <div className="yd-al-award-row" style={{ justifyContent: "flex-start", marginTop: 20 }}>
-                  <Image src="/landingpages/aligner/award-focus.png" alt="Focus-Auszeichnung für hervorragende Zahnmedizin" width={70} height={64} />
-                  <Image src="/landingpages/aligner/award-plusx.png" alt="Plus X Award" width={70} height={64} />
+                <div className="yd-al-practice-awards">
+                  <Image src="/landingpages/aligner/award-focus.png" alt="Focus-Auszeichnung für hervorragende Zahnmedizin" width={56} height={52} />
+                  <Image src="/landingpages/aligner/award-plusx.png" alt="Plus X Award" width={56} height={52} />
                 </div>
               </div>
             </div>
-          </Reveal>
-        </div>
-      </section>
 
-      {/* Team */}
-      <section className="yd-al-section">
-        <div className="yd-al-container">
-          <Reveal>
-            <div className="yd-al-head">
-              <span className="yd-al-kicker">Ihr Team</span>
-              <h2 className="yd-al-title">Ein erfahrenes Team an Ihrer Seite.</h2>
+            <div className="yd-al-practice-room">
+              <Image src="/landingpages/aligner/practice-room.jpg" alt="Behandlungsraum bei Carree Dental mit Gartenblick" fill style={{ objectFit: "cover" }} />
+              <div className="yd-al-practice-room-overlay">
+                <p>Helle, moderne Behandlungsräume mit Gartenblick — Brücker Mauspfad, Köln Brück.</p>
+              </div>
             </div>
-            <div className="yd-al-team-banner">
+
+            <div className="yd-al-team-strip">
               <Image src="/landingpages/aligner/team-banner.png" alt="Team von Carree Dental" width={2560} height={751} />
             </div>
-          </Reveal>
-        </div>
-      </section>
 
-      {/* Pricing */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }}>
-        <div className="yd-al-container">
-          <Reveal>
-            <div className="yd-al-head">
-              <span className="yd-al-kicker">Kosten</span>
-              <h2 className="yd-al-title">Transparent kalkulierbar.</h2>
-            </div>
-            <div className="yd-al-pricing-card">
-              <p className="yd-al-pricing-value">
-                ab 150€ <span>/ Monat zzgl. Laborkosten</span>
-              </p>
-              <p className="yd-al-pricing-note">
-                Gesetzliche Krankenkassen bezuschussen Invisalign-Behandlungen grundsätzlich nicht.
-                Privat Versicherte erhalten je nach Vertrag eine vollständige oder teilweise Erstattung.
-                Im kostenlosen Beratungsgespräch erstellen wir Ihnen einen persönlichen Kostenvoranschlag.
-              </p>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="yd-al-section">
-        <div className="yd-al-container">
-          <Reveal>
-            <div className="yd-al-head">
-              <span className="yd-al-kicker">Patientenstimmen</span>
-              <h2 className="yd-al-title">Das sagen unsere Patient:innen.</h2>
-            </div>
             <StaggerGrid className="yd-al-testimonial-grid">
               {TESTIMONIALS.map((t) => (
                 <GlowCard key={t.quote.slice(0, 24)} className="yd-al-testimonial-card">
@@ -503,41 +479,25 @@ export function YdAlignerLandingCarree() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }}>
-        <div className="yd-al-container">
-          <Reveal>
-            <div className="yd-al-head">
-              <span className="yd-al-kicker">FAQ</span>
-              <h2 className="yd-al-title">Häufige Fragen zur unsichtbaren Zahnspange.</h2>
-            </div>
-            <div className="yd-al-faq">
-              {FAQ.map((f) => (
-                <FaqItem key={f.q} q={f.q} a={f.a} />
-              ))}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="yd-al-section">
+      {/* 9 — CTA Abschluss */}
+      <section className="yd-al-section" id="cta">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-cta-band">
-              <h2>Bereit für Ihr neues Lächeln?</h2>
+              <h2>Bereit für Ihre Eignungsprüfung?</h2>
               <p>
                 Vereinbaren Sie jetzt Ihre kostenlose und unverbindliche Erstberatung bei Carree Dental
                 in Köln Brück.
               </p>
               <div className="yd-al-cta-buttons">
                 <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--glow yd-al-btn--glow-light">
-                  <span>Termin vereinbaren</span>
+                  <span>Kostenlose Erstberatung anfragen</span>
                 </a>
                 <a href={PHONE_HREF} className="yd-al-btn yd-al-btn--ghost">
                   {PHONE_DISPLAY} anrufen
                 </a>
               </div>
+              <p className="yd-al-cta-note">Behandlung ab 150€/Monat zzgl. Laborkosten · individueller Kostenvoranschlag im Beratungsgespräch</p>
             </div>
           </Reveal>
         </div>
@@ -558,7 +518,7 @@ export function YdAlignerLandingCarree() {
         </div>
       </footer>
 
-      <div className="yd-al-sticky-cta">
+      <div className={`yd-al-sticky-cta ${stickyVisible ? "yd-al-sticky-cta--visible" : ""}`}>
         <a href={PHONE_HREF} className="yd-al-btn yd-al-btn--ghost yd-al-btn--sm">
           Anrufen
         </a>
