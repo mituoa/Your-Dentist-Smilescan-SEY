@@ -5,6 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, ClipboardList, MessageSquarePlus, Plus } from "lucide-react";
 
 import { fetchAssignableMembersForTaskCreate } from "@/app/(protected)/my-tasks/actions";
+import { MobileTopbarActionSheet } from "@/components/app-shell/mobile-topbar-action-sheet";
 import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import { NewRelayMessageModal } from "@/components/my-tasks/new-relay-message-modal";
 import type { AssignableMember } from "@/lib/queries/team-members";
@@ -96,13 +97,13 @@ export function RelayCreateMenu({
   }, [userIdProp]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || placement === "mobile") return;
     const onDoc = (e: MouseEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
+  }, [open, placement]);
 
   const ensureMembers = useCallback(async () => {
     if (members.length > 0 && currentUserId) return true;
@@ -120,12 +121,10 @@ export function RelayCreateMenu({
   }, [members.length, currentUserId, membersLoading]);
 
   const openTask = () => {
-    setOpen(false);
     assist?.openTaskModal();
   };
 
   const openMessage = async () => {
-    setOpen(false);
     await ensureMembers();
     setMessageOpen(true);
   };
@@ -155,7 +154,7 @@ export function RelayCreateMenu({
         aria-haspopup="menu"
         aria-controls={menuId}
         title={isMobileIcon ? "Neu erstellen" : undefined}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => (isMobileIcon ? setOpen(true) : setOpen((v) => !v))}
       >
         <Plus className="h-4 w-4 shrink-0" strokeWidth={isMobileIcon ? 2.25 : 2} aria-hidden />
         {triggerLabel ? <span>{triggerLabel}</span> : <span className="sr-only">Neu erstellen</span>}
@@ -164,21 +163,39 @@ export function RelayCreateMenu({
         ) : null}
       </button>
 
-      {open ? (
-        <ul
-          id={menuId}
-          className={cn(
-            "yd-relay-create-menu__dropdown",
-            isMobileIcon && "yd-mobile-topbar-create-menu__dropdown"
-          )}
-          role="menu"
-        >
+      {isMobileIcon ? (
+        <MobileTopbarActionSheet
+          open={open}
+          onClose={() => setOpen(false)}
+          title="Neu erstellen"
+          items={[
+            {
+              id: "task",
+              label: "Aufgabe",
+              hint: "Praxisaufgabe erstellen",
+              icon: ClipboardList,
+              onSelect: openTask,
+            },
+            {
+              id: "message",
+              label: "Teamnachricht",
+              hint: "Nachricht ans Team",
+              icon: MessageSquarePlus,
+              onSelect: () => void openMessage(),
+            },
+          ]}
+        />
+      ) : open ? (
+        <ul id={menuId} className="yd-relay-create-menu__dropdown" role="menu">
           <li role="none">
             <button
               type="button"
               className="yd-relay-create-menu__item yd-relay-create-menu__item--compact"
               role="menuitem"
-              onClick={openTask}
+              onClick={() => {
+                setOpen(false);
+                openTask();
+              }}
             >
               <ClipboardList className="h-4 w-4" strokeWidth={1.75} aria-hidden />
               <span>Aufgabe</span>
@@ -189,7 +206,10 @@ export function RelayCreateMenu({
               type="button"
               className="yd-relay-create-menu__item yd-relay-create-menu__item--compact"
               role="menuitem"
-              onClick={() => void openMessage()}
+              onClick={() => {
+                setOpen(false);
+                void openMessage();
+              }}
             >
               <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
               <span>Teamnachricht</span>

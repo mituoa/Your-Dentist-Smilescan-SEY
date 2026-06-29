@@ -2,9 +2,10 @@
 
 import { ClipboardList, MessageSquarePlus, Plus, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { fetchAssignableMembersForTaskCreate } from "@/app/(protected)/my-tasks/actions";
+import { MobileTopbarActionSheet } from "@/components/app-shell/mobile-topbar-action-sheet";
 import { NewCaseModal } from "@/components/cases/new-case-modal";
 import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import { RelayCreateMenu } from "@/components/my-tasks/relay-create-menu";
@@ -78,23 +79,12 @@ function MobileAtlasCreateMenu({
 }) {
   const router = useRouter();
   const assist = useAssistDispatchOptional();
-  const menuId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [caseOpen, setCaseOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   const [members, setMembers] = useState<AssignableMember[]>([]);
   const [currentUserId, setCurrentUserId] = useState("");
   const [membersLoading, setMembersLoading] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
 
   const ensureMembers = useCallback(async () => {
     if (members.length > 0 && currentUserId) return true;
@@ -111,24 +101,15 @@ function MobileAtlasCreateMenu({
     }
   }, [members.length, currentUserId, membersLoading]);
 
-  const openCase = () => {
-    setOpen(false);
-    setCaseOpen(true);
-  };
-
-  const openTask = () => {
-    setOpen(false);
-    assist?.openTaskModal();
-  };
-
+  const openCase = () => setCaseOpen(true);
+  const openTask = () => assist?.openTaskModal();
   const openMessage = async () => {
-    setOpen(false);
     await ensureMembers();
     setMessageOpen(true);
   };
 
   return (
-    <div ref={rootRef} className={cn("yd-mobile-topbar-create-menu", className)}>
+    <div className={cn("yd-mobile-topbar-create-menu", className)}>
       <button
         type="button"
         className={cn(
@@ -137,51 +118,41 @@ function MobileAtlasCreateMenu({
         )}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-controls={menuId}
         title="Neu erstellen"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(true)}
       >
         <Plus className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
         <span className="sr-only">Neu erstellen</span>
       </button>
 
-      {open ? (
-        <ul id={menuId} className="yd-mobile-topbar-create-menu__dropdown" role="menu">
-          <li role="none">
-            <button
-              type="button"
-              className="yd-relay-create-menu__item yd-relay-create-menu__item--compact"
-              role="menuitem"
-              onClick={openCase}
-            >
-              <UserPlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              <span>Neuer Fall</span>
-            </button>
-          </li>
-          <li role="none">
-            <button
-              type="button"
-              className="yd-relay-create-menu__item yd-relay-create-menu__item--compact"
-              role="menuitem"
-              onClick={openTask}
-            >
-              <ClipboardList className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              <span>Aufgabe</span>
-            </button>
-          </li>
-          <li role="none">
-            <button
-              type="button"
-              className="yd-relay-create-menu__item yd-relay-create-menu__item--compact"
-              role="menuitem"
-              onClick={() => void openMessage()}
-            >
-              <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              <span>Teamnachricht</span>
-            </button>
-          </li>
-        </ul>
-      ) : null}
+      <MobileTopbarActionSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Neu erstellen"
+        items={[
+          {
+            id: "case",
+            label: "Neuer Fall",
+            hint: "Patientenfall anlegen",
+            icon: UserPlus,
+            onSelect: openCase,
+          },
+          {
+            id: "task",
+            label: "Aufgabe",
+            hint: "Praxisaufgabe erstellen",
+            icon: ClipboardList,
+            onSelect: openTask,
+          },
+          {
+            id: "message",
+            label: "Teamnachricht",
+            hint: "Nachricht ans Team",
+            icon: MessageSquarePlus,
+            onSelect: () => void openMessage(),
+          },
+        ]}
+      />
 
       <NewCaseModal open={caseOpen} onClose={() => setCaseOpen(false)} workspaceId={workspaceId} />
       <NewRelayMessageModal

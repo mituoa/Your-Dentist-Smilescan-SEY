@@ -130,16 +130,22 @@
 }
 
 .yd-cl-catalog__preview-link {
+  display: inline-flex;
   align-self: flex-start;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--bento-primary, #1a4f9c);
+  background: rgba(26, 79, 156, 0.08);
+  border-radius: 999px;
   text-decoration: none;
-  padding: 0.2rem 0.1rem;
+  padding: 0.35rem 0.75rem;
+  transition: background-color 150ms ease;
 }
 
 .yd-cl-catalog__preview-link:hover {
-  text-decoration: underline;
+  background: rgba(26, 79, 156, 0.14);
 }
 
 @media (min-width: 768px) {

@@ -55,11 +55,10 @@ export function LandingCatalogCard({ category, onBook }: Props) {
     {category.previewHref ? (
       <Link
         href={category.previewHref}
-        target="_blank"
         className="yd-cl-catalog__preview-link"
         onClick={(e) => e.stopPropagation()}
       >
-        Vorschau ansehen
+        Vorschau ansehen →
       </Link>
     ) : null}
     </li>
