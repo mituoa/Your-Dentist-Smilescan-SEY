@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { dispatchPasswordResetEmail } from "@/lib/auth/dispatch-password-reset-email";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppBaseUrl } from "@/lib/env";
 import { redirect } from "next/navigation";
@@ -584,7 +585,8 @@ export async function signUp(formData: FormData) {
  * - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
  * - `NEXT_PUBLIC_APP_URL` = öffentliche Site-URL (ohne Slash), damit `redirectTo` in Mails stimmt
  * - Supabase Dashboard → Auth → URL configuration: Site URL + Redirect URLs müssen `…/reset-password` (und ggf. Query) erlauben
- * - E-Mail: Supabase SMTP/Custom SMTP oder eingebauter Versand; sonst schlägt der Aufruf mit providerseitigem Fehler fehl
+ * - E-Mail: mit `SMTP_*` + `SUPABASE_SERVICE_ROLE_KEY` → Your-Dentist-Absender (`SMTP_FROM`);
+ *   sonst Supabase Auth (`resetPasswordForEmail` — ggf. Custom SMTP im Supabase-Dashboard)
  * - Rate limits: Supabase-Projekt (E-Mail-Versand) + optional WAF; unten App-best-effort pro Instanz (IP + Zieladresse)
  */
 export async function requestPasswordResetFromLogin(formData: FormData) {
@@ -625,15 +627,14 @@ export async function requestPasswordResetFromLogin(formData: FormData) {
   if (inviteToken) resetUrl.searchParams.set("invite", inviteToken);
 
   try {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error: sendError } = await dispatchPasswordResetEmail({
+      email,
       redirectTo: resetUrl.toString(),
     });
 
-    if (error) {
-      console.error("[requestPasswordResetFromLogin]", error.message);
+    if (sendError) {
       const params = new URLSearchParams();
-      params.set("error", userFacingPasswordResetRequestError(error.message));
+      params.set("error", sendError);
       if (inviteToken) params.set("invite", inviteToken);
       params.set("email", email);
       redirect(`/forgot-password?${params.toString()}`);

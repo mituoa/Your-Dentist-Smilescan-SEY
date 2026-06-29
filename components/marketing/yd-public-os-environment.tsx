@@ -12,7 +12,7 @@ export type YdPublicOsEnvironmentProps = {
   scroll?: boolean;
   /** Landing: kein 2s Blur-Fade — sofort lesbar nach Navigation */
   instantEnter?: boolean;
-  /** Auth: gleiche Luminanz/Mesh wie Startseite — nicht Dashboard-Focus */
+  /** Auth: gleicher Hintergrund wie Startseite (.yd-os) — nur Atmosphäre, Login-UI unverändert */
   landingAtmosphere?: boolean;
   className?: string;
 };

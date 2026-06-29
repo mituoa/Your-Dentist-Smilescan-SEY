@@ -9,6 +9,7 @@ import { isValidSlug } from "@/lib/validation/slug-validation";
 import { isSlugAvailable } from "@/lib/queries/settings";
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
 import { buildTeamInvitationEmail } from "@/lib/mail/team-invitation-email";
+import { dispatchPasswordResetEmail } from "@/lib/auth/dispatch-password-reset-email";
 import { getAppBaseUrl } from "@/lib/env";
 import { findAuthUserIdByEmail } from "@/lib/team-invitations/get-invitation-by-token";
 import { isInviteTokenFormat } from "@/lib/team-invitations/invite-token-format";
@@ -173,12 +174,13 @@ export async function requestPasswordReset(): Promise<{
   } = await supabase.auth.getUser();
   if (!user?.email) return { error: "Nicht angemeldet." };
 
-  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+  const { error: sendError } = await dispatchPasswordResetEmail({
+    email: user.email,
     redirectTo: `${getAppBaseUrl()}/reset-password`,
   });
 
-  if (error) {
-    console.error("[requestPasswordReset]", error);
+  if (sendError) {
+    console.error("[requestPasswordReset]", sendError);
     return { error: "E-Mail konnte nicht verschickt werden." };
   }
 

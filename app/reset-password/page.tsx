@@ -15,7 +15,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
   const invite = sanitizeTeamInvitationTokenForAuth(params.invite);
 
   return (
-    <YdPublicOsEnvironment mode="focus" scroll landingAtmosphere instantEnter>
+    <YdPublicOsEnvironment mode="focus" scroll landingAtmosphere>
       <main className="yd-product-entry yd-login-page-entry">
         <YdProductChrome variant="entry" />
         <section className="yd-product-entry-card yd-clinical-entry--login yd-clinical-entry-panel--login-entrance">

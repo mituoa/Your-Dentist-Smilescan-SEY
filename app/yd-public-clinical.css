@@ -1458,6 +1458,14 @@
   max-width: none;
 }
 
+/* Inline /register: eine Karte — kein zweites Panel darüber (clinical-world-Gradient) */
+.yd-clinical-world .yd-auth-register-panel--page {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .yd-auth-register-panel--page .yd-auth-register-header {
   display: none;
 }
@@ -1478,7 +1486,7 @@
   padding: 0.5rem 0 2rem;
 }
 
-.yd-clinical-world .yd-auth-register-panel {
+.yd-clinical-world .yd-auth-register-panel:not(.yd-auth-register-panel--page) {
   border-radius: 32px;
   background: linear-gradient(168deg, #f2f7fc 0%, #e6eff8 42%, #dae8f4 100%);
   box-shadow:

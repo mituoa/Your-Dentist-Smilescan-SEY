@@ -64,7 +64,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     : "/login";
 
   return (
-    <YdPublicOsEnvironment mode="register" scroll landingAtmosphere instantEnter>
+    <YdPublicOsEnvironment mode="register" scroll landingAtmosphere>
       <main className="yd-product-entry yd-clinical-entry yd-auth-register-page-main">
         <YdProductChrome variant="entry" tagline={null} />
         <section className="yd-product-entry-card yd-auth-register-page-card">

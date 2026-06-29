@@ -5,7 +5,7 @@ import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
 export default function ResetPasswordLoading() {
   return (
-    <YdPublicOsEnvironment mode="focus" landingAtmosphere instantEnter>
+    <YdPublicOsEnvironment mode="focus" landingAtmosphere>
       <YdProductChrome variant="entry" />
       <main className="yd-product-entry">
         <section className="yd-product-entry-card">

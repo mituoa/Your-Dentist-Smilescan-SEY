@@ -1433,3 +1433,32 @@
     transform: none !important;
   }
 }
+
+/* —— Auth (Login/Register/Passwort): Startseiten-Hintergrund 1:1 aus .yd-os / .yd-os-hero::before —— */
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-bg {
+  background: #f8f9fb;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-mesh {
+  background:
+    radial-gradient(46% 60% at 14% 6%, rgba(47, 111, 214, 0.1), transparent 60%),
+    radial-gradient(40% 50% at 92% 0%, rgba(47, 111, 214, 0.06), transparent 55%);
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-ambient,
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-vignette {
+  opacity: 0;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere .yd-public-os-content {
+  background: transparent;
+}
+
+.yd-clinical-world.yd-public-os--landing-atmosphere.yd-public-os--focus:has(.yd-clinical-entry--login)
+  .yd-public-os-ambient--center,
+.yd-clinical-world.yd-public-os--landing-atmosphere.yd-public-os--focus:has(.yd-clinical-entry--login)
+  .yd-public-os-ambient--upper,
+.yd-clinical-world.yd-public-os--landing-atmosphere.yd-public-os--focus:has(.yd-clinical-entry--login)
+  .yd-public-os-vignette {
+  opacity: 0;
+}

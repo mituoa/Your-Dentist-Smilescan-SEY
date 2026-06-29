@@ -3,9 +3,8 @@
 import Link from "next/link";
 
 import { ForgotPasswordCard } from "@/components/auth/forgot-password-card";
-import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
-import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
+import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
 type ForgotPasswordPageClientProps = {
   sent: boolean;
@@ -14,48 +13,72 @@ type ForgotPasswordPageClientProps = {
   prefilledEmail: string;
 };
 
-/** Gleiche Login-/Brand-Shell wie Anmeldung — ruhig, warm, ohne Legacy-Auth-Chrome. */
+function buildLoginHref(inviteToken: string, prefilledEmail: string): string {
+  if (!inviteToken) return "/login";
+  const base = `/login?invite=${encodeURIComponent(inviteToken)}`;
+  return prefilledEmail ? `${base}&email=${encodeURIComponent(prefilledEmail)}` : base;
+}
+
+/** Gleiche Shell wie Anmeldung — eine Karte, Brand oben, ruhige Recovery-Copy. */
 export function ForgotPasswordPageClient({
   sent,
   errorRaw,
   inviteToken,
   prefilledEmail,
 }: ForgotPasswordPageClientProps) {
+  const loginHref = buildLoginHref(inviteToken, prefilledEmail);
+
   return (
-    <YdPublicOsEnvironment mode="focus" landingAtmosphere instantEnter>
-      <div className="yd-clinical-entry yd-clinical-entry--login">
-        <div className="yd-clinical-entry-panel yd-clinical-entry-panel--login-entrance">
-          <div
-            className="yd-auth-login-brand yd-auth-awaken-field"
-            style={{ ["--yd-auth-field-i" as string]: "0" }}
-          >
-            <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
+    <YdPublicOsEnvironment mode="focus" scroll landingAtmosphere>
+      <main className="yd-product-entry yd-login-page-entry">
+        <YdProductChrome variant="entry" />
+        <section className="yd-product-entry-card yd-clinical-entry--login yd-clinical-entry-panel--login-entrance">
+          <div className="min-w-0">
+            <header className="yd-auth-intro yd-auth-intro--recovery">
+              <h1 className="yd-public-entry-title yd-public-entry-title--login">Passwort zurücksetzen</h1>
+            </header>
+
+            {sent ? (
+              <div
+                className="yd-auth-alert yd-auth-alert--success yd-auth-alert--recovery mb-5"
+                role="status"
+              >
+                <p className="yd-auth-alert-title">Prüfen Sie Ihr Postfach.</p>
+                <p className="yd-auth-alert--recovery-hint">
+                  Auch Spam — der Link ist nur kurz gültig.
+                </p>
+              </div>
+            ) : null}
+
+            <ForgotPasswordCard
+              sent={sent}
+              errorRaw={errorRaw}
+              inviteToken={inviteToken}
+              prefilledEmail={prefilledEmail}
+              shell="minimal"
+            />
+
+            <div className="yd-auth-login-access">
+              <p className="yd-auth-register yd-auth-register--subtle">
+                <Link prefetch href={loginHref} className="yd-auth-access-link">
+                  Zurück zur Anmeldung
+                </Link>
+              </p>
+            </div>
+
+            <footer className="yd-auth-legal-minimal">
+              <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
+                <Link href="/datenschutz" className="yd-auth-legal-minimal-link">
+                  Datenschutz
+                </Link>
+                <Link href="/impressum" className="yd-auth-legal-minimal-link">
+                  Impressum
+                </Link>
+              </nav>
+            </footer>
           </div>
-
-          <div className="yd-auth-intro yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "1" }}>
-            <h1 className="yd-public-entry-title yd-public-entry-title--login">Passwort zurücksetzen</h1>
-            <p className="yd-public-entry-lead yd-public-entry-lead--login">
-              {sent
-                ? "E-Mail gesendet. Bitte prüfen Sie Ihr Postfach."
-                : "Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts."}
-            </p>
-          </div>
-
-          <ForgotPasswordCard
-            sent={sent}
-            errorRaw={errorRaw}
-            inviteToken={inviteToken}
-            prefilledEmail={prefilledEmail}
-            shell="minimal"
-          />
-
-          <p className="yd-auth-back-to-login yd-auth-awaken-field" style={{ ["--yd-auth-field-i" as string]: "3" }}>
-            <Link prefetch href={inviteToken ? `/login?invite=${encodeURIComponent(inviteToken)}` : "/login"}>
-              ← Zurück zur Anmeldung
-            </Link>
-          </p>
-        </div>
-      </div>
+        </section>
+      </main>
     </YdPublicOsEnvironment>
   );
 }

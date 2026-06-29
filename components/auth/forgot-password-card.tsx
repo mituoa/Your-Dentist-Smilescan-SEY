@@ -3,14 +3,13 @@
 import * as React from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import { useFormStatus } from "react-dom";
 
 import { requestPasswordResetFromLogin } from "@/app/(auth)/actions";
 import {
   YdAuthAlert,
-  YdAuthFieldStack,
   YdAuthIntro,
-  YdAuthLabel,
   YdAuthLegalFooter,
 } from "@/components/auth/yd-auth-ui";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
@@ -67,7 +66,7 @@ function ForgotPasswordSubmitButton({
       type="submit"
       disabled={disabled}
       aria-busy={pending}
-      className={sent ? "yd-auth-btn-secondary mt-1" : "yd-auth-btn-primary"}
+      className={sent ? "yd-auth-btn-secondary mt-1 w-full" : "yd-auth-btn-primary w-full"}
     >
       {pending ? "Wird übermittelt …" : label}
     </button>
@@ -115,11 +114,10 @@ export function ForgotPasswordCard(props: {
           title="Passwort zurücksetzen"
           subtitle={
             sent ? (
-              <>E-Mail gesendet. Bitte prüfen Sie Ihr Postfach.</>
+              <>Der Link ist nur kurze Zeit gültig. Bitte prüfen Sie auch den Spam-Ordner.</>
             ) : (
               <>
-                Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres
-                Passworts.
+                E-Mail Ihres Praxiszugangs eingeben — wir senden Ihnen einen sicheren Link zum Zurücksetzen.
               </>
             )
           }
@@ -133,26 +131,27 @@ export function ForgotPasswordCard(props: {
         </YdAuthAlert>
       ) : null}
 
-      <form
-        action={requestPasswordResetFromLogin}
-        className="yd-auth-form-stack yd-auth-awaken-field"
-        style={shell === "minimal" ? ({ ["--yd-auth-field-i" as string]: "2" } as React.CSSProperties) : undefined}
-      >
+      <form action={requestPasswordResetFromLogin} className="yd-auth-form-stack">
         {inviteToken ? <input type="hidden" name="invite_token" value={inviteToken} /> : null}
         <ForgotPasswordEmailFieldset>
-          <YdAuthFieldStack fieldIndex={1}>
-            <YdAuthLabel htmlFor="forgot-email">E-Mail</YdAuthLabel>
+          <div className="relative">
             <input
               id="forgot-email"
               name="email"
               type="email"
               required
               autoComplete="email"
-              placeholder="doc@praxis.de"
+              placeholder="E-Mail-Adresse"
               defaultValue={prefilledEmail}
-              className="yd-auth-input"
+              className="yd-auth-input pr-10"
             />
-          </YdAuthFieldStack>
+            <span
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+              aria-hidden
+            >
+              <Mail className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            </span>
+          </div>
         </ForgotPasswordEmailFieldset>
 
         <ForgotPasswordSubmitButton sent={sent} cooldownSec={cooldownSec} />

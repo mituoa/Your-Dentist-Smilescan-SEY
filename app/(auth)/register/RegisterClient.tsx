@@ -737,7 +737,14 @@ export function RegisterClient(props: {
                 {registrationStep > 1 && !props.success ? "Zurück" : "Schließen"}
               </button>
               {!props.success ? (
-                <span className="yd-auth-register-page-meta">
+                <span
+                  className="yd-auth-register-page-meta"
+                  role="progressbar"
+                  aria-valuemin={1}
+                  aria-valuemax={4}
+                  aria-valuenow={registrationStep}
+                  aria-valuetext={REGISTER_STEP_LABELS[registrationStep - 1]}
+                >
                   {registrationStep}/4
                 </span>
               ) : null}
@@ -800,21 +807,17 @@ export function RegisterClient(props: {
                 </p>
               ) : null}
 
+              {presentation !== "page" ? (
               <div
-                className={cn(
-                  "yd-reg-wizard",
-                  presentation === "page" && "yd-reg-wizard--minimal"
-                )}
+                className="yd-reg-wizard"
                 aria-label={`Schritt ${registrationStep} von 4`}
               >
-                {presentation !== "page" ? (
                   <div className="yd-reg-wizard__head">
                     <span className="yd-reg-wizard__eyebrow">Registrierung</span>
                     <span className="yd-reg-wizard__meta">
                       {Math.round(((registrationStep - 1) / 3) * 100)} % abgeschlossen
                     </span>
                   </div>
-                ) : null}
                 <div
                   className="yd-reg-wizard__track"
                   role="progressbar"
@@ -828,10 +831,9 @@ export function RegisterClient(props: {
                     style={{ width: `${((registrationStep - 1) / 3) * 100}%` }}
                   />
                 </div>
-                {presentation !== "page" ? (
                   <p className="yd-reg-wizard__label">{REGISTER_STEP_LABELS[registrationStep - 1]}</p>
-                ) : null}
               </div>
+              ) : null}
 
               {registrationStep === 1 ? (
                 <div className="yd-auth-awaken-field">
@@ -858,7 +860,7 @@ export function RegisterClient(props: {
 
                   <form
                     onSubmit={onStep1Submit}
-                    className="space-y-4"
+                    className="yd-auth-form-stack"
                     aria-busy={emailCheckStatus === "checking"}
                   >
                     <div className="yd-auth-field">
@@ -1033,7 +1035,7 @@ export function RegisterClient(props: {
                         !allPasswordRequirementsMet(regPassword) ||
                         !passwordsMatch
                       }
-                      className="yd-auth-btn-primary mt-2 w-full"
+                      className="yd-auth-btn-primary w-full"
                     >
                       Weiter
                     </button>
