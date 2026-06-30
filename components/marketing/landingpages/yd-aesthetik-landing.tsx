@@ -98,10 +98,10 @@ const PROCESS = [
 ] as const;
 
 const FAQ = [
-  { q: "Wie lange hält das Ergebnis?", a: "Die Haltbarkeit hängt vom gewählten Verfahren und Ihrer Pflege ab — das besprechen wir individuell im Beratungsgespräch." },
+  { q: "Wie lange hält das Ergebnis?", a: "Die Haltbarkeit hängt vom gewählten Verfahren und Ihrer Pflege ab. Das besprechen wir individuell im Beratungsgespräch." },
   { q: "Ist die Behandlung schmerzhaft?", a: "Die meisten ästhetischen Verfahren sind schmerzarm. Details zum jeweiligen Verfahren erläutern wir vorab." },
   { q: "Was kostet eine ästhetische Behandlung?", a: "Die Kosten richten sich nach Umfang und Verfahren. Sie erhalten vorab eine transparente Kostenübersicht." },
-  { q: "Wie viele Termine sind nötig?", a: "Das hängt vom gewählten Verfahren ab — von einer einzelnen Sitzung bis zu mehreren begleiteten Schritten." },
+  { q: "Wie viele Termine sind nötig?", a: "Das hängt vom gewählten Verfahren ab, von einer einzelnen Sitzung bis zu mehreren begleiteten Schritten." },
 ] as const;
 
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -156,8 +156,8 @@ export function YdAesthetikLanding() {
               Ein Lächeln, das <strong>zu Ihnen</strong> passt.
             </h1>
             <p className="yd-ae-hero-lead">
-              Ästhetische Zahnmedizin verbindet Funktion und Form — mit individueller Planung,
-              die Ihre Zahnsituation und Ihre Wünsche zusammenbringt.
+              Ästhetische Zahnmedizin verbindet Funktion und Form. Wir planen individuell,
+              ausgehend von Ihrer Zahnsituation und Ihren Wünschen.
             </p>
             <div className="yd-ae-hero-ctas">
               <a href={PRACTICE.contactUrl} className="yd-ae-btn yd-ae-btn--primary">
@@ -205,7 +205,7 @@ export function YdAesthetikLanding() {
           <Reveal>
             <div className="yd-ae-statement">
               <blockquote>
-                „Ästhetik beginnt mit gesunder Funktion — Form folgt erst danach.“
+                „Ästhetik beginnt mit gesunder Funktion. Die Form folgt danach.“
               </blockquote>
               <cite>Behandlungsphilosophie</cite>
             </div>
@@ -257,7 +257,7 @@ export function YdAesthetikLanding() {
           <Reveal>
             <div className="yd-ae-cta-band">
               <h2>Bereit für Ihre Beratung?</h2>
-              <p>Vereinbaren Sie ein persönliches Gespräch — unverbindlich und individuell.</p>
+              <p>Vereinbaren Sie ein persönliches Gespräch. Unverbindlich, auf Ihre Situation abgestimmt.</p>
               <div className="yd-ae-cta-buttons">
                 <a href={PRACTICE.contactUrl} className="yd-ae-btn yd-ae-btn--primary">
                   Beratung anfragen

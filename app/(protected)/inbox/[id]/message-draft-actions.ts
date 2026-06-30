@@ -14,7 +14,7 @@ import {
 import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 
 export type MessageDraftActionResult =
-  | { ok: true }
+  | { ok: true; draftId?: string }
   | { ok: false; error: string };
 
 function revalidateInboxDetail(submissionId: string) {
@@ -61,7 +61,7 @@ export async function prepareMessageDraftForSubmission(
   }
 
   revalidateInboxDetail(submissionId);
-  return { ok: true };
+  return { ok: true, draftId: result.draftId };
 }
 
 export async function saveMessageDraftBody(input: {

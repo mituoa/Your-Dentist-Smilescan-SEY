@@ -19,6 +19,9 @@
   --ae-shadow-sm: 0 1px 2px rgba(34, 28, 22, 0.04), 0 4px 16px rgba(34, 28, 22, 0.05);
   --ae-shadow-md: 0 4px 14px rgba(34, 28, 22, 0.06), 0 16px 36px rgba(34, 28, 22, 0.06);
   --ae-shadow-lg: 0 10px 30px rgba(34, 28, 22, 0.1), 0 36px 72px rgba(156, 122, 53, 0.12);
+  --ae-gold-grad: linear-gradient(135deg, #b69150 0%, var(--ae-gold) 45%, var(--ae-gold-deep) 100%);
+  --ae-gold-grad-soft: linear-gradient(135deg, rgba(182, 145, 80, 0.14) 0%, rgba(156, 122, 53, 0.06) 100%);
+  --ae-ink-grad: linear-gradient(160deg, #2c241c 0%, var(--ae-ink) 55%, #1a1510 100%);
   --ae-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --ae-font: var(--font-al-inter), "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   background: var(--ae-page);
@@ -147,6 +150,7 @@
 }
 
 .yd-ae-eyebrow {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -154,16 +158,17 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(156, 122, 53, 0.18);
+  background-image: var(--ae-gold-grad-soft), linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  background-position: 0 0, -150% 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 60% 100%;
+  overflow: hidden;
   color: var(--ae-gold-deep);
   margin-bottom: 22px;
-}
-
-.yd-ae-eyebrow::before,
-.yd-ae-eyebrow::after {
-  content: "";
-  width: 24px;
-  height: 1px;
-  background: var(--ae-gold);
+  animation: ae-badge-shimmer 7s ease-in-out infinite;
 }
 
 .yd-ae-hero-title {
@@ -178,7 +183,10 @@
 
 .yd-ae-hero-title strong {
   font-weight: 600;
-  color: var(--ae-gold-deep);
+  background: var(--ae-gold-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .yd-ae-hero-lead {
@@ -234,12 +242,13 @@
   font-weight: 500;
   color: var(--ae-ink-soft);
   box-shadow: var(--ae-shadow-sm);
-  transition: transform 0.25s var(--ae-spring), border-color 0.25s ease, color 0.25s ease;
+  transition: transform 0.25s var(--ae-spring), border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
 }
 
 .yd-ae-pill:hover {
   transform: translateY(-2px);
   border-color: var(--ae-gold);
+  background: var(--ae-gold-grad-soft);
   color: var(--ae-gold-deep);
 }
 
@@ -332,7 +341,10 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ae-gold-deep);
+  background: var(--ae-gold-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   margin-bottom: 8px;
 }
 
@@ -404,7 +416,7 @@
   position: relative;
   border-radius: 4px;
   padding: clamp(40px, 6vw, 64px);
-  background: var(--ae-ink);
+  background: var(--ae-ink-grad);
   color: #fff;
   text-align: center;
   overflow: hidden;
@@ -527,6 +539,18 @@
   transform: translateY(0);
 }
 
+/* ---- Subtle shimmer for hero eyebrow badge ---- */
+
+@keyframes ae-badge-shimmer {
+  0%,
+  100% {
+    background-position: 0 0, -150% 0;
+  }
+  50% {
+    background-position: 0 0, 250% 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .yd-ae-reveal,
   .yd-ae-stagger-item,
@@ -536,5 +560,10 @@
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .yd-ae-eyebrow {
+    animation: none !important;
+    background-position: 0 0, -150% 0 !important;
   }
 }

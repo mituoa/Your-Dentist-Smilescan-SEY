@@ -9,7 +9,7 @@ import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 
 export type CommandDraftPersistResult =
-  | { ok: true; draftId: string; updated: boolean }
+  | { ok: true; draftId: string; updated: boolean; body: string }
   | { ok: false; error: string };
 
 function revalidateInboxDetail(submissionId: string) {
@@ -78,6 +78,7 @@ export async function persistMessageDraftFromCommand(input: {
     ok: true,
     draftId: result.draftId,
     updated: result.updated,
+    body: result.body,
   };
 }
 

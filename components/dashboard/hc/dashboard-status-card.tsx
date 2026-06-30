@@ -48,7 +48,7 @@ export function DashboardStatusCard({ card, className }: Props) {
       ref={rootRef}
       href={card.href}
       className={cn("yd-dash-bento-status", open && "yd-dash-bento-status--open", className)}
-      prefetch
+      prefetch={false}
       onMouseEnter={() => card.detail && setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       onFocus={() => card.detail && setOpen(true)}

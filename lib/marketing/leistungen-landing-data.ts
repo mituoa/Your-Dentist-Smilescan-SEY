@@ -29,7 +29,7 @@ export const LEISTUNGEN_LANDING_META = {
   address: "Brücker Mauspfad 611, 51109 Köln (Brück)",
   heroTitle: "Unser Leistungsspektrum",
   heroLead:
-    "Von Prophylaxe und Zahnerhalt über Ästhetik bis Implantologie — strukturiert, verständlich und auf Ihre Situation ausgerichtet.",
+    "Prophylaxe, Zahnerhalt, Ästhetik, Implantologie. Wir ordnen die Möglichkeiten für Ihre Situation und erklären, was davon für Sie infrage kommt.",
 } as const;
 
 /** Vier Säulen wie auf typischen Zahnarzt-Leistungsseiten — plus ergänzte Standardthemen. */
@@ -38,7 +38,7 @@ export const LEISTUNGEN_PILLARS: LeistungenPillar[] = [
     id: "praxis",
     title: "Das zeichnet uns aus",
     intro:
-      "Technik, Team und besondere Betreuung — für Patientinnen und Patienten, die mehr als Standard erwarten.",
+      "Moderne Technik, ein eingespieltes Team und Betreuung, die über die Standardversorgung hinausgeht.",
     image: "/landingpages/aligner/practice-room.jpg",
     imageAlt: "Moderner Behandlungsraum bei Carree Dental",
     services: [
@@ -58,7 +58,7 @@ export const LEISTUNGEN_PILLARS: LeistungenPillar[] = [
     id: "gesund",
     title: "Gesunde Zähne",
     intro:
-      "Vorsorge, Erhalt und gezielte Therapie — damit Ihre Zähne lange gesund und belastbar bleiben.",
+      "Vorsorge, Zahnerhalt und gezielte Therapie für eine Mundgesundheit, die hält.",
     image: "/landingpages/aligner/dr-andersson.jpg",
     imageAlt: "Zahnärztliche Beratung bei Carree Dental",
     services: [
@@ -80,7 +80,7 @@ export const LEISTUNGEN_PILLARS: LeistungenPillar[] = [
     id: "schoen",
     title: "Schöne Zähne",
     intro:
-      "Ästhetik mit medizinischem Anspruch — natürlich wirkend, planbar und auf Ihr Gesicht abgestimmt.",
+      "Ästhetische Zahnmedizin mit klinischem Anspruch. Planbar, auf Ihr Gesicht abgestimmt und mit natürlichem Ergebnis.",
     image: "/landingpages/aligner/hero-lifestyle.png",
     imageAlt: "Selbstbewusstes Lächeln nach ästhetischer Zahnbehandlung",
     services: [
@@ -99,12 +99,12 @@ export const LEISTUNGEN_PILLARS: LeistungenPillar[] = [
     id: "neu",
     title: "Neue Zähne",
     intro:
-      "Fester Zahnersatz und Implantate — von der Einzelversorgung bis zur vollständigen Rehabilitation.",
+      "Fester Zahnersatz und Implantate, von der Einzelversorgung bis zur vollständigen Rehabilitation.",
     image: "/landingpages/aligner/team-banner.png",
     imageAlt: "Team und moderne Ausstattung bei Carree Dental",
     services: [
       { label: "Implantologie", featured: true },
-      { label: "All-on-4 — feste Zähne in kurzer Zeit", featured: true },
+      { label: "All-on-4, feste Zähne in kurzer Zeit", featured: true },
       { label: "CEREC / Krone am selben Tag", featured: true },
       { label: "Keramikimplantate" },
       { label: "Zygoma-Implantate" },
@@ -142,7 +142,7 @@ export const LEISTUNGEN_HIGHLIGHTS = [
   },
   {
     title: "Notfall",
-    text: "Akute Zahnschmerzen, Trauma und dringende Einschätzung — bitte telefonisch anmelden.",
+    text: "Akute Zahnschmerzen, Trauma und dringende Einschätzung. Bitte telefonisch anmelden.",
   },
 ] as const;
 
@@ -165,6 +165,6 @@ export const LEISTUNGEN_FAQ = [
   },
   {
     q: "Kann ich online einen Termin buchen?",
-    a: "Ja — über unsere Online-Terminbuchung oder telefonisch. Für Notfälle rufen Sie bitte direkt an.",
+    a: "Ja, über unsere Online-Terminbuchung oder telefonisch. Bei Notfällen rufen Sie bitte direkt an.",
   },
 ] as const;

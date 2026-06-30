@@ -32,9 +32,14 @@ export function TrackerInboxStatusPill({
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [localStatus, setLocalStatus] = useState<InboxPracticeStatusId>(status);
 
-  const displayStatus = displayPracticeStatusForCase(status);
+  const displayStatus = displayPracticeStatusForCase(localStatus);
   const label = enterpriseStatusLabel(displayStatus);
+
+  useEffect(() => {
+    setLocalStatus(status);
+  }, [status]);
 
   useEffect(() => {
     if (!open) return;
@@ -54,9 +59,12 @@ export function TrackerInboxStatusPill({
       return;
     }
     setError(null);
+    const previous = displayStatus;
+    setLocalStatus(next);
     startTransition(async () => {
       const res = await updateSubmissionPracticeStatus(submissionId, next);
       if (res.error) {
+        setLocalStatus(previous);
         setError(res.error);
         return;
       }

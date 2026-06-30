@@ -80,11 +80,16 @@ export function TrackerInboxListStatusMenu({
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [localStatus, setLocalStatus] = useState<InboxPracticeStatusId>(status);
   const popoverStyle = usePopoverPosition(open, rootRef);
 
-  const displayStatus = displayPracticeStatusForCase(status);
+  const displayStatus = displayPracticeStatusForCase(localStatus);
   const statusLabel = enterpriseStatusLabel(displayStatus);
   const canMarkUnread = Boolean(seenAt);
+
+  useEffect(() => {
+    setLocalStatus(status);
+  }, [status]);
 
   useEffect(() => {
     if (!open) return;
@@ -132,7 +137,15 @@ export function TrackerInboxListStatusMenu({
       setOpen(false);
       return;
     }
-    run(() => updateSubmissionPracticeStatus(submissionId, next));
+    const previous = displayStatus;
+    setLocalStatus(next);
+    run(async () => {
+      const res = await updateSubmissionPracticeStatus(submissionId, next);
+      if (res.error) {
+        setLocalStatus(previous);
+      }
+      return res;
+    });
   };
 
   const markUnread = () => {

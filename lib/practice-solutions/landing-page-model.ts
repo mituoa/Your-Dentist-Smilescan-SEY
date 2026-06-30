@@ -56,6 +56,7 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
     image: landingCatalogPreview("bleaching", LANDING_IMG.bleaching),
     imagePosition: "50% 28%",
     inquiryId: "aesthetik",
+    previewHref: "/landingpages/bleaching",
   },
   {
     id: "aesthetik",

@@ -168,19 +168,19 @@ const COMMAND_STAGES = [
     tag: "Anfrage",
     icon: MessageSquareText,
     title: "Anfrage trifft ein",
-    body: "„Stechende Schmerzen rechts unten — noch ohne Foto.“",
+    body: "„Stechende Schmerzen rechts unten, noch ohne Foto.“",
   },
   {
     tag: "Foto",
     icon: Camera,
     title: "KI fordert Foto an",
-    body: "Patient sendet Bild — automatisch dem Fall zugeordnet.",
+    body: "Patient sendet Bild, automatisch dem Fall zugeordnet.",
   },
   {
     tag: "Zusammenfassung",
     icon: ScanLine,
     title: "Command AI fasst zusammen",
-    body: "Akute Schmerzen — Entwurf zur Kontrolle bereit.",
+    body: "Akute Schmerzen. Entwurf liegt zur Kontrolle bereit.",
   },
   {
     tag: "Freigabe",
@@ -256,42 +256,42 @@ const MODULES = [
   {
     icon: Users2,
     title: "Relay",
-    text: "Teamaufgaben per Diktat — im Portal statt WhatsApp.",
+    text: "Teamaufgaben per Diktat, im Portal statt WhatsApp.",
     preview: ["Laborauftrag · nachverfolgbar"],
     accent: "navy",
   },
   {
     icon: BookOpen,
     title: "Care Center",
-    text: "Patienten-KI beantwortet Routinefragen — weniger Telefonate.",
+    text: "Patienten-KI beantwortet Routinefragen, das Telefon klingelt seltener.",
     preview: ["Schmerzen nach OP", "KI fordert Foto an"],
     accent: "violet",
   },
   {
     icon: Sparkles,
     title: "Command AI",
-    text: "Entwürfe und Zusammenfassungen — mit Freigabe.",
+    text: "Entwürfe und Zusammenfassungen, freigegeben vom Arzt.",
     preview: ["Wartet auf Freigabe"],
     accent: "sky",
   },
   {
     icon: LayoutTemplate,
     title: "Landingpages",
-    text: "Individuell für Ihre Praxis — mit Nachverfolgung Ihrer Anfragen.",
+    text: "Individuell für Ihre Praxis, mit Nachverfolgung Ihrer Anfragen.",
     preview: ["Implantologie", "Freigabe vor Live-Schaltung"],
     accent: "teal",
   },
 ] as const;
 
 const CARE_KI_POINTS = [
-  "Beantwortet viele Patientenfragen aus veröffentlichten Texten — weniger Standardanrufe.",
+  "Beantwortet Patientenfragen aus veröffentlichten Texten, das senkt die Zahl der Standardanrufe.",
   "Bei Beschwerden fordert die KI gezielt eine Nachricht oder ein Foto an.",
   JOURNAL_KI.safetyLine,
 ];
 
 const LANDING_FLOW_STEPS = [
-  "Sie erhalten Ihre individuelle Landingpage zur Freigabe — angepasst an Ihre Praxis.",
-  "Nach Freigabe schalten wir sie live — mit messbarer Nachverfolgung Ihrer Anfragen.",
+  "Sie erhalten Ihre individuelle Landingpage zur Freigabe, angepasst an Ihre Praxis.",
+  "Nach Freigabe schalten wir sie live und Sie verfolgen jede eingehende Anfrage.",
 ] as const;
 
 const COMMAND_POINTS = [
@@ -432,11 +432,11 @@ export function YdHomeOsPage({
               Für Zahnarztpraxen
             </span>
             <h1 className="yd-os-hero-title">
-              Ein ruhiger Workflow für <em>jede</em> Patientenanfrage.
+              Ein ruhiger Workflow für <em>Ihre</em> Patientenanfragen.
             </h1>
             <p className="yd-os-hero-lead">
-              Wenn eine Anfrage reinkommt, ist klar, was als Nächstes passiert. Vom Foto bis zur
-              Antwort, alles an einem Ort.
+              Eine Anfrage kommt rein, und Ihr Team weiß sofort, was als Nächstes passiert.
+              Foto, Bewertung und Antwort liegen an einem Ort.
             </p>
             <div className="yd-os-hero-ctas">
               <Link href="/login" className="yd-os-btn yd-os-btn--primary">
@@ -641,7 +641,7 @@ export function YdHomeOsPage({
                 <p className="yd-os-command-panel-label">Patientenanfrage</p>
                 <div className="yd-os-command-panel-body">
                   <div className="yd-os-bubble">
-                    „Seit heute Morgen stechende Schmerzen rechts unten — noch kein Foto im Anhang.“
+                    „Seit heute Morgen stechende Schmerzen rechts unten, noch kein Foto im Anhang.“
                   </div>
                   <div className="yd-os-command-status-list">
                     <div className="yd-os-command-status">
@@ -655,8 +655,8 @@ export function YdHomeOsPage({
                       <div className="yd-os-command-status-copy">
                         <strong>KI fordert Foto an</strong>
                         <p>
-                          Bitte Nachricht oder Foto der Beschwerde senden — bevor die Praxis
-                          entscheidet.
+                          Bitte Nachricht oder Foto der Beschwerde senden, damit die Praxis
+                          entscheiden kann.
                         </p>
                       </div>
                     </div>
@@ -671,7 +671,7 @@ export function YdHomeOsPage({
                 <div className="yd-os-command-panel-footer">
                   <div className="yd-os-command-panel-footer-copy">
                     <span className="yd-os-command-panel-footer-label">Ärztliche Freigabe</span>
-                    <p>Entwurf prüfen — Versand erst nach Ihrer Bestätigung.</p>
+                    <p>Entwurf prüfen. Versand erst nach Ihrer Bestätigung.</p>
                   </div>
                   <button type="button" className="yd-os-command-approve" disabled>
                     <CheckCircle2 size={14} /> Freigeben

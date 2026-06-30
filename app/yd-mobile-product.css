@@ -54,6 +54,14 @@
     padding-bottom: 0.5rem;
   }
 
+  .yd-dash-m__card--calendar {
+    padding-bottom: 0.875rem;
+  }
+
+  .yd-dash-m__card--calendar .yd-dash-premium-calendar__head {
+    margin-bottom: 0.5rem;
+  }
+
   .yd-dash-m__card--schedule {
     display: flex;
     flex-direction: column;
@@ -366,6 +374,19 @@
     font-weight: 500;
     color: #94a3b8;
     font-variant-numeric: tabular-nums;
+  }
+
+  .yd-dash-m__relevant-item--example {
+    opacity: 0.72;
+  }
+
+  .yd-dash-m__relevant-item--example .yd-dash-m__relevant-title {
+    font-style: italic;
+    color: #94a3b8;
+  }
+
+  .yd-dash-m__relevant-item--example .yd-dash-m__relevant-when {
+    color: #b8c4d0;
   }
 
   /* Aktivität — kompakte Visualisierung */

@@ -133,7 +133,7 @@ export function YdLeistungenLandingCarree() {
               <span className="yd-al-kicker">Behandlungsschwerpunkte</span>
               <h2 className="yd-al-title">Alles Wichtige auf einen Blick</h2>
               <p className="yd-al-lead">
-                Vier Bereiche — von Praxisbesonderheiten über Zahnerhalt und Ästhetik bis zu Implantaten
+                Vier Bereiche, von Praxisbesonderheiten über Zahnerhalt und Ästhetik bis zu Implantaten
                 und neuem Zahnersatz.
               </p>
             </div>
@@ -181,7 +181,7 @@ export function YdLeistungenLandingCarree() {
               <span className="yd-al-kicker">Häufig gesucht</span>
               <h2 className="yd-al-title">Weitere Schwerpunkte</h2>
               <p className="yd-al-lead">
-                Themen, die Patientinnen und Patienten besonders oft anfragen — ergänzend zu unserem
+                Themen, die Patientinnen und Patienten besonders oft anfragen, ergänzend zu unserem
                 Kernspektrum.
               </p>
             </div>
@@ -220,7 +220,7 @@ export function YdLeistungenLandingCarree() {
               <h2>Passende Behandlung finden?</h2>
               <p>
                 Vereinbaren Sie einen Termin bei {meta.practiceName} in {meta.city}. Wir nehmen uns Zeit
-                für Ihre Fragen — persönlich, verständlich und ohne Druck.
+                für Ihre Fragen, persönlich und ohne Druck.
               </p>
               <div className="yd-al-cta-buttons">
                 <a
@@ -246,7 +246,7 @@ export function YdLeistungenLandingCarree() {
       <footer className="yd-al-footer">
         <div className="yd-al-container">
           <p>
-            {meta.practiceName} — {meta.address} · {meta.phoneDisplay} ·{" "}
+            {meta.practiceName} · {meta.address} · {meta.phoneDisplay} ·{" "}
             <a href="https://carree-dental.de/impressum/" target="_blank" rel="noopener noreferrer">
               Impressum
             </a>{" "}

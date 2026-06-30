@@ -232,7 +232,7 @@ const TRUST_PILLS = [
 
 const BENEFITS = [
   { icon: Bone, title: "Knochenerhalt", text: "Implantate stützen den Kieferknochen und beugen Knochenabbau vor." },
-  { icon: Layers, title: "Natürliches Ergebnis", text: "Form und Farbe werden individuell auf Ihr Gebiss abgestimmt." },
+  { icon: Layers, title: "Natürliches Ergebnis", text: "Form und Farbe stimmen wir auf Ihr Gebiss ab." },
   { icon: ScanLine, title: "Digital geplant", text: "3D-Diagnostik zeigt vorab, wie Implantat und Versorgung sitzen." },
   { icon: Stethoscope, title: "Persönlich begleitet", text: "Von der Eignungsprüfung bis zur Nachsorge an Ihrer Seite." },
 ] as const;
@@ -240,7 +240,7 @@ const BENEFITS = [
 const PROCESS = [
   { title: "Eignungsprüfung", text: "Untersuchung und 3D-Diagnostik klären, ob und welches Implantat passt." },
   { title: "Implantation", text: "Das Implantat wird unter örtlicher Betäubung in den Kieferknochen gesetzt." },
-  { title: "Einheilphase", text: "Das Implantat verwächst über mehrere Wochen fest mit dem Kieferknochen." },
+  { title: "Einheilphase", text: "Das Implantat verwächst über mehrere Wochen mit dem Kieferknochen." },
   { title: "Versorgung", text: "Krone, Brücke oder Prothese wird passgenau auf das Implantat gesetzt." },
 ] as const;
 
@@ -251,16 +251,16 @@ const SEGMENTS = [
 ] as const;
 
 const FAQ = [
-  { q: "Wie lange dauert die Behandlung insgesamt?", a: "Von der Eignungsprüfung bis zur fertigen Versorgung vergehen je nach Einheilzeit meist mehrere Monate — der genaue Ablauf wird individuell besprochen." },
-  { q: "Tut die Implantation weh?", a: "Der Eingriff erfolgt unter örtlicher Betäubung. Im Anschluss können leichte Beschwerden auftreten, die in der Regel gut behandelbar sind." },
+  { q: "Wie lange dauert die Behandlung insgesamt?", a: "Von der Eignungsprüfung bis zur fertigen Versorgung vergehen je nach Einheilzeit meist mehrere Monate. Den genauen Ablauf besprechen wir individuell." },
+  { q: "Tut die Implantation weh?", a: "Der Eingriff erfolgt unter örtlicher Betäubung. Danach können leichte Beschwerden auftreten, die sich in der Regel gut behandeln lassen." },
   { q: "Was kostet ein Implantat?", a: "Die Kosten hängen von Anzahl der Implantate, Versorgung und individueller Ausgangslage ab. Sie erhalten vorab eine transparente Kostenübersicht." },
   { q: "Übernimmt die Krankenkasse die Kosten?", a: "Gesetzliche Krankenkassen übernehmen in der Regel nur einen Festzuschuss. Die genaue Erstattung klären wir gemeinsam vor Behandlungsbeginn." },
-  { q: "Für wen sind Implantate nicht geeignet?", a: "Bestimmte gesundheitliche Voraussetzungen können gegen ein Implantat sprechen — das klärt die individuelle Eignungsprüfung vor Behandlungsbeginn." },
+  { q: "Für wen sind Implantate nicht geeignet?", a: "Bestimmte gesundheitliche Voraussetzungen können gegen ein Implantat sprechen. Das klärt die Eignungsprüfung vor Behandlungsbeginn." },
 ] as const;
 
 const TRUST_NOTES = [
   { icon: ScanLine, text: "3D-Diagnostik vor jeder Behandlungsplanung." },
-  { icon: ShieldCheck, text: "Keine pauschalen Erfolgsversprechen — individuelle Einschätzung." },
+  { icon: ShieldCheck, text: "Individuelle Einschätzung statt pauschaler Erfolgsversprechen." },
   { icon: ClipboardCheck, text: "Transparente Kostenübersicht vor Behandlungsbeginn." },
   { icon: Stethoscope, text: "Persönliche Nachsorge nach der Implantation." },
 ] as const;
@@ -290,7 +290,7 @@ export function YdImplantologieLanding() {
   }, []);
 
   return (
-    <main className="yd-al">
+    <main className="yd-al yd-al--implant">
       <header className="yd-al-topbar">
         <div className="yd-al-container yd-al-topbar-inner">
           <span className="yd-al-logo-text">
@@ -316,12 +316,11 @@ export function YdImplantologieLanding() {
               Implantologie · {PRACTICE.city}
             </span>
             <h1 className="yd-al-hero-title yd-al-hero-stagger" style={{ transitionDelay: "70ms" }}>
-              Zahnimplantate. <em>Fest verankert, natürlich im Ergebnis.</em>
+              Zahnimplantate. <em>Fest verankert, ruhig geplant.</em>
             </h1>
             <p className="yd-al-hero-lead yd-al-hero-stagger" style={{ transitionDelay: "140ms" }}>
-              Ein Zahnimplantat ersetzt die Zahnwurzel und schafft die Grundlage für festsitzenden,
-              natürlich wirkenden Zahnersatz. Wir prüfen individuell, ob und welches Vorgehen zu
-              Ihrer Situation passt.
+              Ein Zahnimplantat ersetzt die Zahnwurzel und trägt festsitzenden Zahnersatz.
+              Wir klären in der Eignungsprüfung, welches Vorgehen zu Ihrer Situation passt.
             </p>
             <div className="yd-al-hero-ctas yd-al-hero-stagger" style={{ transitionDelay: "210ms" }}>
               <a href={PRACTICE.contactUrl} className="yd-al-btn yd-al-btn--glow">
@@ -374,7 +373,7 @@ export function YdImplantologieLanding() {
                 <Sparkles size={15} />
               </span>
               <div>
-                <p>Implantologie — individuell geplant</p>
+                <p>Implantologie, individuell geplant</p>
                 <span>{PRACTICE.name} · {PRACTICE.city}</span>
               </div>
             </div>
@@ -388,10 +387,9 @@ export function YdImplantologieLanding() {
           <Reveal>
             <div className="yd-al-head">
               <span className="yd-al-kicker">Warum Implantate</span>
-              <h2 className="yd-al-title">Fest, natürlich und individuell geplant.</h2>
+              <h2 className="yd-al-title">Fest, natürlich, individuell geplant.</h2>
               <p className="yd-al-lead">
-                Implantate ersetzen die Zahnwurzel und schaffen eine stabile Grundlage für
-                festsitzenden Zahnersatz.
+                Implantate ersetzen die Zahnwurzel und tragen festsitzenden Zahnersatz.
               </p>
             </div>
             <StaggerGrid className="yd-al-benefit-grid">
@@ -452,7 +450,7 @@ export function YdImplantologieLanding() {
           <Reveal>
             <div className="yd-al-head">
               <span className="yd-al-kicker">Wichtig zu wissen</span>
-              <h2 className="yd-al-title">Sorgfältig geplant statt pauschal versprochen.</h2>
+              <h2 className="yd-al-title">Sorgfältig geplant, nicht pauschal versprochen.</h2>
             </div>
             <div className="yd-al-trust-grid">
               {TRUST_NOTES.map((t) => {
@@ -493,7 +491,7 @@ export function YdImplantologieLanding() {
             <div className="yd-al-cta-band">
               <h2>Bereit für Ihre Eignungsprüfung?</h2>
               <p>
-                Vereinbaren Sie eine unverbindliche Beratung und erfahren Sie, welches Vorgehen zu
+                Vereinbaren Sie eine unverbindliche Beratung. Wir klären, welches Vorgehen zu
                 Ihrer Situation passt.
               </p>
               <div className="yd-al-cta-buttons">

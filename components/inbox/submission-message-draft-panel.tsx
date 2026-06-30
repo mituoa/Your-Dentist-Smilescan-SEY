@@ -125,17 +125,36 @@ export function SubmissionMessageDraftPanel({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const commandDraftApplied = useRef(false);
   const lastAppliedRevision = useRef(0);
+  const lastServerDraftAt = useRef<string | null>(null);
+  const localBodyRevision = useRef(0);
 
   const refreshAfterMutation = useCallback(() => {
     router.refresh();
   }, [router]);
 
   useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ submissionId: string; body: string }>).detail;
+      if (!detail || detail.submissionId !== submissionId) return;
+      setBody(detail.body);
+      setDraftPath("custom");
+      localBodyRevision.current += 1;
+      setFlash(true);
+      window.setTimeout(() => setFlash(false), 200);
+    };
+    window.addEventListener("yd-tracker-draft-updated", handler);
+    return () => window.removeEventListener("yd-tracker-draft-updated", handler);
+  }, [submissionId]);
+
+  useEffect(() => {
     setEditableDraft(initialEditableDraft);
     setHistoryDraft(initialHistoryDraft);
-    if (initialEditableDraft) {
-      setBody(initialEditableDraft.body);
-    }
+    const serverUpdated = initialEditableDraft?.updated_at ?? null;
+    if (!initialEditableDraft) return;
+    if (serverUpdated === lastServerDraftAt.current) return;
+    if (localBodyRevision.current > lastAppliedRevision.current) return;
+    setBody(initialEditableDraft.body);
+    lastServerDraftAt.current = serverUpdated;
   }, [initialEditableDraft, initialHistoryDraft]);
 
   useEffect(() => {
@@ -154,6 +173,7 @@ export function SubmissionMessageDraftPanel({
     if (!draftApplyRequest || !editableDraft) return;
     if (draftApplyRequest.revision === lastAppliedRevision.current) return;
     lastAppliedRevision.current = draftApplyRequest.revision;
+    localBodyRevision.current = draftApplyRequest.revision;
     setBody(draftApplyRequest.body);
     setDraftPath(
       draftApplyRequest.path === "termin"
@@ -179,7 +199,7 @@ export function SubmissionMessageDraftPanel({
   }, []);
 
   useEffect(() => {
-    if (draftPath === "custom") return;
+    if (draftPath === "custom" || draftPath === "termin" || draftPath === "ruckfrage") return;
     if (draftApplyRequest) return;
     setBody(canonicalBase);
   }, [canonicalBase, draftPath, draftApplyRequest]);
@@ -330,6 +350,7 @@ export function SubmissionMessageDraftPanel({
             setBody(e.target.value);
             setDraftPath("custom");
             setActiveSnippetId("custom");
+            localBodyRevision.current += 1;
           }}
           onFocus={scrollDraftIntoView}
           rows={8}

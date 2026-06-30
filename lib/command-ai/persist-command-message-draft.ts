@@ -31,7 +31,7 @@ export type PersistCommandMessageDraftInput = {
 };
 
 export type PersistCommandMessageDraftResult =
-  | { ok: true; draftId: string; updated: boolean }
+  | { ok: true; draftId: string; updated: boolean; body: string }
   | { ok: false; error: string };
 
 function toUrgencyKey(urgency: string | null | undefined): UrgencyKey {
@@ -97,7 +97,7 @@ export async function persistCommandMessageDraft(
             : updated.error,
       };
     }
-    return { ok: true, draftId: existingDraft.id, updated: true };
+    return { ok: true, draftId: existingDraft.id, updated: true, body };
   }
 
   const created = await createMessageDraft({
@@ -116,7 +116,7 @@ export async function persistCommandMessageDraft(
     };
   }
 
-  return { ok: true, draftId: created.draft.id, updated: false };
+  return { ok: true, draftId: created.draft.id, updated: false, body };
 }
 
 export type PersistCommandMessageDraftFromTextInput = {
@@ -158,4 +158,63 @@ export async function persistCommandMessageDraftFromText(
     signals,
     submissionUrgency: input.submissionUrgency,
   });
+}
+
+/**
+ * GPT- oder manuell erzeugten Entwurfstext direkt persistieren (ohne Regel-Pipeline).
+ */
+export async function persistCommandMessageDraftBody(input: {
+  submissionId: string;
+  body: string;
+}): Promise<PersistCommandMessageDraftResult> {
+  const workspace = await getCurrentWorkspace();
+  if (!workspace) {
+    return { ok: false, error: "Bitte erneut anmelden." };
+  }
+
+  const body = input.body.trim();
+  if (!body) {
+    return { ok: false, error: "Der Entwurf ist leer." };
+  }
+
+  const existingDraft = await getLatestMessageDraftForSubmission(
+    input.submissionId,
+    workspace.workspace_id,
+    "draft"
+  );
+
+  if (existingDraft) {
+    const updated = await updateMessageDraft({
+      draftId: existingDraft.id,
+      body,
+    });
+    if (!updated.ok) {
+      return {
+        ok: false,
+        error:
+          updated.error.includes("nicht verfügbar") || updated.error.includes("gespeichert")
+            ? "Antwortentwürfe sind aktuell nicht verfügbar."
+            : updated.error,
+      };
+    }
+    return { ok: true, draftId: existingDraft.id, updated: true, body };
+  }
+
+  const created = await createMessageDraft({
+    submissionId: input.submissionId,
+    body,
+    createdByKind: "ai",
+  });
+
+  if (!created.ok) {
+    return {
+      ok: false,
+      error:
+        created.error.includes("nicht verfügbar") || created.error.includes("gespeichert")
+          ? "Antwortentwürfe sind aktuell nicht verfügbar."
+          : created.error,
+    };
+  }
+
+  return { ok: true, draftId: created.draft.id, updated: false, body };
 }

@@ -2,159 +2,78 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Command, Mic, ChevronRight } from "lucide-react";
+import { Bot, Command, Mic, Send } from "lucide-react";
 
 import {
-  buildAssistQuickDraft,
-  type AssistQuickActionId,
-} from "@/lib/clinical/message-templates";
-import { PreparedWorkPreview } from "@/components/command-ai/prepared-work-preview";
-import { createCaseFromQuery } from "@/lib/create-case-return";
-import { persistMessageDraftFromCommand } from "@/app/(protected)/inbox/command-draft-actions";
-import { createRelayMessageFromCommandAction } from "@/app/(protected)/my-tasks/command-relay-message-actions";
-import {
-  createTaskFromCommand,
-  createTaskFromCommandRelay,
-} from "@/app/(protected)/inbox/command-task-actions";
-import { isRelayInternalMessageCommand } from "@/lib/command-ai/relay-message-intent";
+  applyCommandAiPatientDraft,
+  applyCommandAiRelayMessage,
+  applyCommandAiSendToPatient,
+  applyCommandAiStatus,
+  applyCommandAiTask,
+  getCommandAiGptStatus,
+  loadCommandAiChatHistory,
+  resolveCommandAiSession,
+  sendCommandAiChat,
+} from "@/app/(protected)/command-ai/chat-actions";
 import { stashCommandDraftForSubmission } from "@/lib/command-ai/draft-bridge";
-import { resolveCommandIntent } from "@/lib/command-ai/intent-resolver";
-import { isSummarizeOnlyCommand } from "@/lib/command-ai/reply-intent";
-import { isCommandTaskCommand } from "@/lib/command-ai/task-intent";
-import { prepareWorkFromIntent } from "@/lib/command-ai/preparation-engine";
-import { stashCommandTaskDraft } from "@/lib/command-ai/task-draft-bridge";
-import { mergeCommandWorkspaceHints } from "@/lib/command-ai/workspace-context";
-import { COMMAND_AI_NO_AUTO_SEND } from "@/lib/command-ai/safety-copy";
-import { COMMAND_AI_EXAMPLES } from "@/lib/product/workflow";
 import {
-  assistContextQuickActions,
-  detectAssistZone,
-} from "@/lib/clinical/assist-workspace-context";
+  COMMAND_AI_WELCOME_MESSAGE,
+  type CommandAiAssistantAction,
+  type CommandAiChatContext,
+  type CommandAiChatTurn,
+  type CommandAiNavigateTarget,
+  type CommandAiPracticeStatusAction,
+  type CommandAiUiMessage,
+  type CommandAiWorkspaceZone,
+} from "@/lib/command-ai/command-ai-chat-types";
+import {
+  loadLocalCommandAiSession,
+  saveLocalCommandAiSession,
+  streamPracticeCommandAi,
+} from "@/lib/command-ai/stream-chat-client";
+import { COMMAND_AI_NO_AUTO_SEND } from "@/lib/command-ai/safety-copy";
+import { detectAssistZone } from "@/lib/clinical/assist-workspace-context";
 
 import { clinicalCommandSheetWidthMd } from "@/lib/clinical-ui";
 import { cn } from "@/lib/utils";
 import { useAssistCaseOptional, useAssistStateOptional } from "./assist-shell";
 
-/** Navigation — nur Seiten öffnen, keine Serveraktion. */
-function suggestRoutes(text: string, pathname: string): { label: string; href: string }[] {
-  const t = text.toLowerCase();
-  const out: { label: string; href: string }[] = [];
-  if (/(neuer|neue)\s+fall|fall\s+anlegen|patient.*fall/.test(t)) {
-    out.push({
-      label: "Neuer Fall",
-      href: `/create-case?from=${createCaseFromQuery(pathname)}`,
-    });
-  }
-  if (/inbox|tracker|einsendung|posteingang/.test(t)) {
-    out.push({ label: "Posteingang", href: "/inbox" });
-  }
-  if (/relay|aufgabe|task|empfang/.test(t)) {
-    out.push({ label: "Relay", href: "/relay" });
-  }
-  if (/journal|artikel/.test(t)) {
-    out.push({ label: "Care Center", href: "/journal" });
-  }
-  if (/dashboard|atlas/.test(t)) {
-    out.push({ label: "Atlas", href: "/dashboard" });
-  }
-  if (/einstellung|profil|praxis|rolle|admin/.test(t)) {
-    out.push({ label: "Einstellungen", href: "/settings" });
-  }
-  return out.slice(0, 4);
-}
-
-function suggestInboxDeepLinks(
-  text: string,
-  submissionId: string | null
-): { label: string; href: string }[] {
-  if (!submissionId) return [];
-  const t = text.toLowerCase();
-  const base = `/inbox/${submissionId}`;
-  const out: { label: string; href: string }[] = [];
-  if (/(rückfrage|nachricht|korrespondenz|schreiben|entwurf)/.test(t)) {
-    out.push({ label: "Rückmeldung (Entwurf)", href: `${base}#tracker-korrespondenz` });
-  }
-  if (/(termin|einladen|einbestellen|link)/.test(t)) {
-    out.push({ label: "Terminlink", href: `${base}#tracker-termin` });
-  }
-  if (/(dringlich|einschätzung|empfehlung)/.test(t)) {
-    out.push({ label: "Einordnung & Schritte", href: `${base}#tracker-empfehlung` });
-  }
-  return out.slice(0, 3);
-}
-
-const INBOX_QUICK: { id: AssistQuickActionId; label: string }[] = [
-  { id: "invite_today", label: "Einladung heute (Entwurf)" },
-  { id: "pain_followup", label: "Rückfrage Schmerzen (Entwurf)" },
-  { id: "appointment_link_text", label: "Terminlink-Text" },
-  { id: "polish_placeholder", label: "Formulierung (Entwurf)" },
-];
-
-/** Sheet — schwebend, klinisch ruhig, iOS-nah. */
 const SHEET =
-  "flex max-h-[min(88dvh,920px)] flex-col overflow-hidden rounded-t-[20px] border border-black/[0.07] bg-white/[0.92] shadow-[0_-8px_40px_-12px_rgba(15,23,42,0.18),0_0_0_1px_rgba(255,255,255,0.6)_inset,0_24px_64px_-32px_rgba(43,111,232,0.12)] backdrop-blur-2xl backdrop-saturate-150 " +
-  "md:max-h-[min(82dvh,880px)] md:rounded-2xl md:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.22),0_0_0_1px_rgba(255,255,255,0.55)_inset,0_12px_40px_-20px_rgba(43,111,232,0.1)] " +
-  "dark:border-white/[0.08] dark:bg-[rgb(24_26_30/0.94)] dark:shadow-[0_24px_64px_-28px_rgba(0,0,0,0.55)]";
+  "flex max-h-[min(88dvh,920px)] flex-col overflow-hidden rounded-t-[20px] border border-[#E8ECF2] bg-white shadow-[0_-8px_40px_-12px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] " +
+  "md:max-h-[min(82dvh,880px)] md:rounded-2xl md:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.14)]";
 
-const HEADER_DIVIDER =
-  "border-b border-black/[0.05] dark:border-white/[0.06]";
+const HEADER_DIVIDER = "border-b border-[#EEF2F6]";
 
 const FAB =
-  "pointer-events-auto flex h-12 w-12 touch-manipulation items-center justify-center rounded-2xl border border-[rgba(255,255,255,0.22)] bg-[#1A4F9C] text-white shadow-[0_2px_8px_-2px_rgba(47,128,237,0.25),0_10px_28px_-12px_rgba(47,128,237,0.35),0_0_0_1px_rgba(255,255,255,0.12)_inset] " +
-  "transition-[transform,box-shadow,background-color,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none " +
-  "hover:border-[rgba(255,255,255,0.28)] hover:bg-[#2563EB] hover:shadow-[0_4px_14px_-4px_rgba(47,128,237,0.3),0_14px_36px_-16px_rgba(47,128,237,0.4)] " +
-  "active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(47,128,237,0.4)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent " +
-  "md:h-[52px] md:w-[52px] md:rounded-[14px] " +
-  "dark:border-white/[0.12] dark:bg-[#1A4F9C] dark:text-white dark:shadow-[0_12px_36px_-20px_rgba(47,128,237,0.45)]";
+  "pointer-events-auto flex h-[52px] w-[52px] touch-manipulation items-center justify-center rounded-full border border-white/80 bg-white text-[#1A4F9C] " +
+  "shadow-[0_0_0_1px_rgba(43,111,232,0.12),0_8px_24px_-8px_rgba(43,111,232,0.35),0_0_0_8px_rgba(43,111,232,0.08)] " +
+  "transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none " +
+  "hover:shadow-[0_0_0_1px_rgba(43,111,232,0.18),0_12px_32px_-10px_rgba(43,111,232,0.4),0_0_0_10px_rgba(43,111,232,0.1)] " +
+  "active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.35)] focus-visible:ring-offset-2 focus-visible:ring-offset-white";
 
 const ICON_WRAP =
-  "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.1)] " +
-  "dark:bg-[rgba(43,111,232,0.15)] dark:text-[#93C5FD] dark:ring-[rgba(59,130,246,0.2)]";
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#EEF6FF] text-[#2563EB] ring-1 ring-[rgba(43,111,232,0.1)]";
 
 const INPUT_AREA =
-  "w-full resize-none rounded-xl border border-black/[0.08] bg-white/[0.96] px-4 py-3.5 text-[15px] leading-relaxed text-[#0F172A] shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none placeholder:text-[#94A3B8] " +
-  "focus:border-[rgba(43,111,232,0.38)] focus:ring-[3px] focus:ring-[rgba(43,111,232,0.12)] " +
-  "dark:border-white/[0.1] dark:bg-[rgb(22_24_28/0.95)] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-[rgba(96,165,250,0.4)] dark:focus:ring-[rgba(59,130,246,0.15)]";
+  "w-full resize-none rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-[15px] leading-relaxed text-[#0F172A] shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] outline-none placeholder:text-[#94A3B8] " +
+  "focus:border-[rgba(43,111,232,0.38)] focus:ring-[3px] focus:ring-[rgba(43,111,232,0.12)]";
 
 const BTN_SECONDARY =
-  "inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border border-black/[0.08] bg-[#FAFBFF] px-4 text-[14px] font-medium text-[#334155] " +
-  "transition-colors duration-150 hover:border-[rgba(43,111,232,0.22)] hover:bg-[#F4F7FB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:opacity-50 " +
-  "dark:border-white/[0.1] dark:bg-[rgb(24_26_30/0.9)] dark:text-slate-200 dark:hover:bg-[rgb(30_32_38)]";
+  "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#FAFBFF] px-3.5 text-[13px] font-medium text-[#334155] " +
+  "transition-colors duration-150 hover:border-[rgba(43,111,232,0.22)] hover:bg-[#F4F7FB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] disabled:opacity-50";
 
-const HINT_ROW =
-  "flex min-h-11 w-full items-center justify-between rounded-xl border border-black/[0.06] bg-white/[0.72] px-4 py-2.5 text-left text-[14px] font-medium text-[#0F172A] " +
-  "transition-[border-color,background-color] duration-150 hover:border-[rgba(43,111,232,0.2)] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.18)] " +
-  "dark:border-white/[0.08] dark:bg-[rgb(22_24_28/0.75)] dark:text-slate-100 dark:hover:border-[rgba(96,165,250,0.25)]";
+const BTN_PRIMARY =
+  "inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-[#1A4F9C] px-3.5 text-[13px] font-semibold text-white transition hover:bg-[#2563EB] disabled:opacity-45";
 
-const CHIP =
-  "min-h-9 rounded-lg border border-[#E8ECF2] bg-white px-3 py-1.5 text-left text-[13px] font-medium text-[#475569] transition-colors duration-150 " +
-  "hover:border-[rgba(43,111,232,0.28)] hover:bg-[#FAFCFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(43,111,232,0.2)] " +
-  "dark:border-slate-600 dark:bg-[rgb(22_24_28)] dark:text-slate-200 dark:hover:border-[rgba(96,165,250,0.35)]";
+function newMessageId(): string {
+  return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
-function inboxCaseExtraDrafts(patientName: string, concernLine: string | null): { id: string; label: string; text: string }[] {
-  const name = patientName.trim() || "Patient";
-  return [
-    {
-      id: "case_summary",
-      label: "Interne Stichworte (Entwurf)",
-      text:
-        `Interne Kurzfassung (nicht zum Versand):\n\n` +
-        `Patient: ${name}\n` +
-        `Anliegen: ${concernLine?.trim() || "[kurz aus Einsendung]"}\n\n` +
-        `Kernpunkte:\n• \n• \n\nEinordnung / nächster Praxisschritt (intern):\n`,
-    },
-    {
-      id: "patient_contact",
-      label: "Kontakt-Entwurf",
-      text:
-        `Sehr geehrte/r ${name},\n\n` +
-        `[Inhalt — z. B. Termin, Rückfrage, Einladung]\n\n` +
-        `Mit freundlichen Grüßen\nIhr Praxisteam\n\n` +
-        `(Manuell prüfen und versenden.)`,
-    },
-  ];
+function toChatZone(zone: ReturnType<typeof detectAssistZone>): CommandAiWorkspaceZone {
+  if (zone === "default") return "other";
+  return zone;
 }
 
 function placeholderForZone(
@@ -162,22 +81,353 @@ function placeholderForZone(
   hasInboxCase: boolean
 ): string {
   if (hasInboxCase) {
-    return "Notiz, Navigation oder Entwurf — nichts wird automatisch versendet";
+    return "Frage stellen oder Antwortentwurf anfordern …";
   }
   switch (zone) {
     case "dashboard":
-      return "Befehl — z. B. Überblick, Aufgabe, neuer Fall …";
+      return "Was soll als Nächstes passieren?";
     case "relay":
-      return "Befehl — z. B. Delegation, Priorität …";
+      return "Aufgabe oder Nachricht formulieren …";
     case "journal":
-      return "Befehl — z. B. Zusammenfassung, Gliederung …";
+      return "Frage zu Praxiswissen …";
     case "settings":
-      return "Befehl — z. B. Einstellung, Rollen …";
+      return "Einstellung oder Rolle …";
     case "inbox":
-      return "Kurz eingeben — z. B. Triage, Terminvorbereitung (nur Hilfe, kein Versand) …";
+      return "Fall öffnen oder Frage stellen …";
     default:
-      return "Befehl — Tracker, Relay, Care Center …";
+      return "Nachricht an die Praxis-Assistenz …";
   }
+}
+
+function dispatchTrackerDraftUpdated(submissionId: string, body: string) {
+  if (typeof window === "undefined") return;
+  stashCommandDraftForSubmission({
+    submissionId,
+    body,
+    savedAt: new Date().toISOString(),
+  });
+  window.dispatchEvent(
+    new CustomEvent("yd-tracker-draft-updated", {
+      detail: { submissionId, body },
+    })
+  );
+  document.getElementById("tracker-kommunikation")?.scrollIntoView({
+    behavior: "smooth",
+    block: "nearest",
+  });
+}
+
+function navigateTargetHref(
+  target: CommandAiNavigateTarget,
+  submissionId: string | null
+): string {
+  switch (target) {
+    case "inbox_case":
+      return submissionId ? `/inbox/${submissionId}` : "/inbox";
+    case "inbox":
+      return "/inbox";
+    case "relay":
+      return "/relay";
+    case "relay_messages":
+      return "/relay?panel=messages";
+    case "journal":
+      return "/journal";
+    case "dashboard":
+      return "/dashboard";
+    case "settings":
+      return "/settings";
+    default:
+      return "/dashboard";
+  }
+}
+
+function actionLabel(action: CommandAiAssistantAction): string {
+  switch (action.type) {
+    case "set_status":
+      return `Status: ${action.status ?? "ändern"}`;
+    case "navigate":
+      return "Öffnen";
+    case "relay_message":
+      return "Relay-Nachricht senden";
+    case "open_draft":
+      return "Entwurf speichern";
+    case "send_patient":
+      return "An Patient:in senden";
+    default:
+      return "Ausführen";
+  }
+}
+
+function ChatBubble({
+  message,
+  submissionId,
+  onApplyDraft,
+  onApplyTask,
+  onApplyRelay,
+  onApplyStatus,
+  onApplySend,
+  onNavigate,
+  busyAction,
+  taskRelayHref,
+  actionRelayHref,
+}: {
+  message: CommandAiUiMessage;
+  submissionId: string | null;
+  onApplyDraft?: () => void;
+  onApplyTask?: () => void;
+  onApplyRelay?: () => void;
+  onApplyStatus?: (status: string) => void;
+  onApplySend?: () => void;
+  onNavigate?: (href: string) => void;
+  busyAction: boolean;
+  taskRelayHref: string | null;
+  actionRelayHref: string | null;
+}) {
+  const isUser = message.role === "user";
+  const isPending = message.pending;
+
+  return (
+    <div
+      className={cn(
+        "yd-command-chat__row",
+        isUser ? "yd-command-chat__row--user" : "yd-command-chat__row--assistant"
+      )}
+    >
+      {!isUser ? (
+        <div className="yd-command-chat__avatar" aria-hidden>
+          <Bot className="h-4 w-4" strokeWidth={2} />
+        </div>
+      ) : null}
+      <div
+        className={cn(
+          "yd-command-chat__bubble",
+          isUser ? "yd-command-chat__bubble--user" : "yd-command-chat__bubble--assistant"
+        )}
+      >
+        {isPending ? (
+          <span className="yd-command-chat__typing" aria-live="polite">
+            <span />
+            <span />
+            <span />
+          </span>
+        ) : (
+          <p className="whitespace-pre-wrap text-[14px] leading-relaxed">
+            {message.content}
+            {message.streaming ? (
+              <span className="yd-command-chat__cursor" aria-hidden>
+                ▍
+              </span>
+            ) : null}
+          </p>
+        )}
+
+        {!isPending && message.journalLinks && message.journalLinks.length > 0 ? (
+          <div className="yd-command-chat__draft">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">
+              Praxiswissen
+            </p>
+            <ul className="mt-1 space-y-1">
+              {message.journalLinks.map((link) => (
+                <li key={link.title}>
+                  {link.url ? (
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] font-medium text-[#2563EB] underline-offset-2 hover:underline"
+                    >
+                      {link.title}
+                    </a>
+                  ) : (
+                    <span className="text-[13px] text-[#334155]">{link.title}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {!isPending && message.relayMessage ? (
+          <div className="yd-command-chat__draft">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">
+              Interne Nachricht (Relay)
+            </p>
+            <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-[#334155]">
+              {message.relayMessage}
+            </p>
+            {onApplyRelay ? (
+              <button
+                type="button"
+                onClick={onApplyRelay}
+                disabled={busyAction}
+                className={cn(BTN_PRIMARY, "mt-2.5 w-full")}
+              >
+                {busyAction ? "Wird gesendet …" : "An Team senden"}
+              </button>
+            ) : null}
+            {actionRelayHref ? (
+              <Link
+                href={actionRelayHref}
+                className="mt-2 block text-center text-[12px] font-medium text-[#2563EB] underline-offset-2 hover:underline"
+              >
+                In Relay öffnen
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!isPending && message.patientDraft ? (
+          <div className="yd-command-chat__draft">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">
+              Patientenantwort (Entwurf)
+            </p>
+            <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-[#334155]">
+              {message.patientDraft}
+            </p>
+            {onApplyDraft ? (
+              <button
+                type="button"
+                onClick={onApplyDraft}
+                disabled={busyAction}
+                className={cn(BTN_PRIMARY, "mt-2.5 w-full")}
+              >
+                {busyAction ? "Wird übernommen …" : "Entwurf übernehmen"}
+              </button>
+            ) : null}
+            {onApplySend && submissionId ? (
+              <button
+                type="button"
+                onClick={onApplySend}
+                disabled={busyAction}
+                className={cn(BTN_SECONDARY, "mt-2 w-full justify-center")}
+              >
+                {busyAction ? "…" : "Freigeben & senden"}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!isPending && message.taskTitle ? (
+          <div className="yd-command-chat__draft">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[#64748B]">
+              Team-Aufgabe
+            </p>
+            <p className="mt-1 text-[13px] font-semibold text-[#0F172A]">{message.taskTitle}</p>
+            {message.taskNotes ? (
+              <p className="mt-1 whitespace-pre-wrap text-[13px] text-[#475569]">
+                {message.taskNotes}
+              </p>
+            ) : null}
+            {onApplyTask ? (
+              <button
+                type="button"
+                onClick={onApplyTask}
+                disabled={busyAction}
+                className={cn(BTN_PRIMARY, "mt-2.5 w-full")}
+              >
+                {busyAction ? "Wird erstellt …" : "Aufgabe erstellen"}
+              </button>
+            ) : null}
+            {taskRelayHref ? (
+              <Link
+                href={taskRelayHref}
+                className="mt-2 block text-center text-[12px] font-medium text-[#2563EB] underline-offset-2 hover:underline"
+              >
+                In Relay öffnen
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!isPending && message.actions && message.actions.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {message.actions.map((action, idx) => {
+              if (action.type === "navigate" && action.navigate && onNavigate) {
+                return (
+                  <button
+                    key={`${action.type}-${idx}`}
+                    type="button"
+                    disabled={busyAction}
+                    onClick={() =>
+                      onNavigate(navigateTargetHref(action.navigate!, submissionId))
+                    }
+                    className={BTN_SECONDARY}
+                  >
+                    {actionLabel(action)}
+                  </button>
+                );
+              }
+              if (action.type === "set_status" && action.status && onApplyStatus) {
+                return (
+                  <button
+                    key={`${action.type}-${idx}`}
+                    type="button"
+                    disabled={busyAction}
+                    onClick={() => onApplyStatus(action.status!)}
+                    className={BTN_SECONDARY}
+                  >
+                    {actionLabel(action)}
+                  </button>
+                );
+              }
+              if (action.type === "relay_message" && onApplyRelay) {
+                return (
+                  <button
+                    key={`${action.type}-${idx}`}
+                    type="button"
+                    disabled={busyAction}
+                    onClick={onApplyRelay}
+                    className={BTN_SECONDARY}
+                  >
+                    {actionLabel(action)}
+                  </button>
+                );
+              }
+              if (action.type === "open_draft" && onApplyDraft) {
+                return (
+                  <button
+                    key={`${action.type}-${idx}`}
+                    type="button"
+                    disabled={busyAction}
+                    onClick={onApplyDraft}
+                    className={BTN_SECONDARY}
+                  >
+                    {actionLabel(action)}
+                  </button>
+                );
+              }
+              if (action.type === "send_patient" && onApplySend) {
+                return (
+                  <button
+                    key={`${action.type}-${idx}`}
+                    type="button"
+                    disabled={busyAction}
+                    onClick={onApplySend}
+                    className={BTN_SECONDARY}
+                  >
+                    {actionLabel(action)}
+                  </button>
+                );
+              }
+              return null;
+            })}
+          </div>
+        ) : null}
+
+        {!isPending && message.suggestedNavigate && onNavigate ? (
+          <button
+            type="button"
+            className={cn(BTN_SECONDARY, "mt-2")}
+            onClick={() =>
+              onNavigate(navigateTargetHref(message.suggestedNavigate!, submissionId))
+            }
+          >
+            Weiter zu {message.suggestedNavigate}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 export function CommandAssist() {
@@ -190,267 +440,449 @@ export function CommandAssist() {
 
   const open = assistState?.commandOpen ?? false;
   const setOpen = assistCtx?.setCommandOpen ?? (() => {});
-  const preparedWork = assistState?.preparedWork ?? null;
-  const setPreparedWork = assistCtx?.setPreparedWork ?? (() => {});
 
   const [text, setText] = useState("");
-  const [prepareHint, setPrepareHint] = useState<string | null>(null);
-  const [prepareHintTone, setPrepareHintTone] = useState<"neutral" | "success" | "error">("neutral");
-  const [persistBusy, setPersistBusy] = useState(false);
+  const [messages, setMessages] = useState<CommandAiUiMessage[]>([]);
+  const [chatBusy, setChatBusy] = useState(false);
+  const [actionBusy, setActionBusy] = useState(false);
+  const [statusHint, setStatusHint] = useState<string | null>(null);
+  const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
   const [taskRelayHref, setTaskRelayHref] = useState<string | null>(null);
+  const [actionRelayHref, setActionRelayHref] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [gptEnabled, setGptEnabled] = useState<boolean | null>(null);
+  const [persistenceEnabled, setPersistenceEnabled] = useState(false);
   const [listening, setListening] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+
   const recRef = useRef<{ stop: () => void } | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const fabRef = useRef<HTMLButtonElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const textRef = useRef("");
 
   const hidden = pathname.startsWith("/login");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setPortalMounted(true);
   }, []);
 
+  useEffect(() => {
+    textRef.current = text;
+  }, [text]);
+
+  useEffect(() => {
+    void getCommandAiGptStatus().then((s) => {
+      setGptEnabled(s.enabled);
+      setPersistenceEnabled(s.persistence);
+    });
+  }, []);
+
+  const submissionId = inboxCase?.submissionId ?? null;
+
+  useEffect(() => {
+    if (!open || historyLoaded) return;
+
+    const local = loadLocalCommandAiSession(submissionId);
+    if (local.sessionId) setSessionId(local.sessionId);
+
+    const load = async () => {
+      let sid = local.sessionId;
+      if (!sid) {
+        sid = await resolveCommandAiSession({
+          submissionId,
+          existingSessionId: null,
+        });
+        if (sid) setSessionId(sid);
+      }
+
+      if (sid && persistenceEnabled) {
+        const { messages: persisted } = await loadCommandAiChatHistory({ sessionId: sid });
+        if (persisted.length > 0) {
+          setMessages(
+            persisted.map((m) => ({
+              id: m.id,
+              role: m.role,
+              content: m.content,
+              patientDraft: m.payload?.patientDraft,
+              taskTitle: m.payload?.taskTitle,
+              taskNotes: m.payload?.taskNotes,
+              relayMessage: m.payload?.relayMessage,
+              journalLinks: m.payload?.journalLinks,
+              actions: m.payload?.actions,
+              suggestedNavigate: m.payload?.suggestedNavigate,
+            }))
+          );
+          setHistoryLoaded(true);
+          return;
+        }
+      }
+
+      if (local.messages.length > 0) {
+        setMessages(
+          local.messages.map((m) => ({
+            id: newMessageId(),
+            role: m.role,
+            content: m.content,
+          }))
+        );
+      } else {
+        setMessages([
+          {
+            id: newMessageId(),
+            role: "assistant",
+            content: COMMAND_AI_WELCOME_MESSAGE,
+          },
+        ]);
+      }
+      setHistoryLoaded(true);
+    };
+
+    void load();
+  }, [open, historyLoaded, submissionId, persistenceEnabled]);
+
   const zone = detectAssistZone(pathname);
 
-  const draftParams = useMemo(
-    () =>
-      inboxCase
-        ? {
-            patientName: inboxCase.patientName || "Patient",
-            urgency: (inboxCase.urgency as "today" | "this_week" | "not_urgent") || null,
-            practicePhone: inboxCase.practicePhone || "",
-            appointmentUrl: inboxCase.appointmentUrl,
-          }
-        : null,
-    [inboxCase]
-  );
-
-  const caseExtras = useMemo(() => {
-    if (!inboxCase) return [];
-    return inboxCaseExtraDrafts(inboxCase.patientName || "Patient", inboxCase.concernLine);
-  }, [inboxCase]);
-
-  const applyQuickDraft = useCallback(
-    (id: AssistQuickActionId) => {
-      if (!draftParams) return;
-      setText(buildAssistQuickDraft(id, draftParams));
-      setPreparedWork(null);
-    },
-    [draftParams, setPreparedWork]
-  );
-
-  const mergedHints = useMemo(() => {
-    const active =
-      inboxCase != null
+  const chatContext = useMemo((): CommandAiChatContext => {
+    return {
+      zone: toChatZone(zone),
+      activeCase: inboxCase
         ? {
             submissionId: inboxCase.submissionId,
             patientName: inboxCase.patientName,
             concernLine: inboxCase.concernLine,
+            urgency: inboxCase.urgency ?? null,
             practicePhone: inboxCase.practicePhone,
             appointmentUrl: inboxCase.appointmentUrl,
           }
-        : null;
-    return mergeCommandWorkspaceHints(assistState?.workspaceHints ?? null, active);
-  }, [assistState?.workspaceHints, inboxCase]);
+        : null,
+    };
+  }, [zone, inboxCase]);
 
-  const runPrepare = useCallback(async () => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, []);
 
-    const activeCase = inboxCase
-      ? {
-          submissionId: inboxCase.submissionId,
-          patientName: inboxCase.patientName,
-          concernLine: inboxCase.concernLine,
-        }
-      : null;
+  useEffect(() => {
+    if (open) scrollToBottom();
+  }, [open, messages, scrollToBottom]);
 
-    const intent = resolveCommandIntent(trimmed, mergedHints, activeCase);
-
-    if (intent.kind === "patient_message" && !isSummarizeOnlyCommand(trimmed)) {
-      if (!inboxCase?.submissionId) {
-        setPreparedWork(null);
-        setTaskRelayHref(null);
-        setPrepareHintTone("error");
-        setPrepareHint("Bitte öffnen Sie zuerst einen Patientenfall.");
-        return;
-      }
-
-      setPersistBusy(true);
-      setPrepareHint(null);
-      setTaskRelayHref(null);
-      try {
-        const persisted = await persistMessageDraftFromCommand({
-          submissionId: inboxCase.submissionId,
-          rawText: trimmed,
-        });
-        if (persisted.ok) {
-          setPreparedWork(null);
-          setPrepareHintTone("success");
-          setPrepareHint("Antwortentwurf vorbereitet.");
-          router.refresh();
-          return;
-        }
-        setPrepareHintTone("error");
-        setPrepareHint(persisted.error);
-        return;
-      } finally {
-        setPersistBusy(false);
-      }
+  useEffect(() => {
+    if (!open) {
+      setHistoryLoaded(false);
     }
+  }, [submissionId, open]);
 
-    if (intent.kind === "relay_message" || isRelayInternalMessageCommand(trimmed)) {
-      setPersistBusy(true);
-      setPrepareHint(null);
-      setTaskRelayHref(null);
-      try {
-        const sent = await createRelayMessageFromCommandAction({
-          rawText: trimmed,
-          submissionId: inboxCase?.submissionId ?? null,
-        });
-        if (sent.ok) {
-          setPreparedWork(null);
-          setPrepareHintTone("success");
-          setPrepareHint(sent.message);
-          setTaskRelayHref(sent.relayHref);
-          router.refresh();
-          return;
-        }
-        setPrepareHintTone("error");
-        setPrepareHint(sent.error);
-        return;
-      } finally {
-        setPersistBusy(false);
+  useEffect(() => {
+    if (messages.length === 0) return;
+    saveLocalCommandAiSession(
+      submissionId,
+      {
+        sessionId,
+        messages: messages
+          .filter((m) => !m.pending && m.content.trim())
+          .slice(-40)
+          .map((m) => ({ role: m.role, content: m.content })),
       }
-    }
-
-    if (intent.kind === "create_task" || isCommandTaskCommand(trimmed)) {
-      setPersistBusy(true);
-      setPrepareHint(null);
-      setTaskRelayHref(null);
-      try {
-        const created = inboxCase?.submissionId
-          ? await createTaskFromCommand({
-              submissionId: inboxCase.submissionId,
-              rawText: trimmed,
-            })
-          : await createTaskFromCommandRelay({ rawText: trimmed });
-
-        if (created.ok) {
-          setPreparedWork(null);
-          setPrepareHintTone("success");
-          setPrepareHint(created.message);
-          setTaskRelayHref(created.relayHref);
-          router.refresh();
-          return;
-        }
-        setPrepareHintTone("error");
-        setPrepareHint(created.error);
-        return;
-      } finally {
-        setPersistBusy(false);
-      }
-    }
-
-    const work = prepareWorkFromIntent(intent, mergedHints);
-    if (work) {
-      setPrepareHint(null);
-      setPrepareHintTone("neutral");
-      setPreparedWork(work);
-      return;
-    }
-    setPreparedWork(null);
-    setPrepareHintTone("error");
-    setTaskRelayHref(null);
-    setPrepareHint(
-      intent.kind === "patient_message"
-        ? "Ich konnte daraus noch keine passende Aktion vorbereiten."
-        : isCommandTaskCommand(trimmed)
-          ? "Ich konnte daraus noch keine Aufgabe erstellen."
-          : "Konnte nicht vorbereitet werden. Bitte Patientennamen nennen oder einen Tracker-Fall öffnen."
     );
-  }, [text, mergedHints, inboxCase, router, setPreparedWork, zone]);
+  }, [messages, sessionId, submissionId]);
 
-  const handleApprovePrepared = useCallback(async () => {
-    if (!preparedWork) return;
+  const historyForApi = useCallback((msgs: CommandAiUiMessage[]): CommandAiChatTurn[] => {
+    return msgs
+      .filter((m) => !m.pending && m.content.trim())
+      .filter((m) => !(m.role === "assistant" && m.content === COMMAND_AI_WELCOME_MESSAGE))
+      .map((m) => ({ role: m.role, content: m.content }));
+  }, []);
 
-    if (
-      preparedWork.submissionId &&
-      (preparedWork.intent.kind === "create_task" || isCommandTaskCommand(preparedWork.intent.rawText))
-    ) {
-      setPersistBusy(true);
+  const sendMessage = useCallback(
+    async (raw?: string) => {
+      const trimmed = (raw ?? text).trim();
+      if (!trimmed || chatBusy) return;
+
+      setText("");
+      setStatusHint(null);
+      setTaskRelayHref(null);
+      setActionRelayHref(null);
+      setStatusTone("neutral");
+
+      const userMsg: CommandAiUiMessage = {
+        id: newMessageId(),
+        role: "user",
+        content: trimmed,
+      };
+      const pendingId = newMessageId();
+      const pendingMsg: CommandAiUiMessage = {
+        id: pendingId,
+        role: "assistant",
+        content: "",
+        pending: true,
+        streaming: true,
+      };
+
+      const nextMessages = [...messages, userMsg, pendingMsg];
+      setMessages(nextMessages);
+      setChatBusy(true);
+
+      const history = historyForApi(messages).concat({ role: "user", content: trimmed });
+
+      const finalizeAssistant = (assistant: {
+        reply: string;
+        patientDraft?: string | null;
+        taskTitle?: string | null;
+        taskNotes?: string | null;
+        relayMessage?: string | null;
+        journalLinks?: { title: string; url: string | null }[];
+        actions?: CommandAiAssistantAction[];
+        suggestedNavigate?: CommandAiNavigateTarget | null;
+      }) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === pendingId
+              ? {
+                  id: m.id,
+                  role: "assistant" as const,
+                  content: assistant.reply,
+                  patientDraft: assistant.patientDraft,
+                  taskTitle: assistant.taskTitle,
+                  taskNotes: assistant.taskNotes,
+                  relayMessage: assistant.relayMessage,
+                  journalLinks: assistant.journalLinks,
+                  actions: assistant.actions,
+                  suggestedNavigate: assistant.suggestedNavigate,
+                  pending: false,
+                  streaming: false,
+                }
+              : m
+          )
+        );
+      };
+
       try {
-        const created = await createTaskFromCommand({
-          submissionId: preparedWork.submissionId,
-          rawText: preparedWork.intent.rawText,
+        if (gptEnabled) {
+          const streamed = await streamPracticeCommandAi({
+            history,
+            userMessage: trimmed,
+            context: chatContext,
+            sessionId,
+            handlers: {
+              onSession: (id) => setSessionId(id),
+              onDelta: (piece) => {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === pendingId
+                      ? {
+                          ...m,
+                          pending: false,
+                          content: `${m.content}${piece}`,
+                          streaming: true,
+                        }
+                      : m
+                  )
+                );
+              },
+              onDone: (assistant) => finalizeAssistant(assistant),
+              onError: (msg) => {
+                setStatusTone("error");
+                setStatusHint(msg);
+              },
+            },
+          });
+
+          if (streamed) return;
+        }
+
+        const result = await sendCommandAiChat({
+          history,
+          userMessage: trimmed,
+          context: chatContext,
+          sessionId,
         });
-        if (!created.ok) {
-          setPrepareHintTone("error");
-          setPrepareHint(created.error);
+
+        if (!result.ok) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === pendingId
+                ? {
+                    ...m,
+                    pending: false,
+                    streaming: false,
+                    content: result.error,
+                  }
+                : m
+            )
+          );
+          setStatusTone("error");
+          setStatusHint(result.error);
           return;
         }
-        setPreparedWork(null);
-        setOpen(false);
-        router.refresh();
-        router.push(created.relayHref);
+
+        if (result.sessionId) setSessionId(result.sessionId);
+        finalizeAssistant(result.assistant);
+
+        if (!result.usedGpt && gptEnabled === false) {
+          setStatusTone("neutral");
+          setStatusHint("Regel-Assistent aktiv — OPENAI_API_KEY für KI-Chat setzen.");
+        }
+      } finally {
+        setChatBusy(false);
+      }
+    },
+    [text, chatBusy, messages, historyForApi, chatContext, gptEnabled, sessionId]
+  );
+
+  const handleApplyDraft = useCallback(
+    async (message: CommandAiUiMessage) => {
+      if (!message.patientDraft?.trim()) return;
+      if (!inboxCase?.submissionId) {
+        setStatusTone("error");
+        setStatusHint("Bitte öffnen Sie zuerst einen Patientenfall.");
         return;
-      } finally {
-        setPersistBusy(false);
       }
-    } else if (
-      preparedWork.messageDraft &&
-      preparedWork.submissionId &&
-      preparedWork.intent.kind === "patient_message"
-    ) {
-      setPersistBusy(true);
+
+      setActionBusy(true);
+      setStatusHint(null);
       try {
-        const persisted = await persistMessageDraftFromCommand({
-          submissionId: preparedWork.submissionId,
-          rawText: preparedWork.intent.rawText,
+        const result = await applyCommandAiPatientDraft({
+          submissionId: inboxCase.submissionId,
+          body: message.patientDraft,
         });
-        if (!persisted.ok) {
-          setPrepareHintTone("error");
-          setPrepareHint(persisted.error);
+        if (!result.ok) {
+          setStatusTone("error");
+          setStatusHint(result.error);
           return;
         }
+        dispatchTrackerDraftUpdated(inboxCase.submissionId, result.body);
+        setStatusTone("success");
+        setStatusHint("Entwurf übernommen — bitte in der Kommunikation prüfen.");
         router.refresh();
       } finally {
-        setPersistBusy(false);
+        setActionBusy(false);
       }
-    } else if (preparedWork.messageDraft && preparedWork.submissionId) {
-      stashCommandDraftForSubmission({
-        submissionId: preparedWork.submissionId,
-        body: preparedWork.messageDraft,
-        savedAt: new Date().toISOString(),
-      });
-    }
-    if (preparedWork.relayTaskDraft) {
-      stashCommandTaskDraft({
-        title: preparedWork.relayTaskDraft.title,
-        notes: preparedWork.relayTaskDraft.notes,
-        dueDate: preparedWork.relayTaskDraft.dueDate,
-        assigneeHint: preparedWork.relayTaskDraft.assigneeHint,
-        savedAt: new Date().toISOString(),
-      });
-      setPreparedWork(null);
+    },
+    [inboxCase, router]
+  );
+
+  const handleApplyTask = useCallback(
+    async (message: CommandAiUiMessage) => {
+      if (!message.taskTitle?.trim()) return;
+
+      setActionBusy(true);
+      setStatusHint(null);
+      setTaskRelayHref(null);
+      try {
+        const result = await applyCommandAiTask({
+          submissionId: inboxCase?.submissionId ?? null,
+          taskTitle: message.taskTitle,
+          taskNotes: message.taskNotes ?? null,
+        });
+        if (!result.ok) {
+          setStatusTone("error");
+          setStatusHint(result.error);
+          return;
+        }
+        setStatusTone("success");
+        setStatusHint(result.message);
+        setTaskRelayHref(result.relayHref);
+        router.refresh();
+      } finally {
+        setActionBusy(false);
+      }
+    },
+    [inboxCase, router]
+  );
+
+  const handleApplyRelay = useCallback(
+    async (message: CommandAiUiMessage) => {
+      const body = message.relayMessage?.trim();
+      if (!body) return;
+
+      setActionBusy(true);
+      setStatusHint(null);
+      setActionRelayHref(null);
+      try {
+        const result = await applyCommandAiRelayMessage({
+          submissionId: inboxCase?.submissionId ?? null,
+          body,
+        });
+        if (!result.ok) {
+          setStatusTone("error");
+          setStatusHint(result.error);
+          return;
+        }
+        setStatusTone("success");
+        setStatusHint(result.message);
+        setActionRelayHref(result.relayHref);
+        router.refresh();
+      } finally {
+        setActionBusy(false);
+      }
+    },
+    [inboxCase, router]
+  );
+
+  const handleApplyStatus = useCallback(
+    async (status: string) => {
+      if (!inboxCase?.submissionId) {
+        setStatusTone("error");
+        setStatusHint("Bitte öffnen Sie zuerst einen Fall.");
+        return;
+      }
+
+      setActionBusy(true);
+      try {
+        const result = await applyCommandAiStatus({
+          submissionId: inboxCase.submissionId,
+          status: status as CommandAiPracticeStatusAction,
+        });
+        if (!result.ok) {
+          setStatusTone("error");
+          setStatusHint(result.error);
+          return;
+        }
+        setStatusTone("success");
+        setStatusHint(result.message);
+        router.refresh();
+      } finally {
+        setActionBusy(false);
+      }
+    },
+    [inboxCase, router]
+  );
+
+  const handleApplySend = useCallback(
+    async (message: CommandAiUiMessage) => {
+      if (!message.patientDraft?.trim() || !inboxCase?.submissionId) return;
+
+      setActionBusy(true);
+      try {
+        const result = await applyCommandAiSendToPatient({
+          submissionId: inboxCase.submissionId,
+          body: message.patientDraft,
+          messageKind: "reply",
+        });
+        if (!result.ok) {
+          setStatusTone("error");
+          setStatusHint(result.error);
+          return;
+        }
+        setStatusTone("success");
+        setStatusHint(result.message);
+        router.refresh();
+      } finally {
+        setActionBusy(false);
+      }
+    },
+    [inboxCase, router]
+  );
+
+  const handleNavigate = useCallback(
+    (href: string) => {
       setOpen(false);
-      router.refresh();
-      return;
-    }
-    const messageHref = preparedWork.actions.find(
-      (a) => a.enabled && a.kind === "send_message" && a.href
-    )?.href;
-    const relayHref = preparedWork.actions.find(
-      (a) => a.enabled && (a.kind === "create_task" || a.kind === "create_reminder") && a.href
-    )?.href;
-    const href =
-      messageHref ??
-      relayHref ??
-      preparedWork.actions.find((a) => a.enabled && a.href)?.href;
-    setPreparedWork(null);
-    setOpen(false);
-    if (href) router.push(href);
-  }, [preparedWork, router, setOpen, setPreparedWork]);
+      router.push(href);
+    },
+    [router, setOpen]
+  );
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -463,11 +895,6 @@ export function CommandAssist() {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, setOpen]);
-
-  const contextQuick = useMemo(() => {
-    if (inboxCase && draftParams) return [];
-    return assistContextQuickActions(zone);
-  }, [inboxCase, draftParams, zone]);
 
   const startDictation = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -503,12 +930,18 @@ export function CommandAssist() {
       const chunk = ev.results[0]?.[0]?.transcript;
       if (chunk) setText((prev) => (prev ? `${prev.trim()} ${chunk}` : chunk));
     };
-    r.onend = () => setListening(false);
+    r.onend = () => {
+      setListening(false);
+      window.setTimeout(() => {
+        const t = textRef.current.trim();
+        if (t) void sendMessage(t);
+      }, 120);
+    };
     r.onerror = () => setListening(false);
     recRef.current = r;
     setListening(true);
     r.start();
-  }, []);
+  }, [sendMessage]);
 
   useEffect(() => {
     return () => {
@@ -520,7 +953,6 @@ export function CommandAssist() {
     };
   }, []);
 
-  /** iOS-/SaaS-like dismiss: außerhalb tippen, Scroll im Hintergrund, Escape. */
   useEffect(() => {
     if (!open) return;
 
@@ -539,6 +971,7 @@ export function CommandAssist() {
     };
 
     const onScrollCapture = (e: Event) => {
+      if (typeof window !== "undefined" && window.innerWidth < 768) return;
       const t = e.target;
       if (t === document || t === document.documentElement) {
         setOpen(false);
@@ -561,216 +994,162 @@ export function CommandAssist() {
       document.removeEventListener("scroll", onScrollCapture, true);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
-
-  const routeHints = suggestRoutes(text, pathname);
-  const deepHints = suggestInboxDeepLinks(text, inboxCase?.submissionId ?? null);
-  const hints = [...deepHints, ...routeHints].slice(0, 5);
+  }, [open, setOpen]);
 
   const sheetBody = (
     <>
-      <div className={`shrink-0 px-5 pb-3 pt-2 md:px-6 md:pb-4 md:pt-5 ${HEADER_DIVIDER}`}>
-        <div className="flex justify-center pb-2 md:hidden" aria-hidden>
-          <span className="h-1 w-9 rounded-full bg-[#E2E8F0] dark:bg-slate-600" />
-        </div>
-        <div className="flex items-start gap-3">
+      <div className={`yd-command-sheet__head shrink-0 ${HEADER_DIVIDER}`}>
+        <span className="yd-command-sheet__handle md:hidden" aria-hidden />
+        <div className="yd-command-sheet__title-row">
           <div className={ICON_WRAP} aria-hidden>
             <Command className="h-4 w-4" strokeWidth={2} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <p className="text-[15px] font-semibold tracking-tight text-[#0F172A] dark:text-slate-100">
-                Command
-              </p>
-              <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[#94A3B8] dark:text-slate-500">
-                Praxis
-              </span>
-              <kbd className="hidden rounded-md border border-black/[0.08] bg-white/80 px-1.5 py-0.5 text-[10px] font-medium text-[#64748B] sm:inline dark:border-white/[0.1] dark:bg-[rgb(22_24_28/0.8)]">
-                ⌘K
-              </kbd>
-            </div>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-[#64748B] dark:text-slate-400">
-              Absicht eingeben — Assistenz bereitet Entwürfe und nächste Schritte vor.{" "}
-              <span className="font-medium text-[#475569] dark:text-slate-300">
-                {COMMAND_AI_NO_AUTO_SEND}
-              </span>
+            <p className="text-[15px] font-semibold tracking-tight text-[#0F172A]">
+              Praxis-Assistenz
+            </p>
+            <p className="truncate text-[12px] text-[#64748B]">
+              {inboxCase
+                ? inboxCase.patientName || "Patient"
+                : gptEnabled
+                  ? "KI-Assistent"
+                  : "Assistenz"}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 [-webkit-overflow-scrolling:touch] sm:px-6 sm:py-5">
-        <div className="space-y-4">
-          {inboxCase && draftParams ? (
-            <div className="rounded-xl border border-[rgba(43,111,232,0.12)] bg-[#F4F7FB] px-3.5 py-3.5 dark:border-[rgba(59,130,246,0.2)] dark:bg-[rgba(43,111,232,0.08)]">
-              <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Aktueller Fall</p>
-              <p className="mt-1 truncate text-[15px] font-semibold text-[#0F172A] dark:text-slate-100">
-                {inboxCase.patientName || "Patient"}
-              </p>
-              {inboxCase.concernLine ? (
-                <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-[#64748B] dark:text-slate-400">
-                  {inboxCase.concernLine}
-                </p>
-              ) : null}
-              <div className="mt-3 flex flex-wrap gap-2">
-                {INBOX_QUICK.map((q) => (
-                  <button
-                    key={q.id}
-                    type="button"
-                    onClick={() => applyQuickDraft(q.id)}
-                    className={CHIP}
-                  >
-                    {q.label}
-                  </button>
-                ))}
-                {caseExtras.map((q) => (
-                  <button
-                    key={q.id}
-                    type="button"
-                    onClick={() => setText(q.text)}
-                    className={CHIP}
-                  >
-                    {q.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {preparedWork ? (
-            <PreparedWorkPreview
-              work={preparedWork}
-              onApprove={() => {
-                void handleApprovePrepared();
+      <div
+        className="yd-command-sheet__body yd-command-chat min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 [-webkit-overflow-scrolling:touch] sm:px-4"
+        aria-live="polite"
+      >
+        <div className="space-y-3">
+          {messages.map((message) => (
+            <ChatBubble
+              key={message.id}
+              message={message}
+              submissionId={submissionId}
+              busyAction={actionBusy}
+              taskRelayHref={
+                message.taskTitle && taskRelayHref && statusTone === "success"
+                  ? taskRelayHref
+                  : null
+              }
+              actionRelayHref={
+                message.relayMessage && actionRelayHref && statusTone === "success"
+                  ? actionRelayHref
+                  : null
+              }
+              onNavigate={handleNavigate}
+              onApplyStatus={(status) => {
+                void handleApplyStatus(status);
               }}
-              onDismiss={() => setPreparedWork(null)}
-              busy={persistBusy}
+              onApplyDraft={
+                message.patientDraft
+                  ? () => {
+                      void handleApplyDraft(message);
+                    }
+                  : undefined
+              }
+              onApplySend={
+                message.patientDraft && submissionId
+                  ? () => {
+                      void handleApplySend(message);
+                    }
+                  : undefined
+              }
+              onApplyRelay={
+                message.relayMessage
+                  ? () => {
+                      void handleApplyRelay(message);
+                    }
+                  : undefined
+              }
+              onApplyTask={
+                message.taskTitle
+                  ? () => {
+                      void handleApplyTask(message);
+                    }
+                  : undefined
+              }
             />
-          ) : null}
+          ))}
+          <div ref={messagesEndRef} aria-hidden />
+        </div>
+      </div>
 
-          {!preparedWork && !inboxCase && contextQuick.length > 0 ? (
-            <div className="rounded-xl border border-black/[0.06] bg-[#FAFBFF] px-3.5 py-3.5 dark:border-white/[0.08] dark:bg-[rgba(43,111,232,0.06)]">
-              <p className="text-[12px] font-medium text-[#94A3B8] dark:text-slate-500">Entwurfsbausteine</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {contextQuick.map((q) => (
-                  <button
-                    key={q.id}
-                    type="button"
-                    onClick={() => setText(q.template)}
-                    className={CHIP}
-                  >
-                    {q.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
+      <div className="yd-command-chat__composer shrink-0 border-t border-[#EEF2F6] px-3 py-3 sm:px-4">
+        <div className="flex items-end gap-2">
           <textarea
             value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              if (preparedWork) setPreparedWork(null);
-              if (prepareHint) {
-                setPrepareHint(null);
-                setPrepareHintTone("neutral");
-                setTaskRelayHref(null);
-              }
-            }}
+            onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
-              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+              if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                runPrepare();
+                void sendMessage();
               }
             }}
-            rows={5}
-            placeholder={placeholderForZone(zone, Boolean(inboxCase && draftParams))}
-            className={INPUT_AREA}
+            rows={2}
+            placeholder={placeholderForZone(zone, Boolean(inboxCase))}
+            className={cn(INPUT_AREA, "min-h-[2.75rem] flex-1 py-2.5")}
+            disabled={chatBusy}
+            aria-busy={chatBusy}
           />
-
-          <div className="flex flex-wrap gap-2">
+          <div className="flex shrink-0 flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={startDictation}
+              disabled={listening || chatBusy}
+              className={cn(BTN_SECONDARY, "h-10 w-10 justify-center px-0")}
+              aria-label={listening ? "Diktat läuft" : "Diktat starten"}
+            >
+              <Mic className="h-4 w-4 text-[#2563EB]" strokeWidth={1.75} />
+            </button>
             <button
               type="button"
               onClick={() => {
-                void runPrepare();
+                void sendMessage();
               }}
-              disabled={!text.trim() || persistBusy}
-              className="inline-flex h-11 shrink-0 items-center rounded-xl bg-[#0F172A] px-4 text-[14px] font-semibold text-white transition hover:bg-[#1E293B] disabled:opacity-45 dark:bg-[#E2E8F0] dark:text-[#0F172A]"
+              disabled={!text.trim() || chatBusy}
+              className={cn(BTN_PRIMARY, "h-10 w-10 px-0")}
+              aria-label={chatBusy ? "Antwort wird erstellt" : "Nachricht senden"}
             >
-              {persistBusy ? "Wird vorbereitet …" : "Vorbereiten"}
-            </button>
-            <button type="button" onClick={startDictation} disabled={listening} className={BTN_SECONDARY}>
-              <Mic className="h-4 w-4 text-[#2563EB]" strokeWidth={1.75} />
-              {listening ? "Hört zu …" : "Diktat"}
+              <Send className="h-4 w-4" strokeWidth={2} />
             </button>
           </div>
+        </div>
 
-          {prepareHint ? (
-            <div className="space-y-2" role="status">
-              <p
-                className={cn(
-                  "text-[13px] leading-relaxed",
-                  prepareHintTone === "success"
-                    ? "text-[#166534]"
-                    : prepareHintTone === "error"
-                      ? "text-[#B45309]"
-                      : "text-[#64748B]"
-                )}
-              >
-                {prepareHint}
-              </p>
-              {taskRelayHref && prepareHintTone === "success" ? (
+        {statusHint ? (
+          <p
+            className={cn(
+              "mt-2 text-center text-[11px] leading-snug",
+              statusTone === "success"
+                ? "text-[#166534]"
+                : statusTone === "error"
+                  ? "text-[#B45309]"
+                  : "text-[#64748B]"
+            )}
+            role="status"
+          >
+            {statusHint}
+            {taskRelayHref && statusTone === "success" ? (
+              <>
+                {" "}
                 <Link
                   href={taskRelayHref}
                   onClick={() => setOpen(false)}
-                  className="inline-flex text-[13px] font-medium text-[#2563EB] underline-offset-2 hover:underline"
+                  className="font-medium text-[#2563EB] underline-offset-2 hover:underline"
                 >
-                  Aufgabe in Relay öffnen
+                  Relay
                 </Link>
-              ) : null}
-            </div>
-          ) : null}
-
-          {!preparedWork && COMMAND_AI_EXAMPLES.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {COMMAND_AI_EXAMPLES.map((example) => (
-                <button
-                  key={example}
-                  type="button"
-                  onClick={() => setText(example)}
-                  className={CHIP}
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {hints.length > 0 ? (
-            <div className="space-y-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.08]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] dark:text-slate-500">
-                {deepHints.length > 0 ? "Springen" : "Navigation"}
-              </p>
-              {hints.map((h) => (
-                <button
-                  key={h.href + h.label}
-                  type="button"
-                  onClick={() => {
-                    router.push(h.href);
-                    setOpen(false);
-                  }}
-                  className={HINT_ROW}
-                >
-                  <span className="flex items-center gap-2">
-                    <ChevronRight className="h-4 w-4 shrink-0 text-[#64748B]" strokeWidth={2} aria-hidden />
-                    {h.label}
-                  </span>
-                  <span className="shrink-0 text-[#94A3B8]">→</span>
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+              </>
+            ) : null}
+          </p>
+        ) : (
+          <p className="mt-2 text-center text-[10px] leading-snug text-[#94A3B8]">
+            {COMMAND_AI_NO_AUTO_SEND}
+          </p>
+        )}
       </div>
     </>
   );
@@ -783,11 +1162,7 @@ export function CommandAssist() {
         <div
           className="yd-command-assist-backdrop"
           aria-hidden={false}
-          aria-live="polite"
-          onClick={() => {
-            setOpen(false);
-            setPreparedWork(null);
-          }}
+          onClick={() => setOpen(false)}
         />
       ) : null}
 
@@ -797,7 +1172,7 @@ export function CommandAssist() {
           id="command-assist-panel"
           role="dialog"
           aria-modal="true"
-          aria-label="Command — Praxis"
+          aria-label="Praxis-Assistenz"
           className={cn(
             "yd-command-assist-sheet transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
             clinicalCommandSheetWidthMd,
@@ -813,15 +1188,12 @@ export function CommandAssist() {
         <button
           ref={fabRef}
           type="button"
-          onClick={() => {
-            setOpen(!open);
-            if (open) setPreparedWork(null);
-          }}
+          onClick={() => setOpen(!open)}
           className={FAB}
           aria-expanded={open}
           aria-controls="command-assist-panel"
-          aria-label={open ? "Command schließen" : "Command öffnen (⌘K)"}
-          title="Command (⌘K)"
+          aria-label={open ? "Assistenz schließen" : "Praxis-Assistenz öffnen (⌘K)"}
+          title="Praxis-Assistenz (⌘K)"
         >
           <Command className="h-[22px] w-[22px] shrink-0" strokeWidth={2} aria-hidden />
         </button>

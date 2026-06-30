@@ -28,6 +28,7 @@ export type DashboardTodayItem = {
   when: string;
   kind: "entscheidung" | "routine";
   href: string;
+  isExample?: boolean;
 };
 
 export type DashboardGanttRow = {
@@ -44,35 +45,37 @@ function nonGhost(rows: RelayWorkRow[]) {
   return rows.filter((r) => !r.isGhost);
 }
 
-/** Lesbare Dashboard-Zeile — kein „Ohne Titel“ in der Tagesliste. */
+/** Kurze Zeile für „Heute relevant“ — ohne erklärende Fließtexte. */
 export function dashboardDisplayLabel(row: RelayWorkRow): string {
   const primary = row.primaryLabel?.trim();
-  if (primary && primary.toLowerCase() !== "ohne titel") return primary;
-
-  if (row.kind === "journal") {
-    const type = row.typeLabel?.trim();
-    return type ? `${type} zur Freigabe` : "Praxiswissen zur Freigabe";
+  if (!primary || primary.toLowerCase() === "ohne titel") {
+    if (row.kind === "message") return "Teamübergabe";
+    return row.typeLabel?.trim() || "Offener Vorgang";
   }
 
-  const concern = row.concernLine?.trim();
-  if (concern) return concern;
-
-  const context = row.context?.trim();
-  if (context && context.length > 2) {
-    return context.length > 56 ? `${context.slice(0, 53)}…` : context;
+  if (row.groupLabel === "Tracker" || row.typeLabel?.toLowerCase().includes("patient")) {
+    if (/eingesendet/i.test(primary)) return primary;
+    return `${primary} eingesendet`;
   }
 
-  if (row.kind === "message") return "Teamübergabe";
-
-  return row.typeLabel?.trim() || row.statusLabel?.trim() || "Offener Vorgang";
+  return primary;
 }
 
 function dashboardWhenLabel(row: RelayWorkRow): string {
   const when = row.dueLabel ?? row.waitingLabel ?? row.timeLabel;
-  if (when?.trim()) return when.trim();
-  if (row.kind === "journal") return "Freigabe ausstehend";
-  return "In Bearbeitung";
+  return when?.trim() ?? "";
 }
+
+const DASHBOARD_TODAY_EXAMPLES: DashboardTodayItem[] = [
+  {
+    id: "example-patient-submission",
+    label: "Pat. Muster eingesendet",
+    when: "vor 2 Std.",
+    kind: "entscheidung",
+    href: "/inbox",
+    isExample: true,
+  },
+];
 
 export function buildDashboardStatusStrip(snapshot: RelayPracticeSnapshot): DashboardStatusCard[] {
   const attention = nonGhost(snapshot.attention);
@@ -190,7 +193,7 @@ export function buildPracticeStateDomains(snapshot: RelayPracticeSnapshot): Prac
 }
 
 export function buildDashboardTodayRelevant(snapshot: RelayPracticeSnapshot): DashboardTodayItem[] {
-  const decisions = nonGhost(snapshot.attention).map((row) => ({
+  const patients = nonGhost(snapshot.patientWaiting).map((row) => ({
     id: row.id,
     label: dashboardDisplayLabel(row),
     when: dashboardWhenLabel(row),
@@ -198,15 +201,20 @@ export function buildDashboardTodayRelevant(snapshot: RelayPracticeSnapshot): Da
     href: row.href,
   }));
 
-  const routines = nonGhost(snapshot.routines).map((row) => ({
-    id: row.id,
-    label: dashboardDisplayLabel(row),
-    when: dashboardWhenLabel(row),
-    kind: "routine" as const,
-    href: row.href,
-  }));
+  const attention = nonGhost(snapshot.attention)
+    .filter((row) => row.kind !== "journal")
+    .map((row) => ({
+      id: row.id,
+      label: dashboardDisplayLabel(row),
+      when: dashboardWhenLabel(row),
+      kind: "entscheidung" as const,
+      href: row.href,
+    }));
 
-  return [...decisions, ...routines].slice(0, 5);
+  const items = [...patients, ...attention].slice(0, 5);
+  if (items.length > 0) return items;
+
+  return DASHBOARD_TODAY_EXAMPLES;
 }
 
 export function buildDashboardGanttRows(

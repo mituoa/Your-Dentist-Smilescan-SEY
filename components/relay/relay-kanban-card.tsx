@@ -49,7 +49,9 @@ export function RelayKanbanCardView({
         ) : null}
       </div>
       <h3 className="relay-kanban-card__title">{card.title}</h3>
-      {card.metaLine ? <p className="relay-kanban-card__meta">{card.metaLine}</p> : null}
+      {card.metaLine && !card.isGhost ? (
+        <p className="relay-kanban-card__meta">{card.metaLine}</p>
+      ) : null}
       <div className="relay-kanban-card__foot">
         {card.dateLabel ? (
           <span
@@ -65,7 +67,7 @@ export function RelayKanbanCardView({
           <span className="relay-kanban-card__date relay-kanban-card__date--muted">—</span>
         )}
         <span className="relay-kanban-card__action">
-          {draggable && !card.isGhost ? "Ziehen zum Verschieben" : card.actionLabel}
+          {card.isGhost ? "Beispiel" : draggable ? "Ziehen zum Verschieben" : card.actionLabel}
         </span>
       </div>
       {card.priority === "important" ? (

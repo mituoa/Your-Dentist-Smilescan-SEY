@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Calendar, ClipboardCheck, UserRound, Users } from "lucide-react";
 
-import { DashboardWeekStrip } from "@/components/dashboard/hc/dashboard-week-strip";
+import { DashboardPremiumCalendar } from "@/components/dashboard/hc/dashboard-premium-calendar";
+
 import type {
   DashboardTodayItem,
   PracticeStateDomain,
@@ -68,7 +69,7 @@ const TODAY_SUMMARY = [
 ] as const;
 
 function kindLabel(kind: DashboardTodayItem["kind"]) {
-  return kind === "routine" ? "Routine" : "Entscheidung";
+  return kind === "routine" ? "Routine" : "Vorgang";
 }
 
 function compactWhen(when: string): string {
@@ -179,40 +180,49 @@ export function DashboardMobileHealth({
         </div>
       </section>
 
+      <section className="yd-dash-m__card yd-dash-m__card--calendar" aria-label="Kalender">
+        <DashboardPremiumCalendar weeklyCounts={weeklyCounts} compact />
+      </section>
+
       <section className="yd-dash-m__card yd-dash-m__card--schedule" aria-label="Heute relevant">
         <header className="yd-dash-m__card-head yd-dash-m__card-head--schedule">
           <h2 className="yd-dash-m__card-title">Heute relevant</h2>
-          <Link href="/relay" className="yd-dash-m__card-link yd-dash-m__card-link--inline">
-            Relay
-          </Link>
+          {todayItems.some((item) => !item.isExample) ? (
+            <Link href="/relay" className="yd-dash-m__card-link yd-dash-m__card-link--inline" prefetch>
+              Relay
+            </Link>
+          ) : null}
         </header>
 
-        <DashboardWeekStrip />
-
-        {todayItems.length === 0 ? (
-          <p className="yd-dash-m__empty">Keine Termine oder Entscheidungen.</p>
-        ) : (
-          <ul className="yd-dash-m__relevant">
-            {todayItems.map((item) => (
-              <li key={item.id}>
-                <Link href={item.href} className="yd-dash-m__relevant-item">
-                  <span
-                    className={cn(
-                      "yd-dash-m__relevant-dot",
-                      item.kind === "routine" && "yd-dash-m__relevant-dot--routine"
-                    )}
-                    aria-hidden
-                  />
-                  <span className="yd-dash-m__relevant-copy">
-                    <span className="yd-dash-m__relevant-title">{item.label}</span>
+        <ul className="yd-dash-m__relevant">
+          {todayItems.map((item) => (
+            <li key={item.id}>
+              <Link
+                href={item.href}
+                className={cn(
+                  "yd-dash-m__relevant-item",
+                  item.isExample && "yd-dash-m__relevant-item--example"
+                )}
+                prefetch={!item.isExample}
+              >
+                <span className="yd-dash-m__relevant-dot" aria-hidden />
+                <span className="yd-dash-m__relevant-copy">
+                  <span className="yd-dash-m__relevant-title">{item.label}</span>
+                  {item.when ? (
                     <time className="yd-dash-m__relevant-when">{compactWhen(item.when)}</time>
+                  ) : null}
+                </span>
+                {item.isExample ? (
+                  <span className="yd-dash-m__relevant-example" aria-hidden>
+                    Beispiel
                   </span>
+                ) : (
                   <span className="sr-only">{kindLabel(item.kind)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+                )}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="yd-dash-m__card" aria-label="Aktivität">

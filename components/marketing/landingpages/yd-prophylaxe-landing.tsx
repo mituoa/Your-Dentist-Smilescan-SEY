@@ -108,7 +108,7 @@ const TIMELINE = [
 const FAQ = [
   { q: "Wie oft sollte ich zur Prophylaxe?", a: "In der Regel ein- bis zweimal jährlich, je nach individueller Risikoeinschätzung." },
   { q: "Tut eine professionelle Zahnreinigung weh?", a: "Bei normaler Anwendung ist sie schmerzarm. Bei empfindlichem Zahnfleisch sprechen Sie uns vorab an." },
-  { q: "Übernimmt die Krankenkasse die Kosten?", a: "Viele Kassen bezuschussen Prophylaxe-Leistungen unterschiedlich — wir informieren Sie vorab über die Kostenübersicht." },
+  { q: "Übernimmt die Krankenkasse die Kosten?", a: "Die Bezuschussung unterscheidet sich von Kasse zu Kasse. Wir legen Ihnen die Kostenübersicht vorab vor." },
   { q: "Ersetzt Prophylaxe das Zähneputzen zuhause?", a: "Nein. Prophylaxe ergänzt die tägliche Mundhygiene, ersetzt sie aber nicht." },
 ] as const;
 
@@ -184,9 +184,9 @@ export function YdProphylaxeLanding() {
               Vorsorgen statt <em>nachsorgen.</em>
             </h1>
             <p className="yd-pr-hero-lead">
-              Professionelle Zahnreinigung entfernt, was die tägliche Pflege allein nicht
-              schafft — und macht Veränderungen früh sichtbar, bevor daraus eine größere
-              Behandlung wird.
+              Professionelle Zahnreinigung entfernt Beläge, die beim Putzen zuhause
+              zurückbleiben. Veränderungen am Zahnfleisch oder Zahnschmelz fallen früh auf,
+              oft bevor sie spürbar werden.
             </p>
             <div className="yd-pr-hero-ctas">
               <a href={PRACTICE.contactUrl} className="yd-pr-btn yd-pr-btn--primary">
@@ -200,14 +200,16 @@ export function YdProphylaxeLanding() {
         </div>
 
         <div className="yd-pr-container">
-          <div className="yd-pr-stat-strip">
-            {STATS.map((s) => (
-              <div key={s.label} className="yd-pr-stat">
-                <strong>{s.value}</strong>
-                <span>{s.label}</span>
-              </div>
-            ))}
-          </div>
+          <Reveal>
+            <StaggerRow className="yd-pr-stat-strip">
+              {STATS.map((s) => (
+                <div key={s.label} className="yd-pr-stat">
+                  <strong>{s.value}</strong>
+                  <span>{s.label}</span>
+                </div>
+              ))}
+            </StaggerRow>
+          </Reveal>
         </div>
       </section>
 
@@ -217,9 +219,9 @@ export function YdProphylaxeLanding() {
           <Reveal>
             <div className="yd-pr-head">
               <span className="yd-pr-kicker">Der Unterschied</span>
-              <h2 className="yd-pr-title">Was regelmäßige Prophylaxe verändert.</h2>
+              <h2 className="yd-pr-title">So wirkt sich regelmäßige Prophylaxe aus.</h2>
             </div>
-            <div className="yd-pr-compare">
+            <StaggerRow className="yd-pr-compare">
               <div className="yd-pr-compare-col yd-pr-compare-col--positive">
                 <h3>Mit regelmäßiger Prophylaxe</h3>
                 <ul>
@@ -242,7 +244,7 @@ export function YdProphylaxeLanding() {
                   ))}
                 </ul>
               </div>
-            </div>
+            </StaggerRow>
           </Reveal>
         </div>
       </section>
@@ -253,7 +255,7 @@ export function YdProphylaxeLanding() {
           <Reveal>
             <div className="yd-pr-head">
               <span className="yd-pr-kicker">Ablauf einer Sitzung</span>
-              <h2 className="yd-pr-title">Vier Schritte, rund 30 Minuten.</h2>
+              <h2 className="yd-pr-title">Vier Schritte in rund 30 Minuten.</h2>
             </div>
             <StaggerRow className="yd-pr-timeline">
               {TIMELINE.map((t, i) => (
@@ -274,7 +276,7 @@ export function YdProphylaxeLanding() {
           <Reveal>
             <div className="yd-pr-head">
               <span className="yd-pr-kicker">Häufige Fragen</span>
-              <h2 className="yd-pr-title">Was Patient:innen zur Prophylaxe am häufigsten fragen.</h2>
+              <h2 className="yd-pr-title">Fragen zur Prophylaxe.</h2>
             </div>
             <div className="yd-pr-faq">
               {FAQ.map((f) => (
@@ -292,7 +294,7 @@ export function YdProphylaxeLanding() {
             <div className="yd-pr-cta-band">
               <Sparkles size={20} style={{ marginBottom: 12, opacity: 0.85 }} />
               <h2>Zeit für Ihre nächste Prophylaxe?</h2>
-              <p>Vereinbaren Sie jetzt einen Termin — rund 30 Minuten für ein sauberes Gefühl.</p>
+              <p>Ein Termin, rund 30 Minuten, ein spürbar saubereres Gefühl danach.</p>
               <div className="yd-pr-cta-buttons">
                 <a href={PRACTICE.contactUrl} className="yd-pr-btn yd-pr-btn--primary">
                   Termin vereinbaren
@@ -301,7 +303,7 @@ export function YdProphylaxeLanding() {
                   {PRACTICE.phoneDisplay} anrufen
                 </a>
               </div>
-              <p className="yd-pr-cta-note">Ergänzt die tägliche Mundhygiene — ersetzt sie nicht.</p>
+              <p className="yd-pr-cta-note">Ergänzt die tägliche Mundhygiene, ersetzt sie nicht.</p>
             </div>
           </Reveal>
         </div>

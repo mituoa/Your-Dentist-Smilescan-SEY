@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+import { TrackerWorkflowProvider } from "@/components/inbox/tracker-workflow-context";
 import { cn } from "@/lib/utils";
 
 type InboxTrackerShellProps = {
@@ -50,7 +51,9 @@ export function InboxTrackerShell({ list, detail }: InboxTrackerShellProps) {
             "max-md:flex max-md:min-h-0 max-md:w-full max-md:flex-1 max-md:flex-col"
         )}
       >
-        <div className="flex h-full min-h-0 flex-1 flex-col">{detail}</div>
+        <TrackerWorkflowProvider>
+          <div className="flex h-full min-h-0 flex-1 flex-col">{detail}</div>
+        </TrackerWorkflowProvider>
       </div>
     </div>
   );

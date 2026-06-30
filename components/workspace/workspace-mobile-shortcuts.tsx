@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   BookOpen,
@@ -51,6 +51,7 @@ function MobileBottomNavItem({
   return (
     <Link
       href={href}
+      prefetch={false}
       className={cn(
         "yd-mobile-bottom-nav__item yd-ambient-nav-link group relative flex min-w-0 flex-1 flex-col items-center justify-center touch-manipulation",
         active && "yd-nav-link-active yd-mobile-bottom-nav__item--active"
@@ -66,7 +67,7 @@ function MobileBottomNavItem({
         )}
       >
         <Icon
-          className={cn("yd-mobile-bottom-nav__icon transition-colors duration-700", active && "yd-nav-icon--active")}
+          className={cn("yd-mobile-bottom-nav__icon transition-colors duration-150", active && "yd-nav-icon--active")}
           strokeWidth={active ? 2 : 1.55}
           style={{ color: active ? YD.sidebar.iconActive : YD.sidebar.iconIdle }}
           aria-hidden
@@ -191,7 +192,7 @@ export function WorkspaceMobileShortcuts({
   const tabs = role === "doctor" ? doctorTabs : teamTabs;
 
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useLayoutEffect(() => setMounted(true), []);
 
   const rail = (
     <nav
@@ -205,6 +206,7 @@ export function WorkspaceMobileShortcuts({
         } as React.CSSProperties
       }
     >
+      <div className="yd-mobile-bottom-rail__scrim" aria-hidden />
       <div className="yd-mobile-bottom-rail__surface">
         <div className="yd-mobile-bottom-rail__glow" aria-hidden />
         {tabs.map((tab) => (

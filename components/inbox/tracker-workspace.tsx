@@ -1,4 +1,3 @@
-import { TrackerWorkflowProvider } from "@/components/inbox/tracker-workflow-context";
 import { TrackerCaseTimeline } from "@/components/inbox/tracker-case-timeline";
 import { TrackerDraftWorkspace } from "@/components/inbox/tracker-draft-workspace";
 import { TrackerPatientHeader } from "@/components/inbox/tracker-patient-header";
@@ -143,7 +142,6 @@ export function TrackerWorkspace({
     editableMessageDraft?.body?.trim() || historyMessageDraft?.body?.trim() || null;
 
   return (
-    <TrackerWorkflowProvider>
     <div className="yd-tracker-v6-workspace yd-tracker-v7-workspace yd-tracker-v8-workspace yd-tracker-v12-workspace yd-tracker-v14-workspace yd-tracker-v15-workspace">
       <TrackerPatientHeader
         patientName={patientLabel}
@@ -263,6 +261,5 @@ export function TrackerWorkspace({
           </details>
       </div>
     </div>
-    </TrackerWorkflowProvider>
   );
 }

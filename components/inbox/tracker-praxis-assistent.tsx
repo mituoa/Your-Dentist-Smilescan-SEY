@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   prepareMessageDraftForSubmission,
@@ -89,11 +88,23 @@ export function TrackerPraxisAssistent({
   canSendAppointmentLink,
   editableDraftId,
   initialDraftBody,
-  mobileLayout = false,
+  mobileLayout: mobileLayoutProp = false,
 }: TrackerPraxisAssistentProps) {
-  const router = useRouter();
   const { responsePath, setResponsePath, applyDraftToPanel } = useTrackerWorkflow();
   const [sheetIntent, setSheetIntent] = useState<TrackerActionIntent | null>(null);
+
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobileViewport(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const mobileLayout = mobileLayoutProp || isMobileViewport;
 
   const suggestedUrgency = useMemo(
     () =>
@@ -204,41 +215,46 @@ export function TrackerPraxisAssistent({
         return;
       }
 
-      if (!editableDraftId) {
-        const prep = await prepareMessageDraftForSubmission(submissionId);
-        if (!prep.ok) {
-          setActionNotice({ type: "error", message: prep.error });
-          return;
-        }
-        stashWorkflowDraftForSubmission(submissionId, body);
-        router.refresh();
-        return;
-      }
-
-      const saveRes = await saveMessageDraftBody({
-        draftId: editableDraftId,
-        submissionId,
-        body,
-      });
-      if (!saveRes.ok) {
-        setActionNotice({ type: "error", message: saveRes.error });
-        return;
-      }
-
       applyDraftToPanel({
         body,
         path,
         urgency: meta?.urgency ?? clinicalUrgency,
         snippetId: meta?.snippetId ?? null,
       });
-      router.refresh();
+      stashWorkflowDraftForSubmission(submissionId, body);
+
+      let draftId = editableDraftId;
+      if (!draftId) {
+        const prep = await prepareMessageDraftForSubmission(submissionId);
+        if (!prep.ok) {
+          setActionNotice({ type: "error", message: prep.error });
+          return;
+        }
+        draftId = prep.draftId ?? null;
+      }
+
+      if (!draftId) {
+        setActionNotice({
+          type: "error",
+          message: "Antwortentwurf konnte nicht angelegt werden. Bitte erneut versuchen.",
+        });
+        return;
+      }
+
+      const saveRes = await saveMessageDraftBody({
+        draftId,
+        submissionId,
+        body,
+      });
+      if (!saveRes.ok) {
+        setActionNotice({ type: "error", message: saveRes.error });
+      }
     },
     [
       applyDraftToPanel,
       clinicalUrgency,
       draftsAvailable,
       editableDraftId,
-      router,
       submissionId,
     ]
   );
@@ -267,6 +283,12 @@ export function TrackerPraxisAssistent({
         }),
         "beobachten"
       );
+    } else if (path === "termin") {
+      const body = buildTerminOfferDraft({
+        ...draftParams,
+        urgency: toUrgencyKey(clinicalUrgency),
+      });
+      pushDraft(body, "termin", { urgency: clinicalUrgency });
     }
   };
 

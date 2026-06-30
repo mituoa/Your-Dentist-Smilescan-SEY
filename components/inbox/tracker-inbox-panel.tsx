@@ -145,7 +145,7 @@ export function TrackerInboxPanel({ items }: TrackerInboxPanelProps) {
                     <div className="yd-tracker-inbox-card__inner">
                       <Link
                         href={caseHref(item.id, q)}
-                        prefetch
+                        prefetch={false}
                         scroll={false}
                         className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body yd-tracker-v16-inbox-card__body yd-tracker-inbox-card__tap"
                         aria-current={isActive ? "page" : undefined}

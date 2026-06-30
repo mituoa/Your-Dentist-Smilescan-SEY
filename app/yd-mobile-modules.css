@@ -262,6 +262,71 @@
     min-height: min(36dvh, 300px);
   }
 
+  .yd-tracker-mobile-case-view .yd-tracker-v8-clinical-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v12-rail,
+  .yd-tracker-mobile-case-view .yd-m-tracker-rail {
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 14px;
+    background: #fff;
+    padding: 0.875rem;
+    box-shadow: none;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v12-rail__block {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v12-rail__block + .yd-tracker-v12-rail__block {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(241, 245, 249, 0.98);
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v16-hero {
+    padding: 0 0 0.75rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v16-hero__concern {
+    font-size: 1.0625rem;
+    line-height: 1.35;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v6-communication,
+  .yd-tracker-mobile-case-view .yd-tracker-v6-evidence {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v6-section-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v11-comm-card {
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    box-shadow: none;
+  }
+
+  .yd-tracker-mobile-case-view .yd-tracker-v4-detail__scroll {
+    padding-inline: max(0.875rem, env(safe-area-inset-left)) max(0.875rem, env(safe-area-inset-right));
+  }
+
   .yd-tracker-mobile-case-view__bar {
     padding-top: 0.375rem !important;
     padding-inline: max(0.875rem, env(safe-area-inset-left)) max(0.875rem, env(safe-area-inset-right)) !important;

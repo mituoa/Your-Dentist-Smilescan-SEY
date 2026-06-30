@@ -4,6 +4,82 @@
   --leistung-accent: #e86f1a;
   --leistung-accent-soft: rgba(232, 111, 26, 0.1);
   --leistung-accent-border: rgba(232, 111, 26, 0.22);
+  --leistung-accent-2: #c95a12;
+  --leistung-accent-gradient: linear-gradient(135deg, #f08a3c 0%, #e86f1a 45%, #c95a12 100%);
+}
+
+.yd-leistungen .yd-al-eyebrow {
+  background: var(--leistung-accent-gradient);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(232, 111, 26, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.yd-leistungen .yd-al-eyebrow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 45%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: yd-leistungen-shimmer 3.2s ease-in-out infinite;
+}
+
+.yd-leistungen .yd-al-kicker {
+  position: relative;
+  display: inline-block;
+}
+
+.yd-leistungen .yd-al-kicker::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 28px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--leistung-accent-gradient);
+  animation: yd-leistungen-underline 2.6s ease-in-out infinite;
+}
+
+@keyframes yd-leistungen-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  60%,
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+@keyframes yd-leistungen-underline {
+  0%,
+  100% {
+    width: 28px;
+    opacity: 0.85;
+  }
+  50% {
+    width: 44px;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-leistungen .yd-al-eyebrow::after {
+    animation: none;
+    display: none;
+  }
+
+  .yd-leistungen .yd-al-kicker::after {
+    animation: none;
+    width: 28px;
+  }
 }
 
 .yd-leistungen-btn--warm.yd-al-btn--primary,
@@ -150,7 +226,7 @@
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 2px 4px 2px 4px;
-  background: var(--leistung-accent);
+  background: var(--leistung-accent-gradient);
   transform: rotate(-12deg);
   box-shadow: 0 0 0 2px var(--leistung-accent-soft);
 }
@@ -158,6 +234,14 @@
 .yd-leistungen-list__item--featured {
   font-weight: 600;
   color: var(--al-navy);
+}
+
+.yd-leistungen-list__item--featured::before {
+  width: 0.62rem;
+  height: 0.62rem;
+  box-shadow:
+    0 0 0 2px var(--leistung-accent-soft),
+    0 0 8px rgba(232, 111, 26, 0.35);
 }
 
 .yd-leistungen-highlights {

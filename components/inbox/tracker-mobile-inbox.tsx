@@ -1,14 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { TrackerInboxListCardContent } from "@/components/inbox/tracker-inbox-list-card-content";
-import { TrackerInboxListStatusMenu } from "@/components/inbox/tracker-inbox-list-status-menu";
+import { TrackerMobileInboxRow } from "@/components/inbox/tracker-mobile-inbox-row";
 import { useTrackerInboxRead } from "@/components/inbox/tracker-inbox-read-context";
 import {
-  trackerInboxReadState,
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
   countByTrackerFilter,
@@ -18,8 +15,6 @@ import {
   type EnrichedSubmissionListItem,
   type TrackerInboxFilter,
 } from "@/lib/inbox/tracker-inbox-logic";
-import { inboxListUrgencyTier } from "@/lib/inbox/tracker-v9-clinical";
-import { displayPracticeStatusForCase } from "@/lib/inbox/tracker-enterprise-status";
 import type { SubmissionListItem } from "@/lib/queries/inbox";
 import { cn } from "@/lib/utils";
 
@@ -112,51 +107,16 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
         ) : (
           filtered.map((item) => {
             const isActive = pathname === `/inbox/${item.id}`;
-            const readState = trackerInboxReadState(item);
-            const urgencyTier = inboxListUrgencyTier(item);
             const href = caseHref(item.id, q);
 
             return (
               <li key={item.id} className="yd-tracker-mobile-inbox__item">
-                <div
-                  className={cn(
-                    "yd-tracker-v4-inbox-card",
-                    "yd-tracker-v8-inbox-card",
-                    "yd-tracker-v10-inbox-card",
-                    "yd-tracker-v12-inbox-card",
-                    "yd-tracker-v14-inbox-card",
-                    "yd-tracker-v15-inbox-card",
-                    "yd-tracker-v16-inbox-card",
-                    "yd-tracker-mobile-inbox-card",
-                    `yd-tracker-v15-inbox-card--urgency-${urgencyTier}`,
-                    readState === "new_submission" && "yd-tracker-v15-inbox-card--fresh",
-                    readState === "marked_unread" && "yd-tracker-v15-inbox-card--marked-unread",
-                    isActive && "yd-tracker-v4-inbox-card--active",
-                    isActive && "yd-tracker-v8-inbox-card--active",
-                    isActive && "yd-tracker-v10-inbox-card--active",
-                    isActive && "yd-tracker-v12-inbox-card--active"
-                  )}
-                >
-                  <div className="yd-tracker-mobile-inbox-card__inner">
-                    <Link
-                      href={href}
-                      prefetch
-                      scroll={false}
-                      className="yd-tracker-v10-inbox-card__body yd-tracker-v12-inbox-card__body yd-tracker-v15-inbox-card__body yd-tracker-v16-inbox-card__body yd-tracker-mobile-inbox-card__tap"
-                      aria-current={isActive ? "page" : undefined}
-                      onClick={() => markCaseOpened(item.id)}
-                    >
-                      <TrackerInboxListCardContent item={item} showStatusMenu={false} />
-                    </Link>
-                    <div className="yd-tracker-mobile-inbox-card__status">
-                      <TrackerInboxListStatusMenu
-                        submissionId={item.id}
-                        status={displayPracticeStatusForCase(item.practice_status)}
-                        seenAt={item.seen_at}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <TrackerMobileInboxRow
+                  item={item}
+                  href={href}
+                  isActive={isActive}
+                  onOpen={() => markCaseOpened(item.id)}
+                />
               </li>
             );
           })

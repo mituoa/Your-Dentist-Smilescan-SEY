@@ -20,8 +20,6 @@ import { getProfileData, getSubmissionById } from "@/lib/queries/submissions";
 import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
 import { isTrackerBackboneAvailable } from "@/lib/outbound-messages/backbone-available";
 
-import { markSubmissionSeen } from "@/app/(protected)/inbox/[id]/actions";
-
 function messageDraftStatusFromDetail(
   editable: { status: string } | null,
   history: { status: string } | null,
@@ -68,10 +66,6 @@ export async function InboxDetailLoader({ submissionId }: InboxDetailLoaderProps
 
   if (!submission || submission.workspace_id !== workspaceId) {
     notFound();
-  }
-
-  if (!submission.seen_at) {
-    await markSubmissionSeen(submissionId);
   }
 
   const isDoctor = workspace.role === "doctor";
@@ -127,7 +121,7 @@ export async function InboxDetailLoader({ submissionId }: InboxDetailLoaderProps
         concernLine={concernPreview}
       />
       <CaseCreatedToast />
-      <div className="mb-4">
+      <div className="mb-4 hidden md:block">
         <TrackerBackboneNotice available={trackerBackboneAvailable} />
       </div>
       <TrackerWorkspace

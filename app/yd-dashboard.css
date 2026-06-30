@@ -1330,15 +1330,182 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 
 /* Schedule-Panel */
 .yd-dash-ref-card--schedule .yd-dash-week-strip {
-  margin-bottom: 0.625rem;
-  padding: 0;
+  margin-bottom: 0.75rem;
+  padding: 0.375rem 0.25rem;
   border: none;
-  background: transparent;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
 .yd-dash-ref-card--schedule .yd-dash-schedule-list {
   flex: 1;
   padding: 0;
+}
+
+/* Premium-Kalender */
+.yd-dash-premium-calendar {
+  margin-bottom: 0.25rem;
+}
+
+.yd-dash-premium-calendar__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-bottom: 0.625rem;
+}
+
+.yd-dash-premium-calendar__title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.yd-dash-premium-calendar__subtitle {
+  margin: 0;
+  color: #7c8a98;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.yd-dash-premium-calendar__month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.375rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.yd-dash-premium-calendar__month-label {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  color: #243446;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: capitalize;
+}
+
+.yd-dash-premium-calendar__nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #516170;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+@media (hover: hover) {
+  .yd-dash-premium-calendar__nav-btn:hover {
+    background: rgba(255, 255, 255, 0.85);
+    color: #1a4f9c;
+  }
+}
+
+.yd-dash-premium-calendar__grid-wrap {
+  padding: 0.5rem 0.125rem 0.25rem;
+  border-radius: 1.125rem;
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.yd-dash-premium-calendar__weekdays,
+.yd-dash-premium-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.125rem;
+  text-align: center;
+}
+
+.yd-dash-premium-calendar__weekday {
+  padding: 0.25rem 0;
+  color: #9aa6b2;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.yd-dash-premium-calendar__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border-radius: 0.625rem;
+}
+
+.yd-dash-premium-calendar__cell--empty {
+  min-height: 2rem;
+}
+
+.yd-dash-premium-calendar__day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  color: #516170;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.yd-dash-premium-calendar__cell--today .yd-dash-premium-calendar__day-num {
+  background: linear-gradient(180deg, #2563eb 0%, #1a4f9c 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(26, 79, 156, 0.28);
+}
+
+.yd-dash-premium-calendar__cell--activity .yd-dash-premium-calendar__dot {
+  position: absolute;
+  bottom: 0.125rem;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: 999px;
+  background: #1a4f9c;
+}
+
+.yd-dash-calendar-agenda {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.yd-dash-calendar-agenda__head {
+  margin-bottom: 0.5rem;
+}
+
+.yd-dash-premium-calendar--compact .yd-dash-premium-calendar__subtitle {
+  display: none;
+}
+
+.yd-dash-premium-calendar--compact .yd-dash-premium-calendar__grid-wrap {
+  padding: 0.375rem 0.125rem 0.125rem;
+}
+
+.yd-dash-premium-calendar--compact .yd-dash-premium-calendar__cell {
+  min-height: 1.75rem;
+}
+
+.yd-dash-premium-calendar--compact .yd-dash-premium-calendar__day-num {
+  width: 1.625rem;
+  height: 1.625rem;
+  font-size: 0.6875rem;
 }
 
 .yd-dash-ref-card__head--row {
@@ -1384,8 +1551,14 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 }
 
 .yd-dash-week-strip__day--active .yd-dash-week-strip__num {
-  background: #1a4f9c;
+  background: linear-gradient(180deg, #2563eb 0%, #1a4f9c 100%);
   color: #fff;
+  box-shadow: 0 3px 10px rgba(26, 79, 156, 0.24);
+}
+
+.yd-dash-week-strip__day--active .yd-dash-week-strip__label {
+  color: #1a4f9c;
+  font-weight: 600;
 }
 
 .yd-dash-schedule-list {
@@ -1445,6 +1618,19 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   font-weight: 500;
   white-space: nowrap;
   padding-top: 0.125rem;
+}
+
+.yd-dash-schedule-item--example {
+  opacity: 0.72;
+}
+
+.yd-dash-schedule-item--example .yd-dash-schedule-item__label {
+  font-style: italic;
+  color: #94a3b8;
+}
+
+.yd-dash-schedule-item--example .yd-dash-schedule-item__when {
+  color: #b8c4d0;
 }
 
 /* Aktive Vorgänge — Gantt-Timeline */

@@ -1301,8 +1301,20 @@
   width: 40px;
   height: 40px;
   border-radius: 11px;
-  background: var(--module-icon-bg, linear-gradient(135deg, rgba(47, 111, 214, 0.12), rgba(47, 111, 214, 0.04)));
+  background: linear-gradient(140deg, var(--module-icon-bg, rgba(47, 111, 214, 0.14)) 0%, transparent 100%),
+    var(--module-icon-bg, rgba(47, 111, 214, 0.04));
   color: var(--module-accent, var(--os-blue-deep));
+  transition: transform 0.3s var(--os-spring, ease);
+}
+
+.yd-os-module-card:hover .yd-os-module-icon {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-os-module-card:hover .yd-os-module-icon {
+    transform: none;
+  }
 }
 
 .yd-os-module-card h3 {

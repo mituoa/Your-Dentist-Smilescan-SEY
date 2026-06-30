@@ -209,7 +209,7 @@ export default async function DashboardPage() {
 
           <div className="yd-dash-ref-main-row">
             <DashboardPracticeState domains={practiceDomains} />
-            <DashboardTodayPanel items={todayRelevant} />
+            <DashboardTodayPanel items={todayRelevant} weeklyCounts={weeklyRes.ok ? weeklyRes.counts : null} />
           </div>
 
           <DashboardAmbientLower>

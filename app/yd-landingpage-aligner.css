@@ -55,6 +55,7 @@
 /* ---------------- Type scale ---------------- */
 
 .yd-al-eyebrow {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -64,8 +65,33 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--al-blue-deep);
-  background: var(--al-blue-ice);
+  background: linear-gradient(120deg, var(--al-blue-ice) 0%, var(--al-blue-ice-2) 60%, #ffffff 100%);
   border: 1px solid rgba(47, 111, 214, 0.14);
+  overflow: hidden;
+}
+
+.yd-al-eyebrow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.75) 48%, transparent 66%);
+  transform: translateX(-120%);
+  animation: yd-al-eyebrow-shimmer 5s ease-in-out infinite;
+}
+
+@keyframes yd-al-eyebrow-shimmer {
+  0%, 60%, 100% {
+    transform: translateX(-120%);
+  }
+  80% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-al-eyebrow::after {
+    display: none;
+  }
 }
 
 .yd-al-hero-title {
@@ -93,6 +119,7 @@
 }
 
 .yd-al-kicker {
+  position: relative;
   display: inline-block;
   font-size: 13px;
   font-weight: 700;
@@ -100,6 +127,36 @@
   text-transform: uppercase;
   color: var(--al-blue-deep);
   margin-bottom: 10px;
+  padding-bottom: 6px;
+}
+
+.yd-al-kicker::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 28px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--al-blue) 0%, var(--al-accent-warm) 100%);
+  animation: yd-al-kicker-grow 1.1s var(--al-spring) 0.1s both;
+}
+
+@keyframes yd-al-kicker-grow {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 28px;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-al-kicker::after {
+    animation: none;
+  }
 }
 
 .yd-al-title {
@@ -294,8 +351,12 @@
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--al-navy);
   line-height: 1.1;
+  background: linear-gradient(120deg, var(--al-navy) 0%, var(--al-blue-deep) 55%, var(--al-blue) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--al-navy);
 }
 
 .yd-al-hero-stat span {
@@ -664,7 +725,7 @@
   width: 38px;
   height: 38px;
   border-radius: 11px;
-  background: var(--al-blue-ice);
+  background: linear-gradient(140deg, var(--al-blue-ice) 0%, var(--al-blue-ice-2) 100%);
   color: var(--al-blue-deep);
   margin-bottom: 16px;
 }
@@ -1016,8 +1077,12 @@
   display: block;
   font-size: 22px;
   font-weight: 700;
-  color: var(--al-blue-deep);
   line-height: 1.1;
+  background: linear-gradient(120deg, var(--al-blue-deep) 0%, var(--al-blue) 70%, var(--al-accent-warm) 130%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--al-blue-deep);
 }
 
 .yd-al-practice-stat span {
@@ -1266,5 +1331,202 @@
     filter: none !important;
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ---------------- Implantologie-only polish (.yd-al--implant) ---------------- */
+/* Scoped to this page only — does not affect Aligner/SmileScan/Leistungen, which share .yd-al-*. */
+
+.yd-al--implant .yd-al-hero-badge {
+  background: linear-gradient(135deg, var(--al-accent-warm) 0%, #d79a3c 50%, var(--al-accent-warm) 100%);
+  background-size: 220% 220%;
+  animation:
+    yd-al-badge-pop 0.5s var(--al-spring) 0.6s both,
+    yd-al-badge-pulse 2.2s ease-in-out 1.2s 2,
+    yd-implant-badge-sheen 5s ease-in-out 1.4s infinite;
+}
+
+@keyframes yd-implant-badge-sheen {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.yd-al--implant .yd-al-hero-stat strong {
+  background: linear-gradient(120deg, var(--al-navy) 0%, var(--al-blue-deep) 45%, var(--al-blue) 80%, var(--al-blue-deep) 100%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.yd-al--implant .yd-al-benefit-icon {
+  background: linear-gradient(140deg, var(--al-blue-ice) 0%, var(--al-blue-ice-2) 55%, var(--al-blue-ice) 100%);
+  box-shadow: inset 0 0 0 1px rgba(47, 111, 214, 0.1);
+}
+
+.yd-al--implant .yd-al-process-num {
+  background: linear-gradient(135deg, var(--al-navy) 0%, var(--al-blue-deep) 100%);
+  box-shadow: 0 4px 12px rgba(27, 78, 163, 0.28);
+}
+
+.yd-al--implant .yd-al-benefit-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.yd-al--implant .yd-al-benefit-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(47, 111, 214, 0.18), rgba(183, 121, 31, 0.12) 50%, rgba(47, 111, 214, 0.06));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.yd-al--implant .yd-al-benefit-card:hover::after {
+  opacity: 1;
+}
+
+/* Animated underline accent beneath section kickers */
+.yd-al--implant .yd-al-kicker {
+  position: relative;
+  display: inline-block;
+}
+
+.yd-al--implant .yd-al-kicker::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 28px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--al-blue) 0%, var(--al-accent-warm) 100%);
+  background-size: 200% auto;
+  animation: yd-implant-underline-flow 3.5s ease-in-out infinite;
+}
+
+@keyframes yd-implant-underline-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-al--implant .yd-al-hero-badge,
+  .yd-al--implant .yd-al-kicker::after {
+    animation: none;
+  }
+}
+
+/* ---------------- SmileScan-only polish (.yd-al--smilescan) ---------------- */
+/* Scoped to this page only — does not affect Aligner/Implantologie/Leistungen, which share .yd-al-*. */
+
+.yd-al--smilescan .yd-al-hero-badge {
+  background: linear-gradient(135deg, var(--al-accent-mint) 0%, #3f9b76 50%, var(--al-accent-mint) 100%);
+  background-size: 220% 220%;
+  box-shadow: 0 10px 24px rgba(47, 122, 94, 0.3);
+  animation:
+    yd-al-badge-pop 0.5s var(--al-spring) 0.6s both,
+    yd-al-badge-pulse 2.2s ease-in-out 1.2s 2,
+    yd-smile-badge-sheen 5s ease-in-out 1.4s infinite;
+}
+
+@keyframes yd-smile-badge-sheen {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.yd-al--smilescan .yd-al-hero-stat strong {
+  background: linear-gradient(120deg, var(--al-navy) 0%, var(--al-blue-deep) 40%, var(--al-accent-mint) 75%, var(--al-blue-deep) 100%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.yd-al--smilescan .yd-al-benefit-icon {
+  background: linear-gradient(140deg, var(--al-blue-ice) 0%, var(--al-accent-mint-bg) 60%, var(--al-blue-ice) 100%);
+  box-shadow: inset 0 0 0 1px rgba(47, 122, 94, 0.12);
+}
+
+.yd-al--smilescan .yd-al-process-num {
+  background: linear-gradient(135deg, var(--al-navy) 0%, var(--al-accent-mint) 120%);
+  box-shadow: 0 4px 12px rgba(47, 122, 94, 0.26);
+}
+
+.yd-al--smilescan .yd-al-benefit-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.yd-al--smilescan .yd-al-benefit-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(47, 122, 94, 0.18), rgba(47, 111, 214, 0.12) 50%, rgba(47, 122, 94, 0.06));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.yd-al--smilescan .yd-al-benefit-card:hover::after {
+  opacity: 1;
+}
+
+/* Animated underline accent beneath section kickers */
+.yd-al--smilescan .yd-al-kicker {
+  position: relative;
+  display: inline-block;
+}
+
+.yd-al--smilescan .yd-al-kicker::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 28px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--al-accent-mint) 0%, var(--al-blue) 100%);
+  background-size: 200% auto;
+  animation: yd-smile-underline-flow 3.5s ease-in-out infinite;
+}
+
+@keyframes yd-smile-underline-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-al--smilescan .yd-al-hero-badge,
+  .yd-al--smilescan .yd-al-kicker::after {
+    animation: none;
   }
 }

@@ -268,32 +268,32 @@ const TRUST_PILLS = [
 ];
 
 const BENEFITS = [
-  { icon: Sparkles, title: "Fast unsichtbar", text: "Hauchdünne, transparente Aligner — diskret im Beruf und Alltag." },
-  { icon: CalendarCheck, title: "Planbarer Ablauf", text: "Digitale Planung zeigt vorab, wie viele Schienen nötig sind." },
-  { icon: Stethoscope, title: "Schmerzarm", text: "Sanfte Bewegungen pro Schiene, ohne Drücken oder Reiben." },
-  { icon: ScanLine, title: "Komplikationsfrei", text: "Keine Brackets, keine losen Drähte, herausnehmbar zum Essen." },
+  { icon: Sparkles, title: "Fast unsichtbar", text: "Hauchdünne, transparente Aligner für Beruf und Alltag." },
+  { icon: CalendarCheck, title: "Planbarer Ablauf", text: "Die digitale Planung zeigt vorab, wie viele Schienen nötig sind." },
+  { icon: Stethoscope, title: "Schmerzarm", text: "Jede Schiene bewegt die Zähne in kleinen, sanften Schritten." },
+  { icon: ScanLine, title: "Unkompliziert im Alltag", text: "Keine Brackets, keine Drähte. Zum Essen einfach herausnehmen." },
 ];
 
 const SEGMENTS = [
-  { title: "Invisalign First", text: "Für Kinder ab ca. 6–7 Jahren — frühzeitige Korrektur von Fehlstellungen.", img: "invisalign-first.png" },
-  { title: "Invisalign Teen", text: "Speziell für Jugendliche — flexibel im Schul- und Vereinsalltag.", img: "invisalign-teen.png" },
-  { title: "Invisalign Erwachsene", text: "Diskrete Korrektur für Beruf und Alltag — ohne Kompromisse.", img: "invisalign-erwachsene.png" },
+  { title: "Invisalign First", text: "Für Kinder ab etwa 6 bis 7 Jahren, zur frühzeitigen Korrektur von Fehlstellungen.", img: "invisalign-first.png" },
+  { title: "Invisalign Teen", text: "Für Jugendliche, flexibel im Schul- und Vereinsalltag.", img: "invisalign-teen.png" },
+  { title: "Invisalign Erwachsene", text: "Diskrete Korrektur, die sich in Beruf und Alltag einfügt.", img: "invisalign-erwachsene.png" },
 ];
 
 const PROCESS = [
-  { title: "Eignungsprüfung", text: "Erste Untersuchung und Beratung — wir prüfen, ob Aligner für Ihre Zahnsituation geeignet sind." },
-  { title: "Digitale Planung", text: "3D-Scan und Simulation Ihres Behandlungsverlaufs, individuell modellierte Aligner." },
-  { title: "Aligner-Wechsel", text: "Alle 1–2 Wochen ein neues Set — empfohlene Tragedauer mind. 22 Stunden täglich." },
-  { title: "Nachsorge & Retainer", text: "Regelmäßige Kontrolle, danach Stabilisierung des Ergebnisses mit Retainer." },
+  { title: "Eignungsprüfung", text: "Erste Untersuchung und Beratung. Wir prüfen, ob Aligner für Ihre Zahnsituation geeignet sind." },
+  { title: "Digitale Planung", text: "3D-Scan und Simulation des Behandlungsverlaufs, individuell modellierte Aligner." },
+  { title: "Aligner-Wechsel", text: "Alle 1 bis 2 Wochen ein neues Set. Empfohlene Tragedauer mindestens 22 Stunden täglich." },
+  { title: "Nachsorge & Retainer", text: "Regelmäßige Kontrolle, danach Stabilisierung des Ergebnisses mit dem Retainer." },
 ];
 
 const SYSTEMS = [
-  { name: "Invisalign", text: "Marktführer für transparente Aligner — bei uns im Einsatz.", current: true },
-  { name: "Spark", text: "Hochästhetische Aligner-Therapie mit besonders klarem Material." },
+  { name: "Invisalign", text: "Marktführer für transparente Aligner. Bei uns im Einsatz.", current: true },
+  { name: "Spark", text: "Aligner-Therapie mit besonders klarem Material." },
   { name: "SureSmile", text: "Digitale Zahnkorrektur mit präziser Verlaufsplanung." },
-  { name: "ClearCorrect", text: "Transparente Schienen-Therapie für sanfte Korrekturen." },
-  { name: "Angel Aligner", text: "Moderne Aligner-Technologie für individuelle Fälle." },
-  { name: "Eigenes System", text: "Nach Eignungsprüfung besprechen wir die passende Option." },
+  { name: "ClearCorrect", text: "Transparente Schienen für sanfte Korrekturen." },
+  { name: "Angel Aligner", text: "Aligner-Technologie für individuelle Fälle." },
+  { name: "Eigenes System", text: "Wir besprechen die passende Option nach der Eignungsprüfung." },
 ];
 
 const TESTIMONIALS = [
@@ -304,11 +304,11 @@ const TESTIMONIALS = [
 
 const FAQ = [
   { q: "Wie lange dauert eine Invisalign-Behandlung?", a: "Die Dauer hängt von der Schwere der Zahnfehlstellung ab, typischerweise zwischen 3 und 18 Monaten." },
-  { q: "Kann ich die Aligner zum Essen herausnehmen?", a: "Ja. Die Aligner können zum Essen, Trinken und Zähneputzen herausgenommen werden. Wichtig ist, die empfohlene Tragezeit von mindestens 22 Stunden täglich einzuhalten." },
-  { q: "Tut die Behandlung weh?", a: "Es kann zu leichten Druckgefühlen kommen, die nach wenigen Tagen verschwinden. Aligner sind durch das Smart-Track-Material deutlich komfortabler als klassische Zahnspangen." },
-  { q: "Was kostet die unsichtbare Zahnspange?", a: "Eine einfache Korrektur beginnt ab 150€ monatlich zzgl. Laborkosten. Im kostenlosen Beratungsgespräch erhalten Sie eine genaue Kostenübersicht und mögliche Finanzierungsoptionen." },
-  { q: "Übernimmt die Krankenkasse die Kosten?", a: "Gesetzliche Krankenkassen bezuschussen Invisalign grundsätzlich nicht — die Behandlung ist privat zu finanzieren. Privat Versicherte erhalten je nach Vertrag eine vollständige oder teilweise Erstattung." },
-  { q: "Was passiert nach der Eignungsprüfung?", a: "Sie erhalten eine individuelle Einschätzung, ob und welches Aligner-System für Ihre Zahnsituation geeignet ist — unverbindlich und ohne Diagnose vor der Untersuchung." },
+  { q: "Kann ich die Aligner zum Essen herausnehmen?", a: "Ja, zum Essen, Trinken und Zähneputzen. Wichtig ist, die empfohlene Tragezeit von mindestens 22 Stunden täglich einzuhalten." },
+  { q: "Tut die Behandlung weh?", a: "Es kann zu leichten Druckgefühlen kommen, die nach wenigen Tagen verschwinden. Das Smart-Track-Material macht Aligner spürbar komfortabler als klassische Zahnspangen." },
+  { q: "Was kostet die unsichtbare Zahnspange?", a: "Eine einfache Korrektur beginnt ab 150 € monatlich zzgl. Laborkosten. Im kostenlosen Beratungsgespräch erhalten Sie eine genaue Kostenübersicht und mögliche Finanzierungsoptionen." },
+  { q: "Übernimmt die Krankenkasse die Kosten?", a: "Gesetzliche Krankenkassen bezuschussen Invisalign grundsätzlich nicht, die Behandlung ist privat zu finanzieren. Privat Versicherte erhalten je nach Vertrag eine vollständige oder teilweise Erstattung." },
+  { q: "Was passiert nach der Eignungsprüfung?", a: "Sie erhalten eine individuelle Einschätzung, ob und welches Aligner-System für Ihre Zahnsituation geeignet ist, unverbindlich und ohne Diagnose vor der Untersuchung." },
 ];
 
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -362,12 +362,11 @@ export function YdAlignerLandingCarree() {
               Invisalign® · Köln Brück
             </span>
             <h1 className="yd-al-hero-title yd-al-hero-stagger" style={{ transitionDelay: "70ms" }}>
-              Unsichtbare Zahnkorrektur. <em>Sichtbar mehr Sicherheit.</em>
+              Zahnkorrektur, die <em>kaum auffällt.</em>
             </h1>
             <p className="yd-al-hero-lead yd-al-hero-stagger" style={{ transitionDelay: "140ms" }}>
-              Transparente Aligner können Zahnfehlstellungen diskret korrigieren. In unserer Praxis
-              prüfen wir individuell, welches System zu Ihren Zähnen, Ihrem Alltag und Ihrem
-              Behandlungsziel passt.
+              Transparente Aligner korrigieren Zahnfehlstellungen diskret. Welches System zu Ihren
+              Zähnen und Ihrem Alltag passt, klären wir in der Eignungsprüfung vor Ort.
             </p>
             <div className="yd-al-hero-ctas yd-al-hero-stagger" style={{ transitionDelay: "210ms" }}>
               <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--glow">
@@ -436,8 +435,8 @@ export function YdAlignerLandingCarree() {
               <span className="yd-al-kicker">Warum Aligner</span>
               <h2 className="yd-al-title">Komfortabel im Alltag, präzise in der Planung.</h2>
               <p className="yd-al-lead">
-                Transparente Aligner bewegen Ihre Zähne in kleinen, digital geplanten Schritten —
-                ohne feste Brackets oder Drähte.
+                Transparente Aligner bewegen Ihre Zähne in kleinen, digital geplanten Schritten.
+                Ohne feste Brackets, ohne Drähte.
               </p>
             </div>
             <StaggerGrid className="yd-al-benefit-grid">
@@ -464,7 +463,7 @@ export function YdAlignerLandingCarree() {
           <Reveal>
             <div className="yd-al-head">
               <span className="yd-al-kicker">Für wen geeignet</span>
-              <h2 className="yd-al-title">Zahnkorrekturen sind in jedem Alter möglich.</h2>
+              <h2 className="yd-al-title">Vom Kindergartenalter bis ins Berufsleben.</h2>
             </div>
             <SegmentCarousel slides={[...SEGMENTS]} />
           </Reveal>
@@ -500,8 +499,8 @@ export function YdAlignerLandingCarree() {
               <span className="yd-al-kicker">Systeme &amp; Möglichkeiten</span>
               <h2 className="yd-al-title">Welches Aligner-System passt zu Ihnen?</h2>
               <p className="yd-al-lead">
-                Wir arbeiten überwiegend mit Invisalign®, prüfen aber je nach Befund auch
-                Alternativen — die endgültige Empfehlung erfolgt erst nach Ihrer Eignungsprüfung.
+                Wir arbeiten überwiegend mit Invisalign®, prüfen je nach Befund aber auch
+                Alternativen. Die endgültige Empfehlung erfolgt erst nach Ihrer Eignungsprüfung.
               </p>
             </div>
             <div className="yd-al-system-scroller">
@@ -530,10 +529,10 @@ export function YdAlignerLandingCarree() {
             <div className="yd-al-smileview">
               <div>
                 <span className="yd-al-kicker">Invisalign® SmileView™</span>
-                <h2 className="yd-al-title">Sehen Sie Ihr mögliches Lächeln — in 60 Sekunden.</h2>
+                <h2 className="yd-al-title">Ihr mögliches Lächeln, in 60 Sekunden sichtbar.</h2>
                 <p className="yd-al-lead">
-                  Mit einem einfachen Selfie zeigt Ihnen die offizielle Invisalign SmileView-Simulation,
-                  wie Ihr Lächeln nach einer Behandlung aussehen könnte. Unverbindlich und kostenlos —
+                  Mit einem Selfie zeigt Ihnen die offizielle Invisalign SmileView-Simulation, wie Ihr
+                  Lächeln nach einer Behandlung aussehen könnte. Unverbindlich und kostenlos, sie
                   ersetzt keine zahnärztliche Eignungsprüfung.
                 </p>
               </div>
@@ -552,7 +551,7 @@ export function YdAlignerLandingCarree() {
           <Reveal>
             <div className="yd-al-head">
               <span className="yd-al-kicker">Häufige Fragen</span>
-              <h2 className="yd-al-title">Was Patient:innen am häufigsten fragen.</h2>
+              <h2 className="yd-al-title">Fragen, die uns Patient:innen oft stellen.</h2>
             </div>
             <div className="yd-al-faq">
               {FAQ.map((f) => (
@@ -579,9 +578,9 @@ export function YdAlignerLandingCarree() {
                 <p className="yd-al-practice-name">Frau Dr. Andersson</p>
                 <p className="yd-al-practice-role">Fachzahnärztin für Kieferorthopädie</p>
                 <p className="yd-al-practice-bio">
-                  Seit 1999 begleite ich Patient:innen mit Aligner-Therapien — vom einfachen
+                  Seit 1999 begleite ich Patient:innen mit Aligner-Therapien, vom einfachen
                   Korrekturfall bis zu komplexen kieferorthopädischen Situationen. Jede Behandlung
-                  beginnt mit einer individuellen Eignungsprüfung, nicht mit einem Versprechen.
+                  beginnt mit einer individuellen Eignungsprüfung.
                 </p>
                 <div className="yd-al-practice-stats">
                   <div className="yd-al-practice-stat">
@@ -607,7 +606,7 @@ export function YdAlignerLandingCarree() {
             <div className="yd-al-practice-room">
               <Image src="/landingpages/aligner/practice-room.jpg" alt="Behandlungsraum bei Carree Dental mit Gartenblick" fill style={{ objectFit: "cover" }} />
               <div className="yd-al-practice-room-overlay">
-                <p>Helle, moderne Behandlungsräume mit Gartenblick — Brücker Mauspfad, Köln Brück.</p>
+                <p>Helle, moderne Behandlungsräume mit Gartenblick, Brücker Mauspfad in Köln Brück.</p>
               </div>
             </div>
 
@@ -645,7 +644,7 @@ export function YdAlignerLandingCarree() {
                   {PHONE_DISPLAY} anrufen
                 </a>
               </div>
-              <p className="yd-al-cta-note">Behandlung ab 150€/Monat zzgl. Laborkosten · individueller Kostenvoranschlag im Beratungsgespräch</p>
+              <p className="yd-al-cta-note">Behandlung ab 150 €/Monat zzgl. Laborkosten · individueller Kostenvoranschlag im Beratungsgespräch</p>
             </div>
           </Reveal>
         </div>

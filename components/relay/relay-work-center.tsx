@@ -28,7 +28,6 @@ import {
   countLiveKanbanCardsInColumn,
   countRelayMessageInboxTabs,
   countRelayTaskScope,
-  kanbanBoardShowsOnlyExamples,
   type RelayMessageInboxTab,
   type RelayTaskScopeTab,
 } from "@/lib/relay/relay-work-center-model";
@@ -191,7 +190,6 @@ export function RelayWorkCenter({
     [conversations, messageTab, searchQuery]
   );
 
-  const showsOnlyExamples = useMemo(() => kanbanBoardShowsOnlyExamples(board), [board]);
   const decisionLiveCount = useMemo(
     () => countLiveKanbanCardsInColumn(board.decision),
     [board.decision]
@@ -338,12 +336,6 @@ export function RelayWorkCenter({
                 })}
               </div>
             </div>
-
-            {showsOnlyExamples ? (
-              <p className="relay-center__example-notice" role="note">
-                Beispielvorgänge — so könnte Ihr Aufgabenboard aussehen, sobald das Team Relay nutzt.
-              </p>
-            ) : null}
 
             <RelayKanbanBoard
               board={board}

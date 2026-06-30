@@ -11,6 +11,9 @@
   --pr-emerald: #0f7a5c;
   --pr-emerald-deep: #0b5d46;
   --pr-emerald-ice: #e9f6f0;
+  --pr-teal: #0d8d8a;
+  --pr-amber: #c08a3e;
+  --pr-amber-soft: #f3e3c8;
   --pr-surface: #ffffff;
   --pr-warm: #f9faf7;
   --pr-page: #f6f9f7;
@@ -185,6 +188,15 @@
   margin-bottom: 18px;
 }
 
+@keyframes yd-pr-badge-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 .yd-pr-hero-title {
   font-size: clamp(30px, 4.4vw, 46px);
   line-height: 1.1;
@@ -239,7 +251,9 @@
   gap: 7px;
   padding: 9px 15px;
   border-radius: 999px;
-  background: var(--pr-surface);
+  background: linear-gradient(120deg, #ffffff 0%, var(--pr-emerald-ice) 55%, #eaf5f4 100%);
+  background-size: 220% 100%;
+  animation: yd-pr-badge-shimmer 7s ease-in-out infinite;
   border: 1px solid var(--pr-line-soft);
   box-shadow: var(--pr-shadow-md);
   font-size: 12px;
@@ -269,6 +283,32 @@
   backdrop-filter: blur(6px);
   box-shadow: var(--pr-shadow-md);
   border: 2px solid var(--pr-emerald);
+}
+
+.yd-pr-cadence::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border-radius: 999px;
+  border: 1.5px solid var(--pr-teal);
+  opacity: 0.55;
+  animation: yd-pr-ring-pulse 3.2s ease-out infinite;
+}
+
+@keyframes yd-pr-ring-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
 }
 
 .yd-pr-cadence strong {
@@ -316,8 +356,11 @@
   display: block;
   font-size: 24px;
   font-weight: 800;
-  color: var(--pr-emerald-deep);
   margin-bottom: 3px;
+  background: linear-gradient(120deg, var(--pr-emerald-deep) 0%, var(--pr-teal) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .yd-pr-stat span {
@@ -567,10 +610,18 @@
   position: relative;
   border-radius: 26px;
   padding: clamp(36px, 5vw, 56px);
-  background: linear-gradient(135deg, var(--pr-ink) 0%, var(--pr-emerald-deep) 65%, var(--pr-emerald) 100%);
+  background: linear-gradient(135deg, var(--pr-ink) 0%, var(--pr-emerald-deep) 55%, var(--pr-teal) 100%);
   color: #fff;
   text-align: center;
   overflow: hidden;
+}
+
+.yd-pr-cta-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 80% at 85% 110%, rgba(192, 138, 62, 0.22), transparent 60%);
+  pointer-events: none;
 }
 
 .yd-pr-cta-band h2 {
@@ -682,5 +733,14 @@
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .yd-pr-hero-badge,
+  .yd-pr-cadence::before {
+    animation: none !important;
+  }
+
+  .yd-pr-cadence::before {
+    opacity: 0.25 !important;
   }
 }

@@ -265,15 +265,15 @@ const TRUST_PILLS = [
 ];
 
 const BENEFITS = [
-  { icon: Camera, title: "Ein Foto genügt", text: "Ein einfaches Selfie Ihres Lächelns reicht für die erste Einordnung." },
+  { icon: Camera, title: "Ein Foto genügt", text: "Ein Selfie Ihres Lächelns reicht für die erste Einordnung." },
   { icon: ScanLine, title: "Strukturierte Einschätzung", text: "Unser Praxisteam sichtet Ihr Foto und ordnet es fachlich ein." },
   { icon: CalendarCheck, title: "Klare nächste Schritte", text: "Sie erhalten eine Rückmeldung und einen passenden Terminvorschlag." },
-  { icon: ShieldCheck, title: "Ärztlich verantwortet", text: "Keine automatisierte Diagnose — die fachliche Einordnung bleibt beim Praxisteam." },
+  { icon: ShieldCheck, title: "Ärztlich verantwortet", text: "Die fachliche Einordnung bleibt beim Praxisteam, ohne automatisierte Diagnose." },
 ] as const;
 
 const PROCESS = [
   { title: "Foto hochladen", text: "Senden Sie ein Foto Ihres Lächelns über das SmileScan-Formular." },
-  { title: "Kurzer Fragebogen", text: "Ein paar Angaben zu Ihrem Anliegen — dauert unter zwei Minuten." },
+  { title: "Kurzer Fragebogen", text: "Ein paar Angaben zu Ihrem Anliegen, fertig in unter zwei Minuten." },
   { title: "Praxisteam sichtet", text: "Carree Dental ordnet Ihr Foto strukturiert ein, ohne Ferndiagnose." },
   { title: "Persönliche Rückmeldung", text: "Sie erhalten eine erste Einschätzung und einen Terminvorschlag." },
 ] as const;
@@ -287,16 +287,16 @@ const SEGMENTS = [
 ] as const;
 
 const FAQ = [
-  { q: "Ist SmileScan eine Diagnose?", a: "Nein. SmileScan ist eine erste, unverbindliche Einordnung anhand eines Fotos durch unser Praxisteam — keine automatisierte oder zahnärztliche Diagnose. Diese erfolgt ausschließlich bei einer persönlichen Untersuchung in der Praxis." },
+  { q: "Ist SmileScan eine Diagnose?", a: "Nein. SmileScan ist eine erste, unverbindliche Einordnung anhand eines Fotos durch unser Praxisteam. Eine zahnärztliche Diagnose erfolgt ausschließlich bei einer persönlichen Untersuchung in der Praxis." },
   { q: "Was passiert mit meinem Foto?", a: "Ihr Foto wird ausschließlich zur Beratung im Rahmen von SmileScan verwendet und vertraulich behandelt. Details erläutern wir Ihnen gerne im persönlichen Gespräch." },
   { q: "Wie schnell bekomme ich eine Rückmeldung?", a: "In der Regel innerhalb von 24 Stunden an Werktagen." },
   { q: "Kostet SmileScan etwas?", a: "Nein, die erste Foto-Einordnung ist kostenlos und unverbindlich." },
-  { q: "Brauche ich trotzdem einen Termin?", a: "Ja. SmileScan ersetzt keine zahnärztliche Untersuchung — es hilft Ihnen, vorab einzuschätzen, ob und welcher Termin sinnvoll ist." },
-  { q: "Welches Foto eignet sich am besten?", a: "Ein gut beleuchtetes Foto mit offenem, entspanntem Lächeln frontal zur Kamera — ähnlich einem Selfie." },
+  { q: "Brauche ich trotzdem einen Termin?", a: "Ja. SmileScan hilft Ihnen vorab einzuschätzen, ob und welcher Termin sinnvoll ist. Es ersetzt keine zahnärztliche Untersuchung." },
+  { q: "Welches Foto eignet sich am besten?", a: "Ein gut beleuchtetes Foto mit offenem, entspanntem Lächeln frontal zur Kamera, ähnlich einem Selfie." },
 ] as const;
 
 const TRUST_NOTES = [
-  { icon: Stethoscope, text: "Fachliche Einordnung durch das Praxisteam, nicht durch eine Software." },
+  { icon: Stethoscope, text: "Fachliche Einordnung durch das Praxisteam." },
   { icon: ShieldCheck, text: "Keine automatisierte Diagnose." },
   { icon: Lock, text: "Vertrauliche, datenschutzkonforme Verarbeitung." },
   { icon: CalendarCheck, text: "Ersetzt keine zahnärztliche Untersuchung." },
@@ -330,7 +330,7 @@ export function YdSmileScanLandingCarree() {
   }, []);
 
   return (
-    <main className="yd-al">
+    <main className="yd-al yd-al--smilescan">
       <header className="yd-al-topbar">
         <div className="yd-al-container yd-al-topbar-inner">
           <Image src="/landingpages/aligner/logo.png" alt="Carree Dental" width={140} height={35} className="yd-al-logo" priority />
@@ -353,12 +353,11 @@ export function YdSmileScanLandingCarree() {
               SmileScan · Köln Brück
             </span>
             <h1 className="yd-al-hero-title yd-al-hero-stagger" style={{ transitionDelay: "70ms" }}>
-              Ein Foto. <em>Eine ehrliche erste Einordnung.</em>
+              Ein Foto. <em>Eine erste ehrliche Einordnung.</em>
             </h1>
             <p className="yd-al-hero-lead yd-al-hero-stagger" style={{ transitionDelay: "140ms" }}>
-              Mit SmileScan schicken Sie uns ein Foto Ihres Lächelns — unser Praxisteam ordnet es
-              persönlich ein und meldet sich mit einer ersten Einschätzung, bevor Sie einen Termin
-              vereinbaren.
+              Schicken Sie uns ein Foto Ihres Lächelns. Unser Praxisteam sichtet es persönlich und
+              meldet sich mit einer ersten Einschätzung, bevor Sie einen Termin vereinbaren.
             </p>
             <div className="yd-al-hero-ctas yd-al-hero-stagger" style={{ transitionDelay: "210ms" }}>
               <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--glow">
@@ -411,7 +410,7 @@ export function YdSmileScanLandingCarree() {
                 <Sparkles size={15} />
               </span>
               <div>
-                <p>SmileScan — Foto-Check vor der Erstberatung</p>
+                <p>SmileScan, der Foto-Check vor der Erstberatung</p>
                 <span>Carree Dental · Köln Brück</span>
               </div>
             </div>
@@ -427,8 +426,8 @@ export function YdSmileScanLandingCarree() {
               <span className="yd-al-kicker">Warum SmileScan</span>
               <h2 className="yd-al-title">Bevor Sie einen Termin vereinbaren, wissen Sie schon mehr.</h2>
               <p className="yd-al-lead">
-                SmileScan ist ein einfacher erster Schritt — unverbindlich, kostenlos und ohne
-                automatisierte Diagnose.
+                SmileScan ist ein unverbindlicher, kostenloser erster Schritt ohne automatisierte
+                Diagnose.
               </p>
             </div>
             <StaggerGrid className="yd-al-benefit-grid">
@@ -489,10 +488,10 @@ export function YdSmileScanLandingCarree() {
           <Reveal>
             <div className="yd-al-head">
               <span className="yd-al-kicker">Wichtig zu wissen</span>
-              <h2 className="yd-al-title">Ehrlich eingeordnet, nicht automatisch diagnostiziert.</h2>
+              <h2 className="yd-al-title">Eine erste Einordnung von Menschen, für Menschen.</h2>
               <p className="yd-al-lead">
-                SmileScan ist ein erster Anhaltspunkt von Menschen für Menschen — keine
-                Software-Diagnose und kein Ersatz für eine zahnärztliche Untersuchung.
+                SmileScan liefert einen ersten Anhaltspunkt. Es ist kein Ersatz für eine
+                zahnärztliche Untersuchung.
               </p>
             </div>
             <div className="yd-al-trust-grid">
@@ -538,7 +537,7 @@ export function YdSmileScanLandingCarree() {
             <div className="yd-al-practice-room">
               <Image src="/landingpages/aligner/practice-room.jpg" alt="Behandlungsraum bei Carree Dental mit Gartenblick" fill style={{ objectFit: "cover" }} />
               <div className="yd-al-practice-room-overlay">
-                <p>Helle, moderne Behandlungsräume mit Gartenblick — Brücker Mauspfad, Köln Brück.</p>
+                <p>Helle, moderne Behandlungsräume mit Gartenblick am Brücker Mauspfad in Köln Brück.</p>
               </div>
             </div>
             <div className="yd-al-team-strip">
