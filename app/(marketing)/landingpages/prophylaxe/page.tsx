@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 
 import { YdProphylaxeLanding } from "@/components/marketing/landingpages/yd-prophylaxe-landing";
 
@@ -20,7 +21,9 @@ export const metadata: Metadata = {
 export default function ProphylaxeLandingPage() {
   return (
     <div className={inter.variable}>
-      <YdProphylaxeLanding />
+      <Suspense fallback={null}>
+        <YdProphylaxeLanding />
+      </Suspense>
     </div>
   );
 }

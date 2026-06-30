@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, ChevronDown, MinusCircle, ShieldCheck, Sparkles } from "lucide-react";
 
-import { GENERIC_PRACTICE } from "@/lib/marketing/landingpages/generic-practice";
+import { usePracticeOverride } from "@/lib/marketing/landingpages/use-practice-override";
 
 /**
  * Vorlage "Prophylaxe" — eigenständiger Aufbau, eigene Farbidentität (Emerald/Teal,
@@ -13,7 +13,6 @@ import { GENERIC_PRACTICE } from "@/lib/marketing/landingpages/generic-practice"
  * horizontale Zeitleiste statt vertikalem Prozess. Generisch (GENERIC_PRACTICE).
  */
 
-const PRACTICE = GENERIC_PRACTICE;
 const UNSPLASH = (id: string) => `https://images.unsplash.com/photo-${id}?q=80&w=800&auto=format&fit=crop`;
 
 function scrollToId(id: string) {
@@ -126,6 +125,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export function YdProphylaxeLanding() {
+  const PRACTICE = usePracticeOverride();
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 
-import { GENERIC_PRACTICE } from "@/lib/marketing/landingpages/generic-practice";
+import { usePracticeOverride } from "@/lib/marketing/landingpages/use-practice-override";
 
 /**
  * Vorlage "Ästhetische Zahnmedizin" — eigenständiger Aufbau, eigene Farbidentität
@@ -14,7 +14,6 @@ import { GENERIC_PRACTICE } from "@/lib/marketing/landingpages/generic-practice"
  * Zitat-Statement-Block, schlanke horizontale Prozess-Zeile. Generisch (GENERIC_PRACTICE).
  */
 
-const PRACTICE = GENERIC_PRACTICE;
 const UNSPLASH = (id: string) => `https://images.unsplash.com/photo-${id}?q=80&w=1200&auto=format&fit=crop`;
 
 function scrollToId(id: string) {
@@ -118,6 +117,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export function YdAesthetikLanding() {
+  const PRACTICE = usePracticeOverride();
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {

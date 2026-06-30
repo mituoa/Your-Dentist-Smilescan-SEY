@@ -16,7 +16,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 
-import { GENERIC_PRACTICE } from "@/lib/marketing/landingpages/generic-practice";
+import { usePracticeOverride } from "@/lib/marketing/landingpages/use-practice-override";
 
 /**
  * Vorlage "Implantologie" — generisch, praxisunabhängig (siehe GENERIC_PRACTICE).
@@ -24,8 +24,6 @@ import { GENERIC_PRACTICE } from "@/lib/marketing/landingpages/generic-practice"
  * Praxis individualisiert, indem `GENERIC_PRACTICE` durch echte Praxisdaten ersetzt
  * bzw. ein Praxis-Objekt vom Typ `LandingpagePractice` injiziert wird.
  */
-
-const PRACTICE = GENERIC_PRACTICE;
 const UNSPLASH = (id: string) => `https://images.unsplash.com/photo-${id}?q=80&w=760&auto=format&fit=crop`;
 
 function scrollToId(id: string) {
@@ -279,6 +277,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export function YdImplantologieLanding() {
+  const PRACTICE = usePracticeOverride();
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {

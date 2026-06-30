@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 
 import { YdImplantologieLanding } from "@/components/marketing/landingpages/yd-implantologie-landing";
 
@@ -20,7 +21,9 @@ export const metadata: Metadata = {
 export default function ImplantologieLandingPage() {
   return (
     <div className={inter.variable}>
-      <YdImplantologieLanding />
+      <Suspense fallback={null}>
+        <YdImplantologieLanding />
+      </Suspense>
     </div>
   );
 }
