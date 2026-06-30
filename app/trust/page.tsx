@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { TrustHomeOverview } from "@/components/trust/trust-document-page";
 import { TrustShell } from "@/components/trust/trust-shell";
+import { loadTrustPageContext } from "@/lib/trust/trust-page-context";
 
 export const metadata: Metadata = {
   title: "Trust Center",
@@ -9,11 +10,17 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function TrustHomePage() {
+type TrustHomePageProps = {
+  searchParams: Promise<{ return?: string }>;
+};
+
+export default async function TrustHomePage({ searchParams }: TrustHomePageProps) {
+  const { returnTo, isAuthenticated } = await loadTrustPageContext(searchParams);
+
   return (
-    <TrustShell>
+    <TrustShell returnTo={returnTo} isAuthenticated={isAuthenticated}>
       <div className="yd-trust-overview">
-        <TrustHomeOverview />
+        <TrustHomeOverview returnTo={returnTo} />
       </div>
     </TrustShell>
   );

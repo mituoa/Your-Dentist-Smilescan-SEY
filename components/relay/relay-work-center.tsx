@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
+import { parseKanbanMobileColumn } from "@/lib/relay/relay-kanban-columns";
 import { RelayKanbanBoard } from "@/components/relay/relay-kanban-board";
 import { RelayTeamInboxList } from "@/components/relay/relay-team-inbox-list";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
@@ -19,6 +20,7 @@ import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { JournalEntry } from "@/lib/types/journal-entry";
 import {
+  RELAY_KANBAN_COLUMNS,
   RELAY_MESSAGE_INBOX_TABS,
   RELAY_TASK_SCOPE_TABS,
   buildRelayKanbanBoard,
@@ -133,7 +135,7 @@ export function RelayWorkCenter({
   const scope = parseScope(searchParams.get("scope"));
   const messageTab = parseMessageTab(searchParams.get("msg"));
   const searchQuery = searchParams.get("q") ?? "";
-  const effectiveScope = isKanbanMobile ? "all" : scope;
+  const mobileKanbanCol = parseKanbanMobileColumn(searchParams.get("kanban"));
 
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -166,7 +168,7 @@ export function RelayWorkCenter({
         submissionDraftStatus,
         isDoctor,
         userId,
-        scope: effectiveScope,
+        scope,
         searchQuery,
       }),
     [
@@ -176,7 +178,7 @@ export function RelayWorkCenter({
       submissionDraftStatus,
       isDoctor,
       userId,
-      effectiveScope,
+      scope,
       searchQuery,
     ]
   );
@@ -285,7 +287,78 @@ export function RelayWorkCenter({
               </h2>
             )}
 
-            {!isKanbanMobile ? (
+            {isKanbanMobile ? (
+              <div className="relay-center__mobile-filters" aria-label="Aufgaben filtern">
+                <div
+                  className="relay-center__filter-row relay-center__filter-row--scope"
+                  role="tablist"
+                  aria-label="Aufgaben-Zuständigkeit"
+                >
+                  {RELAY_TASK_SCOPE_TABS.map((tab) => {
+                    const active = scope === tab.id;
+                    const count = scopeCounts[tab.id];
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        aria-label={tab.label}
+                        className={cn(
+                          "relay-center__filter-seg",
+                          active && "relay-center__filter-seg--active"
+                        )}
+                        onClick={() =>
+                          replaceParams((p) => {
+                            p.set("scope", tab.id);
+                          })
+                        }
+                      >
+                        {tab.shortLabel}
+                        {count > 0 ? (
+                          <span className="relay-center__filter-seg-count">{count}</span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div
+                  className="relay-center__filter-row relay-center__filter-row--stage"
+                  role="tablist"
+                  aria-label="Aufgaben-Status"
+                >
+                  {RELAY_KANBAN_COLUMNS.map((col) => {
+                    const active = mobileKanbanCol === col.id;
+                    const count = countLiveKanbanCardsInColumn(board[col.id]);
+                    const stageLabel =
+                      col.id === "in_progress" ? "Bearbeitung" : col.label;
+                    return (
+                      <button
+                        key={col.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        aria-label={col.label}
+                        className={cn(
+                          "relay-center__filter-seg",
+                          active && "relay-center__filter-seg--active"
+                        )}
+                        onClick={() =>
+                          replaceParams((p) => {
+                            p.set("kanban", col.id);
+                          })
+                        }
+                      >
+                        {stageLabel}
+                        {count > 0 ? (
+                          <span className="relay-center__filter-seg-count">{count}</span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
               <div className="relay-center__chip-scroll">
                 <div className="relay-center__chips" role="tablist" aria-label="Aufgaben-Ansicht">
                   {RELAY_TASK_SCOPE_TABS.map((tab) => {
@@ -311,14 +384,14 @@ export function RelayWorkCenter({
                   })}
                 </div>
               </div>
-            ) : null}
+            )}
 
             <RelayKanbanBoard
               board={board}
               columns={columns}
               currentUserId={userId}
               isDoctor={isDoctor}
-              mobileColumn={null}
+              mobileColumn={isKanbanMobile ? mobileKanbanCol : null}
               decisionLiveCount={decisionLiveCount}
             />
           </section>

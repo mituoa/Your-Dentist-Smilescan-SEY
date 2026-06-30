@@ -212,7 +212,7 @@ function LandingBriefingStudio({
 
   const profileComplete =
     (context.practiceName?.trim() ?? "").length >= 2 &&
-    (context.contactName?.trim() ?? "").length >= 1 &&
+    (context.contactName?.trim() ?? "").length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((context.contactEmail ?? "").trim());
 
   const answeredCount = briefingFields.filter((f) =>
@@ -365,6 +365,7 @@ function LandingBriefingStudio({
         title=" "
         subtitle=""
         onClose={onClose}
+        headerVariant="compact"
         ariaLabel="Anfrage übermittelt"
         panelClassName="yd-medical-form-panel--landing-briefing yd-medical-form-panel--landing-success"
         footer={
@@ -414,6 +415,7 @@ function LandingBriefingStudio({
       subtitle=""
       onClose={onClose}
       closeDisabled={busy}
+      headerVariant="compact"
       ariaLabel={config.modalTitle}
       panelClassName={cn(
         "yd-medical-form-panel--landing-briefing",
@@ -465,7 +467,8 @@ function LandingBriefingStudio({
           ) : null}
           {!profileComplete ? (
             <p className="yd-medical-form-alert" role="status">
-              Bitte vervollständigen Sie Ihr Praxisprofil.
+              Bitte vervollständigen Sie Ihr Praxisprofil (Praxisname, Ansprechperson mit mindestens
+              zwei Zeichen, gültige E-Mail).
             </p>
           ) : null}
 

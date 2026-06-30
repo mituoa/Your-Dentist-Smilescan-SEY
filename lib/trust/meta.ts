@@ -1,7 +1,10 @@
-/** Zentrale Metadaten — bei finaler Freigabe hier und in workspace_contracts angleichen. */
+/** Zentrale Metadaten — bei neuer Fassung Version + CURRENT_CONTRACT_VERSION anheben. */
 export const TRUST_DOCUMENT_VERSION = "1.0";
 
 export const TRUST_EFFECTIVE_DATE_ISO = "2026-06-05";
+
+/** Veröffentlichte Fassung — keine Entwurfs-Hinweise in der UI. */
+export const TRUST_DOCUMENTS_PUBLISHED = true;
 
 export function formatTrustEffectiveDate(locale = "de-DE"): string {
   const d = new Date(`${TRUST_EFFECTIVE_DATE_ISO}T12:00:00`);
@@ -23,4 +26,16 @@ export function mapContractVersionToLabel(contractVersion: string | null | undef
   if (!v) return "—";
   if (v === "v1" || v === "1.0") return TRUST_VERSION_LABEL;
   return v;
+}
+
+export function trustDraftNotice(): string | null {
+  return TRUST_DOCUMENTS_PUBLISHED ? null : TRUST_DRAFT_BANNER;
+}
+
+export function trustDraftStatusLabel(): string | null {
+  return TRUST_DOCUMENTS_PUBLISHED ? null : TRUST_DRAFT_STATUS;
+}
+
+export function trustDraftFooter(): string | null {
+  return TRUST_DOCUMENTS_PUBLISHED ? null : TRUST_DRAFT_FOOTER;
 }

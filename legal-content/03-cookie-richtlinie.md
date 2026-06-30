@@ -1,33 +1,43 @@
 # Cookie-Richtlinie
 
-> **Entwurf – muss vor Veröffentlichung juristisch geprüft werden.**
+> **Entwurf – muss vor Veröffentlichung durch eine deutsche Rechtsanwaltskanzlei (IT-/Medizinrecht) geprüft und freigegeben werden.**
 
-## 1. Was sind Cookies?
+Stand: [PLATZHALTER – Datum der finalen Fassung] · Version 0.2 (Entwurf)
 
-Cookies sind kleine Textdateien, die auf Ihrem Endgerät gespeichert werden, wenn Sie Websites oder Anwendungen nutzen. Sie helfen dabei, Funktionen bereitzustellen, Sitzungen zu verwalten oder — sofern Sie einwilligen — Nutzungsinformationen zu erfassen.
+## 1. Was sind Cookies und vergleichbare Technologien?
 
-## 2. Welche Cookies setzen wir ein?
+Cookies sind kleine Textdateien, die beim Aufrufen der Plattform auf Ihrem Endgerät gespeichert werden können. Sie dienen unter anderem dazu, Sitzungen zu verwalten, Funktionen bereitzustellen oder – sofern eingewilligt – Nutzungsinformationen zu erfassen. Vergleichbare Speicher- und Auslesetechnologien (z. B. lokaler Speicher des Browsers) werden im Sinne dieser Richtlinie wie Cookies behandelt.
+
+## 2. Rechtsgrundlage
+
+Das Speichern von Informationen auf Ihrem Endgerät oder der Zugriff auf bereits gespeicherte Informationen setzt nach § 25 Abs. 1 TDDDG (vormals TTDSG) grundsätzlich Ihre Einwilligung voraus. Eine Ausnahme gilt nach § 25 Abs. 2 Nr. 2 TDDDG für Cookies, die unbedingt erforderlich sind, um einen von Ihnen ausdrücklich gewünschten Dienst (z. B. die Anmeldung an der Plattform) bereitzustellen.
+
+## 3. Welche Cookies setzen wir derzeit ein?
+
+**Zum Zeitpunkt dieser Fassung setzt die Plattform ausschließlich technisch notwendige Cookies ein.** Eine Erfassung mittels Analyse-, Marketing- oder vergleichbarer optionaler Cookies findet derzeit nicht statt.
 
 ### Technisch notwendige Cookies
 
-Diese Cookies sind für den Betrieb der Plattform erforderlich, z. B. für Authentifizierung, Sitzungssicherheit und grundlegende Einstellungen. Sie werden auf Grundlage berechtigter Interessen bzw. zur Vertragserfüllung eingesetzt.
+Diese Cookies sind für den Betrieb der Plattform erforderlich, insbesondere für die Authentifizierung und Aufrechterhaltung Ihrer Sitzung sowie grundlegende Sicherheitsfunktionen. Sie werden auf Grundlage von § 25 Abs. 2 Nr. 2 TDDDG sowie, soweit personenbezogene Daten betroffen sind, auf Grundlage von Art. 6 Abs. 1 lit. b bzw. f DSGVO eingesetzt. Eine Einwilligung ist hierfür nicht erforderlich.
 
-### Funktionale Cookies
+[PLATZHALTER – konkrete Liste der gesetzten technisch notwendigen Cookies (Name, Zweck, Speicherdauer) ist vor Veröffentlichung aus der tatsächlichen technischen Konfiguration zu ergänzen.]
 
-Funktionale Cookies speichern Präferenzen wie Darstellungsmodus oder zuletzt genutzte Bereiche, um die Nutzung zu erleichtern.
+## 4. Geplante künftige Kategorien
 
-### Analyse-Cookies
+Sollten künftig funktionale Cookies (z. B. zur Speicherung von Darstellungspräferenzen) oder Analyse-Cookies eingesetzt werden, wird vor deren Aktivierung ein rechtskonformer Einwilligungsmechanismus (Consent-Banner mit granularer Auswahlmöglichkeit) implementiert und diese Richtlinie entsprechend aktualisiert. Eine Aktivierung erfolgt nicht ohne vorherige Einwilligung, soweit diese gesetzlich erforderlich ist.
 
-Sofern eingesetzt, helfen Analyse-Cookies uns, die Plattform zu verbessern. Sie werden nur nach Ihrer Einwilligung aktiviert.
+## 5. Speicherdauer
 
-## 3. Speicherdauer
+Sitzungscookies werden mit Beendigung Ihrer Sitzung bzw. nach Ablauf einer technisch festgelegten Frist automatisch gelöscht. Persistente technisch notwendige Cookies verbleiben für einen begrenzten, dem jeweiligen Zweck angemessenen Zeitraum auf Ihrem Endgerät. [PLATZHALTER – konkrete Speicherfristen je Cookie sind zu ergänzen.]
 
-Sitzungscookies werden nach Beendigung der Sitzung gelöscht. Persistente Cookies verbleiben für einen definierten Zeitraum auf Ihrem Gerät, sofern Sie sie nicht manuell entfernen.
+## 6. Verwaltung durch Sie
 
-## 4. Verwaltung und Widerruf
+Sie können Cookies in Ihren Browser-Einstellungen jederzeit einsehen, löschen oder das Setzen neuer Cookies blockieren. Das Blockieren technisch notwendiger Cookies kann dazu führen, dass die Plattform, insbesondere die Anmeldung, nicht oder nur eingeschränkt funktioniert.
 
-Sie können Cookies in Ihren Browser-Einstellungen löschen oder blockieren. Das kann die Funktionsfähigkeit einzelner Bereiche einschränken. Eine erteilte Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen.
+## 7. Änderungen dieser Richtlinie
 
-## 5. Kontakt
+Diese Richtlinie wird aktualisiert, sobald sich die eingesetzten Cookie-Kategorien ändern, insbesondere bei Einführung optionaler Cookies gemäß Ziffer 4.
+
+## 8. Kontakt
 
 Fragen zur Cookie-Nutzung richten Sie bitte an die im Impressum genannte Kontaktadresse.

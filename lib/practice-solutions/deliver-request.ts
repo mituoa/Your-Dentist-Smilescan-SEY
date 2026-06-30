@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { getAdminEmailsAllowlist, isSmtpConfigured } from "@/lib/env";
 import { sendTransactionalMail } from "@/lib/mail/send-mail";
 import { SmtpNotConfiguredError } from "@/lib/mail/mail-errors";
@@ -118,47 +120,76 @@ export type DeliverPracticeSolutionResult = {
   delivered: boolean;
 };
 
+export type PersistPracticeSolutionOptions = {
+  userClient?: SupabaseClient;
+};
+
+function buildRequestRow(workspaceId: string, data: PracticeSolutionRequestPayload) {
+  return {
+    workspace_id: workspaceId,
+    solution_id: data.solutionId,
+    solution_title: data.solutionTitle,
+    practice_name: data.practiceName,
+    contact_name: data.contactName,
+    email: data.email,
+    phone: data.phone || null,
+    message: data.message || null,
+    budget: data.budget || null,
+    timeline: data.timeline || null,
+    status: "received" as const,
+  };
+}
+
 export async function persistPracticeSolutionRequest(
   workspaceId: string,
-  data: PracticeSolutionRequestPayload
+  data: PracticeSolutionRequestPayload,
+  options?: PersistPracticeSolutionOptions
 ): Promise<boolean> {
+  const row = buildRequestRow(workspaceId, data);
+
   try {
     const admin = createAdminClient();
-    const { error } = await admin.from("platform_practice_solution_requests").insert({
-      workspace_id: workspaceId,
-      solution_id: data.solutionId,
-      solution_title: data.solutionTitle,
-      practice_name: data.practiceName,
-      contact_name: data.contactName,
-      email: data.email,
-      phone: data.phone || null,
-      message: data.message || null,
-      budget: data.budget || null,
-      timeline: data.timeline || null,
-      status: "received",
-    });
-    if (error) {
-      const code =
-        typeof error.code === "string" && error.code.trim() !== "" ? error.code : "unknown";
-      const message = typeof error.message === "string" ? error.message : "";
-      console.warn(
-        `[practice-solution-request] persist failed code=${code}`,
-        message || undefined
-      );
-      return persistPracticeSolutionRequestToStorage(admin, workspaceId, data);
+    const { error } = await admin.from("platform_practice_solution_requests").insert(row);
+    if (!error) return true;
+
+    const code =
+      typeof error.code === "string" && error.code.trim() !== "" ? error.code : "unknown";
+    const message = typeof error.message === "string" ? error.message : "";
+    console.warn(
+      `[practice-solution-request] persist failed code=${code}`,
+      message || undefined
+    );
+
+    if (await persistPracticeSolutionRequestToStorage(admin, workspaceId, data)) {
+      return true;
     }
-    return true;
   } catch (error) {
     console.warn(
-      "[practice-solution-request] persist unavailable",
+      "[practice-solution-request] admin persist unavailable",
       error instanceof Error ? error.message : "unknown"
     );
-    try {
-      const admin = createAdminClient();
-      return persistPracticeSolutionRequestToStorage(admin, workspaceId, data);
-    } catch {
-      return false;
-    }
+  }
+
+  if (options?.userClient) {
+    const { error } = await options.userClient
+      .from("platform_practice_solution_requests")
+      .insert(row);
+    if (!error) return true;
+
+    const code =
+      typeof error.code === "string" && error.code.trim() !== "" ? error.code : "unknown";
+    const message = typeof error.message === "string" ? error.message : "";
+    console.warn(
+      `[practice-solution-request] user persist failed code=${code}`,
+      message || undefined
+    );
+  }
+
+  try {
+    const admin = createAdminClient();
+    return persistPracticeSolutionRequestToStorage(admin, workspaceId, data);
+  } catch {
+    return false;
   }
 }
 

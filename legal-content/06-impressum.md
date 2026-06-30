@@ -1,6 +1,8 @@
 # Impressum
 
-> **Entwurf – muss vor Veröffentlichung juristisch geprüft werden.**
+> **Entwurf – muss vor Veröffentlichung durch eine deutsche Rechtsanwaltskanzlei (IT-/Medizinrecht) geprüft und freigegeben werden.**
+
+Stand: [PLATZHALTER – Datum der finalen Fassung] · Version 0.2 (Entwurf)
 
 ## Anbieter
 

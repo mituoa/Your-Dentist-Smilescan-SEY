@@ -91,10 +91,10 @@ export const RELAY_KANBAN_COLUMNS: {
   },
 ];
 
-export const RELAY_TASK_SCOPE_TABS: { id: RelayTaskScopeTab; label: string }[] = [
-  { id: "all", label: "Alle Aufgaben" },
-  { id: "mine", label: "Meine Aufgaben" },
-  { id: "delegated", label: "Delegiert" },
+export const RELAY_TASK_SCOPE_TABS: { id: RelayTaskScopeTab; label: string; shortLabel: string }[] = [
+  { id: "all", label: "Alle Aufgaben", shortLabel: "Alle" },
+  { id: "mine", label: "Meine Aufgaben", shortLabel: "Meine" },
+  { id: "delegated", label: "Delegiert", shortLabel: "Delegiert" },
 ];
 
 export const RELAY_MESSAGE_INBOX_TABS: { id: RelayMessageInboxTab; label: string }[] = [

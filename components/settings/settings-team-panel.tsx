@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { ArrowRight, Check, Plus, Shield } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 
 import {
   displayNameFromEmail,
-  initialsFromEmail,
   SettingsTeamMemberCard,
 } from "@/components/settings/settings-team-member-card";
 import { REFERENCE_ROLES } from "@/lib/settings/reference-roles";
@@ -39,23 +38,15 @@ function PermissionPill({ label }: { label: string }) {
   );
 }
 
-function MemberAvatars({
-  emails,
-  extra = 0,
-}: {
-  emails: string[];
-  extra?: number;
-}) {
-  const visible = emails.slice(0, 2);
+function MemberSummary({ emails }: { emails: string[] }) {
+  if (emails.length === 0) return null;
+  const visible = emails.slice(0, 3).map(displayNameFromEmail);
+  const hidden = emails.length - visible.length;
   return (
-    <div className="yd-settings-v2__avatars" aria-hidden>
-      {visible.map((email) => (
-        <span key={email} className="yd-settings-v2__avatar" title={email}>
-          {initialsFromEmail(email)}
-        </span>
-      ))}
-      {extra > 0 ? <span className="yd-settings-v2__avatar yd-settings-v2__avatar--more">+{extra}</span> : null}
-    </div>
+    <p className="yd-settings-v2__role-members">
+      {visible.join(" · ")}
+      {hidden > 0 ? ` · +${hidden}` : ""}
+    </p>
   );
 }
 
@@ -104,9 +95,13 @@ export function SettingsTeamPanel({
             Verwalten Sie Ihr Team und definieren Sie Rollen mit individuellen Berechtigungen.
           </p>
         </div>
-        <button type="button" className="yd-settings-v2__primary-btn" disabled aria-disabled="true">
+        <button
+          type="button"
+          className="yd-settings-v2__primary-btn"
+          onClick={() => setTab("einladungen")}
+        >
           <Plus className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-          Neue Rolle erstellen
+          Mitglied einladen
         </button>
       </div>
 
@@ -151,23 +146,52 @@ export function SettingsTeamPanel({
               />
             ))}
           </div>
+
+          <div className="yd-settings-v2__invite-box yd-settings-v2__invite-box--inline">
+            <label className="yd-settings-v2__field-label" htmlFor="settings-v2-invite-email-inline">
+              Teammitglied einladen
+            </label>
+            <input
+              id="settings-v2-invite-email-inline"
+              type="email"
+              placeholder="E-Mail-Adresse"
+              value={inviteEmail}
+              onChange={(e) => onInviteEmailChange(e.target.value)}
+              className="yd-settings-v2__input"
+              disabled={busy}
+            />
+            <select
+              value={inviteRole}
+              onChange={(e) => onInviteRoleChange(e.target.value as "doctor" | "team")}
+              className="yd-settings-v2__input"
+              disabled={busy}
+              aria-label="Rolle für Einladung"
+            >
+              <option value="doctor">Zahnarzt / Administrator</option>
+              <option value="team">Teammitglied</option>
+            </select>
+            <button
+              type="button"
+              onClick={onInvite}
+              disabled={!inviteEmail.trim() || busy}
+              className="yd-settings-v2__primary-btn yd-settings-v2__primary-btn--block"
+            >
+              Einladung senden
+            </button>
+          </div>
         </div>
       ) : null}
 
       {tab === "rollen" ? (
         <div className="yd-settings-v2__tab-panel" role="tabpanel">
-          <div className="yd-settings-v2__roles-grid">
+          <div className="yd-settings-v2__roles-group">
             {REFERENCE_ROLES.map((role) => {
-              const Icon = role.icon;
               let emails: string[] = [];
-              let extra = 0;
 
               if (role.memberRole === "doctor") {
                 emails = roleMembers.doctors;
-                extra = Math.max(0, roleMembers.doctors.length - 2);
               } else if (role.memberRole === "team") {
                 emails = roleMembers.team;
-                extra = Math.max(0, roleMembers.team.length - 2);
               }
 
               const memberCount =
@@ -179,20 +203,15 @@ export function SettingsTeamPanel({
 
               return (
                 <article key={role.id} className="yd-settings-v2__role-card">
-                  <div className="yd-settings-v2__role-cell">
-                    <span className="yd-settings-v2__role-icon">
-                      <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                    </span>
-                    <span>
-                      <span className="yd-settings-v2__role-name">{role.label}</span>
-                      <span className="yd-settings-v2__role-desc">{role.description}</span>
-                    </span>
+                  <div className="yd-settings-v2__role-head">
+                    <h3 className="yd-settings-v2__role-name">{role.label}</h3>
+                    <p className="yd-settings-v2__role-desc">{role.description}</p>
                   </div>
 
                   <div className="yd-settings-v2__role-card-section">
                     <p className="yd-settings-v2__role-card-label">Mitglieder</p>
                     {memberCount > 0 ? (
-                      <MemberAvatars emails={emails} extra={extra} />
+                      <MemberSummary emails={emails} />
                     ) : (
                       <span className="yd-settings-v2__role-empty">Noch keine Zuordnung</span>
                     )}
@@ -200,11 +219,13 @@ export function SettingsTeamPanel({
 
                   <div className="yd-settings-v2__role-card-section">
                     <p className="yd-settings-v2__role-card-label">Berechtigungen</p>
-                    <div className="yd-settings-v2__perm-list">
+                    <ul className="yd-settings-v2__perm-list">
                       {role.permissions.map((p) => (
-                        <PermissionPill key={p} label={p} />
+                        <li key={p}>
+                          <PermissionPill label={p} />
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 </article>
               );
@@ -212,19 +233,14 @@ export function SettingsTeamPanel({
           </div>
 
           <div className="yd-settings-v2__info-banner">
-            <Shield className="yd-settings-v2__info-banner-icon" strokeWidth={1.75} aria-hidden />
             <div className="yd-settings-v2__info-banner-body">
               <p className="yd-settings-v2__info-banner-title">
                 Berechtigungen folgen dem Prinzip der minimalen Rechte
               </p>
               <p className="yd-settings-v2__info-banner-copy">
                 Jede Rolle erhält nur die Berechtigungen, die für ihre Aufgaben erforderlich sind.
-                Individuelle Rollen werden in einer kommenden Version ergänzt.
+                Individuelle Rollen können Sie bei Bedarf mit uns abstimmen.
               </p>
-              <button type="button" className="yd-settings-v2__info-banner-btn" disabled aria-disabled="true">
-                Berechtigungen verwalten
-                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-              </button>
             </div>
           </div>
         </div>

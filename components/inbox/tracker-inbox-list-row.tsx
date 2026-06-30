@@ -18,8 +18,10 @@ type TrackerInboxListRowProps = {
   href: string;
   isActive: boolean;
   onOpen: () => void;
-  /** Größere Status-Schaltfläche mit Label (Mobile). */
+  /** Größere Status-Schaltfläche mit Label (selten — Desktop). */
   showStatusLabel?: boolean;
+  /** Nur farbiger Punkt + Menü (Mobile). */
+  compactStatusDot?: boolean;
 };
 
 const ROUTINE_WORK_HEADLINES = new Set(["In Bearbeitung", "Erledigt"]);
@@ -31,6 +33,7 @@ export function TrackerInboxListRow({
   isActive,
   onOpen,
   showStatusLabel = false,
+  compactStatusDot = false,
 }: TrackerInboxListRowProps) {
   const patientName = item.patient_name?.trim() || "Unbekannter Patient";
   const readState = trackerInboxReadState(item);
@@ -95,6 +98,7 @@ export function TrackerInboxListRow({
         status={practiceStatus}
         seenAt={item.seen_at}
         showStatusLabel={showStatusLabel}
+        compactDot={compactStatusDot}
         className="yd-tracker-inbox-list-row__status"
       />
     </div>

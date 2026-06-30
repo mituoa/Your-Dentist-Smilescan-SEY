@@ -30,12 +30,7 @@
 
 .yd-settings-v2.yd-clinical-brand {
   --yd-settings-surface: rgba(248, 252, 255, 0.94);
-  --yd-settings-panel: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.97) 0%,
-    rgba(248, 252, 255, 0.95) 48%,
-    rgba(239, 246, 255, 0.93) 100%
-  );
+  --yd-settings-panel: #fff;
 }
 
 .yd-settings-v2 {
@@ -49,8 +44,8 @@
 
 .yd-settings-v2__frame {
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   padding: 0 0.25rem 2rem;
 }
 
@@ -62,17 +57,18 @@
 
 @media (min-width: 960px) {
   .yd-settings-v2__layout {
-    grid-template-columns: 220px minmax(0, 680px);
-    gap: 2.75rem 3.25rem;
-    justify-content: center;
-    margin: 0 auto;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 2rem 2.75rem;
+    justify-content: stretch;
+    margin: 0;
+    max-width: none;
   }
 }
 
 @media (min-width: 1100px) {
   .yd-settings-v2__layout {
-    grid-template-columns: 232px minmax(0, 700px);
-    gap: 3rem 3.75rem;
+    grid-template-columns: 248px minmax(0, 1fr);
+    gap: 2.5rem 3.25rem;
   }
 }
 
@@ -304,19 +300,17 @@
 }
 
 .yd-settings-v2__panel {
-  padding: 1.75rem 1.35rem 2rem;
-  border: 1px solid rgba(160, 178, 198, 0.32);
-  border-radius: 24px;
+  padding: 1.5rem 1.25rem 1.75rem;
+  border: 1px solid rgba(160, 178, 198, 0.28);
+  border-radius: 14px;
   background: var(--yd-settings-panel);
-  box-shadow:
-    0 1px 2px rgba(15, 35, 58, 0.04),
-    0 10px 28px rgba(30, 91, 189, 0.08);
+  box-shadow: 0 1px 2px rgba(15, 35, 58, 0.03);
 }
 
 @media (min-width: 640px) {
   .yd-settings-v2__panel {
-    padding: 2rem 2rem 2.25rem;
-    border-radius: 24px;
+    padding: 1.65rem 1.65rem 1.85rem;
+    border-radius: 16px;
   }
 }
 
@@ -335,19 +329,19 @@
 
 .yd-settings-v2__panel-title {
   margin: 0;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: clamp(1.25rem, 2.4vw, 1.4375rem);
-  font-weight: 400;
-  letter-spacing: -0.025em;
-  line-height: 1.22;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: clamp(1.125rem, 2vw, 1.3125rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
   color: var(--yd-brand-navy);
 }
 
 .yd-settings-v2__panel-copy {
-  margin: 0.5rem 0 0;
-  max-width: 48ch;
-  font-size: 0.875rem;
-  line-height: 1.6;
+  margin: 0.4rem 0 0;
+  max-width: 62ch;
+  font-size: 0.8125rem;
+  line-height: 1.55;
   color: var(--yd-brand-muted);
 }
 
@@ -434,20 +428,33 @@
   background: var(--yd-brand-accent-deep);
 }
 
-/* ── Roles (card grid) ── */
-.yd-settings-v2__roles-grid {
+/* ── Roles (grouped list) ── */
+.yd-settings-v2__roles-group {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  border: 1px solid rgba(160, 178, 198, 0.28);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
 }
 
 .yd-settings-v2__role-card {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
-  padding: 1.35rem 1.25rem 1.45rem;
-  border-radius: 18px;
-  background: rgba(248, 252, 255, 0.45);
+  gap: 0.85rem;
+  padding: 1rem 1.05rem 1.05rem;
+  border-bottom: 1px solid rgba(160, 178, 198, 0.22);
+  background: #fff;
+}
+
+.yd-settings-v2__role-card:last-child {
+  border-bottom: none;
+}
+
+.yd-settings-v2__role-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
 .yd-settings-v2__role-card-section {
@@ -484,22 +491,30 @@
 }
 
 .yd-settings-v2__role-name {
-  display: block;
+  margin: 0;
+  font-size: 0.9375rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--yd-brand-navy);
 }
 
 .yd-settings-v2__role-desc {
-  display: block;
-  margin-top: 0.12rem;
-  font-size: 0.75rem;
+  margin: 0;
+  font-size: 0.8125rem;
   line-height: 1.45;
   color: var(--yd-brand-muted);
 }
 
 .yd-settings-v2__role-empty {
+  font-size: 0.8125rem;
   color: var(--yd-brand-faint);
+}
+
+.yd-settings-v2__role-members {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--yd-brand-body);
 }
 
 .yd-settings-v2__avatars {
@@ -534,25 +549,30 @@
 
 .yd-settings-v2__perm-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 0.5rem;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .yd-settings-v2__perm {
   display: inline-flex;
-  align-items: center;
-  gap: 0.28rem;
-  padding: 0.32rem 0.55rem;
-  border-radius: 999px;
-  background: rgba(47, 128, 237, 0.06);
-  font-size: 0.625rem;
-  font-weight: 500;
-  line-height: 1.3;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
   color: var(--yd-brand-body);
 }
 
+.yd-settings-v2__perm svg {
+  margin-top: 0.15rem;
+  color: var(--yd-brand-accent-deep);
+}
+
 .yd-settings-v2__perm--muted {
-  background: transparent;
   color: var(--yd-brand-faint);
 }
 
@@ -574,14 +594,10 @@
 .yd-settings-v2__info-banner {
   display: flex;
   gap: 0.85rem;
-  margin-top: 1.75rem;
-  padding: 1.25rem 1.25rem;
-  border-radius: 18px;
-  background: linear-gradient(
-    165deg,
-    rgba(239, 246, 255, 0.95) 0%,
-    rgba(248, 252, 255, 0.92) 100%
-  );
+  margin-top: 1.35rem;
+  padding: 0.95rem 1rem;
+  border-radius: 12px;
+  background: rgba(239, 246, 255, 0.55);
   border: 1px solid rgba(26, 79, 156, 0.1);
 }
 
@@ -909,12 +925,16 @@
 .yd-settings-v2__member-list {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
-  margin-bottom: 1.5rem;
+  gap: 0;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(160, 178, 198, 0.28);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
 }
 
 .yd-settings-v2__member-list--compact {
-  margin-bottom: 1.15rem;
+  margin-bottom: 1rem;
 }
 
 .yd-settings-v2__invite-box {
@@ -923,6 +943,10 @@
   border: 1px solid rgba(160, 178, 198, 0.28);
   border-radius: 18px;
   background: rgba(248, 252, 255, 0.55);
+}
+
+.yd-settings-v2__invite-box--inline {
+  margin-top: 1.75rem;
 }
 
 .yd-settings-v2__invite-summary {

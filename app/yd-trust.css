@@ -31,11 +31,27 @@
   margin: 0 auto;
   padding: 0 max(1rem, env(safe-area-inset-left)) max(2rem, env(safe-area-inset-bottom))
     max(1rem, env(safe-area-inset-right));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.yd-trust-main:has(.yd-trust-doc-layout--focus) {
+  max-width: 52rem;
+  padding-top: 0.25rem;
 }
 
 @media (min-width: 1024px) {
   .yd-trust-main {
-    padding-inline: 2rem;
+    padding-inline: 2.5rem;
+  }
+
+  .yd-trust-main:has(.yd-trust-doc-layout--focus) {
+    margin-left: max(2rem, env(safe-area-inset-left));
+    margin-right: auto;
+    max-width: 56rem;
+    padding-inline: 2rem 3rem;
   }
 }
 
@@ -48,24 +64,76 @@
   text-decoration: none;
 }
 
+/* ── Eingeloggte Nutzer: Rückweg in die App ── */
+
+.yd-trust-escape {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.35rem max(1rem, env(safe-area-inset-left)) 0 max(1rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 1024px) {
+  .yd-trust-escape {
+    padding-inline: 2.5rem;
+  }
+}
+
+.yd-trust-escape__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--trust-blue-deep);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.yd-trust-escape__link:hover {
+  color: var(--trust-blue);
+}
+
+.yd-trust-escape__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
 /* ── Overview (keine Sidebar — Karten sind die Navigation) ── */
 
 .yd-trust-overview {
-  max-width: 32rem;
+  max-width: 26rem;
   margin: 0 auto;
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .yd-trust-overview {
+    max-width: 30rem;
+    padding-top: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-trust-overview {
+    max-width: 34rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 1.25rem;
+  }
 }
 
 /* ── Document index (Übersicht) ── */
 
 .yd-trust-index {
-  border: 1px solid var(--trust-line);
-  border-radius: 14px;
+  border: 1px solid rgba(22, 35, 58, 0.07);
+  border-radius: 16px;
   background: var(--trust-surface);
   overflow: hidden;
   box-shadow:
-    0 1px 2px rgba(22, 35, 58, 0.04),
-    0 12px 32px rgba(22, 35, 58, 0.05);
+    0 1px 2px rgba(22, 35, 58, 0.03),
+    0 16px 40px rgba(22, 35, 58, 0.06);
 }
 
 .yd-trust-index__head {
@@ -364,7 +432,43 @@
   color: var(--trust-blue);
 }
 
-/* ── Document 3-column layout ── */
+/* ── Document — fokussierte Lesesicht (keine Sidebar / kein TOC-Rail) ── */
+
+.yd-trust-doc-layout--focus {
+  display: block;
+  padding-top: 0;
+}
+
+.yd-trust-doc-layout--focus .yd-trust-doc {
+  max-width: none;
+  margin: 0;
+}
+
+.yd-trust-doc__crumb {
+  margin-bottom: 1rem;
+}
+
+.yd-trust-doc__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--trust-blue-deep);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.yd-trust-doc__back:hover {
+  color: var(--trust-blue);
+}
+
+.yd-trust-doc__back-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Legacy 3-column layout (nicht mehr in Produktion genutzt) */
 
 .yd-trust-doc-layout {
   display: grid;
@@ -534,15 +638,19 @@
 
 .yd-trust-h2 {
   margin: 2rem 0 0.75rem;
+  padding-top: 0.875rem;
   font-size: 1.125rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--trust-navy);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--trust-blue-deep);
+  border-top: 1px solid var(--trust-line);
   scroll-margin-top: 5.5rem;
 }
 
 .yd-trust-h2:first-child {
   margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .yd-trust-h3 {
@@ -685,28 +793,144 @@
   box-shadow: 0 1px 3px rgba(22, 35, 58, 0.06);
 }
 
-/* ── Print / PDF ── */
+/* ── Print / PDF (Doctolib-artiges Aktenformat) ── */
+
+.yd-trust-print-header,
+.yd-trust-print-footer {
+  display: none;
+}
+
+@page {
+  size: A4;
+  margin: 26mm 14mm 22mm;
+}
 
 @media print {
   .yd-product-chrome,
   .yd-public-site-footer,
+  .yd-trust-doc__crumb,
+  .yd-trust-doc__meta,
   [data-print-hide] {
     display: none !important;
   }
 
+  html,
+  body {
+    background: #fff;
+  }
+
   .yd-trust {
     background: #fff;
+    min-height: 0;
+    display: block;
+  }
+
+  .yd-trust-main {
+    max-width: none;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .yd-trust-main:has(.yd-trust-doc-layout--focus) {
+    max-width: none;
+    padding-top: 0;
   }
 
   .yd-trust-doc-layout {
     display: block;
   }
 
+  .yd-trust-doc-layout--focus .yd-trust-doc {
+    max-width: none;
+  }
+
+  .yd-trust-doc__draft {
+    border: 1px solid #16233a;
+    background: #fff;
+    color: #16233a;
+  }
+
   .yd-trust-doc__title {
-    font-size: 1.5rem;
+    font-size: 17pt;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: #16233a;
+    margin: 0 0 6mm;
+  }
+
+  .yd-trust-doc__footer {
+    display: none;
+  }
+
+  /* Fließtext im Zwei-Spalten-Satz, wie bei klassischen Vertragsdokumenten */
+  .yd-trust-doc__body {
+    columns: 2;
+    column-gap: 9mm;
+    column-rule: 1px solid var(--trust-line);
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #16233a;
+    orphans: 3;
+    widows: 3;
   }
 
   .yd-trust-h2 {
-    page-break-after: avoid;
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #16233a;
+    border-top: none;
+    padding-top: 0;
+    margin: 3mm 0 1.5mm;
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  .yd-trust-h2:first-child {
+    margin-top: 0;
+  }
+
+  .yd-trust-h3 {
+    font-size: 9.5pt;
+    break-after: avoid;
+  }
+
+  .yd-trust-p,
+  .yd-trust-li {
+    break-inside: avoid;
+  }
+
+  /* Fixierte Kopf-/Fußzeile, wiederholt sich auf jeder gedruckten Seite */
+  .yd-trust-print-header,
+  .yd-trust-print-footer {
+    display: flex;
+    position: fixed;
+    left: 14mm;
+    right: 14mm;
+    font-size: 7.5pt;
+    color: #54637a;
+  }
+
+  .yd-trust-print-header {
+    top: 8mm;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--trust-line);
+    padding-bottom: 2mm;
+  }
+
+  .yd-trust-print-header span:first-child {
+    font-weight: 700;
+    color: #16233a;
+  }
+
+  .yd-trust-print-footer {
+    bottom: 8mm;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5mm;
+    text-align: center;
+    border-top: 1px solid var(--trust-line);
+    padding-top: 2mm;
   }
 }

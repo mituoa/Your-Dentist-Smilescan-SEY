@@ -2,8 +2,9 @@
 
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { dispatchPasswordResetEmail } from "@/lib/auth/dispatch-password-reset-email";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { dispatchPasswordResetEmail } from "@/lib/auth/dispatch-password-reset-email";
+import { CURRENT_CONTRACT_VERSION } from "@/lib/trust/contract-policy";
 import { getAppBaseUrl } from "@/lib/env";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -196,7 +197,8 @@ export async function signUp(formData: FormData) {
   const inviteToken = (formData.get("invite_token") as string | null)?.trim();
 
   const billingInterval = (formData.get("billing_interval") as string | null)?.trim();
-  const contractVersion = (formData.get("contract_version") as string | null)?.trim() || "v1";
+  const contractVersion =
+    (formData.get("contract_version") as string | null)?.trim() || CURRENT_CONTRACT_VERSION;
   const acceptedAtRaw = (formData.get("accepted_at") as string | null)?.trim();
   const acceptedTos = (formData.get("accepted_tos") as string | null) === "1";
   const acceptedPrivacy = (formData.get("accepted_privacy") as string | null) === "1";
@@ -360,8 +362,18 @@ export async function signUp(formData: FormData) {
         deleteRegistrationAuthUser: true,
       });
     }
-    if (!acceptedTos || !acceptedPrivacy || !acceptedWithdrawal) {
-      await registerFail("Bitte alle Pflichtfelder im Vertrag bestätigen.", {
+    if (!acceptedTos) {
+      await registerFail("Bitte akzeptieren Sie die Nutzungsbedingungen.", {
+        deleteRegistrationAuthUser: true,
+      });
+    }
+    if (!acceptedPrivacy) {
+      await registerFail("Bitte bestätigen Sie die Kenntnisnahme der Datenschutzerklärung.", {
+        deleteRegistrationAuthUser: true,
+      });
+    }
+    if (!acceptedWithdrawal) {
+      await registerFail("Bitte bestätigen Sie den vorzeitigen Leistungsbeginn.", {
         deleteRegistrationAuthUser: true,
       });
     }

@@ -1,6 +1,8 @@
 # Rechtliche Übersicht
 
-> **Entwurf – muss vor Veröffentlichung juristisch geprüft werden.**
+> **Entwurf – muss vor Veröffentlichung durch eine deutsche Rechtsanwaltskanzlei (IT-/Medizinrecht) geprüft und freigegeben werden.**
+
+Stand: [PLATZHALTER – Datum der finalen Fassung] · Version 0.2 (Entwurf)
 
 Your Dentist ist eine digitale Plattform für Zahnarztpraxen. In diesem Trust Center finden Sie alle rechtlich relevanten Informationen zu Datenschutz, Sicherheit, Nutzungsbedingungen und KI-Transparenz — strukturiert und nachvollziehbar.
 

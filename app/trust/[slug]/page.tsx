@@ -5,9 +5,11 @@ import { TrustDocumentPage } from "@/components/trust/trust-document-page";
 import { TrustShell } from "@/components/trust/trust-shell";
 import { getAppBaseUrl } from "@/lib/env";
 import { getTrustDocument, isTrustSlug, TRUST_SLUGS } from "@/lib/trust/documents";
+import { loadTrustPageContext } from "@/lib/trust/trust-page-context";
 
 type TrustSlugPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ return?: string }>;
 };
 
 export function generateStaticParams() {
@@ -25,17 +27,22 @@ export async function generateMetadata({ params }: TrustSlugPageProps): Promise<
   };
 }
 
-export default async function TrustSlugPage({ params }: TrustSlugPageProps) {
+export default async function TrustSlugPage({ params, searchParams }: TrustSlugPageProps) {
   const { slug } = await params;
   if (!isTrustSlug(slug)) notFound();
 
   const document = getTrustDocument(slug);
   const base = getAppBaseUrl().replace(/\/$/, "");
   const canonicalUrl = `${base}/trust/${slug}`;
+  const { returnTo, isAuthenticated } = await loadTrustPageContext(searchParams);
 
   return (
-    <TrustShell>
-      <TrustDocumentPage document={document} canonicalPath={canonicalUrl} />
+    <TrustShell returnTo={returnTo} isAuthenticated={isAuthenticated}>
+      <TrustDocumentPage
+        document={document}
+        canonicalPath={canonicalUrl}
+        returnTo={returnTo}
+      />
     </TrustShell>
   );
 }

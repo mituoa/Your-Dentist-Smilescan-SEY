@@ -25,6 +25,8 @@ type TrackerInboxListStatusMenuProps = {
   seenAt?: string | null;
   className?: string;
   showStatusLabel?: boolean;
+  /** Mobile: ein tappbarer Status-Punkt (blau/grau/rot), kein Text-Pill. */
+  compactDot?: boolean;
 };
 
 function usePopoverPosition(
@@ -74,6 +76,7 @@ export function TrackerInboxListStatusMenu({
   seenAt,
   className,
   showStatusLabel = false,
+  compactDot = false,
 }: TrackerInboxListStatusMenuProps) {
   const router = useRouter();
   const { markCaseUnread } = useTrackerInboxRead();
@@ -249,24 +252,31 @@ export function TrackerInboxListStatusMenu({
   return (
     <div
       ref={rootRef}
-      className={cn("yd-tracker-list-status-menu", className)}
+      className={cn(
+        "yd-tracker-list-status-menu",
+        compactDot && "yd-tracker-list-status-menu--compact-dot",
+        className
+      )}
       aria-busy={pending}
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
-      <span
-        className={cn(
-          "yd-tracker-list-status-menu__dot",
-          `yd-tracker-list-status-menu__dot--${displayStatus}`
-        )}
-        title={statusLabel}
-        aria-label={`Status: ${statusLabel}`}
-      />
+      {!compactDot ? (
+        <span
+          className={cn(
+            "yd-tracker-list-status-menu__dot",
+            `yd-tracker-list-status-menu__dot--${displayStatus}`
+          )}
+          title={statusLabel}
+          aria-hidden
+        />
+      ) : null}
       <button
         type="button"
         className={cn(
           "yd-tracker-list-status-menu__trigger",
           showStatusLabel && "yd-tracker-list-status-menu__trigger--labeled",
+          compactDot && "yd-tracker-list-status-menu__trigger--dot-only",
           open && "yd-tracker-list-status-menu__trigger--open",
           pending && "yd-tracker-list-status-menu__trigger--pending"
         )}
@@ -276,10 +286,21 @@ export function TrackerInboxListStatusMenu({
         disabled={pending}
         onClick={toggleOpen}
       >
+        {compactDot ? (
+          <span
+            className={cn(
+              "yd-tracker-list-status-menu__dot yd-tracker-list-status-menu__dot--in-trigger",
+              `yd-tracker-list-status-menu__dot--${displayStatus}`
+            )}
+            aria-hidden
+          />
+        ) : null}
         {showStatusLabel ? (
           <span className="yd-tracker-list-status-menu__trigger-label">{statusLabel}</span>
         ) : null}
-        <MoreHorizontal className="yd-tracker-list-status-menu__icon" strokeWidth={2} aria-hidden />
+        {!compactDot ? (
+          <MoreHorizontal className="yd-tracker-list-status-menu__icon" strokeWidth={2} aria-hidden />
+        ) : null}
       </button>
       {popover ? createPortal(popover, document.body) : null}
     </div>

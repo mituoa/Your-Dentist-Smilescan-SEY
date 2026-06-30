@@ -1470,32 +1470,45 @@
   }
 
   .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row__status {
-    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+    padding-right: max(0.625rem, env(safe-area-inset-right, 0px));
   }
 
-  .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row__status .yd-tracker-list-status-menu__dot {
-    display: inline-flex;
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu--compact-dot {
+    gap: 0;
   }
 
-  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__trigger {
-    min-width: auto;
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__trigger--dot-only {
+    min-width: 2.75rem;
     min-height: 2.75rem;
-    padding: 0.35rem 0.5rem;
-    gap: 0.25rem;
-    border-radius: 999px;
-    border: 1px solid rgba(186, 210, 232, 0.55);
-    background: rgba(248, 251, 254, 0.95);
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__dot--in-trigger {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__dot--in-trigger.yd-tracker-list-status-menu__dot--in_progress {
+    background: #1a4f9c;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__dot--in-trigger.yd-tracker-list-status-menu__dot--waiting_for_patient {
+    background: #d64545;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__dot--in-trigger.yd-tracker-list-status-menu__dot--new {
+    background: #1a4f9c;
+    box-shadow: 0 0 0 2px rgba(26, 79, 156, 0.18);
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__dot--in-trigger.yd-tracker-list-status-menu__dot--resolved {
+    background: #3d8f62;
   }
 
   .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__trigger-label {
-    max-width: 6.75rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    line-height: 1.2;
-    color: #1a4f9c;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none;
   }
 
   /* Legacy mobile row/card — nicht mehr in der Inbox-Liste */

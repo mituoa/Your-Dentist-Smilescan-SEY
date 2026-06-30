@@ -1021,6 +1021,87 @@
     padding-top: 0.25rem;
   }
 
+  /* Kompakte Filter: Zuständigkeit + Status in einem Block */
+  .relay-center__mobile-filters {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-bottom: 0.25rem;
+    padding: 0.375rem;
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.88);
+    background: rgba(248, 250, 252, 0.96);
+  }
+
+  .relay-center__filter-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .relay-center__filter-seg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-height: 2.125rem;
+    padding: 0 0.35rem;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 140ms ease,
+      color 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .relay-center__filter-row--scope .relay-center__filter-seg {
+    font-size: 0.6875rem;
+    min-height: 1.875rem;
+    color: #94a3b8;
+  }
+
+  .relay-center__filter-row--scope .relay-center__filter-seg--active {
+    background: rgba(255, 255, 255, 0.92);
+    color: #475569;
+    box-shadow: 0 0 0 1px rgba(226, 232, 240, 0.95);
+  }
+
+  .relay-center__filter-row--stage .relay-center__filter-seg--active {
+    background: linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 48%, #163d7a 100%);
+    color: rgba(255, 255, 255, 0.98);
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(22, 61, 122, 0.14);
+  }
+
+  .relay-center__filter-seg-count {
+    display: inline-flex;
+    min-width: 1rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.25rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+    color: inherit;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .relay-center__filter-row--stage .relay-center__filter-seg--active .relay-center__filter-seg-count {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
   /* Redundanter Titel — Bereichs-Switcher reicht */
   .relay-center__panel-head .relay-center__panel-title-row {
     display: none;
@@ -1055,15 +1136,19 @@
     font-size: 0.75rem;
   }
 
-  /* Kanban: alle Spalten untereinander — kein Spalten-Switch nötig */
+  /* Kanban: eine Spalte — Filter oben wählt die Ansicht */
   .relay-kanban {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
-    padding: 0.25rem 0 0.5rem;
+    gap: 0;
+    padding: 0 0 0.5rem;
     overflow: visible;
     scroll-snap-type: none;
     touch-action: auto;
+  }
+
+  .relay-kanban--mobile-single .relay-kanban__col-head {
+    display: none;
   }
 
   .relay-kanban__col {
@@ -1071,23 +1156,14 @@
     width: 100%;
     min-height: 0;
     max-height: none;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.98);
-    border: 1px solid rgba(226, 232, 240, 0.88);
+    border: none;
+    border-radius: 0;
+    background: transparent;
     box-shadow: none;
   }
 
   .relay-kanban__col:has(.relay-kanban__empty-state) {
     min-height: 0;
-    padding-bottom: 0;
-  }
-
-  .relay-kanban__col:has(.relay-kanban__empty-state) .relay-kanban__col-head {
-    padding-bottom: 0.35rem;
-  }
-
-  .relay-kanban__col:has(.relay-kanban__empty-state) .relay-kanban__empty-state {
-    padding: 0 0.75rem 0.5rem;
   }
 
   .relay-kanban__col-head {

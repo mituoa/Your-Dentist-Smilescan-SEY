@@ -6,6 +6,7 @@ import {
   persistPracticeSolutionRequest,
 } from "@/lib/practice-solutions/deliver-request";
 import { parsePracticeSolutionRequestBody } from "@/lib/practice-solutions/request";
+import { createClient } from "@/lib/supabase/server";
 
 export async function submitPracticeSolutionRequest(body: unknown) {
   const workspace = await getCurrentWorkspace();
@@ -18,7 +19,12 @@ export async function submitPracticeSolutionRequest(body: unknown) {
     return { ok: false as const, error: "invalid_payload", message: parsed.error };
   }
 
-  const persisted = await persistPracticeSolutionRequest(workspace.workspace_id, parsed.data);
+  const supabase = await createClient();
+  const persisted = await persistPracticeSolutionRequest(
+    workspace.workspace_id,
+    parsed.data,
+    { userClient: supabase }
+  );
   const { delivered } = await deliverPracticeSolutionRequest(parsed.data);
 
   if (persisted || delivered) {

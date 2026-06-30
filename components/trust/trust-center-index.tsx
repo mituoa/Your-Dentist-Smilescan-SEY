@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { TRUST_HOME_CARDS } from "@/lib/trust/navigation";
+import { withTrustReturn } from "@/lib/trust/return-path";
 import { cn } from "@/lib/utils";
 import type { TrustHomeCard, TrustHomeSection } from "@/lib/trust/types";
 
@@ -25,29 +26,24 @@ const TRUST_ROW_ICONS: Record<string, typeof Shield> = {
 
 type TrustCenterIndexProps = {
   sections: TrustHomeSection[];
-  /** In Einstellungen: Dokumente in neuem Tab öffnen. */
-  openInNewTab?: boolean;
+  /** Nach Lesen zurück in die App (z. B. Einstellungen). */
+  returnTo?: string;
   titleAs?: "h1" | "h2";
   className?: string;
 };
 
 function TrustCenterRow({
   card,
-  openInNewTab,
+  returnTo,
 }: {
   card: TrustHomeCard;
-  openInNewTab?: boolean;
+  returnTo?: string;
 }) {
   const Icon = TRUST_ROW_ICONS[card.slug] ?? Shield;
+  const href = withTrustReturn(card.href, returnTo);
 
   return (
-    <Link
-      href={card.href}
-      className={`yd-trust-index-row yd-trust-index-row--${card.accent}`}
-      {...(openInNewTab
-        ? { target: "_blank", rel: "noopener noreferrer" }
-        : {})}
-    >
+    <Link href={href} className={`yd-trust-index-row yd-trust-index-row--${card.accent}`}>
       <span className="yd-trust-index-row__main">
         <span className="yd-trust-index-row__icon" aria-hidden>
           <Icon size={15} strokeWidth={1.75} />
@@ -61,7 +57,7 @@ function TrustCenterRow({
 
 export function TrustCenterIndex({
   sections,
-  openInNewTab = false,
+  returnTo,
   titleAs = "h2",
   className,
 }: TrustCenterIndexProps) {
@@ -86,7 +82,7 @@ export function TrustCenterIndex({
               if (!card) return null;
               return (
                 <li key={slug}>
-                  <TrustCenterRow card={card} openInNewTab={openInNewTab} />
+                  <TrustCenterRow card={card} returnTo={returnTo} />
                 </li>
               );
             })}

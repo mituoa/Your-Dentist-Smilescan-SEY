@@ -1413,6 +1413,29 @@
   padding-inline: var(--lp-gutter);
 }
 
+.yd-medical-form-panel--landing-briefing .yd-medical-form-header--compact {
+  padding-top: 0.85rem;
+  padding-bottom: 0.65rem;
+  padding-right: calc(var(--lp-gutter) + 2.75rem);
+  background: transparent;
+}
+
+.yd-medical-form-panel--landing-briefing .yd-medical-form-header--compact .yd-auth-register-title {
+  margin-bottom: 0;
+  text-align: left;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: clamp(1rem, 2.6vw, 1.1875rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: #0f172a;
+}
+
+.yd-medical-form-panel--landing-briefing .yd-auth-close-btn {
+  top: max(0.65rem, env(safe-area-inset-top));
+  right: max(0.85rem, env(safe-area-inset-right));
+}
+
 .yd-medical-form-panel--landing-briefing .yd-medical-form-body {
   padding-inline: var(--lp-gutter);
 }
@@ -1456,6 +1479,13 @@
   .yd-medical-form-panel--landing-briefing .yd-auth-register-header {
     flex-shrink: 0;
     padding: 0.75rem 1rem 0.5rem;
+  }
+
+  .yd-medical-form-panel--landing-briefing .yd-medical-form-header--compact {
+    padding-right: 3.25rem;
+    padding-left: 1rem;
+    padding-top: 0.65rem;
+    padding-bottom: 0.45rem;
   }
 
   .yd-medical-form-panel--landing-briefing .yd-auth-register-header .mb-5 {
@@ -2893,6 +2923,14 @@
 
 .yd-lp-briefing-visual--mobile {
   display: block;
+}
+
+.yd-lp-briefing-visual--mobile .yd-lp-briefing-visual__frame {
+  display: none;
+}
+
+.yd-lp-briefing-visual--mobile .yd-lp-briefing-visual__category {
+  margin-top: 0;
 }
 
 .yd-lp-briefing-visual--desktop {

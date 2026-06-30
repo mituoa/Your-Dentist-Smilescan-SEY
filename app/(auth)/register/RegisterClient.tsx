@@ -40,6 +40,7 @@ import {
   coerceRegisterPlan,
   type RegisterPlanId,
 } from "@/lib/auth/register-plans";
+import { CURRENT_CONTRACT_VERSION } from "@/lib/trust/contract-policy";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 import { cn } from "@/lib/utils";
 
@@ -234,7 +235,8 @@ export function RegisterClient(props: {
   const [frontQualityHint, setFrontQualityHint] = React.useState<string>("");
   const [backQualityHint, setBackQualityHint] = React.useState<string>("");
 
-  const [acceptedLegal, setAcceptedLegal] = React.useState(false);
+  const [acceptedTos, setAcceptedTos] = React.useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = React.useState(false);
   const [acceptedWithdrawal, setAcceptedWithdrawal] = React.useState(false);
   const [paymentMethod, setPaymentMethod] = React.useState<RegisterStep4PaymentMethod>("sepa_debit");
   const [paymentFields, setPaymentFields] = React.useState<RegisterStep4PaymentFields>({
@@ -304,7 +306,11 @@ export function RegisterClient(props: {
   );
 
   const step4CanSubmit =
-    acceptedLegal && acceptedWithdrawal && registrationDocsSatisfied && paymentSetupValid;
+    acceptedTos &&
+    acceptedPrivacy &&
+    acceptedWithdrawal &&
+    registrationDocsSatisfied &&
+    paymentSetupValid;
 
   React.useEffect(() => {
     if (registrationStep !== 1) return;
@@ -1413,22 +1419,40 @@ export function RegisterClient(props: {
                             Vereinbarungen
                           </h4>
                           <div className="space-y-0.5">
-                            <RegisterStep4Checkbox checked={acceptedLegal} onChange={setAcceptedLegal}>
+                            <RegisterStep4Checkbox
+                              checked={acceptedTos}
+                              onChange={setAcceptedTos}
+                              ariaLabel="Ich habe die Nutzungsbedingungen gelesen und akzeptiere sie."
+                            >
                               <>
+                                Ich habe die{" "}
                                 <Link
                                   href="/trust/terms"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                   className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
                                 >
-                                  AGB
+                                  Nutzungsbedingungen
                                 </Link>{" "}
-                                und{" "}
+                                gelesen und akzeptiere sie.
+                              </>
+                            </RegisterStep4Checkbox>
+                            <RegisterStep4Checkbox
+                              checked={acceptedPrivacy}
+                              onChange={setAcceptedPrivacy}
+                              ariaLabel="Ich habe die Datenschutzerklärung zur Kenntnis genommen."
+                            >
+                              <>
+                                Ich habe die{" "}
                                 <Link
                                   href="/trust/privacy"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                   className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
                                 >
-                                  Datenschutz
+                                  Datenschutzerklärung
                                 </Link>{" "}
-                                akzeptieren
+                                zur Kenntnis genommen.
                               </>
                             </RegisterStep4Checkbox>
                             <RegisterStep4Checkbox
@@ -1443,6 +1467,8 @@ export function RegisterClient(props: {
                                   (
                                   <Link
                                     href="/trust/terms#21-widerruf"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
                                   >
                                     Widerruf
@@ -1467,10 +1493,10 @@ export function RegisterClient(props: {
                     <input type="hidden" name="practice_website" value={regWebsite.trim()} />
                     <input type="hidden" name="workspace_name" value={regPractice} />
                     <input type="hidden" name="billing_interval" value={selectedPlan} />
-                    <input type="hidden" name="contract_version" value="v1" />
+                    <input type="hidden" name="contract_version" value={CURRENT_CONTRACT_VERSION} />
                     <input type="hidden" name="accepted_at" value={new Date().toISOString()} />
-                    <input type="hidden" name="accepted_tos" value={acceptedLegal ? "1" : "0"} />
-                    <input type="hidden" name="accepted_privacy" value={acceptedLegal ? "1" : "0"} />
+                    <input type="hidden" name="accepted_tos" value={acceptedTos ? "1" : "0"} />
+                    <input type="hidden" name="accepted_privacy" value={acceptedPrivacy ? "1" : "0"} />
                     <input type="hidden" name="accepted_withdrawal" value={acceptedWithdrawal ? "1" : "0"} />
                     <input type="hidden" name="payment_method" value={paymentMethod} />
                     <input type="hidden" name="dentist_license_storage_path" value={licenseStoragePath} />

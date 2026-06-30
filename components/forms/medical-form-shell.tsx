@@ -20,6 +20,8 @@ export type MedicalFormShellProps = {
   panelClassName?: string;
   /** Lighter overlay when opened above an existing workspace view */
   overlayVariant?: "auth" | "workspace";
+  /** Kompakter Kopf — Titel links, Platz für Schließen-Button */
+  headerVariant?: "default" | "compact";
 };
 
 /**
@@ -35,6 +37,7 @@ export function MedicalFormShell({
   ariaLabel,
   panelClassName,
   overlayVariant = "auth",
+  headerVariant = "default",
 }: MedicalFormShellProps) {
   const [mounted, setMounted] = React.useState(false);
   const titleId = React.useId();
@@ -104,10 +107,17 @@ export function MedicalFormShell({
             </svg>
           </button>
 
-          <div className="yd-auth-register-header">
-            <div className="mb-5 flex justify-center pb-1 md:mb-6">
-              <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
-            </div>
+          <div
+            className={cn(
+              "yd-auth-register-header",
+              headerVariant === "compact" && "yd-medical-form-header--compact"
+            )}
+          >
+            {headerVariant === "default" ? (
+              <div className="mb-5 flex justify-center pb-1 md:mb-6">
+                <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
+              </div>
+            ) : null}
             <h1 id={titleId} className="yd-auth-register-title">
               {title}
             </h1>

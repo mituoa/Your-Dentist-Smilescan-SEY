@@ -5780,15 +5780,36 @@
 }
 
 .yd-tracker-list-status-menu__dot--in_progress {
-  background: #94a3b8;
+  background: #5b8fd4;
 }
 
 .yd-tracker-list-status-menu__dot--waiting_for_patient {
-  background: #3b6eb4;
+  background: #d64545;
 }
 
 .yd-tracker-list-status-menu__dot--resolved {
   background: #22a06b;
+}
+
+.yd-tracker-list-status-menu__trigger--dot-only {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  opacity: 1;
+}
+
+.yd-tracker-list-status-menu__trigger--dot-only:hover:not(:disabled),
+.yd-tracker-list-status-menu__trigger--dot-only.yd-tracker-list-status-menu__trigger--open {
+  background: rgba(241, 245, 249, 0.92);
+}
+
+.yd-tracker-list-status-menu__dot--in-trigger {
+  width: 0.5625rem;
+  height: 0.5625rem;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95);
 }
 
 .yd-tracker-list-status-menu__icon {
@@ -5898,11 +5919,11 @@
 }
 
 .yd-tracker-list-status-menu__option-dot--in_progress {
-  background: #94a3b8;
+  background: #1a4f9c;
 }
 
 .yd-tracker-list-status-menu__option-dot--waiting_for_patient {
-  background: #3b6eb4;
+  background: #d64545;
 }
 
 .yd-tracker-list-status-menu__option-dot--resolved {

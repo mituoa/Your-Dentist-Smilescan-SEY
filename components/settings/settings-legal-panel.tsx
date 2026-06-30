@@ -1,5 +1,6 @@
 import { TrustCenterIndex } from "@/components/trust/trust-center-index";
 import { TRUST_HOME_SECTIONS, mapContractVersionToLabel } from "@/lib/trust/navigation";
+import { SETTINGS_LEGAL_RETURN_PATH } from "@/lib/trust/return-path";
 import type { WorkspaceContractAcceptance } from "@/lib/types/settings-legal";
 
 type SettingsLegalPanelProps = {
@@ -57,7 +58,11 @@ export function SettingsLegalPanel({ contract }: SettingsLegalPanelProps) {
       </div>
 
       <div className="yd-settings-legal__trust">
-        <TrustCenterIndex sections={TRUST_HOME_SECTIONS} openInNewTab className="yd-trust-index--settings" />
+        <TrustCenterIndex
+          sections={TRUST_HOME_SECTIONS}
+          returnTo={SETTINGS_LEGAL_RETURN_PATH}
+          className="yd-trust-index--settings"
+        />
       </div>
     </div>
   );

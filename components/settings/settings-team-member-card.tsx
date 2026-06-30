@@ -4,10 +4,11 @@ function formatEditorialDate(iso: string | null): string {
   if (!iso) return "—";
   try {
     const d = new Date(iso);
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return `${dd} . ${mm} . ${yyyy}`;
+    return d.toLocaleDateString("de-DE", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   } catch {
     return "—";
   }
@@ -31,14 +32,9 @@ export function initialsFromEmail(email: string): string {
   return local.slice(0, 2).toUpperCase();
 }
 
-function roleLead(role: "doctor" | "team", pending: boolean): string {
-  if (pending) return "Einladung offen";
-  return role === "doctor" ? "Leitung · Praxis" : "Team · Praxis";
-}
-
 function roleLabel(role: "doctor" | "team", pending: boolean): string {
-  if (pending) return "Ausstehend";
-  return role === "doctor" ? "Administrator" : "Bearbeiter";
+  if (pending) return "Einladung offen";
+  return role === "doctor" ? "Administrator" : "Team";
 }
 
 type SettingsTeamMemberCardProps = {
@@ -74,71 +70,55 @@ export function SettingsTeamMemberCard({
       className={`yd-settings-team-card${pending ? " yd-settings-team-card--pending" : ""}`}
       aria-label={pending ? `Ausstehende Einladung ${displayName}` : `Teammitglied ${displayName}`}
     >
-      <div className="yd-settings-team-card__main">
-        <p className="yd-settings-team-card__date">
-          {dateLabel} · {dateValue}
-        </p>
-        <hr className="yd-settings-team-card__rule" aria-hidden />
-
-        <p className="yd-settings-team-card__lead">{roleLead(role, pending)}</p>
-        <h3 className="yd-settings-team-card__name">
-          {displayName}
-          {isCurrentUser ? <span className="yd-settings-team-card__badge-you">Sie</span> : null}
-        </h3>
-        <p className="yd-settings-team-card__subtitle">
-          {role === "doctor" && !pending ? "Zahnärztliche Leitung" : "Praxisorganisation"} · {workspaceName}
-        </p>
-
-        <div className="yd-settings-team-card__meta">
-          <div className="yd-settings-team-card__meta-row">
-            <span className="yd-settings-team-card__meta-label">Kontakt</span>
+      <div className="yd-settings-team-card__row">
+        <span className="yd-settings-team-card__avatar" aria-hidden>
+          {initials}
+        </span>
+        <div className="yd-settings-team-card__body">
+          <div className="yd-settings-team-card__head">
+            <h3 className="yd-settings-team-card__name">
+              {displayName}
+              {isCurrentUser ? (
+                <span className="yd-settings-team-card__badge-you">Sie</span>
+              ) : null}
+            </h3>
             <span
-              className={`yd-settings-team-card__meta-value${pending ? " yd-settings-team-card__meta-value--muted" : ""}`}
+              className={`yd-settings-team-card__role${pending ? " yd-settings-team-card__role--pending" : ""}`}
             >
-              {email}
+              {roleLabel(role, pending)}
             </span>
           </div>
-          <div className="yd-settings-team-card__meta-row">
-            <span className="yd-settings-team-card__meta-label">Rolle</span>
-            <span className="yd-settings-team-card__meta-value">{roleLabel(role, pending)}</span>
-          </div>
-        </div>
-
-        {onRevoke || onRemove ? (
-          <div className="yd-settings-team-card__actions">
-            {onRevoke ? (
-              <button
-                type="button"
-                className="yd-settings-team-card__action"
-                disabled={busy}
-                onClick={onRevoke}
-              >
-                Einladung widerrufen
-              </button>
-            ) : null}
-            {onRemove ? (
-              <button
-                type="button"
-                className="yd-settings-team-card__action"
-                disabled={busy}
-                onClick={onRemove}
-              >
-                Aus Team entfernen
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-
-      <div className="yd-settings-team-card__portrait" aria-hidden>
-        <div className="yd-settings-team-card__portrait-frame">
-          {pending ? (
-            <span className="yd-settings-team-card__portrait-pending">Offen</span>
-          ) : (
-            <span className="yd-settings-team-card__portrait-initials">{initials}</span>
-          )}
+          <p className="yd-settings-team-card__email">{email}</p>
+          <p className="yd-settings-team-card__meta">
+            {dateLabel} {dateValue} · {workspaceName}
+          </p>
         </div>
       </div>
+
+      {onRevoke || onRemove ? (
+        <div className="yd-settings-team-card__actions">
+          {onRevoke ? (
+            <button
+              type="button"
+              className="yd-settings-team-card__action"
+              disabled={busy}
+              onClick={onRevoke}
+            >
+              Einladung widerrufen
+            </button>
+          ) : null}
+          {onRemove ? (
+            <button
+              type="button"
+              className="yd-settings-team-card__action"
+              disabled={busy}
+              onClick={onRemove}
+            >
+              Aus Team entfernen
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </article>
   );
 }
