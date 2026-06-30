@@ -37,7 +37,7 @@ export default async function TrustSlugPage({ params, searchParams }: TrustSlugP
   const { returnTo, isAuthenticated } = await loadTrustPageContext(searchParams);
 
   return (
-    <TrustShell returnTo={returnTo} isAuthenticated={isAuthenticated}>
+    <TrustShell returnTo={returnTo} isAuthenticated={isAuthenticated} showEscapeBar={false}>
       <TrustDocumentPage
         document={document}
         canonicalPath={canonicalUrl}

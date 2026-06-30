@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, getCurrentWorkspace } from "@/lib/auth-helpers";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
+import { listCareCenterPatientSignals } from "@/lib/queries/care-center-patient-signals";
 import { listJournalForWorkspace } from "@/lib/queries/journal";
 import { createClient } from "@/lib/supabase/server";
 import { CareCenter } from "@/components/care-center/care-center";
@@ -22,7 +23,10 @@ export default async function JournalPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const entries = await listJournalForWorkspace(workspace.workspace_id);
+  const [entries, patientSignals] = await Promise.all([
+    listJournalForWorkspace(workspace.workspace_id),
+    listCareCenterPatientSignals(workspace.workspace_id),
+  ]);
 
   // @ts-expect-error - workspaces is joined
   const publicSlug = (workspace.workspaces?.slug as string | undefined) ?? null;
@@ -34,6 +38,7 @@ export default async function JournalPage() {
         initialEntries={entries}
         authorLabel={authorLabel}
         publicSlug={publicSlug}
+        patientSignals={patientSignals}
       />
     </div>
   );

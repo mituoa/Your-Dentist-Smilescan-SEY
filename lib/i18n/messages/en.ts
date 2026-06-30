@@ -46,6 +46,10 @@ export const en = {
       title: "Language",
       description: "Choose the language for menus, settings and system messages in this browser.",
       saved: "Language updated.",
+      note: "Clinical content, patient cases and practice data stay unchanged.",
+      uiEnglish: "UI in English",
+      partialActive:
+        "Menus and settings appear in English. Your practice content stays as before.",
     },
     security: {
       title: "Security",

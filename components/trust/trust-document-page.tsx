@@ -11,6 +11,7 @@ import {
   trustDraftNotice,
   trustDraftStatusLabel,
 } from "@/lib/trust/meta";
+import { withTrustReturn } from "@/lib/trust/return-path";
 import type { TrustDocument } from "@/lib/trust/types";
 
 type TrustDocumentPageProps = {
@@ -24,9 +25,8 @@ export function TrustDocumentPage({ document, canonicalPath, returnTo }: TrustDo
   const draftNotice = document.draftNotice ?? trustDraftNotice();
   const draftStatus = trustDraftStatusLabel();
   const draftFooter = trustDraftFooter();
-  const overviewHref = returnTo && returnTo !== "/trust" ? returnTo : "/trust";
-  const overviewLabel =
-    returnTo?.startsWith("/settings") ? "Zurück zu Einstellungen" : "Trust Center";
+  const trustCenterHref = withTrustReturn("/trust", returnTo);
+  const trustCenterLabel = "Zurück zum Trust Center";
 
   return (
     <div className="yd-trust-doc-layout yd-trust-doc-layout--focus">
@@ -40,9 +40,9 @@ export function TrustDocumentPage({ document, canonicalPath, returnTo }: TrustDo
       </div>
       <article className="yd-trust-doc">
         <nav className="yd-trust-doc__crumb" aria-label="Zurück">
-          <Link href={overviewHref} className="yd-trust-doc__back">
+          <Link href={trustCenterHref} className="yd-trust-doc__back">
             <ChevronLeft className="yd-trust-doc__back-icon" strokeWidth={2} aria-hidden />
-            {overviewLabel}
+            {trustCenterLabel}
           </Link>
         </nav>
 
@@ -75,8 +75,8 @@ export function TrustDocumentPage({ document, canonicalPath, returnTo }: TrustDo
 
         <footer className="yd-trust-doc__footer">
           {draftFooter ? <p>{draftFooter}</p> : null}
-          <Link href={overviewHref} className="yd-trust-doc__footer-link">
-            {overviewLabel}
+          <Link href={trustCenterHref} className="yd-trust-doc__footer-link">
+            {trustCenterLabel}
           </Link>
         </footer>
       </article>

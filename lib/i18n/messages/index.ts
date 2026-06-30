@@ -1,9 +1,10 @@
 import type { AppLocale } from "@/lib/locale";
+import { FULL_UI_LOCALES } from "@/lib/locale";
 
 import { de } from "./de";
 import { en, type Messages } from "./en";
 
-const CATALOG: Record<AppLocale, Messages> = {
+const CATALOG: Partial<Record<AppLocale, Messages>> = {
   en,
   de,
 };
@@ -11,5 +12,8 @@ const CATALOG: Record<AppLocale, Messages> = {
 export type { Messages };
 
 export function getMessages(locale: AppLocale): Messages {
-  return CATALOG[locale] ?? en;
+  if (FULL_UI_LOCALES.has(locale)) {
+    return CATALOG[locale] ?? en;
+  }
+  return en;
 }

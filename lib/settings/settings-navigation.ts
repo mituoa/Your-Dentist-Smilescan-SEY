@@ -231,7 +231,7 @@ export const SETTINGS_MOBILE_NAV_GROUPS: SettingsNavGroup[] = [
     label: "SYSTEM",
     items: pickNavItems(["sprache", "sicherheit", "rechtliches"]).map((item) =>
       item.id === "sprache"
-        ? { ...item, label: "Sprache", hint: "English / Deutsch" }
+        ? { ...item, label: "Sprache", hint: "Deutsch, English & mehr" }
         : item.id === "sicherheit"
           ? {
               ...item,

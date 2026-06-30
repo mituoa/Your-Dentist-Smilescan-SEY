@@ -9,14 +9,17 @@ type TrustShellProps = {
   children: React.ReactNode;
   returnTo?: string;
   isAuthenticated?: boolean;
+  /** Escape-Leiste nur auf der Trust-Übersicht — nicht auf Einzeldokumenten. */
+  showEscapeBar?: boolean;
 };
 
 export function TrustShell({
   children,
   returnTo,
   isAuthenticated = false,
+  showEscapeBar = true,
 }: TrustShellProps) {
-  const showEscape = returnTo !== "/trust";
+  const showEscape = showEscapeBar && returnTo !== "/trust";
 
   return (
     <YdPublicOsEnvironment scroll landingAtmosphere>

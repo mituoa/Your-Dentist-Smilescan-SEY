@@ -1,17 +1,28 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, useTransition } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import { setLocalePreference } from "@/app/actions/locale";
 import { getMessages, type Messages } from "@/lib/i18n/messages";
-import { type AppLocale } from "@/lib/locale";
+import { getLocaleMeta, type AppLocale } from "@/lib/locale";
 
 type LocaleContextValue = {
   locale: AppLocale;
   messages: Messages;
   setLocale: (locale: AppLocale) => void;
   isPending: boolean;
+  error: string | null;
+  clearError: () => void;
 };
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
@@ -25,20 +36,48 @@ export function LocaleProvider({
 }) {
   const router = useRouter();
   const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
     setLocaleState(initialLocale);
   }, [initialLocale]);
 
+  useEffect(() => {
+    const meta = getLocaleMeta(locale);
+    document.documentElement.lang = locale;
+    document.documentElement.dir = meta.direction;
+  }, [locale]);
+
+  const clearError = useCallback(() => setError(null), []);
+
   const setLocale = useCallback(
     (next: AppLocale) => {
-      if (next === locale) return;
+      if (next === locale || inFlightRef.current) return;
+
+      const previous = locale;
+      setError(null);
       setLocaleState(next);
-      startTransition(async () => {
-        await setLocalePreference(next);
-        router.refresh();
-      });
+      inFlightRef.current = true;
+
+      void (async () => {
+        try {
+          await setLocalePreference(next);
+          startTransition(() => {
+            router.refresh();
+          });
+        } catch {
+          setLocaleState(previous);
+          setError(
+            previous === "de"
+              ? "Die Sprache konnte nicht gespeichert werden. Bitte erneut versuchen."
+              : "Could not save language. Please try again."
+          );
+        } finally {
+          inFlightRef.current = false;
+        }
+      })();
     },
     [locale, router]
   );
@@ -49,8 +88,10 @@ export function LocaleProvider({
       messages: getMessages(locale),
       setLocale,
       isPending,
+      error,
+      clearError,
     }),
-    [locale, setLocale, isPending]
+    [locale, setLocale, isPending, error, clearError]
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

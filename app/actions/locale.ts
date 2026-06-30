@@ -15,4 +15,5 @@ export async function setLocalePreference(locale: AppLocale) {
     httpOnly: false,
   });
   revalidatePath("/", "layout");
+  revalidatePath("/settings");
 }

@@ -48,8 +48,12 @@ export const de: Messages = {
     language: {
       title: "Sprache",
       description:
-        "Legen Sie fest, in welcher Sprache Menüs, Einstellungen und Systemhinweise in diesem Browser angezeigt werden.",
+        "Wählen Sie die Sprache für Menüs, Einstellungen und Systemhinweise in diesem Browser.",
       saved: "Sprache aktualisiert.",
+      note: "Klinische Inhalte, Patientenfälle und Praxisdaten bleiben unverändert.",
+      uiEnglish: "UI auf Englisch",
+      partialActive:
+        "Menüs und Einstellungen erscheinen auf Englisch. Ihre Praxisinhalte bleiben wie bisher.",
     },
     security: {
       title: "Sicherheit",
