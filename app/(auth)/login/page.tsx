@@ -1,4 +1,5 @@
 import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "@/components/auth/login-page-client";
@@ -90,6 +91,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             googleLoginEnabled={isGoogleLoginEnabled()}
           />
         </section>
+        <nav className="yd-login-start-nav" aria-label="Weitere Optionen">
+          <Link href="/?welcome=1" prefetch className="yd-login-start-link">
+            Zur Startseite
+          </Link>
+        </nav>
       </main>
     </YdPublicOsEnvironment>
   );

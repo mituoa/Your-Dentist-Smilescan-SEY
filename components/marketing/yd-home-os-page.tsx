@@ -15,7 +15,6 @@ import {
   Menu,
   MessageSquareText,
   ScanLine,
-  Send,
   ShieldCheck,
   Sparkles,
   Stethoscope,
@@ -30,7 +29,8 @@ import { YdPublicSiteFooter } from "@/components/marketing/yd-public-site-footer
 import { YdWorkflowKeynote } from "@/components/marketing/yd-workflow-keynote";
 import { coerceRegisterPlan } from "@/lib/auth/register-plans";
 import { buildRegisterEntryHref } from "@/lib/marketing/auth-access-copy";
-import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
+import { LANDING_HERO } from "@/lib/practice-solutions/landing-page-model";
+import { JOURNAL_HUB, JOURNAL_KI } from "@/lib/journal/journal-hub-product";
 
 type Props = {
   initialPlan?: string | null;
@@ -75,52 +75,6 @@ function Reveal({ children, className }: { children: React.ReactNode; className?
     <div ref={ref} className={`yd-os-reveal ${className ?? ""}`}>
       {children}
     </div>
-  );
-}
-
-/** Zählt einmalig hoch, sobald sichtbar — kein Dauerloop. Respektiert prefers-reduced-motion. */
-function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [display, setDisplay] = useState(0);
-  const started = useRef(false);
-  const reduced = useReducedMotion();
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (reduced) {
-      setDisplay(value);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !started.current) {
-            started.current = true;
-            const duration = 900;
-            const start = performance.now();
-            const tick = (now: number) => {
-              const t = Math.min(1, (now - start) / duration);
-              const eased = 1 - Math.pow(1 - t, 3);
-              setDisplay(Math.round(eased * value));
-              if (t < 1) requestAnimationFrame(tick);
-            };
-            requestAnimationFrame(tick);
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [value, reduced]);
-
-  return (
-    <span ref={ref}>
-      {display}
-      {suffix}
-    </span>
   );
 }
 
@@ -170,10 +124,9 @@ const HERO_SNAPSHOT_METRICS = [
 ] as const;
 
 const HERO_STATUS_LINES = [
-  "Foto trifft ein — Tracker übernimmt den Fall.",
-  "Command AI bereitet Zusammenfassung vor.",
-  "Arzt prüft — Freigabe statt Automatik.",
-  "Command AI sendet die Antwort automatisch an den Patienten.",
+  "Neues Foto im Tracker.",
+  "Entwurf liegt zur Freigabe bereit.",
+  "Antwort geht nach Ihrer Freigabe raus.",
 ] as const;
 
 function HeroSnapshot() {
@@ -212,28 +165,28 @@ function HeroSnapshot() {
  *  Aufgaben ans Team laufen separat über Relay (siehe COMMAND_POINTS). */
 const COMMAND_STAGES = [
   {
-    tag: "01 · Anfrage",
+    tag: "Anfrage",
     icon: MessageSquareText,
-    title: "Patientenanfrage trifft ein",
-    body: "„Seit Tag 5 etwas Druckgefühl an der Implantatstelle, Foto im Anhang.“",
+    title: "Anfrage trifft ein",
+    body: "„Stechende Schmerzen rechts unten — noch ohne Foto.“",
   },
   {
-    tag: "02 · Zusammenfassung",
+    tag: "Foto",
+    icon: Camera,
+    title: "KI fordert Foto an",
+    body: "Patient sendet Bild — automatisch dem Fall zugeordnet.",
+  },
+  {
+    tag: "Zusammenfassung",
     icon: ScanLine,
     title: "Command AI fasst zusammen",
-    body: "Heilung im erwarteten Bereich, kein Hinweis auf Komplikation.",
+    body: "Akute Schmerzen — Entwurf zur Kontrolle bereit.",
   },
   {
-    tag: "03 · Freigabe",
+    tag: "Freigabe",
     icon: Stethoscope,
-    title: "Arzt prüft und gibt frei",
-    body: "Entwurf geprüft — Freigabe statt automatischem Versand.",
-  },
-  {
-    tag: "04 · Versand",
-    icon: Send,
-    title: "Command AI sendet an den Patienten",
-    body: "Freigegebene Antwort geht automatisch raus — vollständig dokumentiert im Portal.",
+    title: "Arzt gibt frei",
+    body: "Geprüft, versendet und im Portal dokumentiert.",
   },
 ] as const;
 
@@ -285,68 +238,75 @@ function CommandAiCycle() {
   );
 }
 
-const STATS = [
-  { value: 8, label: "Schritte bis zur Antwort" },
-  { value: 6, label: "Module in einer Plattform" },
-  { value: 0, label: "Versand ohne ärztliche Freigabe" },
-];
-
 const MODULES = [
   {
     icon: ListChecks,
     title: "Atlas",
-    text: "Überblick über Prioritäten, Entscheidungen und Praxisstatus.",
-    preview: ["3 neue Einsendungen", "1 Aufgabe offen", "Keine Verzögerung"],
+    text: "Prioritäten, Entscheidungen, Praxisstatus.",
+    preview: ["3 Einsendungen", "1 Freigabe offen"],
+    accent: "blue",
   },
   {
     icon: ClipboardCheck,
     title: "Tracker",
-    text: "Strukturierte Patientenfälle mit Fotos, Verlauf und nächsten Schritten.",
-    preview: ["Fall · Implantat Tag 7", "Status: Antwort vorbereitet"],
+    text: "Fälle mit Fotos, Verlauf und nächsten Schritten.",
+    preview: ["Schmerzen rechts unten", "Foto · vor 12 Min."],
+    accent: "indigo",
   },
   {
     icon: Users2,
     title: "Relay",
-    text: "Der Arzt diktiert Aufgaben an Rezeption oder Assistenz per Command AI — dokumentiert im Portal statt über WhatsApp.",
-    preview: ["Laborauftrag · Pat. M. Müller", "Diktiert von Dr. — nachverfolgbar"],
+    text: "Teamaufgaben per Diktat — im Portal statt WhatsApp.",
+    preview: ["Laborauftrag · nachverfolgbar"],
+    accent: "navy",
   },
   {
     icon: BookOpen,
     title: "Care Center",
-    text: "Patientenwissen, Nachsorgeartikel und Wissensbasis für die Patienten-KI.",
-    preview: ["Schmerzen nach OP", "Invisalign Pflege"],
+    text: "Patienten-KI beantwortet Routinefragen — weniger Telefonate.",
+    preview: ["Schmerzen nach OP", "KI fordert Foto an"],
+    accent: "violet",
   },
   {
     icon: Sparkles,
     title: "Command AI",
-    text: "Vorarbeit, Entwürfe, Zusammenfassungen und Assistenz mit ärztlicher Kontrolle.",
-    preview: ["Entwurf vorbereitet", "Wartet auf Freigabe"],
+    text: "Entwürfe und Zusammenfassungen — mit Freigabe.",
+    preview: ["Wartet auf Freigabe"],
+    accent: "sky",
   },
   {
     icon: LayoutTemplate,
     title: "Landingpages",
-    text: "Professionelle Kampagnen und Landingpages für Behandlungen, Schwerpunkte und Praxiswachstum.",
-    preview: ["SmileScan Kampagne", "Implantologie Landingpage"],
+    text: "Individuell für Ihre Praxis — mit Nachverfolgung Ihrer Anfragen.",
+    preview: ["Implantologie", "Freigabe vor Live-Schaltung"],
+    accent: "teal",
   },
+] as const;
+
+const CARE_KI_POINTS = [
+  "Beantwortet viele Patientenfragen aus veröffentlichten Texten — weniger Standardanrufe.",
+  "Bei Beschwerden fordert die KI gezielt eine Nachricht oder ein Foto an.",
+  JOURNAL_KI.safetyLine,
 ];
+
+const LANDING_FLOW_STEPS = [
+  "Sie erhalten Ihre individuelle Landingpage zur Freigabe — angepasst an Ihre Praxis.",
+  "Nach Freigabe schalten wir sie live — mit messbarer Nachverfolgung Ihrer Anfragen.",
+] as const;
 
 const COMMAND_POINTS = [
   "Keine automatische Diagnose",
-  "Keine finale medizinische Entscheidung",
-  "Klare Rückfragen bei Unsicherheit",
   "Ärztliche Freigabe bleibt Pflicht",
-  "Nach Freigabe: Versand an den Patienten",
-  "Team-Aufgaben per Diktat an Relay — nachverfolgbar im Portal",
+  "Versand erst nach Freigabe",
+  "Teamaufgaben über Relay",
 ];
 
 const ARTICLES = [
   "Verhalten nach Implantation",
   "Schmerzen nach OP",
-  "Kaffee nach Implantat",
-  "Sport nach Eingriff",
   "Invisalign Pflege",
-  "Bleaching Hinweise",
   "Schwellung normal?",
+  "Bleaching Hinweise",
   "Retainer verloren",
 ];
 
@@ -365,19 +325,17 @@ const CAMPAIGNS = [
 ] as const;
 
 const PROBLEMS = [
-  "Patienten schreiben über verschiedene Kanäle.",
-  "Fotos und Informationen kommen unstrukturiert an.",
-  "Rückfragen landen am Telefon.",
-  "Teamaufgaben sind nicht sauber verknüpft.",
+  "Anfragen über viele Kanäle",
+  "Fotos ohne Struktur",
+  "Rückfragen am Telefon",
+  "Aufgaben ohne Verknüpfung",
 ];
 
 const TRUST_ITEMS = [
-  { icon: ShieldCheck, text: "KI trifft keine Diagnose." },
-  { icon: ClipboardCheck, text: "Ärztliche Freigabe bleibt zentral." },
-  { icon: ListChecks, text: "Strukturierte Dokumentation." },
-  { icon: Lock, text: "DSGVO-orientierte Produktlogik." },
-  { icon: Users2, text: "Klare Rollen und Verantwortlichkeiten." },
-  { icon: MessageSquareText, text: "Sichere Patientenkommunikation." },
+  { icon: ShieldCheck, text: "KI trifft keine Diagnose" },
+  { icon: ClipboardCheck, text: "Freigabe bleibt beim Arzt" },
+  { icon: Lock, text: "DSGVO-orientierte Logik" },
+  { icon: ListChecks, text: "Nachvollziehbare Dokumentation" },
 ];
 
 export function YdHomeOsPage({
@@ -420,8 +378,8 @@ export function YdHomeOsPage({
     <main className="yd-os">
       <header className={`yd-os-header ${scrolled ? "yd-os-header--scrolled" : ""}`}>
         <div className="yd-os-container yd-os-header-inner">
-          <Link href="/?welcome=1" aria-label="Your Dentist — Startseite">
-            <YourDentistBrandLockup size="sm" tagline={PUBLIC_BRAND_TAGLINE} />
+          <Link href="/?welcome=1" className="yd-os-header-brand" aria-label="Your Dentist — Startseite">
+            <YourDentistBrandLockup size="sm" tagline={null} />
           </Link>
           <nav className="yd-os-nav" aria-label="Hauptnavigation">
             {NAV.map((item) => (
@@ -448,7 +406,7 @@ export function YdHomeOsPage({
               aria-label={menuOpen ? "Menü schließen" : "Bereiche"}
               onClick={() => setMenuOpen((v) => !v)}
             >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              {menuOpen ? <X size={18} strokeWidth={1.75} /> : <Menu size={18} strokeWidth={1.75} />}
             </button>
           </div>
         </div>
@@ -471,13 +429,14 @@ export function YdHomeOsPage({
           <div className="yd-os-hero-copy">
             <span className="yd-os-eyebrow">
               <span className="yd-os-eyebrow-dot" aria-hidden />
-              Digitale Infrastruktur für Zahnarztpraxen
+              Für Zahnarztpraxen
             </span>
             <h1 className="yd-os-hero-title">
               Ein ruhiger Workflow für <em>jede</em> Patientenanfrage.
             </h1>
             <p className="yd-os-hero-lead">
-              Patientenanfragen, KI-Vorbereitung, ärztliche Freigabe und Teamarbeit — in einem System.
+              Wenn eine Anfrage reinkommt, ist klar, was als Nächstes passiert. Vom Foto bis zur
+              Antwort, alles an einem Ort.
             </p>
             <div className="yd-os-hero-ctas">
               <Link href="/login" className="yd-os-btn yd-os-btn--primary">
@@ -495,7 +454,7 @@ export function YdHomeOsPage({
             <div className="yd-os-hero-card yd-os-hero-card--front">
               <div className="yd-os-hero-card-head">
                 <span className="yd-os-hero-card-dot" />
-                <span>Fall · Implantat, Tag 7</span>
+                <span>Fall · Schmerzen + Foto</span>
               </div>
               <HeroSnapshot />
             </div>
@@ -505,28 +464,15 @@ export function YdHomeOsPage({
             </div>
           </div>
         </div>
-
-        <div className="yd-os-container">
-          <div className="yd-os-stat-strip">
-            {STATS.map((s) => (
-              <div key={s.label} className="yd-os-stat">
-                <strong>
-                  <CountUp value={s.value} />
-                </strong>
-                <span>{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* Problem */}
-      <section className="yd-os-section">
+      <section className="yd-os-section yd-os-section--tight">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head">
               <span className="yd-os-kicker">Ausgangslage</span>
-              <h2 className="yd-os-title">Praxen verlieren Zeit, weil Kommunikation zerstreut ist.</h2>
+              <h2 className="yd-os-title">Kommunikation ist oft zerstreut.</h2>
             </div>
             <div className="yd-os-problem-grid">
               {PROBLEMS.map((p, i) => (
@@ -541,12 +487,12 @@ export function YdHomeOsPage({
       </section>
 
       {/* Workflow — Keynote-Sequenz, scroll-gesteuert */}
-      <section className="yd-os-section yd-os-section--flush" id="workflow" style={{ background: "var(--os-warm)" }}>
+      <section className="yd-os-section yd-os-section--alt yd-os-section--flush" id="workflow">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head yd-os-head--left yd-os-head--workflow">
               <span className="yd-os-kicker">Workflow</span>
-              <h2 className="yd-os-title">Ein Fall. Ein ruhiger Ablauf. Vom ersten Foto bis zur Antwort.</h2>
+              <h2 className="yd-os-title">Vom Foto bis zur Antwort.</h2>
             </div>
           </Reveal>
         </div>
@@ -554,24 +500,23 @@ export function YdHomeOsPage({
       </section>
 
       {/* Module */}
-      <section className="yd-os-section" id="module">
+      <section className="yd-os-section yd-os-section--tight" id="module">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head">
               <span className="yd-os-kicker">Plattform</span>
-              <h2 className="yd-os-title">Eine Plattform. Klare Module. Ein Praxisbetrieb.</h2>
+              <h2 className="yd-os-title">Klare Module. Ein Betrieb.</h2>
             </div>
-            <div className="yd-os-module-grid yd-os-module-grid--bento">
-              {MODULES.map((m, i) => {
+            <div className="yd-os-module-grid yd-os-module-grid--uniform">
+              {MODULES.map((m) => {
                 const Icon = m.icon;
-                const featured = i === 0;
                 return (
                   <GlowCard
                     key={m.title}
-                    className={`yd-os-module-card ${featured ? "yd-os-module-card--featured" : ""}`}
+                    className={`yd-os-module-card yd-os-module-card--${m.accent}`}
                   >
                     <div className="yd-os-module-icon">
-                      <Icon size={featured ? 22 : 19} strokeWidth={1.8} />
+                      <Icon size={19} strokeWidth={1.8} />
                     </div>
                     <h3>{m.title}</h3>
                     <p>{m.text}</p>
@@ -592,17 +537,36 @@ export function YdHomeOsPage({
       </section>
 
       {/* Care Center */}
-      <section className="yd-os-section" id="care-center" style={{ background: "var(--os-warm)" }}>
+      <section className="yd-os-section yd-os-section--alt yd-os-section--tight" id="care-center">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head">
               <span className="yd-os-kicker">Care Center</span>
-              <h2 className="yd-os-title">Patientenwissen, das Ihr Team entlastet.</h2>
+              <h2 className="yd-os-title">Wissen, das das Team entlastet.</h2>
+              <p className="yd-os-lead">{JOURNAL_HUB.essence}</p>
+            </div>
+            <div className="yd-os-care-ki-panel">
+              <div className="yd-os-care-ki-panel-head">
+                <span className="yd-os-care-ki-icon" aria-hidden>
+                  <Sparkles size={18} strokeWidth={1.75} />
+                </span>
+                <div>
+                  <h3 className="yd-os-care-ki-title">{JOURNAL_KI.title}</h3>
+                  <p className="yd-os-care-ki-summary">{JOURNAL_KI.summary}</p>
+                </div>
+              </div>
+              <ul className="yd-os-care-ki-points">
+                {CARE_KI_POINTS.map((point) => (
+                  <li key={point}>
+                    <CheckCircle2 size={15} strokeWidth={1.75} aria-hidden />
+                    {point}
+                  </li>
+                ))}
+              </ul>
             </div>
             <div className="yd-os-article-grid">
               {ARTICLES.map((a) => (
                 <div key={a} className="yd-os-article-card">
-                  <span className="yd-os-article-tag">Care Center</span>
                   <h4>{a}</h4>
                 </div>
               ))}
@@ -612,13 +576,24 @@ export function YdHomeOsPage({
       </section>
 
       {/* Landingpages & Kampagnen */}
-      <section className="yd-os-section" id="landingpages">
+      <section className="yd-os-section yd-os-section--tight" id="landingpages">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head">
-              <span className="yd-os-kicker">Landingpages &amp; Kampagnen</span>
-              <h2 className="yd-os-title">Landingpages für jede Praxis. Für jeden Schwerpunkt.</h2>
+              <span className="yd-os-kicker">Landingpages</span>
+              <h2 className="yd-os-title">Für jeden Schwerpunkt.</h2>
+              <p className="yd-os-lead">{LANDING_HERO.subtitle}</p>
             </div>
+            <ol className="yd-os-landing-flow">
+              {LANDING_FLOW_STEPS.map((step, i) => (
+                <li key={step} className="yd-os-landing-flow-step">
+                  <span className="yd-os-landing-flow-num" aria-hidden>
+                    {i + 1}
+                  </span>
+                  <p>{step}</p>
+                </li>
+              ))}
+            </ol>
             <div className="yd-os-campaign-marquee">
               <div className="yd-os-campaign-track">
                 {[...CAMPAIGNS, ...CAMPAIGNS].map((c, i) => {
@@ -654,96 +629,70 @@ export function YdHomeOsPage({
       </section>
 
       {/* Command AI */}
-      <section className="yd-os-section" id="command-ai" style={{ background: "var(--os-warm)" }}>
+      <section className="yd-os-section yd-os-section--alt yd-os-section--tight" id="command-ai">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head">
               <span className="yd-os-kicker">Command AI</span>
-              <h2 className="yd-os-title">KI unterstützt. Der Arzt entscheidet.</h2>
+              <h2 className="yd-os-title">KI bereitet vor. Der Arzt entscheidet.</h2>
             </div>
             <div className="yd-os-command-split">
               <div className="yd-os-command-panel">
                 <p className="yd-os-command-panel-label">Patientenanfrage</p>
-                <div className="yd-os-bubble">
-                  „Seit Tag 5 etwas Druckgefühl an der Implantatstelle, Foto im Anhang.“
-                </div>
-                <div className="yd-os-command-ai-row" style={{ marginTop: 18 }}>
-                  <span className="yd-os-command-ai-row-icon">
-                    <Camera size={14} />
-                  </span>
-                  <div className="yd-os-command-ai-row-text">
-                    <h4>Anhang erkannt</h4>
-                    <p>1 Foto · Implantatstelle, automatisch dem Fall zugeordnet.</p>
+                <div className="yd-os-command-panel-body">
+                  <div className="yd-os-bubble">
+                    „Seit heute Morgen stechende Schmerzen rechts unten — noch kein Foto im Anhang.“
+                  </div>
+                  <div className="yd-os-command-status-list">
+                    <div className="yd-os-command-status">
+                      <span className="yd-os-command-status-key">Status</span>
+                      <span className="yd-os-command-status-val">Foto fehlt · dringend</span>
+                    </div>
+                    <div className="yd-os-command-status yd-os-command-status--highlight">
+                      <span className="yd-os-command-status-icon" aria-hidden>
+                        <Camera size={14} strokeWidth={1.75} />
+                      </span>
+                      <div className="yd-os-command-status-copy">
+                        <strong>KI fordert Foto an</strong>
+                        <p>
+                          Bitte Nachricht oder Foto der Beschwerde senden — bevor die Praxis
+                          entscheidet.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
               <div className="yd-os-command-panel yd-os-command-panel--ai">
                 <p className="yd-os-command-panel-label">Command AI — Ablauf</p>
-                <CommandAiCycle />
+                <div className="yd-os-command-panel-body">
+                  <CommandAiCycle />
+                </div>
                 <button type="button" className="yd-os-command-approve" disabled>
                   <CheckCircle2 size={14} /> Freigeben
                 </button>
               </div>
             </div>
-            <ul className="yd-os-command-list" style={{ marginTop: 28, maxWidth: 760 }}>
-              {COMMAND_POINTS.map((p) => (
-                <li key={p}>
-                  <CheckCircle2 size={16} />
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Vorteile */}
-      <section className="yd-os-section">
-        <div className="yd-os-container">
-          <Reveal>
-            <div className="yd-os-head">
-              <span className="yd-os-kicker">Nutzen</span>
-              <h2 className="yd-os-title">Mehr Klarheit im Alltag. Weniger Reibung im Team.</h2>
-            </div>
-            <div className="yd-os-benefit-grid">
-              <div className="yd-os-benefit-card">
-                <h3>Für Ärzte</h3>
-                <ul>
-                  <li>Weniger Wiederholungen</li>
-                  <li>Bessere Entscheidungsgrundlage</li>
-                  <li>Weniger Kontextsuche</li>
-                  <li>Klare Freigaben</li>
-                </ul>
-              </div>
-              <div className="yd-os-benefit-card">
-                <h3>Für Team</h3>
-                <ul>
-                  <li>Strukturierte Aufgaben</li>
-                  <li>Weniger WhatsApp-Chaos</li>
-                  <li>Klare Übergaben</li>
-                  <li>Weniger Telefonlast</li>
-                </ul>
-              </div>
-              <div className="yd-os-benefit-card">
-                <h3>Für Patienten</h3>
-                <ul>
-                  <li>Bessere Orientierung</li>
-                  <li>Schnellere Rückmeldung</li>
-                  <li>Verständliche Nachsorge</li>
-                  <li>Mehr Vertrauen</li>
-                </ul>
-              </div>
+            <div className="yd-os-command-guarantees">
+              <ul className="yd-os-command-list yd-os-command-list--balanced">
+                {COMMAND_POINTS.map((p) => (
+                  <li key={p}>
+                    <CheckCircle2 size={16} />
+                    {p}
+                  </li>
+                ))}
+              </ul>
             </div>
           </Reveal>
         </div>
       </section>
 
       {/* Sicherheit / Vertrauen */}
-      <section className="yd-os-section" style={{ background: "var(--os-warm)" }}>
+      <section className="yd-os-section yd-os-section--tight">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head">
-              <span className="yd-os-kicker">Sicherheit &amp; Vertrauen</span>
+              <span className="yd-os-kicker">Vertrauen</span>
               <h2 className="yd-os-title">Medizinisch vorsichtig. Technisch sauber.</h2>
             </div>
             <div className="yd-os-trust">
@@ -762,15 +711,12 @@ export function YdHomeOsPage({
       </section>
 
       {/* Pricing */}
-      <section className="yd-os-section" id="pricing">
+      <section className="yd-os-section yd-os-section--alt yd-os-section--tight" id="pricing">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-head">
               <span className="yd-os-kicker">Preise</span>
-              <h2 className="yd-os-title">Ein Rhythmus. Klar kalkulierbar.</h2>
-              <p className="yd-os-lead">
-                Nach Prüfung Ihrer Praxisdaten wird der geschützte Bereich freigeschaltet.
-              </p>
+              <h2 className="yd-os-title">Klar kalkulierbar.</h2>
             </div>
             <div className="yd-os-pricing-shell">
               <YdRegisterPricing
@@ -786,14 +732,13 @@ export function YdHomeOsPage({
       </section>
 
       {/* Abschluss CTA */}
-      <section className="yd-os-section" id="demo">
+      <section className="yd-os-section yd-os-section--tight" id="demo">
         <div className="yd-os-container">
           <Reveal>
             <div className="yd-os-cta-band">
               <div className="yd-os-cta-grid">
                 <div>
-                  <h2>Demo buchen oder direkt starten</h2>
-                  <p>Kurzer Einblick in den Workflow — oder Registrierung mit Prüfung Ihrer Praxisdaten.</p>
+                  <h2>Demo oder Zugang anfordern</h2>
                   <div className="yd-os-hero-ctas">
                     <Link href={registerHref} className="yd-os-btn yd-os-btn--primary">
                       Demo buchen

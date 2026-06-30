@@ -27,38 +27,38 @@ import {
 
 const STEPS = [
   {
-    title: "Patient sendet Foto",
-    detail: "Implantatstelle, Tag 7 — mit kurzer Beschreibung.",
+    title: "Patient meldet Schmerzen",
+    detail: "Foto der betroffenen Stelle.",
     icon: UserRound,
   },
   {
-    title: "Tracker übernimmt den Fall",
-    detail: "Nachricht wird zu einem strukturierten Fall.",
+    title: "Tracker übernimmt",
+    detail: "Strukturierter Fall.",
     icon: ClipboardCheck,
   },
   {
     title: "Command AI bereitet vor",
-    detail: "Zusammenfassung und Antwortentwurf entstehen.",
+    detail: "Zusammenfassung und Entwurf.",
     icon: Sparkles,
   },
   {
     title: "Arzt prüft",
-    detail: "Freigabe statt automatischer Entscheidung.",
+    detail: "Freigabe statt Automatik.",
     icon: Stethoscope,
   },
   {
-    title: "Care Center wird verknüpft",
-    detail: "Passender Nachsorge-Artikel ergänzt die Antwort.",
+    title: "Care Center verknüpft",
+    detail: "Passender Nachsorge-Artikel.",
     icon: BookOpen,
   },
   {
-    title: "Patient erhält Antwort",
-    detail: "Command AI versendet automatisch nach Freigabe.",
+    title: "Antwort an Patient",
+    detail: "Versand nach Freigabe.",
     icon: Send,
   },
   {
     title: "Relay: Aufgabe diktiert",
-    detail: "Laborauftrag für Pat. M. Müller — im Portal, nicht per WhatsApp.",
+    detail: "Laborauftrag im Portal.",
     icon: Users2,
   },
 ] as const;
@@ -133,14 +133,14 @@ function StageContent({ index, progress }: { index: number; progress: number }) 
             <span className="yd-wk-bubble-photo" aria-hidden>
               <Camera size={15} />
             </span>
-            „Seit Tag 5 etwas Druckgefühl an der Implantatstelle, Foto im Anhang.“
+            „Seit heute Morgen stechende Schmerzen rechts unten — Foto im Anhang.“
           </div>
         </div>
       );
     case 1: {
       const fields = [
         { k: "Patient", v: "Fall #1042" },
-        { k: "Anliegen", v: "Implantat · Tag 7" },
+        { k: "Anliegen", v: "Schmerzen + Foto · neu" },
         { k: "Status", v: "Neu" },
       ];
       return (
@@ -169,7 +169,7 @@ function StageContent({ index, progress }: { index: number; progress: number }) 
         <div className="yd-wk-stage-inner">
           <p className="yd-wk-stage-label">Command AI — Entwurf</p>
           <ScrollTypewriter
-            text="Heilung im erwarteten Bereich. Empfehlung: Kontrolle in dieser Woche."
+            text="Akute Schmerzen — Kontrolle in dieser Woche empfohlen."
             progress={progress}
           />
         </div>
@@ -199,7 +199,7 @@ function StageContent({ index, progress }: { index: number; progress: number }) 
             style={{ opacity: progress, transform: `scale(${0.92 + progress * 0.08})` }}
           >
             <BookOpen size={14} />
-            Schwellung nach Implantation — was ist normal?
+            Zahnschmerzen — wann sollte ich kommen?
           </div>
         </div>
       );

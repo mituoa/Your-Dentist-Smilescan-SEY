@@ -327,10 +327,6 @@ export function LoginPageClient({
 
         <LoginRegisterCta inviteToken={inviteToken} prefilledEmail={prefilledEmail} />
 
-        <p className="yd-login-platform-hint">
-          <Link href="/?welcome=1">Plattform kennenlernen</Link>
-        </p>
-
         <footer className="yd-auth-legal-minimal">
           <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
             <Link href="/trust/privacy" className="yd-auth-legal-minimal-link">
