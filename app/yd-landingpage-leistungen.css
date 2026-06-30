@@ -1,0 +1,239 @@
+/* Leistungs-Landingpage — Carrée Dental Vorlage (4-Säulen-Übersicht) */
+
+.yd-leistungen {
+  --leistung-accent: #e86f1a;
+  --leistung-accent-soft: rgba(232, 111, 26, 0.1);
+  --leistung-accent-border: rgba(232, 111, 26, 0.22);
+}
+
+.yd-leistungen-btn--warm.yd-al-btn--primary,
+.yd-leistungen-btn--warm.yd-al-btn--glow {
+  background: linear-gradient(168deg, #f08a3c 0%, #e86f1a 48%, #c95a12 100%);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 1px 2px rgba(160, 70, 10, 0.18),
+    0 6px 18px rgba(232, 111, 26, 0.28);
+}
+
+.yd-leistungen-btn--warm.yd-al-btn--glow-light {
+  background: linear-gradient(168deg, #f08a3c 0%, #e86f1a 55%, #c95a12 100%);
+}
+
+.yd-leistungen-hero {
+  padding-top: clamp(40px, 6vw, 72px);
+  padding-bottom: clamp(32px, 4vw, 56px);
+}
+
+.yd-leistungen-hero-inner {
+  max-width: 720px;
+}
+
+.yd-leistungen-hero-title {
+  max-width: 18ch;
+}
+
+.yd-leistungen-pillars {
+  padding-top: 0;
+}
+
+.yd-leistungen-grid {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .yd-leistungen-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .yd-leistungen-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+.yd-leistungen-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border-radius: 18px;
+  border: 1px solid var(--al-line);
+  background: var(--al-surface);
+  box-shadow: var(--al-shadow-sm);
+  overflow: hidden;
+  transition:
+    transform 280ms var(--al-spring),
+    box-shadow 280ms var(--al-spring);
+}
+
+@media (hover: hover) {
+  .yd-leistungen-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--al-shadow-md);
+  }
+}
+
+.yd-leistungen-card__media {
+  position: relative;
+  aspect-ratio: 4 / 3.2;
+  overflow: hidden;
+}
+
+.yd-leistungen-card__img {
+  object-fit: cover;
+}
+
+.yd-leistungen-card__media-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 26, 44, 0.02) 0%,
+    rgba(16, 26, 44, 0.55) 100%
+  );
+}
+
+.yd-leistungen-card__title {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  margin: 0;
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
+}
+
+.yd-leistungen-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 18px;
+}
+
+.yd-leistungen-card__intro {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--al-text-soft);
+}
+
+.yd-leistungen-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.yd-leistungen-list li {
+  position: relative;
+  padding-left: 1.35rem;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--al-text);
+}
+
+.yd-leistungen-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 2px 4px 2px 4px;
+  background: var(--leistung-accent);
+  transform: rotate(-12deg);
+  box-shadow: 0 0 0 2px var(--leistung-accent-soft);
+}
+
+.yd-leistungen-list__item--featured {
+  font-weight: 600;
+  color: var(--al-navy);
+}
+
+.yd-leistungen-highlights {
+  background: linear-gradient(180deg, var(--al-blue-ice-2) 0%, var(--al-page) 100%);
+}
+
+.yd-leistungen-highlight-grid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .yd-leistungen-highlight-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-leistungen-highlight-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.yd-leistungen-highlight-card {
+  padding: 18px 18px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--al-line-soft);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--al-shadow-sm);
+}
+
+.yd-leistungen-highlight-card h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--al-navy);
+}
+
+.yd-leistungen-highlight-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--al-text-soft);
+}
+
+.yd-leistungen-faq-wrap {
+  max-width: 760px;
+}
+
+.yd-leistungen-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.yd-leistungen-cta-band .yd-al-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.yd-leistungen-cta-band .yd-al-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 767px) {
+  .yd-leistungen-card__body {
+    padding: 14px 14px 16px;
+  }
+
+  .yd-leistungen-list li {
+    font-size: 13px;
+  }
+}

@@ -12,6 +12,8 @@ import { OAuthFormSubmitButton } from "@/components/auth/oauth-form-submit-butto
 import { ResendConfirmationSubmitButton } from "@/components/auth/resend-confirmation-submit-button";
 import { YdAuthPending } from "@/components/auth/yd-auth-ui";
 import { LoginRegisterCta } from "@/components/auth/login-register-cta";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { useLocale } from "@/components/i18n/locale-provider";
 import { AUTH_LOGIN_INVALID_CREDENTIALS } from "@/lib/auth-user-facing-errors";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 
@@ -63,6 +65,7 @@ export function LoginPageClient({
   prefilledEmail = "",
   googleLoginEnabled = true,
 }: LoginPageClientProps) {
+  const { messages } = useLocale();
   const [loginChannelLock, setLoginChannelLock] = useState<LoginSubmitChannel | null>(null);
 
   useEffect(() => {
@@ -101,45 +104,46 @@ export function LoginPageClient({
 
   const parsedError = useMemo(() => {
     const raw = normalizedQueryError;
+    const e = messages.login.errors;
     if (!raw) return null;
 
     if (raw === "account_pending_approval") {
       return {
         tone: "pending" as const,
-        title: "Praxis wird geprüft",
-        body: "Ihre Registrierung und Unterlagen werden validiert. Sobald Ihr Zugang freigeschaltet ist, können Sie sich anmelden.",
+        title: e.accountPendingTitle,
+        body: e.accountPendingBody,
       };
     }
 
     if (raw === "workspace_missing") {
       return {
         tone: "info" as const,
-        title: "Kein Praxiszugang gefunden",
-        body: "Ihrem Benutzerkonto ist derzeit keine Praxis zugeordnet, oder eine Team-Einladung ist noch ausstehend. Bitte prüfen Sie Ihre E‑Mails auf eine Einladung oder wenden Sie sich an Ihre Praxis.",
+        title: e.workspaceMissingTitle,
+        body: e.workspaceMissingBody,
       };
     }
 
     if (raw === "email_not_confirmed") {
       return {
         tone: "warning" as const,
-        title: "E‑Mail noch nicht bestätigt",
-        body: "Bitte bestätigen Sie zuerst Ihre E‑Mail-Adresse. Wenn Sie keine Mail finden, können Sie sie erneut senden.",
+        title: e.emailNotConfirmedTitle,
+        body: e.emailNotConfirmedBody,
       };
     }
 
     if (raw === "auth_callback_failed") {
       return {
         tone: "warning" as const,
-        title: "Link ungültig oder abgelaufen",
-        body: "Bitte versuchen Sie es erneut oder lassen Sie sich eine neue Bestätigungs‑E‑Mail senden.",
+        title: e.authCallbackTitle,
+        body: e.authCallbackBody,
       };
     }
 
     if (/provider is not enabled|unsupported provider/i.test(raw)) {
       return {
         tone: "warning" as const,
-        title: "Anmeldung mit diesem Anbieter nicht verfügbar",
-        body: "Der gewählte Anmelde‑Anbieter ist in Ihrer Umgebung noch nicht freigeschaltet. Bitte nutzen Sie E‑Mail und Passwort.",
+        title: e.providerTitle,
+        body: e.providerBody,
         compact: false,
       };
     }
@@ -147,18 +151,19 @@ export function LoginPageClient({
     if (
       raw === AUTH_LOGIN_INVALID_CREDENTIALS ||
       raw === "E-Mail oder Passwort ist ungültig." ||
+      raw === e.invalidCredentials ||
       /invalid login credentials|invalid_credentials/i.test(raw)
     ) {
       return {
         tone: "warning" as const,
-        body: AUTH_LOGIN_INVALID_CREDENTIALS,
+        body: e.invalidCredentials,
         compact: true,
       };
     }
 
     if (
       raw.length <= 220 &&
-      /^(Bitte|Die |Das |Der |Diese |E-Mail|Passwort|Zu viele|Verbindung|Google-Anmeldung|Der Link)/i.test(
+      /^(Bitte|Die |Das |Der |Diese |E-Mail|Passwort|Zu viele|Verbindung|Google-Anmeldung|Der Link|Please|Email|Password)/i.test(
         raw
       )
     ) {
@@ -171,10 +176,10 @@ export function LoginPageClient({
 
     return {
       tone: "warning" as const,
-      body: "Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+      body: e.generic,
       compact: true,
     };
-  }, [normalizedQueryError]);
+  }, [normalizedQueryError, messages]);
 
   const shouldShowResend = normalizedQueryError === "email_not_confirmed";
 
@@ -184,11 +189,13 @@ export function LoginPageClient({
 
   return (
     <div className="min-w-0">
+      <div className="yd-login-locale-row">
+        <LocaleSwitcher showLabel={false} className="yd-login-locale-switcher" />
+      </div>
+
       <header className="yd-auth-intro">
-        <h1 className="yd-public-entry-title yd-public-entry-title--login">Anmelden</h1>
-        <p className="yd-public-entry-lead yd-public-entry-lead--login">
-          Melden Sie sich mit Ihrem Praxiszugang an.
-        </p>
+        <h1 className="yd-public-entry-title yd-public-entry-title--login">{messages.login.title}</h1>
+        <p className="yd-public-entry-lead yd-public-entry-lead--login">{messages.login.lead}</p>
       </header>
 
         {parsedError ? (
@@ -217,7 +224,7 @@ export function LoginPageClient({
 
         {resent ? (
           <p className="yd-auth-alert yd-auth-alert--success mb-5" role="status">
-            Bestätigungs‑E‑Mail wurde erneut versendet. Bitte prüfen Sie auch den Spam‑Ordner.
+            {messages.login.resent}
           </p>
         ) : null}
 
@@ -236,7 +243,7 @@ export function LoginPageClient({
                 name="email"
                 type="email"
                 defaultValue={prefilledEmail}
-                placeholder="E-Mail-Adresse"
+                placeholder={messages.login.emailPlaceholder}
                 autoComplete="email"
                 onChange={(e) => setResendEmail(e.target.value)}
                 className="yd-auth-input pr-10"
@@ -251,7 +258,7 @@ export function LoginPageClient({
 
             <div className="flex items-center justify-end">
               <Link prefetch href={forgotHref} className="text-[12px] font-medium text-[#1a4f9c] hover:underline">
-                Passwort vergessen?
+                {messages.login.forgotPassword}
               </Link>
             </div>
           </LoginPasswordControlsFieldset>
@@ -261,7 +268,7 @@ export function LoginPageClient({
 
         {shouldShowResend ? (
           <div className="yd-auth-alert yd-auth-alert--warning mt-4 min-w-0 break-words">
-            <p className="yd-auth-alert-title text-[13px]">Keine Bestätigungs‑E‑Mail erhalten?</p>
+            <p className="yd-auth-alert-title text-[13px]">{messages.login.resendTitle}</p>
             <form
               action={resendSignupConfirmation}
               onSubmit={() => setLoginChannelLock("resend")}
@@ -283,7 +290,7 @@ export function LoginPageClient({
         {googleLoginEnabled ? (
           <>
             <div className="yd-auth-divider yd-auth-divider--subtle">
-              <span>oder</span>
+              <span>{messages.common.or}</span>
             </div>
 
             <form
@@ -297,7 +304,7 @@ export function LoginPageClient({
                 className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
               >
                 <OAuthFormSubmitButton
-                  pendingLabel="Weiter zu Google…"
+                  pendingLabel={messages.login.googlePending}
                   className="yd-auth-btn-secondary yd-auth-btn-secondary--oauth"
                 >
                   <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" aria-hidden="true">
@@ -318,7 +325,7 @@ export function LoginPageClient({
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Mit Google anmelden
+                  {messages.login.google}
                 </OAuthFormSubmitButton>
               </fieldset>
             </form>
@@ -330,10 +337,10 @@ export function LoginPageClient({
         <footer className="yd-auth-legal-minimal">
           <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
             <Link href="/trust/privacy" className="yd-auth-legal-minimal-link">
-              Datenschutz
+              {messages.login.privacy}
             </Link>
             <Link href="/trust/imprint" className="yd-auth-legal-minimal-link">
-              Impressum
+              {messages.login.imprint}
             </Link>
           </nav>
         </footer>

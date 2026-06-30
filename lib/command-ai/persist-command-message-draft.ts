@@ -10,6 +10,8 @@ import {
   isSummarizeOnlyCommand,
   resolveCommandReplyIntent,
 } from "@/lib/command-ai/reply-intent";
+import { appendCareCenterRecommendationToDraft } from "@/lib/care-center/format-patient-article-block";
+import { resolveSubmissionCareRecommendation } from "@/lib/care-center/resolve-submission-care-recommendation";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
 import {
   createMessageDraft,
@@ -56,8 +58,10 @@ export async function persistCommandMessageDraft(
     return { ok: false, error: "Bitte erneut anmelden." };
   }
 
+  const workspaceId = workspace.workspace_id;
+
   const replyIntent = resolveCommandReplyIntent(input.rawText, input.signals);
-  const body = buildCommandMessageDraft({
+  const bodyBase = buildCommandMessageDraft({
     patientName: input.patientName,
     practicePhone: input.practicePhone,
     appointmentUrl: input.appointmentUrl,
@@ -66,7 +70,13 @@ export async function persistCommandMessageDraft(
     submissionUrgency: toUrgencyKey(input.submissionUrgency),
   });
 
-  const workspaceId = workspace.workspace_id;
+  const recommendation = await resolveSubmissionCareRecommendation({
+    workspaceId,
+    patientNotes: input.rawText,
+  });
+  const body = recommendation
+    ? appendCareCenterRecommendationToDraft(bodyBase, recommendation)
+    : bodyBase;
   const existingDraft = await getLatestMessageDraftForSubmission(
     input.submissionId,
     workspaceId,

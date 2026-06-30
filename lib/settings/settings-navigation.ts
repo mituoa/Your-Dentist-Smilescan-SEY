@@ -3,6 +3,7 @@ import {
   BookOpen,
   Clock,
   FileText,
+  Languages,
   Layers,
   Mail,
   MapPin,
@@ -23,6 +24,7 @@ export type SettingsSectionId =
   | "team-rollen"
   | "einladungen"
   | "sicherheit"
+  | "sprache"
   | "nachrichten"
   | "automatisierungen"
   | "journal-kategorien"
@@ -129,6 +131,17 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
     ],
   },
   {
+    label: "SYSTEM",
+    items: [
+      {
+        id: "sprache",
+        label: "Sprache",
+        hint: "Oberflächensprache",
+        icon: Languages,
+      },
+    ],
+  },
+  {
     label: "RECHTLICHES",
     items: [
       {
@@ -216,14 +229,16 @@ export const SETTINGS_MOBILE_NAV_GROUPS: SettingsNavGroup[] = [
   },
   {
     label: "SYSTEM",
-    items: pickNavItems(["sicherheit", "rechtliches"]).map((item) =>
-      item.id === "sicherheit"
-        ? {
-            ...item,
-            label: "Sicherheit & Login",
-            hint: "Passwort und Sitzungen",
-          }
-        : item
+    items: pickNavItems(["sprache", "sicherheit", "rechtliches"]).map((item) =>
+      item.id === "sprache"
+        ? { ...item, label: "Sprache", hint: "English / Deutsch" }
+        : item.id === "sicherheit"
+          ? {
+              ...item,
+              label: "Sicherheit & Login",
+              hint: "Passwort und Sitzungen",
+            }
+          : item
     ),
   },
 ];

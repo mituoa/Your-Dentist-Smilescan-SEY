@@ -430,7 +430,7 @@
 
   .yd-relay-work-surface,
   .yd-relay-messages-surface {
-    border-radius: 18px !important;
+    border-radius: var(--yd-ws-module-panel-radius, 16px) !important;
     overflow: hidden;
   }
 

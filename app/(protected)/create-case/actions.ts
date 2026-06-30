@@ -38,6 +38,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import { bootstrapSubmissionMessageDraftBestEffort } from "@/lib/care-center/bootstrap-submission-message-draft";
 import { INTAKE_CHANNEL_PRACTICE_MANUAL } from "@/lib/submissions/intake-channel";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 import { MAX_PHOTOS } from "@/lib/upload/validation";
@@ -440,6 +441,23 @@ export async function createPracticeCase(input: {
   const partialAttachments =
     uniqueTempPaths.length > 0 &&
     photosFullyApplied < uniqueTempPaths.length;
+
+  const { data: profileRow } = await supabase
+    .from("profile_data")
+    .select("practice_phone, appointment_link")
+    .eq("workspace_id", workspaceId)
+    .maybeSingle();
+
+  await bootstrapSubmissionMessageDraftBestEffort({
+    workspaceId,
+    submissionId,
+    patientName: nameTrim || "Patient",
+    patientNotes: notesTrim,
+    practicePhone: profileRow?.practice_phone?.trim() ?? "",
+    appointmentUrl: profileRow?.appointment_link?.trim() ?? null,
+    submissionUrgency: input.urgency,
+    photoCount: photosFullyApplied,
+  });
 
   /* Liste in inbox/layout.tsx muss neu geladen werden, nicht nur die Index-Seite */
   revalidatePath("/inbox", "layout");

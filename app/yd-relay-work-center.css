@@ -13,7 +13,7 @@
   --rc-blue: #1a4f9c;
   --rc-blue-soft: rgba(26, 79, 156, 0.08);
   --rc-green: #16a34a;
-  --rc-radius: 18px;
+  --rc-radius: var(--yd-ws-module-panel-radius, 16px);
   --rc-space: 8px;
   --rc-space-2: 16px;
 
@@ -840,32 +840,11 @@
   }
 }
 
-@media (min-width: 768px) {
-  .yd-workspace main:has(.relay-center) {
-    overflow-y: auto !important;
-    overscroll-behavior: contain;
-  }
-
-  .yd-workspace main:has(.relay-center) .yd-awaken-canvas {
-    overflow: visible;
-    height: auto;
-    max-height: none;
-  }
-
-  .yd-workspace main:has(.relay-center) .yd-awaken-canvas > .relative {
-    overflow: visible;
-    height: auto;
-    max-height: none;
-  }
-}
-
 /* —— Mobile & Tablet (< 1024px) — Desktop unverändert —— */
 
 @media (max-width: 1023px) {
   .relay-center {
-    --rc-radius: 14px;
-    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
-    background: #f4f6f8;
+    --rc-radius: var(--yd-ws-module-panel-radius, 16px);
   }
 
   .relay-center__layout {

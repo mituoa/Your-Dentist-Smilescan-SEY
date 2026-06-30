@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -18,7 +19,6 @@ import {
   ShieldCheck,
   Sparkles,
   Stethoscope,
-  UserRound,
   Users2,
   X,
 } from "lucide-react";
@@ -78,15 +78,20 @@ function Reveal({ children, className }: { children: React.ReactNode; className?
   );
 }
 
-/** Zählt einmalig hoch, sobald sichtbar — kein Dauerloop. */
+/** Zählt einmalig hoch, sobald sichtbar — kein Dauerloop. Respektiert prefers-reduced-motion. */
 function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(0);
   const started = useRef(false);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (reduced) {
+      setDisplay(value);
+      return;
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -109,7 +114,7 @@ function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [value]);
+  }, [value, reduced]);
 
   return (
     <span ref={ref}>
@@ -156,52 +161,126 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** Hero-Szene — exakt der Ablauf, der das Produkt erklärt. */
-const FLOW_NODES = [
-  { icon: UserRound, title: "Patient stellt Anfrage", detail: "Beschwerde wird geschildert." },
-  { icon: Camera, title: "Foto trifft ein", detail: "Implantatstelle, Tag 7." },
-  { icon: ClipboardCheck, title: "Tracker übernimmt Fall", detail: "Strukturiert, mit Kontext." },
-  { icon: Sparkles, title: "Command AI bereitet vor", detail: "Zusammenfassung & Entwurf." },
-  { icon: Stethoscope, title: "Arzt prüft", detail: "Freigabe statt Automatik." },
-  { icon: Users2, title: "Relay erstellt Aufgabe", detail: "Empfang: Termin anbieten." },
-  { icon: BookOpen, title: "Care Center verlinkt", detail: "Passender Nachsorge-Artikel." },
-  { icon: Send, title: "Patient erhält Antwort", detail: "Klar, ruhig, verbindlich." },
+/** Hero-Status-Snapshot — bewusst kein zweiter Schritt-Rail (der lebt in der Workflow-Sektion).
+ *  Zeigt stattdessen den Praxisstatus eines Falls: Kennzahlen + eine ruhig rotierende Statuszeile. */
+const HERO_SNAPSHOT_METRICS = [
+  { label: "Eingänge heute", value: "3" },
+  { label: "Offene Freigabe", value: "1" },
+  { label: "Ø Antwortzeit", value: "11 Min." },
 ] as const;
 
-function LivingWorkflowScene() {
+const HERO_STATUS_LINES = [
+  "Foto trifft ein — Tracker übernimmt den Fall.",
+  "Command AI bereitet Zusammenfassung vor.",
+  "Arzt prüft — Freigabe statt Automatik.",
+  "Command AI sendet die Antwort automatisch an den Patienten.",
+] as const;
+
+function HeroSnapshot() {
   const reduced = useReducedMotion();
-  const [active, setActive] = useState(0);
-  const total = FLOW_NODES.length;
+  const [line, setLine] = useState(0);
+  const total = HERO_STATUS_LINES.length;
 
   useEffect(() => {
     if (reduced) return;
-    const id = window.setInterval(() => {
-      setActive((v) => (v + 1) % total);
-    }, 1900);
+    const id = window.setInterval(() => setLine((v) => (v + 1) % total), 2400);
     return () => window.clearInterval(id);
   }, [reduced, total]);
 
   return (
-    <div className="yd-os-flow-scene" aria-hidden>
-      <div
-        className="yd-os-flow-rail-fill"
-        style={{ height: reduced ? "100%" : `${(active / (total - 1)) * 100}%` }}
-      />
-      {FLOW_NODES.map((node, i) => {
-        const Icon = node.icon;
-        const state = reduced ? "is-done" : i < active ? "is-done" : i === active ? "is-active" : "";
-        return (
-          <div key={node.title} className={`yd-os-flow-node ${state}`}>
-            <span className="yd-os-flow-node-icon">
-              <Icon size={16} strokeWidth={1.9} />
-            </span>
-            <div className="yd-os-flow-node-text">
-              <p className="yd-os-flow-node-title">{node.title}</p>
-              <p className="yd-os-flow-node-detail">{node.detail}</p>
-            </div>
+    <div className="yd-os-hero-snapshot" aria-hidden>
+      <div className="yd-os-hero-snapshot-metrics">
+        {HERO_SNAPSHOT_METRICS.map((m) => (
+          <div key={m.label} className="yd-os-hero-snapshot-metric">
+            <strong>{m.value}</strong>
+            <span>{m.label}</span>
           </div>
-        );
-      })}
+        ))}
+      </div>
+      <div className="yd-os-hero-pulse">
+        <span className="yd-os-hero-pulse-dot" />
+        <span key={line} className="yd-os-hero-pulse-text">
+          {HERO_STATUS_LINES[reduced ? 0 : line]}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Command AI — zyklische Demo: Anfrage → Zusammenfassung → Freigabe → Versand an den Patienten.
+ *  Wichtig: Nach Freigabe sendet Command AI die Antwort direkt an den Patienten — kein Team-Task.
+ *  Aufgaben ans Team laufen separat über Relay (siehe COMMAND_POINTS). */
+const COMMAND_STAGES = [
+  {
+    tag: "01 · Anfrage",
+    icon: MessageSquareText,
+    title: "Patientenanfrage trifft ein",
+    body: "„Seit Tag 5 etwas Druckgefühl an der Implantatstelle, Foto im Anhang.“",
+  },
+  {
+    tag: "02 · Zusammenfassung",
+    icon: ScanLine,
+    title: "Command AI fasst zusammen",
+    body: "Heilung im erwarteten Bereich, kein Hinweis auf Komplikation.",
+  },
+  {
+    tag: "03 · Freigabe",
+    icon: Stethoscope,
+    title: "Arzt prüft und gibt frei",
+    body: "Entwurf geprüft — Freigabe statt automatischem Versand.",
+  },
+  {
+    tag: "04 · Versand",
+    icon: Send,
+    title: "Command AI sendet an den Patienten",
+    body: "Freigegebene Antwort geht automatisch raus — vollständig dokumentiert im Portal.",
+  },
+] as const;
+
+function CommandAiCycle() {
+  const reduced = useReducedMotion();
+  const [stage, setStage] = useState(0);
+  const total = COMMAND_STAGES.length;
+
+  useEffect(() => {
+    if (reduced) return;
+    const id = window.setInterval(() => setStage((v) => (v + 1) % total), 2600);
+    return () => window.clearInterval(id);
+  }, [reduced, total]);
+
+  const current = COMMAND_STAGES[stage];
+  const Icon = current.icon;
+
+  return (
+    <div className="yd-os-cmd-cycle">
+      <div className="yd-os-cmd-cycle-tabs" role="tablist" aria-label="Command-AI-Ablauf">
+        {COMMAND_STAGES.map((s, i) => (
+          <button
+            key={s.tag}
+            type="button"
+            role="tab"
+            aria-selected={i === stage}
+            className={`yd-os-cmd-cycle-tab ${i === stage ? "is-active" : ""}`}
+            onClick={() => setStage(i)}
+          >
+            {s.tag}
+          </button>
+        ))}
+      </div>
+      <div className="yd-os-cmd-cycle-stage" key={stage}>
+        <span className="yd-os-cmd-cycle-icon">
+          <Icon size={18} strokeWidth={1.8} />
+        </span>
+        <div>
+          <h4>{current.title}</h4>
+          <p>{current.body}</p>
+        </div>
+      </div>
+      <div className="yd-os-cmd-cycle-progress">
+        {COMMAND_STAGES.map((s, i) => (
+          <span key={s.tag} className={`yd-os-cmd-cycle-dot ${i <= stage ? "is-filled" : ""}`} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -228,8 +307,8 @@ const MODULES = [
   {
     icon: Users2,
     title: "Relay",
-    text: "Aufgaben, Teamnachrichten, Freigaben und Übergaben.",
-    preview: ["Empfang · Termin anbieten", "Erledigt von: Lisa"],
+    text: "Der Arzt diktiert Aufgaben an Rezeption oder Assistenz per Command AI — dokumentiert im Portal statt über WhatsApp.",
+    preview: ["Laborauftrag · Pat. M. Müller", "Diktiert von Dr. — nachverfolgbar"],
   },
   {
     icon: BookOpen,
@@ -256,8 +335,8 @@ const COMMAND_POINTS = [
   "Keine finale medizinische Entscheidung",
   "Klare Rückfragen bei Unsicherheit",
   "Ärztliche Freigabe bleibt Pflicht",
-  "Weniger Schreibarbeit",
-  "Bessere Struktur für Team und Patient",
+  "Nach Freigabe: automatischer Versand an den Patienten",
+  "Team-Aufgaben (z. B. Laborauftrag) per Diktat an Relay — nicht über WhatsApp, vollständig nachverfolgbar im Portal",
 ];
 
 const ARTICLES = [
@@ -271,18 +350,19 @@ const ARTICLES = [
   "Retainer verloren",
 ];
 
+/** Bildquelle: Unsplash (lizenzfrei für kommerzielle Nutzung), ruhige klinische Aufnahmen. */
 const CAMPAIGNS = [
-  "SmileScan Landingpage",
-  "Aligner / Invisalign",
-  "Implantologie",
-  "Prophylaxe",
-  "Ästhetische Zahnmedizin",
-  "Bleaching",
-  "Kinderzahnheilkunde",
-  "Parodontologie",
-  "Endodontie",
-  "Oral Health Pass",
-];
+  { name: "SmileScan Landingpage", image: "1667133295315-820bb6481730" },
+  { name: "Aligner / Invisalign", image: "1598256989809-394fa4f6cd26" },
+  { name: "Implantologie", image: "1593022356769-11f762e25ed9" },
+  { name: "Prophylaxe", image: "1629909613654-28e377c37b09" },
+  { name: "Ästhetische Zahnmedizin", image: "1677026010083-78ec7f1b84ed" },
+  { name: "Bleaching", image: "1489278353717-f64c6ee8a4d2" },
+  { name: "Kinderzahnheilkunde", image: "1565090568947-7293970ba471" },
+  { name: "Parodontologie", image: "1606811971618-4486d14f3f99" },
+  { name: "Endodontie", image: "1606811841689-23dfddce3e95" },
+  { name: "Oral Health Pass", image: "1598256989800-fe5f95da9787" },
+] as const;
 
 const PROBLEMS = [
   "Patienten schreiben über verschiedene Kanäle.",
@@ -388,11 +468,16 @@ export function YdHomeOsPage({
       <section className="yd-os-hero">
         <div className="yd-os-container yd-os-hero-grid">
           <div className="yd-os-hero-copy">
-            <span className="yd-os-eyebrow">Digitale Infrastruktur für Zahnarztpraxen</span>
-            <h1 className="yd-os-hero-title">Das digitale Betriebssystem für moderne Zahnarztpraxen.</h1>
+            <span className="yd-os-eyebrow">
+              <span className="yd-os-eyebrow-dot" aria-hidden />
+              Digitale Infrastruktur für Zahnarztpraxen
+            </span>
+            <h1 className="yd-os-hero-title">
+              Ein ruhiger Workflow für <em>jede</em> Patientenanfrage.
+            </h1>
             <p className="yd-os-hero-lead">
               Your Dentist verbindet Patientenanfragen, KI-gestützte Vorarbeit, ärztliche Freigabe,
-              Teamaufgaben, Patientenwissen und digitale Kampagnen in einem ruhigen Praxis-Workflow.
+              Teamaufgaben, Patientenwissen und digitale Kampagnen in einem System.
             </p>
             <div className="yd-os-hero-ctas">
               <button type="button" className="yd-os-btn yd-os-btn--primary" onClick={() => go("demo")}>
@@ -408,7 +493,21 @@ export function YdHomeOsPage({
             </p>
           </div>
 
-          <LivingWorkflowScene />
+          <div className="yd-os-hero-visual">
+            <div className="yd-os-hero-card yd-os-hero-card--back" aria-hidden />
+            <div className="yd-os-hero-card yd-os-hero-card--mid" aria-hidden />
+            <div className="yd-os-hero-card yd-os-hero-card--front">
+              <div className="yd-os-hero-card-head">
+                <span className="yd-os-hero-card-dot" />
+                <span>Fall · Implantat, Tag 7</span>
+              </div>
+              <HeroSnapshot />
+            </div>
+            <div className="yd-os-hero-chip yd-os-hero-chip--approval">
+              <ShieldCheck size={14} />
+              Ärztliche Freigabe aktiv
+            </div>
+          </div>
         </div>
 
         <div className="yd-os-container">
@@ -466,13 +565,17 @@ export function YdHomeOsPage({
               <span className="yd-os-kicker">Plattform</span>
               <h2 className="yd-os-title">Eine Plattform. Klare Module. Ein Praxisbetrieb.</h2>
             </div>
-            <div className="yd-os-module-grid">
-              {MODULES.map((m) => {
+            <div className="yd-os-module-grid yd-os-module-grid--bento">
+              {MODULES.map((m, i) => {
                 const Icon = m.icon;
+                const featured = i === 0;
                 return (
-                  <GlowCard key={m.title} className="yd-os-module-card">
+                  <GlowCard
+                    key={m.title}
+                    className={`yd-os-module-card ${featured ? "yd-os-module-card--featured" : ""}`}
+                  >
                     <div className="yd-os-module-icon">
-                      <Icon size={19} strokeWidth={1.8} />
+                      <Icon size={featured ? 22 : 19} strokeWidth={1.8} />
                     </div>
                     <h3>{m.title}</h3>
                     <p>{m.text}</p>
@@ -528,13 +631,27 @@ export function YdHomeOsPage({
                 auf Praxisprofil, Behandlungsangebot und Zielgruppe abgestimmt sind.
               </p>
             </div>
-            <div className="yd-os-campaign-grid">
-              {CAMPAIGNS.map((c) => (
-                <div key={c} className="yd-os-campaign-card">
-                  <div className="yd-os-campaign-preview" />
-                  <p className="yd-os-campaign-name">{c}</p>
-                </div>
-              ))}
+            <div className="yd-os-campaign-marquee">
+              <div className="yd-os-campaign-track">
+                {[...CAMPAIGNS, ...CAMPAIGNS].map((c, i) => (
+                  <div
+                    key={`${c.name}-${i}`}
+                    className="yd-os-campaign-card"
+                    aria-hidden={i >= CAMPAIGNS.length}
+                  >
+                    <div className="yd-os-campaign-preview">
+                      <Image
+                        src={`https://images.unsplash.com/photo-${c.image}?q=80&w=480&auto=format&fit=crop`}
+                        alt=""
+                        fill
+                        sizes="200px"
+                        className="yd-os-campaign-preview-img"
+                      />
+                    </div>
+                    <p className="yd-os-campaign-name">{c.name}</p>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="yd-os-campaign-cta-row">
               <p>
@@ -567,36 +684,19 @@ export function YdHomeOsPage({
                 <div className="yd-os-bubble">
                   „Seit Tag 5 etwas Druckgefühl an der Implantatstelle, Foto im Anhang.“
                 </div>
-              </div>
-              <div className="yd-os-command-panel yd-os-command-panel--ai">
-                <p className="yd-os-command-panel-label">Command AI — Vorbereitung</p>
-                <div className="yd-os-command-ai-row">
-                  <span className="yd-os-command-ai-row-icon">
-                    <ScanLine size={14} />
-                  </span>
-                  <div className="yd-os-command-ai-row-text">
-                    <h4>Zusammenfassung</h4>
-                    <p>Heilung im erwarteten Bereich, kein Hinweis auf Komplikation.</p>
-                  </div>
-                </div>
-                <div className="yd-os-command-ai-row">
-                  <span className="yd-os-command-ai-row-icon">
-                    <MessageSquareText size={14} />
-                  </span>
-                  <div className="yd-os-command-ai-row-text">
-                    <h4>Empfohlene Antwort</h4>
-                    <p>„Verlauf unauffällig — bitte zur Kontrolle in dieser Woche vorbeikommen.“</p>
-                  </div>
-                </div>
-                <div className="yd-os-command-ai-row">
+                <div className="yd-os-command-ai-row" style={{ marginTop: 18 }}>
                   <span className="yd-os-command-ai-row-icon">
                     <Camera size={14} />
                   </span>
                   <div className="yd-os-command-ai-row-text">
-                    <h4>Nächster Schritt</h4>
-                    <p>Terminlink vorbereitet, Aufgabe an Empfang erstellt.</p>
+                    <h4>Anhang erkannt</h4>
+                    <p>1 Foto · Implantatstelle, automatisch dem Fall zugeordnet.</p>
                   </div>
                 </div>
+              </div>
+              <div className="yd-os-command-panel yd-os-command-panel--ai">
+                <p className="yd-os-command-panel-label">Command AI — Ablauf</p>
+                <CommandAiCycle />
                 <button type="button" className="yd-os-command-approve" disabled>
                   <CheckCircle2 size={14} /> Freigeben
                 </button>

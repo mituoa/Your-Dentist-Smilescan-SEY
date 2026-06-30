@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
 import { buildUploadConfirmationEmail } from "@/lib/mail/upload-confirmation-patient-email";
 import { buildNewSubmissionPractitionerEmail } from "@/lib/mail/new-submission-practitioner-email";
+import { bootstrapSubmissionMessageDraftBestEffort } from "@/lib/care-center/bootstrap-submission-message-draft";
 import { getAppBaseUrl } from "@/lib/env";
 import { INTAKE_CHANNEL_PATIENT_UPLOAD } from "@/lib/submissions/intake-channel";
 import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
@@ -108,7 +109,7 @@ export async function submitUpload(
 
   const { data: profile } = await admin
     .from("profile_data")
-    .select("practice_name, display_name")
+    .select("practice_name, display_name, practice_phone, appointment_link")
     .eq("workspace_id", workspace.id)
     .single();
 
@@ -231,6 +232,16 @@ export async function submitUpload(
       );
     }
   }
+
+  await bootstrapSubmissionMessageDraftBestEffort({
+    workspaceId: workspace.id,
+    submissionId,
+    patientName: fullName || patientEmail,
+    patientNotes,
+    practicePhone: profile?.practice_phone?.trim() ?? "",
+    appointmentUrl: profile?.appointment_link?.trim() ?? null,
+    photoCount: finalPaths.length,
+  });
 
   return { success: true };
 }

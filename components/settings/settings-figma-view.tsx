@@ -23,6 +23,7 @@ import { SettingsMobileBack } from "@/components/settings/settings-mobile-back";
 import { SettingsMobileNav } from "@/components/settings/settings-mobile-nav";
 import { SettingsOpeningHoursPanel } from "@/components/settings/settings-opening-hours-panel";
 import { SettingsPracticeProfilePanel } from "@/components/settings/settings-practice-profile-panel";
+import { SettingsLanguagePanel } from "@/components/settings/settings-language-panel";
 import { SettingsLegalPanel } from "@/components/settings/settings-legal-panel";
 import {
   SettingsPlaceholderPanel,
@@ -484,6 +485,8 @@ export function SettingsFigmaView({
             onLogout={handleLogout}
           />
         );
+      case "sprache":
+        return <SettingsLanguagePanel />;
       case "nachrichten":
         return (
           <SettingsPlaceholderPanel

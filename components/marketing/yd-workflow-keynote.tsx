@@ -16,8 +16,13 @@ import {
 /**
  * Workflow-Keynote — eine fortlaufende, scroll-gesteuerte Sequenz statt einer
  * Kartenreihe. Eine Bühne rechts verändert ihre Form je Schritt (Nachricht →
- * Datensatz → KI-Entwurf → Freigabe-Stempel → Aufgabe → Versand-Haken).
+ * Datensatz → KI-Entwurf → Freigabe-Stempel → Care-Center-Verknüpfung → Versand-Haken → Relay-Diktat).
  * Eine schmale Schrittleiste links zeichnet die Verbindung mit dem Scrollfortschritt.
+ *
+ * Wichtig (Produktlogik): Nach der ärztlichen Freigabe sendet Command AI die Antwort
+ * automatisch an den Patienten — das ist KEIN Team-Task. Relay ist ein separater Kanal:
+ * der Arzt diktiert darüber Aufgaben an Rezeption/Assistenz (z. B. Laborauftrag), komplett
+ * im Portal dokumentiert statt über WhatsApp.
  */
 
 const STEPS = [
@@ -42,19 +47,19 @@ const STEPS = [
     icon: Stethoscope,
   },
   {
-    title: "Relay erstellt Aufgabe",
-    detail: "Assistenz: DVT an Labor versenden.",
-    icon: Users2,
-  },
-  {
     title: "Care Center wird verknüpft",
     detail: "Passender Nachsorge-Artikel ergänzt die Antwort.",
     icon: BookOpen,
   },
   {
     title: "Patient erhält Antwort",
-    detail: "Klar, ruhig, mit Terminlink.",
+    detail: "Command AI versendet automatisch nach Freigabe.",
     icon: Send,
+  },
+  {
+    title: "Relay: Aufgabe diktiert",
+    detail: "Laborauftrag für Pat. M. Müller — im Portal, nicht per WhatsApp.",
+    icon: Users2,
   },
 ] as const;
 
@@ -188,22 +193,6 @@ function StageContent({ index, progress }: { index: number; progress: number }) 
     case 4:
       return (
         <div className="yd-wk-stage-inner">
-          <p className="yd-wk-stage-label">Relay — neue Aufgabe</p>
-          <div
-            className="yd-wk-task"
-            style={{
-              opacity: progress,
-              transform: `translateX(${(1 - progress) * 18}px)`,
-            }}
-          >
-            <span className="yd-wk-task-tag">Assistenz</span>
-            <p>DVT an Labor versenden — Fall #1042.</p>
-          </div>
-        </div>
-      );
-    case 5:
-      return (
-        <div className="yd-wk-stage-inner">
           <p className="yd-wk-stage-label">Care Center</p>
           <div
             className="yd-wk-chip"
@@ -214,12 +203,11 @@ function StageContent({ index, progress }: { index: number; progress: number }) 
           </div>
         </div>
       );
-    case 6:
-    default: {
+    case 5: {
       const dash = 44 - progress * 44;
       return (
         <div className="yd-wk-stage-inner">
-          <p className="yd-wk-stage-label">Antwort gesendet</p>
+          <p className="yd-wk-stage-label">Automatisch an den Patienten gesendet</p>
           <div className="yd-wk-sent">
             <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden>
               <circle cx="11" cy="11" r="10" fill="none" stroke="var(--os-blue)" strokeWidth="1.6" />
@@ -239,6 +227,23 @@ function StageContent({ index, progress }: { index: number; progress: number }) 
         </div>
       );
     }
+    case 6:
+    default:
+      return (
+        <div className="yd-wk-stage-inner">
+          <p className="yd-wk-stage-label">Relay — per Diktat beauftragt</p>
+          <div
+            className="yd-wk-task"
+            style={{
+              opacity: progress,
+              transform: `translateX(${(1 - progress) * 18}px)`,
+            }}
+          >
+            <span className="yd-wk-task-tag">Assistenz · Fall #1042</span>
+            <p>„Laborauftrag für Patient M. Müller erstellen.“ — dokumentiert im Portal.</p>
+          </div>
+        </div>
+      );
   }
 }
 
@@ -283,7 +288,7 @@ export function YdWorkflowKeynote() {
   }
 
   return (
-    <div ref={wrapperRef} className="yd-wk-wrapper" style={{ height: `${STEPS.length * 38}vh` }}>
+    <div ref={wrapperRef} className="yd-wk-wrapper" style={{ height: `${STEPS.length * 22}vh` }}>
       <div className="yd-wk-pin">
         <div className="yd-wk-grid">
           <div className="yd-wk-rail">

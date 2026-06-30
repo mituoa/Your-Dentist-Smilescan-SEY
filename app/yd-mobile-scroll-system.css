@@ -83,6 +83,55 @@
     overflow: visible;
   }
 
+  /* Relay: ein Scroll-Pane (Kanban / Team-Inbox) */
+  html[data-yd-scroll-owner="module"] .relay-center {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-yd-scroll-owner="module"] .relay-center__layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-yd-scroll-owner="module"] .relay-center__main {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    scroll-padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
+  /* My-Tasks / Relay-Shell (ältere Ops-Ansicht) */
+  html[data-yd-scroll-owner="module"] .yd-relay-shell {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-yd-scroll-owner="module"] .yd-relay-shell > .mx-auto,
+  html[data-yd-scroll-owner="module"] .yd-relay-shell > div:first-child {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    scroll-padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
   /* Settings (module scroll): flex chain main → canvas → settings */
   html[data-yd-scroll-owner="module"] main:has(.yd-settings-v2) .yd-awaken-canvas,
   html[data-yd-scroll-owner="module"] main:has(.yd-settings-v2) .yd-awaken-canvas > .relative {

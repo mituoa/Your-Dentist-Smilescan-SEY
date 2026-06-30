@@ -5,15 +5,12 @@ import { SignOutIconForm } from "@/components/app-shell/sign-out-form";
 import { TopbarContextActions } from "@/components/app-shell/topbar-context-actions";
 import { UserMenu } from "./user-menu";
 import { cn } from "@/lib/utils";
-import type { ThemePreference } from "@/lib/theme";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 type ProtectedTopbarProps = {
   email: string;
   workspaceName: string;
   workspaceId: string;
   role: "doctor" | "team";
-  initialTheme: ThemePreference;
   avatarUrl?: string | null;
   displayName?: string | null;
   inboxCount?: number;
@@ -28,7 +25,6 @@ export function ProtectedTopbar({
   workspaceName,
   workspaceId,
   role,
-  initialTheme,
   avatarUrl,
   displayName,
 }: ProtectedTopbarProps) {
@@ -52,13 +48,11 @@ export function ProtectedTopbar({
           <YourDentistBrandLockup size="sm" tagline={null} className="min-w-0" priority />
         </div>
         <div className="yd-mobile-topbar-actions">
-          <ThemeToggle initialTheme={initialTheme} />
           <SignOutIconForm />
           <UserMenu
             email={email}
             workspaceName={workspaceName}
             role={role}
-            initialTheme={initialTheme}
             avatarUrl={avatarUrl}
             displayName={displayName}
             compact

@@ -5,13 +5,11 @@ import Link from "next/link";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { MobileMenuButton } from "@/components/app-shell/mobile-nav";
 import { UserMenu } from "@/components/app-shell/user-menu";
-import type { ThemePreference } from "@/lib/theme";
 
 type MobileWorkspaceTopbarProps = {
   email: string;
   workspaceName: string;
   role: "doctor" | "team";
-  initialTheme: ThemePreference;
   avatarUrl?: string | null;
   displayName?: string | null;
 };
@@ -21,7 +19,6 @@ export function MobileWorkspaceTopbar({
   email,
   workspaceName,
   role,
-  initialTheme,
   avatarUrl,
   displayName,
 }: MobileWorkspaceTopbarProps) {
@@ -40,7 +37,6 @@ export function MobileWorkspaceTopbar({
           email={email}
           workspaceName={workspaceName}
           role={role}
-          initialTheme={initialTheme}
           avatarUrl={avatarUrl}
           displayName={displayName}
         />

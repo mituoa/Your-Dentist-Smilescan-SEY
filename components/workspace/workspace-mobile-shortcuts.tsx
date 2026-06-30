@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { NavBadge } from "@/components/app-shell/nav-badge";
+import { useLocale } from "@/components/i18n/locale-provider";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { cn } from "@/lib/utils";
 
@@ -97,6 +98,7 @@ export function WorkspaceMobileShortcuts({
   relayBadgeUrgent = false,
   className,
 }: WorkspaceMobileShortcutsProps) {
+  const { messages } = useLocale();
   const pathname = usePathname() || "";
 
   const isRelayActive =
@@ -114,16 +116,16 @@ export function WorkspaceMobileShortcuts({
     {
       id: "atlas",
       href: "/dashboard",
-      label: "Atlas",
-      description: "Praxisüberblick",
+      label: messages.nav.atlas,
+      description: messages.nav.atlasDesc,
       icon: Home,
       active: pathname === "/dashboard" || pathname.startsWith("/dashboard/"),
     },
     {
       id: "tracker",
       href: "/inbox",
-      label: "Tracker",
-      description: "Patientenfälle",
+      label: messages.nav.tracker,
+      description: messages.nav.trackerDesc,
       icon: Users,
       active: pathname === "/inbox" || pathname.startsWith("/inbox/"),
       badge: inboxBadge,
@@ -131,8 +133,8 @@ export function WorkspaceMobileShortcuts({
     {
       id: "relay",
       href: "/relay",
-      label: "Relay",
-      description: "Aufgaben & Nachrichten",
+      label: messages.nav.relay,
+      description: messages.nav.relayDesc,
       icon: CalendarDays,
       active: isRelayActive,
       badge: relayBadge,
@@ -141,24 +143,24 @@ export function WorkspaceMobileShortcuts({
     {
       id: "profile",
       href: "/profile/editor",
-      label: "Profil",
-      description: "Benutzer",
+      label: messages.nav.profile,
+      description: messages.nav.profileDesc,
       icon: MessageSquare,
       active: isProfileActive,
     },
     {
       id: "journal",
       href: "/journal",
-      label: "Care Center",
-      description: "Patientenwissen",
+      label: messages.nav.careCenter,
+      description: messages.nav.careCenterDesc,
       icon: BookOpen,
       active: isJournalActive,
     },
     {
       id: "admin",
       href: "/settings",
-      label: "Admin",
-      description: "Einstellungen",
+      label: messages.nav.admin,
+      description: messages.nav.adminDesc,
       icon: Settings,
       active: isSettingsActive,
     },
@@ -168,8 +170,8 @@ export function WorkspaceMobileShortcuts({
     {
       id: "tracker",
       href: "/inbox",
-      label: "Tracker",
-      description: "Patientenfälle",
+      label: messages.nav.tracker,
+      description: messages.nav.trackerDesc,
       icon: Users,
       active: pathname === "/inbox" || pathname.startsWith("/inbox/"),
       badge: inboxBadge,
@@ -177,8 +179,8 @@ export function WorkspaceMobileShortcuts({
     {
       id: "relay",
       href: "/relay",
-      label: "Relay",
-      description: "Aufgaben & Nachrichten",
+      label: messages.nav.relay,
+      description: messages.nav.relayDesc,
       icon: CalendarDays,
       active: isRelayActive,
       badge: relayBadge,

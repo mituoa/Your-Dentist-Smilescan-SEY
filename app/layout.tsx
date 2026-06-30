@@ -18,6 +18,8 @@ import {
   SITE_TITLE_TEMPLATE,
 } from "@/lib/site-metadata";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
+import { parseLocaleCookie, LOCALE_COOKIE_NAME } from "@/lib/locale";
+import { LocaleProvider } from "@/components/i18n/locale-provider";
 
 import "./globals.css";
 
@@ -149,15 +151,18 @@ export default async function RootLayout({
 }) {
   const cookieStore = await cookies();
   const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE_NAME)?.value);
+  const locale = parseLocaleCookie(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
   const themeClass = theme === "dark" ? "dark" : "";
 
   return (
     <html
-      lang="de"
+      lang={locale}
       suppressHydrationWarning
       className={`${dmSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} ${themeClass}`.trim()}
     >
-      <body>{children}</body>
+      <body>
+        <LocaleProvider initialLocale={locale}>{children}</LocaleProvider>
+      </body>
     </html>
   );
 }

@@ -1,11 +1,11 @@
-import { ThemeToggle } from "@/components/theme/theme-toggle";
-import type { ThemePreference } from "@/lib/theme";
+"use client";
+
+import { useLocale } from "@/components/i18n/locale-provider";
 
 interface UserMenuProps {
   email: string;
   workspaceName: string;
   role: "doctor" | "team";
-  initialTheme: ThemePreference;
   avatarUrl?: string | null;
   displayName?: string | null;
   compact?: boolean;
@@ -15,11 +15,11 @@ export function UserMenu({
   email,
   workspaceName,
   role,
-  initialTheme,
   avatarUrl,
   displayName,
   compact = false,
 }: UserMenuProps) {
+  const { messages } = useLocale();
   const fallbackBase = (displayName || workspaceName || email).trim();
   const initials = fallbackBase
     .split(/\s+/)
@@ -56,13 +56,12 @@ export function UserMenu({
 
   return (
     <div className="flex min-w-0 items-center gap-2 md:gap-3">
-      <ThemeToggle initialTheme={initialTheme} />
       <div className="hidden text-right leading-tight sm:block">
         <div className="text-sm font-medium text-text-primary">
           {displayName || workspaceName}
         </div>
         <div className="text-xs text-text-tertiary">
-          {role === "doctor" ? "Arzt" : "Team"}
+          {role === "doctor" ? messages.common.doctor : messages.common.team}
         </div>
       </div>
       <div className="h-10 w-10 overflow-hidden rounded-full border border-white/70 bg-white/80 shadow-[0px_6px_14px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/60">

@@ -1,0 +1,82 @@
+/* Locale switcher — login & settings */
+
+.yd-locale-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yd-locale-switcher--labeled {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.yd-locale-switcher__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #334155;
+}
+
+.yd-locale-switcher__options {
+  display: inline-flex;
+  gap: 0.375rem;
+  padding: 0.1875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(180, 198, 218, 0.42);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.yd-locale-switcher__btn {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #64748b;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.yd-locale-switcher__btn--active {
+  background: #ffffff;
+  color: #1a4f9c;
+  box-shadow: 0 1px 4px rgba(22, 61, 122, 0.1);
+}
+
+.yd-locale-switcher__btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.yd-login-locale-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.yd-login-locale-switcher .yd-locale-switcher__options {
+  background: rgba(248, 251, 255, 0.92);
+}
+
+.yd-settings-v2__locale-switcher {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.yd-settings-v2__locale-switcher .yd-locale-switcher__options {
+  width: 100%;
+}
+
+.yd-settings-v2__locale-switcher .yd-locale-switcher__btn {
+  flex: 1;
+  min-height: 2.625rem;
+  font-size: 0.875rem;
+}

@@ -1,0 +1,137 @@
+/**
+ * Workspace module shell — einheitliche Canvas-Radien, Scroll-Kette, Panel-Rhythmus.
+ * Gilt für Tracker, Relay, Atlas, Journals, Care, Settings (Desktop + Mobile).
+ */
+
+.yd-workspace {
+  --yd-ws-module-canvas-radius-mobile: 22px;
+  --yd-ws-module-canvas-radius-desktop: 40px;
+  --yd-ws-module-panel-radius: 16px;
+}
+
+/* —— Mobile: gleiche Canvas-Kante überall —— */
+@media (max-width: 767px) {
+  .yd-workspace main:has(.yd-inbox-workspace),
+  .yd-workspace main:has(.relay-center),
+  .yd-workspace main:has(.yd-relay-shell),
+  .yd-workspace main:has(.yd-dashboard),
+  .yd-workspace main:has(.yd-journal-v6),
+  .yd-workspace main:has(.care-center),
+  .yd-workspace main:has(.yd-settings-v2),
+  .yd-workspace main:has(.yd-profile-hub) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas,
+  .yd-workspace main:has(.relay-center) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-dashboard) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-journal-v6) .yd-awaken-canvas,
+  .yd-workspace main:has(.care-center) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-settings-v2) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-profile-hub) .yd-awaken-canvas {
+    padding: 0.375rem max(0.75rem, env(safe-area-inset-right))
+      calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + 0.5rem) max(0.75rem, env(safe-area-inset-left)) !important;
+    border-radius: var(--yd-ws-module-canvas-radius-mobile) !important;
+  }
+}
+
+/* —— Desktop: gleiche Insel-Radien + Relay-Scroll wie Tracker —— */
+@media (min-width: 768px) {
+  .yd-workspace main:has(.relay-center) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden !important;
+    overscroll-behavior: contain;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .yd-workspace main:has(.relay-center) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-journal-v6) .yd-awaken-canvas,
+  .yd-workspace main:has(.care-center) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-dashboard--bento) .yd-awaken-canvas {
+    border-radius: var(--yd-ws-module-canvas-radius-desktop) !important;
+  }
+
+  .yd-workspace main:has(.relay-center) .yd-awaken-canvas {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden !important;
+    padding: 0.5rem 1rem 0.75rem;
+  }
+
+  .yd-workspace main:has(.relay-center) .yd-awaken-canvas > .relative {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden !important;
+  }
+
+  .relay-center {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .relay-center__layout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .relay-center__layout {
+      display: grid;
+      grid-template-columns: 13.75rem minmax(0, 1fr);
+      align-items: stretch;
+    }
+  }
+
+  .relay-center__main {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Relay: gleiche Panel-Radien wie Tracker-Karten */
+.relay-center {
+  --rc-radius: var(--yd-ws-module-panel-radius);
+}
+
+.relay-center__panel,
+.yd-tracker-v4-inbox-card {
+  border-radius: var(--yd-ws-module-panel-radius);
+}
+
+@media (max-width: 1023px) {
+  .relay-center {
+    background: transparent;
+    padding-bottom: 0;
+  }
+
+  .relay-kanban__col {
+    border-radius: var(--yd-ws-module-panel-radius);
+  }
+}

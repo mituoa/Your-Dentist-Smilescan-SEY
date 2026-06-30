@@ -481,17 +481,6 @@
     padding-inline: 0.875rem !important;
   }
 
-  .yd-workspace main:has(.yd-inbox-workspace),
-  .yd-workspace main:has(.yd-relay-shell) {
-    padding-inline: 0 !important;
-  }
-
-  .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas,
-  .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas {
-    padding: 0 !important;
-    border-radius: 0 !important;
-  }
-
   .yd-dashboard .yd-dash-ambient-orb {
     display: none;
   }

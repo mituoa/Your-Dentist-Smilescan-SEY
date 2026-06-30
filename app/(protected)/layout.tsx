@@ -266,7 +266,6 @@ export default async function ProtectedLayout({
                     workspaceName={workspaceName}
                     workspaceId={workspace.workspace_id}
                     role={role}
-                    initialTheme={theme}
                     avatarUrl={profileData?.photo_url ?? null}
                     displayName={profileData?.display_name ?? null}
                     inboxCount={inboxCount}

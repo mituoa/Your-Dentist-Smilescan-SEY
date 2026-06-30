@@ -2,9 +2,11 @@
 
 import { useFormStatus } from "react-dom";
 
+import { useLocale } from "@/components/i18n/locale-provider";
 import { YdInlineBusy } from "@/components/design-system/yd-skeleton";
 
 export function LoginSubmitButton(props: { disabledExternal?: boolean }) {
+  const { messages } = useLocale();
   const { pending } = useFormStatus();
   const disabled = pending || Boolean(props.disabledExternal);
 
@@ -25,7 +27,7 @@ export function LoginSubmitButton(props: { disabledExternal?: boolean }) {
         aria-hidden={!pending}
       >
         <YdInlineBusy inverse />
-        <span>Anmeldung…</span>
+        <span>{messages.login.submitPending}</span>
       </span>
       <span
         className={
@@ -34,7 +36,7 @@ export function LoginSubmitButton(props: { disabledExternal?: boolean }) {
         }
         aria-hidden={pending}
       >
-        Anmelden
+        {messages.login.submit}
       </span>
     </button>
   );

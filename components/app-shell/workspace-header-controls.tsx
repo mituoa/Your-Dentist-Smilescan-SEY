@@ -95,7 +95,6 @@ export function WorkspaceHeaderControls({
           email={email}
           workspaceName={workspaceName}
           role={role}
-          initialTheme={initialTheme}
           avatarUrl={avatarUrl}
           displayName={displayName}
           compact

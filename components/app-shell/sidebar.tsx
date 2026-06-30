@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
 import { HcSidebarProfile } from "./hc-sidebar-profile";
+import { useLocale } from "@/components/i18n/locale-provider";
 import { YD } from "@/lib/design/yd-design-tokens";
 import { NavItem } from "./nav-item";
 import { JournalNavGroup } from "./journal-nav-group";
@@ -34,6 +35,7 @@ export function Sidebar({
   email = "",
   navAmbient,
 }: SidebarProps) {
+  const { messages } = useLocale();
   const myTasksUrgent = myTasksOverdueCount > 0;
   const mobileNav = useMobileNavOptional();
 
@@ -73,7 +75,7 @@ export function Sidebar({
             type="button"
             onClick={() => mobileNav?.close()}
             className="yd-mobile-sidebar-close touch-manipulation"
-            aria-label="Navigation schließen"
+            aria-label={messages.nav.closeNav}
           >
             <X className="h-[18px] w-[18px]" strokeWidth={1.85} />
           </button>
@@ -92,8 +94,8 @@ export function Sidebar({
             <NavItem
               href="/dashboard"
               iconName="dashboard"
-              label="Atlas"
-              description="Praxisüberblick"
+              label={messages.nav.atlas}
+              description={messages.nav.atlasDesc}
               ambientPreview={navAmbient?.dashboard}
               tier="primary"
             />
@@ -102,8 +104,8 @@ export function Sidebar({
           <NavItem
             href="/inbox"
             iconName="inbox"
-            label="Tracker"
-            description="Patientenfälle"
+            label={messages.nav.tracker}
+            description={messages.nav.trackerDesc}
             badge={inboxCount}
             ambientPreview={navAmbient?.inbox}
             tier="primary"
@@ -112,8 +114,8 @@ export function Sidebar({
           <NavItem
             href="/relay"
             iconName="relay"
-            label="Relay"
-            description="Aufgaben & Nachrichten"
+            label={messages.nav.relay}
+            description={messages.nav.relayDesc}
             badge={myTasksCount}
             badgeUrgent={myTasksUrgent}
             ambientPreview={navAmbient?.relay}
@@ -126,16 +128,16 @@ export function Sidebar({
             <NavItem
               href="/profile/editor"
               iconName="profile"
-              label="Profil"
-              description="Benutzer"
+              label={messages.nav.profile}
+              description={messages.nav.profileDesc}
               tier="secondary"
             />
             <JournalNavGroup ambientPreview={navAmbient?.journal} tier="secondary" />
             <NavItem
               href="/settings"
               iconName="settings"
-              label="Admin"
-              description="Einstellungen"
+              label={messages.nav.admin}
+              description={messages.nav.adminDesc}
               tier="secondary"
             />
           </div>

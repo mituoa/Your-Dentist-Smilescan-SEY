@@ -39,6 +39,7 @@
 @import "./yd-campaigns-landing.css";
 @import "./yd-settings-team.css";
 @import "./yd-settings-v2.css";
+@import "./yd-locale.css";
 @import "./yd-carree-profile.css";
 @import "./yd-clinical-brand.css";
 @import "./yd-clinical-settings.css";
@@ -51,6 +52,8 @@
 @import "./yd-legal.css";
 @import "./yd-trust.css";
 @import "./yd-landingpage-aligner.css";
+@import "./yd-landingpage-leistungen.css";
+@import "./yd-workspace-module-unified.css";
 
 @layer base {
   :root {
