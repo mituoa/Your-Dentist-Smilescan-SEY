@@ -1960,20 +1960,25 @@
   .yd-medical-form-overlay--workspace.yd-auth-register-overlay {
     height: 100dvh;
     max-height: 100dvh;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
+    justify-content: flex-end;
   }
 
   .yd-medical-form-overlay--workspace .yd-auth-register-stage {
     min-height: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     width: 100%;
-    max-height: calc(
-      100dvh - var(--yd-mobile-bottom-nav-h, 4.75rem) - 1.25rem
-    );
-    justify-content: center;
-    padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem
-      calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + 0.5rem);
+    max-height: 100dvh;
+    justify-content: flex-end;
+    align-items: stretch;
+    padding: 0;
+    padding-bottom: var(--yd-mobile-bottom-nav-h, 3.625rem);
+  }
+
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage:has(.yd-medical-form-panel--landing-briefing),
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage:has(.yd-medical-form-panel--landing-configurator) {
+    padding-top: max(0.25rem, env(safe-area-inset-top, 0px));
+    padding-inline: 0;
   }
 
   .yd-medical-form-overlay--workspace .yd-medical-form-panel--landing-briefing,
@@ -1981,10 +1986,19 @@
     flex: 1 1 auto;
     width: 100%;
     max-width: 100%;
-    max-height: min(
-      calc(100dvh - var(--yd-mobile-bottom-nav-h, 4.75rem) - max(0.75rem, env(safe-area-inset-top)) - max(0.5rem, env(safe-area-inset-bottom))),
-      58rem
-    );
+    min-height: 0;
+    height: auto;
+    max-height: calc(100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - max(0.25rem, env(safe-area-inset-top, 0px)));
+    margin: 0;
+    border-radius: 1.125rem 1.125rem 0 0;
+  }
+
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage:has(.yd-medical-form-panel--create-case) {
+    padding: max(0.5rem, env(safe-area-inset-top, 0px))
+      max(0.625rem, env(safe-area-inset-right, 0px))
+      var(--yd-mobile-bottom-nav-h, 3.625rem)
+      max(0.625rem, env(safe-area-inset-left, 0px));
+    justify-content: center;
   }
 
   .yd-medical-form-panel--workspace-compact {

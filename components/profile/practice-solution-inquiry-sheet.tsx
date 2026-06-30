@@ -41,7 +41,6 @@ import {
   storeLandingInquirySuccess,
   type LandingInquirySuccessRecord,
 } from "@/lib/practice-solutions/landing-preview-return";
-import { userFacingPracticeSolutionRequestError } from "@/lib/practice-solutions/request";
 import { cn } from "@/lib/utils";
 
 import type { InquiryTarget } from "./practice-solution-inquiry-types";
@@ -175,6 +174,7 @@ function LandingBriefingStudio({
   initialView,
   onClose,
 }: StudioProps) {
+  const router = useRouter();
   const config = React.useMemo(() => getLandingConfig(target.configId), [target.configId]);
   const briefingFields = React.useMemo(() => getBriefingFields(config), [config]);
   const categoryVisual = React.useMemo(
@@ -230,7 +230,7 @@ function LandingBriefingStudio({
 
   const openPreview = () => {
     if (!previewUrl) return;
-    window.open(previewUrl, "_blank", "noopener,noreferrer");
+    router.push(previewUrl);
   };
 
   React.useEffect(() => {
@@ -308,7 +308,7 @@ function LandingBriefingStudio({
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
   };
 
-  const finishWithPreview = async () => {
+  const submitInquiry = async () => {
     if (!canFinish || busy) return;
     setSubmitState("pending");
     setSubmitError(null);
@@ -332,7 +332,7 @@ function LandingBriefingStudio({
         website: "",
       });
     } catch {
-      /* Vorschau hat Vorrang — Mail/DB optional */
+      /* Testbetrieb: Absenden lokal fortsetzen — E-Mail/DB später */
     }
 
     storeLandingInquirySuccess({
@@ -345,7 +345,7 @@ function LandingBriefingStudio({
     setSubmitState("success");
   };
 
-  const submit = finishWithPreview;
+  const submit = submitInquiry;
 
   if (submitState === "success") {
     return (
@@ -360,11 +360,11 @@ function LandingBriefingStudio({
         footer={
           <div className="yd-medical-form-footer__row yd-medical-form-footer__row--stack">
             {previewUrl ? (
-              <button type="button" className="yd-auth-btn-secondary w-full" onClick={openPreview}>
-                Vorschau mit meinen Angaben öffnen
+              <button type="button" className="yd-auth-btn-primary w-full" onClick={openPreview}>
+                Vorschau öffnen
               </button>
             ) : null}
-            <button type="button" className="yd-auth-btn-primary w-full" onClick={onClose}>
+            <button type="button" className="yd-auth-btn-secondary w-full" onClick={onClose}>
               Schließen
             </button>
           </div>
@@ -417,8 +417,8 @@ function LandingBriefingStudio({
             onCancel={onClose}
             cancelDisabled={busy}
             cancelLabel="Abbrechen"
-            primaryLabel="Vorschau öffnen"
-            primaryPendingLabel="Vorschau wird vorbereitet …"
+            primaryLabel="Angaben absenden"
+            primaryPendingLabel="Wird gesendet …"
             onPrimary={submit}
             primaryDisabled={!canFinish}
             isPending={busy}

@@ -1422,6 +1422,15 @@
   overflow: hidden;
 }
 
+@media (max-width: 959px) {
+  .yd-medical-form-panel--landing-briefing,
+  .yd-medical-form-panel--landing-briefing.yd-medical-form-panel--summary {
+    max-height: calc(
+      100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - max(0.25rem, env(safe-area-inset-top, 0px))
+    );
+  }
+}
+
 .yd-medical-form-panel--landing-briefing .yd-auth-register-header {
   padding-inline: var(--lp-gutter);
 }
@@ -1473,15 +1482,24 @@
     height: 100dvh;
     max-height: 100dvh;
     overflow: hidden;
+    align-items: stretch;
+    justify-content: flex-end;
   }
 
   .yd-medical-form-overlay--workspace .yd-auth-register-stage {
     min-height: 0;
     flex: 1 1 auto;
-    max-height: 100%;
+    max-height: 100dvh;
+    width: 100%;
     overflow: hidden;
-    padding: max(0.375rem, env(safe-area-inset-top)) clamp(0.625rem, 3vw, 2rem)
-      calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + max(0.375rem, env(safe-area-inset-bottom)));
+    align-items: stretch;
+    justify-content: flex-end;
+    padding: 0;
+    padding-bottom: var(--yd-mobile-bottom-nav-h, 3.625rem);
+  }
+
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage:has(.yd-medical-form-panel--landing-briefing) {
+    padding-top: max(0.25rem, env(safe-area-inset-top, 0px));
   }
 
   .yd-medical-form-overlay.yd-auth-register-overlay:not(.yd-medical-form-overlay--workspace) {
@@ -1502,12 +1520,16 @@
   .yd-medical-form-panel--landing-briefing {
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    max-height: 100%;
     flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
     max-width: 100%;
+    max-height: calc(
+      100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - max(0.25rem, env(safe-area-inset-top, 0px))
+    );
     overflow: hidden;
-    border-radius: 1rem;
+    border-radius: 1.125rem 1.125rem 0 0;
+    margin: 0;
   }
 
   .yd-medical-form-panel--landing-briefing .yd-auth-register-header {

@@ -44,7 +44,6 @@ export function WorkspaceIntegratedHeaderBridge({
 }: WorkspaceIntegratedHeaderBridgeProps) {
   const pathname = usePathname() || "";
   const ctx = resolveWorkspaceIntegratedHeader(pathname);
-  const onTracker = pathname.startsWith("/inbox");
   const onDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const onRelay = pathname === "/relay" || pathname.startsWith("/relay/");
 
@@ -52,26 +51,22 @@ export function WorkspaceIntegratedHeaderBridge({
     ? dashboardHeaderSummary?.subtitle || ctx.subtitle
     : onRelay
       ? relayHeaderSummary?.lead || ctx.subtitle
-      : onTracker && trackerHeaderSummary
-        ? trackerHeaderSummary.lead
-        : ctx.subtitle;
+      : ctx.subtitle;
 
-  const subtitleMeta =
-    onTracker && trackerHeaderSummary?.breakdown
-      ? trackerHeaderSummary.breakdown
-      : ctx.subtitleMeta;
+  const subtitleMeta = onDashboard ? ctx.subtitleMeta : undefined;
 
   const greeting = useMemo(() => {
     return resolveWorkspaceGreeting(new Date().getHours());
   }, []);
 
   const mobileHome = onDashboard;
+  const hideGreeting = !onDashboard || ctx.hideGreeting === true;
 
   return (
     <WorkspaceIntegratedHeader
       eyebrow={ctx.eyebrow}
       greeting={greeting}
-      hideGreeting={ctx.hideGreeting}
+      hideGreeting={hideGreeting}
       displayName={displayName}
       subtitle={subtitle}
       subtitleMeta={subtitleMeta}

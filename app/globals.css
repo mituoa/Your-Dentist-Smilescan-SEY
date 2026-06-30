@@ -58,6 +58,7 @@
 @import "./yd-landingpage-bleaching.css";
 @import "./yd-landingpage-karriere.css";
 @import "./yd-landing-preview-shell.css";
+@import "./yd-landing-preview-mobile.css";
 @import "./yd-workspace-module-unified.css";
 
 @layer base {

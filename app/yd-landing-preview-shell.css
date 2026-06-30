@@ -2,12 +2,22 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.yd-lp-preview-shell__content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .yd-lp-preview-banner {
   position: sticky;
   top: 0;
   z-index: 60;
+  flex-shrink: 0;
   border-bottom: 1px solid rgba(186, 203, 222, 0.55);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
@@ -76,9 +86,4 @@
 
 .yd-lp-preview-banner__back:hover {
   background: rgba(26, 79, 156, 0.11);
-}
-
-.yd-lp-preview-shell__content {
-  flex: 1;
-  min-height: 0;
 }

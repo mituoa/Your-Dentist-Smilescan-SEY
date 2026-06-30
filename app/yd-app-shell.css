@@ -182,21 +182,50 @@
 
   .yd-command-assist-fab-host {
     z-index: 48;
-    right: max(0.875rem, env(safe-area-inset-right, 0px));
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
     left: auto;
     transform: none;
-    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.375rem) + 0.5rem);
+    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.625rem);
   }
 
+  .yd-command-assist-fab-host button {
+    height: 3rem;
+    width: 3rem;
+  }
+
+  .yd-command-assist-fab-host button svg {
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+
+  /* Volle Breite — Bottom-Sheet über der Nav, nicht schmal rechts */
   .yd-command-assist-sheet {
     z-index: 49;
-    left: auto;
-    right: max(0.625rem, env(safe-area-inset-right, 0px));
-    width: min(calc(100vw - 1.25rem), 24rem);
-    max-width: 24rem;
-    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.375rem) + 0.25rem);
-    max-height: min(72dvh, calc(100dvh - var(--yd-mobile-bottom-nav-h, 3.375rem) - 4.5rem));
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    bottom: var(--yd-mobile-bottom-nav-h, 3.625rem) !important;
+    max-height: calc(
+      100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - max(0.25rem, env(safe-area-inset-top, 0px))
+    ) !important;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.125rem 1.125rem 0 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+  }
+
+  .yd-command-assist-sheet .yd-command-sheet__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
   }
 
   .yd-command-assist-backdrop {
@@ -230,11 +259,27 @@ html[data-yd-workspace-modal="true"] .yd-medical-form-overlay {
 html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
   z-index: 285;
   pointer-events: auto;
-  left: auto;
-  right: max(0.625rem, env(safe-area-inset-right, 0px));
-  width: min(calc(100vw - 1.25rem), 24rem);
-  max-width: 24rem;
-  bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.25rem);
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  bottom: var(--yd-mobile-bottom-nav-h, 3.625rem) !important;
+  max-height: calc(
+    100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - max(0.25rem, env(safe-area-inset-top, 0px))
+  ) !important;
+}
+
+@media (min-width: 768px) {
+  html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
+    left: auto !important;
+    right: max(0.625rem, env(safe-area-inset-right, 0px)) !important;
+    width: min(calc(100vw - 1.25rem), 24rem) !important;
+    max-width: 24rem !important;
+    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.25rem) !important;
+    max-height: min(72dvh, calc(100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - 4.5rem)) !important;
+    border-radius: 1rem !important;
+    border: 1px solid #e8ecf2 !important;
+  }
 }
 
 html[data-yd-workspace-modal="true"] .yd-command-assist-backdrop {
