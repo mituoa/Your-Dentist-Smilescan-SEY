@@ -29,6 +29,14 @@
 }
 
 @media (min-width: 768px) {
+  .yd-workspace .yd-tracker-shell {
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+}
+
+@media (min-width: 768px) {
   .yd-tracker-shell {
     flex-direction: row;
   }

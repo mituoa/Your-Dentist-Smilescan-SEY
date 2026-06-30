@@ -116,6 +116,7 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
                   href={href}
                   isActive={isActive}
                   onOpen={() => markCaseOpened(item.id)}
+                  showStatusLabel
                 />
               </li>
             );

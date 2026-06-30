@@ -8,7 +8,8 @@ export type TrustSlug =
   | "ai-principles"
   | "security"
   | "patient-privacy"
-  | "imprint";
+  | "imprint"
+  | "dpa";
 
 type TrustDocMeta = {
   slug: TrustSlug;
@@ -73,6 +74,13 @@ export const TRUST_DOC_META: TrustDocMeta[] = [
     fileName: "06-impressum.md",
     description: "Rechtliche Anbieterinformationen.",
     navLabel: "Impressum",
+    showInNav: true,
+  },
+  {
+    slug: "dpa",
+    fileName: "08-auftragsverarbeitungsvertrag.md",
+    description: "Vertragsmuster zur Auftragsverarbeitung nach Art. 28 DSGVO für Praxen.",
+    navLabel: "Auftragsverarbeitung",
     showInNav: true,
   },
 ];
@@ -150,6 +158,13 @@ export const TRUST_HOME_CARDS: TrustHomeCard[] = [
     description: "Einsatz und Verwaltung von Cookies auf der Plattform.",
     accent: "cookies",
   },
+  {
+    slug: "dpa",
+    href: "/trust/dpa",
+    title: "Auftragsverarbeitung",
+    description: "Vertragsmuster zur Auftragsverarbeitung nach Art. 28 DSGVO für Praxen.",
+    accent: "dpa",
+  },
 ];
 
 export const TRUST_HOME_SECTIONS: TrustHomeSection[] = [
@@ -166,7 +181,7 @@ export const TRUST_HOME_SECTIONS: TrustHomeSection[] = [
   {
     id: "legal",
     kicker: "Rechtliches",
-    slugs: ["terms", "cookies", "imprint"],
+    slugs: ["terms", "cookies", "imprint", "dpa"],
   },
 ];
 
@@ -189,6 +204,8 @@ export const LEGAL_TO_TRUST_REDIRECTS: Record<string, string> = {
   impressum: "/trust/imprint",
   "ki-grundsaetze": "/trust/ai-principles",
   "patienten-datenschutz": "/trust/patient-privacy",
+  avv: "/trust/dpa",
+  auftragsverarbeitung: "/trust/dpa",
   melden: "/trust/legal",
 };
 

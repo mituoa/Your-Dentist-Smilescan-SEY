@@ -275,6 +275,7 @@
 .yd-trust-card--patient::before { background: #2a9d8f; }
 .yd-trust-card--imprint::before { background: #54637a; }
 .yd-trust-card--cookies::before { background: #6b7c93; }
+.yd-trust-card--dpa::before { background: #7a5cc9; }
 
 @media (hover: hover) {
   .yd-trust-card:hover {
@@ -323,6 +324,11 @@
 .yd-trust-card--cookies .yd-trust-card__icon {
   background: rgba(84, 99, 122, 0.1);
   color: #54637a;
+}
+
+.yd-trust-card--dpa .yd-trust-card__icon {
+  background: rgba(122, 92, 201, 0.1);
+  color: #7a5cc9;
 }
 
 .yd-trust-home__draft p {

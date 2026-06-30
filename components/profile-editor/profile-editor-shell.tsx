@@ -1,7 +1,7 @@
 "use client";
 
 /** Öffentliche Präsenz: Bühne (Vorschau) dominant, Kuratieren in schmaler Nebenspur. */
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, Suspense } from "react";
 import { Check } from "lucide-react";
 
 import { AutoSaveIndicator, type SaveStatus } from "./auto-save-indicator";
@@ -769,7 +769,9 @@ export function ProfileEditorShell({
           <span className="yd-profile-editor-growth-zone__label">Kampagnen & Landingpages</span>
           <span className="yd-profile-editor-growth-zone__line" />
         </div>
-        <ProfileSolutionsShowcase inquiryContext={inquiryContact} />
+        <Suspense fallback={null}>
+          <ProfileSolutionsShowcase inquiryContext={inquiryContact} />
+        </Suspense>
       </div>
     </div>
   );

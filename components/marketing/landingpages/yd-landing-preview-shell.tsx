@@ -1,12 +1,12 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { PREVIEW_PRACTICE_PARAMS } from "@/lib/marketing/landingpages/generic-practice";
 import { readPreviewContentFromSearchParams } from "@/lib/marketing/landingpages/landing-preview-content";
+import { LANDING_PREVIEW_RETURN_PARAM } from "@/lib/practice-solutions/landing-preview-return";
 
 type Props = {
   children: React.ReactNode;
@@ -14,8 +14,23 @@ type Props = {
 
 function PreviewBanner() {
   const params = useSearchParams();
+  const router = useRouter();
   const hasOwnData = params.get(PREVIEW_PRACTICE_PARAMS.name) !== null;
   const hasContent = readPreviewContentFromSearchParams(params) !== null;
+  const returnPath = params.get(LANDING_PREVIEW_RETURN_PARAM);
+  const hasConfiguredReturn = Boolean(returnPath);
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.opener) {
+      window.close();
+      return;
+    }
+    if (returnPath) {
+      router.push(returnPath);
+      return;
+    }
+    router.push("/profile/solutions");
+  };
 
   return (
     <div className="yd-lp-preview-banner" role="status" aria-live="polite">
@@ -30,10 +45,10 @@ function PreviewBanner() {
               : "Vorgefertigte Vorlage zur Orientierung. Nach der Konfiguration sehen Sie hier Ihre Praxisdaten."}
           </p>
         </div>
-        <Link href="/profile/editor#praxis-loesungen" className="yd-lp-preview-banner__back">
+        <button type="button" onClick={handleBack} className="yd-lp-preview-banner__back">
           <ArrowLeft size={14} aria-hidden />
-          Zurück
-        </Link>
+          {hasConfiguredReturn ? "Zurück zur Konfiguration" : "Zurück"}
+        </button>
       </div>
     </div>
   );

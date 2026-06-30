@@ -2,10 +2,55 @@ import "server-only";
 
 import { getAdminEmailsAllowlist, isSmtpConfigured } from "@/lib/env";
 import { sendTransactionalMail } from "@/lib/mail/send-mail";
-import { MailSendError, SmtpNotConfiguredError } from "@/lib/mail/mail-errors";
+import { SmtpNotConfiguredError } from "@/lib/mail/mail-errors";
 import type { PracticeSolutionRequestPayload } from "@/lib/practice-solutions/request";
 import { isPracticeSolutionHoneypot } from "@/lib/practice-solutions/request";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+const PRACTICE_SOLUTION_REQUESTS_BUCKET = "platform-practice-solution-requests";
+
+async function persistPracticeSolutionRequestToStorage(
+  admin: ReturnType<typeof createAdminClient>,
+  workspaceId: string,
+  data: PracticeSolutionRequestPayload
+): Promise<boolean> {
+  const objectPath = `${workspaceId}/${Date.now()}-${crypto.randomUUID()}.json`;
+  const payload = {
+    workspace_id: workspaceId,
+    solution_id: data.solutionId,
+    solution_title: data.solutionTitle,
+    practice_name: data.practiceName,
+    contact_name: data.contactName,
+    email: data.email,
+    phone: data.phone || null,
+    message: data.message || null,
+    budget: data.budget || null,
+    timeline: data.timeline || null,
+    status: "received",
+    created_at: new Date().toISOString(),
+    storage_fallback: true,
+  };
+
+  const { error } = await admin.storage
+    .from(PRACTICE_SOLUTION_REQUESTS_BUCKET)
+    .upload(objectPath, JSON.stringify(payload, null, 2), {
+      contentType: "application/json",
+      upsert: false,
+    });
+
+  if (error) {
+    console.warn(
+      "[practice-solution-request] storage fallback failed",
+      error.message || "unknown"
+    );
+    return false;
+  }
+
+  console.info(
+    `[practice-solution-request] stored in bucket ${PRACTICE_SOLUTION_REQUESTS_BUCKET}/${objectPath}`
+  );
+  return true;
+}
 
 function getRecipient(): string | null {
   const direct = (process.env.PRACTICE_SOLUTION_REQUEST_TO || process.env.DEMO_REQUEST_TO || "").trim();
@@ -69,9 +114,9 @@ ${optional}
 </body></html>`;
 }
 
-export type DeliverPracticeSolutionResult =
-  | { ok: true; delivered: boolean; persisted: boolean }
-  | { ok: false; reason: "send_failed" };
+export type DeliverPracticeSolutionResult = {
+  delivered: boolean;
+};
 
 export async function persistPracticeSolutionRequest(
   workspaceId: string,
@@ -93,12 +138,27 @@ export async function persistPracticeSolutionRequest(
       status: "received",
     });
     if (error) {
-      console.warn("[practice-solution-request] persist failed", (error as { code?: string }).code);
-      return false;
+      const code =
+        typeof error.code === "string" && error.code.trim() !== "" ? error.code : "unknown";
+      const message = typeof error.message === "string" ? error.message : "";
+      console.warn(
+        `[practice-solution-request] persist failed code=${code}`,
+        message || undefined
+      );
+      return persistPracticeSolutionRequestToStorage(admin, workspaceId, data);
     }
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    console.warn(
+      "[practice-solution-request] persist unavailable",
+      error instanceof Error ? error.message : "unknown"
+    );
+    try {
+      const admin = createAdminClient();
+      return persistPracticeSolutionRequestToStorage(admin, workspaceId, data);
+    } catch {
+      return false;
+    }
   }
 }
 
@@ -106,13 +166,13 @@ export async function deliverPracticeSolutionRequest(
   data: PracticeSolutionRequestPayload
 ): Promise<DeliverPracticeSolutionResult> {
   if (isPracticeSolutionHoneypot(data)) {
-    return { ok: true, delivered: false, persisted: false };
+    return { delivered: false };
   }
 
   const to = getRecipient();
   if (!to || !isSmtpConfigured()) {
     console.warn("[practice-solution-request] mail skipped — no recipient or SMTP");
-    return { ok: true, delivered: false, persisted: false };
+    return { delivered: false };
   }
 
   try {
@@ -123,18 +183,15 @@ export async function deliverPracticeSolutionRequest(
       html: buildMailHtml(data),
       mailContext: "practice_solution_request",
     });
-    return { ok: true, delivered: true, persisted: false };
+    return { delivered: true };
   } catch (error) {
     if (error instanceof SmtpNotConfiguredError) {
-      return { ok: true, delivered: false, persisted: false };
+      return { delivered: false };
     }
-    if (error instanceof MailSendError) {
-      return { ok: false, reason: "send_failed" };
-    }
-    console.error(
-      "[practice-solution-request] unexpected",
+    console.warn(
+      "[practice-solution-request] mail delivery failed",
       error instanceof Error ? error.message : "unknown"
     );
-    return { ok: false, reason: "send_failed" };
+    return { delivered: false };
   }
 }

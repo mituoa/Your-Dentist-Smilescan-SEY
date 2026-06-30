@@ -23,41 +23,41 @@ export function buildDashboardHeaderSummary(input: {
   const hasCritical =
     preparedAwaitingCount > 0 || tasksNeedingDecision > 0 || unseenCount > 0;
 
-  let statusPrimary: string;
-  let statusSecondary: string | undefined;
+  let statusPrimary = "";
 
-  if (!hasCritical) {
-    statusPrimary = "Keine kritischen Vorgänge.";
-    statusSecondary = "Alle Bereiche arbeiten aktuell.";
-  } else if (tasksNeedingDecision > 0 && preparedAwaitingCount === 0 && unseenCount === 0) {
-    statusPrimary =
-      tasksNeedingDecision === 1
-        ? "1 Entscheidung wartet auf Sie."
-        : `${tasksNeedingDecision} Entscheidungen warten auf Sie.`;
-  } else {
-    statusPrimary = buildDashboardAttentionSubtitle({
-      unseenCount,
-      preparedAwaitingCount,
-      tasksNeedingDecision,
-    }).replace(/^Heute /, "");
-    if (preparedAwaitingCount === 0 && unseenCount === 0) {
-      statusSecondary = "Alle anderen Bereiche arbeiten aktuell.";
+  if (hasCritical) {
+    if (tasksNeedingDecision > 0 && preparedAwaitingCount === 0 && unseenCount === 0) {
+      statusPrimary =
+        tasksNeedingDecision === 1
+          ? "1 Entscheidung wartet auf Sie."
+          : `${tasksNeedingDecision} Entscheidungen warten auf Sie.`;
+    } else {
+      statusPrimary = buildDashboardAttentionSubtitle({
+        unseenCount,
+        preparedAwaitingCount,
+        tasksNeedingDecision,
+      }).replace(/^Heute /, "");
     }
   }
 
   const metricsParts = [
-    `${preparedCasesCount} ${preparedCasesCount === 1 ? "Fall vorbereitet" : "Fälle vorbereitet"}`,
-    `${preparedAwaitingCount} ${preparedAwaitingCount === 1 ? "Freigabe offen" : "Freigaben offen"}`,
-    `${tasksNeedingDecision} ${tasksNeedingDecision === 1 ? "Teamblockade" : "Teamblockaden"}`,
-  ];
+    preparedCasesCount > 0
+      ? `${preparedCasesCount} ${preparedCasesCount === 1 ? "Fall vorbereitet" : "Fälle vorbereitet"}`
+      : null,
+    preparedAwaitingCount > 0
+      ? `${preparedAwaitingCount} ${preparedAwaitingCount === 1 ? "Freigabe offen" : "Freigaben offen"}`
+      : null,
+    tasksNeedingDecision > 0
+      ? `${tasksNeedingDecision} ${tasksNeedingDecision === 1 ? "Teamblockade" : "Teamblockaden"}`
+      : null,
+  ].filter((part): part is string => Boolean(part));
 
   return {
     subtitle: statusPrimary,
     editorial: {
       statusTitle: "Praxisstatus heute",
       statusPrimary,
-      statusSecondary,
-      metricsLine: metricsParts.join(" · "),
+      metricsLine: metricsParts.length > 0 ? metricsParts.join(" · ") : "",
     },
   };
 }

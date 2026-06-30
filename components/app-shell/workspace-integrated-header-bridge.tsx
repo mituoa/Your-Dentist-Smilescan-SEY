@@ -40,7 +40,7 @@ export function WorkspaceIntegratedHeaderBridge({
   inboxCount,
   trackerHeaderSummary,
   dashboardHeaderSummary,
-  relayHeaderSummary: _relayHeaderSummary,
+  relayHeaderSummary,
 }: WorkspaceIntegratedHeaderBridgeProps) {
   const pathname = usePathname() || "";
   const ctx = resolveWorkspaceIntegratedHeader(pathname);
@@ -50,8 +50,8 @@ export function WorkspaceIntegratedHeaderBridge({
   const dashboardEditorial =
     onDashboard && dashboardHeaderSummary
       ? dashboardHeaderSummary.editorial
-      : onRelay
-        ? { statusTitle: "", statusPrimary: "", metricsLine: "" }
+      : onRelay && relayHeaderSummary
+        ? relayHeaderSummary.editorial
         : null;
 
   const subtitle =

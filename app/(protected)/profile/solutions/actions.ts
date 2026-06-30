@@ -19,19 +19,29 @@ export async function submitPracticeSolutionRequest(body: unknown) {
   }
 
   const persisted = await persistPracticeSolutionRequest(workspace.workspace_id, parsed.data);
-  const delivery = await deliverPracticeSolutionRequest(parsed.data);
+  const { delivered } = await deliverPracticeSolutionRequest(parsed.data);
 
-  if (!delivery.ok) {
-    if (persisted) {
-      return { ok: true as const, received: true, persisted: true, delivered: false };
-    }
-    return { ok: false as const, error: "delivery_unavailable" };
+  if (persisted || delivered) {
+    return {
+      ok: true as const,
+      received: true,
+      persisted,
+      delivered,
+    };
   }
 
-  return {
-    ok: true as const,
-    received: true,
-    persisted,
-    delivered: delivery.delivered,
-  };
+  if (process.env.NODE_ENV === "development") {
+    console.warn(
+      "[practice-solution-request] dev accept — weder DB noch Mail verfügbar",
+      { solutionId: parsed.data.solutionId, workspaceId: workspace.workspace_id }
+    );
+    return {
+      ok: true as const,
+      received: true,
+      persisted: false,
+      delivered: false,
+    };
+  }
+
+  return { ok: false as const, error: "delivery_unavailable" };
 }

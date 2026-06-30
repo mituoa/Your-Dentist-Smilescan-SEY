@@ -15,7 +15,6 @@ type Props = {
 /** Klick öffnet den Konfigurator — keine separate Anfrage-Schaltfläche. */
 export function LandingCatalogCard({ category, onBook }: Props) {
   const [imageSrc, setImageSrc] = useState(category.image);
-  const hasPreview = Boolean(category.previewHref);
 
   return (
     <li className="yd-cl-catalog__item">
@@ -23,7 +22,7 @@ export function LandingCatalogCard({ category, onBook }: Props) {
         type="button"
         className="yd-cl-catalog__card"
         onClick={() => onBook(category)}
-        aria-label={`${category.title} — Vorlage konfigurieren`}
+        aria-label={`${category.title} konfigurieren`}
       >
         <div className="yd-cl-catalog__preview">
           <Image
@@ -43,9 +42,6 @@ export function LandingCatalogCard({ category, onBook }: Props) {
               }
             }}
           />
-          {hasPreview ? (
-            <span className="yd-cl-catalog__preview-badge">Vorlage</span>
-          ) : null}
         </div>
 
         <div className="yd-cl-catalog__foot">

@@ -1,6 +1,7 @@
 import type { PracticeSolutionInquiryContext } from "@/lib/practice-solutions/inquiry-context";
 import { PREVIEW_PRACTICE_PARAMS } from "@/lib/marketing/landingpages/generic-practice";
 import { appendPreviewContentToParams } from "@/lib/marketing/landingpages/landing-preview-content";
+import { LANDING_PREVIEW_RETURN_PARAM } from "@/lib/practice-solutions/landing-preview-return";
 
 import { buildLandingPreviewDraft, profileCityLine } from "./index";
 import type { LandingConfigId, LandingFieldValues, LandingPageConfig } from "./types";
@@ -30,7 +31,8 @@ export function buildStaticPreviewUrl(
   configId: LandingConfigId,
   context: PracticeSolutionInquiryContext,
   config: LandingPageConfig,
-  fieldValues: LandingFieldValues
+  fieldValues: LandingFieldValues,
+  options?: { returnPath?: string }
 ): string {
   const params = new URLSearchParams();
 
@@ -53,6 +55,10 @@ export function buildStaticPreviewUrl(
     subheadline: draft.subheadline,
     ctaLabel: draft.ctaLabel,
   });
+
+  if (options?.returnPath) {
+    params.set(LANDING_PREVIEW_RETURN_PARAM, options.returnPath);
+  }
 
   const query = params.toString();
   return query ? `/landingpages/${configId}?${query}` : `/landingpages/${configId}`;

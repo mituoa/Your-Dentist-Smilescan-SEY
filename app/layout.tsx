@@ -56,8 +56,8 @@ export const metadata: Metadata = {
     template: SITE_TITLE_TEMPLATE,
   },
   description: SITE_DESCRIPTION,
-  authors: [{ name: "Your Dentist GmbH" }],
-  creator: "Your Dentist GmbH",
+  authors: [{ name: "Sanctus Cura Holdings Ltd" }],
+  creator: "Sanctus Cura Holdings Ltd",
   category: "technology",
   manifest: "/site.webmanifest",
   formatDetection: {

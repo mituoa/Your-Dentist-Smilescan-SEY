@@ -48,6 +48,14 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
 }
 
+@media (min-width: 768px) {
+  .yd-workspace .yd-awaken-canvas {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
 .yd-workspace .yd-awaken-canvas > div:first-child {
   background: radial-gradient(
     ellipse 85% 55% at 92% 8%,
@@ -68,10 +76,22 @@
 .yd-workspace .yd-awaken-sidebar {
   background: rgba(252, 254, 255, 0.52) !important;
   border-color: rgba(255, 255, 255, 0.78) !important;
-  box-shadow:
-    0 12px 40px rgba(15, 35, 58, 0.11),
-    0 4px 16px rgba(47, 128, 237, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+@media (min-width: 768px) {
+  .yd-workspace .yd-awaken-sidebar {
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .yd-workspace .yd-awaken-sidebar {
+    box-shadow:
+      0 12px 40px rgba(15, 35, 58, 0.11),
+      0 4px 16px rgba(47, 128, 237, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+  }
 }
 
 .yd-workspace .yd-awaken-sidebar > div:first-child {

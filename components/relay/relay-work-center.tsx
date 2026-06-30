@@ -11,7 +11,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import { RelayCommandTaskPrefill } from "@/components/command-ai/relay-command-task-prefill";
-import { parseKanbanMobileColumn } from "@/lib/relay/relay-kanban-columns";
 import { RelayKanbanBoard } from "@/components/relay/relay-kanban-board";
 import { RelayTeamInboxList } from "@/components/relay/relay-team-inbox-list";
 import type { MessageDraftListStatus } from "@/lib/message-drafts/list-status";
@@ -20,7 +19,6 @@ import type { RelayConversationRow } from "@/lib/queries/relay-messages";
 import type { AssignableMember } from "@/lib/queries/team-members";
 import type { JournalEntry } from "@/lib/types/journal-entry";
 import {
-  RELAY_KANBAN_COLUMNS,
   RELAY_MESSAGE_INBOX_TABS,
   RELAY_TASK_SCOPE_TABS,
   buildRelayKanbanBoard,
@@ -135,7 +133,7 @@ export function RelayWorkCenter({
   const scope = parseScope(searchParams.get("scope"));
   const messageTab = parseMessageTab(searchParams.get("msg"));
   const searchQuery = searchParams.get("q") ?? "";
-  const mobileKanbanCol = parseKanbanMobileColumn(searchParams.get("kanban"));
+  const effectiveScope = isKanbanMobile ? "all" : scope;
 
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -168,7 +166,7 @@ export function RelayWorkCenter({
         submissionDraftStatus,
         isDoctor,
         userId,
-        scope,
+        scope: effectiveScope,
         searchQuery,
       }),
     [
@@ -178,7 +176,7 @@ export function RelayWorkCenter({
       submissionDraftStatus,
       isDoctor,
       userId,
-      scope,
+      effectiveScope,
       searchQuery,
     ]
   );
@@ -272,77 +270,55 @@ export function RelayWorkCenter({
 
           {activeArea === "aufgaben" ? (
           <section id="relay-aufgaben" className="relay-center__panel" aria-labelledby="relay-aufgaben-title">
-            <header className="relay-center__panel-head">
-              <div className="relay-center__panel-title-row">
-                <ClipboardList strokeWidth={1.75} className="relay-center__panel-icon" aria-hidden />
-                <h2 id="relay-aufgaben-title" className="relay-center__panel-title">
-                  Aufgaben
-                </h2>
-              </div>
-            </header>
+            {!isKanbanMobile ? (
+              <header className="relay-center__panel-head">
+                <div className="relay-center__panel-title-row">
+                  <ClipboardList strokeWidth={1.75} className="relay-center__panel-icon" aria-hidden />
+                  <h2 id="relay-aufgaben-title" className="relay-center__panel-title">
+                    Aufgaben
+                  </h2>
+                </div>
+              </header>
+            ) : (
+              <h2 id="relay-aufgaben-title" className="sr-only">
+                Aufgaben
+              </h2>
+            )}
 
-            <div className="relay-center__chip-scroll">
-              <div className="relay-center__chips" role="tablist" aria-label="Aufgaben-Ansicht">
-                {RELAY_TASK_SCOPE_TABS.map((tab) => {
-                  const active = scope === tab.id;
-                  const count = scopeCounts[tab.id];
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      className={cn("relay-center__chip", active && "relay-center__chip--active")}
-                      onClick={() =>
-                        replaceParams((p) => {
-                          p.set("scope", tab.id);
-                        })
-                      }
-                    >
-                      {tab.label}
-                      {count > 0 ? <span className="relay-center__chip-count">{count}</span> : null}
-                    </button>
-                  );
-                })}
+            {!isKanbanMobile ? (
+              <div className="relay-center__chip-scroll">
+                <div className="relay-center__chips" role="tablist" aria-label="Aufgaben-Ansicht">
+                  {RELAY_TASK_SCOPE_TABS.map((tab) => {
+                    const active = scope === tab.id;
+                    const count = scopeCounts[tab.id];
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        className={cn("relay-center__chip", active && "relay-center__chip--active")}
+                        onClick={() =>
+                          replaceParams((p) => {
+                            p.set("scope", tab.id);
+                          })
+                        }
+                      >
+                        {tab.label}
+                        {count > 0 ? <span className="relay-center__chip-count">{count}</span> : null}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-
-            <div className="relay-center__kanban-col-scroll lg:hidden">
-              <div className="relay-center__chips" role="tablist" aria-label="Kanban-Spalte">
-                {RELAY_KANBAN_COLUMNS.map((col) => {
-                  const active = mobileKanbanCol === col.id;
-                  const count = countLiveKanbanCardsInColumn(board[col.id]);
-                  return (
-                    <button
-                      key={col.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      className={cn("relay-center__chip", active && "relay-center__chip--active")}
-                      onClick={() =>
-                        replaceParams((p) => {
-                          p.set("kanban", col.id);
-                        })
-                      }
-                    >
-                      {col.id === "decision"
-                        ? "Offen"
-                        : col.id === "in_progress"
-                          ? "Bearbeitung"
-                          : "Erl."}
-                      {count > 0 ? <span className="relay-center__chip-count">{count}</span> : null}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            ) : null}
 
             <RelayKanbanBoard
               board={board}
               columns={columns}
               currentUserId={userId}
               isDoctor={isDoctor}
-              mobileColumn={isKanbanMobile ? mobileKanbanCol : null}
+              mobileColumn={null}
               decisionLiveCount={decisionLiveCount}
             />
           </section>
@@ -352,18 +328,26 @@ export function RelayWorkCenter({
             className="relay-center__panel"
             aria-labelledby="relay-nachrichten-title"
           >
-            <header className="relay-center__panel-head">
-              <div className="relay-center__panel-title-row">
-                <MessageSquare strokeWidth={1.75} className="relay-center__panel-icon" aria-hidden />
-                <h2 id="relay-nachrichten-title" className="relay-center__panel-title">
-                  Nachrichten vom Team
-                </h2>
-              </div>
-            </header>
+            {!isKanbanMobile ? (
+              <header className="relay-center__panel-head">
+                <div className="relay-center__panel-title-row">
+                  <MessageSquare strokeWidth={1.75} className="relay-center__panel-icon" aria-hidden />
+                  <h2 id="relay-nachrichten-title" className="relay-center__panel-title">
+                    Nachrichten vom Team
+                  </h2>
+                </div>
+              </header>
+            ) : (
+              <h2 id="relay-nachrichten-title" className="sr-only">
+                Nachrichten vom Team
+              </h2>
+            )}
 
-            <div className="relay-center__chip-scroll">
+            <div className="relay-center__chip-scroll relay-center__chip-scroll--messages">
               <div className="relay-center__chips" role="tablist" aria-label="Nachrichten-Ansicht">
-                {RELAY_MESSAGE_INBOX_TABS.map((tab) => {
+                {RELAY_MESSAGE_INBOX_TABS.filter(
+                  (tab) => !isKanbanMobile || tab.id !== "mentions"
+                ).map((tab) => {
                   const active = messageTab === tab.id;
                   const count = messageCounts[tab.id];
                   return (

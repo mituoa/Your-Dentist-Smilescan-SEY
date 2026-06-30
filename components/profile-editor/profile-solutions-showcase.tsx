@@ -23,7 +23,9 @@ type Props = {
 };
 
 export function ProfileSolutionsShowcase({ inquiryContext }: Props) {
-  const { openInquiry, portal } = usePracticeSolutionInquiry(inquiryContext);
+  const { openInquiry, portal } = usePracticeSolutionInquiry(inquiryContext, {
+    resumePath: "/profile/editor",
+  });
 
   const featured = LANDING_CATEGORIES.filter((c) =>
     (SHOWCASE_IDS as readonly string[]).includes(c.id)

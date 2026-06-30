@@ -24,6 +24,7 @@ type TrackerInboxListStatusMenuProps = {
   status: InboxPracticeStatusId;
   seenAt?: string | null;
   className?: string;
+  showStatusLabel?: boolean;
 };
 
 function usePopoverPosition(
@@ -72,6 +73,7 @@ export function TrackerInboxListStatusMenu({
   status,
   seenAt,
   className,
+  showStatusLabel = false,
 }: TrackerInboxListStatusMenuProps) {
   const router = useRouter();
   const { markCaseUnread } = useTrackerInboxRead();
@@ -264,15 +266,19 @@ export function TrackerInboxListStatusMenu({
         type="button"
         className={cn(
           "yd-tracker-list-status-menu__trigger",
+          showStatusLabel && "yd-tracker-list-status-menu__trigger--labeled",
           open && "yd-tracker-list-status-menu__trigger--open",
           pending && "yd-tracker-list-status-menu__trigger--pending"
         )}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Status ändern"
+        aria-label={`Status ändern: ${statusLabel}`}
         disabled={pending}
         onClick={toggleOpen}
       >
+        {showStatusLabel ? (
+          <span className="yd-tracker-list-status-menu__trigger-label">{statusLabel}</span>
+        ) : null}
         <MoreHorizontal className="yd-tracker-list-status-menu__icon" strokeWidth={2} aria-hidden />
       </button>
       {popover ? createPortal(popover, document.body) : null}

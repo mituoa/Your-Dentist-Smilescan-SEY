@@ -18,7 +18,7 @@ export type LandingCategory = {
 export const LANDING_HERO = {
   eyebrow: "Kampagnen",
   title: "Landingpages",
-  subtitle: "Vorgefertigte Vorlagen wählen, mit Ihren Praxisdaten anpassen.",
+  subtitle: "Leistung wählen und mit Ihren Praxisdaten anpassen.",
 } as const;
 
 export const LANDING_CATEGORIES: readonly LandingCategory[] = [
@@ -162,3 +162,18 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
 export const LANDING_CLOSING = {
   title: "Anderes Thema?",
 } as const;
+
+export function findLandingCategoryVisual(
+  configOrCategoryId: string
+): Pick<LandingCategory, "categoryLabel" | "title" | "image" | "imagePosition"> | null {
+  const match = LANDING_CATEGORIES.find(
+    (cat) => cat.id === configOrCategoryId || cat.inquiryId === configOrCategoryId
+  );
+  if (!match) return null;
+  return {
+    categoryLabel: match.categoryLabel,
+    title: match.title,
+    image: match.image,
+    imagePosition: match.imagePosition,
+  };
+}

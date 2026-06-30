@@ -55,8 +55,11 @@
   .yd-workspace main:has(.relay-center) .yd-awaken-canvas,
   .yd-workspace main:has(.yd-journal-v6) .yd-awaken-canvas,
   .yd-workspace main:has(.care-center) .yd-awaken-canvas,
-  .yd-workspace main:has(.yd-dashboard--bento) .yd-awaken-canvas {
-    border-radius: var(--yd-ws-module-canvas-radius-desktop) !important;
+  .yd-workspace main:has(.yd-dashboard--bento) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-settings-v2) .yd-awaken-canvas,
+  .yd-workspace main:has(.yd-profile-hub) .yd-awaken-canvas {
+    border-radius: 0 !important;
   }
 
   .yd-workspace main:has(.relay-center) .yd-awaken-canvas {
@@ -133,5 +136,26 @@
 
   .relay-kanban__col {
     border-radius: var(--yd-ws-module-panel-radius);
+  }
+}
+
+/* —— Desktop: eine Shell-Insel — keine verschachtelten Karten-Ecken —— */
+@media (min-width: 768px) {
+  .yd-workspace .yd-tracker-shell,
+  .yd-workspace .yd-tracker-page .yd-tracker-shell,
+  .yd-workspace .yd-inbox-workspace .yd-tracker-shell,
+  .yd-workspace .yd-relay-v6-shell,
+  .yd-workspace .yd-relay-v3-shell,
+  .yd-workspace .yd-relay-v4-shell,
+  .yd-workspace .yd-relay-v5-shell,
+  .yd-workspace .yd-relay-tracker-shell {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .yd-workspace .yd-tracker-shell__inbox,
+  .yd-workspace .yd-tracker-shell__workspace {
+    background: transparent;
   }
 }

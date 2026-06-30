@@ -27,7 +27,7 @@ export type TrustHomeCard = {
   href: string;
   title: string;
   description: string;
-  accent: "privacy" | "security" | "ai" | "terms" | "patient" | "imprint" | "cookies";
+  accent: "privacy" | "security" | "ai" | "terms" | "patient" | "imprint" | "cookies" | "dpa";
 };
 
 export type TrustHomeSection = {

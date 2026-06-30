@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createPortal } from "react-dom";
 import { Check, ChevronRight } from "lucide-react";
 
@@ -30,6 +32,15 @@ import {
   type LandingFieldDef,
   type LandingFieldValues,
 } from "@/lib/practice-solutions/landing-configs";
+import { findLandingCategoryVisual } from "@/lib/practice-solutions/landing-page-model";
+import {
+  buildLandingPreviewReturnPath,
+  clearLandingInquirySuccess,
+  LANDING_PREVIEW_RETURN_PARAM,
+  readLandingInquirySuccess,
+  storeLandingInquirySuccess,
+  type LandingInquirySuccessRecord,
+} from "@/lib/practice-solutions/landing-preview-return";
 import { userFacingPracticeSolutionRequestError } from "@/lib/practice-solutions/request";
 import { cn } from "@/lib/utils";
 
@@ -41,10 +52,23 @@ type SubmitState = "idle" | "pending" | "success" | "error";
 
 const ADVANCE_DELAY_MS = 320;
 
-export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryContext) {
+type InquiryHookOptions = {
+  /** Pfad ohne landingReturn-Parameter — für Wiederaufnahme nach Vorschau. */
+  resumePath?: string;
+};
+
+export function usePracticeSolutionInquiry(
+  context: PracticeSolutionInquiryContext,
+  options?: InquiryHookOptions
+) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const resumePath = options?.resumePath ?? "/profile/solutions";
   const [target, setTarget] = React.useState<InquiryTarget | null>(null);
   const [open, setOpen] = React.useState(false);
+  const [initialView, setInitialView] = React.useState<"form" | "success">("form");
   const [portalTarget, setPortalTarget] = React.useState<HTMLElement | null>(null);
+  const resumedRef = React.useRef(false);
 
   React.useEffect(() => {
     setPortalTarget(document.body);
@@ -53,6 +77,8 @@ export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryConte
   const closeSheet = React.useCallback(() => {
     setOpen(false);
     setTarget(null);
+    setInitialView("form");
+    clearLandingInquirySuccess();
     document.documentElement.style.overflow = "";
   }, []);
 
@@ -70,12 +96,45 @@ export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryConte
     };
   }, []);
 
+  const openInquiryFromRecord = React.useCallback(
+    (record: LandingInquirySuccessRecord, view: "form" | "success") => {
+      const solution = getPracticeSolution(record.inquiryId as PracticeSolutionId);
+      if (!solution) return;
+      const configId = resolveLandingConfigId(
+        record.inquiryId as PracticeSolutionId,
+        record.displayTitle,
+        record.categoryId
+      );
+      setTarget({
+        solution,
+        displayTitle: record.displayTitle,
+        configId,
+      });
+      setInitialView(view);
+      setOpen(true);
+    },
+    []
+  );
+
+  React.useEffect(() => {
+    if (resumedRef.current) return;
+    if (searchParams.get(LANDING_PREVIEW_RETURN_PARAM) !== "1") return;
+
+    const record = readLandingInquirySuccess();
+    if (!record) return;
+
+    resumedRef.current = true;
+    openInquiryFromRecord(record, "success");
+    router.replace(record.resumePath, { scroll: false });
+  }, [openInquiryFromRecord, router, searchParams]);
+
   const openInquiry = React.useCallback(
     (inquiryId: PracticeSolutionId, displayTitle: string, categoryId?: string) => {
       const solution = getPracticeSolution(inquiryId);
       if (!solution) return;
       const configId = resolveLandingConfigId(inquiryId, displayTitle, categoryId);
       setTarget({ solution, displayTitle, configId });
+      setInitialView("form");
       setOpen(true);
     },
     []
@@ -86,9 +145,11 @@ export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryConte
       ? createPortal(
           <InquiryErrorBoundary onClose={closeSheet}>
             <LandingBriefingStudio
-              key={`${target.configId}-${target.displayTitle}`}
+              key={`${target.configId}-${target.displayTitle}-${initialView}`}
               target={target}
               context={context}
+              resumePath={resumePath}
+              initialView={initialView}
               onClose={closeSheet}
             />
           </InquiryErrorBoundary>,
@@ -102,19 +163,41 @@ export function usePracticeSolutionInquiry(context: PracticeSolutionInquiryConte
 type StudioProps = {
   target: InquiryTarget;
   context: PracticeSolutionInquiryContext;
+  resumePath: string;
+  initialView: "form" | "success";
   onClose: () => void;
 };
 
-function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
+function LandingBriefingStudio({
+  target,
+  context,
+  resumePath,
+  initialView,
+  onClose,
+}: StudioProps) {
   const config = React.useMemo(() => getLandingConfig(target.configId), [target.configId]);
   const briefingFields = React.useMemo(() => getBriefingFields(config), [config]);
-
-  const [fieldValues, setFieldValues] = React.useState<LandingFieldValues>(() =>
-    getEmptyBriefingValues(config)
+  const categoryVisual = React.useMemo(
+    () => findLandingCategoryVisual(target.configId),
+    [target.configId]
   );
+  const storedSuccess = initialView === "success" ? readLandingInquirySuccess() : null;
+
+  const [fieldValues, setFieldValues] = React.useState<LandingFieldValues>(() => {
+    if (
+      storedSuccess?.fieldValues &&
+      storedSuccess.configId === config.id &&
+      initialView === "success"
+    ) {
+      return storedSuccess.fieldValues;
+    }
+    return getEmptyBriefingValues(config);
+  });
   const [expandedIndex, setExpandedIndex] = React.useState(0);
   const [summaryVisible, setSummaryVisible] = React.useState(false);
-  const [submitState, setSubmitState] = React.useState<SubmitState>("idle");
+  const [submitState, setSubmitState] = React.useState<SubmitState>(
+    initialView === "success" ? "success" : "idle"
+  );
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const advanceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const summaryRef = React.useRef<HTMLDivElement>(null);
@@ -141,10 +224,18 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
       : 0;
 
   const canSubmit = profileComplete && summaryVisible && isLandingConfigComplete(config, fieldValues);
+  const previewReturnPath = buildLandingPreviewReturnPath(resumePath);
   const previewUrl =
-    summaryVisible && hasStaticTemplate(config.id)
-      ? buildStaticPreviewUrl(config.id, context, config, fieldValues)
+    submitState === "success" && hasStaticTemplate(config.id)
+      ? buildStaticPreviewUrl(config.id, context, config, fieldValues, {
+          returnPath: previewReturnPath,
+        })
       : null;
+
+  const openPreview = () => {
+    if (!previewUrl) return;
+    window.open(previewUrl, "_blank", "noopener,noreferrer");
+  };
 
   React.useEffect(() => {
     return () => {
@@ -254,6 +345,13 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
         );
         return;
       }
+      storeLandingInquirySuccess({
+        inquiryId: config.solutionId,
+        displayTitle: target.displayTitle,
+        configId: config.id,
+        resumePath,
+        fieldValues,
+      });
       setSubmitState("success");
     } catch {
       setSubmitState("error");
@@ -270,7 +368,12 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
         ariaLabel="Anfrage übermittelt"
         panelClassName="yd-medical-form-panel--landing-briefing yd-medical-form-panel--landing-success"
         footer={
-          <div className="yd-medical-form-footer__row">
+          <div className="yd-medical-form-footer__row yd-medical-form-footer__row--stack">
+            {previewUrl ? (
+              <button type="button" className="yd-auth-btn-secondary w-full" onClick={openPreview}>
+                Vorschau mit meinen Angaben öffnen
+              </button>
+            ) : null}
             <button type="button" className="yd-auth-btn-primary w-full" onClick={onClose}>
               Schließen
             </button>
@@ -283,6 +386,12 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
           </div>
           <YourDentistBrandLockup size="md" centered priority />
           <h2 className="yd-lp-briefing-success__title">Ihre Konfiguration wurde übermittelt</h2>
+          {previewUrl ? (
+            <p className="yd-lp-briefing-success__preview-hint">
+              Optional können Sie jetzt eine Vorschau mit Ihren Stammdaten und Antworten öffnen —
+              als Ausgangspunkt, nicht als fertige Seite.
+            </p>
+          ) : null}
           <div className="yd-lp-briefing-success__next">
             <p className="yd-lp-briefing-success__next-label">So geht es weiter</p>
             <ol className="yd-lp-briefing-success__steps">
@@ -290,7 +399,7 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
                 Wir prüfen Ihre Angaben und melden uns mit einem Entwurf, der zu Ihrer Praxis passt.
               </li>
               <li className="yd-lp-briefing-success__step">
-                Sie geben frei, wenn alles stimmig ist — die Vorlage dient nur als Ausgangspunkt.
+                Sie geben frei, wenn alles stimmig ist — wir setzen Ihre Landingpage dann um.
               </li>
             </ol>
           </div>
@@ -333,6 +442,16 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
     >
       <div className="yd-lp-briefing-studio">
         <div className="yd-lp-briefing-studio__main">
+          {categoryVisual ? (
+            <LandingBriefingVisual
+              categoryLabel={categoryVisual.categoryLabel}
+              title={target.displayTitle}
+              image={categoryVisual.image}
+              imagePosition={categoryVisual.imagePosition}
+              variant="mobile"
+            />
+          ) : null}
+
           <PracticeBriefingCard
             practiceName={context.practiceName}
             doctorLine={doctorLine}
@@ -404,22 +523,6 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
                 Zusammenfassung Ihrer Konfiguration
               </h2>
               <BriefingSummaryChecklist items={summaryItems} />
-              {previewUrl ? (
-                <div className="yd-lp-briefing-summary-block__preview">
-                  <p className="yd-lp-briefing-summary-block__preview-lead">
-                    Optional: Vorschau mit Ihren Stammdaten und Antworten — als Ausgangspunkt, nicht
-                    als fertige Seite.
-                  </p>
-                  <Link
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="yd-auth-btn-secondary yd-lp-briefing-summary-block__preview-btn"
-                  >
-                    Vorschau mit meinen Angaben öffnen
-                  </Link>
-                </div>
-              ) : null}
               <button
                 type="button"
                 className="yd-lp-briefing-summary-block__edit"
@@ -438,8 +541,56 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
             <input type="text" name="website" tabIndex={-1} autoComplete="off" />
           </label>
         </div>
+
+        {categoryVisual ? (
+          <aside className="yd-lp-briefing-studio__preview" aria-hidden>
+            <LandingBriefingVisual
+              categoryLabel={categoryVisual.categoryLabel}
+              title={target.displayTitle}
+              image={categoryVisual.image}
+              imagePosition={categoryVisual.imagePosition}
+              variant="desktop"
+            />
+          </aside>
+        ) : null}
       </div>
     </MedicalFormShell>
+  );
+}
+
+function LandingBriefingVisual({
+  categoryLabel,
+  title,
+  image,
+  imagePosition,
+  variant,
+}: {
+  categoryLabel: string;
+  title: string;
+  image: string;
+  imagePosition?: string;
+  variant: "mobile" | "desktop";
+}) {
+  return (
+    <div
+      className={cn(
+        "yd-lp-briefing-visual",
+        variant === "mobile" ? "yd-lp-briefing-visual--mobile" : "yd-lp-briefing-visual--desktop"
+      )}
+    >
+      <div className="yd-lp-briefing-visual__frame">
+        <Image
+          src={image}
+          alt=""
+          fill
+          sizes={variant === "mobile" ? "100vw" : "280px"}
+          className="yd-lp-briefing-visual__image"
+          style={imagePosition ? { objectPosition: imagePosition } : undefined}
+        />
+      </div>
+      <p className="yd-lp-briefing-visual__category">{categoryLabel}</p>
+      <p className="yd-lp-briefing-visual__title">{title}</p>
+    </div>
   );
 }
 

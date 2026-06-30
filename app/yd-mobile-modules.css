@@ -141,10 +141,18 @@
     padding-right: 0 !important;
   }
 
+  .yd-workspace main:has(.relay-center) .yd-awaken-canvas {
+    padding: 0.25rem max(0.75rem, env(safe-area-inset-right))
+      calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + 0.375rem) max(0.75rem, env(safe-area-inset-left)) !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
   .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas,
   .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas,
-  .yd-workspace main:has(.relay-ws) .yd-awaken-canvas,
-  .yd-workspace main:has(.relay-center) .yd-awaken-canvas {
+  .yd-workspace main:has(.relay-ws) .yd-awaken-canvas {
     padding: 0.375rem max(0.75rem, env(safe-area-inset-right))
       calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + 0.5rem) max(0.75rem, env(safe-area-inset-left)) !important;
     border-radius: 22px !important;
@@ -367,6 +375,12 @@
   .yd-tracker-shell--mobile-list .yd-tracker-shell__inbox {
     background: transparent;
     border-right: none;
+  }
+
+  .yd-tracker-page .yd-tracker-shell {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .yd-tracker-v4-inbox-card {

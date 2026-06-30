@@ -42,7 +42,7 @@ export function Sidebar({
   return (
     <aside
       id="app-sidebar"
-      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-full max-md:bg-transparent max-md:shadow-none md:h-full md:w-full md:overflow-visible md:rounded-[44px] md:border"
+      className="yd-awaken-sidebar yd-mobile-nav-sidebar relative isolate flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden backdrop-blur-[22px] max-md:h-full max-md:max-h-full max-md:bg-transparent max-md:shadow-none md:h-full md:w-full md:overflow-hidden md:rounded-none md:border-0"
       style={{
         backgroundColor: YD.sidebar.glass,
         borderColor: YD.border.whisper,

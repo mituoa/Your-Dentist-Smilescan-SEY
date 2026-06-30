@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import { PracticeSolutionsView } from "@/components/profile/practice-solutions-view";
@@ -35,7 +36,9 @@ export default async function ProfileSolutionsPage() {
 
   return (
     <div className="yd-profile-editor-workspace yd-profile-solutions-workspace flex min-h-0 w-full flex-1 flex-col md:h-full">
-      <PracticeSolutionsView inquiryContext={inquiryContext} />
+      <Suspense fallback={null}>
+        <PracticeSolutionsView inquiryContext={inquiryContext} />
+      </Suspense>
     </div>
   );
 }

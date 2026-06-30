@@ -70,6 +70,7 @@
   font-weight: 600;
   color: #1a4f9c;
   text-decoration: none;
+  cursor: pointer;
   transition: background-color 140ms ease;
 }
 

@@ -12,6 +12,10 @@ Die Nutzung von Your Dentist durch Praxen und autorisierte Nutzerinnen richtet s
 
 Personenbezogene Daten, Gesundheitsdaten und Praxisdaten werden gemäß der **Datenschutzerklärung** verarbeitet. Für Patientinnen und Patienten gilt ergänzend die **Patienten-Datenschutzerklärung**.
 
+## Auftragsverarbeitung
+
+Für die Verarbeitung von Patientendaten, bei denen die Praxis datenschutzrechtlich verantwortlich bleibt, gilt das Vertragsmuster zur **Auftragsverarbeitung** nach Art. 28 DSGVO.
+
 ## Cookies und Tracking
 
 Technisch notwendige und optionale Cookies werden in der **Cookie-Richtlinie** erläutert.
