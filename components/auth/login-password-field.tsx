@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-import { useLocale } from "@/components/i18n/locale-provider";
-
 type LoginPasswordFieldProps = {
   id?: string;
   name?: string;
@@ -18,7 +16,6 @@ export function LoginPasswordField({
   disabled = false,
   defaultValue,
 }: LoginPasswordFieldProps) {
-  const { messages } = useLocale();
   const [visible, setVisible] = useState(false);
 
   return (
@@ -27,7 +24,7 @@ export function LoginPasswordField({
         id={id}
         name={name}
         type={visible ? "text" : "password"}
-        placeholder={messages.login.password}
+        placeholder="Passwort"
         autoComplete="current-password"
         className="yd-auth-input pr-10"
         required
@@ -39,7 +36,7 @@ export function LoginPasswordField({
         className="absolute right-3.5 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-full text-[#94A3B8] transition hover:text-[#1a4f9c] disabled:opacity-60"
         onClick={() => setVisible((v) => !v)}
         disabled={disabled}
-        aria-label={visible ? messages.login.hidePassword : messages.login.showPassword}
+        aria-label={visible ? "Passwort verbergen" : "Passwort anzeigen"}
         tabIndex={-1}
       >
         {visible ? (

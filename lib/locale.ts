@@ -4,7 +4,7 @@ export const APP_LOCALES = ["en", "de"] as const;
 
 export type AppLocale = (typeof APP_LOCALES)[number];
 
-export const DEFAULT_LOCALE: AppLocale = "en";
+export const DEFAULT_LOCALE: AppLocale = "de";
 
 export function isAppLocale(value: string | undefined | null): value is AppLocale {
   return value === "en" || value === "de";

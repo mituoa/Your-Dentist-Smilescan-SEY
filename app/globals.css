@@ -53,6 +53,8 @@
 @import "./yd-trust.css";
 @import "./yd-landingpage-aligner.css";
 @import "./yd-landingpage-leistungen.css";
+@import "./yd-landingpage-prophylaxe.css";
+@import "./yd-landingpage-aesthetik.css";
 @import "./yd-workspace-module-unified.css";
 
 @layer base {

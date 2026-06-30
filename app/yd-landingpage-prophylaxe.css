@@ -1,0 +1,686 @@
+/* Prophylaxe-Landingpage — eigenständige Vorlage, eigene Farbidentität (Emerald/Teal
+   statt Navy/Blue), eigener Seitenaufbau (Vergleichsliste + horizontale Zeitleiste
+   statt Karten-Grid + vertikalem Prozess). Ruhig, klinisch, aber bewusst anders als
+   die Aligner-/Implantologie-Vorlage. */
+
+.yd-pr {
+  --pr-ink: #0f2a22;
+  --pr-ink-soft: #3c5c50;
+  --pr-text-soft: #51695f;
+  --pr-text-faint: #8aa097;
+  --pr-emerald: #0f7a5c;
+  --pr-emerald-deep: #0b5d46;
+  --pr-emerald-ice: #e9f6f0;
+  --pr-surface: #ffffff;
+  --pr-warm: #f9faf7;
+  --pr-page: #f6f9f7;
+  --pr-line: rgba(15, 42, 34, 0.09);
+  --pr-line-soft: rgba(15, 42, 34, 0.06);
+  --pr-shadow-sm: 0 1px 2px rgba(15, 42, 34, 0.04), 0 4px 16px rgba(15, 42, 34, 0.05);
+  --pr-shadow-md: 0 4px 14px rgba(15, 42, 34, 0.06), 0 16px 36px rgba(15, 42, 34, 0.06);
+  --pr-shadow-lg: 0 10px 30px rgba(15, 42, 34, 0.09), 0 36px 72px rgba(15, 122, 92, 0.1);
+  --pr-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --pr-font: var(--font-al-inter), "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  background: var(--pr-page);
+  color: var(--pr-ink);
+  font-family: var(--pr-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.yd-pr-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 22px;
+}
+
+@media (min-width: 768px) {
+  .yd-pr-container {
+    padding: 0 40px;
+  }
+}
+
+.yd-pr-section {
+  position: relative;
+  padding: clamp(56px, 8vw, 108px) 0;
+}
+
+/* ---- Top bar ---- */
+
+.yd-pr-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(249, 250, 247, 0.88);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid var(--pr-line-soft);
+}
+
+.yd-pr-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  gap: 12px;
+}
+
+.yd-pr-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--pr-ink);
+  white-space: nowrap;
+}
+
+.yd-pr-logo-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--pr-emerald);
+  flex-shrink: 0;
+}
+
+.yd-pr-topbar-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Buttons ---- */
+
+.yd-pr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  transition: transform 0.25s var(--pr-spring), box-shadow 0.25s var(--pr-spring), background 0.2s ease;
+}
+
+.yd-pr-btn--primary {
+  color: #fff;
+  background: linear-gradient(135deg, var(--pr-emerald) 0%, var(--pr-emerald-deep) 100%);
+  box-shadow: 0 10px 24px rgba(15, 122, 92, 0.26);
+}
+
+.yd-pr-btn--primary:hover {
+  transform: translateY(-1px) scale(1.012);
+  box-shadow: 0 14px 30px rgba(15, 122, 92, 0.32);
+}
+
+.yd-pr-btn--ghost {
+  color: var(--pr-ink);
+  background: rgba(15, 42, 34, 0.04);
+  border: 1px solid var(--pr-line);
+}
+
+.yd-pr-btn--ghost:hover {
+  background: rgba(15, 42, 34, 0.07);
+}
+
+.yd-pr-btn--sm {
+  padding: 9px 16px;
+  font-size: 13px;
+}
+
+/* ---- Hero (Bild links, Text rechts — bewusst gespiegelt zur Aligner-Vorlage) ---- */
+
+.yd-pr-hero {
+  position: relative;
+  padding-top: clamp(40px, 7vw, 76px);
+  padding-bottom: clamp(40px, 6vw, 64px);
+  overflow: hidden;
+}
+
+.yd-pr-hero::before {
+  content: "";
+  position: absolute;
+  inset: -10% -10% auto -10%;
+  height: 80%;
+  background: radial-gradient(50% 60% at 80% 0%, rgba(15, 122, 92, 0.1), transparent 60%);
+  pointer-events: none;
+}
+
+.yd-pr-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  align-items: center;
+}
+
+@media (min-width: 980px) {
+  .yd-pr-hero-grid {
+    grid-template-columns: 0.92fr 1.08fr;
+    gap: 52px;
+  }
+
+  .yd-pr-hero-visual {
+    order: -1;
+  }
+}
+
+.yd-pr-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--pr-emerald-deep);
+  background: var(--pr-emerald-ice);
+  border: 1px solid rgba(15, 122, 92, 0.18);
+  margin-bottom: 18px;
+}
+
+.yd-pr-hero-title {
+  font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--pr-ink);
+  margin-bottom: 16px;
+}
+
+.yd-pr-hero-title em {
+  font-style: normal;
+  color: var(--pr-emerald-deep);
+}
+
+.yd-pr-hero-lead {
+  font-size: clamp(15px, 1.3vw, 17px);
+  line-height: 1.6;
+  color: var(--pr-text-soft);
+  max-width: 50ch;
+  margin-bottom: 26px;
+}
+
+.yd-pr-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.yd-pr-hero-frame {
+  position: relative;
+  border-radius: 26px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3.6;
+  box-shadow: var(--pr-shadow-lg);
+  border: 1px solid var(--pr-line-soft);
+}
+
+.yd-pr-hero-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.yd-pr-hero-badge {
+  position: absolute;
+  z-index: 2;
+  bottom: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: var(--pr-surface);
+  border: 1px solid var(--pr-line-soft);
+  box-shadow: var(--pr-shadow-md);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pr-ink);
+}
+
+.yd-pr-hero-badge svg {
+  color: var(--pr-emerald);
+}
+
+/* ---- Recall-Rhythmus-Ring (eigenständiges Detail, nicht aus Aligner-Vorlage) ---- */
+
+.yd-pr-cadence {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 78px;
+  height: 78px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--pr-shadow-md);
+  border: 2px solid var(--pr-emerald);
+}
+
+.yd-pr-cadence strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pr-emerald-deep);
+  line-height: 1;
+}
+
+.yd-pr-cadence span {
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--pr-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Stat strip direkt unter Hero ---- */
+
+.yd-pr-stat-strip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin-top: clamp(32px, 5vw, 52px);
+  background: var(--pr-line-soft);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--pr-line-soft);
+}
+
+@media (max-width: 640px) {
+  .yd-pr-stat-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.yd-pr-stat {
+  background: var(--pr-surface);
+  padding: 18px 20px;
+}
+
+.yd-pr-stat strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--pr-emerald-deep);
+  margin-bottom: 3px;
+}
+
+.yd-pr-stat span {
+  font-size: 12px;
+  color: var(--pr-text-faint);
+  line-height: 1.4;
+}
+
+/* ---- Section head ---- */
+
+.yd-pr-head {
+  max-width: 600px;
+  margin: 0 auto clamp(32px, 5vw, 48px);
+  text-align: center;
+}
+
+.yd-pr-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pr-emerald-deep);
+  margin-bottom: 9px;
+}
+
+.yd-pr-title {
+  font-size: clamp(22px, 2.8vw, 30px);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--pr-ink);
+  margin-bottom: 9px;
+}
+
+.yd-pr-lead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--pr-text-soft);
+}
+
+/* ---- Vergleichsliste "Mit / Ohne Prophylaxe" (neues Muster) ---- */
+
+.yd-pr-compare {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+@media (min-width: 720px) {
+  .yd-pr-compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yd-pr-compare-col {
+  border-radius: 20px;
+  padding: 26px 24px;
+  border: 1px solid var(--pr-line-soft);
+  background: var(--pr-surface);
+  box-shadow: var(--pr-shadow-sm);
+}
+
+.yd-pr-compare-col--positive {
+  border-color: rgba(15, 122, 92, 0.25);
+  background: linear-gradient(165deg, var(--pr-emerald-ice) 0%, #ffffff 70%);
+}
+
+.yd-pr-compare-col h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--pr-ink);
+}
+
+.yd-pr-compare-col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.yd-pr-compare-col li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--pr-text-soft);
+}
+
+.yd-pr-compare-col li svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.yd-pr-compare-col--positive li svg {
+  color: var(--pr-emerald);
+}
+
+.yd-pr-compare-col:not(.yd-pr-compare-col--positive) li svg {
+  color: #b08a45;
+}
+
+/* ---- Horizontale Zeitleiste "Ablauf" (statt vertikaler Karten) ---- */
+
+.yd-pr-timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+
+@media (max-width: 760px) {
+  .yd-pr-timeline {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+
+.yd-pr-timeline::before {
+  content: "";
+  position: absolute;
+  top: 19px;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  background: var(--pr-line);
+}
+
+@media (max-width: 760px) {
+  .yd-pr-timeline::before {
+    display: none;
+  }
+}
+
+.yd-pr-timeline-step {
+  position: relative;
+  text-align: center;
+  padding: 0 10px;
+}
+
+@media (max-width: 760px) {
+  .yd-pr-timeline-step {
+    text-align: left;
+    padding-left: 46px;
+  }
+}
+
+.yd-pr-timeline-num {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--pr-emerald);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 0 0 6px var(--pr-page);
+}
+
+@media (max-width: 760px) {
+  .yd-pr-timeline-num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin-bottom: 0;
+    box-shadow: none;
+  }
+}
+
+.yd-pr-timeline-step h3 {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--pr-ink);
+  margin-bottom: 6px;
+}
+
+.yd-pr-timeline-step p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pr-text-soft);
+}
+
+/* ---- FAQ ---- */
+
+.yd-pr-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.yd-pr-faq-item {
+  border-radius: 14px;
+  background: var(--pr-surface);
+  border: 1px solid var(--pr-line-soft);
+  overflow: hidden;
+}
+
+.yd-pr-faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pr-ink);
+  cursor: pointer;
+}
+
+.yd-pr-faq-q svg {
+  flex-shrink: 0;
+  color: var(--pr-emerald-deep);
+}
+
+.yd-pr-faq-a {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--pr-text-soft);
+  transition: max-height 0.35s var(--pr-spring), padding 0.35s var(--pr-spring);
+}
+
+.yd-pr-faq-a--open {
+  max-height: 200px;
+  padding: 0 18px 18px;
+}
+
+/* ---- CTA band ---- */
+
+.yd-pr-cta-band {
+  position: relative;
+  border-radius: 26px;
+  padding: clamp(36px, 5vw, 56px);
+  background: linear-gradient(135deg, var(--pr-ink) 0%, var(--pr-emerald-deep) 65%, var(--pr-emerald) 100%);
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+
+.yd-pr-cta-band h2 {
+  font-size: clamp(22px, 2.8vw, 30px);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.yd-pr-cta-band p {
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto 22px;
+}
+
+.yd-pr-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.yd-pr-cta-band .yd-pr-btn--primary {
+  background: #fff;
+  color: var(--pr-emerald-deep);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.yd-pr-cta-band .yd-pr-btn--ghost {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.yd-pr-cta-note {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ---- Footer & sticky CTA ---- */
+
+.yd-pr-footer {
+  padding: 28px 0 40px;
+  font-size: 12.5px;
+  color: var(--pr-text-faint);
+}
+
+.yd-pr-sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(249, 250, 247, 0.94);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--pr-line-soft);
+  transform: translateY(100%);
+  transition: transform 0.3s var(--pr-spring);
+}
+
+.yd-pr-sticky-cta--visible {
+  transform: translateY(0);
+}
+
+.yd-pr-sticky-cta .yd-pr-btn {
+  flex: 1;
+}
+
+@media (min-width: 900px) {
+  .yd-pr-sticky-cta {
+    display: none;
+  }
+}
+
+/* ---- Reveal & stagger ---- */
+
+.yd-pr-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.65s var(--pr-spring), transform 0.65s var(--pr-spring);
+}
+
+.yd-pr-reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.yd-pr-stagger-item {
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  transition: opacity 0.5s var(--pr-spring), transform 0.5s var(--pr-spring);
+}
+
+.yd-pr-stagger-item--in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yd-pr-reveal,
+  .yd-pr-stagger-item,
+  .yd-pr-btn,
+  .yd-pr-sticky-cta {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

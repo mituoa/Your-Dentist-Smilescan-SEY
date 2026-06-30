@@ -1,4 +1,4 @@
-/* Locale switcher — login & settings */
+/* Locale switcher — settings */
 
 .yd-locale-switcher {
   display: inline-flex;
@@ -54,16 +54,6 @@
 .yd-locale-switcher__btn:disabled {
   opacity: 0.55;
   cursor: wait;
-}
-
-.yd-login-locale-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.75rem;
-}
-
-.yd-login-locale-switcher .yd-locale-switcher__options {
-  background: rgba(248, 251, 255, 0.92);
 }
 
 .yd-settings-v2__locale-switcher {

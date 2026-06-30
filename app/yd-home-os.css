@@ -1487,6 +1487,33 @@
   font-size: 12.5px;
   font-weight: 600;
   color: var(--os-navy);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.yd-os-campaign-card--live {
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.yd-os-campaign-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--os-blue-deep);
+}
+
+.yd-os-campaign-live-tag::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #4d8a66;
 }
 
 .yd-os-campaign-cta-row {

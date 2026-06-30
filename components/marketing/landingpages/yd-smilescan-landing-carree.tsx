@@ -4,21 +4,25 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarCheck,
+  Camera,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Lock,
   MessageCircle,
   ScanLine,
+  ShieldCheck,
   Sparkles,
   Stethoscope,
   Users,
 } from "lucide-react";
 
 /**
- * Vorlage "Aligner" — erstes reales Beispiel: Carree Dental, Köln Brück.
- * Eigenständige Ads-Landingpage, echte Inhalte/Fotos von carree-dental.de
- * (mit Freigabe der Praxis). Dient als Premium-Referenzvorlage für weitere
- * Your-Dentist-Landingpages.
+ * Vorlage "SmileScan" — zweites reales Beispiel auf Basis der Aligner-Premium-Vorlage
+ * (gleiches .yd-al-* Design-System aus app/yd-landingpage-aligner.css).
+ * Carree Dental, Köln Brück. SmileScan ist ein unverbindlicher Foto-Check vor der
+ * Erstberatung — ausdrücklich KEIN automatisiertes Diagnosetool und KEIN Ersatz für
+ * eine zahnärztliche Untersuchung.
  */
 
 const PHONE_DISPLAY = "0221 9842700";
@@ -40,59 +44,6 @@ function useReducedMotion() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
   return reduced;
-}
-
-/** Zählt den numerischen Anteil eines Werts wie "30+" oder "4,9★" hoch, Rest bleibt statisch. */
-function CountUpStat({ value }: { value: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const reduced = useReducedMotion();
-  const match = value.match(/^([\d.,]+)(.*)$/);
-  const numPart = match?.[1] ?? "";
-  const suffix = match?.[2] ?? "";
-  const isDecimal = numPart.includes(",");
-  const target = parseFloat(numPart.replace(/\./g, "").replace(",", "."));
-  const [display, setDisplay] = useState(reduced || !match ? numPart : "0");
-  const started = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !match || reduced) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !started.current) {
-            started.current = true;
-            const duration = 900;
-            const start = performance.now();
-            const tick = (now: number) => {
-              const t = Math.min(1, (now - start) / duration);
-              const eased = 1 - Math.pow(1 - t, 3);
-              const current = eased * target;
-              setDisplay(
-                isDecimal
-                  ? current.toFixed(1).replace(".", ",")
-                  : Math.round(current).toLocaleString("de-DE")
-              );
-              if (t < 1) requestAnimationFrame(tick);
-            };
-            requestAnimationFrame(tick);
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [reduced, match, target, isDecimal]);
-
-  if (!match) return <span ref={ref}>{value}</span>;
-  return (
-    <span ref={ref}>
-      {display}
-      {suffix}
-    </span>
-  );
 }
 
 function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -176,8 +127,61 @@ function GlowCard({ className, children }: { className?: string; children: React
   );
 }
 
+/** Zählt den numerischen Anteil eines Werts wie "24h" oder "4,9★" hoch, Rest bleibt statisch. */
+function CountUpStat({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const reduced = useReducedMotion();
+  const match = value.match(/^([\d.,]+)(.*)$/);
+  const numPart = match?.[1] ?? "";
+  const suffix = match?.[2] ?? "";
+  const isDecimal = numPart.includes(",");
+  const target = parseFloat(numPart.replace(/\./g, "").replace(",", "."));
+  const [display, setDisplay] = useState(reduced || !match ? numPart : "0");
+  const started = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !match || reduced) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !started.current) {
+            started.current = true;
+            const duration = 900;
+            const start = performance.now();
+            const tick = (now: number) => {
+              const t = Math.min(1, (now - start) / duration);
+              const eased = 1 - Math.pow(1 - t, 3);
+              const current = eased * target;
+              setDisplay(
+                isDecimal
+                  ? current.toFixed(1).replace(".", ",")
+                  : Math.round(current).toLocaleString("de-DE")
+              );
+              if (t < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+            observer.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [reduced, match, target, isDecimal]);
+
+  if (!match) return <span ref={ref}>{value}</span>;
+  return (
+    <span ref={ref}>
+      {display}
+      {suffix}
+    </span>
+  );
+}
+
 /** Swipebare Slideshow (Touch + Pfeile + Dots + Auto-Advance, pausiert bei Interaktion). */
-function SegmentCarousel({
+function ScanCarousel({
   slides,
 }: {
   slides: { title: string; text: string; img: string }[];
@@ -207,18 +211,11 @@ function SegmentCarousel({
 
   return (
     <div className="yd-al-carousel">
-      <div
-        className="yd-al-carousel-viewport"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        <div
-          className="yd-al-carousel-track"
-          style={{ transform: `translateX(-${index * 100}%)` }}
-        >
+      <div className="yd-al-carousel-viewport" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div className="yd-al-carousel-track" style={{ transform: `translateX(-${index * 100}%)` }}>
           {slides.map((s) => (
             <div key={s.title} className="yd-al-carousel-slide">
-              <Image src={`/landingpages/aligner/${s.img}`} alt={s.title} width={760} height={480} />
+              <Image src={s.img} alt={s.title} width={760} height={480} />
               <div className="yd-al-carousel-slide-body">
                 <h3>{s.title}</h3>
                 <p>{s.text}</p>
@@ -261,55 +258,49 @@ function SegmentCarousel({
 }
 
 const TRUST_PILLS = [
-  { icon: Stethoscope, label: "Kieferorthopädisch begleitet" },
-  { icon: ScanLine, label: "Digitale Planung" },
-  { icon: MessageCircle, label: "Transparente Beratung" },
-  { icon: Users, label: "Für Erwachsene & Jugendliche" },
+  { icon: ShieldCheck, label: "Kein Ersatz für Untersuchung" },
+  { icon: CalendarCheck, label: "Rückmeldung in 24h" },
+  { icon: MessageCircle, label: "Kostenlos & unverbindlich" },
+  { icon: Lock, label: "Datenschutzkonform" },
 ];
 
 const BENEFITS = [
-  { icon: Sparkles, title: "Fast unsichtbar", text: "Hauchdünne, transparente Aligner — diskret im Beruf und Alltag." },
-  { icon: CalendarCheck, title: "Planbarer Ablauf", text: "Digitale Planung zeigt vorab, wie viele Schienen nötig sind." },
-  { icon: Stethoscope, title: "Schmerzarm", text: "Sanfte Bewegungen pro Schiene, ohne Drücken oder Reiben." },
-  { icon: ScanLine, title: "Komplikationsfrei", text: "Keine Brackets, keine losen Drähte, herausnehmbar zum Essen." },
-];
-
-const SEGMENTS = [
-  { title: "Invisalign First", text: "Für Kinder ab ca. 6–7 Jahren — frühzeitige Korrektur von Fehlstellungen.", img: "invisalign-first.png" },
-  { title: "Invisalign Teen", text: "Speziell für Jugendliche — flexibel im Schul- und Vereinsalltag.", img: "invisalign-teen.png" },
-  { title: "Invisalign Erwachsene", text: "Diskrete Korrektur für Beruf und Alltag — ohne Kompromisse.", img: "invisalign-erwachsene.png" },
-];
+  { icon: Camera, title: "Ein Foto genügt", text: "Ein einfaches Selfie Ihres Lächelns reicht für die erste Einordnung." },
+  { icon: ScanLine, title: "Strukturierte Einschätzung", text: "Unser Praxisteam sichtet Ihr Foto und ordnet es fachlich ein." },
+  { icon: CalendarCheck, title: "Klare nächste Schritte", text: "Sie erhalten eine Rückmeldung und einen passenden Terminvorschlag." },
+  { icon: ShieldCheck, title: "Ärztlich verantwortet", text: "Keine automatisierte Diagnose — die fachliche Einordnung bleibt beim Praxisteam." },
+] as const;
 
 const PROCESS = [
-  { title: "Eignungsprüfung", text: "Erste Untersuchung und Beratung — wir prüfen, ob Aligner für Ihre Zahnsituation geeignet sind." },
-  { title: "Digitale Planung", text: "3D-Scan und Simulation Ihres Behandlungsverlaufs, individuell modellierte Aligner." },
-  { title: "Aligner-Wechsel", text: "Alle 1–2 Wochen ein neues Set — empfohlene Tragedauer mind. 22 Stunden täglich." },
-  { title: "Nachsorge & Retainer", text: "Regelmäßige Kontrolle, danach Stabilisierung des Ergebnisses mit Retainer." },
-];
+  { title: "Foto hochladen", text: "Senden Sie ein Foto Ihres Lächelns über das SmileScan-Formular." },
+  { title: "Kurzer Fragebogen", text: "Ein paar Angaben zu Ihrem Anliegen — dauert unter zwei Minuten." },
+  { title: "Praxisteam sichtet", text: "Carree Dental ordnet Ihr Foto strukturiert ein, ohne Ferndiagnose." },
+  { title: "Persönliche Rückmeldung", text: "Sie erhalten eine erste Einschätzung und einen Terminvorschlag." },
+] as const;
 
-const SYSTEMS = [
-  { name: "Invisalign", text: "Marktführer für transparente Aligner — bei uns im Einsatz.", current: true },
-  { name: "Spark", text: "Hochästhetische Aligner-Therapie mit besonders klarem Material." },
-  { name: "SureSmile", text: "Digitale Zahnkorrektur mit präziser Verlaufsplanung." },
-  { name: "ClearCorrect", text: "Transparente Schienen-Therapie für sanfte Korrekturen." },
-  { name: "Angel Aligner", text: "Moderne Aligner-Technologie für individuelle Fälle." },
-  { name: "Eigenes System", text: "Nach Eignungsprüfung besprechen wir die passende Option." },
-];
+const UNSPLASH = (id: string) => `https://images.unsplash.com/photo-${id}?q=80&w=760&auto=format&fit=crop`;
 
-const TESTIMONIALS = [
-  { quote: "Nach fast 2 Jahren Invisalign Behandlung bei Frau Dr. Andersson bin ich mit dem Ergebnis wirklich super zufrieden! Kompetent ist ne nette Kieferorthopädin! Sehr zu empfehlen!" },
-  { quote: "War wegen massiver Kieferprobleme bei Frau Andersson in Behandlung. Sie hat mich sehr gut aufgeklärt, nahm sich viel Zeit für meine Fragen und konnte mir sehr kompetent Auskunft über die Behandlungsoptionen geben." },
-  { quote: "Ich fühlte mich vom ersten Termin an gut aufgehoben, sowohl von der Kieferorthopädin als auch Mitarbeitern. Frau Dr. Andersson hat eine sehr angenehme Art mit ihren Patienten zu sprechen." },
-];
+const SEGMENTS = [
+  { title: "Zahnstellung", text: "Erste Einordnung sichtbarer Engstände oder Lücken.", img: UNSPLASH("1670250492416-570b5b7343b1") },
+  { title: "Verfärbungen", text: "Hinweise zu Verfärbungen, die optisch auffallen.", img: UNSPLASH("1677026010083-78ec7f1b84ed") },
+  { title: "Symmetrie & Lächeln", text: "Wie Lächeln und Zahnreihen im Gesamtbild wirken.", img: UNSPLASH("1489278353717-f64c6ee8a4d2") },
+] as const;
 
 const FAQ = [
-  { q: "Wie lange dauert eine Invisalign-Behandlung?", a: "Die Dauer hängt von der Schwere der Zahnfehlstellung ab, typischerweise zwischen 3 und 18 Monaten." },
-  { q: "Kann ich die Aligner zum Essen herausnehmen?", a: "Ja. Die Aligner können zum Essen, Trinken und Zähneputzen herausgenommen werden. Wichtig ist, die empfohlene Tragezeit von mindestens 22 Stunden täglich einzuhalten." },
-  { q: "Tut die Behandlung weh?", a: "Es kann zu leichten Druckgefühlen kommen, die nach wenigen Tagen verschwinden. Aligner sind durch das Smart-Track-Material deutlich komfortabler als klassische Zahnspangen." },
-  { q: "Was kostet die unsichtbare Zahnspange?", a: "Eine einfache Korrektur beginnt ab 150€ monatlich zzgl. Laborkosten. Im kostenlosen Beratungsgespräch erhalten Sie eine genaue Kostenübersicht und mögliche Finanzierungsoptionen." },
-  { q: "Übernimmt die Krankenkasse die Kosten?", a: "Gesetzliche Krankenkassen bezuschussen Invisalign grundsätzlich nicht — die Behandlung ist privat zu finanzieren. Privat Versicherte erhalten je nach Vertrag eine vollständige oder teilweise Erstattung." },
-  { q: "Was passiert nach der Eignungsprüfung?", a: "Sie erhalten eine individuelle Einschätzung, ob und welches Aligner-System für Ihre Zahnsituation geeignet ist — unverbindlich und ohne Diagnose vor der Untersuchung." },
-];
+  { q: "Ist SmileScan eine Diagnose?", a: "Nein. SmileScan ist eine erste, unverbindliche Einordnung anhand eines Fotos durch unser Praxisteam — keine automatisierte oder zahnärztliche Diagnose. Diese erfolgt ausschließlich bei einer persönlichen Untersuchung in der Praxis." },
+  { q: "Was passiert mit meinem Foto?", a: "Ihr Foto wird ausschließlich zur Beratung im Rahmen von SmileScan verwendet und vertraulich behandelt. Details erläutern wir Ihnen gerne im persönlichen Gespräch." },
+  { q: "Wie schnell bekomme ich eine Rückmeldung?", a: "In der Regel innerhalb von 24 Stunden an Werktagen." },
+  { q: "Kostet SmileScan etwas?", a: "Nein, die erste Foto-Einordnung ist kostenlos und unverbindlich." },
+  { q: "Brauche ich trotzdem einen Termin?", a: "Ja. SmileScan ersetzt keine zahnärztliche Untersuchung — es hilft Ihnen, vorab einzuschätzen, ob und welcher Termin sinnvoll ist." },
+  { q: "Welches Foto eignet sich am besten?", a: "Ein gut beleuchtetes Foto mit offenem, entspanntem Lächeln frontal zur Kamera — ähnlich einem Selfie." },
+] as const;
+
+const TRUST_NOTES = [
+  { icon: Stethoscope, text: "Fachliche Einordnung durch das Praxisteam, nicht durch eine Software." },
+  { icon: ShieldCheck, text: "Keine automatisierte Diagnose." },
+  { icon: Lock, text: "Vertrauliche, datenschutzkonforme Verarbeitung." },
+  { icon: CalendarCheck, text: "Ersetzt keine zahnärztliche Untersuchung." },
+] as const;
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -324,7 +315,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-export function YdAlignerLandingCarree() {
+export function YdSmileScanLandingCarree() {
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {
@@ -348,7 +339,7 @@ export function YdAlignerLandingCarree() {
               {PHONE_DISPLAY}
             </a>
             <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--primary yd-al-btn--sm">
-              Termin vereinbaren
+              SmileScan starten
             </a>
           </div>
         </div>
@@ -359,22 +350,22 @@ export function YdAlignerLandingCarree() {
         <div className="yd-al-container yd-al-hero-grid">
           <div>
             <span className="yd-al-eyebrow yd-al-hero-stagger" style={{ transitionDelay: "0ms" }}>
-              Invisalign® · Köln Brück
+              SmileScan · Köln Brück
             </span>
             <h1 className="yd-al-hero-title yd-al-hero-stagger" style={{ transitionDelay: "70ms" }}>
-              Unsichtbare Zahnkorrektur. <em>Sichtbar mehr Sicherheit.</em>
+              Ein Foto. <em>Eine ehrliche erste Einordnung.</em>
             </h1>
             <p className="yd-al-hero-lead yd-al-hero-stagger" style={{ transitionDelay: "140ms" }}>
-              Transparente Aligner können Zahnfehlstellungen diskret korrigieren. In unserer Praxis
-              prüfen wir individuell, welches System zu Ihren Zähnen, Ihrem Alltag und Ihrem
-              Behandlungsziel passt.
+              Mit SmileScan schicken Sie uns ein Foto Ihres Lächelns — unser Praxisteam ordnet es
+              persönlich ein und meldet sich mit einer ersten Einschätzung, bevor Sie einen Termin
+              vereinbaren.
             </p>
             <div className="yd-al-hero-ctas yd-al-hero-stagger" style={{ transitionDelay: "210ms" }}>
               <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--glow">
-                <span>Kostenlose Erstberatung anfragen</span>
+                <span>SmileScan jetzt starten</span>
               </a>
               <button type="button" className="yd-al-btn yd-al-btn--ghost" onClick={() => scrollToId("ablauf")}>
-                Behandlung ansehen
+                So funktioniert's
               </button>
             </div>
             <div className="yd-al-pill-row yd-al-hero-stagger" style={{ transitionDelay: "280ms" }}>
@@ -390,12 +381,12 @@ export function YdAlignerLandingCarree() {
             </div>
             <div className="yd-al-hero-stats yd-al-hero-stagger" style={{ transitionDelay: "340ms" }}>
               <div className="yd-al-hero-stat">
-                <strong><CountUpStat value="30+" /></strong>
-                <span>Jahre kieferorth. Erfahrung</span>
+                <strong><CountUpStat value="24h" /></strong>
+                <span>Antwortzeit</span>
               </div>
               <div className="yd-al-hero-stat">
-                <strong><CountUpStat value="2.000+" /></strong>
-                <span>begleitete Aligner-Fälle</span>
+                <strong><CountUpStat value="0€" /></strong>
+                <span>Kosten für SmileScan</span>
               </div>
               <div className="yd-al-hero-stat">
                 <strong><CountUpStat value="4,9★" /></strong>
@@ -407,37 +398,37 @@ export function YdAlignerLandingCarree() {
           <div className="yd-al-hero-visual">
             <div className="yd-al-hero-frame">
               <Image
-                src="/landingpages/aligner/hero-lifestyle.png"
-                alt="Patientin setzt einen unsichtbaren Invisalign-Aligner ein"
+                src="https://images.unsplash.com/photo-1713812956759-371b4e8fc468?q=80&w=800&auto=format&fit=crop"
+                alt="Patientin macht ein Foto ihres Lächelns für SmileScan"
                 width={760}
                 height={874}
                 priority
               />
-              <span className="yd-al-hero-badge">Kostenlose Erstberatung</span>
+              <span className="yd-al-hero-badge">Kostenlos &amp; unverbindlich</span>
             </div>
             <div className="yd-al-hero-caption">
               <span className="yd-al-hero-caption-icon">
                 <Sparkles size={15} />
               </span>
               <div>
-                <p>Invisalign Platinum Elite II Provider</p>
-                <span>Frau Dr. Andersson · Fachzahnärztin für Kieferorthopädie</span>
+                <p>SmileScan — Foto-Check vor der Erstberatung</p>
+                <span>Carree Dental · Köln Brück</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2 — Warum Aligner */}
+      {/* 2 — Warum SmileScan */}
       <section className="yd-al-section" id="warum">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Warum Aligner</span>
-              <h2 className="yd-al-title">Komfortabel im Alltag, präzise in der Planung.</h2>
+              <span className="yd-al-kicker">Warum SmileScan</span>
+              <h2 className="yd-al-title">Bevor Sie einen Termin vereinbaren, wissen Sie schon mehr.</h2>
               <p className="yd-al-lead">
-                Transparente Aligner bewegen Ihre Zähne in kleinen, digital geplanten Schritten —
-                ohne feste Brackets oder Drähte.
+                SmileScan ist ein einfacher erster Schritt — unverbindlich, kostenlos und ohne
+                automatisierte Diagnose.
               </p>
             </div>
             <StaggerGrid className="yd-al-benefit-grid">
@@ -458,26 +449,26 @@ export function YdAlignerLandingCarree() {
         </div>
       </section>
 
-      {/* 3 — Für wen geeignet */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="fuer-wen">
+      {/* 3 — Was SmileScan einordnet (Diashow) */}
+      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="was-wir-pruefen">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Für wen geeignet</span>
-              <h2 className="yd-al-title">Zahnkorrekturen sind in jedem Alter möglich.</h2>
+              <span className="yd-al-kicker">Was SmileScan einordnet</span>
+              <h2 className="yd-al-title">Vier Aspekte, ein erster Überblick.</h2>
             </div>
-            <SegmentCarousel slides={[...SEGMENTS]} />
+            <ScanCarousel slides={[...SEGMENTS]} />
           </Reveal>
         </div>
       </section>
 
-      {/* 4 — Ablauf der Behandlung */}
+      {/* 4 — Ablauf */}
       <section className="yd-al-section" id="ablauf">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Ablauf der Behandlung</span>
-              <h2 className="yd-al-title">Vier Schritte, klar begleitet.</h2>
+              <span className="yd-al-kicker">So funktioniert's</span>
+              <h2 className="yd-al-title">Vier Schritte bis zur Rückmeldung.</h2>
             </div>
             <StaggerGrid className="yd-al-process">
               {PROCESS.map((p, i) => (
@@ -492,67 +483,40 @@ export function YdAlignerLandingCarree() {
         </div>
       </section>
 
-      {/* 5 — Systeme / Möglichkeiten */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="systeme">
+      {/* 5 — Vertrauen & Grenzen */}
+      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="vertrauen">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Systeme &amp; Möglichkeiten</span>
-              <h2 className="yd-al-title">Welches Aligner-System passt zu Ihnen?</h2>
+              <span className="yd-al-kicker">Wichtig zu wissen</span>
+              <h2 className="yd-al-title">Ehrlich eingeordnet, nicht automatisch diagnostiziert.</h2>
               <p className="yd-al-lead">
-                Wir arbeiten überwiegend mit Invisalign®, prüfen aber je nach Befund auch
-                Alternativen — die endgültige Empfehlung erfolgt erst nach Ihrer Eignungsprüfung.
+                SmileScan ist ein erster Anhaltspunkt von Menschen für Menschen — keine
+                Software-Diagnose und kein Ersatz für eine zahnärztliche Untersuchung.
               </p>
             </div>
-            <div className="yd-al-system-scroller">
-              <div className="yd-al-system-track">
-                {SYSTEMS.map((s) => (
-                  <div
-                    key={s.name}
-                    className={`yd-al-system-chip ${s.current ? "yd-al-system-chip--current" : ""}`}
-                  >
-                    {s.current ? <span className="yd-al-system-tag">Im Einsatz</span> : null}
-                    <h3>{s.name}</h3>
-                    <p>{s.text}</p>
+            <div className="yd-al-trust-grid">
+              {TRUST_NOTES.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <div key={t.text} className="yd-al-trust-item">
+                    <Icon size={18} strokeWidth={1.8} />
+                    <p>{t.text}</p>
                   </div>
-                ))}
-              </div>
-            </div>
-            <p className="yd-al-system-hint">← Zur Seite wischen, um alle Systeme zu sehen →</p>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* 6 — Behandlungsbeispiele (SmileView statt Vorher/Nachher) */}
-      <section className="yd-al-section" id="smileview">
-        <div className="yd-al-container">
-          <Reveal>
-            <div className="yd-al-smileview">
-              <div>
-                <span className="yd-al-kicker">Invisalign® SmileView™</span>
-                <h2 className="yd-al-title">Sehen Sie Ihr mögliches Lächeln — in 60 Sekunden.</h2>
-                <p className="yd-al-lead">
-                  Mit einem einfachen Selfie zeigt Ihnen die offizielle Invisalign SmileView-Simulation,
-                  wie Ihr Lächeln nach einer Behandlung aussehen könnte. Unverbindlich und kostenlos —
-                  ersetzt keine zahnärztliche Eignungsprüfung.
-                </p>
-              </div>
-              <div className="yd-al-smileview-qr">
-                <Image src="/landingpages/aligner/qr-smileview.png" alt="QR-Code zur Invisalign SmileView Simulation" width={150} height={150} />
-                <span>QR-Code scannen &amp; starten</span>
-              </div>
+                );
+              })}
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* 7 — FAQ */}
-      <section className="yd-al-section" style={{ background: "var(--al-warm)" }} id="faq">
+      {/* 6 — FAQ */}
+      <section className="yd-al-section" id="faq">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
               <span className="yd-al-kicker">Häufige Fragen</span>
-              <h2 className="yd-al-title">Was Patient:innen am häufigsten fragen.</h2>
+              <h2 className="yd-al-title">Was Patient:innen zu SmileScan am häufigsten fragen.</h2>
             </div>
             <div className="yd-al-faq">
               {FAQ.map((f) => (
@@ -563,89 +527,46 @@ export function YdAlignerLandingCarree() {
         </div>
       </section>
 
-      {/* 8 — Praxis & Behandlerin */}
+      {/* 7 — Praxis */}
       <section className="yd-al-section" id="praxis">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-head">
-              <span className="yd-al-kicker">Praxis &amp; Behandlerin</span>
-              <h2 className="yd-al-title">Persönlich begleitet, fachlich erfahren.</h2>
+              <span className="yd-al-kicker">Praxis</span>
+              <h2 className="yd-al-title">Carree Dental, Köln Brück.</h2>
             </div>
-            <div className="yd-al-practice">
-              <div className="yd-al-practice-photo">
-                <Image src="/landingpages/aligner/dr-andersson.jpg" alt="Frau Dr. Andersson" width={480} height={600} />
-              </div>
-              <div>
-                <p className="yd-al-practice-name">Frau Dr. Andersson</p>
-                <p className="yd-al-practice-role">Fachzahnärztin für Kieferorthopädie</p>
-                <p className="yd-al-practice-bio">
-                  Seit 1999 begleite ich Patient:innen mit Aligner-Therapien — vom einfachen
-                  Korrekturfall bis zu komplexen kieferorthopädischen Situationen. Jede Behandlung
-                  beginnt mit einer individuellen Eignungsprüfung, nicht mit einem Versprechen.
-                </p>
-                <div className="yd-al-practice-stats">
-                  <div className="yd-al-practice-stat">
-                    <strong>30+</strong>
-                    <span>Jahre Erfahrung</span>
-                  </div>
-                  <div className="yd-al-practice-stat">
-                    <strong>2.000+</strong>
-                    <span>Aligner-Behandlungen</span>
-                  </div>
-                  <div className="yd-al-practice-stat">
-                    <strong>Platinum</strong>
-                    <span>Elite II Provider</span>
-                  </div>
-                </div>
-                <div className="yd-al-practice-awards">
-                  <Image src="/landingpages/aligner/award-focus.png" alt="Focus-Auszeichnung für hervorragende Zahnmedizin" width={56} height={52} />
-                  <Image src="/landingpages/aligner/award-plusx.png" alt="Plus X Award" width={56} height={52} />
-                </div>
-              </div>
-            </div>
-
             <div className="yd-al-practice-room">
               <Image src="/landingpages/aligner/practice-room.jpg" alt="Behandlungsraum bei Carree Dental mit Gartenblick" fill style={{ objectFit: "cover" }} />
               <div className="yd-al-practice-room-overlay">
                 <p>Helle, moderne Behandlungsräume mit Gartenblick — Brücker Mauspfad, Köln Brück.</p>
               </div>
             </div>
-
             <div className="yd-al-team-strip">
               <Image src="/landingpages/aligner/team-banner.png" alt="Team von Carree Dental" width={2560} height={751} />
             </div>
-
-            <StaggerGrid className="yd-al-testimonial-grid">
-              {TESTIMONIALS.map((t) => (
-                <GlowCard key={t.quote.slice(0, 24)} className="yd-al-testimonial-card">
-                  <p className="yd-al-testimonial-stars">★★★★★</p>
-                  <p>„{t.quote}"</p>
-                </GlowCard>
-              ))}
-            </StaggerGrid>
           </Reveal>
         </div>
       </section>
 
-      {/* 9 — CTA Abschluss */}
+      {/* 8 — CTA Abschluss */}
       <section className="yd-al-section" id="cta">
         <div className="yd-al-container">
           <Reveal>
             <div className="yd-al-cta-band">
-              <h2>Bereit für Ihre Eignungsprüfung?</h2>
+              <h2>Bereit für Ihren SmileScan?</h2>
               <p>
-                Vereinbaren Sie jetzt Ihre kostenlose und unverbindliche Erstberatung bei Carree Dental
-                in Köln Brück.
+                Senden Sie uns ein Foto Ihres Lächelns und erhalten Sie eine erste, unverbindliche
+                Einschätzung von Carree Dental in Köln Brück.
               </p>
               <div className="yd-al-cta-buttons">
                 <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--glow yd-al-btn--glow-light">
-                  <span>Kostenlose Erstberatung anfragen</span>
+                  <span>SmileScan jetzt starten</span>
                 </a>
                 <a href={PHONE_HREF} className="yd-al-btn yd-al-btn--ghost">
                   {PHONE_DISPLAY} anrufen
                 </a>
               </div>
-              <p className="yd-al-cta-note">Behandlung ab 150€/Monat zzgl. Laborkosten · individueller Kostenvoranschlag im Beratungsgespräch</p>
+              <p className="yd-al-cta-note">Kostenlos &amp; unverbindlich · ersetzt keine zahnärztliche Untersuchung</p>
             </div>
           </Reveal>
         </div>
@@ -671,7 +592,7 @@ export function YdAlignerLandingCarree() {
           Anrufen
         </a>
         <a href={CONTACT_URL} target="_blank" rel="noopener" className="yd-al-btn yd-al-btn--primary yd-al-btn--sm">
-          Termin vereinbaren
+          SmileScan starten
         </a>
       </div>
     </main>

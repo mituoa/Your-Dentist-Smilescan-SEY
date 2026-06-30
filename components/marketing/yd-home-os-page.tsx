@@ -352,16 +352,16 @@ const ARTICLES = [
 
 /** Bildquelle: Unsplash (lizenzfrei für kommerzielle Nutzung), ruhige klinische Aufnahmen. */
 const CAMPAIGNS = [
-  { name: "SmileScan Landingpage", image: "1667133295315-820bb6481730" },
-  { name: "Aligner / Invisalign", image: "1598256989809-394fa4f6cd26" },
-  { name: "Implantologie", image: "1593022356769-11f762e25ed9" },
-  { name: "Prophylaxe", image: "1629909613654-28e377c37b09" },
-  { name: "Ästhetische Zahnmedizin", image: "1677026010083-78ec7f1b84ed" },
-  { name: "Bleaching", image: "1489278353717-f64c6ee8a4d2" },
-  { name: "Kinderzahnheilkunde", image: "1565090568947-7293970ba471" },
-  { name: "Parodontologie", image: "1606811971618-4486d14f3f99" },
-  { name: "Endodontie", image: "1606811841689-23dfddce3e95" },
-  { name: "Oral Health Pass", image: "1598256989800-fe5f95da9787" },
+  { name: "SmileScan Landingpage", image: "1667133295315-820bb6481730", href: "/landingpages/smilescan" },
+  { name: "Aligner / Invisalign", image: "1598256989809-394fa4f6cd26", href: "/landingpages/aligner" },
+  { name: "Implantologie", image: "1593022356769-11f762e25ed9", href: "/landingpages/implantologie" },
+  { name: "Prophylaxe", image: "1629909613654-28e377c37b09", href: "/landingpages/prophylaxe" },
+  { name: "Ästhetische Zahnmedizin", image: "1677026010083-78ec7f1b84ed", href: "/landingpages/aesthetik" },
+  { name: "Bleaching", image: "1489278353717-f64c6ee8a4d2", href: null },
+  { name: "Kinderzahnheilkunde", image: "1565090568947-7293970ba471", href: null },
+  { name: "Parodontologie", image: "1606811971618-4486d14f3f99", href: null },
+  { name: "Endodontie", image: "1606811841689-23dfddce3e95", href: null },
+  { name: "Oral Health Pass", image: "1598256989800-fe5f95da9787", href: null },
 ] as const;
 
 const PROBLEMS = [
@@ -633,24 +633,42 @@ export function YdHomeOsPage({
             </div>
             <div className="yd-os-campaign-marquee">
               <div className="yd-os-campaign-track">
-                {[...CAMPAIGNS, ...CAMPAIGNS].map((c, i) => (
-                  <div
-                    key={`${c.name}-${i}`}
-                    className="yd-os-campaign-card"
-                    aria-hidden={i >= CAMPAIGNS.length}
-                  >
-                    <div className="yd-os-campaign-preview">
-                      <Image
-                        src={`https://images.unsplash.com/photo-${c.image}?q=80&w=480&auto=format&fit=crop`}
-                        alt=""
-                        fill
-                        sizes="200px"
-                        className="yd-os-campaign-preview-img"
-                      />
+                {[...CAMPAIGNS, ...CAMPAIGNS].map((c, i) => {
+                  const hidden = i >= CAMPAIGNS.length;
+                  const cardInner = (
+                    <>
+                      <div className="yd-os-campaign-preview">
+                        <Image
+                          src={`https://images.unsplash.com/photo-${c.image}?q=80&w=480&auto=format&fit=crop`}
+                          alt=""
+                          fill
+                          sizes="200px"
+                          className="yd-os-campaign-preview-img"
+                        />
+                      </div>
+                      <p className="yd-os-campaign-name">
+                        {c.name}
+                        {c.href ? <span className="yd-os-campaign-live-tag">Live ansehen</span> : null}
+                      </p>
+                    </>
+                  );
+                  return c.href ? (
+                    <Link
+                      key={`${c.name}-${i}`}
+                      href={c.href}
+                      target="_blank"
+                      rel="noopener"
+                      className="yd-os-campaign-card yd-os-campaign-card--live"
+                      aria-hidden={hidden}
+                    >
+                      {cardInner}
+                    </Link>
+                  ) : (
+                    <div key={`${c.name}-${i}`} className="yd-os-campaign-card" aria-hidden={hidden}>
+                      {cardInner}
                     </div>
-                    <p className="yd-os-campaign-name">{c.name}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
             <div className="yd-os-campaign-cta-row">
