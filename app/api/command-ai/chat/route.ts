@@ -11,6 +11,8 @@ import type {
 } from "@/lib/command-ai/command-ai-chat-types";
 import { buildRichCommandAiContext, streamCommandAiChat } from "@/lib/command-ai/gpt-practice-assistant";
 import { isCommandAiGptEnabled } from "@/lib/command-ai/gpt-config";
+import { buildInstantGreetingReply } from "@/lib/command-ai/instant-greeting-reply";
+import { isGreetingOnlyMessage } from "@/lib/command-ai/message-weight";
 
 export const runtime = "nodejs";
 
@@ -47,7 +49,8 @@ export async function POST(req: Request) {
   }
 
   const submissionId = body.context?.activeCase?.submissionId ?? null;
-  const sessionId = await getOrCreateCommandAiSession(
+
+  const sessionPromise = getOrCreateCommandAiSession(
     {
       workspaceId: workspace.workspace_id,
       userId: user.id,
@@ -57,15 +60,7 @@ export async function POST(req: Request) {
     body.sessionId
   );
 
-  if (sessionId) {
-    await appendCommandAiMessage({
-      sessionId,
-      role: "user",
-      content: trimmed,
-    });
-  }
-
-  const rich = await buildRichCommandAiContext({
+  const richPromise = buildRichCommandAiContext({
     workspaceId: workspace.workspace_id,
     context: body.context,
     userMessage: trimmed,
@@ -80,7 +75,34 @@ export async function POST(req: Request) {
       };
 
       try {
-        if (sessionId) send("session", { sessionId });
+        send("status", { phase: "preparing" });
+
+        const [sessionId, rich] = await Promise.all([sessionPromise, richPromise]);
+
+        if (sessionId) {
+          send("session", { sessionId });
+          void appendCommandAiMessage({
+            sessionId,
+            role: "user",
+            content: trimmed,
+          });
+        }
+
+        if (isGreetingOnlyMessage(trimmed)) {
+          const assistant = buildInstantGreetingReply(rich);
+          send("done", { assistant });
+          if (sessionId) {
+            void appendCommandAiMessage({
+              sessionId,
+              role: "assistant",
+              content: assistant.reply,
+              payload: assistant,
+            });
+          }
+          return;
+        }
+
+        send("status", { phase: "streaming" });
 
         let assistantPayload = null;
         for await (const chunk of streamCommandAiChat({

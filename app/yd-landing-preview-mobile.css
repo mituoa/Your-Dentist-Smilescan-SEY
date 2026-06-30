@@ -1,32 +1,8 @@
 /**
- * Landingpage-Vorschau — Mobile: volle 1:1-Größe (wie auf dem Gerät),
- * eine durchgehende Scrollfläche, kein Horizontal-Overflow.
+ * Landingpage-Vorschau — Mobile: volle 1:1-Größe, Document-Scroll (wie echtes Handy).
  */
 
 @media (max-width: 767px) {
-  .yd-lp-preview-shell {
-    height: 100dvh;
-    max-height: 100dvh;
-    overflow: hidden;
-  }
-
-  .yd-lp-preview-shell__content {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    touch-action: pan-y;
-  }
-
-  .yd-lp-preview-banner {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    flex-shrink: 0;
-  }
-
   .yd-lp-preview-banner__inner {
     padding: 0.5rem max(0.75rem, env(safe-area-inset-right))
       0.5rem max(0.75rem, env(safe-area-inset-left));
@@ -61,10 +37,6 @@
   }
 
   .yd-lp-preview-shell__scale {
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-    transform: none;
     padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   }
 
@@ -78,7 +50,6 @@
     position: relative;
     top: auto;
     max-width: 100%;
-    overflow: hidden;
   }
 
   .yd-lp-preview-shell__scale [class$="-topbar-inner"] {
@@ -134,17 +105,14 @@
     text-overflow: ellipsis;
   }
 
-  .yd-lp-preview-shell__scale main {
-    overflow-x: hidden;
-    max-width: 100%;
-  }
-
+  .yd-lp-preview-shell__scale main,
   .yd-lp-preview-shell__scale .yd-al,
   .yd-lp-preview-shell__scale .yd-bl,
   .yd-lp-preview-shell__scale .yd-ae,
   .yd-lp-preview-shell__scale .yd-pr,
   .yd-lp-preview-shell__scale .yd-kr {
-    overflow-x: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     max-width: 100%;
     width: 100%;
   }
@@ -195,19 +163,10 @@
 
   .yd-lp-preview-shell__scale [class*="carousel"] {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
-  /* Sticky-CTAs im Scroll-Kontext, nicht viewport-fixed */
-  .yd-lp-preview-shell__scale [class*="sticky-cta"] {
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
+  /* Unten Platz für fixierte Sticky-CTAs der Vorlagen */
   .yd-lp-preview-shell__scale main > section:last-of-type {
     padding-bottom: 5.5rem;
   }

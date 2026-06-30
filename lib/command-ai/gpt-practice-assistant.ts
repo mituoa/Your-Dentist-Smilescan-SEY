@@ -15,6 +15,12 @@ import {
   COMMAND_AI_PATIENT_AUDIENCE_RULES,
 } from "@/lib/command-ai/domain-knowledge";
 import { parseMessageSignals } from "@/lib/command-ai/message-signals";
+import {
+  commandAiMaxTokensForMessage,
+  isLightweightUserMessage,
+  isGreetingOnlyMessage,
+} from "@/lib/command-ai/message-weight";
+import { buildInstantGreetingReply } from "@/lib/command-ai/instant-greeting-reply";
 import { resolveCommandReplyIntent } from "@/lib/command-ai/reply-intent";
 import { resolveCommandIntent } from "@/lib/command-ai/intent-resolver";
 import { prepareWorkFromIntent } from "@/lib/command-ai/preparation-engine";
@@ -161,16 +167,31 @@ type OpenAiMessage =
 
 function buildOpenAiMessages(
   history: CommandAiChatTurn[],
-  rich: CommandAiRichContext
+  rich: CommandAiRichContext,
+  userMessage: string
 ): OpenAiMessage[] {
+  const lightweight = isLightweightUserMessage(userMessage);
   const messages: OpenAiMessage[] = [
     { role: "system", content: buildSystemPrompt(rich.audience) },
     { role: "system", content: `Kontext:\n${formatRichContextBlock(rich)}` },
-    ...history.slice(-16).map((m) => ({
+  ];
+
+  if (lightweight) {
+    messages.push({
+      role: "system",
+      content:
+        "Kurze informelle Nachricht: Antworte in höchstens 2 kurzen Sätzen auf Deutsch. " +
+        `Setze actions auf [], patientDraft/taskTitle/relayMessage auf null. ` +
+        `Delimiter ${COMMAND_AI_ACTIONS_DELIMITER} und minimales JSON trotzdem ausgeben.`,
+    });
+  }
+
+  messages.push(
+    ...history.slice(-12).map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
-    })),
-  ];
+    }))
+  );
 
   if (rich.photoUrls.length > 0) {
     const lastUserIdx = [...messages].reverse().findIndex((m) => m.role === "user");
@@ -217,7 +238,10 @@ export async function* streamCommandAiChat(input: {
 
   const useVision = input.rich.photoUrls.length > 0;
   const model = useVision ? commandAiVisionModel() : commandAiGptModel();
-  const messages = buildOpenAiMessages(history, input.rich);
+  const messages = buildOpenAiMessages(history, input.rich, input.userMessage.trim());
+  const maxTokens = commandAiMaxTokensForMessage(input.userMessage, {
+    hasPhotoUrls: useVision,
+  });
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -227,11 +251,12 @@ export async function* streamCommandAiChat(input: {
     },
     body: JSON.stringify({
       model,
-      temperature: 0.4,
-      max_tokens: 2200,
+      temperature: isLightweightUserMessage(input.userMessage) ? 0.35 : 0.4,
+      max_tokens: maxTokens,
       stream: true,
       messages,
     }),
+    signal: AbortSignal.timeout(45_000),
   });
 
   if (!res.ok || !res.body) {
@@ -244,6 +269,7 @@ export async function* streamCommandAiChat(input: {
   const decoder = new TextDecoder();
   let buffer = "";
   let full = "";
+  let streamedVisibleLength = 0;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -262,13 +288,13 @@ export async function* streamCommandAiChat(input: {
           choices?: { delta?: { content?: string } }[];
         };
         const piece = chunk.choices?.[0]?.delta?.content;
-        if (piece) {
-          full += piece;
-          const delimiterAt = full.indexOf(COMMAND_AI_ACTIONS_DELIMITER);
-          const visible =
-            delimiterAt === -1 ? piece : full.slice(0, delimiterAt).slice(-piece.length);
-          if (visible) yield { type: "delta", text: visible };
-        }
+        if (!piece) continue;
+        full += piece;
+        const delimiterAt = full.indexOf(COMMAND_AI_ACTIONS_DELIMITER);
+        const visibleFull = delimiterAt === -1 ? full : full.slice(0, delimiterAt);
+        const newVisible = visibleFull.slice(streamedVisibleLength);
+        streamedVisibleLength = visibleFull.length;
+        if (newVisible) yield { type: "delta", text: newVisible };
       } catch {
         /* ignore partial SSE */
       }
@@ -287,7 +313,9 @@ async function callOpenAiChatBlocking(
 
   const useVision = rich.photoUrls.length > 0;
   const model = useVision ? commandAiVisionModel() : commandAiGptModel();
-  const messages = buildOpenAiMessages(history, rich);
+  const lastUser = history.filter((m) => m.role === "user").at(-1)?.content ?? "";
+  const messages = buildOpenAiMessages(history, rich, lastUser);
+  const maxTokens = commandAiMaxTokensForMessage(lastUser, { hasPhotoUrls: useVision });
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -297,10 +325,11 @@ async function callOpenAiChatBlocking(
     },
     body: JSON.stringify({
       model,
-      temperature: 0.4,
-      max_tokens: 2200,
+      temperature: isLightweightUserMessage(lastUser) ? 0.35 : 0.4,
+      max_tokens: maxTokens,
       messages,
     }),
+    signal: AbortSignal.timeout(45_000),
   });
 
   if (!res.ok) {
@@ -444,6 +473,10 @@ export async function runCommandAiChatTurn(input: {
     userMessage: trimmed,
     audience,
   });
+
+  if (isGreetingOnlyMessage(trimmed)) {
+    return { ok: true, assistant: buildInstantGreetingReply(rich), usedGpt: false };
+  }
 
   const history: CommandAiChatTurn[] = [
     ...input.history,

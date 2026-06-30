@@ -8,6 +8,7 @@ import type {
 
 export type CommandAiStreamHandlers = {
   onSession?: (sessionId: string) => void;
+  onStatus?: (phase: "preparing" | "streaming") => void;
   onDelta: (text: string) => void;
   onDone: (assistant: CommandAiAssistantPayload) => void;
   onError: (message: string) => void;
@@ -61,6 +62,10 @@ export async function streamPracticeCommandAi(input: {
         const parsed = JSON.parse(data) as Record<string, unknown>;
         if (event === "session" && typeof parsed.sessionId === "string") {
           input.handlers.onSession?.(parsed.sessionId);
+        } else if (event === "status" && typeof parsed.phase === "string") {
+          if (parsed.phase === "preparing" || parsed.phase === "streaming") {
+            input.handlers.onStatus?.(parsed.phase);
+          }
         } else if (event === "delta" && typeof parsed.text === "string") {
           input.handlers.onDelta(parsed.text);
         } else if (event === "done" && parsed.assistant) {

@@ -132,6 +132,31 @@ export function SubmissionMessageDraftPanel({
     router.refresh();
   }, [router]);
 
+  const handleDraftPrepared = useCallback(
+    (draft: { draftId: string; body: string }) => {
+      const now = new Date().toISOString();
+      setEditableDraft({
+        id: draft.draftId,
+        workspace_id: "",
+        submission_id: submissionId,
+        body: draft.body,
+        status: "draft",
+        created_by_kind: "user",
+        created_by_user_id: null,
+        approved_at: null,
+        approved_by: null,
+        sent_at: null,
+        created_at: now,
+        updated_at: now,
+      });
+      setBody(draft.body);
+      setDraftPath("custom");
+      lastServerDraftAt.current = now;
+      refreshAfterMutation();
+    },
+    [submissionId, refreshAfterMutation]
+  );
+
   useEffect(() => {
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<{ submissionId: string; body: string }>).detail;
@@ -276,7 +301,7 @@ export function SubmissionMessageDraftPanel({
             startTransition={startTransition}
             onStatus={setStatusMessage}
             onError={setErrorMessage}
-            onSuccess={refreshAfterMutation}
+            onSuccess={handleDraftPrepared}
           />
         ) : null}
         <StatusBanners statusMessage={statusMessage} errorMessage={errorMessage} />
@@ -298,7 +323,7 @@ export function SubmissionMessageDraftPanel({
           startTransition={startTransition}
           onStatus={setStatusMessage}
           onError={setErrorMessage}
-          onSuccess={refreshAfterMutation}
+          onSuccess={handleDraftPrepared}
         />
         <StatusBanners statusMessage={statusMessage} errorMessage={errorMessage} />
         <p className="text-[12px] leading-relaxed text-slate-500">
@@ -498,7 +523,7 @@ function PrepareDraftButton({
   startTransition: (fn: () => void | Promise<void>) => void;
   onStatus: (msg: string | null) => void;
   onError: (msg: string | null) => void;
-  onSuccess: () => void;
+  onSuccess: (draft: { draftId: string; body: string }) => void;
 }) {
   return (
     <button
@@ -510,9 +535,11 @@ function PrepareDraftButton({
         startTransition(async () => {
           const res = await prepareMessageDraftForSubmission(submissionId);
           if (!res.ok) onError(res.error);
-          else {
-            onStatus("Antwortentwurf gespeichert");
-            onSuccess();
+          else if (res.draftId && res.body) {
+            onSuccess({ draftId: res.draftId, body: res.body });
+            onStatus("Antwortentwurf erstellt");
+          } else {
+            onError("Der Entwurf konnte nicht geladen werden. Bitte erneut versuchen.");
           }
         });
       }}

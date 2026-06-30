@@ -1,6 +1,7 @@
 import "server-only";
 
 import { formatJournalSnippetsForPrompt, searchJournalForCommandAi } from "@/lib/command-ai/journal-rag";
+import { isLightweightUserMessage } from "@/lib/command-ai/message-weight";
 import type {
   CommandAiAudience,
   CommandAiChatContext,
@@ -15,6 +16,40 @@ import { getOpenTaskCountForSubmission } from "@/lib/queries/inbox";
 const MAX_PHOTOS_FOR_VISION = 4;
 const NOTES_EXCERPT = 600;
 
+function emptyJournalBlock() {
+  return {
+    journalSnippets: [] as Awaited<ReturnType<typeof searchJournalForCommandAi>>,
+    journalPromptBlock: "Keine passenden Journal-Artikel (Kurznachricht).",
+  };
+}
+
+function buildLightweightCaseRichContext(
+  input: {
+    context: CommandAiChatContext;
+    audience: CommandAiAudience;
+  }
+): CommandAiRichContext {
+  const { context, audience } = input;
+  const activeCase = context.activeCase;
+  const status = normalizePracticeStatus(activeCase?.practiceStatus ?? null);
+  const { journalSnippets, journalPromptBlock } = emptyJournalBlock();
+
+  return {
+    ...context,
+    audience,
+    patientNotesExcerpt: null,
+    practiceStatus: status,
+    practiceStatusLabel: status ? practiceStatusLabel(status) : null,
+    photoCount: activeCase?.photoCount ?? 0,
+    photoUrls: [],
+    openTaskCount: null,
+    draftPreview: null,
+    outboundSummary: null,
+    journalSnippets,
+    journalPromptBlock,
+  };
+}
+
 export async function buildRichCommandAiContext(input: {
   workspaceId: string;
   context: CommandAiChatContext;
@@ -23,8 +58,27 @@ export async function buildRichCommandAiContext(input: {
 }): Promise<CommandAiRichContext> {
   const { context, workspaceId, userMessage } = input;
   const activeCase = context.activeCase;
+  const lightweight = isLightweightUserMessage(userMessage);
 
   if (!activeCase?.submissionId) {
+    if (lightweight) {
+      const { journalSnippets, journalPromptBlock } = emptyJournalBlock();
+      return {
+        ...context,
+        audience: input.audience,
+        patientNotesExcerpt: null,
+        practiceStatus: null,
+        practiceStatusLabel: null,
+        photoCount: 0,
+        photoUrls: [],
+        openTaskCount: null,
+        draftPreview: null,
+        outboundSummary: null,
+        journalSnippets,
+        journalPromptBlock,
+      };
+    }
+
     const journalSnippets = await searchJournalForCommandAi({
       workspaceId,
       query: userMessage,
@@ -44,6 +98,13 @@ export async function buildRichCommandAiContext(input: {
       journalSnippets,
       journalPromptBlock: formatJournalSnippetsForPrompt(journalSnippets),
     };
+  }
+
+  if (lightweight) {
+    return buildLightweightCaseRichContext({
+      context,
+      audience: input.audience,
+    });
   }
 
   const submissionId = activeCase.submissionId;

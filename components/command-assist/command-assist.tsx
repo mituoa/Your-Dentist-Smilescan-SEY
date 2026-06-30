@@ -205,7 +205,7 @@ function ChatBubble({
           isUser ? "yd-command-chat__bubble--user" : "yd-command-chat__bubble--assistant"
         )}
       >
-        {isPending ? (
+        {isPending && !message.content?.trim() ? (
           <span className="yd-command-chat__typing" aria-live="polite">
             <span />
             <span />
@@ -680,6 +680,13 @@ export function CommandAssist() {
             sessionId,
             handlers: {
               onSession: (id) => setSessionId(id),
+              onStatus: (phase) => {
+                if (phase === "preparing") {
+                  setStatusHint("Antwort wird vorbereitet …");
+                } else {
+                  setStatusHint(null);
+                }
+              },
               onDelta: (piece) => {
                 setMessages((prev) =>
                   prev.map((m) =>

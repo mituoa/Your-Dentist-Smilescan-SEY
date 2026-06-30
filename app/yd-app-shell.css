@@ -271,50 +271,26 @@ html[data-yd-workspace-modal="true"] .yd-command-assist-fab-host {
 }
 
 html[data-yd-workspace-modal="true"] .yd-medical-form-overlay {
-  z-index: 260;
+  z-index: 290;
 }
 
-html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
-  z-index: 285;
-  pointer-events: auto;
-  left: 0.75rem !important;
-  right: 0.75rem !important;
-  width: auto !important;
-  max-width: none !important;
-  bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + var(--yd-command-assist-float-gap, 0.875rem)) !important;
-  max-height: min(
-    72dvh,
-    calc(
-      100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - var(--yd-command-assist-float-gap, 0.875rem) -
-        max(0.5rem, env(safe-area-inset-top, 0px))
-    )
-  ) !important;
-  border-radius: 1.25rem !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow:
-    0 24px 56px rgba(15, 35, 58, 0.16),
-    0 8px 20px rgba(15, 35, 58, 0.08) !important;
+/* Workspace-Modal offen: KI-Panel schließen/ausblenden — sonst verdeckt es Aufgabe/Nachricht-Formulare */
+html[data-yd-workspace-modal="true"] .yd-command-assist-sheet,
+html[data-yd-workspace-modal="true"] .yd-command-assist-backdrop {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(10px) scale(0.98);
+  transition:
+    opacity 160ms ease,
+    visibility 160ms ease,
+    transform 160ms ease;
 }
 
 @media (min-width: 768px) {
-  html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
-    left: auto !important;
-    right: max(0.625rem, env(safe-area-inset-right, 0px)) !important;
-    width: min(calc(100vw - 1.25rem), 24rem) !important;
-    max-width: 24rem !important;
-    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.25rem) !important;
-    max-height: min(72dvh, calc(100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - 4.5rem)) !important;
-    border-radius: 1rem !important;
-    border: 1px solid #e8ecf2 !important;
+  html[data-yd-workspace-modal="true"] .yd-medical-form-overlay {
+    z-index: 290;
   }
-}
-
-html[data-yd-workspace-modal="true"] .yd-command-assist-backdrop {
-  z-index: 279;
-  pointer-events: none;
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .yd-command-sheet__head {

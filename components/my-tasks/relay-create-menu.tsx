@@ -124,9 +124,10 @@ export function RelayCreateMenu({
     assist?.openTaskModal();
   };
 
-  const openMessage = async () => {
-    await ensureMembers();
+  const openMessage = () => {
+    assist?.setCommandOpen(false);
     setMessageOpen(true);
+    void ensureMembers();
   };
 
   const handleMessageClose = () => {

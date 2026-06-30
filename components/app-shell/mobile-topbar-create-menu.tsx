@@ -103,9 +103,10 @@ function MobileAtlasCreateMenu({
 
   const openCase = () => setCaseOpen(true);
   const openTask = () => assist?.openTaskModal();
-  const openMessage = async () => {
-    await ensureMembers();
+  const openMessage = () => {
+    assist?.setCommandOpen(false);
     setMessageOpen(true);
+    void ensureMembers();
   };
 
   return (

@@ -1,16 +1,24 @@
+/* Vorschau: natives Document-Scrolling — kein verschachtelter Scroll-Container (iOS-safe). */
+html:has(.yd-lp-preview-shell),
+body:has(.yd-lp-preview-shell) {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: clip;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .yd-lp-preview-shell {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .yd-lp-preview-shell__content {
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .yd-lp-preview-banner {
@@ -22,6 +30,13 @@
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+.yd-lp-preview-shell__scale {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
 }
 
 .yd-lp-preview-banner__inner {

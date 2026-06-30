@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
+import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ export function MedicalFormShell({
 }: MedicalFormShellProps) {
   const [mounted, setMounted] = React.useState(false);
   const titleId = React.useId();
+  const assist = useAssistDispatchOptional();
 
   React.useEffect(() => {
     setMounted(true);
@@ -52,6 +54,7 @@ export function MedicalFormShell({
     html.style.overflow = "hidden";
     if (overlayVariant === "workspace") {
       html.setAttribute("data-yd-workspace-modal", "true");
+      assist?.setCommandOpen(false);
     }
     return () => {
       html.style.overflow = prev;
@@ -59,7 +62,7 @@ export function MedicalFormShell({
         html.removeAttribute("data-yd-workspace-modal");
       }
     };
-  }, [overlayVariant]);
+  }, [overlayVariant, assist]);
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
