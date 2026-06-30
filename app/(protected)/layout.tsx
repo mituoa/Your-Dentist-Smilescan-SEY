@@ -6,42 +6,20 @@ import { YdAwakenBootstrap } from "@/components/ambient/yd-awaken-bootstrap";
 import { YdWorkspaceAwakening } from "@/components/ambient/yd-workspace-awakening";
 import { requireUser, requireApprovedWorkspace } from "@/lib/auth-helpers";
 import { buildNavAmbientPreviews } from "@/lib/ambient/build-nav-ambient-previews";
-import { getInboxSubmissions } from "@/lib/queries/inbox";
-import { getOpenTasks } from "@/lib/queries/dashboard";
-import { listJournalForWorkspace } from "@/lib/queries/journal";
 import { Sidebar } from "@/components/app-shell/sidebar";
-import { MobileNavProvider,
+import {
+  MobileNavProvider,
   MobileSidebarFrame,
 } from "@/components/app-shell/mobile-nav";
 import { MobileScrollFoundation } from "@/components/app-shell/mobile-scroll-foundation";
-import { WorkspaceIntegratedHeaderBridge } from "@/components/app-shell/workspace-integrated-header-bridge";
+import { ProtectedLayoutHeavyBridge } from "@/components/app-shell/protected-layout-heavy-bridge";
 import { ProtectedTopbar } from "@/components/app-shell/protected-topbar";
-import { WorkspaceMobileShortcutsBar } from "@/components/workspace/workspace-mobile-shortcuts-bar";
+import { WorkspaceMobileShortcuts } from "@/components/workspace/workspace-mobile-shortcuts";
 import { cockpitDoctorLabel } from "@/lib/format-doctor-display-name";
 import { countUnseenInboxSubmissions } from "@/lib/queries/inbox";
-import { buildTrackerHeaderSummary } from "@/lib/inbox/tracker-header-summary";
-import { buildDashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
-import type { DashboardHeaderSummary } from "@/lib/dashboard/dashboard-header-summary";
-import { buildRelayPracticeSnapshot } from "@/lib/relay/build-relay-practice-snapshot";
-import { buildRelayHeaderSummary } from "@/lib/relay/relay-header-summary";
-import type { RelayHeaderSummary } from "@/lib/relay/relay-header-summary";
-import { getMyTasks } from "@/lib/queries/my-tasks";
-import { getMessageDraftStatusMapForSubmissions } from "@/lib/queries/message-drafts";
-import { getRelayConversationsForUser } from "@/lib/queries/relay-messages";
-import { getAssignableWorkspaceMembers } from "@/lib/queries/team-members";
-import {
-  countPreparedAwaitingReview,
-  countTasksNeedingDecision,
-} from "@/lib/command-ai/submission-preparation";
-import {
-  getRecentSubmissionsPreview,
-  getTotalUnseenSubmissions,
-} from "@/lib/queries/dashboard";
-import type { EnrichedSubmissionListItem } from "@/lib/inbox/tracker-inbox-logic";
 import { countMyOpenTasks } from "@/lib/queries/my-tasks";
 import { parseThemeCookie, THEME_COOKIE_NAME } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/server";
-import { CommandWorkspaceHydration } from "@/components/command-ai/command-workspace-hydration";
 import { AssistShell } from "@/components/command-assist/assist-shell";
 import { HcAppCanvas } from "@/components/design/hc-app-canvas";
 import { YD } from "@/lib/design/yd-design-tokens";
@@ -62,68 +40,39 @@ export default async function ProtectedLayout({
 
   if (!workspace) redirect("/login?error=workspace_missing");
 
-  let myTasksCount = 0;
-  let myTasksOverdueCount = 0;
-  let inboxCount: number | undefined;
-  type ProfileHeader = {
-    photo_url: string | null;
-    display_name: string | null;
-    practice_phone: string | null;
-    appointment_link: string | null;
-  };
-  const headerState = { profileData: null as ProfileHeader | null };
+  const workspaceId = workspace.workspace_id;
 
-  await Promise.all([
+  const [taskCounts, unseenRes, profileRes] = await Promise.all([
+    countMyOpenTasks(user.id, workspaceId, role).catch(() => ({
+      total: 0,
+      overdue: 0,
+    })),
+    countUnseenInboxSubmissions(workspaceId).catch(() => ({ ok: false as const })),
     (async () => {
-      if (!workspace) return;
-      try {
-        const counts = await countMyOpenTasks(
-          user.id,
-          workspace.workspace_id,
-          role
-        );
-        myTasksCount = counts.total;
-        myTasksOverdueCount = counts.overdue;
-      } catch (e) {
-        console.error("[ProtectedLayout] countMyOpenTasks failed:", e);
-      }
-    })(),
-    (async () => {
-      if (!workspace) return;
-      try {
-        const unseen = await countUnseenInboxSubmissions(workspace.workspace_id);
-        if (unseen.ok && unseen.count > 0) {
-          inboxCount = unseen.count;
-        }
-      } catch (e) {
-        console.error("[ProtectedLayout] inbox unseen count failed:", e);
-      }
-    })(),
-    (async () => {
-      if (!workspace) return;
       try {
         const supabase = await createClient();
-        const res = await supabase
+        return await supabase
           .from("profile_data")
           .select("photo_url, display_name, practice_phone, appointment_link")
-          .eq("workspace_id", workspace.workspace_id)
+          .eq("workspace_id", workspaceId)
           .maybeSingle();
-        headerState.profileData = res.data as ProfileHeader | null;
-        if (res.error) {
-          console.error("[ProtectedLayout] profile_data query:", res.error);
-        }
-      } catch (e) {
-        console.error("[ProtectedLayout] profile fetch failed:", e);
+      } catch {
+        return { data: null, error: null };
       }
     })(),
   ]);
 
-  const profileData = headerState.profileData;
+  const myTasksCount = taskCounts.total;
+  const myTasksOverdueCount = taskCounts.overdue;
+  const inboxCount =
+    unseenRes.ok && unseenRes.count > 0 ? unseenRes.count : undefined;
+
+  const profileData = profileRes.data;
   const doctorLabel = cockpitDoctorLabel(
     profileData?.display_name || user.email?.split("@")[0] || workspaceName
   );
 
-  let navAmbient = buildNavAmbientPreviews({
+  const navAmbient = buildNavAmbientPreviews({
     inboxItems: [],
     openTasks: [],
     tasksOverdue: myTasksOverdueCount,
@@ -131,111 +80,10 @@ export default async function ProtectedLayout({
     role,
   });
 
-  let commandPatients: {
-    id: string;
-    patient_name: string | null;
-    patient_notes: string | null;
-  }[] = [];
-  let trackerHeaderSummary = null;
-  let dashboardHeaderSummary: DashboardHeaderSummary | null = null;
-  let relayHeaderSummary: RelayHeaderSummary | null = null;
-
-  if (workspace) {
-    const isDoctor = role === "doctor";
-    const [inboxRes, tasksRes, journals, relayOpen, relayPending, relayConversations, relayMembers] =
-      await Promise.all([
-      getInboxSubmissions(workspace.workspace_id),
-      getOpenTasks(workspace.workspace_id),
-      isDoctor ? listJournalForWorkspace(workspace.workspace_id) : Promise.resolve([]),
-      getMyTasks(user.id, workspace.workspace_id, isDoctor, "open"),
-      getMyTasks(user.id, workspace.workspace_id, isDoctor, "pending_review"),
-      getRelayConversationsForUser(workspace.workspace_id, user.id),
-      getAssignableWorkspaceMembers(workspace.workspace_id, user.id),
-    ]);
-
-    if (inboxRes.ok) {
-      commandPatients = inboxRes.items.map((item) => ({
-        id: item.id,
-        patient_name: item.patient_name,
-        patient_notes: item.patient_notes,
-      }));
-      trackerHeaderSummary = buildTrackerHeaderSummary(
-        inboxRes.items as EnrichedSubmissionListItem[]
-      );
-    }
-
-    if (role === "doctor") {
-      const [unseenRes, previewRes] = await Promise.all([
-        getTotalUnseenSubmissions(workspace.workspace_id),
-        getRecentSubmissionsPreview(workspace.workspace_id),
-      ]);
-      const unseenCount = unseenRes.ok ? unseenRes.count : 0;
-      const previewRows = previewRes.ok ? previewRes.rows : [];
-      const preparedAwaitingCount = countPreparedAwaitingReview(
-        previewRows.map((row) => ({
-          id: row.id,
-          patient_name: row.patient_name,
-          patient_notes: row.patient_notes,
-          seen_at: row.seen_at,
-          photo_count: 0,
-        }))
-      );
-      const tasksNeedingDecision = tasksRes.ok
-        ? countTasksNeedingDecision(tasksRes.tasks)
-        : 0;
-
-      dashboardHeaderSummary = buildDashboardHeaderSummary({
-        unseenCount,
-        preparedAwaitingCount,
-        tasksNeedingDecision,
-        preparedCasesCount: previewRows.length,
-      });
-    }
-
-    const journalDrafts = journals.filter((entry) => entry.status === "draft");
-    const relaySubmissionIds = [
-      ...new Set(
-        [...relayOpen, ...relayPending]
-          .map((t) => t.submission_id)
-          .filter((id): id is string => Boolean(id))
-      ),
-    ];
-    const relayDraftMap = await getMessageDraftStatusMapForSubmissions(
-      workspace.workspace_id,
-      relaySubmissionIds
-    );
-    const relaySnapshot = buildRelayPracticeSnapshot({
-      open: relayOpen,
-      pending: relayPending,
-      members: relayMembers,
-      draftBySubmissionId: relayDraftMap.available
-        ? relayDraftMap.statusBySubmissionId
-        : {},
-      conversations: relayConversations,
-      journalDrafts,
-      isDoctor,
-      userId: user.id,
-      basePath: "/relay",
-    });
-    relayHeaderSummary = buildRelayHeaderSummary(relaySnapshot);
-
-    navAmbient = buildNavAmbientPreviews({
-      inboxItems: inboxRes.ok ? inboxRes.items : [],
-      inboxUnseen: inboxCount,
-      openTasks: tasksRes.ok ? tasksRes.tasks : [],
-      tasksOverdue: myTasksOverdueCount,
-      journalEntries: journals,
-      role,
-    });
-  }
+  const relayBadge = myTasksCount > 0 ? myTasksCount : undefined;
 
   return (
     <AssistShell>
-      <CommandWorkspaceHydration
-        patients={commandPatients}
-        practicePhone={profileData?.practice_phone ?? null}
-        appointmentUrl={profileData?.appointment_link ?? null}
-      />
       <YdWorkspaceAwakening>
         <MobileNavProvider>
           <MobileScrollFoundation>
@@ -264,7 +112,7 @@ export default async function ProtectedLayout({
                   <ProtectedTopbar
                     email={user.email || ""}
                     workspaceName={workspaceName}
-                    workspaceId={workspace.workspace_id}
+                    workspaceId={workspaceId}
                     role={role}
                     avatarUrl={profileData?.photo_url ?? null}
                     displayName={profileData?.display_name ?? null}
@@ -273,27 +121,32 @@ export default async function ProtectedLayout({
 
                   <main className="yd-workspace-main relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] p-2 md:p-5 md:pb-6">
                     <HcAppCanvas>
-                      <WorkspaceIntegratedHeaderBridge
+                      <ProtectedLayoutHeavyBridge
+                        workspaceId={workspaceId}
+                        userId={user.id}
+                        role={role}
+                        inboxCount={inboxCount}
+                        tasksOverdue={myTasksOverdueCount}
+                        practicePhone={profileData?.practice_phone ?? null}
+                        appointmentUrl={profileData?.appointment_link ?? null}
                         email={user.email || ""}
                         workspaceName={workspaceName}
-                        workspaceId={workspace.workspace_id}
-                        role={role}
                         initialTheme={theme}
                         displayName={doctorLabel}
                         avatarUrl={profileData?.photo_url ?? null}
-                        inboxCount={inboxCount}
-                        trackerHeaderSummary={trackerHeaderSummary}
-                        dashboardHeaderSummary={dashboardHeaderSummary}
-                        relayHeaderSummary={relayHeaderSummary}
                       />
                       {children}
                     </HcAppCanvas>
                   </main>
                 </div>
               </div>
-              <Suspense fallback={null}>
-                <WorkspaceMobileShortcutsBar />
-              </Suspense>
+
+              <WorkspaceMobileShortcuts
+                role={role}
+                inboxBadge={inboxCount}
+                relayBadge={relayBadge}
+                relayBadgeUrgent={myTasksOverdueCount > 0}
+              />
             </div>
           </MobileScrollFoundation>
         </MobileNavProvider>

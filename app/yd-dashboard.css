@@ -285,9 +285,20 @@
   overflow: hidden;
 }
 
+/* Dashboard — einheitliches Praxis-Blau (Kalender-Familie) */
+.yd-dashboard {
+  --yd-dash-blue: #1a4f9c;
+  --yd-dash-blue-deep: #163d7a;
+  --yd-dash-blue-mid: rgba(26, 79, 156, 0.55);
+  --yd-dash-blue-soft: rgba(26, 79, 156, 0.28);
+  --yd-dash-blue-track: rgba(26, 79, 156, 0.12);
+  --yd-dash-blue-gradient: linear-gradient(180deg, #1a4f9c 0%, #163d7a 100%);
+  --yd-dash-blue-gradient-h: linear-gradient(90deg, #1a4f9c 0%, rgba(26, 79, 156, 0.5) 100%);
+}
+
 .yd-dashboard .yd-dash-kpi-card__icon {
   color: #ffffff;
-  background: linear-gradient(160deg, #4a8fd4 0%, #1a4f9c 52%, #163d7a 100%);
+  background: var(--yd-dash-blue-gradient);
   border: none;
   box-shadow:
     0 2px 8px rgba(22, 61, 122, 0.26),
@@ -772,7 +783,7 @@
 }
 
 .yd-dashboard .yd-dash-primary-action {
-  background: linear-gradient(168deg, #2a5f9e 0%, #1a4f9c 48%, #163d7a 100%);
+  background: var(--yd-dash-blue-gradient);
   box-shadow: 0 6px 20px rgba(22, 61, 122, 0.28);
 }
 
@@ -1281,7 +1292,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 }
 
 .yd-dash-state-chart__col--quiet .yd-dash-state-chart__bar {
-  background: linear-gradient(180deg, rgba(26, 79, 156, 0.22) 0%, rgba(26, 79, 156, 0.08) 100%);
+  background: linear-gradient(180deg, var(--yd-dash-blue-soft) 0%, rgba(26, 79, 156, 0.1) 100%);
 }
 
 @media (hover: hover) {
@@ -1303,7 +1314,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   display: block;
   width: min(2rem, 70%);
   border-radius: 999px 999px 10px 10px;
-  background: linear-gradient(180deg, #1a4f9c 0%, rgba(26, 79, 156, 0.38) 100%);
+  background: var(--yd-dash-blue-gradient);
   min-height: 0.5rem;
   transition: height 200ms ease, filter 160ms ease;
   filter: blur(0);
@@ -1368,6 +1379,15 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.02em;
+}
+
+.yd-dash-premium-calendar__today-chip {
+  margin: 0;
+  color: var(--yd-dash-blue, #1a4f9c);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .yd-dash-premium-calendar__month-nav {
@@ -1465,7 +1485,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
 }
 
 .yd-dash-premium-calendar__cell--today .yd-dash-premium-calendar__day-num {
-  background: linear-gradient(180deg, #2563eb 0%, #1a4f9c 100%);
+  background: var(--yd-dash-blue-gradient, linear-gradient(180deg, #1a4f9c 0%, #163d7a 100%));
   color: #fff;
   font-weight: 600;
   box-shadow: 0 4px 14px rgba(26, 79, 156, 0.28);
@@ -1477,7 +1497,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   width: 0.3125rem;
   height: 0.3125rem;
   border-radius: 999px;
-  background: #1a4f9c;
+  background: var(--yd-dash-blue, #1a4f9c);
 }
 
 .yd-dash-calendar-agenda {
@@ -1490,7 +1510,8 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   margin-bottom: 0.5rem;
 }
 
-.yd-dash-premium-calendar--compact .yd-dash-premium-calendar__subtitle {
+.yd-dash-premium-calendar--compact .yd-dash-premium-calendar__subtitle,
+.yd-dash-premium-calendar--compact .yd-dash-premium-calendar__today-chip {
   display: none;
 }
 
@@ -1728,7 +1749,7 @@ main:has(.yd-dashboard--bento) .yd-dash-header-premium__toolbar {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1a4f9c 0%, rgba(26, 79, 156, 0.5) 100%);
+  background: var(--yd-dash-blue-gradient-h, linear-gradient(90deg, #1a4f9c 0%, rgba(26, 79, 156, 0.5) 100%));
   min-width: 1.5rem;
   transition: width 200ms ease;
 }

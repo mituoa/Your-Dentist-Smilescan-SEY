@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { TrackerMobileInboxRow } from "@/components/inbox/tracker-mobile-inbox-row";
+import { TrackerInboxListRow } from "@/components/inbox/tracker-inbox-list-row";
 import { useTrackerInboxRead } from "@/components/inbox/tracker-inbox-read-context";
 import {
   TRACKER_FILTER_CHIPS,
@@ -26,7 +26,7 @@ function caseHref(id: string, q?: string | null): string {
   return q ? `/inbox/${id}?q=${encodeURIComponent(q)}` : `/inbox/${id}`;
 }
 
-/** Mobile Tracker-Liste — Navigation nur per Link (kein pointerDown-Overlay). */
+/** Mobile Tracker-Liste — dieselbe flache Zeile wie Desktop. */
 export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
   const pathname = usePathname() || "";
   const searchParams = useSearchParams();
@@ -111,7 +111,7 @@ export function TrackerMobileInbox({ items }: TrackerMobileInboxProps) {
 
             return (
               <li key={item.id} className="yd-tracker-mobile-inbox__item">
-                <TrackerMobileInboxRow
+                <TrackerInboxListRow
                   item={item}
                   href={href}
                   isActive={isActive}

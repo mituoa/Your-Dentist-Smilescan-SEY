@@ -5,6 +5,7 @@ import Image from "next/image";
 import { CheckCircle2, ChevronDown, MinusCircle, ShieldCheck, Sparkles } from "lucide-react";
 
 import { usePracticeOverride } from "@/lib/marketing/landingpages/use-practice-override";
+import { useLandingPreviewContent } from "@/lib/marketing/landingpages/landing-preview-content";
 
 /**
  * Vorlage "Prophylaxe" — eigenständiger Aufbau, eigene Farbidentität (Emerald/Teal,
@@ -126,6 +127,13 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export function YdProphylaxeLanding() {
   const PRACTICE = usePracticeOverride();
+  const content = useLandingPreviewContent({
+    eyebrow: `Prophylaxe · ${PRACTICE.city}`,
+    headline: "Vorsorgen statt nachsorgen.",
+    subheadline:
+      "Professionelle Zahnreinigung entfernt Beläge, die beim Putzen zuhause zurückbleiben. Veränderungen am Zahnfleisch oder Zahnschmelz fallen früh auf, oft bevor sie spürbar werden.",
+    ctaLabel: "Termin zur Prophylaxe",
+  });
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {
@@ -179,18 +187,12 @@ export function YdProphylaxeLanding() {
           </div>
 
           <div>
-            <span className="yd-pr-eyebrow">Prophylaxe · {PRACTICE.city}</span>
-            <h1 className="yd-pr-hero-title">
-              Vorsorgen statt <em>nachsorgen.</em>
-            </h1>
-            <p className="yd-pr-hero-lead">
-              Professionelle Zahnreinigung entfernt Beläge, die beim Putzen zuhause
-              zurückbleiben. Veränderungen am Zahnfleisch oder Zahnschmelz fallen früh auf,
-              oft bevor sie spürbar werden.
-            </p>
+            <span className="yd-pr-eyebrow">{content.eyebrow}</span>
+            <h1 className="yd-pr-hero-title">{content.headline}</h1>
+            <p className="yd-pr-hero-lead">{content.subheadline}</p>
             <div className="yd-pr-hero-ctas">
               <a href={PRACTICE.contactUrl} className="yd-pr-btn yd-pr-btn--primary">
-                Termin zur Prophylaxe
+                {content.ctaLabel}
               </a>
               <button type="button" className="yd-pr-btn yd-pr-btn--ghost" onClick={() => scrollToId("ablauf")}>
                 Ablauf ansehen

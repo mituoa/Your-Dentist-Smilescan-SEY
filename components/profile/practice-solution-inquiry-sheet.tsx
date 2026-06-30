@@ -7,8 +7,8 @@ import { Check, ChevronRight } from "lucide-react";
 
 import { MedicalFormShell } from "@/components/forms/medical-form-shell";
 import { MedicalFormFooterActions, MedicalFormTextarea } from "@/components/forms/medical-form-ui";
+import { buildStaticPreviewUrl, hasStaticTemplate } from "@/lib/practice-solutions/landing-configs/static-preview";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
-import { LandingInquiryLivePreview } from "@/components/profile/landing-inquiry-live-preview";
 import { submitPracticeSolutionRequest } from "@/app/(protected)/profile/solutions/actions";
 import {
   getPracticeSolution,
@@ -141,15 +141,10 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
       : 0;
 
   const canSubmit = profileComplete && summaryVisible && isLandingConfigComplete(config, fieldValues);
-
-  const livePreview = (
-    <LandingInquiryLivePreview
-      variant="studio"
-      config={config}
-      fieldValues={fieldValues}
-      profile={context}
-    />
-  );
+  const previewUrl =
+    summaryVisible && hasStaticTemplate(config.id)
+      ? buildStaticPreviewUrl(config.id, context, config, fieldValues)
+      : null;
 
   React.useEffect(() => {
     return () => {
@@ -287,16 +282,15 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
             <Check className="h-5 w-5" strokeWidth={2.25} />
           </div>
           <YourDentistBrandLockup size="md" centered priority />
-          <h2 className="yd-lp-briefing-success__title">Ihre Anfrage wurde übermittelt</h2>
+          <h2 className="yd-lp-briefing-success__title">Ihre Konfiguration wurde übermittelt</h2>
           <div className="yd-lp-briefing-success__next">
             <p className="yd-lp-briefing-success__next-label">So geht es weiter</p>
             <ol className="yd-lp-briefing-success__steps">
               <li className="yd-lp-briefing-success__step">
-                In den nächsten Tagen erhalten Sie Ihre individuelle Landingpage zur Freigabe.
+                Wir prüfen Ihre Angaben und melden uns mit einem Entwurf, der zu Ihrer Praxis passt.
               </li>
               <li className="yd-lp-briefing-success__step">
-                Sobald Sie freigeben, schalten wir sie für Ihre Praxis — mit messbarer
-                Nachverfolgung Ihrer Anfragen.
+                Sie geben frei, wenn alles stimmig ist — die Vorlage dient nur als Ausgangspunkt.
               </li>
             </ol>
           </div>
@@ -322,8 +316,8 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
             onCancel={onClose}
             cancelDisabled={busy}
             cancelLabel="Abbrechen"
-            primaryLabel="Projekt beauftragen"
-            primaryPendingLabel="Wird beauftragt …"
+            primaryLabel="Konfiguration senden"
+            primaryPendingLabel="Wird gesendet …"
             onPrimary={submit}
             primaryDisabled={!canSubmit}
             isPending={busy}
@@ -344,11 +338,6 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
             doctorLine={doctorLine}
             city={city}
           />
-
-          <details className="yd-lp-briefing-mobile-preview">
-            <summary>Live-Vorschau anzeigen</summary>
-            <div className="yd-lp-briefing-mobile-preview__frame">{livePreview}</div>
-          </details>
 
           {submitError ? (
             <p className="yd-medical-form-alert" role="alert">
@@ -412,9 +401,25 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
           ) : (
             <div ref={summaryRef} className="yd-lp-briefing-summary-block">
               <h2 className="yd-lp-briefing-summary-block__title">
-                Zusammenfassung Ihres Briefings
+                Zusammenfassung Ihrer Konfiguration
               </h2>
               <BriefingSummaryChecklist items={summaryItems} />
+              {previewUrl ? (
+                <div className="yd-lp-briefing-summary-block__preview">
+                  <p className="yd-lp-briefing-summary-block__preview-lead">
+                    Optional: Vorschau mit Ihren Stammdaten und Antworten — als Ausgangspunkt, nicht
+                    als fertige Seite.
+                  </p>
+                  <Link
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="yd-auth-btn-secondary yd-lp-briefing-summary-block__preview-btn"
+                  >
+                    Vorschau mit meinen Angaben öffnen
+                  </Link>
+                </div>
+              ) : null}
               <button
                 type="button"
                 className="yd-lp-briefing-summary-block__edit"
@@ -433,10 +438,6 @@ function LandingBriefingStudio({ target, context, onClose }: StudioProps) {
             <input type="text" name="website" tabIndex={-1} autoComplete="off" />
           </label>
         </div>
-
-        <aside className="yd-lp-briefing-studio__preview" aria-label="Live-Vorschau">
-          {livePreview}
-        </aside>
       </div>
     </MedicalFormShell>
   );

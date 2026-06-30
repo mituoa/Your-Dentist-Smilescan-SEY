@@ -47,6 +47,19 @@ export function YdWorkspaceAwakening({ children }: YdWorkspaceAwakeningProps) {
       return;
     }
 
+    const isMobile =
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches;
+
+    if (isMobile) {
+      try {
+        sessionStorage.removeItem(YD_AWAKEN_SESSION_KEY);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+
     let should = false;
     try {
       should = sessionStorage.getItem(YD_AWAKEN_SESSION_KEY) === "1";

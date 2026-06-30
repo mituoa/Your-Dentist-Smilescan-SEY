@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import {
   BookOpen,
   CalendarDays,
@@ -51,7 +49,7 @@ function MobileBottomNavItem({
   return (
     <Link
       href={href}
-      prefetch={false}
+      prefetch
       className={cn(
         "yd-mobile-bottom-nav__item yd-ambient-nav-link group relative flex min-w-0 flex-1 flex-col items-center justify-center touch-manipulation",
         active && "yd-nav-link-active yd-mobile-bottom-nav__item--active"
@@ -91,7 +89,7 @@ function MobileBottomNavItem({
   );
 }
 
-/** Bottom-Rail — 6 Module nebeneinander (Arzt), kompakt wie Desktop-Sidebar. */
+/** Bottom-Rail — sofort sichtbar, ohne Portal/Hydration-Verzögerung. */
 export function WorkspaceMobileShortcuts({
   role = "doctor",
   inboxBadge,
@@ -191,10 +189,7 @@ export function WorkspaceMobileShortcuts({
 
   const tabs = role === "doctor" ? doctorTabs : teamTabs;
 
-  const [mounted, setMounted] = useState(false);
-  useLayoutEffect(() => setMounted(true), []);
-
-  const rail = (
+  return (
     <nav
       className={cn("yd-mobile-bottom-rail md:hidden", className)}
       aria-label="Hauptnavigation"
@@ -222,8 +217,4 @@ export function WorkspaceMobileShortcuts({
       </div>
     </nav>
   );
-
-  if (!mounted) return null;
-
-  return createPortal(rail, document.body);
 }

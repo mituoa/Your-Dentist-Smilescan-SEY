@@ -364,8 +364,18 @@
     overscroll-behavior: contain;
   }
 
+  .yd-tracker-shell--mobile-list .yd-tracker-shell__inbox {
+    background: transparent;
+    border-right: none;
+  }
+
   .yd-tracker-v4-inbox-card {
     border-radius: 16px;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row,
+  .yd-tracker-mobile-inbox .yd-tracker-v4-inbox-card {
+    border-radius: 0;
   }
 
   .yd-tracker-filter-scroll {

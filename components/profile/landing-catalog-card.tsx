@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import type { LandingCategory } from "@/lib/practice-solutions/landing-page-model";
@@ -13,30 +12,18 @@ type Props = {
   onBook: (category: LandingCategory) => void;
 };
 
+/** Klick öffnet den Konfigurator — keine separate Anfrage-Schaltfläche. */
 export function LandingCatalogCard({ category, onBook }: Props) {
-  const router = useRouter();
   const [imageSrc, setImageSrc] = useState(category.image);
   const hasPreview = Boolean(category.previewHref);
-
-  const handleCardClick = () => {
-    if (category.previewHref) {
-      router.push(category.previewHref);
-      return;
-    }
-    onBook(category);
-  };
 
   return (
     <li className="yd-cl-catalog__item">
       <button
         type="button"
         className="yd-cl-catalog__card"
-        onClick={handleCardClick}
-        aria-label={
-          hasPreview
-            ? `${category.title} — Beispielvorlage ansehen`
-            : `${category.title} — anfragen`
-        }
+        onClick={() => onBook(category)}
+        aria-label={`${category.title} — Vorlage konfigurieren`}
       >
         <div className="yd-cl-catalog__preview">
           <Image
@@ -57,7 +44,7 @@ export function LandingCatalogCard({ category, onBook }: Props) {
             }}
           />
           {hasPreview ? (
-            <span className="yd-cl-catalog__preview-badge">Beispielvorlage</span>
+            <span className="yd-cl-catalog__preview-badge">Vorlage</span>
           ) : null}
         </div>
 
@@ -69,15 +56,6 @@ export function LandingCatalogCard({ category, onBook }: Props) {
           <ChevronRight className="yd-cl-catalog__chevron" aria-hidden />
         </div>
       </button>
-      {hasPreview ? (
-        <button
-          type="button"
-          className="yd-cl-catalog__inquire"
-          onClick={() => onBook(category)}
-        >
-          Anfragen
-        </button>
-      ) : null}
     </li>
   );
 }

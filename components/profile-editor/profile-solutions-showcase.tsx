@@ -59,7 +59,7 @@ export function ProfileSolutionsShowcase({ inquiryContext }: Props) {
         </ul>
 
         <footer className="yd-pe-growth-preview__foot">
-          <Link href="/profile/solutions" className="yd-pe-growth-preview__all-link">
+          <Link href="/profile/editor#praxis-loesungen" className="yd-pe-growth-preview__all-link">
             Alle anzeigen
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>

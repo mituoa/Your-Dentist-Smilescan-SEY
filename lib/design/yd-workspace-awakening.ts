@@ -5,8 +5,8 @@ export const YD_AWAKEN_SESSION_KEY = "yd-workspace-awaken";
 /** Stagger between content layers (ms) — calm OS pacing */
 export const YD_STAGGER_MS = [0, 80, 160, 240, 320, 400, 480, 560] as const;
 
-/** Total awakening window before interactive settle */
-export const YD_AWAKEN_DURATION_MS = 4400;
+/** Total awakening window before interactive settle — kurz, kein Login-Hänger */
+export const YD_AWAKEN_DURATION_MS = 900;
 
 export function pathWithWorkspaceEnter(path: string): string {
   if (path.includes(YD_ENTER_QUERY)) return path;

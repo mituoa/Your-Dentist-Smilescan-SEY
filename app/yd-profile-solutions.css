@@ -3291,6 +3291,27 @@
   color: #0c1929;
 }
 
+.yd-lp-briefing-summary-block__preview {
+  margin: 1.25rem 0 0;
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  background: rgba(248, 251, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.yd-lp-briefing-summary-block__preview-lead {
+  margin: 0 0 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #5e7389;
+}
+
+.yd-lp-briefing-summary-block__preview-btn {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+}
+
 .yd-lp-briefing-summary-block__edit {
   margin-top: 1rem;
   padding: 0;

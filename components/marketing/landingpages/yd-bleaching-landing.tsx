@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronDown, Droplets, Home, Sparkles, Sun } from "lucide-react";
 
 import { usePracticeOverride } from "@/lib/marketing/landingpages/use-practice-override";
+import { useLandingPreviewContent } from "@/lib/marketing/landingpages/landing-preview-content";
 
 /**
  * Vorlage "Bleaching" — eigenständiger Aufbau, eigene Farbidentität (Champagne-Gold/
@@ -162,6 +163,13 @@ function CompareSlider() {
 
 export function YdBleachingLanding() {
   const PRACTICE = usePracticeOverride();
+  const content = useLandingPreviewContent({
+    eyebrow: `Bleaching · ${PRACTICE.city}`,
+    headline: "Ein helleres Lächeln, fachlich begleitet.",
+    subheadline:
+      "Professionelles Bleaching hellt die natürliche Zahnfarbe sichtbar auf. Wir prüfen vorab, was zu Ihren Zähnen passt, und begleiten die Behandlung von Anfang bis Ende.",
+    ctaLabel: "Bleaching-Beratung vereinbaren",
+  });
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {
@@ -185,7 +193,7 @@ export function YdBleachingLanding() {
               {PRACTICE.phoneDisplay}
             </a>
             <a href={PRACTICE.contactUrl} className="yd-bl-btn yd-bl-btn--primary yd-bl-btn--sm">
-              Beratung anfragen
+              {content.ctaLabel}
             </a>
           </div>
         </div>
@@ -195,17 +203,12 @@ export function YdBleachingLanding() {
       <section className="yd-bl-hero">
         <div className="yd-bl-container yd-bl-hero-grid">
           <div>
-            <span className="yd-bl-eyebrow">Bleaching · {PRACTICE.city}</span>
-            <h1 className="yd-bl-hero-title">
-              Ein <em>helleres</em> Lächeln, fachlich begleitet.
-            </h1>
-            <p className="yd-bl-hero-lead">
-              Professionelles Bleaching hellt die natürliche Zahnfarbe sichtbar auf. Wir prüfen
-              vorab, was zu Ihren Zähnen passt, und begleiten die Behandlung von Anfang bis Ende.
-            </p>
+            <span className="yd-bl-eyebrow">{content.eyebrow}</span>
+            <h1 className="yd-bl-hero-title">{content.headline}</h1>
+            <p className="yd-bl-hero-lead">{content.subheadline}</p>
             <div className="yd-bl-hero-ctas">
               <a href={PRACTICE.contactUrl} className="yd-bl-btn yd-bl-btn--primary">
-                Bleaching-Beratung vereinbaren
+                {content.ctaLabel}
               </a>
               <button type="button" className="yd-bl-btn yd-bl-btn--ghost" onClick={() => scrollToId("methoden")}>
                 Methoden ansehen

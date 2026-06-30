@@ -18,7 +18,7 @@ export type LandingCategory = {
 export const LANDING_HERO = {
   eyebrow: "Kampagnen",
   title: "Landingpages",
-  subtitle: "Individuell für Ihre Praxis.",
+  subtitle: "Vorgefertigte Vorlagen wählen, mit Ihren Praxisdaten anpassen.",
 } as const;
 
 export const LANDING_CATEGORIES: readonly LandingCategory[] = [
@@ -123,6 +123,7 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
     image: landingCatalogPreview("karriere", LANDING_IMG.karriere),
     imagePosition: "42% 28%",
     inquiryId: "individuell",
+    previewHref: "/landingpages/karriere",
   },
   {
     id: "standort",

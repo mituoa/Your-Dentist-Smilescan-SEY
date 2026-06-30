@@ -246,7 +246,7 @@
     display: none !important;
   }
 
-  /* Bottom navigation — fixiert am Viewport (portaled), über Modals erreichbar */
+  /* Bottom navigation — fixiert am Viewport, sofort im Layout-DOM */
   .yd-mobile-bottom-rail {
     position: fixed;
     z-index: 245;
@@ -1422,23 +1422,55 @@
 
   .yd-tracker-mobile-inbox__list {
     margin: 0;
-    padding: 0 max(0.625rem, env(safe-area-inset-left))
-      max(0.75rem, env(safe-area-inset-bottom)) max(0.625rem, env(safe-area-inset-right));
+    padding: 0 0 max(0.5rem, env(safe-area-inset-bottom, 0px));
     list-style: none;
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-radius: 14px;
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    background: #fff;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
   }
 
   .yd-tracker-mobile-inbox__item + .yd-tracker-mobile-inbox__item {
-    border-top: 1px solid rgba(241, 245, 249, 0.98);
+    border-top: none;
   }
 
+  .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row {
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row--active {
+    background: linear-gradient(
+      95deg,
+      rgba(224, 238, 252, 0.92) 0%,
+      rgba(241, 247, 252, 0.95) 48%,
+      rgba(255, 255, 255, 0.98) 100%
+    );
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row__tap {
+    padding-left: max(0.875rem, env(safe-area-inset-left, 0px));
+    padding-right: 0.25rem;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row__status {
+    padding-right: max(0.35rem, env(safe-area-inset-right, 0px));
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-inbox-list-row__status .yd-tracker-list-status-menu__dot {
+    display: none;
+  }
+
+  .yd-tracker-mobile-inbox .yd-tracker-list-status-menu__trigger {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  /* Legacy mobile row/card — nicht mehr in der Inbox-Liste */
   .yd-tracker-mobile-row {
     display: flex;
     align-items: stretch;

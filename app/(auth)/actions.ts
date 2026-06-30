@@ -111,7 +111,6 @@ export async function signIn(formData: FormData) {
     redirect(loginQuery(userFacingAuthError(error.message)));
   }
 
-  revalidatePath("/", "layout");
   if (inviteToken) {
     redirect(`/accept-invite?token=${encodeURIComponent(inviteToken)}`);
   }

@@ -3,14 +3,19 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { DashboardWeekStrip } from "@/components/dashboard/hc/dashboard-week-strip";
-
 const WEEKDAYS = ["MO", "DI", "MI", "DO", "FR", "SA", "SO"];
 
 type Props = {
   weeklyCounts?: number[] | null;
   compact?: boolean;
 };
+
+function localDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 function buildActivityMap(weeklyCounts: number[] | null | undefined): Map<string, number> {
   const map = new Map<string, number>();
@@ -23,7 +28,7 @@ function buildActivityMap(weeklyCounts: number[] | null | undefined): Map<string
     if (count <= 0) return;
     const d = new Date(today);
     d.setDate(today.getDate() - (weeklyCounts.length - 1 - index));
-    map.set(d.toISOString().slice(0, 10), count);
+    map.set(localDateKey(d), count);
   });
 
   return map;
@@ -32,6 +37,12 @@ function buildActivityMap(weeklyCounts: number[] | null | undefined): Map<string
 function mondayPadding(year: number, month: number): number {
   const dow = new Date(year, month, 1).getDay();
   return dow === 0 ? 6 : dow - 1;
+}
+
+function formatTodayChip(date: Date): string {
+  const weekday = date.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", "");
+  const dayMonth = date.toLocaleDateString("de-DE", { day: "numeric", month: "long" });
+  return `${weekday}, ${dayMonth}`;
 }
 
 export function DashboardPremiumCalendar({ weeklyCounts, compact = false }: Props) {
@@ -46,6 +57,9 @@ export function DashboardPremiumCalendar({ weeklyCounts, compact = false }: Prop
   );
 
   const activityMap = useMemo(() => buildActivityMap(weeklyCounts), [weeklyCounts]);
+
+  const viewingCurrentMonth =
+    view.getFullYear() === today.getFullYear() && view.getMonth() === today.getMonth();
 
   const { cells, monthLabel } = useMemo(() => {
     const year = view.getFullYear();
@@ -75,7 +89,7 @@ export function DashboardPremiumCalendar({ weeklyCounts, compact = false }: Prop
     view.getFullYear() === today.getFullYear();
 
   const activityForDay = (day: number): number => {
-    const key = new Date(view.getFullYear(), view.getMonth(), day).toISOString().slice(0, 10);
+    const key = localDateKey(new Date(view.getFullYear(), view.getMonth(), day));
     return activityMap.get(key) ?? 0;
   };
 
@@ -87,7 +101,11 @@ export function DashboardPremiumCalendar({ weeklyCounts, compact = false }: Prop
       <header className="yd-dash-premium-calendar__head">
         <div className="yd-dash-premium-calendar__title-row">
           <h2 className="yd-dash-ref-card__title">Kalender</h2>
-          <p className="yd-dash-premium-calendar__subtitle">Praxis & Termine</p>
+          {viewingCurrentMonth ? (
+            <p className="yd-dash-premium-calendar__today-chip">{formatTodayChip(today)}</p>
+          ) : (
+            <p className="yd-dash-premium-calendar__subtitle">Monatsansicht</p>
+          )}
         </div>
         <div className="yd-dash-premium-calendar__month-nav">
           <button
@@ -110,8 +128,6 @@ export function DashboardPremiumCalendar({ weeklyCounts, compact = false }: Prop
         </div>
       </header>
 
-      <DashboardWeekStrip />
-
       <div className="yd-dash-premium-calendar__grid-wrap">
         <div className="yd-dash-premium-calendar__weekdays" aria-hidden>
           {WEEKDAYS.map((d) => (
@@ -131,7 +147,7 @@ export function DashboardPremiumCalendar({ weeklyCounts, compact = false }: Prop
 
             return (
               <span
-                key={`${day}-${i}`}
+                key={`${view.getFullYear()}-${view.getMonth()}-${day}`}
                 role="gridcell"
                 className={[
                   "yd-dash-premium-calendar__cell",
@@ -141,6 +157,13 @@ export function DashboardPremiumCalendar({ weeklyCounts, compact = false }: Prop
                   .filter(Boolean)
                   .join(" ")}
                 aria-current={todayCell ? "date" : undefined}
+                aria-label={
+                  todayCell
+                    ? `Heute, ${day}. ${monthLabel}`
+                    : activity > 0
+                      ? `${day}. ${activity} Einsendung${activity === 1 ? "" : "en"}`
+                      : `${day}.`
+                }
                 title={activity > 0 ? `${activity} Einsendung${activity === 1 ? "" : "en"}` : undefined}
               >
                 <span className="yd-dash-premium-calendar__day-num">{day}</span>

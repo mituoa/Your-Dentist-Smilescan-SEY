@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { PREVIEW_PRACTICE_PARAMS } from "@/lib/marketing/landingpages/generic-practice";
+import { readPreviewContentFromSearchParams } from "@/lib/marketing/landingpages/landing-preview-content";
 
 type Props = {
   children: React.ReactNode;
@@ -14,30 +15,31 @@ type Props = {
 function PreviewBanner() {
   const params = useSearchParams();
   const hasOwnData = params.get(PREVIEW_PRACTICE_PARAMS.name) !== null;
+  const hasContent = readPreviewContentFromSearchParams(params) !== null;
 
   return (
     <div className="yd-lp-preview-banner" role="status" aria-live="polite">
       <div className="yd-lp-preview-banner__inner">
         <div className="yd-lp-preview-banner__copy">
           <p className="yd-lp-preview-banner__eyebrow">
-            {hasOwnData ? "Vorschau mit Ihren Angaben" : "Beispielvorlage"}
+            {hasOwnData || hasContent ? "Vorschau mit Ihren Angaben" : "Beispielvorlage"}
           </p>
           <p className="yd-lp-preview-banner__text">
-            {hasOwnData
-              ? "Praxisname, Ort und Telefon stammen aus Ihrer Konfiguration. Texte und Bilder zeigen weiterhin eine Vorführung, kein Endergebnis."
-              : "Texte, Bilder und Angaben werden individuell an Ihre Praxis angepasst."}
+            {hasOwnData || hasContent
+              ? "Stammdaten und Konfigurator-Antworten sind eingespielt. Layout und Texte dienen als Ausgangspunkt — Ihre finale Seite gestalten wir gemeinsam."
+              : "Vorgefertigte Vorlage zur Orientierung. Nach der Konfiguration sehen Sie hier Ihre Praxisdaten."}
           </p>
         </div>
-        <Link href="/profile/solutions" className="yd-lp-preview-banner__back">
+        <Link href="/profile/editor#praxis-loesungen" className="yd-lp-preview-banner__back">
           <ArrowLeft size={14} aria-hidden />
-          Landingpages
+          Zurück
         </Link>
       </div>
     </div>
   );
 }
 
-/** Sticky Hinweis auf geschützten Landingpage-Vorschauen (nur nach Anmeldung). */
+/** Hinweis auf geschützten Landingpage-Vorschauen (nach Anmeldung). */
 export function YdLandingPreviewShell({ children }: Props) {
   return (
     <div className="yd-lp-preview-shell">

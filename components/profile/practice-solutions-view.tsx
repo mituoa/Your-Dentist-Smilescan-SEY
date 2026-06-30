@@ -57,9 +57,9 @@ export function PracticeSolutionsView({ inquiryContext }: Props) {
               <button
                 type="button"
                 className="yd-cl-closing__link"
-                onClick={() => openInquiry("individuell", "Individuelles Projekt")}
+                onClick={() => openInquiry("individuell", "Individuelles Schwerpunktthema")}
               >
-                Projekt anfragen
+                Eigenes Thema konfigurieren
               </button>
             </footer>
           </div>

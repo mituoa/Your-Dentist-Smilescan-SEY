@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { usePracticeOverride } from "@/lib/marketing/landingpages/use-practice-override";
+import { useLandingPreviewContent } from "@/lib/marketing/landingpages/landing-preview-content";
 
 /**
  * Vorlage "Implantologie" — generisch, praxisunabhängig (siehe GENERIC_PRACTICE).
@@ -278,6 +279,13 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export function YdImplantologieLanding() {
   const PRACTICE = usePracticeOverride();
+  const content = useLandingPreviewContent({
+    eyebrow: `Implantologie · ${PRACTICE.city}`,
+    headline: "Zahnimplantate. Fest verankert, ruhig geplant.",
+    subheadline:
+      "Ein Zahnimplantat ersetzt die Zahnwurzel und trägt festsitzenden Zahnersatz. Wir klären in der Eignungsprüfung, welches Vorgehen zu Ihrer Situation passt.",
+    ctaLabel: "Eignungsprüfung anfragen",
+  });
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {
@@ -312,18 +320,17 @@ export function YdImplantologieLanding() {
         <div className="yd-al-container yd-al-hero-grid">
           <div>
             <span className="yd-al-eyebrow yd-al-hero-stagger" style={{ transitionDelay: "0ms" }}>
-              Implantologie · {PRACTICE.city}
+              {content.eyebrow}
             </span>
             <h1 className="yd-al-hero-title yd-al-hero-stagger" style={{ transitionDelay: "70ms" }}>
-              Zahnimplantate. <em>Fest verankert, ruhig geplant.</em>
+              {content.headline}
             </h1>
             <p className="yd-al-hero-lead yd-al-hero-stagger" style={{ transitionDelay: "140ms" }}>
-              Ein Zahnimplantat ersetzt die Zahnwurzel und trägt festsitzenden Zahnersatz.
-              Wir klären in der Eignungsprüfung, welches Vorgehen zu Ihrer Situation passt.
+              {content.subheadline}
             </p>
             <div className="yd-al-hero-ctas yd-al-hero-stagger" style={{ transitionDelay: "210ms" }}>
               <a href={PRACTICE.contactUrl} className="yd-al-btn yd-al-btn--glow">
-                <span>Eignungsprüfung anfragen</span>
+                <span>{content.ctaLabel}</span>
               </a>
               <button type="button" className="yd-al-btn yd-al-btn--ghost" onClick={() => scrollToId("ablauf")}>
                 Behandlung ansehen

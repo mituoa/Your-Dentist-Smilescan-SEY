@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 
 import { usePracticeOverride } from "@/lib/marketing/landingpages/use-practice-override";
+import { useLandingPreviewContent } from "@/lib/marketing/landingpages/landing-preview-content";
 
 /**
  * Vorlage "Ästhetische Zahnmedizin" — eigenständiger Aufbau, eigene Farbidentität
@@ -118,6 +119,13 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export function YdAesthetikLanding() {
   const PRACTICE = usePracticeOverride();
+  const content = useLandingPreviewContent({
+    eyebrow: `Ästhetische Zahnmedizin · ${PRACTICE.city}`,
+    headline: "Ein Lächeln, das zu Ihnen passt.",
+    subheadline:
+      "Ästhetische Zahnmedizin verbindet Funktion und Form. Wir planen individuell, ausgehend von Ihrer Zahnsituation und Ihren Wünschen.",
+    ctaLabel: "Beratung anfragen",
+  });
   const [stickyVisible, setStickyVisible] = useState(false);
 
   useEffect(() => {
@@ -151,17 +159,12 @@ export function YdAesthetikLanding() {
       <section className="yd-ae-hero">
         <div className="yd-ae-container">
           <Reveal>
-            <span className="yd-ae-eyebrow">Ästhetische Zahnmedizin · {PRACTICE.city}</span>
-            <h1 className="yd-ae-hero-title">
-              Ein Lächeln, das <strong>zu Ihnen</strong> passt.
-            </h1>
-            <p className="yd-ae-hero-lead">
-              Ästhetische Zahnmedizin verbindet Funktion und Form. Wir planen individuell,
-              ausgehend von Ihrer Zahnsituation und Ihren Wünschen.
-            </p>
+            <span className="yd-ae-eyebrow">{content.eyebrow}</span>
+            <h1 className="yd-ae-hero-title">{content.headline}</h1>
+            <p className="yd-ae-hero-lead">{content.subheadline}</p>
             <div className="yd-ae-hero-ctas">
               <a href={PRACTICE.contactUrl} className="yd-ae-btn yd-ae-btn--primary">
-                Beratung anfragen
+                {content.ctaLabel}
               </a>
               <button type="button" className="yd-ae-btn yd-ae-btn--ghost" onClick={() => scrollToId("ablauf")}>
                 Ablauf ansehen
