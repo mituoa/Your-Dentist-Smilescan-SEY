@@ -105,6 +105,6 @@ export default async function CreateCasePage({ searchParams }: CreateCasePagePro
   const cancelHref = resolveCreateCaseCancelHref(sp.from);
 
   return (
-    <CreateCaseClient workspaceId={workspace.workspace_id} cancelHref={cancelHref} />
+    <CreateCaseClient workspaceId={workspace.workspace_id} cancelHref={cancelHref} overlay="workspace" />
   );
 }

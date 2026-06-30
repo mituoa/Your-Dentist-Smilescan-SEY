@@ -31,9 +31,23 @@
   .yd-workspace main:has(.care-center) .yd-awaken-canvas,
   .yd-workspace main:has(.yd-settings-v2) .yd-awaken-canvas,
   .yd-workspace main:has(.yd-profile-hub) .yd-awaken-canvas {
-    padding: 0.375rem max(0.75rem, env(safe-area-inset-right))
-      calc(var(--yd-mobile-bottom-nav-h, 4.75rem) + 0.5rem) max(0.75rem, env(safe-area-inset-left)) !important;
+    /* Bottom-Nav-Abstand nur über main scroll-padding — kein doppelter Rand */
+    padding: 0.375rem max(0.75rem, env(safe-area-inset-right)) 0.375rem
+      max(0.75rem, env(safe-area-inset-left)) !important;
     border-radius: var(--yd-ws-module-canvas-radius-mobile) !important;
+  }
+
+  /* Tracker/Relay: Canvas bis zur Nav — Liste scrollt innen */
+  html[data-yd-scroll-owner="module"] .yd-workspace main:has(.yd-inbox-workspace) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="module"] .yd-workspace main:has(.relay-center) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="module"] .yd-workspace main:has(.yd-relay-shell) .yd-awaken-canvas {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    padding-bottom: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
   }
 }
 

@@ -19,6 +19,8 @@ export type WorkspaceIntegratedHeaderProps = {
   avatarUrl?: string | null;
   inboxCount?: number;
   showSearch?: boolean;
+  /** Mobile: Begrüßung nur auf Atlas (Dashboard). */
+  mobileHome?: boolean;
 };
 
 /** Integrierte Praxis-Headline — einheitlich in Dashboard, Tracker, Relay & Co. */
@@ -38,6 +40,7 @@ export function WorkspaceIntegratedHeader({
   inboxCount,
   showSearch = true,
   dashboardEditorial = null,
+  mobileHome = false,
 }: WorkspaceIntegratedHeaderProps) {
   const editorial = dashboardEditorial;
 
@@ -45,7 +48,8 @@ export function WorkspaceIntegratedHeader({
     <header
       className={cn(
         "yd-dash-header-premium yd-workspace-integrated-header w-full min-w-0 max-w-full",
-        editorial && "yd-dash-header-premium--editorial"
+        editorial && "yd-dash-header-premium--editorial",
+        mobileHome && "yd-workspace-integrated-header--mobile-home"
       )}
     >
       <div className="yd-dash-header-premium__grid">

@@ -1006,14 +1006,10 @@ export function CommandAssist() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[15px] font-semibold tracking-tight text-[#0F172A]">
-              Praxis-Assistenz
+              KI Assistenz
             </p>
             <p className="truncate text-[12px] text-[#64748B]">
-              {inboxCase
-                ? inboxCase.patientName || "Patient"
-                : gptEnabled
-                  ? "KI-Assistent"
-                  : "Assistenz"}
+              {inboxCase ? inboxCase.patientName || "Patient" : "Fälle, Entwürfe, Aufgaben"}
             </p>
           </div>
         </div>
@@ -1172,7 +1168,7 @@ export function CommandAssist() {
           id="command-assist-panel"
           role="dialog"
           aria-modal="true"
-          aria-label="Praxis-Assistenz"
+          aria-label="KI Assistenz"
           className={cn(
             "yd-command-assist-sheet transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
             clinicalCommandSheetWidthMd,

@@ -814,17 +814,17 @@
   }
 
   .yd-settings-v2 {
-    flex: 1 1 auto;
+    flex: none;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .yd-settings-v2__frame {
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
+    flex: none;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     padding-bottom: 0;
   }
 
@@ -832,17 +832,12 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    flex: 1 1 auto;
+    flex: none;
     min-height: 0;
   }
 
   .yd-settings-v2__layout--mobile-hub {
-    overflow-x: hidden;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    touch-action: pan-y;
-    scroll-padding-bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 1.25rem);
+    overflow: visible !important;
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
@@ -1433,7 +1428,7 @@
 
   .yd-tracker-mobile-inbox__list {
     margin: 0;
-    padding: 0 0 max(4.5rem, calc(3.25rem + env(safe-area-inset-bottom, 0px)));
+    padding: 0 0 max(4.75rem, calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.875rem));
     list-style: none;
     display: flex;
     flex-direction: column;

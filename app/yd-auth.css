@@ -1658,16 +1658,12 @@
 
   .yd-auth-register-header {
     flex-shrink: 0;
+    overflow: visible;
     padding: 0.875rem 1rem 0.625rem;
   }
 
   .yd-auth-register-header .mb-5 {
     margin-bottom: 0.5rem !important;
-  }
-
-  .yd-auth-register-header [data-brand="your-dentist"] {
-    transform: scale(0.92);
-    transform-origin: center top;
   }
 
   .yd-auth-register-title {
@@ -1747,6 +1743,7 @@
 
 .yd-auth-register-header {
   position: relative;
+  overflow: visible;
   padding: 1.75rem 1.25rem 1.125rem;
   background: linear-gradient(180deg, rgba(125, 211, 252, 0.08) 0%, transparent 100%);
 }
@@ -2109,6 +2106,80 @@
   .yd-medical-form-panel--workspace-compact .yd-medical-form-routine--collapsible > .yd-medical-form-section__head {
     display: none;
   }
+
+  /* Neuer Fall — volles Sheet, Safe Area, Footer im Panel */
+  .yd-medical-form-overlay--workspace .yd-medical-form-panel--create-case,
+  .yd-medical-form-overlay .yd-medical-form-panel--create-case {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    max-height: min(
+      calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.75rem),
+      52rem
+    );
+    margin-inline: auto;
+    overflow: hidden;
+    border-radius: 1.25rem;
+  }
+
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage:has(.yd-medical-form-panel--create-case),
+  .yd-medical-form-overlay .yd-auth-register-stage:has(.yd-medical-form-panel--create-case) {
+    justify-content: center;
+    align-items: stretch;
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+    padding-inline: max(0.625rem, env(safe-area-inset-left, 0px))
+      max(0.625rem, env(safe-area-inset-right, 0px));
+  }
+
+  .yd-medical-form-panel--create-case .yd-medical-form-header--compact {
+    flex-shrink: 0;
+    padding: 0.875rem 1rem 0.5rem;
+    padding-right: 3rem;
+  }
+
+  .yd-medical-form-panel--create-case .yd-medical-form-header--compact .yd-auth-register-title {
+    font-size: 1.125rem;
+    text-align: left;
+  }
+
+  .yd-medical-form-panel--create-case .yd-medical-form-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .yd-medical-form-panel--create-case .yd-medical-form-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.75rem;
+  }
+
+  .yd-medical-form-panel--create-case .yd-medical-form-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 0.75rem 1rem max(0.875rem, env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(186, 203, 222, 0.32);
+    background: rgba(255, 255, 255, 0.98);
+  }
+
+  .yd-medical-form-panel--create-case.yd-medical-form-panel--workspace-compact {
+    max-height: min(
+      calc(100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - env(safe-area-inset-top, 0px) - 0.75rem),
+      52rem
+    );
+  }
+
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage:has(.yd-medical-form-panel--create-case) {
+    padding-bottom: max(0.375rem, env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .yd-medical-form-body {
@@ -2384,6 +2455,303 @@
   background: rgba(255, 255, 255, 0.92);
   color: rgba(47, 128, 237, 0.75);
   box-shadow: 0 4px 16px rgba(47, 128, 237, 0.08);
+}
+
+/* —— Registrierung: Zahnarztausweis / Approbation (Medical Blue) —— */
+.yd-reg-proof-card {
+  position: relative;
+  border-radius: 0.875rem;
+  border: 1px dashed rgba(47, 128, 237, 0.32);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(237, 246, 255, 0.94) 52%,
+    rgba(226, 238, 252, 0.88) 100%
+  );
+  padding: 1rem 1.125rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 12px rgba(26, 79, 156, 0.06);
+  transition:
+    border-color 280ms ease,
+    background 280ms ease,
+    box-shadow 280ms ease;
+}
+
+@media (min-width: 640px) {
+  .yd-reg-proof-card {
+    padding: 1.125rem 1.25rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .yd-reg-proof-card {
+    min-height: 148px;
+  }
+}
+
+.yd-reg-proof-card--drag {
+  border-color: rgba(47, 128, 237, 0.55);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(224, 238, 255, 0.98) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 0 0 3px rgba(47, 128, 237, 0.12),
+    0 4px 18px rgba(47, 128, 237, 0.14);
+}
+
+.yd-reg-proof-card--ready {
+  border-style: solid;
+  border-color: rgba(47, 128, 237, 0.38);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.99) 0%,
+    rgba(232, 243, 255, 0.96) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 4px 16px rgba(26, 79, 156, 0.1);
+}
+
+.yd-reg-proof-card--checking {
+  border-color: rgba(47, 128, 237, 0.28);
+  background: linear-gradient(
+    165deg,
+    rgba(248, 251, 255, 0.98) 0%,
+    rgba(237, 246, 255, 0.95) 100%
+  );
+}
+
+.yd-reg-proof-card--warn {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 253, 248, 0.98) 0%,
+    rgba(255, 247, 237, 0.92) 100%
+  );
+}
+
+.yd-reg-proof-card--error {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 253, 248, 0.98) 0%,
+    rgba(255, 247, 237, 0.9) 100%
+  );
+}
+
+.yd-reg-proof-card__label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(26, 79, 156, 0.82);
+}
+
+.yd-reg-proof-card__empty {
+  margin-top: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yd-reg-proof-card__pick {
+  display: inline-flex;
+  height: 2.75rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(47, 128, 237, 0.28);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(232, 243, 255, 0.95) 100%);
+  padding: 0 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a4f9c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 8px rgba(47, 128, 237, 0.1);
+  transition: background 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.yd-reg-proof-card__pick:hover {
+  border-color: rgba(47, 128, 237, 0.42);
+  background: linear-gradient(180deg, #ffffff 0%, rgba(219, 234, 254, 0.98) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 4px 14px rgba(47, 128, 237, 0.16);
+}
+
+.yd-reg-proof-card__pick-icon {
+  display: flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background: rgba(47, 128, 237, 0.12);
+  color: #2f80ed;
+}
+
+.yd-reg-proof-card__hint {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: rgba(26, 79, 156, 0.58);
+}
+
+.yd-reg-proof-card__status {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a4f9c;
+}
+
+.yd-reg-proof-card__preview {
+  margin: 0.75rem 0;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(47, 128, 237, 0.22);
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(26, 79, 156, 0.08);
+}
+
+.yd-reg-proof-card__preview img {
+  display: block;
+  height: 7rem;
+  width: 100%;
+  object-fit: cover;
+}
+
+.yd-reg-proof-card__filename {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0c1929;
+}
+
+.yd-reg-proof-card__filesize {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(26, 79, 156, 0.55);
+}
+
+.yd-reg-proof-card__quality {
+  margin: 0.5rem 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.yd-reg-proof-card__quality--ok {
+  font-weight: 500;
+  color: #1a4f9c;
+}
+
+.yd-reg-proof-card__quality--warn {
+  color: #92400e;
+}
+
+.yd-reg-proof-card__change {
+  margin-top: 0.75rem;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #2f80ed;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.yd-reg-proof-card__change:hover {
+  color: #1a4f9c;
+  text-decoration: underline;
+}
+
+.yd-reg-proof-tip {
+  margin-bottom: 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(47, 128, 237, 0.2);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(237, 246, 255, 0.92) 100%
+  );
+  padding: 0.875rem 1rem;
+  box-shadow: 0 2px 10px rgba(26, 79, 156, 0.05);
+}
+
+.yd-reg-proof-tip__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1a4f9c;
+}
+
+.yd-reg-proof-tip__list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yd-reg-proof-tip__list li {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(26, 79, 156, 0.72);
+}
+
+.yd-reg-proof-tip__list li + li {
+  margin-top: 0.25rem;
+}
+
+.yd-reg-proof-tip__check {
+  flex-shrink: 0;
+  color: #2f80ed;
+  font-weight: 700;
+}
+
+.yd-reg-proof-trust {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.625rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(47, 128, 237, 0.18);
+  background: linear-gradient(
+    165deg,
+    rgba(248, 251, 255, 0.98) 0%,
+    rgba(232, 243, 255, 0.9) 100%
+  );
+  padding: 0.875rem 1rem;
+  text-align: left;
+}
+
+.yd-reg-proof-trust__icon {
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+  color: rgba(47, 128, 237, 0.72);
+}
+
+.yd-reg-proof-trust__text {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: rgba(26, 79, 156, 0.68);
 }
 
 .yd-medical-form .yd-medical-date-wrap .yd-smart-date-field {
@@ -3431,11 +3799,13 @@
 .yd-reg-checkout {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 1.25rem;
 }
 
-.yd-reg-checkout__section-head {
-  margin-bottom: 0.85rem;
+.yd-reg-checkout__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
 .yd-reg-checkout__kicker {
@@ -3447,12 +3817,11 @@
   color: #64748b;
 }
 
-.yd-reg-checkout__lead {
-  margin: 0.35rem 0 0;
-  max-width: 42ch;
-  font-size: 0.8125rem;
-  line-height: 1.55;
-  color: #64748b;
+.yd-reg-checkout__note {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgba(26, 79, 156, 0.68);
 }
 
 .yd-reg-checkout__plans {

@@ -210,11 +210,6 @@ function LandingBriefingStudio({
     [config, fieldValues]
   );
 
-  const profileComplete =
-    (context.practiceName?.trim() ?? "").length >= 2 &&
-    (context.contactName?.trim() ?? "").length >= 2 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((context.contactEmail ?? "").trim());
-
   const answeredCount = briefingFields.filter((f) =>
     isConfiguratorFieldComplete(f, fieldValues)
   ).length;
@@ -223,7 +218,8 @@ function LandingBriefingStudio({
       ? Math.round((summaryVisible ? briefingFields.length : answeredCount) / briefingFields.length * 100)
       : 0;
 
-  const canSubmit = profileComplete && summaryVisible && isLandingConfigComplete(config, fieldValues);
+  const canFinish =
+    summaryVisible && isLandingConfigComplete(config, fieldValues);
   const previewReturnPath = buildLandingPreviewReturnPath(resumePath);
   const previewUrl =
     submitState === "success" && hasStaticTemplate(config.id)
@@ -312,8 +308,8 @@ function LandingBriefingStudio({
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
   };
 
-  const submit = async () => {
-    if (!canSubmit || busy) return;
+  const finishWithPreview = async () => {
+    if (!canFinish || busy) return;
     setSubmitState("pending");
     setSubmitError(null);
 
@@ -324,40 +320,32 @@ function LandingBriefingStudio({
     });
 
     try {
-      const result = await submitPracticeSolutionRequest({
+      await submitPracticeSolutionRequest({
         solutionId: config.solutionId,
         practiceName: context.practiceName,
         contactName: context.contactName,
-        email: context.contactEmail,
+        email: context.contactEmail || "vorschau@praxis.local",
         phone: context.contactPhone ?? "",
         message,
         budget: "",
         timeline: "",
         website: "",
       });
-
-      if (!result.ok) {
-        setSubmitState("error");
-        setSubmitError(
-          "message" in result && result.message
-            ? result.message
-            : userFacingPracticeSolutionRequestError(result.error)
-        );
-        return;
-      }
-      storeLandingInquirySuccess({
-        inquiryId: config.solutionId,
-        displayTitle: target.displayTitle,
-        configId: config.id,
-        resumePath,
-        fieldValues,
-      });
-      setSubmitState("success");
     } catch {
-      setSubmitState("error");
-      setSubmitError(userFacingPracticeSolutionRequestError(undefined));
+      /* Vorschau hat Vorrang — Mail/DB optional */
     }
+
+    storeLandingInquirySuccess({
+      inquiryId: config.solutionId,
+      displayTitle: target.displayTitle,
+      configId: config.id,
+      resumePath,
+      fieldValues,
+    });
+    setSubmitState("success");
   };
+
+  const submit = finishWithPreview;
 
   if (submitState === "success") {
     return (
@@ -429,10 +417,10 @@ function LandingBriefingStudio({
             onCancel={onClose}
             cancelDisabled={busy}
             cancelLabel="Abbrechen"
-            primaryLabel="Konfiguration senden"
-            primaryPendingLabel="Wird gesendet …"
+            primaryLabel="Vorschau öffnen"
+            primaryPendingLabel="Vorschau wird vorbereitet …"
             onPrimary={submit}
-            primaryDisabled={!canSubmit}
+            primaryDisabled={!canFinish}
             isPending={busy}
           />
         ) : (
@@ -465,12 +453,6 @@ function LandingBriefingStudio({
           {submitError ? (
             <p className="yd-medical-form-alert" role="alert">
               {submitError}
-            </p>
-          ) : null}
-          {!profileComplete ? (
-            <p className="yd-medical-form-alert" role="status">
-              Bitte vervollständigen Sie Ihr Praxisprofil (Praxisname, Ansprechperson mit mindestens
-              zwei Zeichen, gültige E-Mail).
             </p>
           ) : null}
 

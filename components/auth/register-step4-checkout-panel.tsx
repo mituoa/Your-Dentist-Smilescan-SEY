@@ -37,23 +37,14 @@ export function RegisterStep4CheckoutPanel({
   onPaymentMethodChange,
   paymentFields,
   onPaymentFieldChange,
-  skipPaymentAtSignup = false,
   disabled = false,
 }: RegisterStep4CheckoutPanelProps) {
-  const activePlan = REGISTER_PLANS[selectedPlan];
-
   return (
     <div className="yd-reg-checkout">
       <section className="yd-reg-checkout__section" aria-labelledby="reg-checkout-plan-heading">
-        <div className="yd-reg-checkout__section-head">
-          <h4 id="reg-checkout-plan-heading" className="yd-reg-checkout__kicker">
-            Abrechnungsintervall
-          </h4>
-          <p className="yd-reg-checkout__lead">
-            Wählen Sie den Rhythmus für Ihren geschützten Praxiszugang — jederzeit nach Freischaltung
-            anpassbar.
-          </p>
-        </div>
+        <h4 id="reg-checkout-plan-heading" className="yd-reg-checkout__kicker">
+          Abrechnungsintervall
+        </h4>
 
         <div className="yd-reg-checkout__plans" role="radiogroup" aria-label="Abrechnungsintervall">
           {PLAN_ORDER.map((key) => {
@@ -104,51 +95,18 @@ export function RegisterStep4CheckoutPanel({
                 {key !== "monthly" ? (
                   <span className="yd-reg-checkout__plan-total">{formatTotalLabel(key)}</span>
                 ) : null}
-                <span className="yd-reg-checkout__plan-desc">{plan.description}</span>
               </button>
             );
           })}
         </div>
-      </section>
 
-      <section className="yd-reg-checkout__summary" aria-label="Auswahl">
-        <div className="yd-reg-checkout__summary-row">
-          <div>
-            <p className="yd-reg-checkout__summary-title">Praxiszugang</p>
-            <p className="yd-reg-checkout__summary-meta">{activePlan.label}</p>
-          </div>
-          <div className="yd-reg-checkout__summary-price">
-            <span className="yd-reg-checkout__summary-amount">{activePlan.price} €</span>
-            <span className="yd-reg-checkout__summary-unit">/ Monat</span>
-          </div>
-        </div>
-        {selectedPlan !== "monthly" ? (
-          <p className="yd-reg-checkout__summary-total">{formatTotalLabel(selectedPlan)}</p>
-        ) : null}
-        <ul className="yd-reg-checkout__trust" role="list">
-          <li>Keine Abbuchung vor Freischaltung</li>
-          <li>Prüfung Ihrer Unterlagen innerhalb von 24 Stunden</li>
-          {!skipPaymentAtSignup ? (
-            <li>
-              {paymentMethod === "invoice"
-                ? "Rechnung nach Freischaltung — kein Online-Checkout"
-                : "Zahlung wird nach Freischaltung im sicheren Checkout abgeschlossen"}
-            </li>
-          ) : null}
-        </ul>
+        <p className="yd-reg-checkout__note">Abbuchung erst nach Freischaltung Ihrer Praxis.</p>
       </section>
 
       <section className="yd-reg-checkout__section" aria-labelledby="reg-checkout-pay-heading">
-        <div className="yd-reg-checkout__section-head">
-          <h4 id="reg-checkout-pay-heading" className="yd-reg-checkout__kicker">
-            Zahlungsweise
-          </h4>
-          <p className="yd-reg-checkout__lead">
-            {skipPaymentAtSignup
-              ? "Ihre Zahlungsdaten werden nach Freischaltung ergänzt."
-              : "Wählen Sie, wie Ihr Praxiszugang abgerechnet werden soll."}
-          </p>
-        </div>
+        <h4 id="reg-checkout-pay-heading" className="yd-reg-checkout__kicker">
+          Zahlungsweise
+        </h4>
         <RegisterStep4PaymentSetup
           method={paymentMethod}
           onMethodChange={onPaymentMethodChange}

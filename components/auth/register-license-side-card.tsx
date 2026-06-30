@@ -2,6 +2,9 @@
 
 import * as React from "react";
 import type { DragEvent } from "react";
+import { Camera, Check, ImageIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 type DocStatus = "idle" | "checking" | "success" | "warn";
 
@@ -22,18 +25,18 @@ type RegisterLicenseSideCardProps = {
   onClear: () => void;
 };
 
-function borderClass(
+function cardStateClass(
   file: File | null,
   docStatus: DocStatus,
   dragActive: boolean,
   sideError: string | null | undefined
 ): string {
-  if (sideError) return "border-amber-200/90 bg-amber-50/35";
-  if (dragActive) return "border-[#0284C7]/40 bg-[#0284C7]/5";
-  if (!file) return "border-slate-200/90 bg-slate-50/35";
-  if (docStatus === "checking") return "border-slate-200/90 bg-slate-50/50";
-  if (docStatus === "warn") return "border-amber-200/90 bg-amber-50/35";
-  return "border-green-200/90 bg-green-50/45";
+  if (sideError) return "yd-reg-proof-card--error";
+  if (dragActive) return "yd-reg-proof-card--drag";
+  if (!file) return "";
+  if (docStatus === "checking") return "yd-reg-proof-card--checking";
+  if (docStatus === "warn") return "yd-reg-proof-card--warn";
+  return "yd-reg-proof-card--ready";
 }
 
 export function RegisterLicenseSideCard({
@@ -57,7 +60,7 @@ export function RegisterLicenseSideCard({
   return (
     <div className="min-w-0">
       <div
-        className={`relative rounded-xl border border-dashed px-4 py-4 transition-colors duration-200 max-md:min-h-[148px] sm:px-5 sm:py-5 ${borderClass(file, docStatus, dragActive, sideError)}`}
+        className={cn("yd-reg-proof-card", cardStateClass(file, docStatus, dragActive, sideError))}
         onDragEnter={onDragEnter}
         onDragLeave={onDragLeave}
         onDragOver={onDragOver}
@@ -71,72 +74,58 @@ export function RegisterLicenseSideCard({
           className="sr-only"
         />
 
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">{title}</p>
+        <p className="yd-reg-proof-card__label">{title}</p>
 
         {file ? (
-          <div className="mt-3">
+          <div className="mt-1">
             {docStatus !== "checking" ? (
-              <p className="flex items-center gap-1.5 text-[13px] font-medium text-green-800">
-                <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+              <p className="yd-reg-proof-card__status">
+                <Check className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                 Dokument bereit zur Prüfung
               </p>
             ) : null}
             {preview ? (
-              <div className="mb-3 mt-3 overflow-hidden rounded-lg border border-green-200/70 bg-white">
+              <div className="yd-reg-proof-card__preview">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={preview} alt={title} className="h-28 w-full object-cover" />
+                <img src={preview} alt={title} />
               </div>
             ) : null}
-            <p className="truncate text-[13px] font-medium text-gray-900">{file.name}</p>
-            <p className="mt-0.5 text-[12px] text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            <p className="yd-reg-proof-card__filename">{file.name}</p>
+            <p className="yd-reg-proof-card__filesize">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
 
             {docStatus === "checking" ? (
-              <p className="mt-2 flex items-center gap-1.5 text-[12px] text-slate-600" aria-live="polite">
-                <span className="yd-auth-loading-pulse !h-3 !w-3" aria-hidden />
+              <p className="yd-reg-proof-card__quality yd-reg-proof-card__quality--ok" aria-live="polite">
+                <span className="yd-auth-loading-pulse !h-3 !w-3 shrink-0" aria-hidden />
                 Nachweis wird geprüft…
               </p>
             ) : qualityHint ? (
               <p
-                className={`mt-2 flex items-start gap-1.5 text-[12px] ${
-                  docStatus === "success" ? "font-medium text-green-700" : "text-amber-800"
-                }`}
+                className={cn(
+                  "yd-reg-proof-card__quality",
+                  docStatus === "success" ? "yd-reg-proof-card__quality--ok" : "yd-reg-proof-card__quality--warn"
+                )}
               >
                 {docStatus === "success" ? (
-                  <svg className="mt-0.5 h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
                 ) : null}
                 <span>{qualityHint}</span>
               </p>
             ) : null}
 
-            <button
-              type="button"
-              onClick={onClear}
-              className="mt-3 text-[13px] font-medium yd-auth-link hover:text-[#0369A1]"
-            >
+            <button type="button" onClick={onClear} className="yd-reg-proof-card__change">
               Andere Datei wählen
             </button>
           </div>
         ) : (
-          <div className="mt-4 flex flex-col gap-2">
-            <label
-              htmlFor={fileInputId}
-              className="inline-flex h-[44px] cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-            >
+          <div className="yd-reg-proof-card__empty">
+            <label htmlFor={fileInputId} className="yd-reg-proof-card__pick">
+              <span className="yd-reg-proof-card__pick-icon" aria-hidden>
+                <Camera className="h-3.5 w-3.5" strokeWidth={2} />
+              </span>
               Dokument auswählen
             </label>
-            <p className="text-[11px] leading-relaxed text-gray-500">
+            <p className="yd-reg-proof-card__hint">
+              <ImageIcon className="mr-1 inline h-3 w-3 -translate-y-px opacity-70" strokeWidth={2} aria-hidden />
               Foto, Kamera oder PDF — über die Auswahl Ihres Geräts (max. 10 MB)
             </p>
           </div>

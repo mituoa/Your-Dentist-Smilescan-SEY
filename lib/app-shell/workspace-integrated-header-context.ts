@@ -44,7 +44,7 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname.startsWith("/journal")) {
     return {
       eyebrow: "Care Center",
-      subtitle: "Antworten für Patienten — weniger Standardanrufe.",
+      subtitle: "",
       showSearch: false,
     };
   }
@@ -58,7 +58,7 @@ export function resolveWorkspaceIntegratedHeader(
   if (pathname.startsWith("/settings")) {
     return {
       eyebrow: "Einstellungen",
-      subtitle: "Verwalten Sie Ihre Praxis und Ihr Team",
+      subtitle: "",
       showSearch: false,
     };
   }

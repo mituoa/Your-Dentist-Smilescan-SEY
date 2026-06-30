@@ -22,7 +22,7 @@ export function PreparationStatusBlock({
     <div className={cn("yd-command-prep-block min-w-0", className)}>
       {!compact ? (
         <p className="text-[10px] font-semibold uppercase tracking-[0.07em] text-[#64748B]">
-          Assistenz
+          Vorbereitung
         </p>
       ) : null}
       <ul className={cn("space-y-0.5", compact ? "mt-0" : "mt-1.5")}>

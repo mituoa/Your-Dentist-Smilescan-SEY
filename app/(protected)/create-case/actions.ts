@@ -184,16 +184,47 @@ export async function deleteTempSubmissionPhotos(
   if (safe.length === 0) {
     return { ok: true };
   }
-  const admin = createAdminClient();
-  const { error } = await admin.storage.from("submission-photos").remove(safe);
-  if (error) {
-    console.error("[deleteTempSubmissionPhotos] storage remove failed");
-    return { error: "Temporäre Uploads konnten nicht vollständig entfernt werden." };
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin.storage.from("submission-photos").remove(safe);
+    if (error) {
+      console.error("[deleteTempSubmissionPhotos] storage remove failed");
+      return { error: "Temporäre Uploads konnten nicht vollständig entfernt werden." };
+    }
+    return { ok: true };
+  } catch (error) {
+    console.error("[deleteTempSubmissionPhotos] admin client unavailable", error);
+    return { ok: true };
   }
-  return { ok: true };
 }
 
 export async function createPracticeCase(input: {
+  patientName: string;
+  patientBirthDate: string | null;
+  patientExternalId: string | null;
+  patientEmail: string | null;
+  patientPhone: string | null;
+  patientNotes: string | null;
+  urgency: PracticeCaseUrgency;
+  isDraft: boolean;
+  tempStoragePaths: string[];
+}): Promise<{
+  error?: string;
+  submissionId?: string;
+  partialAttachments?: boolean;
+}> {
+  try {
+    return await createPracticeCaseInner(input);
+  } catch (error) {
+    console.error("[createPracticeCase] unexpected failure", error);
+    return {
+      error:
+        "Die Speicherung ist momentan nicht möglich. Bitte versuchen Sie es in Kürze erneut.",
+    };
+  }
+}
+
+async function createPracticeCaseInner(input: {
   patientName: string;
   patientBirthDate: string | null;
   patientExternalId: string | null;
@@ -406,8 +437,19 @@ export async function createPracticeCase(input: {
   }
 
   const submissionId = insertedRow.id;
-  const admin = createAdminClient();
   let photosFullyApplied = 0;
+
+  if (uniqueTempPaths.length > 0) {
+    let admin: ReturnType<typeof createAdminClient>;
+    try {
+      admin = createAdminClient();
+    } catch (error) {
+      console.error("[createPracticeCase] admin client unavailable", error);
+      return {
+        error:
+          "Die Bilder konnten nicht gespeichert werden. Bitte versuchen Sie es ohne Anlagen erneut oder kontaktieren Sie den Support.",
+      };
+    }
 
   for (let i = 0; i < uniqueTempPaths.length; i++) {
     const tempPath = uniqueTempPaths[i];
@@ -436,6 +478,7 @@ export async function createPracticeCase(input: {
       continue;
     }
     photosFullyApplied += 1;
+  }
   }
 
   const partialAttachments =

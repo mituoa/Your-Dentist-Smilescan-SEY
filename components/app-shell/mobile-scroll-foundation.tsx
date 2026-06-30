@@ -11,9 +11,6 @@ function resolveScrollOwner(pathname: string): ScrollOwner {
   if (pathname.startsWith("/inbox")) return "module";
   if (pathname.startsWith("/relay")) return "module";
   if (pathname.startsWith("/my-tasks")) return "module";
-  if (pathname.startsWith("/settings")) return "module";
-  if (pathname.startsWith("/profile/solutions")) return "main";
-  if (pathname.startsWith("/profile/editor")) return "main";
   return "main";
 }
 

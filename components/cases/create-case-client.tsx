@@ -306,8 +306,11 @@ export function CreateCaseClient({
       closeDisabled={busy}
       ariaLabel="Neuer Fall"
       overlayVariant={overlay}
+      headerVariant="compact"
       panelClassName={
-        overlay === "workspace" ? "yd-medical-form-panel--workspace-compact" : undefined
+        overlay === "workspace"
+          ? "yd-medical-form-panel--workspace-compact yd-medical-form-panel--create-case"
+          : "yd-medical-form-panel--create-case"
       }
       footer={
         <MedicalFormFooterActions

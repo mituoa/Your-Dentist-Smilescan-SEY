@@ -208,18 +208,9 @@ export function RegisterStep4PaymentSetup({
       ) : null}
 
       {method === "card" ? (
-        <div
-          className={
-            isCheckout
-              ? "yd-reg-checkout__pay-note"
-              : "rounded-xl border border-dashed border-slate-200/90 bg-slate-50/50 px-4 py-6 text-center"
-          }
-          aria-hidden={false}
-        >
-          <p className={isCheckout ? "yd-reg-checkout__pay-note-text" : "text-[12px] leading-relaxed text-slate-600"}>
-            Kartendaten werden nach Freischaltung sicher im nächsten Schritt erfasst.
-          </p>
-        </div>
+        <p className={isCheckout ? "yd-reg-checkout__pay-hint" : "text-[11px] leading-relaxed text-slate-500"}>
+          Kartenzahlung im nächsten Schritt nach Freischaltung.
+        </p>
       ) : null}
     </div>
   );

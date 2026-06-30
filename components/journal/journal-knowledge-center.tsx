@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   ChevronRight,
-  ExternalLink,
   FileEdit,
   FileText,
-  PencilLine,
   Plus,
   Search,
   Sparkles,
@@ -26,9 +24,7 @@ import { excerptFromMarkdown } from "@/lib/journal/excerpt-from-markdown";
 import { getRecommendedTopicsMissing } from "@/lib/journal/recommended-topics";
 import { JOURNAL_HUB, JOURNAL_KI, JOURNAL_SECTION_COPY } from "@/lib/journal/journal-hub-product";
 import {
-  formatDraftCount,
   formatLastUpdatedLabel,
-  formatPublishedCount,
   journalEntryTitle,
   journalWorkspaceStats,
 } from "@/lib/journal/workspace-display";
@@ -257,8 +253,6 @@ export function JournalKnowledgeCenter({
     ? areaStats.find((a) => a.id === focusArea)?.label
     : null;
 
-  const resumeDraft = drafts[0] ?? null;
-
   const searchField = (
     <JournalSearchField
       id="journal-hub-search"
@@ -267,14 +261,6 @@ export function JournalKnowledgeCenter({
       placeholder="Antworten suchen…"
     />
   );
-
-  const toolbarMeta = [
-    formatPublishedCount(stats.publishedCount),
-    `${stats.coveredAreas} Bereiche`,
-    stats.draftCount > 0 ? formatDraftCount(stats.draftCount) : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
 
   const openKiAssist = () => {
     if (assist?.openCommand) {
@@ -306,78 +292,25 @@ export function JournalKnowledgeCenter({
                 <Plus className="yd-journal-v6__action-icon" strokeWidth={1.5} aria-hidden />
                 Neue Antwort
               </button>
-              {publicSlug ? (
-                <a
-                  href={`/doc/${publicSlug}/journal`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="yd-journal-v6__action yd-journal-v6__action--ghost"
-                >
-                  <ExternalLink className="yd-journal-v6__action-icon" strokeWidth={1.5} aria-hidden />
-                  {JOURNAL_SECTION_COPY.library.patientView}
-                </a>
-              ) : null}
             </div>
           </div>
           <div className="yd-cc-hub__header-bar">
-            <div className="yd-cc-hub__stats-pills" aria-label="Überblick">
+            <div className="yd-cc-hub__stats-pills yd-cc-hub__stats-pills--compact" aria-label="Überblick">
               <span className="yd-cc-hub__stats-pill">
-                <strong>{stats.publishedCount}</strong> Veröffentlicht
+                <strong>{stats.publishedCount}</strong> live
               </span>
               <span className="yd-cc-hub__stats-pill">
-                <strong>{priorityTopics.length}</strong> Offene Fragen
+                <strong>{stats.draftCount}</strong> Entwürfe
               </span>
               <span className="yd-cc-hub__stats-pill">
-                <strong>
-                  {stats.coveredAreas}/{stats.totalAreas}
-                </strong>{" "}
-                Bereiche
-              </span>
-              <span
-                className={cn(
-                  "yd-cc-hub__stats-pill",
-                  kiReady && "yd-cc-hub__stats-pill--active"
-                )}
-              >
-                Patienten-KI {kiReady ? "aktiv" : "—"}
+                <strong>{stats.coveredAreas}</strong>/{stats.totalAreas} Bereiche
               </span>
             </div>
-            <p className="yd-cc-hub__header-meta md:hidden" aria-label="Stand">
-              {toolbarMeta}
-            </p>
             <div className="yd-cc-hub__header-search">{searchField}</div>
           </div>
         </header>
 
         <div className="yd-journal-v6__body yd-cc-hub__body">
-          {resumeDraft ? (
-            <section
-              className="yd-journal-v6__section yd-journal-v6__section--resume md:hidden"
-              aria-label="Entwurf fortsetzen"
-            >
-              <button
-                type="button"
-                className="yd-journal-v6__resume-card"
-                onClick={() => openEditor(resumeDraft.id)}
-              >
-                <span className="yd-journal-v6__resume-icon" aria-hidden>
-                  <PencilLine className="h-[1.125rem] w-[1.125rem]" strokeWidth={1.65} />
-                </span>
-                <span className="yd-journal-v6__resume-body">
-                  <span className="yd-journal-v6__resume-label">Entwurf fortsetzen</span>
-                  <span className="yd-journal-v6__resume-title">
-                    {journalEntryTitle(resumeDraft)}
-                  </span>
-                  <span className="yd-journal-v6__resume-meta">
-                    Zuletzt bearbeitet {formatLastUpdatedLabel(resumeDraft.updated_at)}
-                  </span>
-                </span>
-                <ChevronRight className="yd-journal-v6__resume-chevron" strokeWidth={1.75} aria-hidden />
-              </button>
-            </section>
-          ) : null}
-
-
           <section
             className="yd-journal-v6__section yd-journal-v6__panel yd-cc-hub__zone"
             aria-label={JOURNAL_SECTION_COPY.questionsColumn.tag}

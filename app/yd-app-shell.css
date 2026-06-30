@@ -223,6 +223,10 @@ html[data-yd-workspace-modal="true"] .yd-command-assist-fab-host {
   bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.5rem);
 }
 
+html[data-yd-workspace-modal="true"] .yd-medical-form-overlay {
+  z-index: 260;
+}
+
 html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
   z-index: 285;
   pointer-events: auto;

@@ -65,6 +65,8 @@ export function WorkspaceIntegratedHeaderBridge({
     return resolveWorkspaceGreeting(new Date().getHours());
   }, []);
 
+  const mobileHome = onDashboard;
+
   return (
     <WorkspaceIntegratedHeader
       eyebrow={ctx.eyebrow}
@@ -81,6 +83,7 @@ export function WorkspaceIntegratedHeaderBridge({
       avatarUrl={avatarUrl}
       inboxCount={inboxCount}
       showSearch={ctx.showSearch}
+      mobileHome={mobileHome}
     />
   );
 }

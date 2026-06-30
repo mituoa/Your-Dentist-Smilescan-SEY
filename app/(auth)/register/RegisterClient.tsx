@@ -24,7 +24,6 @@ import {
 import { RegisterPasswordGuidance } from "@/components/auth/register-password-guidance";
 import { RegisterSuccessWaiting } from "@/components/auth/register-success-waiting";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
-import { PUBLIC_BRAND_TAGLINE } from "@/lib/brand/constants";
 import { userFacingAuthError } from "@/lib/auth-user-facing-errors";
 import { REGISTER_CONTACT_ROLES } from "@/lib/auth/register-contact-roles";
 import {
@@ -763,14 +762,18 @@ export function RegisterClient(props: {
           )}
 
           {presentation === "page" && !props.success ? (
-            <h1 className="yd-auth-register-page-title">Registrierung</h1>
+            registrationStep < 4 ? (
+              <h1 className="yd-auth-register-page-title">Registrierung</h1>
+            ) : null
           ) : null}
 
+            {presentation !== "page" ? (
             <div className="yd-auth-register-header">
               <div className="mb-5 flex justify-center pb-1 md:mb-6">
-                <YourDentistBrandLockup size="md" centered tagline={PUBLIC_BRAND_TAGLINE} />
+                <YourDentistBrandLockup size="md" centered tagline={null} />
               </div>
             </div>
+            ) : null}
 
             <div className="yd-auth-register-body">
               {props.success ? (
@@ -1150,23 +1153,23 @@ export function RegisterClient(props: {
 
                     <div className="min-w-0">
                       {!licenseFrontFile && !licenseBackFile ? (
-                        <div className="mb-4 rounded-xl border border-slate-200/90 bg-slate-50/50 px-4 py-3.5 text-left">
-                          <p className="text-[12px] font-medium text-slate-800">Gute Aufnahme:</p>
-                          <ul className="mt-2 space-y-1 text-[12px] leading-relaxed text-slate-600">
-                            <li className="flex gap-2">
-                              <span className="text-green-700" aria-hidden>
+                        <div className="yd-reg-proof-tip">
+                          <p className="yd-reg-proof-tip__title">Gute Aufnahme:</p>
+                          <ul className="yd-reg-proof-tip__list">
+                            <li>
+                              <span className="yd-reg-proof-tip__check" aria-hidden>
                                 ✓
                               </span>
                               vollständig sichtbar
                             </li>
-                            <li className="flex gap-2">
-                              <span className="text-green-700" aria-hidden>
+                            <li>
+                              <span className="yd-reg-proof-tip__check" aria-hidden>
                                 ✓
                               </span>
                               gute Beleuchtung
                             </li>
-                            <li className="flex gap-2">
-                              <span className="text-green-700" aria-hidden>
+                            <li>
+                              <span className="yd-reg-proof-tip__check" aria-hidden>
                                 ✓
                               </span>
                               Text lesbar
@@ -1236,9 +1239,9 @@ export function RegisterClient(props: {
                           {licenseUploadError}
                         </p>
                       ) : null}
-                      <div className="mt-4 flex gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/40 px-4 py-3.5 text-left">
+                      <div className="yd-reg-proof-trust">
                         <svg
-                          className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
+                          className="yd-reg-proof-trust__icon h-4 w-4"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -1251,7 +1254,7 @@ export function RegisterClient(props: {
                             d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
                           />
                         </svg>
-                        <p className="text-[12px] leading-relaxed text-slate-600">
+                        <p className="yd-reg-proof-trust__text">
                           Ihre Angaben werden geschützt übertragen und ausschließlich zur Einrichtung Ihres
                           Praxiszugangs verwendet.
                         </p>
@@ -1301,7 +1304,7 @@ export function RegisterClient(props: {
 
                   <form
                     action={props.signUpAction}
-                    className="block min-w-0 space-y-8"
+                    className="block min-w-0 space-y-5"
                     onSubmit={(e) => {
                       const sub = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null | undefined;
                       registerStep4SubmitIntentRef.current =
@@ -1321,7 +1324,7 @@ export function RegisterClient(props: {
 
                       <section
                         aria-labelledby="reg-step4-agreements-heading"
-                        className="mt-8 border-t border-slate-100 pt-6"
+                        className="mt-5 border-t border-slate-100 pt-5"
                       >
                           <h4
                             id="reg-step4-agreements-heading"
@@ -1422,13 +1425,6 @@ export function RegisterClient(props: {
                     />
                     {props.inviteToken ? (
                       <input type="hidden" name="invite_token" value={props.inviteToken} />
-                    ) : null}
-
-                    {presentation === "page" ? (
-                      <p className="yd-auth-register-approval-note" role="note">
-                        Mit Absenden schließen Sie den Praxiszugang ab. Die Abbuchung startet erst nach
-                        Freischaltung Ihrer Praxis.
-                      </p>
                     ) : null}
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">

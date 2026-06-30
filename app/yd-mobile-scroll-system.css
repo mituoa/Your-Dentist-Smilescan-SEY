@@ -153,6 +153,84 @@
     min-height: 0 !important;
   }
 
+  /* Settings — ein Scroll (main), kein verschachtelter Hub-Scroll */
+  html[data-yd-scroll-owner="main"] main:has(.yd-settings-v2) .yd-settings-v2,
+  html[data-yd-scroll-owner="main"] main:has(.yd-settings-v2) .yd-settings-v2__frame,
+  html[data-yd-scroll-owner="main"] main:has(.yd-settings-v2) .yd-settings-v2__layout--mobile-hub {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* Tracker: Liste bis zur unteren Nav nutzen */
+  html[data-yd-scroll-owner="module"] .yd-workspace main:has(.yd-inbox-workspace) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  html[data-yd-scroll-owner="module"] main:has(.yd-inbox-workspace) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="module"] main:has(.yd-inbox-workspace) .yd-awaken-canvas > .relative,
+  html[data-yd-scroll-owner="module"] main:has(.yd-inbox-workspace) .yd-inbox-workspace {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  html[data-yd-scroll-owner="module"] .yd-tracker-shell--mobile-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  html[data-yd-scroll-owner="module"] .yd-tracker-shell--mobile-list .yd-tracker-shell__inbox,
+  html[data-yd-scroll-owner="module"] .yd-tracker-mobile-inbox {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  html[data-yd-scroll-owner="module"] .yd-tracker-mobile-inbox__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  /* Module-Routen: kein doppelter Bottom-Nav-Abstand unter der Canvas */
+  html[data-yd-scroll-owner="module"] .yd-workspace main {
+    padding-bottom: 0 !important;
+  }
+
+  /* Main-Scroll: Canvas wächst mit Inhalt — kein Abschneiden mitten im Screen */
+  html[data-yd-scroll-owner="main"] main:has(.yd-settings-v2),
+  html[data-yd-scroll-owner="main"] main:has(.yd-journal-v6),
+  html[data-yd-scroll-owner="main"] main:has(.care-center) {
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  html[data-yd-scroll-owner="main"] main:has(.yd-settings-v2) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="main"] main:has(.yd-settings-v2) .yd-awaken-canvas > .relative,
+  html[data-yd-scroll-owner="main"] main:has(.yd-journal-v6) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="main"] main:has(.yd-journal-v6) .yd-awaken-canvas > .relative,
+  html[data-yd-scroll-owner="main"] main:has(.care-center) .yd-awaken-canvas,
+  html[data-yd-scroll-owner="main"] main:has(.care-center) .yd-awaken-canvas > .relative {
+    display: block !important;
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  html[data-yd-scroll-owner="main"] .yd-journal-v6,
+  html[data-yd-scroll-owner="main"] .care-center {
+    overflow: visible !important;
+    flex: none !important;
+  }
+
   html[data-yd-scroll-owner="main"] main:has(.yd-profile-solutions-workspace) .yd-awaken-canvas > .relative,
   html[data-yd-scroll-owner="main"] main:has(.yd-profile-editor-workspace) .yd-awaken-canvas > .relative {
     overflow: visible !important;
