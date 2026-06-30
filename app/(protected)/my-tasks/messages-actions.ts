@@ -110,6 +110,70 @@ export async function createDirectConversation(recipientUserId: string): Promise
   return { ok: true, conversationId: conv.id };
 }
 
+const PERSONAL_NOTES_TITLE = "Eigene Notizen";
+
+async function ensurePersonalNotesConversation(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  workspaceId: string,
+  userId: string
+): Promise<string | null> {
+  const { data: myConvs } = await supabase
+    .from("relay_conversation_members")
+    .select("conversation_id")
+    .eq("user_id", userId);
+
+  const myIds = (myConvs || []).map((c) => c.conversation_id);
+  if (myIds.length > 0) {
+    const { data: groups } = await supabase
+      .from("relay_conversations")
+      .select("id, title")
+      .eq("workspace_id", workspaceId)
+      .eq("kind", "group")
+      .in("id", myIds);
+
+    for (const group of groups || []) {
+      if (group.title !== PERSONAL_NOTES_TITLE) continue;
+      const { data: members } = await supabase
+        .from("relay_conversation_members")
+        .select("user_id")
+        .eq("conversation_id", group.id);
+      const memberIds = (members || []).map((m) => m.user_id);
+      if (memberIds.length === 1 && memberIds[0] === userId) {
+        return group.id as string;
+      }
+    }
+  }
+
+  const { data: conv, error } = await supabase
+    .from("relay_conversations")
+    .insert({
+      workspace_id: workspaceId,
+      kind: "group",
+      title: PERSONAL_NOTES_TITLE,
+      created_by: userId,
+    })
+    .select("id")
+    .single();
+
+  if (error || !conv?.id) {
+    console.error("[ensurePersonalNotesConversation]", error?.code);
+    return null;
+  }
+
+  const { error: memErr } = await supabase.from("relay_conversation_members").insert({
+    conversation_id: conv.id,
+    user_id: userId,
+    last_read_at: new Date().toISOString(),
+  });
+
+  if (memErr) {
+    await supabase.from("relay_conversations").delete().eq("id", conv.id);
+    return null;
+  }
+
+  return conv.id as string;
+}
+
 export async function createGroupConversation(formData: FormData): Promise<{
   ok?: boolean;
   conversationId?: string;
@@ -247,7 +311,17 @@ export async function sendRelayMessageToRecipient(input: {
       .map((m) => m.user_id as string)
       .filter((id) => id !== user.id);
     if (memberIds.length === 0) {
-      return { error: "Keine weiteren Teammitglieder gefunden." };
+      const conversationId = await ensurePersonalNotesConversation(
+        supabase,
+        workspace.workspace_id,
+        user.id
+      );
+      if (!conversationId) {
+        return { error: "Nachricht konnte nicht gesendet werden." };
+      }
+      const sent = await sendRelayMessage(conversationId, trimmed);
+      if (sent.error) return { error: sent.error };
+      return { ok: true, conversationId };
     }
 
     const fd = new FormData();

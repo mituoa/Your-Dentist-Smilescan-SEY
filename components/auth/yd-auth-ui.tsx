@@ -151,3 +151,28 @@ export function YdAuthLegalFooter(props: {
     </div>
   );
 }
+
+/** Rechtliches unterhalb der Login-Karte — nicht im Formularbereich. */
+export function YdLoginEntryFooter(props: { className?: string }) {
+  return (
+    <nav className={cn("yd-login-entry-footer", props.className)} aria-label="Weitere Optionen">
+      <div className="yd-login-entry-footer-links">
+        <Link prefetch href="/?welcome=1" className="yd-login-entry-footer-link">
+          Zur Startseite
+        </Link>
+        <span className="yd-login-entry-footer-sep" aria-hidden>
+          ·
+        </span>
+        <Link href="/trust/privacy" className="yd-login-entry-footer-link">
+          Datenschutz
+        </Link>
+        <span className="yd-login-entry-footer-sep" aria-hidden>
+          ·
+        </span>
+        <Link href="/trust/imprint" className="yd-login-entry-footer-link">
+          Impressum
+        </Link>
+      </div>
+    </nav>
+  );
+}

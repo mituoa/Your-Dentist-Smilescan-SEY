@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 export function TrustMobileNav() {
   const pathname = usePathname();
 
+  /** Übersicht nutzt Karten als Navigation — horizontale Liste wäre redundant. */
+  if (pathname === "/trust") return null;
+
   return (
     <nav className="yd-trust-mobile-nav lg:hidden" aria-label="Trust Center">
       <ul className="yd-trust-mobile-nav__list">

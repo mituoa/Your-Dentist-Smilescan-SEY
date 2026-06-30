@@ -50,12 +50,22 @@ export function WorkspaceIntegratedHeaderBridge({
   const dashboardEditorial =
     onDashboard && dashboardHeaderSummary
       ? dashboardHeaderSummary.editorial
-      : onTracker || onRelay
+      : onRelay
         ? { statusTitle: "", statusPrimary: "", metricsLine: "" }
         : null;
 
-  const subtitle = onRelay || onDashboard || onTracker ? "" : ctx.subtitle;
-  const subtitleMeta = onRelay || onDashboard || onTracker ? "" : ctx.subtitleMeta;
+  const subtitle =
+    onDashboard || onRelay
+      ? ""
+      : onTracker && trackerHeaderSummary
+        ? trackerHeaderSummary.lead
+        : ctx.subtitle;
+  const subtitleMeta =
+    onDashboard || onRelay
+      ? ""
+      : onTracker && trackerHeaderSummary?.breakdown
+        ? trackerHeaderSummary.breakdown
+        : ctx.subtitleMeta;
 
   const greeting = useMemo(() => {
     return resolveWorkspaceGreeting(new Date().getHours());

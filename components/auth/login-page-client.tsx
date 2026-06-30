@@ -326,17 +326,6 @@ export function LoginPageClient({
         ) : null}
 
         <LoginRegisterCta inviteToken={inviteToken} prefilledEmail={prefilledEmail} />
-
-        <footer className="yd-auth-legal-minimal">
-          <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
-            <Link href="/trust/privacy" className="yd-auth-legal-minimal-link">
-              Datenschutz
-            </Link>
-            <Link href="/trust/imprint" className="yd-auth-legal-minimal-link">
-              Impressum
-            </Link>
-          </nav>
-        </footer>
       </div>
   );
 }

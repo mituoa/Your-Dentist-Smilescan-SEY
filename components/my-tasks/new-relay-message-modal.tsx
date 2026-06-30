@@ -92,6 +92,8 @@ function RelayMessageCreateForm({
   const [msgSubmissionId, setMsgSubmissionId] = useState(submissionId ?? "");
 
   const busy = isPending;
+  const otherMembers = members.filter((m) => m.user_id !== currentUserId);
+  const hasOtherMembers = otherMembers.length > 0;
 
   useEffect(() => {
     if (membersProp?.length) {
@@ -116,6 +118,14 @@ function RelayMessageCreateForm({
   }, [membersProp]);
 
   useEffect(() => {
+    if (!hasOtherMembers) {
+      setMsgRecipientMode("team");
+      setMsgRecipientId("");
+      setMsgRecipientIds([]);
+    }
+  }, [hasOtherMembers]);
+
+  useEffect(() => {
     if (!error) return;
     errorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [error]);
@@ -136,11 +146,11 @@ function RelayMessageCreateForm({
       setError("Bitte schreiben Sie eine Nachricht.");
       return;
     }
-    if (msgRecipientMode === "person" && !msgRecipientId) {
+    if (hasOtherMembers && msgRecipientMode === "person" && !msgRecipientId) {
       setError("Bitte wählen Sie einen Empfänger.");
       return;
     }
-    if (msgRecipientMode === "people" && msgRecipientIds.length === 0) {
+    if (hasOtherMembers && msgRecipientMode === "people" && msgRecipientIds.length === 0) {
       setError("Bitte wählen Sie mindestens eine Person.");
       return;
     }
@@ -148,7 +158,7 @@ function RelayMessageCreateForm({
 
     startTransition(async () => {
       const res = await sendRelayMessageToRecipient({
-        assignAllTeam: msgRecipientMode === "team",
+        assignAllTeam: !hasOtherMembers || msgRecipientMode === "team",
         recipientUserId: msgRecipientMode === "person" ? msgRecipientId : undefined,
         recipientUserIds: msgRecipientMode === "people" ? msgRecipientIds : undefined,
         body: messageBody.trim(),
@@ -204,14 +214,20 @@ function RelayMessageCreateForm({
           className="m-0 min-w-0 border-0 p-0 disabled:pointer-events-none disabled:opacity-[0.58]"
         >
           <MedicalFormSection title="Empfänger">
-            <MedicalFormSegmented
-              name="msg_recipient_mode"
-              aria-label="Empfänger"
-              options={MSG_RECIPIENT_OPTIONS}
-              value={msgRecipientMode}
-              onChange={(v) => v && setMsgRecipientMode(v)}
-              disabled={busy}
-            />
+            {hasOtherMembers ? (
+              <MedicalFormSegmented
+                name="msg_recipient_mode"
+                aria-label="Empfänger"
+                options={MSG_RECIPIENT_OPTIONS}
+                value={msgRecipientMode}
+                onChange={(v) => v && setMsgRecipientMode(v)}
+                disabled={busy}
+              />
+            ) : (
+              <p className="yd-medical-form-context-note">
+                Noch keine weiteren Teammitglieder — Nachricht wird als eigene Notiz gespeichert.
+              </p>
+            )}
             {msgRecipientMode === "person" ? (
               <div className="mt-4">
                 <MedicalFormLabel htmlFor={`${formId}-msg-to`}>Person</MedicalFormLabel>

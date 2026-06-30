@@ -30,7 +30,8 @@ export function NewPraxisTaskModal({
       cancelHref={cancelHref}
       onClose={onClose}
       overlay="workspace"
-      initialMode={initialMode}
+      formVariant="modal"
+      initialMode={initialMode === "assign" ? "assign" : "task"}
       submissionId={submissionId}
       initialTitle={initialTitle}
       initialDescription={initialDescription}

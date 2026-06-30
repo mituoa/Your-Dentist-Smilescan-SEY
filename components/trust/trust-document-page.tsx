@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ChevronRight, Shield } from "lucide-react";
 
 import { TrustDocumentActions } from "@/components/trust/trust-document-actions";
+import { TrustCenterIndex } from "@/components/trust/trust-center-index";
 import { TrustSidebar } from "@/components/trust/trust-sidebar";
 import { TrustToc } from "@/components/trust/trust-toc";
+import { TRUST_HOME_SECTIONS } from "@/lib/trust/navigation";
 import {
   TRUST_DRAFT_BANNER,
   TRUST_DRAFT_FOOTER,
@@ -68,52 +69,6 @@ export function TrustDocumentPage({ document, canonicalPath }: TrustDocumentPage
   );
 }
 
-type TrustHomeHeroProps = {
-  children?: React.ReactNode;
-};
-
-export function TrustHomeHero({ children }: TrustHomeHeroProps) {
-  return (
-    <div className="yd-trust-home">
-      <div className="yd-trust-home__hero">
-        <div className="yd-trust-home__badge">
-          <Shield className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-          Trust Center
-        </div>
-        <h1 className="yd-trust-home__title">Trust Center</h1>
-        <p className="yd-trust-home__lead">
-          Datenschutz, Sicherheit und Transparenz für moderne Zahnarztpraxen.
-        </p>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-type TrustHomeCardsProps = {
-  cards: Array<{
-    href: string;
-    title: string;
-    description: string;
-    accent: string;
-  }>;
-};
-
-export function TrustHomeCards({ cards }: TrustHomeCardsProps) {
-  return (
-    <div className="yd-trust-home__grid">
-      {cards.map((card) => (
-        <Link key={card.href} href={card.href} className={`yd-trust-card yd-trust-card--${card.accent}`}>
-          <div className="yd-trust-card__inner">
-            <h2 className="yd-trust-card__title">{card.title}</h2>
-            <p className="yd-trust-card__desc">{card.description}</p>
-            <span className="yd-trust-card__cta">
-              Lesen
-              <ChevronRight className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-            </span>
-          </div>
-        </Link>
-      ))}
-    </div>
-  );
+export function TrustHomeOverview() {
+  return <TrustCenterIndex sections={TRUST_HOME_SECTIONS} titleAs="h1" />;
 }

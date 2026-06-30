@@ -1078,9 +1078,17 @@ html:has(.yd-public-site-page) {
 @media (min-width: 640px) {
   .yd-public-site-footer-inner {
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
   }
+}
+
+.yd-public-site-footer--compact .yd-public-site-footer-inner {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.625rem 1.25rem;
 }
 
 .yd-public-site-footer-nav {
@@ -1972,9 +1980,11 @@ button.yd-public-site-cta-register {
   }
 
   .yd-public-site-footer--compact .yd-public-site-footer-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
   }
 
   .yd-public-site-footer--compact .yd-public-site-footer-nav {

@@ -1,4 +1,4 @@
-import type { TrustHomeCard, TrustNavItem } from "@/lib/trust/types";
+import type { TrustHomeCard, TrustHomeSection, TrustNavItem } from "@/lib/trust/types";
 
 export type TrustSlug =
   | "legal"
@@ -142,6 +142,31 @@ export const TRUST_HOME_CARDS: TrustHomeCard[] = [
     title: "Impressum",
     description: "Rechtliche Anbieterinformationen.",
     accent: "imprint",
+  },
+  {
+    slug: "cookies",
+    href: "/trust/cookies",
+    title: "Cookies",
+    description: "Einsatz und Verwaltung von Cookies auf der Plattform.",
+    accent: "cookies",
+  },
+];
+
+export const TRUST_HOME_SECTIONS: TrustHomeSection[] = [
+  {
+    id: "platform",
+    kicker: "Plattform",
+    slugs: ["privacy", "security", "ai-principles"],
+  },
+  {
+    id: "patients",
+    kicker: "Patienten",
+    slugs: ["patient-privacy"],
+  },
+  {
+    id: "legal",
+    kicker: "Rechtliches",
+    slugs: ["terms", "cookies", "imprint"],
   },
 ];
 

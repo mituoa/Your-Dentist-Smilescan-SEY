@@ -31,9 +31,15 @@ import { taskMutationClientFailureMessage } from "@/lib/tasks/task-mutation-clie
 
 interface CommentFormProps {
   taskId: string;
+  placeholder?: string;
+  label?: string;
 }
 
-export function CommentForm({ taskId }: CommentFormProps) {
+export function CommentForm({
+  taskId,
+  placeholder = "Kurze Notiz zur Dokumentation …",
+  label = "Bemerkung hinzufügen",
+}: CommentFormProps) {
   const router = useRouter();
   const [content, setContent] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -62,10 +68,11 @@ export function CommentForm({ taskId }: CommentFormProps) {
       aria-busy={isPending}
       className="min-w-0 touch-manipulation space-y-2 border-0 p-0 disabled:[&_textarea]:cursor-not-allowed disabled:[&_textarea]:opacity-60"
     >
+      <p className="text-sm font-medium text-[#334155]">{label}</p>
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Kurze Notiz zur Dokumentation …"
+        placeholder={placeholder}
         rows={3}
         maxLength={2000}
         className="w-full resize-none rounded-md border border-border bg-surface-card px-3 py-2 text-base leading-6 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-brand/40"

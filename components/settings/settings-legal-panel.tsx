@@ -1,11 +1,5 @@
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-
-import {
-  TRUST_DOCUMENT_LINKS,
-  TRUST_FOOTER_LINK,
-  mapContractVersionToLabel,
-} from "@/lib/trust/navigation";
+import { TrustCenterIndex } from "@/components/trust/trust-center-index";
+import { TRUST_HOME_SECTIONS, mapContractVersionToLabel } from "@/lib/trust/navigation";
 import type { WorkspaceContractAcceptance } from "@/lib/types/settings-legal";
 
 type SettingsLegalPanelProps = {
@@ -36,9 +30,7 @@ export function SettingsLegalPanel({ contract }: SettingsLegalPanelProps) {
       <div className="yd-settings-v2__panel-head yd-settings-v2__panel-head--solo">
         <div>
           <h2 className="yd-settings-v2__panel-title">Rechtliches</h2>
-          <p className="yd-settings-v2__panel-copy">
-            Akzeptierte Vertragsstände und Zugriff auf das Trust Center.
-          </p>
+          <p className="yd-settings-v2__panel-copy">Akzeptierte Vertragsstände.</p>
         </div>
       </div>
 
@@ -64,29 +56,8 @@ export function SettingsLegalPanel({ contract }: SettingsLegalPanelProps) {
         </div>
       </div>
 
-      <p className="yd-settings-v2__field-label yd-settings-legal__links-label">Trust Center</p>
-      <div className="yd-settings-legal__links">
-        <Link
-          href={TRUST_FOOTER_LINK.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="yd-settings-legal__link-row"
-        >
-          {TRUST_FOOTER_LINK.label}
-          <ChevronRight className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-        </Link>
-        {TRUST_DOCUMENT_LINKS.map((entry) => (
-          <Link
-            key={entry.href}
-            href={entry.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="yd-settings-legal__link-row"
-          >
-            {entry.label}
-            <ChevronRight className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-          </Link>
-        ))}
+      <div className="yd-settings-legal__trust">
+        <TrustCenterIndex sections={TRUST_HOME_SECTIONS} openInNewTab className="yd-trust-index--settings" />
       </div>
     </div>
   );

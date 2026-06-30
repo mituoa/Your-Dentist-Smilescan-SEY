@@ -2,7 +2,9 @@
 
 import {
   ClipboardList,
+  ChevronRight,
   MessageSquare,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,8 +25,10 @@ import {
   RELAY_TASK_SCOPE_TABS,
   buildRelayKanbanBoard,
   buildRelayTeamInboxRows,
+  countLiveKanbanCardsInColumn,
   countRelayMessageInboxTabs,
   countRelayTaskScope,
+  kanbanBoardShowsOnlyExamples,
   type RelayMessageInboxTab,
   type RelayTaskScopeTab,
 } from "@/lib/relay/relay-work-center-model";
@@ -61,6 +65,59 @@ function useRelayKanbanMobile(): boolean {
     },
     () => window.matchMedia(RELAY_KANBAN_MOBILE_MQ).matches,
     () => false
+  );
+}
+
+function RelayAreaNavItem({
+  active,
+  onClick,
+  icon: Icon,
+  title,
+  shortTitle,
+  layout = "desktop",
+  count,
+  countLabel,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: LucideIcon;
+  title: string;
+  shortTitle?: string;
+  layout?: "desktop" | "mobile";
+  count?: number;
+  countLabel?: string;
+}) {
+  const label = layout === "mobile" && shortTitle ? shortTitle : title;
+
+  return (
+    <button
+      type="button"
+      className={cn(
+        "relay-center__area",
+        layout === "mobile" && "relay-center__area--mobile-seg",
+        active && "relay-center__area--active"
+      )}
+      onClick={onClick}
+      aria-current={active ? "true" : undefined}
+      aria-label={layout === "mobile" && shortTitle ? title : undefined}
+    >
+      <span className="relay-center__area-icon" aria-hidden>
+        <Icon strokeWidth={1.75} />
+      </span>
+      <span className="relay-center__area-title">{label}</span>
+      {count != null && count > 0 ? (
+        <span className="relay-center__area-count" aria-label={countLabel}>
+          {count}
+        </span>
+      ) : null}
+      {layout === "desktop" ? (
+        <ChevronRight
+          className={cn("relay-center__area-chevron", active && "relay-center__area-chevron--visible")}
+          strokeWidth={2}
+          aria-hidden
+        />
+      ) : null}
+    </button>
   );
 }
 
@@ -134,6 +191,12 @@ export function RelayWorkCenter({
     [conversations, messageTab, searchQuery]
   );
 
+  const showsOnlyExamples = useMemo(() => kanbanBoardShowsOnlyExamples(board), [board]);
+  const decisionLiveCount = useMemo(
+    () => countLiveKanbanCardsInColumn(board.decision),
+    [board.decision]
+  );
+
   const activeArea =
     searchParams.get("area") === "nachrichten" || searchParams.get("conversation")
       ? "nachrichten"
@@ -148,93 +211,63 @@ export function RelayWorkCenter({
     });
   };
 
+  const liveTaskCount = scopeCounts.all;
+
   return (
     <div className="relay-center relay-center--premium relay-center--v3" data-relay-ui="work-center">
       <RelayCommandTaskPrefill />
 
       <div className="relay-center__layout">
-        <nav className="relay-center__areas relay-center__areas--desktop" aria-label="Arbeitsbereiche">
+        <nav className="relay-center__areas relay-center__areas--desktop" aria-label="Bereich wählen">
           <ul className="relay-center__areas-list">
             <li>
-              <button
-                type="button"
-                className={cn(
-                  "relay-center__area",
-                  activeArea === "aufgaben" && "relay-center__area--active"
-                )}
+              <RelayAreaNavItem
+                active={activeArea === "aufgaben"}
                 onClick={() => openArea("aufgaben")}
-                aria-current={activeArea === "aufgaben" ? "true" : undefined}
-              >
-                <span className="relay-center__area-icon" aria-hidden>
-                  <ClipboardList strokeWidth={1.75} />
-                </span>
-                <span className="relay-center__area-copy">
-                  <span className="relay-center__area-title">Aufgaben</span>
-                  <span className="relay-center__area-hint">Kanban & Freigaben</span>
-                </span>
-              </button>
+                icon={ClipboardList}
+                title="Aufgaben"
+                count={liveTaskCount}
+                countLabel={`${liveTaskCount} offene Aufgaben`}
+              />
             </li>
             <li>
-              <button
-                type="button"
-                className={cn(
-                  "relay-center__area",
-                  activeArea === "nachrichten" && "relay-center__area--active"
-                )}
+              <RelayAreaNavItem
+                active={activeArea === "nachrichten"}
                 onClick={() => openArea("nachrichten")}
-                aria-current={activeArea === "nachrichten" ? "true" : undefined}
-              >
-                <span className="relay-center__area-icon" aria-hidden>
-                  <MessageSquare strokeWidth={1.75} />
-                </span>
-                <span className="relay-center__area-copy">
-                  <span className="relay-center__area-title">
-                    <span className="relay-center__area-label relay-center__area-label--long">Teamnachrichten</span>
-                    <span className="relay-center__area-label relay-center__area-label--short">Team</span>
-                  </span>
-                  <span className="relay-center__area-hint">Interne Übergaben</span>
-                </span>
-                {messageCounts.unread > 0 ? (
-                  <span className="relay-center__area-count">{messageCounts.unread}</span>
-                ) : null}
-              </button>
+                icon={MessageSquare}
+                title="Teamnachrichten"
+                count={messageCounts.unread}
+                countLabel={`${messageCounts.unread} ungelesene Nachrichten`}
+              />
             </li>
           </ul>
         </nav>
 
         <div className="relay-center__main">
-          <nav className="relay-center__areas relay-center__areas--mobile" aria-label="Arbeitsbereich wählen">
+          <nav className="relay-center__areas relay-center__areas--mobile" aria-label="Bereich wählen">
             <ul className="relay-center__areas-list relay-center__areas-list--mobile">
               <li>
-                <button
-                  type="button"
-                  className={cn(
-                    "relay-center__area",
-                    activeArea === "aufgaben" && "relay-center__area--active"
-                  )}
+                <RelayAreaNavItem
+                  layout="mobile"
+                  active={activeArea === "aufgaben"}
                   onClick={() => openArea("aufgaben")}
-                  aria-current={activeArea === "aufgaben" ? "true" : undefined}
-                >
-                  <ClipboardList strokeWidth={1.75} aria-hidden />
-                  <span>Aufgaben</span>
-                </button>
+                  icon={ClipboardList}
+                  title="Aufgaben"
+                  count={liveTaskCount}
+                  countLabel={`${liveTaskCount} offene Aufgaben`}
+                />
               </li>
               <li>
-                <button
-                  type="button"
-                  className={cn(
-                    "relay-center__area",
-                    activeArea === "nachrichten" && "relay-center__area--active"
-                  )}
+                <RelayAreaNavItem
+                  layout="mobile"
+                  active={activeArea === "nachrichten"}
                   onClick={() => openArea("nachrichten")}
-                  aria-current={activeArea === "nachrichten" ? "true" : undefined}
-                >
-                  <MessageSquare strokeWidth={1.75} aria-hidden />
-                  <span>Teamnachrichten</span>
-                  {messageCounts.unread > 0 ? (
-                    <span className="relay-center__area-count">{messageCounts.unread}</span>
-                  ) : null}
-                </button>
+                  icon={MessageSquare}
+                  title="Teamnachrichten"
+                  shortTitle="Team"
+                  count={messageCounts.unread}
+                  countLabel={`${messageCounts.unread} ungelesene Nachrichten`}
+                />
               </li>
             </ul>
           </nav>
@@ -269,7 +302,7 @@ export function RelayWorkCenter({
                       }
                     >
                       {tab.label}
-                      <span className="relay-center__chip-count">{count}</span>
+                      {count > 0 ? <span className="relay-center__chip-count">{count}</span> : null}
                     </button>
                   );
                 })}
@@ -280,7 +313,7 @@ export function RelayWorkCenter({
               <div className="relay-center__chips" role="tablist" aria-label="Kanban-Spalte">
                 {RELAY_KANBAN_COLUMNS.map((col) => {
                   const active = mobileKanbanCol === col.id;
-                  const count = board[col.id].length;
+                  const count = countLiveKanbanCardsInColumn(board[col.id]);
                   return (
                     <button
                       key={col.id}
@@ -295,16 +328,22 @@ export function RelayWorkCenter({
                       }
                     >
                       {col.id === "decision"
-                        ? "Entscheidung"
+                        ? "Offen"
                         : col.id === "in_progress"
                           ? "Bearbeitung"
-                          : "Erledigt"}
-                      <span className="relay-center__chip-count">{count}</span>
+                          : "Erl."}
+                      {count > 0 ? <span className="relay-center__chip-count">{count}</span> : null}
                     </button>
                   );
                 })}
               </div>
             </div>
+
+            {showsOnlyExamples ? (
+              <p className="relay-center__example-notice" role="note">
+                Beispielvorgänge — so könnte Ihr Aufgabenboard aussehen, sobald das Team Relay nutzt.
+              </p>
+            ) : null}
 
             <RelayKanbanBoard
               board={board}
@@ -312,6 +351,7 @@ export function RelayWorkCenter({
               currentUserId={userId}
               isDoctor={isDoctor}
               mobileColumn={isKanbanMobile ? mobileKanbanCol : null}
+              decisionLiveCount={decisionLiveCount}
             />
           </section>
           ) : (

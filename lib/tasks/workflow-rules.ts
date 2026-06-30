@@ -32,26 +32,47 @@ export function taskStatusToColumn(status: TaskDbStatus): BoardColumnId {
 export function canMoveTask(task: MyTask, from: BoardColumnId, to: BoardColumnId, ctx: RuleContext): boolean {
   if (from === to) return true;
 
-  const isInternalSelfTask = task.submission_id === null && task.created_by === ctx.currentUserId;
+  const isCreator = task.created_by === ctx.currentUserId;
+  const isAssigned =
+    task.assignee_ids.includes(ctx.currentUserId) ||
+    task.specific_recipient_id === ctx.currentUserId;
+  const isDoctorReviewer =
+    ctx.isDoctor &&
+    (task.recipient_type === "doctor_only" || isCreator || task.status === "pending_review");
+
+  const isInternalSelfTask =
+    task.submission_id === null && isCreator && task.assignee_ids.length === 0;
+
   if (isInternalSelfTask) {
-    return from === "open" && to === "done";
+    return (
+      (from === "open" && (to === "pending" || to === "done")) ||
+      (from === "pending" && (to === "open" || to === "done"))
+    );
   }
 
-  const isAssignedTask = task.assignee_ids.includes(ctx.currentUserId);
-  if (isAssignedTask) {
-    return from === "open" && to === "pending";
+  const canParticipate = isAssigned || isCreator || isDoctorReviewer;
+  if (!canParticipate) return false;
+
+  if ((from === "open" && to === "pending") || (from === "pending" && to === "open")) {
+    return true;
   }
 
   if (from === "pending" && to === "done") {
-    return ctx.isDoctor && task.created_by === ctx.currentUserId;
+    return ctx.isDoctor;
   }
 
-  if (ctx.isDoctor && task.created_by === ctx.currentUserId) {
-    return (
-      (from === "open" && to === "pending") ||
-      (from === "open" && to === "done") ||
-      (from === "pending" && to === "done")
-    );
+  if (from === "open" && to === "done") {
+    if (!canParticipate) return false;
+    if (ctx.isDoctor) return true;
+    return isAssigned;
+  }
+
+  if (from === "done" && to === "open") {
+    return ctx.isDoctor;
+  }
+
+  if (from === "done" && to === "pending") {
+    return ctx.isDoctor;
   }
 
   return false;

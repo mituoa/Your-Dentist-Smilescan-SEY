@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { ForgotPasswordCard } from "@/components/auth/forgot-password-card";
+import { YdLoginEntryFooter } from "@/components/auth/yd-auth-ui";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 
@@ -66,18 +67,9 @@ export function ForgotPasswordPageClient({
               </p>
             </div>
 
-            <footer className="yd-auth-legal-minimal">
-              <nav className="yd-auth-legal-minimal-links" aria-label="Rechtliches">
-                <Link href="/trust/privacy" className="yd-auth-legal-minimal-link">
-                  Datenschutz
-                </Link>
-                <Link href="/trust/imprint" className="yd-auth-legal-minimal-link">
-                  Impressum
-                </Link>
-              </nav>
-            </footer>
           </div>
         </section>
+        <YdLoginEntryFooter />
       </main>
     </YdPublicOsEnvironment>
   );

@@ -20,6 +20,7 @@ import { CommentForm } from "./comment-form";
 import { CommentThread } from "./comment-thread";
 import { RelayOpsStatusBadge } from "./relay-ops-status-badge";
 import { TaskActions } from "./task-actions";
+import { TaskStatusControl } from "./task-status-control";
 
 /**
  * Aufgaben-Detail-Shell — **Punkt 1 (Zweck)** s. `app/(protected)/my-tasks/[id]/page.tsx`: ruhige Koordination,
@@ -123,6 +124,13 @@ export function TaskDetailView({
   const trackerRecommendation = task.submission_id
     ? inferTrackerRecommendation(task.title, task.description)
     : null;
+  const creatorShort =
+    task.created_by_email?.split("@")[0]?.replace(/[._-]/g, " ") || "Auftraggeber";
+  const canAskCreator =
+    task.status !== "done" &&
+    currentUserId !== task.created_by &&
+    (task.assignee_user_ids.includes(currentUserId) ||
+      task.specific_recipient_id === currentUserId);
 
   return (
     <div
@@ -312,9 +320,23 @@ export function TaskDetailView({
             className={`mb-10 p-4 sm:p-5 ${clinicalCorePanel}`}
             aria-labelledby="task-actions-heading"
           >
-            <h2 id="task-actions-heading" className="sr-only">
+            <h2 id="task-actions-heading" className="mb-3 text-sm font-semibold text-[#334155]">
               Nächste Schritte
             </h2>
+            <TaskStatusControl
+              taskId={task.id}
+              status={task.status}
+              task={{
+                created_by: task.created_by,
+                assignee_ids: task.assignee_user_ids,
+                specific_recipient_id: task.specific_recipient_id,
+                recipient_type: task.recipient_type,
+                submission_id: task.submission_id,
+                recurrence_type: task.recurrence_type,
+              }}
+              currentUserId={currentUserId}
+              isDoctor={isDoctor}
+            />
             <TaskActions
               taskId={task.id}
               status={task.status}
@@ -330,15 +352,23 @@ export function TaskDetailView({
             id="task-comments-heading"
             className="text-sm font-semibold leading-snug text-[#334155]"
           >
-            Historie
+            Notizen & Rückfragen
             <span className="ml-1.5 font-normal tabular-nums text-[#94A3B8]">({comments.length})</span>
           </h2>
           <p className="text-xs leading-relaxed text-[#94A3B8]">
-            Wer, wann, was — dokumentierende Notizen und Systemeinträge.
+            Bemerkungen dokumentieren oder Rückfragen an die auftraggebende Person stellen.
           </p>
           <CommentThread comments={comments} currentUserId={currentUserId} />
           <div className={`border-t pt-4 ${clinicalDividerBorder}`}>
-            <CommentForm taskId={task.id} />
+            <CommentForm
+              taskId={task.id}
+              label={canAskCreator ? `Rückfrage an ${creatorShort}` : "Bemerkung hinzufügen"}
+              placeholder={
+                canAskCreator
+                  ? `Frage oder Hinweis an ${creatorShort} …`
+                  : "Kurze Bemerkung zur Dokumentation …"
+              }
+            />
           </div>
         </section>
         </div>

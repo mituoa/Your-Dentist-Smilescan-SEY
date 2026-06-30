@@ -116,6 +116,8 @@ function RelayQuickCreatePopover({
 
   const domains = relayDomainsForRole(isDoctor);
   const isMobile = useIsMobile();
+  const otherMembers = assignableMembers.filter((m) => m.user_id !== currentUserId);
+  const hasOtherMembers = otherMembers.length > 0;
 
   useEffect(() => setMounted(true), []);
 
@@ -146,6 +148,13 @@ function RelayQuickCreatePopover({
       if (!isMobile) document.removeEventListener("mousedown", onClick);
     };
   }, [isPending, isMobile, onClose]);
+
+  useEffect(() => {
+    if (!hasOtherMembers && assignMode !== "me") {
+      setAssignMode("me");
+      setSelectedIds([]);
+    }
+  }, [hasOtherMembers, assignMode]);
 
   const panelWidth = 400;
   const left = Math.min(
@@ -360,9 +369,18 @@ function RelayQuickCreatePopover({
                   disabled={domainById(domainId).doctorOnly}
                 >
                   <option value="me">Mir zuweisen</option>
-                  <option value="team">Gesamtes Team</option>
-                  <option value="people">Bestimmte Personen</option>
+                  {hasOtherMembers ? (
+                    <>
+                      <option value="team">Gesamtes Team</option>
+                      <option value="people">Bestimmte Personen</option>
+                    </>
+                  ) : null}
                 </select>
+                {!hasOtherMembers ? (
+                  <p className="yd-relay-qc-field__opt mt-1">
+                    Noch keine weiteren Teammitglieder — Aufgabe wird Ihnen zugewiesen.
+                  </p>
+                ) : null}
               </div>
               <div>
                 <label className="yd-relay-qc-field__label" htmlFor={`${formId}-due`}>

@@ -4,10 +4,14 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  TouchSensor,
   closestCenter,
+  pointerWithin,
+  rectIntersection,
   useDroppable,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
@@ -18,6 +22,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 
 import { moveTaskStatusByDrag } from "@/app/(protected)/my-tasks/actions";
@@ -26,6 +31,7 @@ import type { MyTask } from "@/lib/queries/my-tasks";
 import { kanbanColumnToBoardColumn } from "@/lib/relay/relay-kanban-columns";
 import {
   RELAY_KANBAN_COLUMNS,
+  countLiveKanbanCardsInColumn,
   type RelayKanbanCard,
   type RelayKanbanColumnId,
 } from "@/lib/relay/relay-work-center-model";
@@ -40,6 +46,15 @@ type RelayKanbanBoardProps = {
   currentUserId: string;
   isDoctor: boolean;
   mobileColumn?: RelayKanbanColumnId | null;
+  decisionLiveCount?: number;
+};
+
+const kanbanCollisionDetection: CollisionDetection = (args) => {
+  const pointerHits = pointerWithin(args);
+  if (pointerHits.length > 0) return pointerHits;
+  const rectHits = rectIntersection(args);
+  if (rectHits.length > 0) return rectHits;
+  return closestCenter(args);
 };
 
 function findTask(
@@ -103,7 +118,7 @@ function SortableKanbanCard({
       )}
       {...(draggable ? { ...attributes, ...listeners } : {})}
     >
-      <RelayKanbanCardView card={card} done={done} />
+      <RelayKanbanCardView card={card} done={done} isDragging={isDragging} draggable={draggable} />
     </div>
   );
 }
@@ -111,15 +126,21 @@ function SortableKanbanCard({
 function KanbanColumnDrop({
   columnId,
   children,
+  canAcceptDrop,
 }: {
   columnId: RelayKanbanColumnId;
   children: ReactNode;
+  canAcceptDrop: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: columnId });
   return (
     <div
       ref={setNodeRef}
-      className={cn("relay-kanban__cards", isOver && "relay-kanban__cards--over")}
+      className={cn(
+        "relay-kanban__cards",
+        isOver && canAcceptDrop && "relay-kanban__cards--over",
+        isOver && !canAcceptDrop && "relay-kanban__cards--over-denied"
+      )}
     >
       {children}
     </div>
@@ -132,28 +153,51 @@ export function RelayKanbanBoard({
   currentUserId,
   isDoctor,
   mobileColumn = null,
+  decisionLiveCount = 0,
 }: RelayKanbanBoardProps) {
+  const router = useRouter();
   const [board, setBoard] = useState(initialBoard);
   const [activeCard, setActiveCard] = useState<RelayKanbanCard | null>(null);
   const [isPending, startTransition] = useTransition();
   const dragStartRef = useRef<BoardState | null>(null);
+  const activeDropColumnRef = useRef<RelayKanbanColumnId | null>(null);
 
   useEffect(() => {
-    if (!activeCard && !isPending) {
-      setBoard(initialBoard);
-    }
-  }, [initialBoard, activeCard, isPending]);
+    if (activeCard) return;
+    setBoard(initialBoard);
+  }, [initialBoard, activeCard]);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } })
+  );
 
   const visibleColumns = useMemo(() => {
     if (!mobileColumn) return RELAY_KANBAN_COLUMNS;
     return RELAY_KANBAN_COLUMNS.filter((c) => c.id === mobileColumn);
   }, [mobileColumn]);
 
+  const activeTask = useMemo(() => {
+    if (!activeCard?.taskId) return null;
+    return findTask(activeCard.taskId, columns);
+  }, [activeCard, columns]);
+
+  const activeFromColumn = useMemo(() => {
+    if (!activeCard) return null;
+    return findCardColumn(activeCard.id, dragStartRef.current ?? board);
+  }, [activeCard, board]);
+
+  const canDropInColumn = (columnId: RelayKanbanColumnId): boolean => {
+    if (!activeTask || !activeFromColumn) return false;
+    const fromBoard = kanbanColumnToBoardColumn(activeFromColumn);
+    const toBoard = kanbanColumnToBoardColumn(columnId);
+    return canMoveTask(activeTask, fromBoard, toBoard, { currentUserId, isDoctor });
+  };
+
   const onDragStart = (event: DragStartEvent) => {
     const cardId = String(event.active.id).replace("card-", "");
     dragStartRef.current = board;
+    activeDropColumnRef.current = null;
     for (const col of RELAY_KANBAN_COLUMNS) {
       const card = board[col.id].find((c) => c.id === cardId);
       if (card) {
@@ -179,6 +223,8 @@ export function RelayKanbanBoard({
     const toBoard = kanbanColumnToBoardColumn(toCol);
     if (!canMoveTask(task, fromBoard, toBoard, { currentUserId, isDoctor })) return;
 
+    activeDropColumnRef.current = toCol;
+
     setBoard((prev) => {
       const moving = prev[fromCol].find((c) => c.id === cardId);
       if (!moving) return prev;
@@ -195,6 +241,7 @@ export function RelayKanbanBoard({
     const before = dragStartRef.current ?? initialBoard;
     setActiveCard(null);
     dragStartRef.current = null;
+    activeDropColumnRef.current = null;
 
     const fromCol = findCardColumn(cardId, before);
     const toCol = findCardColumn(cardId, board);
@@ -226,14 +273,16 @@ export function RelayKanbanBoard({
       const result = await moveTaskStatusByDrag(card.taskId!, toBoard);
       if (result.error || result.notAllowed) {
         setBoard(before);
+        return;
       }
+      router.refresh();
     });
   };
 
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={kanbanCollisionDetection}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
@@ -244,8 +293,19 @@ export function RelayKanbanBoard({
       >
         {visibleColumns.map((column) => {
           const cards = board[column.id];
+          const liveCount = countLiveKanbanCardsInColumn(cards);
+          const dropAllowed = canDropInColumn(column.id);
           return (
-            <div key={column.id} className="relay-kanban__col" data-column={column.id}>
+            <div
+              key={column.id}
+              className={cn(
+                "relay-kanban__col",
+                column.id === "decision" &&
+                  decisionLiveCount > 0 &&
+                  "relay-kanban__col--has-live-decision"
+              )}
+              data-column={column.id}
+            >
               <header className="relay-kanban__col-head">
                 <div className="relay-kanban__col-label">
                   <span
@@ -253,10 +313,10 @@ export function RelayKanbanBoard({
                     aria-hidden
                   />
                   <h3>{column.label}</h3>
-                  <span className="relay-kanban__count">{cards.length}</span>
+                  {liveCount > 0 ? <span className="relay-kanban__count">{liveCount}</span> : null}
                 </div>
               </header>
-              <KanbanColumnDrop columnId={column.id}>
+              <KanbanColumnDrop columnId={column.id} canAcceptDrop={dropAllowed}>
                 <SortableContext
                   items={cards.map((c) => `card-${c.id}`)}
                   strategy={verticalListSortingStrategy}
@@ -290,7 +350,7 @@ export function RelayKanbanBoard({
       <DragOverlay>
         {activeCard ? (
           <div className="relay-kanban-card-wrap relay-kanban-card-wrap--overlay">
-            <RelayKanbanCardView card={activeCard} />
+            <RelayKanbanCardView card={activeCard} draggable />
           </div>
         ) : null}
       </DragOverlay>

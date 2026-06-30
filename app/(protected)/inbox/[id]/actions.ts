@@ -7,6 +7,10 @@ import { buildTerminOfferDraft } from "@/lib/clinical/message-templates";
 import { sendTransactionalMailBestEffort } from "@/lib/mail/send-mail-best-effort";
 import { sendPatientOutboundMessage } from "@/lib/outbound-messages/send-to-patient";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
+import {
+  recipientIdsRequiringMembershipCheck,
+  resolveTaskCreateAssignment,
+} from "@/lib/tasks/resolve-task-create-assignment";
 import { submitTaskForReview } from "@/app/(protected)/my-tasks/actions";
 import { upsertTaskReceipts } from "@/lib/tasks/receipts";
 import { resolveTaskDisplayTitle } from "@/lib/tasks/title";
@@ -322,35 +326,41 @@ export async function createTask(formData: FormData) {
     return { error: "Bitte wählen Sie entweder alle Mitarbeitenden oder konkrete Personen." };
   }
 
-  const recipientType = assignAllTeam ? "all_team" : "specific_person";
+  const { count: otherMemberCount } = await supabase
+    .from("workspace_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("workspace_id", workspace.workspace_id)
+    .neq("user_id", user.id);
 
-  if (
-    !assignAllTeam &&
-    specificRecipientIds.length === 0 &&
-    (!specificRecipientId || specificRecipientId.trim().length === 0)
-  ) {
-    return { error: "Bitte wählen Sie einen Mitarbeitenden aus." };
-  }
+  const assignment = resolveTaskCreateAssignment({
+    assignAllTeam,
+    assignToMe,
+    assignToDoctor: false,
+    specificRecipientId,
+    specificRecipientIds,
+    creatorUserId: user.id,
+    otherMemberCount: otherMemberCount ?? 0,
+  });
 
-  const normalizedSpecificRecipientIds =
-    !assignAllTeam
-      ? specificRecipientIds.length > 0
-        ? specificRecipientIds
-        : specificRecipientId
-          ? [specificRecipientId]
-          : []
-      : [];
-  const finalSpecificRecipientIds = assignToMe
-    ? Array.from(new Set([...normalizedSpecificRecipientIds, user.id]))
-    : normalizedSpecificRecipientIds;
+  const {
+    recipientType,
+    assignAllTeam: effectiveAssignAllTeam,
+    finalSpecificRecipientIds,
+    specificRecipientIdForRow,
+  } = assignment;
 
-  if (recipientType === "specific_person" && finalSpecificRecipientIds.length > 0) {
+  const recipientIdsToVerify = recipientIdsRequiringMembershipCheck(
+    finalSpecificRecipientIds,
+    user.id
+  );
+
+  if (recipientType === "specific_person" && recipientIdsToVerify.length > 0) {
     const { data: members, error: memberError } = await supabase
       .from("workspace_members")
       .select("user_id")
       .eq("workspace_id", workspace.workspace_id)
-      .in("user_id", finalSpecificRecipientIds);
-    if (memberError || !members || members.length !== finalSpecificRecipientIds.length) {
+      .in("user_id", recipientIdsToVerify);
+    if (memberError || !members || members.length !== recipientIdsToVerify.length) {
       return {
         error: "Ausgewählter Mitarbeitender ist in diesem Arbeitsbereich nicht verfügbar.",
       };
@@ -366,10 +376,7 @@ export async function createTask(formData: FormData) {
       content: content.trim(),
       priority,
       recipient_type: recipientType,
-      specific_recipient_id:
-        !assignAllTeam
-          ? finalSpecificRecipientIds[0] || specificRecipientId || null
-          : null,
+      specific_recipient_id: specificRecipientIdForRow,
       created_by: user.id,
       status: "open",
       sort_order: sortOrder,
@@ -386,7 +393,7 @@ export async function createTask(formData: FormData) {
 
   const newTaskId = inserted?.id as string;
 
-  if (!assignAllTeam && finalSpecificRecipientIds.length > 0) {
+  if (!effectiveAssignAllTeam && finalSpecificRecipientIds.length > 0) {
     const assigneeRows = finalSpecificRecipientIds.map((id) => ({
       task_id: newTaskId,
       user_id: id,
@@ -409,7 +416,7 @@ export async function createTask(formData: FormData) {
     const admin = createAdminClient();
     const recipients: Array<{ userId: string; email: string }> = [];
 
-    if (assignAllTeam) {
+    if (effectiveAssignAllTeam) {
       const { data: members } = await admin
         .from("workspace_members")
         .select("user_id")
@@ -452,7 +459,7 @@ export async function createTask(formData: FormData) {
         });
       }
     }
-    if (!assignAllTeam) {
+    if (!effectiveAssignAllTeam) {
       const knownRecipientIds = new Set(receiptRows.map((row) => row.userId));
       for (const recipientId of finalSpecificRecipientIds) {
         if (!knownRecipientIds.has(recipientId)) {

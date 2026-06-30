@@ -72,6 +72,32 @@ export type MedicalSegmentOption<T extends string> = {
   label: string;
 };
 
+export function MedicalFormSelect<T extends string>(props: {
+  id?: string;
+  value: T;
+  onChange: (value: T) => void;
+  options: MedicalSegmentOption<T>[];
+  disabled?: boolean;
+  "aria-label"?: string;
+}) {
+  return (
+    <select
+      id={props.id}
+      value={props.value}
+      onChange={(e) => props.onChange(e.target.value as T)}
+      disabled={props.disabled}
+      aria-label={props["aria-label"]}
+      className={cn("yd-auth-input", "yd-medical-form-select")}
+    >
+      {props.options.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function MedicalFormSegmented<T extends string>(props: {
   name: string;
   options: MedicalSegmentOption<T>[];

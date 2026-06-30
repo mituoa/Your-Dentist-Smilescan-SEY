@@ -17,6 +17,8 @@ import {
   type RelayWorkObjectType,
 } from "@/lib/relay/relay-work-object";
 import { formatRelayMessageTimestamp } from "@/lib/relay/read-receipt-display";
+import type { KanbanDueTone } from "@/lib/relay/kanban-due-label";
+import { formatKanbanDueMeta } from "@/lib/relay/kanban-due-label";
 import { examplesForKanbanColumn } from "@/lib/relay/relay-kanban-examples";
 import type { BoardColumnId } from "@/lib/tasks/workflow-rules";
 
@@ -42,6 +44,8 @@ export type RelayKanbanCard = {
   /** Beispielkarte — nicht persistiert. */
   isGhost?: boolean;
   columnId?: RelayKanbanColumnId;
+  isRoutine?: boolean;
+  dueTone?: KanbanDueTone;
 };
 
 export type RelayTeamInboxRow = {
@@ -66,24 +70,24 @@ export const RELAY_KANBAN_COLUMNS: {
 }[] = [
   {
     id: "decision",
-    label: "Benötigt Entscheidung",
+    label: "Offen",
     tone: "waiting",
-    emptyTitle: "Keine offenen Entscheidungen.",
-    emptyHint: "Freigaben und Rückfragen erscheinen hier.",
+    emptyTitle: "Keine offenen Aufgaben.",
+    emptyHint: "Neue Vorgänge und Routinen erscheinen hier.",
   },
   {
     id: "in_progress",
     label: "In Bearbeitung",
     tone: "progress",
     emptyTitle: "Nichts in Bearbeitung.",
-    emptyHint: "Laufende Vorgänge des Teams erscheinen hier.",
+    emptyHint: "Ziehen Sie eine Aufgabe hierher oder starten Sie in der Detailansicht.",
   },
   {
     id: "done",
     label: "Erledigt",
     tone: "done",
-    emptyTitle: "Keine offenen Aufgaben.",
-    emptyHint: "Sie sind für heute fertig.",
+    emptyTitle: "Noch nichts erledigt.",
+    emptyHint: "Abgeschlossene Aufgaben erscheinen hier.",
   },
 ];
 
@@ -260,17 +264,23 @@ function rowToKanbanCard(
 
   const from = row.fromLabel?.trim();
   const metaLine = from
-    ? `Bearbeitet von ${from}`
+    ? `Von ${from}`
     : enriched.waitingLabel ?? enriched.concernLine ?? row.statusLabel;
+
+  const dueMeta = formatKanbanDueMeta(task);
+  const isRoutine = Boolean(task && task.recurrence_type !== "once");
+  const href = task?.id ? `/my-tasks/${task.id}` : row.href;
 
   return {
     id: row.id,
-    href: row.href,
+    href,
     typeLabel: enriched.workTypeLabel ?? row.typeLabel,
     typeCode: TYPE_CODES[objectType],
     title: enriched.primaryLabel,
     metaLine,
-    dateLabel: row.dueLabel ?? row.timeLabel,
+    dateLabel: dueMeta.dateLabel ?? row.dueLabel ?? row.timeLabel,
+    dueTone: dueMeta.dueTone,
+    isRoutine,
     actionLabel: row.actionLabel?.trim() || "Öffnen",
     assigneeInitials: assignee.initials,
     assigneeColor: assignee.color,
@@ -313,15 +323,18 @@ function mapDoneTaskToCard(
   const doneAt = task.done_at
     ? new Date(task.done_at).toLocaleDateString("de-DE", { day: "2-digit", month: "short" })
     : null;
+  const dueMeta = formatKanbanDueMeta(task);
 
   return {
     id: task.id,
     href: `/my-tasks/${task.id}`,
-    typeLabel: task.submission_id ? "Patientenanfrage" : "Teamaufgabe",
-    typeCode: task.submission_id ? "P" : "T",
+    typeLabel: task.submission_id ? "Patientenanfrage" : task.recurrence_type !== "once" ? "Routine" : "Teamaufgabe",
+    typeCode: task.submission_id ? "P" : task.recurrence_type !== "once" ? "R" : "T",
     title: task.title,
     metaLine: "Erledigt",
-    dateLabel: doneAt,
+    dateLabel: doneAt ?? dueMeta.dateLabel,
+    dueTone: dueMeta.dueTone,
+    isRoutine: task.recurrence_type !== "once",
     actionLabel: "Öffnen",
     assigneeInitials: assignee.initials,
     assigneeColor: assignee.color,
@@ -449,38 +462,45 @@ function bundleJournalDecisionCards(cards: RelayKanbanCard[]): RelayKanbanCard[]
   return [...rest, bundle];
 }
 
+/** Nur echte Vorgänge — Beispielkarten (`isGhost`) nicht mitzählen. */
+export function countLiveKanbanCards(
+  board: Record<RelayKanbanColumnId, RelayKanbanCard[]>
+): number {
+  return (["decision", "in_progress", "done"] as RelayKanbanColumnId[]).reduce(
+    (sum, colId) => sum + board[colId].filter((c) => !c.isGhost).length,
+    0
+  );
+}
+
+export function countLiveKanbanCardsInColumn(cards: RelayKanbanCard[]): number {
+  return cards.filter((c) => !c.isGhost).length;
+}
+
+export function kanbanBoardShowsOnlyExamples(
+  board: Record<RelayKanbanColumnId, RelayKanbanCard[]>
+): boolean {
+  const all = [...board.decision, ...board.in_progress, ...board.done];
+  return all.length > 0 && all.every((c) => c.isGhost);
+}
+
 function enrichKanbanWithExamples(
   board: Record<RelayKanbanColumnId, RelayKanbanCard[]>
 ): Record<RelayKanbanColumnId, RelayKanbanCard[]> {
+  const liveTotal = countLiveKanbanCards(board);
+
+  // Beispiele nur, wenn die Praxis noch keine Live-Vorgänge hat — nie mit echten Karten mischen.
+  if (liveTotal > 0) {
+    return board;
+  }
+
   const next: Record<RelayKanbanColumnId, RelayKanbanCard[]> = {
-    decision: [...board.decision],
-    in_progress: [...board.in_progress],
-    done: [...board.done],
+    decision: [],
+    in_progress: [],
+    done: [],
   };
 
-  const liveTotal =
-    next.decision.filter((c) => !c.isGhost).length +
-    next.in_progress.filter((c) => !c.isGhost).length +
-    next.done.filter((c) => !c.isGhost).length;
-
-  const journalHeavy =
-    next.decision.filter((c) => c.typeCode === "J" && !c.isGhost).length > 0 &&
-    next.in_progress.filter((c) => !c.isGhost).length === 0;
-
   for (const column of RELAY_KANBAN_COLUMNS) {
-    const live = next[column.id].filter((c) => !c.isGhost);
-    const shouldAdd =
-      live.length === 0 ||
-      (journalHeavy && column.id !== "decision") ||
-      (liveTotal < 3 && column.id !== "decision");
-
-    if (!shouldAdd) continue;
-
-    const examples = examplesForKanbanColumn(column.id).filter(
-      (ex) => !next[column.id].some((c) => c.id === ex.id)
-    );
-    const limit = live.length === 0 ? examples.length : Math.min(2, examples.length);
-    next[column.id] = [...next[column.id], ...examples.slice(0, limit)];
+    next[column.id] = examplesForKanbanColumn(column.id);
   }
 
   return next;
@@ -505,7 +525,7 @@ export function countRelayTaskScope(
       userId,
       scope: tab.id,
     });
-    counts[tab.id] = Object.values(board).reduce((sum, col) => sum + col.length, 0);
+    counts[tab.id] = countLiveKanbanCards(board);
   }
   return counts;
 }

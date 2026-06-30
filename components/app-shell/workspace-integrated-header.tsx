@@ -54,6 +54,15 @@ export function WorkspaceIntegratedHeader({
             <div className="yd-dash-header-premium__editorial-greeting">
               <p className="yd-dash-header-premium__editorial-time">{greeting}</p>
               <h1 className="yd-dash-header-premium__editorial-name">{displayName}</h1>
+              {editorial.statusPrimary ? (
+                <p className="yd-dash-header-premium__editorial-primary">{editorial.statusPrimary}</p>
+              ) : null}
+              {editorial.statusSecondary ? (
+                <p className="yd-dash-header-premium__editorial-secondary">{editorial.statusSecondary}</p>
+              ) : null}
+              {editorial.metricsLine ? (
+                <p className="yd-dash-header-premium__editorial-metrics">{editorial.metricsLine}</p>
+              ) : null}
             </div>
           ) : (
             <>

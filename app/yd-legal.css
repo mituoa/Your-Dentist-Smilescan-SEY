@@ -324,43 +324,23 @@
   color: #8a93a3;
 }
 
-.yd-settings-legal__links {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border: 1px solid rgba(22, 35, 58, 0.08);
-  border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
+.yd-settings-legal__trust {
+  margin-top: 0.25rem;
 }
 
-.yd-settings-legal__link-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #16233a;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(22, 35, 58, 0.06);
-  transition: background 0.18s ease;
+.yd-trust-index--settings .yd-trust-index__head {
+  padding: 1rem 1rem 0.875rem;
 }
 
-.yd-settings-legal__link-row:last-child {
-  border-bottom: none;
+.yd-trust-index--settings .yd-trust-index__title {
+  font-size: 1rem;
 }
 
-.yd-settings-legal__link-row:hover {
-  background: rgba(248, 251, 253, 0.95);
+.yd-trust-index--settings .yd-trust-index__mark {
+  width: 2rem;
+  height: 2rem;
 }
 
-.yd-settings-legal__link-row svg {
-  flex-shrink: 0;
-  color: #8a93a3;
-}
-
-.yd-settings-legal__links-label {
-  margin-bottom: 0.5rem;
+.yd-trust-index--settings {
+  box-shadow: 0 1px 2px rgba(22, 35, 58, 0.04);
 }

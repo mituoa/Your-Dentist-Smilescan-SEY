@@ -761,16 +761,24 @@
   color: #64748b;
 }
 
-.yd-login-start-nav {
+.yd-login-entry-footer {
   width: 100%;
   max-width: 28rem;
-  margin: 0.375rem auto 0;
+  margin: 0.5rem auto 0;
   text-align: center;
 }
 
-.yd-login-start-link {
+.yd-login-entry-footer-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem 0.25rem;
+}
+
+.yd-login-entry-footer-link {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.35rem;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 500;
@@ -780,10 +788,16 @@
   transition: color 140ms ease;
 }
 
-.yd-login-start-link:hover {
+.yd-login-entry-footer-link:hover {
   color: #64748b;
   text-decoration: underline;
   text-underline-offset: 0.14em;
+}
+
+.yd-login-entry-footer-sep {
+  font-size: 0.6875rem;
+  color: rgba(100, 116, 139, 0.45);
+  user-select: none;
 }
 
 .yd-clinical-entry--login .yd-auth-form-stack {
@@ -2047,6 +2061,38 @@
     margin-top: 0.875rem;
     padding-top: 0;
     border-top: none;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-segmented__btn--active {
+    border-color: rgba(15, 23, 42, 0.14);
+    background: #f8fafc;
+    color: #0f172a;
+    box-shadow: none;
+  }
+
+  .yd-medical-form-panel--workspace-compact .yd-medical-segmented__btn:hover:not(:disabled) {
+    border-color: rgba(15, 23, 42, 0.12);
+    background: #fafbfc;
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-section__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: rgba(15, 23, 41, 0.62);
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-section + .yd-medical-form-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top-color: rgba(186, 203, 222, 0.22);
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-routine--collapsible > summary {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: rgba(15, 23, 41, 0.55);
   }
 
   .yd-medical-form-panel--workspace-compact .yd-medical-form-routine--collapsible > .yd-medical-form-section__head {

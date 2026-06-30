@@ -1,8 +1,8 @@
 import type { User } from "@supabase/supabase-js";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "@/components/auth/login-page-client";
+import { YdLoginEntryFooter } from "@/components/auth/yd-auth-ui";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { isGoogleLoginEnabled } from "@/lib/auth-google-login";
@@ -91,11 +91,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             googleLoginEnabled={isGoogleLoginEnabled()}
           />
         </section>
-        <nav className="yd-login-start-nav" aria-label="Weitere Optionen">
-          <Link href="/?welcome=1" prefetch className="yd-login-start-link">
-            Zur Startseite
-          </Link>
-        </nav>
+        <YdLoginEntryFooter />
       </main>
     </YdPublicOsEnvironment>
   );

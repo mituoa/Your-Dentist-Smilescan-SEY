@@ -15,6 +15,7 @@ import {
   MedicalFormLabel,
   MedicalFormSection,
   MedicalFormSegmented,
+  MedicalFormSelect,
   MedicalFormTextarea,
 } from "@/components/forms/medical-form-ui";
 import {
@@ -94,6 +95,7 @@ const SHELL_COPY: Record<
 type CreatePraxisTaskClientProps = {
   cancelHref: string;
   initialMode?: CreateMode;
+  formVariant?: "modal" | "page";
   submissionId?: string | null;
   initialTitle?: string;
   initialDescription?: string;
@@ -105,6 +107,7 @@ type CreatePraxisTaskClientProps = {
 export function CreatePraxisTaskClient({
   cancelHref,
   initialMode = "task",
+  formVariant = "page",
   submissionId = null,
   initialTitle = "",
   initialDescription = "",
@@ -120,6 +123,8 @@ export function CreatePraxisTaskClient({
   const [membersError, setMembersError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [createMode, setCreateMode] = useState<CreateMode>(initialMode);
+  const isModalForm = formVariant === "modal";
+  const effectiveMode: CreateMode = isModalForm ? "task" : createMode;
 
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
@@ -145,8 +150,10 @@ export function CreatePraxisTaskClient({
   const busy = isPending;
   const titleTrim = title.trim();
   const contextLocked = Boolean(submissionId);
-  const shell = SHELL_COPY[createMode];
-  const isTaskFlow = createMode === "task" || createMode === "assign";
+  const shell = SHELL_COPY[effectiveMode];
+  const isTaskFlow = effectiveMode === "task" || effectiveMode === "assign";
+  const otherMembers = members.filter((m) => m.user_id !== currentUserId);
+  const hasOtherMembers = otherMembers.length > 0;
 
   const applyCommandDraft = useCallback((draft: PendingCommandTaskDraft) => {
     setTitle(draft.title);
@@ -192,10 +199,17 @@ export function CreatePraxisTaskClient({
   }, [error]);
 
   useEffect(() => {
-    if (createMode === "assign" && assignMode === "self") {
+    if (effectiveMode === "assign" && assignMode === "self" && hasOtherMembers) {
       setAssignMode("team");
     }
-  }, [createMode, assignMode]);
+  }, [effectiveMode, assignMode, hasOtherMembers]);
+
+  useEffect(() => {
+    if (!hasOtherMembers && assignMode !== "self") {
+      setAssignMode("self");
+      setSelectedMemberIds([]);
+    }
+  }, [hasOtherMembers, assignMode]);
 
   const close = () => {
     if (busy) return;
@@ -223,7 +237,7 @@ export function CreatePraxisTaskClient({
       setError("Bitte geben Sie einen Titel für die Aufgabe an.");
       return;
     }
-    if (assignMode === "specific" && selectedMemberIds.length === 0) {
+    if (hasOtherMembers && assignMode === "specific" && selectedMemberIds.length === 0) {
       setError("Bitte wählen Sie mindestens eine Person aus.");
       return;
     }
@@ -234,7 +248,7 @@ export function CreatePraxisTaskClient({
     setError(null);
 
     const fd = new FormData();
-    fd.set("task_form", "page");
+    fd.set("task_form", isModalForm ? "modal" : "page");
     fd.set("title", titleTrim);
     fd.set("description", description.trim());
     fd.set("task_context", taskContext);
@@ -317,16 +331,52 @@ export function CreatePraxisTaskClient({
   };
 
   const assignOptions =
-    createMode === "assign"
-      ? [
-          { id: "team" as const, label: "Gesamtes Team" },
-          { id: "specific" as const, label: "Bestimmte Personen" },
-        ]
-      : [
-          { id: "self" as const, label: "Mir zuweisen" },
-          { id: "team" as const, label: "Gesamtes Team" },
-          { id: "specific" as const, label: "Bestimmte Personen" },
-        ];
+    effectiveMode === "assign"
+      ? hasOtherMembers
+        ? [
+            { id: "team" as const, label: "Gesamtes Team" },
+            { id: "specific" as const, label: "Bestimmte Personen" },
+          ]
+        : [{ id: "self" as const, label: "Mir zuweisen" }]
+      : hasOtherMembers
+        ? [
+            { id: "self" as const, label: "Mir zuweisen" },
+            { id: "team" as const, label: "Gesamtes Team" },
+            { id: "specific" as const, label: "Bestimmte Personen" },
+          ]
+        : [{ id: "self" as const, label: "Mir zuweisen" }];
+
+  const soloAssignNote =
+    !hasOtherMembers && !membersError ? (
+      <p className="yd-medical-form-context-note">
+        Noch keine weiteren Teammitglieder eingeladen — die Aufgabe wird Ihnen zugewiesen.
+      </p>
+    ) : null;
+
+  const memberPicker =
+    assignMode === "specific" ? (
+      <div className="space-y-2">
+        <MedicalFormLabel>Personen</MedicalFormLabel>
+        {members
+          .filter((m) => m.user_id !== currentUserId)
+          .map((m) => (
+            <label
+              key={m.user_id}
+              className="flex cursor-pointer items-center gap-2 text-[14px] text-[#334155]"
+            >
+              <input
+                type="checkbox"
+                checked={selectedMemberIds.includes(m.user_id)}
+                onChange={() => toggleMember(m.user_id)}
+              />
+              <span className="truncate">{m.email}</span>
+            </label>
+          ))}
+        {membersError ? (
+          <p className="yd-medical-form-context-note">{membersError}</p>
+        ) : null}
+      </div>
+    ) : null;
 
   return (
     <MedicalFormShell
@@ -336,7 +386,12 @@ export function CreatePraxisTaskClient({
       ariaLabel={shell.title}
       overlayVariant={overlay}
       panelClassName={
-        overlay === "workspace" ? "yd-medical-form-panel--workspace-compact" : undefined
+        overlay === "workspace"
+          ? cn(
+              "yd-medical-form-panel--workspace-compact",
+              isModalForm && "yd-medical-form-panel--task-modal"
+            )
+          : undefined
       }
       footer={
         <MedicalFormFooterActions
@@ -350,21 +405,23 @@ export function CreatePraxisTaskClient({
         />
       }
     >
-      <div className="yd-medical-form">
-        <MedicalFormSection title="Aktion">
-          <MedicalFormSegmented
-            name="create_mode"
-            aria-label="Aktion wählen"
-            options={MODE_OPTIONS}
-            value={createMode}
-            onChange={(v) => {
-              if (!v || busy) return;
-              setCreateMode(v);
-              setError(null);
-            }}
-            disabled={busy}
-          />
-        </MedicalFormSection>
+      <div className={cn("yd-medical-form", isModalForm && "yd-medical-form--modal")}>
+        {!isModalForm ? (
+          <MedicalFormSection title="Aktion">
+            <MedicalFormSegmented
+              name="create_mode"
+              aria-label="Aktion wählen"
+              options={MODE_OPTIONS}
+              value={createMode}
+              onChange={(v) => {
+                if (!v || busy) return;
+                setCreateMode(v);
+                setError(null);
+              }}
+              disabled={busy}
+            />
+          </MedicalFormSection>
+        ) : null}
 
         <div ref={errorRef} aria-live="polite">
           {error ? (
@@ -409,80 +466,154 @@ export function CreatePraxisTaskClient({
                 </MedicalFormFieldStack>
               </MedicalFormSection>
 
-              <MedicalFormSection title="Kontext">
-                <MedicalFormSegmented
-                  name="task_context"
-                  aria-label="Aufgabenkontext"
-                  options={CONTEXT_OPTIONS}
-                  value={taskContext}
-                  onChange={(v) => v && setTaskContext(v)}
-                  disabled={contextLocked || busy}
-                />
-              </MedicalFormSection>
-
-              <MedicalFormSection title="Verantwortlichkeit">
-                <MedicalFormSegmented
-                  name="assign_mode"
-                  aria-label="Zuweisung"
-                  options={assignOptions}
-                  value={assignMode}
-                  onChange={(v) => v && setAssignMode(v)}
-                  disabled={busy}
-                />
-                {assignMode === "specific" ? (
-                  <div className="mt-4 space-y-2">
-                    <MedicalFormLabel>Personen</MedicalFormLabel>
-                    {members
-                      .filter((m) => m.user_id !== currentUserId)
-                      .map((m) => (
-                        <label
-                          key={m.user_id}
-                          className="flex cursor-pointer items-center gap-2 text-[14px] text-[#334155]"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedMemberIds.includes(m.user_id)}
-                            onChange={() => toggleMember(m.user_id)}
-                          />
-                          <span className="truncate">{m.email}</span>
-                        </label>
-                      ))}
-                    {membersError ? (
-                      <p className="yd-medical-form-context-note">{membersError}</p>
-                    ) : null}
-                  </div>
-                ) : null}
-              </MedicalFormSection>
-
-              <MedicalFormSection title="Planung">
-                <MedicalFormFieldStack>
-                  <div>
-                    <MedicalFormLabel htmlFor={`${formId}-due`} optional>
-                      Fälligkeitsdatum
-                    </MedicalFormLabel>
-                    <input
-                      id={`${formId}-due`}
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      className="yd-auth-input"
-                    />
-                  </div>
-                  <div>
-                    <MedicalFormLabel>Priorität</MedicalFormLabel>
+              {isModalForm ? (
+                <MedicalFormSection title="Zuordnung">
+                  <MedicalFormFieldStack>
+                    <div>
+                      <MedicalFormLabel htmlFor={`${formId}-context`}>Kontext</MedicalFormLabel>
+                      <MedicalFormSelect
+                        id={`${formId}-context`}
+                        aria-label="Kontext"
+                        options={CONTEXT_OPTIONS}
+                        value={taskContext}
+                        onChange={setTaskContext}
+                        disabled={contextLocked || busy}
+                      />
+                    </div>
+                    <div>
+                      <MedicalFormLabel htmlFor={`${formId}-assign`}>Zuständig</MedicalFormLabel>
+                      <MedicalFormSelect
+                        id={`${formId}-assign`}
+                        aria-label="Zuständig"
+                        options={assignOptions}
+                        value={assignMode}
+                        onChange={setAssignMode}
+                        disabled={busy}
+                      />
+                    </div>
+                    {soloAssignNote}
+                    {memberPicker}
+                    <MedicalFormFieldStack className="yd-medical-form-stack--pair">
+                      <div>
+                        <MedicalFormLabel htmlFor={`${formId}-due`} optional>
+                          Fällig am
+                        </MedicalFormLabel>
+                        <input
+                          id={`${formId}-due`}
+                          type="date"
+                          value={dueDate}
+                          onChange={(e) => setDueDate(e.target.value)}
+                          className="yd-auth-input"
+                        />
+                      </div>
+                      <div>
+                        <MedicalFormLabel htmlFor={`${formId}-priority`}>Priorität</MedicalFormLabel>
+                        <MedicalFormSelect
+                          id={`${formId}-priority`}
+                          aria-label="Priorität"
+                          options={PRIORITY_OPTIONS}
+                          value={priority}
+                          onChange={setPriority}
+                          disabled={busy}
+                        />
+                      </div>
+                    </MedicalFormFieldStack>
+                  </MedicalFormFieldStack>
+                </MedicalFormSection>
+              ) : (
+                <>
+                  <MedicalFormSection title="Kontext">
                     <MedicalFormSegmented
-                      name="priority"
-                      aria-label="Priorität"
-                      options={PRIORITY_OPTIONS}
-                      value={priority}
-                      onChange={(v) => v && setPriority(v)}
+                      name="task_context"
+                      aria-label="Aufgabenkontext"
+                      options={CONTEXT_OPTIONS}
+                      value={taskContext}
+                      onChange={(v) => v && setTaskContext(v)}
+                      disabled={contextLocked || busy}
+                    />
+                  </MedicalFormSection>
+
+                  <MedicalFormSection title="Verantwortlichkeit">
+                    <MedicalFormSegmented
+                      name="assign_mode"
+                      aria-label="Zuweisung"
+                      options={assignOptions}
+                      value={assignMode}
+                      onChange={(v) => v && setAssignMode(v)}
                       disabled={busy}
                     />
-                  </div>
-                </MedicalFormFieldStack>
-              </MedicalFormSection>
+                    {soloAssignNote}
+                    {memberPicker ? <div className="mt-4">{memberPicker}</div> : null}
+                  </MedicalFormSection>
 
-              {overlay === "workspace" ? (
+                  <MedicalFormSection title="Planung">
+                    <MedicalFormFieldStack>
+                      <div>
+                        <MedicalFormLabel htmlFor={`${formId}-due`} optional>
+                          Fälligkeitsdatum
+                        </MedicalFormLabel>
+                        <input
+                          id={`${formId}-due`}
+                          type="date"
+                          value={dueDate}
+                          onChange={(e) => setDueDate(e.target.value)}
+                          className="yd-auth-input"
+                        />
+                      </div>
+                      <div>
+                        <MedicalFormLabel>Priorität</MedicalFormLabel>
+                        <MedicalFormSegmented
+                          name="priority"
+                          aria-label="Priorität"
+                          options={PRIORITY_OPTIONS}
+                          value={priority}
+                          onChange={(v) => v && setPriority(v)}
+                          disabled={busy}
+                        />
+                      </div>
+                    </MedicalFormFieldStack>
+                  </MedicalFormSection>
+                </>
+              )}
+
+              {isModalForm ? (
+                <details className="yd-medical-form-reminder yd-medical-form-routine--collapsible">
+                  <summary>Rhythmus & Erinnerung (optional)</summary>
+                  <MedicalFormFieldStack>
+                    <div>
+                      <MedicalFormLabel htmlFor={`${formId}-recurrence`} optional>
+                        Wiederholung
+                      </MedicalFormLabel>
+                      <MedicalFormSelect
+                        id={`${formId}-recurrence`}
+                        aria-label="Wiederholung"
+                        options={RECURRENCE_OPTIONS}
+                        value={recurrence}
+                        onChange={setRecurrence}
+                        disabled={busy}
+                      />
+                    </div>
+                    <div>
+                      <MedicalFormLabel htmlFor={`${formId}-reminder`} optional>
+                        Erinnerung
+                      </MedicalFormLabel>
+                      <MedicalFormSelect
+                        id={`${formId}-reminder`}
+                        aria-label="Erinnerung"
+                        options={REMINDER_OPTIONS}
+                        value={reminderMode}
+                        onChange={setReminderMode}
+                        disabled={busy}
+                      />
+                      {reminderMode !== "none" && !dueDate.trim() ? (
+                        <p className="yd-medical-form-context-note" role="alert">
+                          Bitte ein Fälligkeitsdatum setzen, damit die Erinnerung ausgelöst werden kann.
+                        </p>
+                      ) : null}
+                    </div>
+                  </MedicalFormFieldStack>
+                </details>
+              ) : overlay === "workspace" ? (
                 <details className="yd-medical-form-reminder yd-medical-form-routine--collapsible">
                   <summary>Rhythmus & Erinnerung (optional)</summary>
                   <MedicalFormFieldStack>

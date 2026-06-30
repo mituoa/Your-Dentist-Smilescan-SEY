@@ -25,6 +25,10 @@ import {
   parseRecurrenceType,
   parseRemindBefore,
 } from "@/lib/tasks/recurrence";
+import {
+  recipientIdsRequiringMembershipCheck,
+  resolveTaskCreateAssignment,
+} from "@/lib/tasks/resolve-task-create-assignment";
 import { maybeSpawnNextRecurrence } from "@/lib/tasks/spawn-recurrence";
 import {
   canMoveTask,
@@ -150,6 +154,28 @@ export async function fetchAssignableMembersForTaskCreate(): Promise<
   return { ok: true, members, currentUserId: actor.user.id };
 }
 
+async function countOtherWorkspaceMembers(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  workspaceId: string,
+  userId: string
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("workspace_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("workspace_id", workspaceId)
+    .neq("user_id", userId);
+
+  if (error) {
+    console.error(
+      "[countOtherWorkspaceMembers]",
+      (error as { code?: string }).code ?? "unknown"
+    );
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
 export async function createMyTask(formData: FormData): Promise<{
   error?: string;
   success?: boolean;
@@ -208,13 +234,14 @@ export async function createMyTask(formData: FormData): Promise<{
   const content =
     contentField.length > 0
       ? contentField
-      : isPageForm
+      : isPageForm || isModalForm
         ? descriptionBody || titleTrim
         : titleTrim.length > 0
           ? descriptionBody
             ? `${titleTrim}\n\n${descriptionBody}`
             : titleTrim
           : "";
+  const contentForInsert = (content.trim() || titleTrim || descriptionBody).trim();
   const assignAllTeam = formData.get("assign_all_team") === "true";
   const assignToMe = formData.get("assign_to_me") === "true";
   const assignToDoctor = formData.get("assign_to_doctor") === "true";
@@ -233,7 +260,7 @@ export async function createMyTask(formData: FormData): Promise<{
     return { error: "Bitte geben Sie einen Titel ein." };
   }
 
-  if (!content.trim() && !isPageForm) {
+  if (!contentForInsert && !isPageForm && !isModalForm) {
     return { error: "Bitte geben Sie eine Aufgabe ein." };
   }
 
@@ -260,42 +287,41 @@ export async function createMyTask(formData: FormData): Promise<{
     return { error: "Bitte wählen Sie entweder alle Mitarbeitenden oder konkrete Personen." };
   }
 
-  let recipientType: "doctor_only" | "all_team" | "specific_person" = assignAllTeam
-    ? "all_team"
-    : "specific_person";
+  const otherMemberCount = await countOtherWorkspaceMembers(
+    supabase,
+    workspace.workspace_id,
+    user.id
+  );
 
-  if (assignToDoctor) {
-    recipientType = "doctor_only";
-  }
+  const assignment = resolveTaskCreateAssignment({
+    assignAllTeam,
+    assignToMe,
+    assignToDoctor,
+    specificRecipientId,
+    specificRecipientIds,
+    creatorUserId: user.id,
+    otherMemberCount,
+  });
 
-  if (
-    recipientType === "specific_person" &&
-    !assignToMe &&
-    specificRecipientIds.length === 0 &&
-    (!specificRecipientId || specificRecipientId.trim().length === 0)
-  ) {
-    return { error: "Bitte wählen Sie einen Mitarbeitenden aus." };
-  }
+  const {
+    recipientType,
+    assignAllTeam: effectiveAssignAllTeam,
+    finalSpecificRecipientIds,
+    specificRecipientIdForRow,
+  } = assignment;
 
-  const normalizedSpecificRecipientIds =
-    recipientType === "specific_person"
-      ? specificRecipientIds.length > 0
-        ? specificRecipientIds
-        : specificRecipientId
-          ? [specificRecipientId]
-          : []
-      : [];
-  const finalSpecificRecipientIds = assignToMe
-    ? Array.from(new Set([...normalizedSpecificRecipientIds, user.id]))
-    : normalizedSpecificRecipientIds;
+  const recipientIdsToVerify = recipientIdsRequiringMembershipCheck(
+    finalSpecificRecipientIds,
+    user.id
+  );
 
-  if (recipientType === "specific_person" && finalSpecificRecipientIds.length > 0) {
+  if (recipientType === "specific_person" && recipientIdsToVerify.length > 0) {
     const { data: members, error: memberError } = await supabase
       .from("workspace_members")
       .select("user_id")
       .eq("workspace_id", workspace.workspace_id)
-      .in("user_id", finalSpecificRecipientIds);
-    if (memberError || !members || members.length !== finalSpecificRecipientIds.length) {
+      .in("user_id", recipientIdsToVerify);
+    if (memberError || !members || members.length !== recipientIdsToVerify.length) {
       return {
         error: "Ausgewählter Mitarbeitender ist in diesem Arbeitsbereich nicht verfügbar.",
       };
@@ -305,8 +331,8 @@ export async function createMyTask(formData: FormData): Promise<{
   const titleForInsert =
     titleTrim.length > 0
       ? titleTrim
-      : content.trim().length > 120
-        ? content.trim().slice(0, 120)
+      : contentForInsert.length > 120
+        ? contentForInsert.slice(0, 120)
         : null;
 
   const recurrenceType = parseRecurrenceType(formData.get("recurrence_type") as string);
@@ -330,15 +356,12 @@ export async function createMyTask(formData: FormData): Promise<{
       workspace_id: workspace.workspace_id,
       submission_id: submissionIdForInsert,
       title: titleForInsert,
-      content: content.trim(),
+      content: contentForInsert,
       description: descriptionForRow,
       due_date: dueDateIso,
       priority,
       recipient_type: recipientType,
-      specific_recipient_id:
-        !assignAllTeam
-          ? finalSpecificRecipientIds[0] || specificRecipientId || null
-          : null,
+      specific_recipient_id: specificRecipientIdForRow,
       created_by: user.id,
       status: "open",
       sort_order: sortOrder,
@@ -357,7 +380,7 @@ export async function createMyTask(formData: FormData): Promise<{
     return { error: "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen." };
   }
 
-  if (!assignAllTeam && finalSpecificRecipientIds.length > 0) {
+  if (!effectiveAssignAllTeam && finalSpecificRecipientIds.length > 0) {
     const assigneeRows = finalSpecificRecipientIds.map((id) => ({
       task_id: inserted.id,
       user_id: id,
@@ -376,7 +399,7 @@ export async function createMyTask(formData: FormData): Promise<{
     const admin = createAdminClient();
     const recipients: Array<{ userId: string; email: string }> = [];
 
-    if (assignAllTeam) {
+    if (effectiveAssignAllTeam) {
       const { data: members } = await admin
         .from("workspace_members")
         .select("user_id")
@@ -402,7 +425,7 @@ export async function createMyTask(formData: FormData): Promise<{
     if (dedupedRecipients.length > 0) {
       const taskUrl = `${getAppBaseUrl()}/my-tasks/${inserted.id}`;
       const mail = buildTaskAssigned({
-        taskTitle: resolveTaskDisplayTitle(titleForInsert, content.trim()),
+        taskTitle: resolveTaskDisplayTitle(titleForInsert, contentForInsert),
         taskUrl,
         actorName: user.email || "Team-Mitglied",
         recipientEmail: dedupedRecipients[0]?.email || "",
@@ -419,7 +442,7 @@ export async function createMyTask(formData: FormData): Promise<{
         });
       }
     }
-    if (!assignAllTeam) {
+    if (!effectiveAssignAllTeam) {
       const knownRecipientIds = new Set(receiptRows.map((row) => row.userId));
       for (const recipientId of finalSpecificRecipientIds) {
         if (!knownRecipientIds.has(recipientId)) {
@@ -528,7 +551,7 @@ export async function moveTaskStatusByDrag(
   const { data: task } = await supabase
     .from("tasks")
     .select(
-      "id, workspace_id, status, created_by, submission_id, recipient_type, specific_recipient_id, task_assignees(user_id)"
+      "id, workspace_id, status, created_by, submission_id, recipient_type, specific_recipient_id, recurrence_type, task_assignees(user_id)"
     )
     .eq("id", taskId)
     .eq("workspace_id", workspace.workspace_id)
@@ -554,7 +577,9 @@ export async function moveTaskStatusByDrag(
     done_at: null,
     done_by: null,
     done_by_email: null,
-    recurrence_type: "once",
+    recurrence_type: parseRecurrenceType(
+      (task.recurrence_type as string | null | undefined) ?? "once"
+    ),
     submitted_for_review_at: null,
     sort_order: 0,
     completed: false,
@@ -581,6 +606,14 @@ export async function moveTaskStatusByDrag(
   if (nextStatus === "pending_review") {
     updates.submitted_for_review_at = now;
     updates.submitted_by_user_id = user.id;
+    updates.done_at = null;
+    updates.done_by = null;
+  } else if (nextStatus === "open") {
+    updates.submitted_for_review_at = null;
+    updates.submitted_by_user_id = null;
+    updates.reviewed_at = null;
+    updates.reviewed_by_user_id = null;
+    updates.rejection_reason = null;
     updates.done_at = null;
     updates.done_by = null;
   } else if (nextStatus === "done") {
