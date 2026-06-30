@@ -1,6 +1,5 @@
 "use client";
 
-import { MobileTopbarAssistButton } from "@/components/app-shell/mobile-topbar-assist-button";
 import { YourDentistBrandLockup } from "@/components/brand/your-dentist-brand-lockup";
 import { SignOutIconForm } from "@/components/app-shell/sign-out-form";
 import { TopbarContextActions } from "@/components/app-shell/topbar-context-actions";
@@ -49,7 +48,6 @@ export function ProtectedTopbar({
           <YourDentistBrandLockup size="sm" tagline={null} className="min-w-0" priority />
         </div>
         <div className="yd-mobile-topbar-actions">
-          <MobileTopbarAssistButton />
           <SignOutIconForm />
           <UserMenu
             email={email}

@@ -1,6 +1,6 @@
 /**
  * Landingpage-Vorschau — Mobile: volle 1:1-Größe (wie auf dem Gerät),
- * vertikal scrollbar, kein Horizontal-Overflow.
+ * eine durchgehende Scrollfläche, kein Horizontal-Overflow.
  */
 
 @media (max-width: 767px) {
@@ -18,7 +18,46 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     touch-action: pan-y;
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .yd-lp-preview-banner {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    flex-shrink: 0;
+  }
+
+  .yd-lp-preview-banner__inner {
+    padding: 0.5rem max(0.75rem, env(safe-area-inset-right))
+      0.5rem max(0.75rem, env(safe-area-inset-left));
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+  }
+
+  .yd-lp-preview-banner__copy {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .yd-lp-preview-banner__text {
+    display: none;
+  }
+
+  .yd-lp-preview-banner__eyebrow {
+    font-size: 0.625rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .yd-lp-preview-banner__back {
+    min-height: 2.5rem;
+    padding-inline: 0.625rem;
+    font-size: 0.6875rem;
+    max-width: 52%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .yd-lp-preview-shell__scale {
@@ -29,27 +68,7 @@
     padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   }
 
-  .yd-lp-preview-banner {
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .yd-lp-preview-banner__inner {
-    padding: 0.5rem max(0.75rem, env(safe-area-inset-right))
-      0.5rem max(0.75rem, env(safe-area-inset-left));
-    gap: 0.625rem;
-  }
-
-  .yd-lp-preview-banner__text {
-    display: none;
-  }
-
-  .yd-lp-preview-banner__back {
-    min-height: 2.75rem;
-    padding-inline: 0.75rem;
-    font-size: 0.75rem;
-  }
-
+  /* Landing-Topbars: in die Displaybreite, nichts abgeschnitten */
   .yd-lp-preview-shell__scale .yd-al-topbar,
   .yd-lp-preview-shell__scale .yd-bl-topbar,
   .yd-lp-preview-shell__scale .yd-ae-topbar,
@@ -58,6 +77,61 @@
   .yd-lp-preview-shell__scale [class$="-topbar"] {
     position: relative;
     top: auto;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .yd-lp-preview-shell__scale [class$="-topbar-inner"] {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    height: auto;
+    min-height: 3.25rem;
+    padding-block: 0.5rem;
+    gap: 0.375rem 0.5rem;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .yd-lp-preview-shell__scale [class$="-topbar-inner"] img,
+  .yd-lp-preview-shell__scale [class$="-logo"]:not([class*="logo-text"]) {
+    max-width: min(6.5rem, 34vw);
+    width: auto;
+    height: auto;
+    flex-shrink: 1;
+    object-fit: contain;
+  }
+
+  .yd-lp-preview-shell__scale [class$="-logo-text"] {
+    font-size: 0.8125rem;
+    max-width: min(9rem, 42vw);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yd-lp-preview-shell__scale [class$="-topbar-cta"] {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.375rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .yd-lp-preview-shell__scale [class$="-topbar-cta"] [class$="-btn--ghost"] {
+    display: none;
+  }
+
+  .yd-lp-preview-shell__scale [class$="-topbar-cta"] [class$="-btn"] {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .yd-lp-preview-shell__scale main {
@@ -93,12 +167,48 @@
 
   .yd-lp-preview-shell__scale [class*="hero-grid"],
   .yd-lp-preview-shell__scale [class*="hero-stats"],
-  .yd-lp-preview-shell__scale [class*="pill-row"] {
+  .yd-lp-preview-shell__scale [class*="pill-row"],
+  .yd-lp-preview-shell__scale [class*="benefit-grid"],
+  .yd-lp-preview-shell__scale [class*="trust-grid"] {
+    grid-template-columns: 1fr !important;
     max-width: 100%;
+  }
+
+  .yd-lp-preview-shell__scale [class*="hero-title"],
+  .yd-lp-preview-shell__scale h1 {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .yd-lp-preview-shell__scale [class*="hero-ctas"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .yd-lp-preview-shell__scale [class*="hero-ctas"] [class$="-btn"] {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
   }
 
   .yd-lp-preview-shell__scale [class*="carousel"] {
     max-width: 100%;
     overflow-x: hidden;
+  }
+
+  /* Sticky-CTAs im Scroll-Kontext, nicht viewport-fixed */
+  .yd-lp-preview-shell__scale [class*="sticky-cta"] {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .yd-lp-preview-shell__scale main > section:last-of-type {
+    padding-bottom: 5.5rem;
   }
 }

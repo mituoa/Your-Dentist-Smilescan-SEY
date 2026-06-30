@@ -91,6 +91,7 @@ export function TrackerInboxListStatusMenu({
   const rootRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const ignoreOutsideUntilRef = useRef(0);
+  const pendingStatusRef = useRef<InboxPracticeStatusId | null>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -103,9 +104,17 @@ export function TrackerInboxListStatusMenu({
   const canMarkUnread = Boolean(seenAt);
 
   useEffect(() => {
-    if (!isSaving) {
-      setLocalStatus(storedStatus);
+    if (isSaving) return;
+
+    if (pendingStatusRef.current !== null) {
+      if (storedStatus === pendingStatusRef.current) {
+        pendingStatusRef.current = null;
+        setLocalStatus(storedStatus);
+      }
+      return;
     }
+
+    setLocalStatus(storedStatus);
   }, [storedStatus, isSaving]);
 
   useEffect(() => {
@@ -126,7 +135,7 @@ export function TrackerInboxListStatusMenu({
 
     const timer = window.setTimeout(() => {
       document.addEventListener("pointerdown", onPointerDown, true);
-    }, 200);
+    }, 80);
 
     document.addEventListener("keydown", onKeyDown);
     return () => {
@@ -156,15 +165,18 @@ export function TrackerInboxListStatusMenu({
   };
 
   const applyStatus = (next: InboxPracticeStatusValue) => {
-    if (next === displayStatus) {
+    const storedNorm = normalizePracticeStatus(status) ?? "new";
+    if (next === storedNorm) {
       setOpen(false);
       return;
     }
     const previous = localStatus;
+    pendingStatusRef.current = next;
     setLocalStatus(next);
     void runMutation(async () => {
       const res = await updateSubmissionPracticeStatus(submissionId, next);
       if (res.error) {
+        pendingStatusRef.current = null;
         setLocalStatus(previous);
       }
       return res;

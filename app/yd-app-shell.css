@@ -181,9 +181,24 @@
     --yd-command-assist-float-gap: 0.875rem;
   }
 
-  /* Mobile: kein schwebender FAB — Öffnen über Topbar-Button */
   .yd-command-assist-fab-host {
-    display: none !important;
+    z-index: 48;
+    right: max(0.875rem, env(safe-area-inset-right, 0px));
+    left: auto;
+    transform: none;
+    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.5rem);
+  }
+
+  /* Panel offen: FAB ausblenden — Sheet bleibt unverändert schwebend */
+  html[data-yd-command-open="true"] .yd-command-assist-fab-host {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.94);
+    transition:
+      opacity 180ms ease,
+      visibility 180ms ease,
+      transform 180ms ease;
   }
 
   .yd-command-assist-backdrop {
@@ -328,6 +343,12 @@ html[data-yd-workspace-modal="true"] .yd-command-assist-backdrop {
 /* Tracker: Command AI über Fallansicht — Mobile nutzt globale Float-Regeln */
 .yd-inbox-workspace .yd-command-assist-fab-host {
   z-index: 52;
+}
+
+@media (max-width: 767px) {
+  .yd-inbox-workspace .yd-command-assist-fab-host {
+    z-index: 52;
+  }
 }
 
 .yd-inbox-workspace .yd-command-assist-sheet {

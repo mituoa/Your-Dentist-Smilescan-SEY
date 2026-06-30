@@ -58,10 +58,10 @@ function PreviewBanner() {
 export function YdLandingPreviewShell({ children }: Props) {
   return (
     <div className="yd-lp-preview-shell">
-      <Suspense fallback={null}>
-        <PreviewBanner />
-      </Suspense>
       <div className="yd-lp-preview-shell__content">
+        <Suspense fallback={null}>
+          <PreviewBanner />
+        </Suspense>
         <div className="yd-lp-preview-shell__scale">{children}</div>
       </div>
     </div>
