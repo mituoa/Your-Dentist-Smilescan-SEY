@@ -2,7 +2,10 @@
 
 export const JOURNAL_HUB = {
   title: "Care Center",
+  /** Ein Wort — sofort erkennbar auf Mobile */
+  tagline: "Patientenantworten",
   essence: "Antworten für Patienten — weniger Standardanrufe.",
+  modalLead: "Frage eingeben — KI schreibt den ersten Entwurf, Sie geben frei.",
 } as const;
 
 export const JOURNAL_KI = {

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { createDraftArticle, saveArticle } from "@/app/(protected)/journal/actions";
+import { CareCenterNewAnswerModal } from "@/components/care-center/care-center-new-answer-modal";
 import { useAssistDispatchOptional } from "@/components/command-assist/assist-shell";
 import {
   type ClinicalAreaId,
@@ -135,6 +136,7 @@ export function JournalKnowledgeCenter({
   const [libraryFilter, setLibraryFilter] = useState<"all" | JournalContentType>("all");
   const [isBusy, setIsBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [newAnswerOpen, setNewAnswerOpen] = useState(false);
 
   const stats = useMemo(() => journalWorkspaceStats(initialEntries), [initialEntries]);
   const areaStats = useMemo(() => getClinicalAreaStats(initialEntries), [initialEntries]);
@@ -270,8 +272,11 @@ export function JournalKnowledgeCenter({
     router.push("/settings");
   };
 
+  const openNewAnswer = () => setNewAnswerOpen(true);
+
   return (
-    <div className="yd-journal-v6 yd-journal-v6--hub yd-journal-v6--premium yd-journal-v6--clinical yd-journal-v6--care-hub yd-clinical-brand yd-clinical-control flex min-h-0 flex-1 flex-col overflow-auto">
+    <div className="care-center yd-journal-v6 yd-journal-v6--hub yd-journal-v6--premium yd-journal-v6--clinical yd-journal-v6--care-hub yd-clinical-brand yd-clinical-control flex min-h-0 flex-1 flex-col overflow-auto">
+      <CareCenterNewAnswerModal open={newAnswerOpen} onClose={() => setNewAnswerOpen(false)} />
       <div className={`yd-journal-v6__frame ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
         {actionError ? (
           <div className="yd-journal-v6__error" role="alert">
@@ -282,12 +287,16 @@ export function JournalKnowledgeCenter({
         <div className="yd-journal-v6__canvas">
         <header className="yd-cc-hub__header">
           <div className="yd-cc-hub__header-main">
+            <div className="yd-cc-hub__header-copy">
+              <p className="yd-cc-hub__header-tagline">{JOURNAL_HUB.tagline}</p>
+              <p className="yd-cc-hub__header-lead">{JOURNAL_HUB.essence}</p>
+            </div>
             <div className="yd-cc-hub__header-actions yd-cc-hub__header-actions--solo">
               <button
                 type="button"
                 className="yd-journal-v6__action yd-journal-v6__action--primary yd-cc-hub__action-primary"
                 disabled={isBusy}
-                onClick={() => router.push("/journal/new")}
+                onClick={openNewAnswer}
               >
                 <Plus className="yd-journal-v6__action-icon" strokeWidth={1.5} aria-hidden />
                 Neue Antwort
@@ -295,6 +304,7 @@ export function JournalKnowledgeCenter({
             </div>
           </div>
           <div className="yd-cc-hub__header-bar">
+            <div className="yd-cc-hub__header-search">{searchField}</div>
             <div className="yd-cc-hub__stats-pills yd-cc-hub__stats-pills--compact" aria-label="Überblick">
               <span className="yd-cc-hub__stats-pill">
                 <strong>{stats.publishedCount}</strong> live
@@ -306,13 +316,12 @@ export function JournalKnowledgeCenter({
                 <strong>{stats.coveredAreas}</strong>/{stats.totalAreas} Bereiche
               </span>
             </div>
-            <div className="yd-cc-hub__header-search">{searchField}</div>
           </div>
         </header>
 
         <div className="yd-journal-v6__body yd-cc-hub__body">
           <section
-            className="yd-journal-v6__section yd-journal-v6__panel yd-cc-hub__zone"
+            className="yd-journal-v6__section yd-journal-v6__section--questions yd-journal-v6__panel yd-cc-hub__zone yd-cc-hub__zone--questions"
             aria-label={JOURNAL_SECTION_COPY.questionsColumn.tag}
           >
             <div className="yd-journal-v6__block-head">
@@ -346,7 +355,7 @@ export function JournalKnowledgeCenter({
               <button
                 type="button"
                 className="yd-cc-hub__ki-card-cta"
-                onClick={kiReady ? openKiAssist : () => router.push("/journal/new")}
+                onClick={kiReady ? openKiAssist : openNewAnswer}
               >
                 {kiReady ? JOURNAL_KI.ctaActive : JOURNAL_KI.ctaSetup}
                 <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
@@ -421,7 +430,7 @@ export function JournalKnowledgeCenter({
           </section>
 
           <section
-            className="yd-journal-v6__section yd-journal-v6__panel yd-cc-hub__zone"
+            className="yd-journal-v6__section yd-journal-v6__section--doctor yd-journal-v6__panel yd-cc-hub__zone yd-cc-hub__zone--doctor"
             aria-label={JOURNAL_SECTION_COPY.doctorJournal.title}
           >
             <div className="yd-journal-v6__block-head yd-journal-v6__block-head--row">
@@ -435,7 +444,7 @@ export function JournalKnowledgeCenter({
                 type="button"
                 className="yd-cc-hub__zone-action"
                 disabled={isBusy}
-                onClick={() => router.push("/journal/new")}
+                onClick={openNewAnswer}
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
                 {JOURNAL_SECTION_COPY.doctorJournal.newCta}

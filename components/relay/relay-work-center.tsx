@@ -242,32 +242,136 @@ export function RelayWorkCenter({
         </nav>
 
         <div className="relay-center__main">
-          <nav className="relay-center__areas relay-center__areas--mobile" aria-label="Bereich wählen">
-            <ul className="relay-center__areas-list relay-center__areas-list--mobile">
-              <li>
-                <RelayAreaNavItem
-                  layout="mobile"
-                  active={activeArea === "aufgaben"}
-                  onClick={() => openArea("aufgaben")}
-                  icon={ClipboardList}
-                  title="Aufgaben"
-                  count={liveTaskCount}
-                  countLabel={`${liveTaskCount} offene Aufgaben`}
-                />
-              </li>
-              <li>
-                <RelayAreaNavItem
-                  layout="mobile"
-                  active={activeArea === "nachrichten"}
-                  onClick={() => openArea("nachrichten")}
-                  icon={MessageSquare}
-                  title="Nachrichten"
-                  count={messageCounts.unread}
-                  countLabel={`${messageCounts.unread} ungelesene Nachrichten`}
-                />
-              </li>
-            </ul>
-          </nav>
+          {isKanbanMobile ? (
+            <div className="relay-center__mobile-sticky">
+              <nav className="relay-center__areas relay-center__areas--mobile" aria-label="Bereich wählen">
+                <ul className="relay-center__areas-list relay-center__areas-list--mobile">
+                  <li>
+                    <RelayAreaNavItem
+                      layout="mobile"
+                      active={activeArea === "aufgaben"}
+                      onClick={() => openArea("aufgaben")}
+                      icon={ClipboardList}
+                      title="Aufgaben"
+                      count={liveTaskCount}
+                      countLabel={`${liveTaskCount} offene Aufgaben`}
+                    />
+                  </li>
+                  <li>
+                    <RelayAreaNavItem
+                      layout="mobile"
+                      active={activeArea === "nachrichten"}
+                      onClick={() => openArea("nachrichten")}
+                      icon={MessageSquare}
+                      title="Nachrichten"
+                      count={messageCounts.unread}
+                      countLabel={`${messageCounts.unread} ungelesene Nachrichten`}
+                    />
+                  </li>
+                </ul>
+              </nav>
+
+              {activeArea === "aufgaben" ? (
+                <div className="relay-center__mobile-filters" aria-label="Aufgaben filtern">
+                  <div
+                    className="relay-center__filter-row relay-center__filter-row--scope"
+                    role="tablist"
+                    aria-label="Aufgaben-Zuständigkeit"
+                  >
+                    {RELAY_TASK_SCOPE_TABS.map((tab) => {
+                      const active = scope === tab.id;
+                      const count = scopeCounts[tab.id];
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={active}
+                          aria-label={tab.label}
+                          className={cn(
+                            "relay-center__filter-seg",
+                            active && "relay-center__filter-seg--active"
+                          )}
+                          onClick={() =>
+                            replaceParams((p) => {
+                              p.set("scope", tab.id);
+                            })
+                          }
+                        >
+                          {tab.shortLabel}
+                          {count > 0 ? (
+                            <span className="relay-center__filter-seg-count">{count}</span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div
+                    className="relay-center__filter-row relay-center__filter-row--stage"
+                    role="tablist"
+                    aria-label="Aufgaben-Status"
+                  >
+                    {RELAY_KANBAN_COLUMNS.map((col) => {
+                      const active = mobileKanbanCol === col.id;
+                      const count = countLiveKanbanCardsInColumn(board[col.id]);
+                      const stageLabel =
+                        col.id === "in_progress" ? "Bearbeitung" : col.label;
+                      return (
+                        <button
+                          key={col.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={active}
+                          aria-label={col.label}
+                          className={cn(
+                            "relay-center__filter-seg",
+                            active && "relay-center__filter-seg--active"
+                          )}
+                          onClick={() =>
+                            replaceParams((p) => {
+                              p.set("kanban", col.id);
+                            })
+                          }
+                        >
+                          {stageLabel}
+                          {count > 0 ? (
+                            <span className="relay-center__filter-seg-count">{count}</span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="relay-center__chip-scroll relay-center__chip-scroll--messages relay-center__chip-scroll--sticky">
+                  <div className="relay-center__chips" role="tablist" aria-label="Nachrichten-Ansicht">
+                    {RELAY_MESSAGE_INBOX_TABS.filter((tab) => tab.id !== "mentions").map((tab) => {
+                      const active = messageTab === tab.id;
+                      const count = messageCounts[tab.id];
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={active}
+                          className={cn("relay-center__chip", active && "relay-center__chip--active")}
+                          onClick={() =>
+                            replaceParams((p) => {
+                              p.set("msg", tab.id);
+                              p.set("area", "nachrichten");
+                            })
+                          }
+                        >
+                          {tab.label}
+                          {count > 0 ? <span className="relay-center__chip-count">{count}</span> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
 
           {activeArea === "aufgaben" ? (
           <section id="relay-aufgaben" className="relay-center__panel" aria-labelledby="relay-aufgaben-title">
@@ -286,78 +390,7 @@ export function RelayWorkCenter({
               </h2>
             )}
 
-            {isKanbanMobile ? (
-              <div className="relay-center__mobile-filters" aria-label="Aufgaben filtern">
-                <div
-                  className="relay-center__filter-row relay-center__filter-row--scope"
-                  role="tablist"
-                  aria-label="Aufgaben-Zuständigkeit"
-                >
-                  {RELAY_TASK_SCOPE_TABS.map((tab) => {
-                    const active = scope === tab.id;
-                    const count = scopeCounts[tab.id];
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={active}
-                        aria-label={tab.label}
-                        className={cn(
-                          "relay-center__filter-seg",
-                          active && "relay-center__filter-seg--active"
-                        )}
-                        onClick={() =>
-                          replaceParams((p) => {
-                            p.set("scope", tab.id);
-                          })
-                        }
-                      >
-                        {tab.shortLabel}
-                        {count > 0 ? (
-                          <span className="relay-center__filter-seg-count">{count}</span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div
-                  className="relay-center__filter-row relay-center__filter-row--stage"
-                  role="tablist"
-                  aria-label="Aufgaben-Status"
-                >
-                  {RELAY_KANBAN_COLUMNS.map((col) => {
-                    const active = mobileKanbanCol === col.id;
-                    const count = countLiveKanbanCardsInColumn(board[col.id]);
-                    const stageLabel =
-                      col.id === "in_progress" ? "Bearbeitung" : col.label;
-                    return (
-                      <button
-                        key={col.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={active}
-                        aria-label={col.label}
-                        className={cn(
-                          "relay-center__filter-seg",
-                          active && "relay-center__filter-seg--active"
-                        )}
-                        onClick={() =>
-                          replaceParams((p) => {
-                            p.set("kanban", col.id);
-                          })
-                        }
-                      >
-                        {stageLabel}
-                        {count > 0 ? (
-                          <span className="relay-center__filter-seg-count">{count}</span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
+            {isKanbanMobile ? null : (
               <div className="relay-center__chip-scroll">
                 <div className="relay-center__chips" role="tablist" aria-label="Aufgaben-Ansicht">
                   {RELAY_TASK_SCOPE_TABS.map((tab) => {
@@ -415,11 +448,10 @@ export function RelayWorkCenter({
               </h2>
             )}
 
+            {!isKanbanMobile ? (
             <div className="relay-center__chip-scroll relay-center__chip-scroll--messages">
               <div className="relay-center__chips" role="tablist" aria-label="Nachrichten-Ansicht">
-                {RELAY_MESSAGE_INBOX_TABS.filter(
-                  (tab) => !isKanbanMobile || tab.id !== "mentions"
-                ).map((tab) => {
+                {RELAY_MESSAGE_INBOX_TABS.map((tab) => {
                   const active = messageTab === tab.id;
                   const count = messageCounts[tab.id];
                   return (
@@ -443,6 +475,7 @@ export function RelayWorkCenter({
                 })}
               </div>
             </div>
+            ) : null}
 
             <RelayTeamInboxList rows={inboxRows} />
 

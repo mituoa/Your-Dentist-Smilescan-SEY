@@ -178,45 +178,44 @@
 @media (max-width: 767px) {
   .yd-workspace {
     --yd-mobile-bottom-nav-h: calc(3.625rem + var(--yd-mobile-safe-bottom, env(safe-area-inset-bottom, 0px)));
+    --yd-command-assist-float-gap: 0.875rem;
   }
 
+  /* Mobile: kein schwebender FAB — Öffnen über Topbar-Button */
   .yd-command-assist-fab-host {
-    z-index: 48;
-    right: max(0.75rem, env(safe-area-inset-right, 0px));
-    left: auto;
-    transform: none;
-    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.625rem);
+    display: none !important;
   }
 
-  .yd-command-assist-fab-host button {
-    height: 3rem;
-    width: 3rem;
+  .yd-command-assist-backdrop {
+    z-index: 270;
+    background: rgba(15, 23, 42, 0.28);
   }
 
-  .yd-command-assist-fab-host button svg {
-    height: 1.25rem;
-    width: 1.25rem;
-  }
-
-  /* Volle Breite — Bottom-Sheet über der Nav, nicht schmal rechts */
+  /* Schwebendes Panel — Abstand zur Bottom-Nav, nicht angeklebt */
   .yd-command-assist-sheet {
-    z-index: 49;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
+    z-index: 275;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    width: auto !important;
     max-width: none !important;
     margin: 0 !important;
-    bottom: var(--yd-mobile-bottom-nav-h, 3.625rem) !important;
-    max-height: calc(
-      100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - max(0.25rem, env(safe-area-inset-top, 0px))
+    bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + var(--yd-command-assist-float-gap, 0.875rem)) !important;
+    max-height: min(
+      72dvh,
+      calc(
+        100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - var(--yd-command-assist-float-gap, 0.875rem) -
+          max(0.5rem, env(safe-area-inset-top, 0px))
+      )
     ) !important;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    border-radius: 1.125rem 1.125rem 0 0 !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
+    border-radius: 1.25rem !important;
+    border: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    box-shadow:
+      0 24px 56px rgba(15, 35, 58, 0.16),
+      0 8px 20px rgba(15, 35, 58, 0.08) !important;
   }
 
   .yd-command-assist-sheet .yd-command-sheet__body {
@@ -228,8 +227,9 @@
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
   }
 
-  .yd-command-assist-backdrop {
-    z-index: 47;
+  /* Kein Bottom-Sheet-Griff — wirkt sonst wie Nav-Anhang */
+  .yd-command-assist-sheet .yd-command-sheet__handle {
+    display: none;
   }
 }
 
@@ -242,14 +242,17 @@
   }
 }
 
-/* Workspace-Modals (Aufgabe, Fall, Nachricht): Command AI bleibt erreichbar; Bottom-Rail bleibt sichtbar */
+/* Workspace-Modals (Landing-Konfigurator, Aufgabe, Fall, …): KI-FAB ausblenden —
+   sonst überdeckt er Weiter-/Absenden-CTAs unten rechts im Sheet. */
 html[data-yd-workspace-modal="true"] .yd-command-assist-fab-host {
-  z-index: 280;
-  pointer-events: auto;
-  right: max(0.875rem, env(safe-area-inset-right, 0px));
-  left: auto;
-  transform: none;
-  bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + 0.5rem);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.94);
+  transition:
+    opacity 180ms ease,
+    visibility 180ms ease,
+    transform 180ms ease;
 }
 
 html[data-yd-workspace-modal="true"] .yd-medical-form-overlay {
@@ -259,14 +262,23 @@ html[data-yd-workspace-modal="true"] .yd-medical-form-overlay {
 html[data-yd-workspace-modal="true"] .yd-command-assist-sheet {
   z-index: 285;
   pointer-events: auto;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
+  left: 0.75rem !important;
+  right: 0.75rem !important;
+  width: auto !important;
   max-width: none !important;
-  bottom: var(--yd-mobile-bottom-nav-h, 3.625rem) !important;
-  max-height: calc(
-    100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - max(0.25rem, env(safe-area-inset-top, 0px))
+  bottom: calc(var(--yd-mobile-bottom-nav-h, 3.625rem) + var(--yd-command-assist-float-gap, 0.875rem)) !important;
+  max-height: min(
+    72dvh,
+    calc(
+      100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - var(--yd-command-assist-float-gap, 0.875rem) -
+        max(0.5rem, env(safe-area-inset-top, 0px))
+    )
   ) !important;
+  border-radius: 1.25rem !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow:
+    0 24px 56px rgba(15, 35, 58, 0.16),
+    0 8px 20px rgba(15, 35, 58, 0.08) !important;
 }
 
 @media (min-width: 768px) {
@@ -313,22 +325,23 @@ html[data-yd-workspace-modal="true"] .yd-command-assist-backdrop {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
-/* Tracker: Command AI über Fallansicht */
+/* Tracker: Command AI über Fallansicht — Mobile nutzt globale Float-Regeln */
 .yd-inbox-workspace .yd-command-assist-fab-host {
   z-index: 52;
 }
 
 .yd-inbox-workspace .yd-command-assist-sheet {
-  z-index: 53;
+  z-index: 275;
 }
 
 .yd-inbox-workspace .yd-command-assist-backdrop {
-  z-index: 51;
+  z-index: 270;
 }
 
 @media (min-width: 768px) {
   .yd-inbox-workspace .yd-command-assist-fab-host {
     z-index: 56;
+    display: block !important;
   }
 
   .yd-inbox-workspace .yd-command-assist-sheet {

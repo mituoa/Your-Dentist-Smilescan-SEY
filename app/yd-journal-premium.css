@@ -1707,3 +1707,122 @@
     display: contents;
   }
 }
+
+/* —— Care Center: Header-Tagline + Mobile-Priorität —— */
+
+.yd-cc-hub__header-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.yd-cc-hub__header-tagline {
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: clamp(1.125rem, 3.2vw, 1.3125rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--yd-brand-navy);
+}
+
+.yd-cc-hub__header-main .yd-cc-hub__header-lead {
+  margin: 0.3rem 0 0;
+  max-width: 42ch;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--yd-brand-muted);
+}
+
+.yd-cc-new-answer-form__ki-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(47, 128, 237, 0.14);
+  background: rgba(239, 246, 255, 0.55);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(26, 79, 156, 0.78);
+}
+
+.yd-cc-new-answer-form__ki-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--yd-brand-accent-deep);
+}
+
+@media (max-width: 767px) {
+  .yd-cc-hub__header {
+    padding: 0.875rem 1rem 0.75rem;
+  }
+
+  .yd-cc-hub__header-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .yd-cc-hub__header-tagline {
+    font-size: 1.25rem;
+  }
+
+  .yd-cc-hub__header-actions--solo {
+    order: 2;
+    justify-content: stretch;
+  }
+
+  .yd-cc-hub__header-bar {
+    order: 3;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .yd-cc-hub__header-search {
+    order: 1;
+    width: 100%;
+  }
+
+  .yd-cc-hub__stats-pills--compact {
+    order: 2;
+    width: 100%;
+  }
+
+  .yd-journal-v6--care-hub .yd-cc-hub__body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Bibliothek zuerst — sofort sichtbar, was live ist */
+  .yd-journal-v6--care-hub .yd-cc-hub__library-full {
+    order: 1;
+    border-top: none;
+    padding-top: 1rem;
+  }
+
+  .yd-journal-v6--care-hub .yd-cc-hub__zone--questions {
+    order: 2;
+  }
+
+  .yd-journal-v6--care-hub .yd-cc-hub__zone--doctor {
+    order: 3;
+  }
+
+  .yd-journal-v6--care-hub .yd-cc-hub__areas-full {
+    order: 4;
+  }
+
+  .yd-journal-v6--care-hub .yd-cc-hub__ki-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .yd-journal-v6--care-hub .yd-cc-hub__ki-card-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}

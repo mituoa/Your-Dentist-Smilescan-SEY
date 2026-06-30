@@ -10,8 +10,10 @@ import {
   countWords,
   JOURNAL_LIMITS,
 } from "@/lib/validation/journal-limits";
-import { isClinicalAreaId } from "@/lib/journal/clinical-areas";
+import { generateCareAnswerDraft } from "@/lib/care-center/generate-care-answer-draft";
+import { isClinicalAreaId, type ClinicalAreaId } from "@/lib/journal/clinical-areas";
 import { isContentType } from "@/lib/journal/content-categories";
+import { excerptFromMarkdown } from "@/lib/journal/excerpt-from-markdown";
 import { JOURNAL_TOPICS } from "@/lib/masterdata/journal-topics";
 
 const VALID_TOPIC_IDS = new Set(JOURNAL_TOPICS.map((t) => t.id));
@@ -84,6 +86,54 @@ export async function createDraftArticle(): Promise<{ id?: string; error?: strin
   }
 
   return { id: data.id };
+}
+
+export async function createCareAnswerDraftFromForm(input: {
+  question: string;
+  notes?: string;
+  clinicalArea?: string | null;
+  contentType?: string | null;
+}): Promise<{ id?: string; draftSource?: "ki" | "template"; error?: string }> {
+  const question = input.question.trim();
+  if (!question) {
+    return { error: "Bitte geben Sie eine Patientenfrage oder ein Thema an." };
+  }
+
+  const created = await createDraftArticle();
+  if (created.error || !created.id) {
+    return { error: created.error || "Entwurf konnte nicht erstellt werden." };
+  }
+
+  const clinicalArea: ClinicalAreaId | null = isClinicalAreaId(input.clinicalArea ?? "")
+    ? (input.clinicalArea as ClinicalAreaId)
+    : null;
+  const contentType = isContentType(input.contentType) ? input.contentType : "faq";
+
+  const draft = await generateCareAnswerDraft({
+    question,
+    notes: input.notes,
+    clinicalArea,
+  });
+
+  const content = draft.content.slice(0, JOURNAL_LIMITS.content_markdown);
+  const excerpt = excerptFromMarkdown(content);
+
+  const saved = await saveArticle({
+    id: created.id,
+    title: question.slice(0, JOURNAL_LIMITS.title),
+    excerpt,
+    content_markdown: content,
+    topic: null,
+    clinical_area: clinicalArea,
+    content_type: contentType,
+    cover_photo_url: null,
+  });
+
+  if (saved.error) {
+    return { error: saved.error };
+  }
+
+  return { id: created.id, draftSource: draft.source };
 }
 
 export interface SaveArticlePayload {

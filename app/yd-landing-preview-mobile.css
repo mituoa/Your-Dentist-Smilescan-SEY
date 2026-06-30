@@ -1,5 +1,6 @@
 /**
- * Landingpage-Vorschau — Mobile: skaliert, ein Scroll, kein Horizontal-Overflow.
+ * Landingpage-Vorschau — Mobile: volle 1:1-Größe (wie auf dem Gerät),
+ * vertikal scrollbar, kein Horizontal-Overflow.
  */
 
 @media (max-width: 767px) {
@@ -20,14 +21,12 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
-  /* Gesamte Vorschau verkleinern — volle Seite sichtbar beim Scrollen */
   .yd-lp-preview-shell__scale {
-    transform: scale(0.46);
-    transform-origin: top center;
-    width: calc(100% / 0.46);
-    max-width: none;
-    margin-inline: calc((100% - 100% / 0.46) / 2);
-    padding-bottom: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    transform: none;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   }
 
   .yd-lp-preview-banner {
@@ -73,6 +72,7 @@
   .yd-lp-preview-shell__scale .yd-kr {
     overflow-x: hidden;
     max-width: 100%;
+    width: 100%;
   }
 
   .yd-lp-preview-shell__scale .yd-al-container,
@@ -81,6 +81,7 @@
     padding-left: max(1rem, env(safe-area-inset-left));
     padding-right: max(1rem, env(safe-area-inset-right));
     max-width: 100%;
+    box-sizing: border-box;
   }
 
   .yd-lp-preview-shell__scale img,

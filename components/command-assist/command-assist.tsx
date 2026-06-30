@@ -41,8 +41,9 @@ import { cn } from "@/lib/utils";
 import { useAssistCaseOptional, useAssistStateOptional } from "./assist-shell";
 
 const SHEET =
-  "flex max-md:min-h-0 max-md:flex-1 flex-col overflow-hidden rounded-t-[20px] border border-[#E8ECF2] bg-white shadow-[0_-8px_40px_-12px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.9)_inset] " +
-  "max-md:max-h-none md:max-h-[min(82dvh,880px)] md:rounded-2xl md:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.14)]";
+  "flex max-md:min-h-0 max-md:flex-1 flex-col overflow-hidden rounded-2xl border border-[#E8ECF2] bg-white " +
+  "shadow-[0_20px_56px_-16px_rgba(15,23,42,0.16),0_8px_20px_-8px_rgba(15,23,42,0.08)] " +
+  "max-md:max-h-none md:max-h-[min(82dvh,880px)] md:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.14)]";
 
 const HEADER_DIVIDER = "border-b border-[#EEF2F6]";
 
@@ -467,6 +468,18 @@ export function CommandAssist() {
   useLayoutEffect(() => {
     setPortalMounted(true);
   }, []);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    if (!open) {
+      html.removeAttribute("data-yd-command-open");
+      return;
+    }
+    html.setAttribute("data-yd-command-open", "true");
+    return () => {
+      html.removeAttribute("data-yd-command-open");
+    };
+  }, [open]);
 
   useEffect(() => {
     textRef.current = text;

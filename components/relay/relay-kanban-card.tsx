@@ -66,8 +66,11 @@ export function RelayKanbanCardView({
         ) : (
           <span className="relay-kanban-card__date relay-kanban-card__date--muted">—</span>
         )}
-        <span className="relay-kanban-card__action">
-          {card.isGhost ? "Beispiel" : draggable ? "Ziehen zum Verschieben" : card.actionLabel}
+        <span className="relay-kanban-card__action relay-kanban-card__action--tap">
+          {card.isGhost ? "Beispiel" : card.actionLabel}
+        </span>
+        <span className="relay-kanban-card__action relay-kanban-card__action--drag">
+          Ziehen zum Verschieben
         </span>
       </div>
       {card.priority === "important" ? (

@@ -14,6 +14,9 @@ export function RelayTeamInboxList({ rows }: RelayTeamInboxListProps) {
     return (
       <div className="relay-team-inbox__empty">
         <p>Keine Nachrichten in dieser Ansicht.</p>
+        <p className="relay-team-inbox__empty-hint">
+          Anderen Filter wählen oder alle Nachrichten öffnen.
+        </p>
       </div>
     );
   }

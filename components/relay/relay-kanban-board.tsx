@@ -291,6 +291,25 @@ export function RelayKanbanBoard({
         className={cn("relay-kanban", mobileColumn && "relay-kanban--mobile-single")}
         aria-busy={isPending}
       >
+        {mobileColumn ? (
+          (() => {
+            const column = RELAY_KANBAN_COLUMNS.find((c) => c.id === mobileColumn);
+            if (!column) return null;
+            const liveCount = countLiveKanbanCardsInColumn(board[mobileColumn]);
+            return (
+              <div className="relay-kanban__mobile-stage" aria-live="polite">
+                <span
+                  className={cn("relay-kanban__dot", `relay-kanban__dot--${column.tone}`)}
+                  aria-hidden
+                />
+                <span className="relay-kanban__mobile-stage-label">{column.label}</span>
+                <span className="relay-kanban__mobile-stage-meta">
+                  {liveCount > 0 ? `${liveCount} offen` : column.emptyTitle}
+                </span>
+              </div>
+            );
+          })()
+        ) : null}
         {visibleColumns.map((column) => {
           const cards = board[column.id];
           const liveCount = countLiveKanbanCardsInColumn(cards);
