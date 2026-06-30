@@ -2117,6 +2117,85 @@
     color: rgba(15, 23, 41, 0.55);
   }
 
+  /* Aufgabe-Modal — Scroll-Kette wie Neuer Fall, Footer überdeckt Felder nicht */
+  .yd-medical-form-overlay--workspace .yd-medical-form-panel--task-modal,
+  .yd-medical-form-panel--task-modal.yd-medical-form-panel--workspace-compact {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: min(100%, 26rem);
+    min-height: 0;
+    max-height: min(
+      calc(100dvh - var(--yd-mobile-bottom-nav-h, 3.625rem) - env(safe-area-inset-top, 0px) - 0.75rem),
+      40rem
+    );
+    margin-inline: auto;
+    overflow: hidden;
+    border-radius: 1.25rem;
+  }
+
+  .yd-medical-form-overlay--workspace .yd-auth-register-stage:has(.yd-medical-form-panel--task-modal) {
+    justify-content: center;
+    align-items: stretch;
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+    padding-inline: max(0.625rem, env(safe-area-inset-left, 0px))
+      max(0.625rem, env(safe-area-inset-right, 0px));
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-header--compact {
+    flex-shrink: 0;
+    padding: 0.875rem 1rem 0.5rem;
+    padding-right: 3rem;
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-header--compact .yd-auth-register-title {
+    font-size: 1.125rem;
+    text-align: left;
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    border-top: 1px solid rgba(186, 203, 222, 0.32);
+    background: rgba(255, 255, 255, 0.98);
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-stack--pair {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .yd-medical-form-panel--task-modal .yd-medical-form-stack--pair > *,
+  .yd-medical-form-panel--task-modal .yd-medical-form-stack > * {
+    min-width: 0;
+  }
+
+  .yd-medical-form-panel--task-modal .yd-auth-input,
+  .yd-medical-form-panel--task-modal .yd-medical-form-select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   .yd-medical-form-panel--workspace-compact .yd-medical-form-routine--collapsible > .yd-medical-form-section__head {
     display: none;
   }

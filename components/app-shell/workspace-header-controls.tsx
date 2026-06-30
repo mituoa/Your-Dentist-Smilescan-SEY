@@ -71,8 +71,8 @@ export function WorkspaceHeaderControls({
         <Link
           href="/relay?section=handoffs"
           className="yd-dash-header-premium__action"
-          aria-label="Team-Nachrichten in Relay"
-          title="Team-Nachrichten (Relay)"
+          aria-label="Nachrichten in Relay"
+          title="Nachrichten (Relay)"
         >
           <MessageCircle strokeWidth={1.65} />
         </Link>

@@ -233,7 +233,7 @@ export function RelayWorkCenter({
                 active={activeArea === "nachrichten"}
                 onClick={() => openArea("nachrichten")}
                 icon={MessageSquare}
-                title="Teamnachrichten"
+                title="Nachrichten"
                 count={messageCounts.unread}
                 countLabel={`${messageCounts.unread} ungelesene Nachrichten`}
               />
@@ -261,8 +261,7 @@ export function RelayWorkCenter({
                   active={activeArea === "nachrichten"}
                   onClick={() => openArea("nachrichten")}
                   icon={MessageSquare}
-                  title="Teamnachrichten"
-                  shortTitle="Team"
+                  title="Nachrichten"
                   count={messageCounts.unread}
                   countLabel={`${messageCounts.unread} ungelesene Nachrichten`}
                 />

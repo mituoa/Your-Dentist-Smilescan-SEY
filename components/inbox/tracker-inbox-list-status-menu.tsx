@@ -60,7 +60,7 @@ function usePopoverPosition(
         left: Math.min(Math.max(8, rect.right - width), window.innerWidth - width - 8),
         top: openUp ? rect.top - 8 : rect.bottom + 6,
         transform: openUp ? "translateY(-100%)" : undefined,
-        zIndex: 10050,
+        zIndex: 100000,
         minWidth: "13.5rem",
       });
     };
@@ -90,6 +90,7 @@ export function TrackerInboxListStatusMenu({
   const { markCaseUnread } = useTrackerInboxRead();
   const rootRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const ignoreOutsideUntilRef = useRef(0);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -111,6 +112,7 @@ export function TrackerInboxListStatusMenu({
     if (!open) return;
 
     const onPointerDown = (e: PointerEvent) => {
+      if (Date.now() < ignoreOutsideUntilRef.current) return;
       const target = e.target as Node;
       if (rootRef.current?.contains(target) || popoverRef.current?.contains(target)) {
         return;
@@ -124,7 +126,7 @@ export function TrackerInboxListStatusMenu({
 
     const timer = window.setTimeout(() => {
       document.addEventListener("pointerdown", onPointerDown, true);
-    }, 0);
+    }, 200);
 
     document.addEventListener("keydown", onKeyDown);
     return () => {
@@ -180,10 +182,11 @@ export function TrackerInboxListStatusMenu({
     });
   };
 
-  const toggleOpen = (e: React.MouseEvent | React.PointerEvent) => {
+  const toggleOpen = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isSaving) return;
+    ignoreOutsideUntilRef.current = Date.now() + 280;
     setOpen((v) => !v);
   };
 

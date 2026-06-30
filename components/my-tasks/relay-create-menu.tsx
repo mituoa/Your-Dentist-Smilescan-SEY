@@ -178,8 +178,8 @@ export function RelayCreateMenu({
             },
             {
               id: "message",
-              label: "Teamnachricht",
-              hint: "Nachricht ans Team",
+              label: "Nachricht",
+              hint: "Nachricht senden",
               icon: MessageSquarePlus,
               onSelect: () => void openMessage(),
             },
@@ -212,7 +212,7 @@ export function RelayCreateMenu({
               }}
             >
               <MessageSquarePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-              <span>Teamnachricht</span>
+              <span>Nachricht</span>
             </button>
           </li>
         </ul>

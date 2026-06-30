@@ -13,7 +13,7 @@ export function RelayTeamInboxList({ rows }: RelayTeamInboxListProps) {
   if (rows.length === 0) {
     return (
       <div className="relay-team-inbox__empty">
-        <p>Keine Team-Nachrichten in dieser Ansicht.</p>
+        <p>Keine Nachrichten in dieser Ansicht.</p>
       </div>
     );
   }

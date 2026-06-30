@@ -146,8 +146,8 @@ function MobileAtlasCreateMenu({
           },
           {
             id: "message",
-            label: "Teamnachricht",
-            hint: "Nachricht ans Team",
+            label: "Nachricht",
+            hint: "Nachricht senden",
             icon: MessageSquarePlus,
             onSelect: () => void openMessage(),
           },

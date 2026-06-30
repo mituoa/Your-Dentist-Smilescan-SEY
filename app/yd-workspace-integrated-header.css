@@ -58,10 +58,19 @@
   }
 
   .yd-workspace .yd-workspace-integrated-header.yd-dash-header-premium {
-    padding: 0.25rem 0 0.5rem;
+    padding: 0.125rem 0 0.35rem;
   }
 
-  /* Nur Atlas: Begrüßung — sonst nur Modulname (Nav zeigt Kontext). */
+  /* Modulnamen ausblenden — stehen in der Bottom-Navigation. */
+  .yd-workspace .yd-workspace-integrated-header .yd-dash-header-premium__headline {
+    display: none;
+  }
+
+  /* Nur Atlas: Begrüßung mit Name — sonst kein Header-Text. */
+  .yd-workspace .yd-workspace-integrated-header:not(.yd-workspace-integrated-header--mobile-home) .yd-dash-header-premium__identity {
+    display: none;
+  }
+
   .yd-workspace .yd-workspace-integrated-header:not(.yd-workspace-integrated-header--mobile-home) .yd-dash-header-premium__greeting,
   .yd-workspace .yd-workspace-integrated-header:not(.yd-workspace-integrated-header--mobile-home) .yd-dash-header-premium__subtitle,
   .yd-workspace .yd-workspace-integrated-header:not(.yd-workspace-integrated-header--mobile-home) .yd-dash-header-premium__subtitle-meta {
@@ -73,17 +82,14 @@
     display: none;
   }
 
-  .yd-workspace .yd-workspace-integrated-header .yd-dash-header-premium__headline {
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.018em;
-    text-transform: none;
-    color: rgba(21, 42, 69, 0.82);
-  }
-
   .yd-workspace .yd-workspace-integrated-header--mobile-home .yd-dash-header-premium__greeting {
-    margin-top: 0.35rem;
-    font-size: 1.0625rem;
+    display: block;
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+    line-height: 1.25;
   }
 }
 

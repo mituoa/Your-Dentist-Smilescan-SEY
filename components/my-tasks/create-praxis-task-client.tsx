@@ -384,6 +384,7 @@ export function CreatePraxisTaskClient({
       onClose={close}
       closeDisabled={busy}
       ariaLabel={shell.title}
+      headerVariant={isModalForm ? "compact" : "default"}
       overlayVariant={overlay}
       panelClassName={
         overlay === "workspace"
@@ -460,7 +461,7 @@ export function CreatePraxisTaskClient({
                       id={`${formId}-desc`}
                       value={description}
                       onChange={setDescription}
-                      rows={4}
+                      rows={isModalForm ? 3 : 4}
                     />
                   </div>
                 </MedicalFormFieldStack>
@@ -493,7 +494,7 @@ export function CreatePraxisTaskClient({
                     </div>
                     {soloAssignNote}
                     {memberPicker}
-                    <MedicalFormFieldStack className="yd-medical-form-stack--pair">
+                    <MedicalFormFieldStack>
                       <div>
                         <MedicalFormLabel htmlFor={`${formId}-due`} optional>
                           Fällig am

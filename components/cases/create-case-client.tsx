@@ -280,6 +280,13 @@ export function CreateCaseClient({
           tempStoragePaths: pathsResult,
         });
 
+        if (!result) {
+          setError(
+            "Die Speicherung ist momentan nicht möglich. Bitte laden Sie die Seite neu und versuchen Sie es erneut."
+          );
+          return;
+        }
+
         if (result.error) {
           if (uploadedPaths.length > 0) void deleteTempSubmissionPhotos(uploadedPaths);
           setError(result.error);

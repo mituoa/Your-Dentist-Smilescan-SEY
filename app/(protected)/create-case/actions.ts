@@ -35,6 +35,8 @@
  */
 
 import { revalidatePath } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspace } from "@/lib/auth-helpers";
@@ -147,6 +149,164 @@ function mergeCaseFieldsIntoNotes(
 }
 
 /** Nur Pfade unter `workspaceId/temp/<uuid>.<ext>` — verhindert Löschen/Moves außerhalb des Temp-Präfixes und fremde Schlüssel. */
+function tryGetAdminClient(): SupabaseClient | null {
+  try {
+    return createAdminClient();
+  } catch (error) {
+    console.error("[createPracticeCase] admin client unavailable", error);
+    return null;
+  }
+}
+
+function isRlsInsertDenial(
+  err: { code?: string; message?: string } | null | undefined
+): boolean {
+  if (!err) return false;
+  const msg = (err.message ?? "").toLowerCase();
+  return err.code === "42501" || msg.includes("row-level security");
+}
+
+function userFacingSubmissionInsertError(
+  err: { code?: string; message?: string } | null | undefined
+): string {
+  if (isRlsInsertDenial(err)) {
+    return "Der Patientenfall konnte nicht gespeichert werden. Bitte laden Sie die Seite neu oder melden Sie sich erneut an.";
+  }
+  return "Die Speicherung ist momentan nicht möglich. Bitte versuchen Sie es in Kürze erneut.";
+}
+
+function safeRevalidateCreateCasePaths(submissionId: string): void {
+  try {
+    revalidatePath("/inbox", "layout");
+    revalidatePath("/inbox", "page");
+    revalidatePath(`/inbox/${submissionId}`);
+    revalidatePath("/dashboard");
+    revalidatePath("/relay");
+    revalidatePath("/create-case");
+  } catch (error) {
+    console.error("[createPracticeCase] revalidate failed", error);
+  }
+}
+
+type PracticeSubmissionInsertInput = {
+  workspaceId: string;
+  nameTrim: string;
+  notesTrim: string | null;
+  extIdTrim: string | null;
+  emailTrim: string | null;
+  phoneTrim: string | null;
+  birth: string | null;
+  urgency: PracticeCaseUrgency;
+  isDraft: boolean;
+};
+
+async function insertPracticeSubmissionRow(
+  db: SupabaseClient,
+  input: PracticeSubmissionInsertInput
+): Promise<{ id: string } | { error: string }> {
+  const {
+    workspaceId,
+    nameTrim,
+    notesTrim,
+    extIdTrim,
+    emailTrim,
+    phoneTrim,
+    birth,
+    urgency,
+    isDraft,
+  } = input;
+
+  const caseInsertBase = {
+    workspace_id: workspaceId,
+    patient_name: nameTrim || null,
+    patient_email: emailTrim,
+    patient_phone: phoneTrim,
+    patient_notes: notesTrim,
+    patient_birth_date: birth,
+    patient_external_id: extIdTrim,
+    urgency,
+    is_draft: isDraft,
+  };
+
+  let fullInsert = await db
+    .from("submissions")
+    .insert({
+      ...caseInsertBase,
+      intake_channel: INTAKE_CHANNEL_PRACTICE_MANUAL,
+    })
+    .select("id")
+    .single();
+
+  if (
+    fullInsert.error &&
+    isLikelyMissingDbColumnError(fullInsert.error) &&
+    !looksLikeMissingCaseColumnsError(fullInsert.error)
+  ) {
+    fullInsert = await db
+      .from("submissions")
+      .insert(caseInsertBase)
+      .select("id")
+      .single();
+  }
+
+  if (!fullInsert.error && fullInsert.data?.id) {
+    return { id: fullInsert.data.id as string };
+  }
+
+  if (
+    fullInsert.error &&
+    looksLikeMissingCaseColumnsError(fullInsert.error)
+  ) {
+    console.warn(
+      "[createPracticeCase] DB ohne Migration-023-Felder — Fallback mit strukturierten Notizen."
+    );
+    const legacyNotes = mergeCaseFieldsIntoNotes(notesTrim, {
+      birth,
+      externalId: extIdTrim,
+      email: emailTrim,
+      phone: phoneTrim,
+      urgency,
+      isDraft,
+    });
+    const legacyBase = {
+      workspace_id: workspaceId,
+      patient_name: nameTrim || null,
+      patient_email: emailTrim,
+      patient_phone: phoneTrim,
+      patient_notes: legacyNotes,
+    };
+    let legacy = await db
+      .from("submissions")
+      .insert({
+        ...legacyBase,
+        intake_channel: INTAKE_CHANNEL_PRACTICE_MANUAL,
+      })
+      .select("id")
+      .single();
+    if (legacy.error && isLikelyMissingDbColumnError(legacy.error)) {
+      legacy = await db
+        .from("submissions")
+        .insert(legacyBase)
+        .select("id")
+        .single();
+    }
+    if (!legacy.error && legacy.data?.id) {
+      return { id: legacy.data.id as string };
+    }
+    console.error(
+      "[createPracticeCase] legacy insert",
+      legacy.error?.code ?? "unknown"
+    );
+    return { error: userFacingSubmissionInsertError(legacy.error) };
+  }
+
+  console.error(
+    "[createPracticeCase] insert",
+    fullInsert.error?.code ?? "unknown"
+  );
+  return { error: userFacingSubmissionInsertError(fullInsert.error) };
+}
+
 function filterTempPathsForWorkspace(
   workspaceId: string,
   paths: string[]
@@ -338,147 +498,83 @@ async function createPracticeCaseInner(input: {
     return { error: "Nicht angemeldet." };
   }
 
-  let insertedRow: { id: string } | null = null;
-
-  const caseInsertBase = {
-    workspace_id: workspaceId,
-    patient_name: nameTrim || null,
-    patient_email: emailTrim,
-    patient_phone: phoneTrim,
-    patient_notes: notesTrim,
-    patient_birth_date: birth,
-    patient_external_id: extIdTrim,
+  const insertInput: PracticeSubmissionInsertInput = {
+    workspaceId,
+    nameTrim,
+    notesTrim,
+    extIdTrim,
+    emailTrim,
+    phoneTrim,
+    birth,
     urgency: input.urgency,
-    is_draft: input.isDraft,
+    isDraft: input.isDraft,
   };
 
-  let fullInsert = await supabase
-    .from("submissions")
-    .insert({
-      ...caseInsertBase,
-      intake_channel: INTAKE_CHANNEL_PRACTICE_MANUAL,
-    })
-    .select("id")
-    .single();
+  const admin = tryGetAdminClient();
+  let insertedRow: { id: string } | null = null;
 
-  if (
-    fullInsert.error &&
-    isLikelyMissingDbColumnError(fullInsert.error) &&
-    !looksLikeMissingCaseColumnsError(fullInsert.error)
-  ) {
-    fullInsert = await supabase
-      .from("submissions")
-      .insert(caseInsertBase)
-      .select("id")
-      .single();
+  if (admin) {
+    const adminInsert = await insertPracticeSubmissionRow(admin, insertInput);
+    if ("id" in adminInsert) {
+      insertedRow = adminInsert;
+    }
   }
 
-  if (fullInsert.error || !fullInsert.data?.id) {
-    console.error(
-      "[createPracticeCase] insert",
-      fullInsert.error?.code ?? "unknown"
-    );
-    if (
-      fullInsert.error &&
-      looksLikeMissingCaseColumnsError(fullInsert.error)
-    ) {
-      console.warn(
-        "[createPracticeCase] DB ohne Migration-023-Felder — Fallback mit strukturierten Notizen. Migration 023 ausführen, um Felder nativ zu speichern."
-      );
-      const legacyNotes = mergeCaseFieldsIntoNotes(notesTrim, {
-        birth,
-        externalId: extIdTrim,
-        email: emailTrim,
-        phone: phoneTrim,
-        urgency: input.urgency,
-        isDraft: input.isDraft,
-      });
-      const legacyBase = {
-        workspace_id: workspaceId,
-        patient_name: nameTrim || null,
-        patient_email: emailTrim,
-        patient_phone: phoneTrim,
-        patient_notes: legacyNotes,
-      };
-      let legacy = await supabase
-        .from("submissions")
-        .insert({
-          ...legacyBase,
-          intake_channel: INTAKE_CHANNEL_PRACTICE_MANUAL,
-        })
-        .select("id")
-        .single();
-      if (legacy.error && isLikelyMissingDbColumnError(legacy.error)) {
-        legacy = await supabase
-          .from("submissions")
-          .insert(legacyBase)
-          .select("id")
-          .single();
-      }
-      if (legacy.error || !legacy.data?.id) {
-        console.error(
-          "[createPracticeCase] legacy insert",
-          legacy.error?.code ?? "unknown"
-        );
+  if (!insertedRow) {
+    const userInsert = await insertPracticeSubmissionRow(supabase, insertInput);
+    if ("id" in userInsert) {
+      insertedRow = userInsert;
+    } else {
+      if (!admin) {
         return {
           error:
-            "Die Speicherung ist momentan nicht möglich. Bitte versuchen Sie es in Kürze erneut.",
+            "Die Speicherung ist momentan nicht möglich. Bitte versuchen Sie es in Kürze erneut oder kontaktieren Sie den Support.",
         };
       }
-      insertedRow = { id: legacy.data.id as string };
-    } else {
-      return {
-        error:
-          "Die Speicherung ist momentan nicht möglich. Bitte versuchen Sie es in Kürze erneut.",
-      };
+      return { error: userInsert.error };
     }
-  } else {
-    insertedRow = { id: fullInsert.data.id as string };
   }
 
   const submissionId = insertedRow.id;
   let photosFullyApplied = 0;
+  const photoDb = admin ?? supabase;
 
   if (uniqueTempPaths.length > 0) {
-    let admin: ReturnType<typeof createAdminClient>;
-    try {
-      admin = createAdminClient();
-    } catch (error) {
-      console.error("[createPracticeCase] admin client unavailable", error);
+    if (!admin) {
       return {
         error:
           "Die Bilder konnten nicht gespeichert werden. Bitte versuchen Sie es ohne Anlagen erneut oder kontaktieren Sie den Support.",
       };
     }
 
-  for (let i = 0; i < uniqueTempPaths.length; i++) {
-    const tempPath = uniqueTempPaths[i];
-    const fileName = tempPath.split("/").pop() || `photo-${i}.jpg`;
-    const finalPath = `${workspaceId}/${submissionId}/${fileName}`;
+    for (let i = 0; i < uniqueTempPaths.length; i++) {
+      const tempPath = uniqueTempPaths[i];
+      const fileName = tempPath.split("/").pop() || `photo-${i}.jpg`;
+      const finalPath = `${workspaceId}/${submissionId}/${fileName}`;
 
-    const { error: moveError } = await admin.storage
-      .from("submission-photos")
-      .move(tempPath, finalPath);
+      const { error: moveError } = await admin.storage
+        .from("submission-photos")
+        .move(tempPath, finalPath);
 
-    if (moveError) {
-      console.error("[createPracticeCase] storage move failed", { index: i });
-      continue;
-    }
+      if (moveError) {
+        console.error("[createPracticeCase] storage move failed", { index: i });
+        continue;
+      }
 
-    const sortOrder = photosFullyApplied;
-    const { error: photoErr } = await supabase.from("submission_photos").insert({
-      submission_id: submissionId,
-      storage_path: finalPath,
-      sort_order: sortOrder,
-    });
-    if (photoErr) {
-      console.error("[createPracticeCase] submission_photos insert failed", {
-        index: i,
+      const sortOrder = photosFullyApplied;
+      const { error: photoErr } = await photoDb.from("submission_photos").insert({
+        submission_id: submissionId,
+        storage_path: finalPath,
+        sort_order: sortOrder,
       });
-      continue;
+      if (photoErr) {
+        console.error("[createPracticeCase] submission_photos insert failed", {
+          index: i,
+        });
+        continue;
+      }
+      photosFullyApplied += 1;
     }
-    photosFullyApplied += 1;
-  }
   }
 
   const partialAttachments =
@@ -503,12 +599,7 @@ async function createPracticeCaseInner(input: {
   });
 
   /* Liste in inbox/layout.tsx muss neu geladen werden, nicht nur die Index-Seite */
-  revalidatePath("/inbox", "layout");
-  revalidatePath("/inbox", "page");
-  revalidatePath(`/inbox/${submissionId}`);
-  revalidatePath("/dashboard");
-  revalidatePath("/relay");
-  revalidatePath("/create-case");
+  safeRevalidateCreateCasePaths(submissionId);
 
   return {
     submissionId,
