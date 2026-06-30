@@ -10,13 +10,12 @@ import { useFormStatus } from "react-dom";
 import { RegisterFormBackButton } from "@/components/auth/register-form-back-button";
 import { RegisterFormSubmitButton } from "@/components/auth/register-form-submit-button";
 import { RegisterStep4Checkbox } from "@/components/auth/register-step4-checkbox";
+import { RegisterStep4CheckoutPanel } from "@/components/auth/register-step4-checkout-panel";
 import {
   isRegisterStep4PaymentSetupValid,
-  RegisterStep4PaymentSetup,
   type RegisterStep4PaymentFields,
   type RegisterStep4PaymentMethod,
 } from "@/components/auth/register-step4-payment-setup";
-import { RegisterStep4TrustStatus } from "@/components/auth/register-step4-trust-status";
 import { RegisterLicenseSideCard } from "@/components/auth/register-license-side-card";
 import {
   userFacingRegisterProofFileError,
@@ -36,11 +35,11 @@ import {
   suggestRegisterEmailFix,
 } from "@/lib/auth/register-validation";
 import {
-  REGISTER_PLANS,
   coerceRegisterPlan,
   type RegisterPlanId,
 } from "@/lib/auth/register-plans";
 import { CURRENT_CONTRACT_VERSION } from "@/lib/trust/contract-policy";
+import { withTrustReturn } from "@/lib/trust/return-path";
 import { clearReturnToPricingFlag } from "@/lib/login-pricing-return";
 import { cn } from "@/lib/utils";
 
@@ -419,8 +418,6 @@ export function RegisterClient(props: {
     setPaymentFields((prev) => ({ ...prev, [field]: value }));
   };
 
-  const plans = REGISTER_PLANS;
-
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -514,16 +511,6 @@ export function RegisterClient(props: {
   };
 
   const handleBackFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) ingestLicenseFile(e.target.files[0], "back");
-    e.target.value = "";
-  };
-
-  const handleFrontCameraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) ingestLicenseFile(e.target.files[0], "front");
-    e.target.value = "";
-  };
-
-  const handleBackCameraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) ingestLicenseFile(e.target.files[0], "back");
     e.target.value = "";
   };
@@ -1202,7 +1189,6 @@ export function RegisterClient(props: {
                           onDragOver={handleDrag}
                           onDrop={handleDrop}
                           onFilePick={handleFrontFileChange}
-                          onCameraPick={handleFrontCameraChange}
                           onClear={() => {
                             setLicenseFrontFile(null);
                             setFrontPreview(null);
@@ -1227,7 +1213,6 @@ export function RegisterClient(props: {
                           onDragOver={handleDrag}
                           onDrop={handleDrop}
                           onFilePick={handleBackFileChange}
-                          onCameraPick={handleBackCameraChange}
                           onClear={() => {
                             setLicenseBackFile(null);
                             setBackPreview(null);
@@ -1304,17 +1289,15 @@ export function RegisterClient(props: {
               {registrationStep === 4 ? (
                 <div className="yd-auth-awaken-field">
                   {presentation !== "page" ? (
-                    <header className="mb-4 text-center md:mb-5">
+                    <header className="mb-5 text-center md:mb-6">
                       <h3 className="text-[22px] font-semibold leading-snug tracking-tight text-slate-900 md:text-[23px]">
-                        Praxiszugang vorbereiten
+                        Praxiszugang abschließen
                       </h3>
                       <p className="mx-auto mt-2.5 max-w-md text-[13px] leading-relaxed text-slate-600">
-                        Abrechnung vorbereiten. Aktivierung nach Prüfung Ihrer Praxis.
+                        Intervall und Zahlungsweise wählen — Freischaltung nach Prüfung Ihrer Praxis.
                       </p>
                     </header>
                   ) : null}
-
-                  {presentation !== "page" ? <RegisterStep4TrustStatus /> : null}
 
                   <form
                     action={props.signUpAction}
@@ -1326,92 +1309,20 @@ export function RegisterClient(props: {
                     }}
                   >
                     <RegisterStep4LockableFieldset>
-                      <div className="flex flex-col gap-8">
-                        <section aria-labelledby="reg-step4-tarif-heading" className="min-w-0">
-                          <h4
-                            id="reg-step4-tarif-heading"
-                            className="mb-4 text-left text-[11px] font-semibold uppercase tracking-widest text-slate-500"
-                          >
-                            Abrechnungsintervall
-                          </h4>
-                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-4">
-                            {(Object.keys(plans) as Plan[]).map((key) => {
-                              const p = plans[key];
-                              const active = selectedPlan === key;
-                              const recommended = key === "yearly";
-                              return (
-                                <button
-                                  key={key}
-                                  type="button"
-                                  onClick={() => setSelectedPlan(key)}
-                                  className={cn(
-                                    "relative rounded-xl border px-5 py-4 text-left transition-colors duration-150",
-                                    active ? "yd-reg-step4-plan--selected" : "yd-reg-step4-plan--idle"
-                                  )}
-                                >
-                                  {active ? (
-                                    <span
-                                      className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#0284C7] text-white"
-                                      aria-hidden
-                                    >
-                                      <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                        <path
-                                          fillRule="evenodd"
-                                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                          clipRule="evenodd"
-                                        />
-                                      </svg>
-                                    </span>
-                                  ) : null}
-                                  <div className="flex items-center gap-2 pr-7">
-                                    <p className="text-[13px] font-medium text-slate-900">{p.label}</p>
-                                    {recommended ? (
-                                      <span className="text-[10px] font-medium text-slate-500">Empfohlen</span>
-                                    ) : null}
-                                  </div>
-                                  <p className="mt-2 text-[1.15rem] font-semibold tabular-nums tracking-tight text-slate-800">
-                                    {p.price} €
-                                  </p>
-                                  {active && key !== "monthly" ? (
-                                    <p className="mt-1.5 text-[10px] leading-snug text-slate-500">
-                                      {p.total} €
-                                      {key === "halfyearly" ? " alle 6 Monate" : " jährlich"}
-                                    </p>
-                                  ) : null}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </section>
+                      <RegisterStep4CheckoutPanel
+                        selectedPlan={selectedPlan}
+                        onPlanChange={setSelectedPlan}
+                        paymentMethod={paymentMethod}
+                        onPaymentMethodChange={setPaymentMethod}
+                        paymentFields={paymentFields}
+                        onPaymentFieldChange={onPaymentFieldChange}
+                        skipPaymentAtSignup={props.skipPaymentAtSignup}
+                      />
 
-                        <div className="border-t border-slate-100 pt-4" aria-live="polite">
-                          <p className="text-[13px] font-medium text-slate-900">Praxiszugang</p>
-                          <p className="text-[12px] text-slate-600">{plans[selectedPlan].label}</p>
-                          <p className="mt-1 text-[14px] font-semibold tabular-nums text-slate-900">
-                            {plans[selectedPlan].price} €/Monat
-                          </p>
-                        </div>
-
-                        <section
-                          aria-labelledby="reg-step4-pay-heading"
-                          className="border-t border-slate-100 pt-5"
-                        >
-                          <h4
-                            id="reg-step4-pay-heading"
-                            className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
-                          >
-                            Zahlungsweise
-                          </h4>
-                          <RegisterStep4PaymentSetup
-                            method={paymentMethod}
-                            onMethodChange={setPaymentMethod}
-                            selectedPlan={selectedPlan}
-                            fields={paymentFields}
-                            onFieldChange={onPaymentFieldChange}
-                          />
-                        </section>
-
-                        <section aria-labelledby="reg-step4-agreements-heading" className="border-t border-slate-100 pt-6">
+                      <section
+                        aria-labelledby="reg-step4-agreements-heading"
+                        className="mt-8 border-t border-slate-100 pt-6"
+                      >
                           <h4
                             id="reg-step4-agreements-heading"
                             className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500"
@@ -1427,7 +1338,7 @@ export function RegisterClient(props: {
                               <>
                                 Ich habe die{" "}
                                 <Link
-                                  href="/trust/terms"
+                                  href={withTrustReturn("/trust/terms", "/register")}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
@@ -1445,7 +1356,7 @@ export function RegisterClient(props: {
                               <>
                                 Ich habe die{" "}
                                 <Link
-                                  href="/trust/privacy"
+                                  href={withTrustReturn("/trust/privacy", "/register")}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="font-medium text-slate-800 underline decoration-slate-300 underline-offset-2 hover:decoration-slate-500"
@@ -1466,7 +1377,7 @@ export function RegisterClient(props: {
                                   {" "}
                                   (
                                   <Link
-                                    href="/trust/terms#21-widerruf"
+                                    href={withTrustReturn("/trust/terms#21-widerruf", "/register")}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
@@ -1479,7 +1390,6 @@ export function RegisterClient(props: {
                             </RegisterStep4Checkbox>
                           </div>
                         </section>
-                      </div>
                     </RegisterStep4LockableFieldset>
                     <RegisterStep4PendingIntentSync intentRef={registerStep4SubmitIntentRef} />
 
@@ -1516,7 +1426,8 @@ export function RegisterClient(props: {
 
                     {presentation === "page" ? (
                       <p className="yd-auth-register-approval-note" role="note">
-                        Freischaltung nach fachlicher Prüfung Ihrer Angaben.
+                        Mit Absenden schließen Sie den Praxiszugang ab. Die Abbuchung startet erst nach
+                        Freischaltung Ihrer Praxis.
                       </p>
                     ) : null}
 
@@ -1532,8 +1443,8 @@ export function RegisterClient(props: {
                         value="standard"
                         submitIntentRef={registerStep4SubmitIntentRef}
                         submitIntentValue="standard"
-                        label="Registrierung absenden"
-                        pendingLabel="Wird übermittelt…"
+                        label="Praxiszugang abschließen"
+                        pendingLabel="Wird eingerichtet…"
                         disabled={!step4CanSubmit}
                         className={cn(
                           "h-[52px] min-h-[48px] flex-1 sm:h-[52px]",

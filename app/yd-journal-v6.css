@@ -2243,11 +2243,6 @@
   color: var(--pw-faint);
 }
 
-.yd-workspace main:has(.yd-praxiswissen) .yd-workspace-integrated-header,
-.yd-workspace main:has(.yd-knowledge-hub) .yd-workspace-integrated-header {
-  display: none;
-}
-
 /* —— Knowledge Hub sections —— */
 
 .yd-knowledge-hub .yd-pw__shell {
@@ -2910,10 +2905,6 @@
 .yd-journal-v6__draft-list--rail {
   margin-top: 0;
   border-radius: 12px;
-}
-
-.yd-workspace main:has(.yd-journal-v6--hub) .yd-workspace-integrated-header {
-  display: none;
 }
 
 /* —— Zweck & Patienten-KI —— */

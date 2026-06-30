@@ -6,10 +6,8 @@ export type WorkspaceIntegratedHeaderContext = {
   /** Zweite Zeile (z. B. Tracker-Aufschlüsselung). */
   subtitleMeta?: string;
   showSearch: boolean;
-  /** Keine Begrüßung mit Namen (z. B. Relay — ruhiger Kopf). */
+  /** Keine Begrüßung mit Namen (selten — Standard ist einheitliche Begrüßung). */
   hideGreeting?: boolean;
-  /** Desktop: integrierte Headline ausblenden (eigene Mobile-UI). */
-  hideOnDesktop?: boolean;
 };
 
 export function resolveWorkspaceIntegratedHeader(
@@ -17,7 +15,7 @@ export function resolveWorkspaceIntegratedHeader(
 ): WorkspaceIntegratedHeaderContext {
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
     return {
-      eyebrow: "Praxisüberblick",
+      eyebrow: "Atlas",
       subtitle: "Was heute Ihre Aufmerksamkeit benötigt",
       showSearch: true,
     };
@@ -48,7 +46,6 @@ export function resolveWorkspaceIntegratedHeader(
       eyebrow: "Care Center",
       subtitle: "Antworten für Patienten — weniger Standardanrufe.",
       showSearch: false,
-      hideGreeting: true,
     };
   }
   if (pathname.startsWith("/create-case")) {
@@ -63,7 +60,6 @@ export function resolveWorkspaceIntegratedHeader(
       eyebrow: "Einstellungen",
       subtitle: "Verwalten Sie Ihre Praxis und Ihr Team",
       showSearch: false,
-      hideGreeting: true,
     };
   }
   if (pathname.startsWith("/admin")) {
@@ -78,7 +74,6 @@ export function resolveWorkspaceIntegratedHeader(
       eyebrow: "Profil",
       subtitle: "Patientenbereich bearbeiten",
       showSearch: false,
-      hideOnDesktop: true,
     };
   }
   if (pathname.startsWith("/profile/solutions")) {

@@ -14,6 +14,8 @@ export type YdPublicOsEnvironmentProps = {
   instantEnter?: boolean;
   /** Auth: gleicher Hintergrund wie Startseite (.yd-os) — nur Atmosphäre, Login-UI unverändert */
   landingAtmosphere?: boolean;
+  /** App/Auth: keine Mesh-/Ambient-Layer (ruhiger, kein Überlappen) */
+  hideAtmosphere?: boolean;
   className?: string;
 };
 
@@ -26,6 +28,7 @@ export function YdPublicOsEnvironment({
   scroll = false,
   instantEnter = false,
   landingAtmosphere = false,
+  hideAtmosphere = false,
   className,
 }: YdPublicOsEnvironmentProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -50,17 +53,21 @@ export function YdPublicOsEnvironment({
         mode === "focus" && "yd-public-os--focus",
         mode === "register" && "yd-public-os--register",
         landingAtmosphere && "yd-public-os--landing-atmosphere",
+        hideAtmosphere && "yd-public-os--flat",
         scroll && "yd-public-os--scroll",
         className
       )}
     >
-      <div className="yd-public-os-bg" aria-hidden />
-      <div className="yd-public-os-mesh" aria-hidden />
-      {/* Selective accent glow — under content, not full-screen flood */}
-      <div className="yd-public-os-ambient yd-public-os-ambient--upper" aria-hidden />
-      <div className="yd-public-os-ambient yd-public-os-ambient--center" aria-hidden />
-      <div className="yd-public-os-ambient yd-public-os-ambient--lower" aria-hidden />
-      <div className="yd-public-os-vignette" aria-hidden />
+      {hideAtmosphere ? null : (
+        <>
+          <div className="yd-public-os-bg" aria-hidden />
+          <div className="yd-public-os-mesh" aria-hidden />
+          <div className="yd-public-os-ambient yd-public-os-ambient--upper" aria-hidden />
+          <div className="yd-public-os-ambient yd-public-os-ambient--center" aria-hidden />
+          <div className="yd-public-os-ambient yd-public-os-ambient--lower" aria-hidden />
+          <div className="yd-public-os-vignette" aria-hidden />
+        </>
+      )}
       <div className="yd-public-os-content yd-public-os-awaken-content">{children}</div>
     </div>
   );

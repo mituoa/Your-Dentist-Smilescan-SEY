@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { TrackerInboxListStatusMenu } from "@/components/inbox/tracker-inbox-list-status-menu";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
-import { displayPracticeStatusForCase } from "@/lib/inbox/tracker-enterprise-status";
 import {
   formatTrackerListDate,
   trackerInboxReadState,
@@ -38,7 +37,6 @@ export function TrackerInboxListRow({
   const patientName = item.patient_name?.trim() || "Unbekannter Patient";
   const readState = trackerInboxReadState(item);
   const work = trackerInboxWorkType(item);
-  const practiceStatus = displayPracticeStatusForCase(item.practice_status);
   const isUnread = readState !== "read";
   const photoLabel =
     item.photo_count === 0
@@ -95,7 +93,7 @@ export function TrackerInboxListRow({
       </Link>
       <TrackerInboxListStatusMenu
         submissionId={item.id}
-        status={practiceStatus}
+        status={item.practice_status}
         seenAt={item.seen_at}
         showStatusLabel={showStatusLabel}
         compactDot={compactStatusDot}

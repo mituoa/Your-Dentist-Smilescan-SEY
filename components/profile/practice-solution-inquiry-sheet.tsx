@@ -366,6 +366,7 @@ function LandingBriefingStudio({
         subtitle=""
         onClose={onClose}
         headerVariant="compact"
+        overlayVariant="workspace"
         ariaLabel="Anfrage übermittelt"
         panelClassName="yd-medical-form-panel--landing-briefing yd-medical-form-panel--landing-success"
         footer={
@@ -416,6 +417,7 @@ function LandingBriefingStudio({
       onClose={onClose}
       closeDisabled={busy}
       headerVariant="compact"
+      overlayVariant="workspace"
       ariaLabel={config.modalTitle}
       panelClassName={cn(
         "yd-medical-form-panel--landing-briefing",

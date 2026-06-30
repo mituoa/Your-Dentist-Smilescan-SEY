@@ -4,6 +4,12 @@ import { YdPublicSiteFooter } from "@/components/marketing/yd-public-site-footer
 import { YdProductChrome } from "@/components/marketing/yd-product-chrome";
 import { YdPublicOsEnvironment } from "@/components/marketing/yd-public-os-environment";
 import { TrustEscapeBar } from "@/components/trust/trust-escape-bar";
+import {
+  appTrustBackLabel,
+  isAppTrustReturnPath,
+  isAuthTrustReturnPath,
+} from "@/lib/trust/return-path";
+import { cn } from "@/lib/utils";
 
 type TrustShellProps = {
   children: React.ReactNode;
@@ -19,28 +25,37 @@ export function TrustShell({
   isAuthenticated = false,
   showEscapeBar = true,
 }: TrustShellProps) {
-  const showEscape = showEscapeBar && returnTo !== "/trust";
+  const authContext = isAuthTrustReturnPath(returnTo);
+  const appContext = isAuthenticated || isAppTrustReturnPath(returnTo);
+  const publicMarketing = !authContext && !appContext;
+  const flatShell = appContext || authContext;
+  const showEscape =
+    showEscapeBar && Boolean(returnTo) && returnTo !== "/trust" && !authContext;
 
   return (
-    <YdPublicOsEnvironment scroll landingAtmosphere>
-      <div className="yd-trust">
-        <YdProductChrome
-          variant="entry"
-          tagline={null}
-          loginHref={isAuthenticated ? returnTo ?? "/dashboard" : "/login"}
-        />
-        {showEscape ? (
-          <TrustEscapeBar
-            returnTo={returnTo!}
-            label={
-              returnTo?.startsWith("/settings")
-                ? "Zurück zu Einstellungen"
-                : "Zurück zur Praxis"
-            }
-          />
+    <YdPublicOsEnvironment
+      scroll
+      instantEnter={flatShell}
+      hideAtmosphere={flatShell}
+      landingAtmosphere={publicMarketing}
+      className={appContext ? "yd-public-os--trust-app" : undefined}
+      mode={authContext ? "focus" : undefined}
+    >
+      <div
+        className={cn(
+          "yd-trust",
+          authContext && "yd-trust--auth",
+          appContext && "yd-trust--app"
+        )}
+      >
+        {publicMarketing ? (
+          <YdProductChrome variant="entry" tagline={null} loginHref="/login" />
+        ) : null}
+        {showEscape && returnTo ? (
+          <TrustEscapeBar returnTo={returnTo} label={appTrustBackLabel(returnTo)} />
         ) : null}
         <main className="yd-trust-main">{children}</main>
-        <YdPublicSiteFooter compact />
+        {publicMarketing ? <YdPublicSiteFooter compact /> : null}
       </div>
     </YdPublicOsEnvironment>
   );
@@ -48,8 +63,8 @@ export function TrustShell({
 
 export function TrustBackLink() {
   return (
-    <Link href="/?welcome=1" className="yd-trust-back">
-      Startseite
+    <Link href="/dashboard" className="yd-trust-back">
+      Zurück zur Praxis
     </Link>
   );
 }

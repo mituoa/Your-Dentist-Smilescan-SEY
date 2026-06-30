@@ -3376,17 +3376,6 @@
   margin-bottom: 0.125rem;
 }
 
-.yd-workspace main:has(.yd-relay-v7) .yd-dash-header-premium__greeting {
-  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
-  margin-bottom: 0.125rem;
-}
-
-.yd-workspace main:has(.yd-relay-v7) .yd-dash-header-premium__subtitle,
-.yd-workspace main:has(.yd-relay-v7) .yd-dash-header-premium__subtitle-meta {
-  font-size: 0.8125rem;
-  line-height: 1.35;
-}
-
 .yd-workspace main:has(.yd-relay-v7) {
   padding-top: 0.75rem !important;
 }

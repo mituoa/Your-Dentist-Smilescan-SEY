@@ -183,8 +183,6 @@ export default async function DashboardPage() {
       style={{ maxWidth: YD.space.contentMax }}
     >
       <DashboardMobileHealth
-        greeting={greeting}
-        displayName={doctorLabel}
         practiceDomains={practiceDomains}
         todayItems={todayRelevant}
         weeklyCounts={weeklyRes.ok ? weeklyRes.counts : null}

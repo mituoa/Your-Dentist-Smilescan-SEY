@@ -2,7 +2,6 @@
 
 import { TrackerInboxListStatusMenu } from "@/components/inbox/tracker-inbox-list-status-menu";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
-import { displayPracticeStatusForCase } from "@/lib/inbox/tracker-enterprise-status";
 import {
   trackerInboxReadState,
   type EnrichedSubmissionListItem,
@@ -30,7 +29,6 @@ export function TrackerInboxListCardContent({
     maxLen: 96,
     emptyLabel: "",
   });
-  const practiceStatus = displayPracticeStatusForCase(item.practice_status);
 
   return (
     <>
@@ -62,7 +60,7 @@ export function TrackerInboxListCardContent({
             {showStatusMenu ? (
               <TrackerInboxListStatusMenu
                 submissionId={item.id}
-                status={practiceStatus}
+                status={item.practice_status}
                 seenAt={item.seen_at}
               />
             ) : null}

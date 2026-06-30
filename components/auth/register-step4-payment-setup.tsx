@@ -20,6 +20,7 @@ type RegisterStep4PaymentSetupProps = {
   fields: RegisterStep4PaymentFields;
   onFieldChange: (field: keyof RegisterStep4PaymentFields, value: string) => void;
   disabled?: boolean;
+  variant?: "default" | "checkout";
 };
 
 export function isRegisterStep4PaymentSetupValid(
@@ -49,22 +50,36 @@ export function RegisterStep4PaymentSetup({
   fields,
   onFieldChange,
   disabled = false,
+  variant = "default",
 }: RegisterStep4PaymentSetupProps) {
   const invoiceDisabled = selectedPlan === "monthly";
+  const isCheckout = variant === "checkout";
+
+  const methodButtonClass = (active: boolean, extra?: string) =>
+    cn(
+      isCheckout ? "yd-reg-checkout__pay-option" : "flex min-h-[44px] w-full items-center justify-center rounded-lg border px-3 text-[13px] font-medium transition-colors duration-150",
+      isCheckout
+        ? active
+          ? "yd-reg-checkout__pay-option--active"
+          : "yd-reg-checkout__pay-option--idle"
+        : active
+          ? "yd-reg-step4-pay--selected text-slate-900"
+          : "yd-reg-step4-pay--idle text-slate-700",
+      extra
+    );
+
+  const fieldShellClass = isCheckout
+    ? "yd-reg-checkout__pay-fields"
+    : "space-y-3 rounded-xl border border-slate-200/90 bg-white px-4 py-4 shadow-[0_1px_3px_rgba(15,23,42,0.04)]";
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col gap-2">
+    <div className={isCheckout ? "yd-reg-checkout__pay" : "space-y-3"}>
+      <div className={isCheckout ? "yd-reg-checkout__pay-options" : "flex flex-col gap-2"}>
         <button
           type="button"
           disabled={disabled}
           onClick={() => onMethodChange("sepa_debit")}
-          className={cn(
-            "flex min-h-[44px] w-full items-center justify-center rounded-lg border px-3 text-[13px] font-medium transition-colors duration-150",
-            method === "sepa_debit"
-              ? "yd-reg-step4-pay--selected text-slate-900"
-              : "yd-reg-step4-pay--idle text-slate-700"
-          )}
+          className={methodButtonClass(method === "sepa_debit")}
         >
           SEPA Lastschrift
         </button>
@@ -72,13 +87,9 @@ export function RegisterStep4PaymentSetup({
           type="button"
           disabled={disabled || invoiceDisabled}
           onClick={() => onMethodChange("invoice")}
-          className={cn(
-            "flex min-h-[44px] w-full items-center justify-center rounded-lg border px-3 text-[13px] font-medium transition-colors duration-150",
-            invoiceDisabled
-              ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"
-              : method === "invoice"
-                ? "yd-reg-step4-pay--selected text-slate-900"
-                : "yd-reg-step4-pay--idle text-slate-700"
+          className={methodButtonClass(
+            method === "invoice",
+            invoiceDisabled ? "cursor-not-allowed opacity-45" : undefined
           )}
         >
           Rechnung
@@ -87,19 +98,19 @@ export function RegisterStep4PaymentSetup({
           type="button"
           disabled={disabled}
           onClick={() => onMethodChange("card")}
-          className={cn(
-            "flex min-h-[44px] w-full items-center justify-center rounded-lg border px-3 text-[13px] font-medium transition-colors duration-150",
-            method === "card"
-              ? "yd-reg-step4-pay--selected text-slate-900"
-              : "yd-reg-step4-pay--idle text-slate-700"
-          )}
+          className={methodButtonClass(method === "card")}
         >
           Karte
         </button>
       </div>
+      {invoiceDisabled && method !== "invoice" ? (
+        <p className={isCheckout ? "yd-reg-checkout__pay-hint" : "text-[11px] leading-relaxed text-slate-500"}>
+          Rechnung ist ab Halbjahres- oder Jahrestarif verfügbar.
+        </p>
+      ) : null}
 
       {method === "sepa_debit" ? (
-        <div className="space-y-3 rounded-xl border border-slate-200/90 bg-white px-4 py-4 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+        <div className={fieldShellClass}>
           <div>
             <label htmlFor="reg-sepa-holder" className="mb-1.5 block text-[12px] font-medium text-slate-700">
               Kontoinhaber
@@ -136,7 +147,7 @@ export function RegisterStep4PaymentSetup({
       ) : null}
 
       {method === "invoice" && !invoiceDisabled ? (
-        <div className="space-y-3 rounded-xl border border-slate-200/90 bg-white px-4 py-4 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+        <div className={fieldShellClass}>
           <div>
             <label htmlFor="reg-invoice-name" className="mb-1.5 block text-[12px] font-medium text-slate-700">
               Praxis / Rechnungsname
@@ -198,10 +209,14 @@ export function RegisterStep4PaymentSetup({
 
       {method === "card" ? (
         <div
-          className="rounded-xl border border-dashed border-slate-200/90 bg-slate-50/50 px-4 py-6 text-center"
+          className={
+            isCheckout
+              ? "yd-reg-checkout__pay-note"
+              : "rounded-xl border border-dashed border-slate-200/90 bg-slate-50/50 px-4 py-6 text-center"
+          }
           aria-hidden={false}
         >
-          <p className="text-[12px] leading-relaxed text-slate-600">
+          <p className={isCheckout ? "yd-reg-checkout__pay-note-text" : "text-[12px] leading-relaxed text-slate-600"}>
             Kartendaten werden nach Freischaltung sicher im nächsten Schritt erfasst.
           </p>
         </div>

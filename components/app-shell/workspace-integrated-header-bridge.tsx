@@ -28,7 +28,7 @@ type WorkspaceIntegratedHeaderBridgeProps = {
   relayHeaderSummary?: RelayHeaderSummary | null;
 };
 
-/** Route-aware integrierte Headline — Desktop md+, ersetzt die alte Toolbar. */
+/** Route-aware integrierte Headline — einheitlich auf Mobile und Desktop. */
 export function WorkspaceIntegratedHeaderBridge({
   email,
   workspaceName,
@@ -47,53 +47,40 @@ export function WorkspaceIntegratedHeaderBridge({
   const onTracker = pathname.startsWith("/inbox");
   const onDashboard = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const onRelay = pathname === "/relay" || pathname.startsWith("/relay/");
-  const dashboardEditorial =
-    onDashboard && dashboardHeaderSummary
-      ? dashboardHeaderSummary.editorial
-      : onRelay && relayHeaderSummary
-        ? relayHeaderSummary.editorial
-        : null;
 
-  const subtitle =
-    onDashboard || onRelay
-      ? ""
+  const subtitle = onDashboard
+    ? dashboardHeaderSummary?.subtitle || ctx.subtitle
+    : onRelay
+      ? relayHeaderSummary?.lead || ctx.subtitle
       : onTracker && trackerHeaderSummary
         ? trackerHeaderSummary.lead
         : ctx.subtitle;
+
   const subtitleMeta =
-    onDashboard || onRelay
-      ? ""
-      : onTracker && trackerHeaderSummary?.breakdown
-        ? trackerHeaderSummary.breakdown
-        : ctx.subtitleMeta;
+    onTracker && trackerHeaderSummary?.breakdown
+      ? trackerHeaderSummary.breakdown
+      : ctx.subtitleMeta;
 
   const greeting = useMemo(() => {
     return resolveWorkspaceGreeting(new Date().getHours());
   }, []);
 
-  if (ctx.hideOnDesktop) {
-    return null;
-  }
-
   return (
-    <div className="hidden md:block">
-      <WorkspaceIntegratedHeader
-        eyebrow={ctx.eyebrow}
-        greeting={greeting}
-        hideGreeting={ctx.hideGreeting}
-        displayName={displayName}
-        subtitle={subtitle}
-        subtitleMeta={subtitleMeta}
-        dashboardEditorial={dashboardEditorial}
-        email={email}
-        workspaceName={workspaceName}
-        workspaceId={workspaceId}
-        role={role}
-        initialTheme={initialTheme}
-        avatarUrl={avatarUrl}
-        inboxCount={inboxCount}
-        showSearch={ctx.showSearch}
-      />
-    </div>
+    <WorkspaceIntegratedHeader
+      eyebrow={ctx.eyebrow}
+      greeting={greeting}
+      hideGreeting={ctx.hideGreeting}
+      displayName={displayName}
+      subtitle={subtitle}
+      subtitleMeta={subtitleMeta}
+      email={email}
+      workspaceName={workspaceName}
+      workspaceId={workspaceId}
+      role={role}
+      initialTheme={initialTheme}
+      avatarUrl={avatarUrl}
+      inboxCount={inboxCount}
+      showSearch={ctx.showSearch}
+    />
   );
 }

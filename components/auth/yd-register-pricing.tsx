@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { REGISTER_PLANS, type RegisterPlanId } from "@/lib/auth/register-plans";
 import { AUTH_ACCESS_COPY } from "@/lib/marketing/auth-access-copy";
+import { withTrustReturn } from "@/lib/trust/return-path";
 import { cn } from "@/lib/utils";
 
 const PLAN_ORDER: RegisterPlanId[] = ["monthly", "halfyearly", "yearly"];
@@ -166,7 +167,7 @@ export function YdRegisterPricing({
 
       <p className="yd-register-pricing-enterprise">
         Größere Einrichtungen oder mehrere Standorte?{" "}
-        <Link href="/trust/imprint" className="yd-auth-link">
+        <Link href={withTrustReturn("/trust/imprint", "/register")} className="yd-auth-link">
           Kontakt aufnehmen
         </Link>
       </p>

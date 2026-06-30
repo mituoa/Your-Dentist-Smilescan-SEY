@@ -81,9 +81,22 @@ const INBOX_SELECT_BASE = [
   "patient_notes",
   "created_at",
   "seen_at",
-  "practice_status",
-  "photo_request_requested_at",
-  "follow_up_series_id",
+  "submission_photos(count)",
+].join(", ");
+
+/** Ohne Migration 038 (practice_status / Foto-Nachforderung / Serie). */
+const INBOX_SELECT_WITHOUT_BACKBONE = [
+  "id",
+  "patient_name",
+  "patient_email",
+  "patient_notes",
+  "patient_birth_date",
+  "patient_external_id",
+  "urgency",
+  "is_draft",
+  "intake_channel",
+  "created_at",
+  "seen_at",
   "submission_photos(count)",
 ].join(", ");
 
@@ -241,6 +254,37 @@ async function getInboxSubmissionsInner(
         const withDrafts = await attachMessageDraftStatusToRows(
           workspaceId,
           intakeRetry.items
+        );
+        const enriched = await enrichInboxListItems(workspaceId, withDrafts);
+        return { ok: true, items: enriched };
+      }
+    }
+
+    const backboneOnlyMissing =
+      (errMsg.includes("practice_status") ||
+        errMsg.includes("photo_request_requested_at") ||
+        errMsg.includes("follow_up_series_id")) &&
+      !errMsg.includes("patient_birth_date") &&
+      !errMsg.includes("patient_external_id") &&
+      !errMsg.includes("is_draft") &&
+      !errMsg.includes("urgency") &&
+      !errMsg.includes("intake_channel");
+
+    if (backboneOnlyMissing) {
+      console.warn(
+        "[inbox] tracker backbone columns missing — retrying list without migration-038 fields."
+      );
+      const backboneRetry = await fetchInboxRowsOnce(
+        workspaceId,
+        searchQuery,
+        INBOX_SELECT_WITHOUT_BACKBONE,
+        false,
+        errMsg.includes("intake_channel")
+      );
+      if (backboneRetry.ok) {
+        const withDrafts = await attachMessageDraftStatusToRows(
+          workspaceId,
+          backboneRetry.items
         );
         const enriched = await enrichInboxListItems(workspaceId, withDrafts);
         return { ok: true, items: enriched };

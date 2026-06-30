@@ -192,20 +192,6 @@ export default async function ProfilePage() {
   return (
     <div className={`yd-profile-hub ${clinicalWorkspaceFrame} ${clinicalWorkspaceVerticalPadding}`}>
       <div className="mx-auto w-full min-w-0 max-w-4xl space-y-8 overflow-x-hidden">
-        <div className="yd-profile-hub__intro min-w-0">
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[#64748B]">
-            Praxis · Patientenunterlagen
-          </p>
-          <h1 className="yd-profile-hub__title mb-3 text-balance text-[1.625rem] font-semibold leading-snug tracking-[-0.02em] text-[#0F172A] md:text-[1.875rem]">
-            Praxisangaben und freigegebener Patientenbereich
-          </h1>
-          <p className="yd-profile-hub__lead max-w-xl text-[14px] leading-relaxed text-[#475569] md:text-[15px]">
-            Bearbeiten Sie Praxisangaben im geschützten Editor. Der öffentliche Bereich unter Ihrer Kurzadresse dient
-            ausschließlich der dokumentierten Einsendung von Unterlagen — nicht einer allgemeinen Webpräsenz. Nach dem
-            Speichern sind die Angaben dort sichtbar; eine getrennte Vorschau gibt es in diesem MVP nicht.
-          </p>
-        </div>
-
         <div className="yd-profile-hub__cards grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch md:gap-4">
           <Link
             href="/profile/editor"

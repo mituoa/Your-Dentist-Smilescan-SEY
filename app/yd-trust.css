@@ -32,9 +32,16 @@
   padding: 0 max(1rem, env(safe-area-inset-left)) max(2rem, env(safe-area-inset-bottom))
     max(1rem, env(safe-area-inset-right));
   overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+}
+
+/* Eingeloggte App: ein Scroll-Container (äußeres OS), kein verschachteltes Scrollen */
+.yd-trust--app .yd-trust-main {
+  overflow-y: visible;
+  flex: 1 1 auto;
+}
+
+.yd-trust--auth .yd-trust-main {
+  overflow-y: visible;
 }
 
 .yd-trust-main:has(.yd-trust-doc-layout--focus) {
@@ -805,6 +812,24 @@
   margin: 26mm 14mm 22mm;
 }
 
+/* ── Auth-Kontext (Login/Registrierung): nur Dokument, kein Website-Footer ── */
+
+.yd-trust--auth {
+  min-height: 100dvh;
+}
+
+.yd-trust--auth .yd-trust-main {
+  max-width: 42rem;
+  margin-inline: auto;
+  padding-top: 0.5rem;
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+.yd-trust--auth .yd-trust-main:has(.yd-trust-doc-layout--focus) {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
 @media print {
   .yd-product-chrome,
   .yd-public-site-footer,
@@ -932,5 +957,54 @@
     text-align: center;
     border-top: 1px solid var(--trust-line);
     padding-top: 2mm;
+  }
+}
+
+/* —— App-Kontext (eingeloggt): flach, ohne Marketing-Atmosphäre —— */
+
+.yd-public-os--trust-app {
+  background: #f8f9fb;
+}
+
+.yd-public-os--trust-app.yd-public-os--flat {
+  background: #f8f9fb;
+}
+
+.yd-public-os--trust-app .yd-public-os-bg,
+.yd-public-os--trust-app .yd-public-os-mesh,
+.yd-public-os--trust-app .yd-public-os-ambient,
+.yd-public-os--trust-app .yd-public-os-vignette {
+  display: none;
+}
+
+.yd-public-os--trust-app.yd-public-os--scroll {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yd-public-os--trust-app.yd-public-os--scroll .yd-public-os-content {
+  min-height: 0;
+  height: auto;
+  max-width: none;
+  padding-top: max(0.25rem, env(safe-area-inset-top));
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.yd-trust--app {
+  min-height: 0;
+  background: transparent;
+}
+
+@media (max-width: 899px) {
+  .yd-public-os--trust-app.yd-public-os--scroll {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .yd-trust--app .yd-trust-main {
+    padding-bottom: max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem));
   }
 }

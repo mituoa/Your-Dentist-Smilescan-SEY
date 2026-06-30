@@ -63,6 +63,10 @@
   min-height: 100dvh;
 }
 
+.yd-clinical-world.yd-public-os--flat.yd-public-os--scroll .yd-public-os-content {
+  min-height: 0;
+}
+
 /* Hide legacy card-landing on clinical pages */
 .yd-clinical-world .yd-public-story,
 .yd-clinical-world .yd-public-hero-cinema-bg,

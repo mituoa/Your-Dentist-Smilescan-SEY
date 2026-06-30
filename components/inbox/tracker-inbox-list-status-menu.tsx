@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, MoreHorizontal } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
@@ -17,17 +17,25 @@ import {
   enterpriseStatusLabel,
 } from "@/lib/inbox/tracker-enterprise-status";
 import type { InboxPracticeStatusId } from "@/lib/inbox/tracker-v9-clinical";
+import { normalizePracticeStatus } from "@/lib/practice-status";
 import { cn } from "@/lib/utils";
 
 type TrackerInboxListStatusMenuProps = {
   submissionId: string;
-  status: InboxPracticeStatusId;
+  /** Roher DB-Wert (`submissions.practice_status`) — nicht display-gemappt. */
+  status: string | null | undefined;
   seenAt?: string | null;
   className?: string;
   showStatusLabel?: boolean;
   /** Mobile: ein tappbarer Status-Punkt (blau/grau/rot), kein Text-Pill. */
   compactDot?: boolean;
 };
+
+function normalizeStoredStatus(
+  stored: string | null | undefined
+): InboxPracticeStatusId {
+  return normalizePracticeStatus(stored) ?? "new";
+}
 
 function usePopoverPosition(
   open: boolean,
@@ -84,8 +92,9 @@ export function TrackerInboxListStatusMenu({
   const popoverRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const [localStatus, setLocalStatus] = useState<InboxPracticeStatusId>(status);
+  const [isSaving, setIsSaving] = useState(false);
+  const storedStatus = normalizeStoredStatus(status);
+  const [localStatus, setLocalStatus] = useState<InboxPracticeStatusId>(storedStatus);
   const popoverStyle = usePopoverPosition(open, rootRef);
 
   const displayStatus = displayPracticeStatusForCase(localStatus);
@@ -93,8 +102,10 @@ export function TrackerInboxListStatusMenu({
   const canMarkUnread = Boolean(seenAt);
 
   useEffect(() => {
-    setLocalStatus(status);
-  }, [status]);
+    if (!isSaving) {
+      setLocalStatus(storedStatus);
+    }
+  }, [storedStatus, isSaving]);
 
   useEffect(() => {
     if (!open) return;
@@ -123,10 +134,13 @@ export function TrackerInboxListStatusMenu({
     };
   }, [open]);
 
-  const run = (fn: () => Promise<{ error?: string; success?: boolean } | void>) => {
-    if (pending) return;
+  const runMutation = async (
+    fn: () => Promise<{ error?: string; success?: boolean } | void>
+  ) => {
+    if (isSaving) return;
     setError(null);
-    startTransition(async () => {
+    setIsSaving(true);
+    try {
       const res = await fn();
       if (res && "error" in res && res.error) {
         setError(res.error);
@@ -134,7 +148,9 @@ export function TrackerInboxListStatusMenu({
       }
       setOpen(false);
       router.refresh();
-    });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const applyStatus = (next: InboxPracticeStatusValue) => {
@@ -142,9 +158,9 @@ export function TrackerInboxListStatusMenu({
       setOpen(false);
       return;
     }
-    const previous = displayStatus;
+    const previous = localStatus;
     setLocalStatus(next);
-    run(async () => {
+    void runMutation(async () => {
       const res = await updateSubmissionPracticeStatus(submissionId, next);
       if (res.error) {
         setLocalStatus(previous);
@@ -155,7 +171,7 @@ export function TrackerInboxListStatusMenu({
 
   const markUnread = () => {
     if (!canMarkUnread) return;
-    run(async () => {
+    void runMutation(async () => {
       const res = await markSubmissionUnseen(submissionId);
       if (!res.error) {
         markCaseUnread(submissionId);
@@ -167,7 +183,7 @@ export function TrackerInboxListStatusMenu({
   const toggleOpen = (e: React.MouseEvent | React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (pending) return;
+    if (isSaving) return;
     setOpen((v) => !v);
   };
 
@@ -196,7 +212,7 @@ export function TrackerInboxListStatusMenu({
                     "yd-tracker-list-status-menu__option",
                     isActive && "yd-tracker-list-status-menu__option--active"
                   )}
-                  disabled={pending}
+                  disabled={isSaving}
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.preventDefault();
@@ -229,7 +245,7 @@ export function TrackerInboxListStatusMenu({
               type="button"
               role="menuitem"
               className="yd-tracker-list-status-menu__secondary"
-              disabled={pending}
+              disabled={isSaving}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.preventDefault();
@@ -257,7 +273,7 @@ export function TrackerInboxListStatusMenu({
         compactDot && "yd-tracker-list-status-menu--compact-dot",
         className
       )}
-      aria-busy={pending}
+      aria-busy={isSaving}
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
@@ -278,12 +294,12 @@ export function TrackerInboxListStatusMenu({
           showStatusLabel && "yd-tracker-list-status-menu__trigger--labeled",
           compactDot && "yd-tracker-list-status-menu__trigger--dot-only",
           open && "yd-tracker-list-status-menu__trigger--open",
-          pending && "yd-tracker-list-status-menu__trigger--pending"
+          isSaving && "yd-tracker-list-status-menu__trigger--pending"
         )}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Status ändern: ${statusLabel}`}
-        disabled={pending}
+        disabled={isSaving}
         onClick={toggleOpen}
       >
         {compactDot ? (

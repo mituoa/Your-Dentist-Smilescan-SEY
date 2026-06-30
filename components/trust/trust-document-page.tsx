@@ -11,7 +11,13 @@ import {
   trustDraftNotice,
   trustDraftStatusLabel,
 } from "@/lib/trust/meta";
-import { withTrustReturn } from "@/lib/trust/return-path";
+import {
+  withTrustReturn,
+  appTrustBackLabel,
+  authTrustBackLabel,
+  isAppTrustReturnPath,
+  isAuthTrustReturnPath,
+} from "@/lib/trust/return-path";
 import type { TrustDocument } from "@/lib/trust/types";
 
 type TrustDocumentPageProps = {
@@ -25,8 +31,20 @@ export function TrustDocumentPage({ document, canonicalPath, returnTo }: TrustDo
   const draftNotice = document.draftNotice ?? trustDraftNotice();
   const draftStatus = trustDraftStatusLabel();
   const draftFooter = trustDraftFooter();
-  const trustCenterHref = withTrustReturn("/trust", returnTo);
-  const trustCenterLabel = "Zurück zum Trust Center";
+  const authContext = isAuthTrustReturnPath(returnTo);
+  const appContext = isAppTrustReturnPath(returnTo);
+  const trustCenterHref =
+    authContext && returnTo
+      ? returnTo
+      : appContext && returnTo
+        ? returnTo
+        : withTrustReturn("/trust", returnTo);
+  const trustCenterLabel =
+    authContext && returnTo
+      ? authTrustBackLabel(returnTo)
+      : appContext && returnTo
+        ? appTrustBackLabel(returnTo)
+        : "Zurück zum Trust Center";
 
   return (
     <div className="yd-trust-doc-layout yd-trust-doc-layout--focus">

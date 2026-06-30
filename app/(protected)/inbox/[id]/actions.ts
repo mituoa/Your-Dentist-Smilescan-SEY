@@ -19,6 +19,7 @@ import {
   normalizePracticeStatus,
   type PracticeStatusId,
 } from "@/lib/practice-status";
+import { isLikelyMissingDbColumnError } from "@/lib/supabase/postgrest-errors";
 import JSZip from "jszip";
 
 /**
@@ -260,15 +261,32 @@ export async function updateSubmissionPracticeStatus(
     }
   }
 
-  const { error } = await supabase
+  let { data: updated, error } = await supabase
     .from("submissions")
     .update(patch)
     .eq("id", submissionId)
-    .eq("workspace_id", workspace.workspace_id);
+    .eq("workspace_id", workspace.workspace_id)
+    .select("id")
+    .maybeSingle();
+
+  if (error && isLikelyMissingDbColumnError(error)) {
+    const errMsg = (error.message ?? "").toLowerCase();
+    if (errMsg.includes("practice_status")) {
+      logPostgrest("updateSubmissionPracticeStatus:backbone-missing", error);
+      return {
+        error:
+          "Fallstatus ist auf dieser Umgebung noch nicht verfügbar. Bitte Datenbank-Migration 038 anwenden.",
+      };
+    }
+  }
 
   if (error) {
     logPostgrest("updateSubmissionPracticeStatus", error);
     return { error: "Status konnte nicht gespeichert werden." };
+  }
+
+  if (!updated) {
+    return { error: "Fall konnte nicht aktualisiert werden." };
   }
 
   revalidatePath(`/inbox/${submissionId}`);

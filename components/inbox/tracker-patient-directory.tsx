@@ -8,7 +8,6 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TrackerInboxSearch } from "@/components/inbox/tracker-inbox-search";
 import { TrackerInboxListStatusMenu } from "@/components/inbox/tracker-inbox-list-status-menu";
 import { deriveSubmissionIssueShortLine } from "@/lib/inbox/derive-submission-issue-short-line";
-import { displayPracticeStatusForCase } from "@/lib/inbox/tracker-enterprise-status";
 import {
   TRACKER_FILTER_CHIPS,
   TRACKER_FILTER_EMPTY,
@@ -200,7 +199,6 @@ export function TrackerPatientDirectory({
                         item.patient_name,
                         { maxLen: 72, emptyLabel: "" }
                       );
-                      const practiceStatus = displayPracticeStatusForCase(item.practice_status);
                       const readState = trackerInboxReadState(item);
 
                       return (
@@ -271,7 +269,7 @@ export function TrackerPatientDirectory({
                           <td data-label="Status" onClick={(e) => e.stopPropagation()}>
                             <TrackerInboxListStatusMenu
                               submissionId={item.id}
-                              status={practiceStatus}
+                              status={item.practice_status}
                               seenAt={item.seen_at}
                             />
                           </td>
@@ -342,8 +340,6 @@ export function TrackerPatientDirectory({
                 item.patient_name,
                 { maxLen: 72, emptyLabel: "" }
               );
-              const practiceStatus = displayPracticeStatusForCase(item.practice_status);
-
               const readState = trackerInboxReadState(item);
 
               return (
@@ -415,7 +411,7 @@ export function TrackerPatientDirectory({
                     >
                       <TrackerInboxListStatusMenu
                         submissionId={item.id}
-                        status={practiceStatus}
+                        status={item.practice_status}
                         seenAt={item.seen_at}
                       />
                     </div>

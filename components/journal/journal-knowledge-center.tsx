@@ -1,21 +1,17 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  CalendarDays,
   ChevronRight,
   ExternalLink,
   FileEdit,
   FileText,
-  Inbox,
   PencilLine,
   Plus,
   Search,
   Sparkles,
-  UserRound,
 } from "lucide-react";
 
 import { createDraftArticle, saveArticle } from "@/app/(protected)/journal/actions";
@@ -40,7 +36,6 @@ import {
   clinicalWorkspaceFrame,
   clinicalWorkspaceVerticalPadding,
 } from "@/lib/clinical-ui";
-import type { CareCenterPatientSignal } from "@/lib/queries/care-center-patient-signals";
 import type { JournalEntry } from "@/lib/types/journal-entry";
 import { JOURNAL_LIMITS } from "@/lib/validation/journal-limits";
 import { cn } from "@/lib/utils";
@@ -49,7 +44,6 @@ export type JournalKnowledgeCenterProps = {
   initialEntries: JournalEntry[];
   authorLabel: string;
   publicSlug?: string | null;
-  patientSignals?: CareCenterPatientSignal[];
 };
 
 const PATIENT_FACING_TYPES: JournalContentType[] = ["faq", "nachsorge"];
@@ -137,7 +131,6 @@ export function JournalKnowledgeCenter({
   initialEntries,
   authorLabel,
   publicSlug = null,
-  patientSignals = [],
 }: JournalKnowledgeCenterProps) {
   const router = useRouter();
   const assist = useAssistDispatchOptional();
@@ -183,18 +176,6 @@ export function JournalKnowledgeCenter({
         )
         .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
         .slice(0, 6),
-    [initialEntries]
-  );
-
-  const patientFacingPublished = useMemo(
-    () =>
-      initialEntries
-        .filter(
-          (e) =>
-            e.status === "published" && PATIENT_FACING_TYPES.includes(inferContentType(e))
-        )
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-        .slice(0, 5),
     [initialEntries]
   );
 
@@ -313,102 +294,60 @@ export function JournalKnowledgeCenter({
         ) : null}
 
         <div className="yd-journal-v6__canvas">
-        <header className="yd-journal-v6__mobile-head md:hidden">
-          <h1 className="yd-journal-v6__mobile-title">{JOURNAL_HUB.title}</h1>
-          <p className="yd-journal-v6__mobile-sub">{JOURNAL_HUB.essence}</p>
-        </header>
-
-        <div className="yd-journal-v6__toolbar" role="toolbar" aria-label="Care Center">
-          <div className="yd-journal-v6__toolbar-start">
-            <button
-              type="button"
-              className="yd-journal-v6__action yd-journal-v6__action--primary"
-              disabled={isBusy}
-              onClick={() => router.push("/journal/new")}
-            >
-              <Plus className="yd-journal-v6__action-icon" strokeWidth={1.5} aria-hidden />
-              Neue Antwort
-            </button>
-            {publicSlug ? (
-              <a
-                href={`/doc/${publicSlug}/journal`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="yd-journal-v6__action yd-journal-v6__action--ghost"
+        <header className="yd-cc-hub__header">
+          <div className="yd-cc-hub__header-main">
+            <div className="yd-cc-hub__header-actions yd-cc-hub__header-actions--solo">
+              <button
+                type="button"
+                className="yd-journal-v6__action yd-journal-v6__action--primary yd-cc-hub__action-primary"
+                disabled={isBusy}
+                onClick={() => router.push("/journal/new")}
               >
-                <ExternalLink className="yd-journal-v6__action-icon" strokeWidth={1.5} aria-hidden />
-                {JOURNAL_SECTION_COPY.library.patientView}
-              </a>
-            ) : null}
-          </div>
-          <p className="yd-journal-v6__toolbar-meta" aria-label="Stand">
-            {toolbarMeta}
-          </p>
-          <div className="yd-journal-v6__toolbar-search hidden md:block">{searchField}</div>
-        </div>
-
-        <header className="yd-journal-v6__hero yd-journal-v6__hero--primary hidden md:block">
-          <div className="yd-journal-v6__hero-top">
-            <div>
-              <p className="yd-journal-v6__eyebrow">PRAXISWISSEN</p>
-              <h1 className="yd-journal-v6__title">{JOURNAL_HUB.title}</h1>
-              <p className="yd-journal-v6__essence">{JOURNAL_HUB.essence}</p>
+                <Plus className="yd-journal-v6__action-icon" strokeWidth={1.5} aria-hidden />
+                Neue Antwort
+              </button>
+              {publicSlug ? (
+                <a
+                  href={`/doc/${publicSlug}/journal`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="yd-journal-v6__action yd-journal-v6__action--ghost"
+                >
+                  <ExternalLink className="yd-journal-v6__action-icon" strokeWidth={1.5} aria-hidden />
+                  {JOURNAL_SECTION_COPY.library.patientView}
+                </a>
+              ) : null}
             </div>
-            <div className="yd-cc-hub__hero-stats" aria-label="Überblick">
-              <div className="yd-cc-hub__hero-stat">
-                <span className="yd-cc-hub__hero-stat-value">{stats.publishedCount}</span>
-                <span className="yd-cc-hub__hero-stat-label">Veröffentlicht</span>
-              </div>
-              <div className="yd-cc-hub__hero-stat yd-cc-hub__hero-stat--amber">
-                <span className="yd-cc-hub__hero-stat-value">{priorityTopics.length}</span>
-                <span className="yd-cc-hub__hero-stat-label">Offene Fragen</span>
-              </div>
-              <div className="yd-cc-hub__hero-stat">
-                <span className="yd-cc-hub__hero-stat-value">
+          </div>
+          <div className="yd-cc-hub__header-bar">
+            <div className="yd-cc-hub__stats-pills" aria-label="Überblick">
+              <span className="yd-cc-hub__stats-pill">
+                <strong>{stats.publishedCount}</strong> Veröffentlicht
+              </span>
+              <span className="yd-cc-hub__stats-pill">
+                <strong>{priorityTopics.length}</strong> Offene Fragen
+              </span>
+              <span className="yd-cc-hub__stats-pill">
+                <strong>
                   {stats.coveredAreas}/{stats.totalAreas}
-                </span>
-                <span className="yd-cc-hub__hero-stat-label">Bereiche</span>
-              </div>
-              <div
+                </strong>{" "}
+                Bereiche
+              </span>
+              <span
                 className={cn(
-                  "yd-cc-hub__hero-stat",
-                  kiReady && "yd-cc-hub__hero-stat--active"
+                  "yd-cc-hub__stats-pill",
+                  kiReady && "yd-cc-hub__stats-pill--active"
                 )}
               >
-                <span className="yd-cc-hub__hero-stat-value">{kiReady ? "Aktiv" : "—"}</span>
-                <span className="yd-cc-hub__hero-stat-label">Patienten-KI</span>
-              </div>
+                Patienten-KI {kiReady ? "aktiv" : "—"}
+              </span>
             </div>
+            <p className="yd-cc-hub__header-meta md:hidden" aria-label="Stand">
+              {toolbarMeta}
+            </p>
+            <div className="yd-cc-hub__header-search">{searchField}</div>
           </div>
         </header>
-
-        <div className="yd-cc-hub__overview md:hidden" aria-label="Überblick">
-          <div className="yd-cc-hub__stat">
-            <span className="yd-cc-hub__stat-value">{stats.publishedCount}</span>
-            <span className="yd-cc-hub__stat-label">Veröffentlicht</span>
-          </div>
-          <div className="yd-cc-hub__stat">
-            <span className="yd-cc-hub__stat-value">{priorityTopics.length}</span>
-            <span className="yd-cc-hub__stat-label">Offene Fragen</span>
-          </div>
-          <div className="yd-cc-hub__stat">
-            <span className="yd-cc-hub__stat-value">
-              {stats.coveredAreas}/{stats.totalAreas}
-            </span>
-            <span className="yd-cc-hub__stat-label">Bereiche</span>
-          </div>
-          <div className="yd-cc-hub__stat">
-            <span
-              className={cn(
-                "yd-cc-hub__stat-value",
-                kiReady && "yd-cc-hub__stat-value--active"
-              )}
-            >
-              {kiReady ? "Aktiv" : "—"}
-            </span>
-            <span className="yd-cc-hub__stat-label">Patienten-KI</span>
-          </div>
-        </div>
 
         <div className="yd-journal-v6__body yd-cc-hub__body">
           {resumeDraft ? (
@@ -438,182 +377,177 @@ export function JournalKnowledgeCenter({
             </section>
           ) : null}
 
+
           <section
-            className="yd-journal-v6__section yd-journal-v6__section--search yd-journal-v6__section--search-mobile md:hidden"
-            aria-label="Suche"
+            className="yd-journal-v6__section yd-journal-v6__panel yd-cc-hub__zone"
+            aria-label={JOURNAL_SECTION_COPY.questionsColumn.tag}
           >
-            {searchField}
-          </section>
+            <div className="yd-journal-v6__block-head">
+              <h2 className="yd-journal-v6__block-title yd-journal-v6__block-title--large">
+                {JOURNAL_SECTION_COPY.questionsColumn.title}
+              </h2>
+              <p className="yd-journal-v6__block-copy">{JOURNAL_SECTION_COPY.questionsColumn.lead}</p>
+            </div>
 
-          <div className="yd-cc-hub__columns">
-            <article
-              className="yd-cc-hub__column yd-cc-hub__column--questions"
-              aria-label={JOURNAL_SECTION_COPY.questionsColumn.tag}
-            >
-              <header className="yd-cc-hub__column-head">
-                <span className="yd-cc-hub__column-tag">{JOURNAL_SECTION_COPY.questionsColumn.tag}</span>
-                <h2 className="yd-journal-v6__block-title">{JOURNAL_SECTION_COPY.questionsColumn.title}</h2>
-                <p className="yd-journal-v6__block-copy">{JOURNAL_SECTION_COPY.questionsColumn.lead}</p>
-              </header>
-
-              <div className="yd-cc-hub__ki-card" aria-label="Patienten-KI">
-                <div className="yd-cc-hub__ki-card-main">
-                  <Sparkles className="yd-cc-hub__ki-card-icon" strokeWidth={1.5} aria-hidden />
-                  <div>
-                    <p className="yd-cc-hub__ki-card-title">
-                      {JOURNAL_KI.title}
-                      <span
-                        className={cn(
-                          "yd-cc-hub__ki-card-badge",
-                          kiReady && "yd-cc-hub__ki-card-badge--active"
-                        )}
-                      >
-                        {kiReady ? JOURNAL_KI.badgeActive : JOURNAL_KI.badgeSetup}
-                      </span>
-                    </p>
-                    <p className="yd-cc-hub__ki-card-summary">
-                      {kiReady ? JOURNAL_KI.summary : JOURNAL_KI.emptyHint}
-                    </p>
-                    <p className="yd-cc-hub__ki-card-safety">{JOURNAL_KI.safetyLine}</p>
-                  </div>
+            <div className="yd-cc-hub__ki-card" aria-label="Patienten-KI">
+              <div className="yd-cc-hub__ki-card-main">
+                <Sparkles className="yd-cc-hub__ki-card-icon" strokeWidth={1.5} aria-hidden />
+                <div className="yd-cc-hub__ki-card-copy">
+                  <p className="yd-cc-hub__ki-card-title">
+                    {JOURNAL_KI.title}
+                    <span
+                      className={cn(
+                        "yd-cc-hub__ki-card-badge",
+                        kiReady && "yd-cc-hub__ki-card-badge--active"
+                      )}
+                    >
+                      {kiReady ? JOURNAL_KI.badgeActive : JOURNAL_KI.badgeSetup}
+                    </span>
+                  </p>
+                  <p className="yd-cc-hub__ki-card-summary">
+                    {kiReady ? JOURNAL_KI.summary : JOURNAL_KI.emptyHint}
+                  </p>
+                  <p className="yd-cc-hub__ki-card-safety">{JOURNAL_KI.safetyLine}</p>
                 </div>
-                <button
-                  type="button"
-                  className="yd-cc-hub__ki-card-cta"
-                  onClick={kiReady ? openKiAssist : () => router.push("/journal/new")}
-                >
-                  {kiReady ? JOURNAL_KI.ctaActive : JOURNAL_KI.ctaSetup}
-                  <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
-                </button>
               </div>
+              <button
+                type="button"
+                className="yd-cc-hub__ki-card-cta"
+                onClick={kiReady ? openKiAssist : () => router.push("/journal/new")}
+              >
+                {kiReady ? JOURNAL_KI.ctaActive : JOURNAL_KI.ctaSetup}
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
+              </button>
+            </div>
 
-              {priorityTopics.length > 0 ? (
-                <ol className="yd-cc-hub__faq-list">
-                  {priorityTopics.map((topic, index) => (
-                    <li key={topic.title}>
-                      <button
-                        type="button"
-                        className="yd-cc-hub__faq-row"
-                        disabled={isBusy}
-                        onClick={() =>
-                          void startArticle({
-                            title: topic.title,
-                            content: topic.content,
-                            clinicalArea: topic.clinicalArea,
-                            contentType: topic.contentType,
-                          })
-                        }
-                      >
-                        <span className="yd-cc-hub__faq-rank" aria-hidden>
-                          {index + 1}
-                        </span>
-                        <span className="yd-cc-hub__faq-body">
-                          <span className="yd-cc-hub__faq-q">{topic.title}</span>
-                          <span className="yd-cc-hub__faq-hint">{topic.hint}</span>
-                        </span>
-                        <span className="yd-cc-hub__faq-cta">
-                          Antwort erstellen
-                          <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <p className="yd-journal-v6__empty-copy">
-                  Alle priorisierten Fragen sind beantwortet — Patienten finden die Antworten online.
-                </p>
-              )}
+            {priorityTopics.length > 0 ? (
+              <ol className="yd-cc-hub__faq-list">
+                {priorityTopics.map((topic, index) => (
+                  <li key={topic.title}>
+                    <button
+                      type="button"
+                      className="yd-cc-hub__faq-row"
+                      disabled={isBusy}
+                      onClick={() =>
+                        void startArticle({
+                          title: topic.title,
+                          content: topic.content,
+                          clinicalArea: topic.clinicalArea,
+                          contentType: topic.contentType,
+                        })
+                      }
+                    >
+                      <span className="yd-cc-hub__faq-rank" aria-hidden>
+                        {index + 1}
+                      </span>
+                      <span className="yd-cc-hub__faq-body">
+                        <span className="yd-cc-hub__faq-q">{topic.title}</span>
+                        <span className="yd-cc-hub__faq-hint">{topic.hint}</span>
+                      </span>
+                      <span className="yd-cc-hub__faq-cta">
+                        Antwort erstellen
+                        <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="yd-journal-v6__empty-copy">
+                Alle priorisierten Fragen sind beantwortet — Patienten finden die Antworten online.
+              </p>
+            )}
 
-              {patientQuestionDrafts.length > 0 ? (
-                <div className="yd-cc-hub__column-sub">
-                  <h3 className="yd-cc-hub__column-subtitle">Antworten in Arbeit</h3>
-                  <ul className="yd-journal-v6__draft-list">
-                    {patientQuestionDrafts.map((entry) => (
-                      <li key={entry.id}>
-                        <button
-                          type="button"
-                          className="yd-journal-v6__draft-row"
-                          onClick={() => openEditor(entry.id)}
-                        >
-                          <FileEdit className="yd-journal-v6__draft-row-icon" strokeWidth={1.5} aria-hidden />
-                          <span className="yd-journal-v6__draft-row-body">
-                            <span className="yd-journal-v6__draft-row-title">
-                              {journalEntryTitle(entry)}
-                            </span>
-                            <span className="yd-journal-v6__draft-row-meta">
-                              {formatLastUpdatedLabel(entry.updated_at)}
-                            </span>
-                          </span>
-                          <ChevronRight className="yd-journal-v6__draft-row-chevron" strokeWidth={1.75} aria-hidden />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </article>
-
-            <article
-              className="yd-cc-hub__column yd-cc-hub__column--doctor"
-              aria-label={JOURNAL_SECTION_COPY.doctorJournal.title}
-            >
-              <header className="yd-cc-hub__column-head yd-cc-hub__column-head--row">
-                <div>
-                  <span className="yd-cc-hub__column-tag yd-cc-hub__column-tag--doctor">Arzt-Journal</span>
-                  <h2 className="yd-journal-v6__block-title">{JOURNAL_SECTION_COPY.doctorJournal.title}</h2>
-                  <p className="yd-journal-v6__block-copy">{JOURNAL_SECTION_COPY.doctorJournal.lead}</p>
-                </div>
-                <button
-                  type="button"
-                  className="yd-cc-hub__column-action"
-                  disabled={isBusy}
-                  onClick={() => router.push("/journal/new")}
-                >
-                  <Plus className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
-                  {JOURNAL_SECTION_COPY.doctorJournal.newCta}
-                </button>
-              </header>
-
-              {doctorJournalEntries.length > 0 ? (
-                <ul className="yd-cc-hub__journal-list">
-                  {doctorJournalEntries.map((entry) => (
+            {patientQuestionDrafts.length > 0 ? (
+              <div className="yd-cc-hub__zone-sub">
+                <h3 className="yd-cc-hub__zone-subtitle">Antworten in Arbeit</h3>
+                <ul className="yd-journal-v6__draft-list">
+                  {patientQuestionDrafts.map((entry) => (
                     <li key={entry.id}>
                       <button
                         type="button"
-                        className="yd-cc-hub__journal-row"
+                        className="yd-journal-v6__draft-row"
                         onClick={() => openEditor(entry.id)}
                       >
-                        <FileText className="yd-cc-hub__journal-row-icon" strokeWidth={1.5} aria-hidden />
-                        <span className="yd-cc-hub__journal-row-body">
-                          <span className="yd-cc-hub__journal-row-title">
+                        <FileEdit className="yd-journal-v6__draft-row-icon" strokeWidth={1.5} aria-hidden />
+                        <span className="yd-journal-v6__draft-row-body">
+                          <span className="yd-journal-v6__draft-row-title">
                             {journalEntryTitle(entry)}
                           </span>
-                          <span className="yd-cc-hub__journal-row-meta">
-                            {getContentTypeLabel(inferContentType(entry))} · {authorLabel}
+                          <span className="yd-journal-v6__draft-row-meta">
+                            {formatLastUpdatedLabel(entry.updated_at)}
                           </span>
                         </span>
-                        <ChevronRight className="h-4 w-4 shrink-0 opacity-40" strokeWidth={1.75} aria-hidden />
+                        <ChevronRight className="yd-journal-v6__draft-row-chevron" strokeWidth={1.75} aria-hidden />
                       </button>
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <p className="yd-journal-v6__empty-copy">
-                  Noch keine Erklärungen oder Praxiswissen veröffentlicht — ideal für fachliche Texte
-                  und Behandlungserklärungen.
-                </p>
-              )}
+              </div>
+            ) : null}
+          </section>
 
-              {doctorDrafts.length > 0 ? (
-                <div className="yd-cc-hub__column-sub">
-                  <h3 className="yd-cc-hub__column-subtitle">
-                    {JOURNAL_SECTION_COPY.doctorJournal.draftsTitle}
-                  </h3>
-                  <p className="yd-cc-hub__column-subcopy">
-                    {JOURNAL_SECTION_COPY.doctorJournal.draftsLead}
-                  </p>
-                  <ul className="yd-journal-v6__draft-list">
+          <section
+            className="yd-journal-v6__section yd-journal-v6__panel yd-cc-hub__zone"
+            aria-label={JOURNAL_SECTION_COPY.doctorJournal.title}
+          >
+            <div className="yd-journal-v6__block-head yd-journal-v6__block-head--row">
+              <div>
+                <h2 className="yd-journal-v6__block-title yd-journal-v6__block-title--large">
+                  {JOURNAL_SECTION_COPY.doctorJournal.title}
+                </h2>
+                <p className="yd-journal-v6__block-copy">{JOURNAL_SECTION_COPY.doctorJournal.lead}</p>
+              </div>
+              <button
+                type="button"
+                className="yd-cc-hub__zone-action"
+                disabled={isBusy}
+                onClick={() => router.push("/journal/new")}
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+                {JOURNAL_SECTION_COPY.doctorJournal.newCta}
+              </button>
+            </div>
+
+            {doctorJournalEntries.length > 0 ? (
+              <ul className="yd-cc-hub__journal-list">
+                {doctorJournalEntries.map((entry) => (
+                  <li key={entry.id}>
+                    <button
+                      type="button"
+                      className="yd-cc-hub__journal-row"
+                      onClick={() => openEditor(entry.id)}
+                    >
+                      <FileText className="yd-cc-hub__journal-row-icon" strokeWidth={1.5} aria-hidden />
+                      <span className="yd-cc-hub__journal-row-body">
+                        <span className="yd-cc-hub__journal-row-title">
+                          {journalEntryTitle(entry)}
+                        </span>
+                        <span className="yd-cc-hub__journal-row-meta">
+                          {getContentTypeLabel(inferContentType(entry))} · {authorLabel}
+                        </span>
+                      </span>
+                      <ChevronRight className="h-4 w-4 shrink-0 opacity-40" strokeWidth={1.75} aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="yd-journal-v6__empty-copy">
+                Noch keine Erklärungen oder Praxiswissen veröffentlicht — ideal für fachliche Texte
+                und Behandlungserklärungen.
+              </p>
+            )}
+
+            {doctorDrafts.length > 0 ? (
+              <div className="yd-cc-hub__zone-sub">
+                <h3 className="yd-cc-hub__zone-subtitle">
+                  {JOURNAL_SECTION_COPY.doctorJournal.draftsTitle}
+                </h3>
+                <p className="yd-cc-hub__zone-subcopy">
+                  {JOURNAL_SECTION_COPY.doctorJournal.draftsLead}
+                </p>
+                <ul className="yd-journal-v6__draft-list">
                     {doctorDrafts.map((entry) => (
                       <li key={entry.id}>
                         <button
@@ -637,117 +571,7 @@ export function JournalKnowledgeCenter({
                   </ul>
                 </div>
               ) : null}
-            </article>
-
-            <article
-              className="yd-cc-hub__column yd-cc-hub__column--patient"
-              aria-label={JOURNAL_SECTION_COPY.patientInfo.title}
-            >
-              <header className="yd-cc-hub__column-head">
-                <span className="yd-cc-hub__column-tag yd-cc-hub__column-tag--patient">
-                  Patienten-Informationen
-                </span>
-                <h2 className="yd-journal-v6__block-title">{JOURNAL_SECTION_COPY.patientInfo.title}</h2>
-                <p className="yd-journal-v6__block-copy">{JOURNAL_SECTION_COPY.patientInfo.lead}</p>
-              </header>
-
-              <div className="yd-cc-hub__column-block">
-                <h3 className="yd-cc-hub__column-subtitle">
-                  {JOURNAL_SECTION_COPY.patientInfo.signalsTitle}
-                </h3>
-                <p className="yd-cc-hub__column-subcopy">
-                  {JOURNAL_SECTION_COPY.patientInfo.signalsLead}
-                </p>
-                {patientSignals.length > 0 ? (
-                  <ul className="yd-cc-hub__signal-list">
-                    {patientSignals.map((signal) => (
-                      <li key={signal.id}>
-                        <Link href={`/inbox/${signal.id}`} className="yd-cc-hub__signal-row">
-                          <UserRound className="yd-cc-hub__signal-icon" strokeWidth={1.5} aria-hidden />
-                          <span className="yd-cc-hub__signal-body">
-                            <span className="yd-cc-hub__signal-name">{signal.patientName}</span>
-                            <span className="yd-cc-hub__signal-concern">{signal.concernLine}</span>
-                          </span>
-                          <span className="yd-cc-hub__signal-time">{signal.relativeTime}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="yd-journal-v6__empty-copy">
-                    {JOURNAL_SECTION_COPY.patientInfo.signalsEmpty}
-                  </p>
-                )}
-              </div>
-
-              <div className="yd-cc-hub__column-block">
-                <h3 className="yd-cc-hub__column-subtitle">
-                  {JOURNAL_SECTION_COPY.patientInfo.publishedTitle}
-                </h3>
-                <p className="yd-cc-hub__column-subcopy">
-                  {JOURNAL_SECTION_COPY.patientInfo.publishedLead}
-                </p>
-                {patientFacingPublished.length > 0 ? (
-                  <ul className="yd-cc-hub__patient-list">
-                    {patientFacingPublished.map((entry) => (
-                      <li key={entry.id}>
-                        <button
-                          type="button"
-                          className="yd-cc-hub__patient-row"
-                          onClick={() => openEditor(entry.id)}
-                        >
-                          <span className="yd-cc-hub__patient-row-title">
-                            {journalEntryTitle(entry)}
-                          </span>
-                          <span className="yd-cc-hub__patient-row-meta">
-                            {getContentTypeLabel(inferContentType(entry))}
-                          </span>
-                          <ChevronRight className="h-4 w-4 shrink-0 opacity-35" strokeWidth={1.75} aria-hidden />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="yd-journal-v6__empty-copy">
-                    {JOURNAL_SECTION_COPY.patientInfo.publishedEmpty}
-                  </p>
-                )}
-              </div>
-
-              <div className="yd-cc-hub__column-block yd-cc-hub__column-block--links">
-                <h3 className="yd-cc-hub__column-subtitle">{JOURNAL_SECTION_COPY.quickLinks.title}</h3>
-                <ul className="yd-cc-hub__quick-list yd-cc-hub__quick-list--compact">
-                  <li>
-                    <Link href="/inbox" className="yd-cc-hub__quick-link">
-                      <Inbox className="yd-cc-hub__quick-icon" strokeWidth={1.5} aria-hidden />
-                      <span className="yd-cc-hub__quick-label">
-                        {JOURNAL_SECTION_COPY.quickLinks.tracker}
-                      </span>
-                      <ChevronRight className="h-4 w-4 shrink-0 opacity-35" strokeWidth={1.75} aria-hidden />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/settings?section=oeffnungszeiten" className="yd-cc-hub__quick-link">
-                      <CalendarDays className="yd-cc-hub__quick-icon" strokeWidth={1.5} aria-hidden />
-                      <span className="yd-cc-hub__quick-label">
-                        {JOURNAL_SECTION_COPY.quickLinks.appointments}
-                      </span>
-                      <ChevronRight className="h-4 w-4 shrink-0 opacity-35" strokeWidth={1.75} aria-hidden />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/profile/editor" className="yd-cc-hub__quick-link">
-                      <ExternalLink className="yd-cc-hub__quick-icon" strokeWidth={1.5} aria-hidden />
-                      <span className="yd-cc-hub__quick-label">
-                        {JOURNAL_SECTION_COPY.quickLinks.profile}
-                      </span>
-                      <ChevronRight className="h-4 w-4 shrink-0 opacity-35" strokeWidth={1.75} aria-hidden />
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </article>
-          </div>
+          </section>
 
           <section
             className="yd-journal-v6__section yd-journal-v6__section--library yd-journal-v6__panel yd-cc-hub__library-full"

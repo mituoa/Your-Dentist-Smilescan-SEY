@@ -52,6 +52,34 @@
   max-width: 38rem;
 }
 
+@media (max-width: 767px) {
+  .yd-workspace .yd-workspace-integrated-header .yd-dash-header-premium__toolbar {
+    display: none;
+  }
+
+  .yd-workspace .yd-workspace-integrated-header.yd-dash-header-premium {
+    padding: 0.35rem 0 0.875rem;
+  }
+
+  .yd-workspace .yd-workspace-integrated-header .yd-dash-header-premium__greeting {
+    margin-top: 0.5rem;
+    font-size: 1.0625rem;
+  }
+
+  .yd-workspace .yd-workspace-integrated-header .yd-dash-header-premium__headline {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    text-transform: none;
+    color: rgba(21, 42, 69, 0.82);
+  }
+
+  .yd-workspace .yd-workspace-integrated-header .yd-dash-header-premium__subtitle {
+    margin-top: 0.4rem;
+    font-size: 0.8125rem;
+  }
+}
+
 /* Dashboard — editorial greeting (minimal, zweizeilig) */
 .yd-workspace .yd-dash-header-premium--editorial {
   padding-bottom: 1rem;

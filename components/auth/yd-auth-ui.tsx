@@ -3,6 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 
+import { withTrustReturn } from "@/lib/trust/return-path";
 import { cn } from "@/lib/utils";
 
 export type YdAuthAlertTone = "danger" | "warning" | "info" | "success";
@@ -135,11 +136,11 @@ export function YdAuthLegalFooter(props: {
           Startseite
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/trust/privacy" className="yd-auth-link">
+        <Link href={withTrustReturn("/trust/privacy", loginHref)} className="yd-auth-link">
           Datenschutz
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/trust/imprint" className="yd-auth-link">
+        <Link href={withTrustReturn("/trust/imprint", loginHref)} className="yd-auth-link">
           Impressum
         </Link>
       </div>
@@ -163,13 +164,13 @@ export function YdLoginEntryFooter(props: { className?: string }) {
         <span className="yd-login-entry-footer-sep" aria-hidden>
           ·
         </span>
-        <Link href="/trust/privacy" className="yd-login-entry-footer-link">
+        <Link href={withTrustReturn("/trust/privacy", "/login")} className="yd-login-entry-footer-link">
           Datenschutz
         </Link>
         <span className="yd-login-entry-footer-sep" aria-hidden>
           ·
         </span>
-        <Link href="/trust/imprint" className="yd-login-entry-footer-link">
+        <Link href={withTrustReturn("/trust/imprint", "/login")} className="yd-login-entry-footer-link">
           Impressum
         </Link>
       </div>

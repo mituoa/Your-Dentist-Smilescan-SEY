@@ -12,8 +12,6 @@ import { cn } from "@/lib/utils";
 const DAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 type Props = {
-  greeting: string;
-  displayName: string;
   practiceDomains: PracticeStateDomain[];
   todayItems: DashboardTodayItem[];
   weeklyCounts: number[] | null;
@@ -103,8 +101,6 @@ function MiniSparkline({ counts, className }: { counts: number[]; className?: st
 }
 
 export function DashboardMobileHealth({
-  greeting,
-  displayName,
   practiceDomains,
   todayItems,
   weeklyCounts,
@@ -118,11 +114,6 @@ export function DashboardMobileHealth({
 
   return (
     <div className="yd-dash-m md:hidden">
-      <header className="yd-dash-m__header">
-        <p className="yd-dash-m__greet">{greeting}</p>
-        <h1 className="yd-dash-m__name">{displayName}</h1>
-      </header>
-
       {overviewIncomplete ? (
         <p className="yd-dash-m__notice" role="status">
           Einige Bereiche konnten nicht geladen werden — bitte Seite erneut laden.

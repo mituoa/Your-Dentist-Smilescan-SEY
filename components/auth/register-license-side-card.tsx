@@ -19,7 +19,6 @@ type RegisterLicenseSideCardProps = {
   onDragOver: (e: DragEvent) => void;
   onDrop: (e: DragEvent) => void;
   onFilePick: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onCameraPick: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
 };
 
@@ -51,11 +50,9 @@ export function RegisterLicenseSideCard({
   onDragOver,
   onDrop,
   onFilePick,
-  onCameraPick,
   onClear,
 }: RegisterLicenseSideCardProps) {
   const fileInputId = `${sideId}-file`;
-  const cameraInputId = `${sideId}-camera`;
 
   return (
     <div className="min-w-0">
@@ -71,14 +68,6 @@ export function RegisterLicenseSideCard({
           type="file"
           accept="image/jpeg,image/png,image/jpg,application/pdf,.pdf"
           onChange={onFilePick}
-          className="sr-only"
-        />
-        <input
-          id={cameraInputId}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={onCameraPick}
           className="sr-only"
         />
 
@@ -145,15 +134,11 @@ export function RegisterLicenseSideCard({
               htmlFor={fileInputId}
               className="inline-flex h-[44px] cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
             >
-              Datei hinzufügen
+              Dokument auswählen
             </label>
-            <label
-              htmlFor={cameraInputId}
-              className="yd-auth-btn-secondary inline-flex h-[44px] cursor-pointer items-center justify-center text-[13px]"
-            >
-              Foto aufnehmen
-            </label>
-            <p className="text-[11px] leading-relaxed text-gray-500">JPG, PNG oder PDF (max. 10 MB)</p>
+            <p className="text-[11px] leading-relaxed text-gray-500">
+              Foto, Kamera oder PDF — über die Auswahl Ihres Geräts (max. 10 MB)
+            </p>
           </div>
         )}
       </div>
