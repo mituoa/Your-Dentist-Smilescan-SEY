@@ -1354,7 +1354,7 @@
 .yd-os-command-split {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: 24px;
   align-items: stretch;
 }
 
@@ -1371,7 +1371,7 @@
 
 .yd-os-command-panel {
   border-radius: 20px;
-  padding: 22px 24px;
+  padding: 28px;
   background: var(--os-surface);
   border: 1px solid var(--os-line-soft);
   box-shadow: var(--os-shadow-sm);
@@ -1384,15 +1384,52 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   min-height: 0;
+}
+
+.yd-os-command-panel-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(47, 111, 214, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+@media (min-width: 560px) {
+  .yd-os-command-panel-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+}
+
+.yd-os-command-panel-footer-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--os-text-faint);
+  margin-bottom: 6px;
+}
+
+.yd-os-command-panel-footer-copy p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--os-text-soft);
+  max-width: 28ch;
 }
 
 .yd-os-command-status-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   margin-top: auto;
+  padding-top: 4px;
 }
 
 .yd-os-command-status {
@@ -1400,7 +1437,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 14px 16px;
   border-radius: 12px;
   background: rgba(36, 52, 70, 0.03);
   border: 1px solid var(--os-line-soft);
@@ -1422,6 +1459,7 @@
 
 .yd-os-command-status--highlight {
   align-items: flex-start;
+  gap: 14px;
   background: rgba(47, 111, 214, 0.06);
   border-color: rgba(47, 111, 214, 0.14);
 }
@@ -1443,12 +1481,12 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--os-navy);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .yd-os-command-status-copy p {
   font-size: 12.5px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--os-text-soft);
 }
 
@@ -1463,15 +1501,15 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--os-text-faint);
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .yd-os-bubble {
   border-radius: 14px;
   background: var(--os-blue-ice);
-  padding: 14px 16px;
+  padding: 16px 18px;
   font-size: 13.5px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--os-navy);
   max-width: 92%;
 }
@@ -1515,14 +1553,13 @@
 .yd-os-command-approve {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: auto;
-  align-self: flex-start;
-  padding: 9px 16px;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 11px 18px;
   border-radius: 10px;
   background: var(--os-navy);
   color: #fff;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -1566,8 +1603,8 @@
 }
 
 .yd-os-command-guarantees {
-  margin-top: 1.5rem;
-  max-width: 48rem;
+  margin-top: 2rem;
+  max-width: 52rem;
   margin-inline: auto;
   border-radius: 16px;
   overflow: hidden;
@@ -1597,8 +1634,8 @@
 
 .yd-os-command-list--balanced li {
   font-size: 12.5px;
-  gap: 8px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 16px 18px;
   border-top: 1px solid var(--os-line-soft);
   border-right: 1px solid var(--os-line-soft);
 }
@@ -1629,19 +1666,17 @@
 .yd-os-cmd-cycle {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  flex: 1;
-  justify-content: space-between;
+  gap: 20px;
 }
 
 .yd-os-cmd-cycle-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .yd-os-cmd-cycle-tab {
-  padding: 6px 11px;
+  padding: 7px 13px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
@@ -1661,8 +1696,9 @@
 .yd-os-cmd-cycle-stage {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  min-height: 84px;
+  gap: 14px;
+  min-height: 88px;
+  padding: 4px 0 8px;
   animation: yd-os-cmd-fade 0.45s var(--os-ease);
 }
 
@@ -1704,7 +1740,8 @@
 
 .yd-os-cmd-cycle-progress {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  padding-top: 4px;
 }
 
 .yd-os-cmd-cycle-dot {

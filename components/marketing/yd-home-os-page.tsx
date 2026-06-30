@@ -668,9 +668,15 @@ export function YdHomeOsPage({
                 <div className="yd-os-command-panel-body">
                   <CommandAiCycle />
                 </div>
-                <button type="button" className="yd-os-command-approve" disabled>
-                  <CheckCircle2 size={14} /> Freigeben
-                </button>
+                <div className="yd-os-command-panel-footer">
+                  <div className="yd-os-command-panel-footer-copy">
+                    <span className="yd-os-command-panel-footer-label">Ärztliche Freigabe</span>
+                    <p>Entwurf prüfen — Versand erst nach Ihrer Bestätigung.</p>
+                  </div>
+                  <button type="button" className="yd-os-command-approve" disabled>
+                    <CheckCircle2 size={14} /> Freigeben
+                  </button>
+                </div>
               </div>
             </div>
             <div className="yd-os-command-guarantees">
