@@ -24,7 +24,7 @@ export function TrustShell({ children }: TrustShellProps) {
 
 export function TrustBackLink() {
   return (
-    <Link href="/" className="yd-trust-back">
+    <Link href="/?welcome=1" className="yd-trust-back">
       Startseite
     </Link>
   );

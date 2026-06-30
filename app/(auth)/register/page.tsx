@@ -87,7 +87,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
               initialWizardStep={initialWizardStep}
               fromPricing={fromPricing}
               loginHref={loginHrefPlain}
-              exitHref="/"
+              exitHref="/login"
               registrationDemoUi={registrationDemoUi}
               registrationDemoServer={isRegistrationDemoMode()}
               skipPaymentAtSignup={skipPaymentAtSignup()}

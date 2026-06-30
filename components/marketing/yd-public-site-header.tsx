@@ -87,7 +87,7 @@ export function YdPublicSiteHeader({
         style={{ ["--yd-public-field-i" as string]: "0" }}
       >
         <div className="yd-public-site-header-inner">
-          <Link href="/" className="yd-public-site-header-brand min-w-0" aria-label="Startseite">
+          <Link href="/?welcome=1" className="yd-public-site-header-brand min-w-0" aria-label="Startseite">
             <YourDentistBrandLockup
               size="sm"
               tagline={mobileNav ? undefined : PUBLIC_SITE_FOOTER.tagline}

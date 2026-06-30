@@ -29,6 +29,7 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
     image: landingCatalogPreview("smilescan", LANDING_IMG.smilescan),
     imagePosition: "50% 40%",
     inquiryId: "smilescan",
+    previewHref: "/landingpages/smilescan",
   },
   {
     id: "aligner",
@@ -46,6 +47,7 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
     image: landingCatalogPreview("implantologie", LANDING_IMG.implantologie),
     imagePosition: "55% 30%",
     inquiryId: "implantologie",
+    previewHref: "/landingpages/implantologie",
   },
   {
     id: "bleaching",
@@ -62,6 +64,7 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
     image: landingCatalogPreview("aesthetik", LANDING_IMG.aesthetik),
     imagePosition: "50% 25%",
     inquiryId: "aesthetik",
+    previewHref: "/landingpages/aesthetik",
   },
   {
     id: "endodontie",
@@ -94,6 +97,7 @@ export const LANDING_CATEGORIES: readonly LandingCategory[] = [
     image: landingCatalogPreview("prophylaxe", LANDING_IMG.prophylaxe),
     imagePosition: "50% 35%",
     inquiryId: "prophylaxe",
+    previewHref: "/landingpages/prophylaxe",
   },
   {
     id: "oral-health-pass",

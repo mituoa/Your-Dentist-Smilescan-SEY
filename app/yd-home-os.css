@@ -125,15 +125,40 @@
 }
 
 .yd-os-login {
-  display: none;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--os-text-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--os-blue-deep);
   text-decoration: none;
+  border: 1px solid rgba(26, 79, 156, 0.18);
+  background: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .yd-os-login {
+    min-height: auto;
+    padding: 4px 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--os-text-soft);
+  }
+}
+
+.yd-os-header-demo {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .yd-os-header-demo {
     display: inline-flex;
   }
 }
@@ -177,12 +202,15 @@
   right: 0;
   height: 100%;
   width: min(78vw, 320px);
-  background: var(--os-warm);
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 88px 24px 24px;
-  box-shadow: -16px 0 48px rgba(22, 35, 58, 0.16);
+  padding: calc(var(--os-header-h, 80px) + 12px) 20px 24px;
+  background: rgba(255, 255, 255, 0.97);
+  border-left: 1px solid var(--os-line-soft);
+  box-shadow: -12px 0 40px rgba(22, 35, 58, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .yd-os-mobile-nav-panel button,
@@ -193,8 +221,16 @@
   color: var(--os-navy);
   background: none;
   border: none;
-  padding: 13px 4px;
-  border-bottom: 1px solid var(--os-line-soft);
+  border-radius: 12px;
+  padding: 0.75rem 0.875rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.16s ease;
+}
+
+.yd-os-mobile-nav-panel button:hover,
+.yd-os-mobile-nav-panel a:hover {
+  background: rgba(237, 245, 253, 0.85);
 }
 
 /* ---------------- Buttons ---------------- */
@@ -288,6 +324,74 @@
   align-items: flex-start;
   gap: 20px;
   max-width: 560px;
+}
+
+@media (max-width: 767px) {
+  .yd-os-hero-copy {
+    align-items: center;
+    text-align: center;
+    margin-inline: auto;
+  }
+
+  .yd-os-hero-title {
+    max-width: none;
+  }
+
+  .yd-os-hero-lead {
+    max-width: 34ch;
+    margin-inline: auto;
+  }
+
+  .yd-os-hero-ctas {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .yd-os-hero-ctas .yd-os-btn {
+    flex: 1 1 auto;
+    min-width: min(100%, 11.5rem);
+    max-width: 14rem;
+  }
+
+  .yd-os-head,
+  .yd-os-head--left,
+  .yd-os-head--workflow {
+    text-align: center;
+    margin-inline: auto;
+  }
+
+  .yd-os-eyebrow {
+    margin-inline: auto;
+  }
+
+  .yd-os-stat-strip {
+    text-align: center;
+  }
+
+  .yd-os-lead {
+    margin-inline: auto;
+    max-width: 34ch;
+  }
+
+  .yd-os-campaign-cta-row {
+    justify-content: center;
+  }
+
+  .yd-os-cta-grid {
+    text-align: center;
+  }
+
+  .yd-os-cta-grid .yd-os-hero-ctas {
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yd-os-head--workflow {
+    text-align: left;
+    margin-left: 0;
+    margin-right: auto;
+  }
 }
 
 .yd-os-eyebrow {
@@ -1459,7 +1563,13 @@
   transition: transform 0.2s var(--os-ease), box-shadow 0.2s var(--os-ease);
 }
 
-.yd-os-campaign-card:hover {
+.yd-os-campaign-card--static {
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
+
+.yd-os-campaign-card:not(.yd-os-campaign-card--static):hover {
   transform: translateY(-3px);
   box-shadow: var(--os-shadow-lg);
 }
@@ -1478,7 +1588,7 @@
   transition: transform 0.4s var(--os-ease);
 }
 
-.yd-os-campaign-card:hover .yd-os-campaign-preview-img {
+.yd-os-campaign-card:not(.yd-os-campaign-card--static):hover .yd-os-campaign-preview-img {
   transform: scale(1.04);
 }
 
@@ -1519,20 +1629,13 @@
 .yd-os-campaign-cta-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
   padding: 22px;
   border-radius: 18px;
   background: var(--os-blue-ice);
   border: 1px solid rgba(47, 111, 214, 0.12);
-}
-
-.yd-os-campaign-cta-row p {
-  font-size: 13.5px;
-  color: var(--os-navy-soft);
-  max-width: 480px;
-  line-height: 1.55;
 }
 
 /* ---------------- Benefits ---------------- */

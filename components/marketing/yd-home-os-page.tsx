@@ -286,9 +286,9 @@ function CommandAiCycle() {
 }
 
 const STATS = [
-  { value: 8, label: "Schritte — vom Patientenkontakt bis zur Antwort" },
-  { value: 6, label: "Module: Atlas, Tracker, Relay, Care Center, Command AI, Landingpages" },
-  { value: 0, label: "Automatischer Versand ohne ärztliche Freigabe" },
+  { value: 8, label: "Schritte bis zur Antwort" },
+  { value: 6, label: "Module in einer Plattform" },
+  { value: 0, label: "Versand ohne ärztliche Freigabe" },
 ];
 
 const MODULES = [
@@ -335,8 +335,8 @@ const COMMAND_POINTS = [
   "Keine finale medizinische Entscheidung",
   "Klare Rückfragen bei Unsicherheit",
   "Ärztliche Freigabe bleibt Pflicht",
-  "Nach Freigabe: automatischer Versand an den Patienten",
-  "Team-Aufgaben (z. B. Laborauftrag) per Diktat an Relay — nicht über WhatsApp, vollständig nachverfolgbar im Portal",
+  "Nach Freigabe: Versand an den Patienten",
+  "Team-Aufgaben per Diktat an Relay — nachverfolgbar im Portal",
 ];
 
 const ARTICLES = [
@@ -352,16 +352,16 @@ const ARTICLES = [
 
 /** Bildquelle: Unsplash (lizenzfrei für kommerzielle Nutzung), ruhige klinische Aufnahmen. */
 const CAMPAIGNS = [
-  { name: "SmileScan Landingpage", image: "1667133295315-820bb6481730", href: "/landingpages/smilescan" },
-  { name: "Aligner / Invisalign", image: "1598256989809-394fa4f6cd26", href: "/landingpages/aligner" },
-  { name: "Implantologie", image: "1593022356769-11f762e25ed9", href: "/landingpages/implantologie" },
-  { name: "Prophylaxe", image: "1629909613654-28e377c37b09", href: "/landingpages/prophylaxe" },
-  { name: "Ästhetische Zahnmedizin", image: "1677026010083-78ec7f1b84ed", href: "/landingpages/aesthetik" },
-  { name: "Bleaching", image: "1489278353717-f64c6ee8a4d2", href: null },
-  { name: "Kinderzahnheilkunde", image: "1565090568947-7293970ba471", href: null },
-  { name: "Parodontologie", image: "1606811971618-4486d14f3f99", href: null },
-  { name: "Endodontie", image: "1606811841689-23dfddce3e95", href: null },
-  { name: "Oral Health Pass", image: "1598256989800-fe5f95da9787", href: null },
+  { name: "SmileScan Landingpage", image: "1667133295315-820bb6481730" },
+  { name: "Aligner / Invisalign", image: "1598256989809-394fa4f6cd26" },
+  { name: "Implantologie", image: "1593022356769-11f762e25ed9" },
+  { name: "Prophylaxe", image: "1629909613654-28e377c37b09" },
+  { name: "Ästhetische Zahnmedizin", image: "1677026010083-78ec7f1b84ed" },
+  { name: "Bleaching", image: "1489278353717-f64c6ee8a4d2" },
+  { name: "Kinderzahnheilkunde", image: "1565090568947-7293970ba471" },
+  { name: "Parodontologie", image: "1606811971618-4486d14f3f99" },
+  { name: "Endodontie", image: "1606811841689-23dfddce3e95" },
+  { name: "Oral Health Pass", image: "1598256989800-fe5f95da9787" },
 ] as const;
 
 const PROBLEMS = [
@@ -420,7 +420,7 @@ export function YdHomeOsPage({
     <main className="yd-os">
       <header className={`yd-os-header ${scrolled ? "yd-os-header--scrolled" : ""}`}>
         <div className="yd-os-container yd-os-header-inner">
-          <Link href="/" aria-label="Your Dentist — Startseite">
+          <Link href="/?welcome=1" aria-label="Your Dentist — Startseite">
             <YourDentistBrandLockup size="sm" tagline={PUBLIC_BRAND_TAGLINE} />
           </Link>
           <nav className="yd-os-nav" aria-label="Hauptnavigation">
@@ -434,14 +434,18 @@ export function YdHomeOsPage({
             <Link href="/login" className="yd-os-login">
               Anmelden
             </Link>
-            <button type="button" className="yd-os-btn yd-os-btn--primary yd-os-btn--sm" onClick={() => go("demo")}>
+            <button
+              type="button"
+              className="yd-os-btn yd-os-btn--primary yd-os-btn--sm yd-os-header-demo"
+              onClick={() => go("demo")}
+            >
               Demo buchen
             </button>
             <button
               type="button"
               className="yd-os-menu-btn"
               aria-expanded={menuOpen}
-              aria-label={menuOpen ? "Menü schließen" : "Menü öffnen"}
+              aria-label={menuOpen ? "Menü schließen" : "Bereiche"}
               onClick={() => setMenuOpen((v) => !v)}
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -452,15 +456,12 @@ export function YdHomeOsPage({
 
       <div className={`yd-os-mobile-nav ${menuOpen ? "yd-os-mobile-nav--open" : ""}`}>
         <button type="button" className="yd-os-mobile-nav-backdrop" aria-label="Menü schließen" onClick={() => setMenuOpen(false)} />
-        <nav className="yd-os-mobile-nav-panel">
+        <nav className="yd-os-mobile-nav-panel" aria-label="Bereiche">
           {NAV.map((item) => (
             <button key={item.id} type="button" onClick={() => go(item.id)}>
               {item.label}
             </button>
           ))}
-          <Link href="/login" onClick={() => setMenuOpen(false)}>
-            Anmelden
-          </Link>
         </nav>
       </div>
 
@@ -476,21 +477,16 @@ export function YdHomeOsPage({
               Ein ruhiger Workflow für <em>jede</em> Patientenanfrage.
             </h1>
             <p className="yd-os-hero-lead">
-              Your Dentist verbindet Patientenanfragen, KI-gestützte Vorarbeit, ärztliche Freigabe,
-              Teamaufgaben, Patientenwissen und digitale Kampagnen in einem System.
+              Patientenanfragen, KI-Vorbereitung, ärztliche Freigabe und Teamarbeit — in einem System.
             </p>
             <div className="yd-os-hero-ctas">
-              <button type="button" className="yd-os-btn yd-os-btn--primary" onClick={() => go("demo")}>
+              <Link href="/login" className="yd-os-btn yd-os-btn--primary">
+                Anmelden
+              </Link>
+              <button type="button" className="yd-os-btn yd-os-btn--ghost" onClick={() => go("demo")}>
                 Demo buchen
               </button>
-              <button type="button" className="yd-os-btn yd-os-btn--ghost" onClick={() => go("module")}>
-                Plattform ansehen
-              </button>
             </div>
-            <p className="yd-os-hero-note">
-              Für Praxen, die Patientenkommunikation, Nachsorge und digitale Abläufe professioneller
-              strukturieren möchten.
-            </p>
           </div>
 
           <div className="yd-os-hero-visual">
@@ -548,7 +544,7 @@ export function YdHomeOsPage({
       <section className="yd-os-section yd-os-section--flush" id="workflow" style={{ background: "var(--os-warm)" }}>
         <div className="yd-os-container">
           <Reveal>
-            <div className="yd-os-head yd-os-head--left">
+            <div className="yd-os-head yd-os-head--left yd-os-head--workflow">
               <span className="yd-os-kicker">Workflow</span>
               <h2 className="yd-os-title">Ein Fall. Ein ruhiger Ablauf. Vom ersten Foto bis zur Antwort.</h2>
             </div>
@@ -602,10 +598,6 @@ export function YdHomeOsPage({
             <div className="yd-os-head">
               <span className="yd-os-kicker">Care Center</span>
               <h2 className="yd-os-title">Patientenwissen, das Ihr Team entlastet.</h2>
-              <p className="yd-os-lead">
-                Beantworten Sie häufige Fragen einmal und nutzen Sie diese Inhalte für
-                Patientenportal, Nachsorge, Landingpages und Patienten-KI.
-              </p>
             </div>
             <div className="yd-os-article-grid">
               {ARTICLES.map((a) => (
@@ -626,17 +618,17 @@ export function YdHomeOsPage({
             <div className="yd-os-head">
               <span className="yd-os-kicker">Landingpages &amp; Kampagnen</span>
               <h2 className="yd-os-title">Landingpages für jede Praxis. Für jeden Schwerpunkt.</h2>
-              <p className="yd-os-lead">
-                Your Dentist kann für Praxen hochwertige Landingpages und Kampagnen erstellen, die
-                auf Praxisprofil, Behandlungsangebot und Zielgruppe abgestimmt sind.
-              </p>
             </div>
             <div className="yd-os-campaign-marquee">
               <div className="yd-os-campaign-track">
                 {[...CAMPAIGNS, ...CAMPAIGNS].map((c, i) => {
                   const hidden = i >= CAMPAIGNS.length;
-                  const cardInner = (
-                    <>
+                  return (
+                    <div
+                      key={`${c.name}-${i}`}
+                      className="yd-os-campaign-card yd-os-campaign-card--static"
+                      aria-hidden={hidden}
+                    >
                       <div className="yd-os-campaign-preview">
                         <Image
                           src={`https://images.unsplash.com/photo-${c.image}?q=80&w=480&auto=format&fit=crop`}
@@ -646,36 +638,13 @@ export function YdHomeOsPage({
                           className="yd-os-campaign-preview-img"
                         />
                       </div>
-                      <p className="yd-os-campaign-name">
-                        {c.name}
-                        {c.href ? <span className="yd-os-campaign-live-tag">Live ansehen</span> : null}
-                      </p>
-                    </>
-                  );
-                  return c.href ? (
-                    <Link
-                      key={`${c.name}-${i}`}
-                      href={c.href}
-                      target="_blank"
-                      rel="noopener"
-                      className="yd-os-campaign-card yd-os-campaign-card--live"
-                      aria-hidden={hidden}
-                    >
-                      {cardInner}
-                    </Link>
-                  ) : (
-                    <div key={`${c.name}-${i}`} className="yd-os-campaign-card" aria-hidden={hidden}>
-                      {cardInner}
+                      <p className="yd-os-campaign-name">{c.name}</p>
                     </div>
                   );
                 })}
               </div>
             </div>
             <div className="yd-os-campaign-cta-row">
-              <p>
-                Praxen können Landingpages direkt anfragen. Stammdaten werden aus dem Praxisprofil
-                übernommen. Das Kreativteam erstellt daraus eine professionelle Kampagne.
-              </p>
               <button type="button" className="yd-os-btn yd-os-btn--primary" onClick={() => go("demo")}>
                 Landingpage anfragen <ArrowRight size={15} />
               </button>
@@ -691,10 +660,6 @@ export function YdHomeOsPage({
             <div className="yd-os-head">
               <span className="yd-os-kicker">Command AI</span>
               <h2 className="yd-os-title">KI unterstützt. Der Arzt entscheidet.</h2>
-              <p className="yd-os-lead">
-                Command AI bereitet Informationen vor, formuliert Entwürfe und erkennt fehlende
-                Angaben. Medizinische Entscheidungen bleiben immer bei der Praxis.
-              </p>
             </div>
             <div className="yd-os-command-split">
               <div className="yd-os-command-panel">
@@ -804,8 +769,7 @@ export function YdHomeOsPage({
               <span className="yd-os-kicker">Preise</span>
               <h2 className="yd-os-title">Ein Rhythmus. Klar kalkulierbar.</h2>
               <p className="yd-os-lead">
-                Praxisdaten und Nachweis einmal einreichen — nach Prüfung wird der geschützte
-                Praxisbereich freigeschaltet.
+                Nach Prüfung Ihrer Praxisdaten wird der geschützte Bereich freigeschaltet.
               </p>
             </div>
             <div className="yd-os-pricing-shell">
@@ -828,11 +792,8 @@ export function YdHomeOsPage({
             <div className="yd-os-cta-band">
               <div className="yd-os-cta-grid">
                 <div>
-                  <h2>Bereit für einen ruhigeren Praxisalltag?</h2>
-                  <p>
-                    Sehen Sie, wie Your Dentist Patientenkommunikation, KI-Vorarbeit, Teamaufgaben
-                    und Praxiswissen in einem Workflow verbindet.
-                  </p>
+                  <h2>Demo buchen oder direkt starten</h2>
+                  <p>Kurzer Einblick in den Workflow — oder Registrierung mit Prüfung Ihrer Praxisdaten.</p>
                   <div className="yd-os-hero-ctas">
                     <Link href={registerHref} className="yd-os-btn yd-os-btn--primary">
                       Demo buchen

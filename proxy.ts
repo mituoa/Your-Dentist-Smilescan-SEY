@@ -28,6 +28,7 @@ const PROTECTED_PATHS = [
   "/my-tasks",
   "/relay",
   "/create-case",
+  "/landingpages",
 ];
 
 /** Exakt `/inbox` oder `/inbox/…` — nicht `/inbox-preview` (Demo-UI ohne Session). */

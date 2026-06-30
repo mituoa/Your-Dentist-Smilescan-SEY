@@ -15,10 +15,10 @@ export default function NotFound() {
           verschoben oder entfernt.
         </p>
         <Link
-          href="/"
+          href="/login"
           className="inline-flex min-h-[44px] items-center justify-center rounded-lg px-6 text-sm font-medium text-brand underline-offset-4 hover:underline"
         >
-          Zur Startseite
+          Zur Anmeldung
         </Link>
       </div>
     </div>

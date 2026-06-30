@@ -55,7 +55,7 @@ export function BentoHeader({ dashboardHref = null }: Props) {
     <>
       <header className={cn("yd-bento-header", scrolled && "yd-bento-header--scrolled")}>
         <div className="yd-bento-header__inner">
-          <Link href="/" className="yd-bento-header__brand" aria-label="Startseite">
+          <Link href="/?welcome=1" className="yd-bento-header__brand" aria-label="Startseite">
             <YourDentistBrandLockup size="sm" tagline={PUBLIC_BRAND_TAGLINE} />
           </Link>
 

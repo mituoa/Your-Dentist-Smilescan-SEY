@@ -1,0 +1,83 @@
+.yd-lp-preview-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.yd-lp-preview-banner {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  border-bottom: 1px solid rgba(186, 203, 222, 0.55);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.yd-lp-preview-banner__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding: 0.625rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .yd-lp-preview-banner__inner {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+.yd-lp-preview-banner__copy {
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.yd-lp-preview-banner__eyebrow {
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1a4f9c;
+  line-height: 1.2;
+}
+
+.yd-lp-preview-banner__text {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(12, 25, 41, 0.62);
+}
+
+.yd-lp-preview-banner__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 79, 156, 0.18);
+  background: rgba(26, 79, 156, 0.06);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a4f9c;
+  text-decoration: none;
+  transition: background-color 140ms ease;
+}
+
+.yd-lp-preview-banner__back:hover {
+  background: rgba(26, 79, 156, 0.11);
+}
+
+.yd-lp-preview-shell__content {
+  flex: 1;
+  min-height: 0;
+}

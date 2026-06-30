@@ -55,6 +55,7 @@
 @import "./yd-landingpage-leistungen.css";
 @import "./yd-landingpage-prophylaxe.css";
 @import "./yd-landingpage-aesthetik.css";
+@import "./yd-landing-preview-shell.css";
 @import "./yd-workspace-module-unified.css";
 
 @layer base {

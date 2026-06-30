@@ -44,7 +44,7 @@ export function YdPublicPricingStage({
       </header>
       {showHomeLink ? (
         <p className="yd-clinical-whisper">
-          <Link href="/" className="yd-clinical-cta-ghost">
+          <Link href="/?welcome=1" className="yd-clinical-cta-ghost">
             Zur Startseite
           </Link>
         </p>

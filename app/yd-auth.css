@@ -761,6 +761,24 @@
   color: #64748b;
 }
 
+.yd-login-platform-hint {
+  margin: 0.875rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #8ba3b8;
+}
+
+.yd-login-platform-hint a {
+  color: #1a4f9c;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.yd-login-platform-hint a:hover {
+  text-decoration: underline;
+}
+
 .yd-clinical-entry--login .yd-auth-form-stack {
   gap: 1rem;
 }

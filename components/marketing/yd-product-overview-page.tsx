@@ -94,7 +94,7 @@ function ProductOverviewHeader() {
   return (
     <header className="yd-bento-header">
       <div className="yd-bento-header__inner">
-        <Link href="/" className="yd-bento-header__brand" aria-label="Startseite">
+        <Link href="/?welcome=1" className="yd-bento-header__brand" aria-label="Startseite">
           <YourDentistBrandLockup size="sm" />
         </Link>
         <div className="yd-bento-header__actions">
